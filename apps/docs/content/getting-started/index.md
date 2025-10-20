@@ -2,8 +2,16 @@ Welcome to **ng-forge** - the most intuitive dynamic forms library for Angular u
 
 ## Quick Installation
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
 ```
 
 ## 5-Minute Setup
@@ -105,7 +113,7 @@ Try out ng-forge with this interactive demo:
 - ✅ **Zero Boilerplate**: No `ControlValueAccessor` implementation needed
 - ✅ **Signal-First**: Reactive forms using Angular signals
 - ✅ **Extensible**: Easy to create custom field types
-- ✅ **UI Agnostic**: Works with Material, PrimeNG, Bootstrap, or custom components
+- ✅ **UI Agnostic**: Works with Material, PrimeNG, Bootstrap, Ionic, or custom components
 
 ## Next Steps
 

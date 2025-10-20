@@ -1,23 +1,21 @@
-import { InputSignal } from '@angular/core';
-
 /**
  * Option interface for radio field
  */
-export interface RadioOption {
+export interface RadioOption<T > {
   label: string;
-  value: any;
+  value: T;
   disabled?: boolean;
 }
 
 /**
  * Interface for radio field components
  */
-export interface RadioField {
-  label: InputSignal<string>;
-  options: InputSignal<RadioOption[]>;
-  required?: InputSignal<boolean>;
-  color?: InputSignal<'primary' | 'accent' | 'warn'>;
-  labelPosition?: InputSignal<'before' | 'after'>;
-  hint?: InputSignal<string>;
-  className?: InputSignal<string>;
+export interface RadioField<T> {
+  label: string;
+  options: RadioOption<T>[];
+  required?: boolean;
+  color?: 'primary' | 'accent' | 'warn';
+  labelPosition?: 'before' | 'after';
+  hint?: string;
+  className?: string;
 }

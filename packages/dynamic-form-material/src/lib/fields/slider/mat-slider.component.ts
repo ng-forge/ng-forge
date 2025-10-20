@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatError, MatFormField, MatFormFieldAppearance, MatHint, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { SliderField } from '@ng-forge/dynamic-form';
+import { MatSliderField, MatSliderProps } from './mat-slider.type';
 
 /**
  * Material Design slider field component
@@ -12,7 +12,7 @@ import { SliderField } from '@ng-forge/dynamic-form';
   selector: 'df-mat-slider',
   imports: [FormsModule, MatFormField, MatLabel, MatHint, MatError, MatSlider, MatSliderThumb],
   template: `
-    <mat-form-field [appearance]="appearance()" [class]="className()">
+    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className()">
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
@@ -51,8 +51,7 @@ import { SliderField } from '@ng-forge/dynamic-form';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSliderFieldComponent implements FormValueControl<number>, SliderField {
-  // FormValueControl implementation
+export class MatSliderFieldComponent implements FormValueControl<number>, MatSliderField {
   readonly value = model<number>(0);
   readonly disabled = model<boolean>(false);
   readonly touched = model<boolean>(false);
@@ -60,16 +59,16 @@ export class MatSliderFieldComponent implements FormValueControl<number>, Slider
   readonly errors = model<readonly any[]>([]);
 
   // SliderField implementation
-  readonly label = input.required<string>();
-  readonly minValue = input<number>(0);
-  readonly maxValue = input<number>(100);
-  readonly step = input<number>(1);
-  readonly thumbLabel = input<boolean>(false);
-  readonly tickInterval = input<number | 'auto'>();
-  readonly vertical = input<boolean>(false);
-  readonly invert = input<boolean>(false);
-  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
-  readonly hint = input<string>('');
-  readonly className = input<string>('');
-  readonly appearance = input<MatFormFieldAppearance>('fill');
+  readonly label = input.required<MatSliderProps['label']>();
+  readonly minValue = input<MatSliderProps['minValue']>(0);
+  readonly maxValue = input<MatSliderProps['maxValue']>(100);
+  readonly step = input<MatSliderProps['step']>(1);
+  readonly thumbLabel = input<MatSliderProps['thumbLabel']>(false);
+  readonly tickInterval = input<MatSliderProps['tickInterval']>();
+  readonly vertical = input<MatSliderProps['vertical']>(false);
+  readonly invert = input<MatSliderProps['invert']>(false);
+  readonly color = input<MatSliderProps['color']>('primary');
+  readonly hint = input<MatSliderProps['hint']>('');
+  readonly className = input<MatSliderProps['className']>('');
+  readonly appearance = input<MatSliderProps['appearance']>('fill');
 }

@@ -1,8 +1,7 @@
-import { SubmitField, UnwrapField } from '@ng-forge/dynamic-form';
-import { InputSignal } from '@angular/core';
+import { FieldType, SubmitField } from '@ng-forge/dynamic-form';
 
-export interface MatSubmitField extends SubmitField {
-  color: InputSignal<'primary' | 'accent' | 'warn'>;
+export interface MatSubmitProps extends SubmitField {
+  color: 'primary' | 'accent' | 'warn';
 }
 
-export type MatSubmitProps = UnwrapField<MatSubmitField>;
+export type MatSubmitField = FieldType<MatSubmitProps>;

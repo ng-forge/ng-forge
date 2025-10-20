@@ -1,5 +1,9 @@
-import { SliderField, UnwrapField } from '@ng-forge/dynamic-form';
+import { FieldType, SliderField } from '@ng-forge/dynamic-form';
+import { MatFormFieldAppearance } from '@angular/material/form-field';
 
-export type MatSliderField = SliderField;
+export interface MatSliderProps extends SliderField {
+  color: 'primary' | 'accent' | 'warn';
+  appearance: MatFormFieldAppearance;
+}
 
-export type MatSliderProps = UnwrapField<SliderField>;
+export type MatSliderField = FieldType<MatSliderProps>;

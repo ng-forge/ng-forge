@@ -5,9 +5,10 @@ const config: NgDocConfiguration = {
   outDir: 'dist',
   cache: true,
   repoConfig: {
-    url: 'https://github.com/antimprisacaru/dynamic-form-lib',
+    url: 'https://github.com/ng-forge/ng-forge',
     mainBranch: 'main',
     releaseBranch: 'main',
+    platform: 'github',
   },
   guide: {
     anchorHeadings: ['h2', 'h3', 'h4'],

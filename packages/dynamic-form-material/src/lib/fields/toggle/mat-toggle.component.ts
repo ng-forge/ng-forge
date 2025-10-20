@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatError, MatFormField, MatFormFieldAppearance, MatHint, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { ToggleField } from '@ng-forge/dynamic-form';
+import { MatToggleField, MatToggleProps } from './mat-toggle.type';
 
 /**
  * Material Design toggle field component
@@ -12,7 +12,7 @@ import { ToggleField } from '@ng-forge/dynamic-form';
   selector: 'df-mat-toggle',
   imports: [FormsModule, MatFormField, MatLabel, MatHint, MatError, MatSlideToggle],
   template: `
-    <mat-form-field [appearance]="appearance()" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
@@ -50,8 +50,7 @@ import { ToggleField } from '@ng-forge/dynamic-form';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatToggleFieldComponent implements FormValueControl<boolean>, ToggleField {
-  // FormValueControl implementation
+export class MatToggleFieldComponent implements FormValueControl<boolean>, MatToggleField {
   readonly value = model<boolean>(false);
   readonly disabled = model<boolean>(false);
   readonly touched = model<boolean>(false);
@@ -59,11 +58,11 @@ export class MatToggleFieldComponent implements FormValueControl<boolean>, Toggl
   readonly errors = model<readonly any[]>([]);
 
   // ToggleField implementation
-  readonly label = input.required<string>();
-  readonly labelPosition = input<'before' | 'after'>('after');
+  readonly label = input.required<MatToggleProps['label']>();
+  readonly labelPosition = input<MatToggleProps['labelPosition']>('after');
   readonly required = input<boolean>(false);
-  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
-  readonly hint = input<string>('');
-  readonly className = input<string>('');
-  readonly appearance = input<MatFormFieldAppearance>('fill');
+  readonly color = input<MatToggleProps['color']>('primary');
+  readonly hint = input<MatToggleProps['hint']>('');
+  readonly className = input<MatToggleProps['className']>('');
+  readonly appearance = input<MatToggleProps['appearance']>('fill');
 }

@@ -5,7 +5,7 @@ import { MatCheckboxFieldComponent } from '../fields/checkbox/mat-checkbox.compo
 import { MatSubmitFieldComponent } from '../fields/submit/mat-submit.component';
 import { MatTextareaFieldComponent } from '../fields/textarea/mat-textarea.component';
 import { MatRadioFieldComponent } from '../fields/radio/mat-radio.component';
-import { MatMultiCheckboxFieldComponent } from '../fields/multi-checkbox/mat-multicheckbox.component';
+import { MatMultiCheckboxFieldComponent } from '../fields/multi-checkbox/mat-multi-checkbox.component';
 import { MatDatepickerFieldComponent } from '../fields/datepicker/mat-datepicker.component';
 import { MatSliderFieldComponent } from '../fields/slider/mat-slider.component';
 import { MatToggleFieldComponent } from '../fields/toggle/mat-toggle.component';

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatFormField, MatFormFieldAppearance, MatLabel } from '@angular/material/form-field';
-import { SelectField, SelectOption } from '@ng-forge/dynamic-form';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatError, MatHint } from '@angular/material/input';
+import { MatSelectField, MatSelectProps } from './mat-select.type';
 
 /**
  * Material Design select field component
@@ -13,7 +13,7 @@ import { MatError, MatHint } from '@angular/material/input';
   selector: 'df-mat-select',
   imports: [FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatError],
   template: `
-    <mat-form-field [appearance]="appearance()" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
@@ -46,23 +46,23 @@ import { MatError, MatHint } from '@angular/material/input';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSelectFieldComponent implements FormValueControl<any>, SelectField {
-  // FormValueControl implementation
-  readonly value = model<any>(null);
+export class MatSelectFieldComponent<T > implements FormValueControl<T>, MatSelectField<T> {
+  readonly value = model<T>(undefined as T);
   readonly disabled = model<boolean>(false);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
   readonly errors = model<readonly any[]>([]);
 
   // SelectField implementation
-  readonly label = input.required<string>();
-  readonly placeholder = input<string>('');
-  readonly options = input.required<SelectOption[]>();
-  readonly multiple = input<boolean>(false);
-  readonly compareWith = input<((o1: unknown, o2: unknown) => boolean) | undefined>();
-  readonly hint = input<string>('');
-  readonly className = input<string>('');
-  readonly appearance = input<MatFormFieldAppearance>('fill');
+  readonly label = input.required<MatSelectProps['label']>();
+  readonly placeholder = input<MatSelectProps['placeholder']>('');
+  readonly options = input.required<MatSelectProps['options']>();
+  readonly multiple = input<MatSelectProps['multiple']>(false);
+  readonly compareWith = input<MatSelectProps['compareWith']>();
+  readonly hint = input<MatSelectProps['hint']>('');
+  readonly className = input<MatSelectProps['className']>('');
+  readonly appearance = input<MatSelectProps['appearance']>('fill');
+  readonly required = input<boolean>(false);
 
   /**
    * Default comparison function

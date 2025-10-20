@@ -1,20 +1,15 @@
-import { InputSignal } from '@angular/core';
-
 /**
  * Interface for slider/range field components
  */
 export interface SliderField {
-  label: InputSignal<string>;
-  minValue: InputSignal<number>;
-  maxValue: InputSignal<number>;
-  step: InputSignal<number>;
-  value: InputSignal<number>;
-  thumbLabel: InputSignal<boolean>;
-  tickInterval: InputSignal<number | 'auto' | undefined>;
-  vertical: InputSignal<boolean>;
-  invert: InputSignal<boolean>;
-  disabled: InputSignal<boolean>;
-  hint: InputSignal<string>;
-  className: InputSignal<string>;
-  color: InputSignal<'primary' | 'accent' | 'warn'>;
+  label: string;
+  minValue: number;
+  maxValue: number;
+  step: number;
+  thumbLabel: boolean;
+  tickInterval: number | 'auto' | undefined;
+  vertical: boolean;
+  invert: boolean;
+  hint: string;
+  className: string;
 }

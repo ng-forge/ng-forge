@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatError, MatFormField, MatFormFieldAppearance, MatHint, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
-import { RadioField, RadioOption } from '@ng-forge/dynamic-form';
+import { MatRadioField, MatRadioProps } from './mat-radio.type';
 
 /**
  * Material Design radio field component
@@ -12,7 +12,7 @@ import { RadioField, RadioOption } from '@ng-forge/dynamic-form';
   selector: 'df-mat-radio',
   imports: [FormsModule, MatFormField, MatLabel, MatHint, MatError, MatRadioGroup, MatRadioButton],
   template: `
-    <mat-form-field [appearance]="appearance()" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
       @if (label()) {
       <mat-label>{{ label() }}</mat-label>
       }
@@ -56,21 +56,20 @@ import { RadioField, RadioOption } from '@ng-forge/dynamic-form';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatRadioFieldComponent implements FormValueControl<any>, RadioField {
-  // FormValueControl implementation
-  readonly value = model<any>(null);
+export class MatRadioFieldComponent<T > implements FormValueControl<T>, MatRadioField<T> {
+  readonly value = model<T>(undefined as T);
   readonly disabled = model<boolean>(false);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
   readonly errors = model<readonly any[]>([]);
 
   // RadioField implementation
-  readonly label = input.required<string>();
-  readonly options = input.required<RadioOption[]>();
+  readonly label = input.required<MatRadioProps<T>['label']>();
+  readonly options = input.required<MatRadioProps<T>['options']>();
   readonly required = input<boolean>(false);
-  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
-  readonly labelPosition = input<'before' | 'after'>('after');
-  readonly hint = input<string>('');
-  readonly className = input<string>('');
-  readonly appearance = input<MatFormFieldAppearance>('fill');
+  readonly color = input<MatRadioProps<T>['color']>('primary');
+  readonly labelPosition = input<MatRadioProps<T>['labelPosition']>('after');
+  readonly hint = input<MatRadioProps<T>['hint']>('');
+  readonly className = input<MatRadioProps<T>['className']>('');
+  readonly appearance = input<MatRadioProps<T>['appearance']>('fill');
 }

@@ -24,12 +24,12 @@ import { MatSubmitField, MatSubmitProps } from './mat-submit.type';
 })
 export class MatSubmitFieldComponent implements MatSubmitField {
   readonly label = input.required<MatSubmitProps['label']>();
-  readonly disabled = input<boolean>(false);
-  readonly className = input<string>('');
+  readonly disabled = input<MatSubmitProps['disabled']>(false);
+  readonly className = input<MatSubmitProps['className']>('');
   readonly onClick = input<MatSubmitProps['onClick']>();
 
   // Material specific props
-  readonly color = input<MatSubmitProps['color']>('primary');
+  readonly color = input<MatSubmitProps['color']>('primary' as const);
 
   handleClick(): void {
     const clickHandler = this.onClick();

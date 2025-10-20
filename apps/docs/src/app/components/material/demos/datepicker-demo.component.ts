@@ -3,11 +3,10 @@ import { JsonPipe } from '@angular/common';
 import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
 
 @Component({
-  selector: 'app-material-example',
+  selector: 'datepicker-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <div class="example-container">
-      <h4>Material Input Fields</h4>
+    <div class="demo-container">
       <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
@@ -17,10 +16,10 @@ import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
   `,
   styles: [
     `
-      .example-container {
+      .demo-container {
+        padding: 1rem;
         border: 1px solid #e0e0e0;
         border-radius: 8px;
-        padding: 1.5rem;
         margin: 1rem 0;
       }
       .output {
@@ -35,73 +34,49 @@ import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
         font-size: 0.9rem;
         margin: 0.5rem 0;
       }
-      h4 {
-        margin-top: 0;
-        color: #1976d2;
-      }
     `,
   ],
 })
-export class MaterialExampleComponent {
+export class DatepickerDemoComponent {
   model = signal({
-    name: '',
-    email: '',
-    phone: '',
-    website: '',
+    birthdate: null,
+    startDate: null,
+    dueDate: null,
   });
 
   fields: FieldConfig[] = [
     {
-      key: 'name',
-      type: 'input',
+      key: 'birthdate',
+      type: 'datepicker',
       props: {
-        label: 'Full Name',
-        placeholder: 'Enter your full name',
+        label: 'Birth Date',
+        placeholder: 'Select your birth date',
         appearance: 'outline',
-        required: true,
-        hint: 'First and last name',
-      },
-      validators: {
-        required: true,
-        minLength: 2,
+        hint: 'Used for age verification',
       },
     },
     {
-      key: 'email',
-      type: 'input',
+      key: 'startDate',
+      type: 'datepicker',
       props: {
-        label: 'Email Address',
-        type: 'email',
-        placeholder: 'user@example.com',
-        appearance: 'outline',
-        required: true,
-        hint: 'We will never share your email',
-      },
-      validators: {
-        required: true,
-        email: true,
-      },
-    },
-    {
-      key: 'phone',
-      type: 'input',
-      props: {
-        label: 'Phone Number',
-        type: 'tel',
-        placeholder: '+1 (555) 123-4567',
+        label: 'Project Start Date',
+        placeholder: 'Select start date',
         appearance: 'fill',
-        hint: 'Include country code',
+        hint: 'When does the project begin?',
+        required: true,
+      },
+      validators: {
+        required: true,
       },
     },
     {
-      key: 'website',
-      type: 'input',
+      key: 'dueDate',
+      type: 'datepicker',
       props: {
-        label: 'Website',
-        type: 'url',
-        placeholder: 'https://yoursite.com',
+        label: 'Due Date',
+        placeholder: 'Select due date',
         appearance: 'outline',
-        hint: 'Optional personal website',
+        hint: 'Project completion deadline',
       },
     },
   ];

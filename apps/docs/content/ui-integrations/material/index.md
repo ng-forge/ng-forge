@@ -2,8 +2,16 @@ The `@ng-forge/dynamic-form-material` package provides beautiful Material Design
 
 ## Installation
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-material @angular/material @angular/cdk
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-material @angular/material @angular/cdk
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-material @angular/material @angular/cdk
 ```
 
 ## Setup
@@ -30,124 +38,126 @@ Add to your `styles.scss`:
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 ```
 
-## Material Field Components
+## Material Field Types
 
-### Mat Input Field
+All field components use type-safe implementations with Angular's signal forms, implementing both FormControl interfaces and field-specific interfaces using specialized control field types.
 
-Enhanced text input with Material Design styling:
+### Input Field
 
-```jsonl
-{
-  "key": "email",
-  "type": "input",
-  "props": {
-    "label": "Email Address",
-    "type": "email",
-    "placeholder": "user@example.com",
-    "hint": "We will never share your email",
-    "required": true,
-    "appearance": "outline"
-  },
-  "validators": {
-    "required": true,
-    "email": true
-  }
-}
-```
+Enhanced text inputs with various types and validation:
 
-### Interactive Example
+{{ NgDocActions.demo("InputDemoComponent") }}
 
-Experience Material Design fields in action:
+### Select Field
 
-{{ NgDocActions.playground("MaterialExample") }}
+Dropdown selection with single or multiple options:
 
-### Mat Select Field
+{{ NgDocActions.demo("SelectDemoComponent") }}
 
-Material dropdown with search and multi-select capabilities:
+### Checkbox Field
 
-```jsonl
-{
-  "key": "country",
-  "type": "select",
-  "props": {
-    "label": "Country",
-    "placeholder": "Select your country",
-    "appearance": "outline",
-    "multiple": false,
-    "options": [
-      {
-        "value": "us",
-        "label": "United States"
-      },
-      {
-        "value": "uk",
-        "label": "United Kingdom"
-      },
-      {
-        "value": "ca",
-        "label": "Canada"
-      }
-    ]
-  }
-}
-```
+Single boolean checkbox with Material styling:
 
-### Interactive Example
+{{ NgDocActions.demo("CheckboxDemoComponent") }}
 
-Try different select configurations:
+### Radio Field
 
-{{ NgDocActions.playground("MaterialSelectExample") }}
+Single selection from radio button group:
 
-### Mat Checkbox Field
+{{ NgDocActions.demo("RadioDemoComponent") }}
 
-Material Design checkboxes with proper spacing and theming:
+### Multi-Checkbox Field
 
-```jsonl
-{
-  "key": "newsletter",
-  "type": "checkbox",
-  "props": {
-    "label": "Subscribe to newsletter",
-    "hint": "Get updates about new features",
-    "color": "primary"
-  }
-}
-```
+Multiple selections with checkboxes:
 
-### Interactive Example
+{{ NgDocActions.demo("MultiCheckboxDemoComponent") }}
 
-See Material checkboxes with different configurations:
+### Toggle Field
 
-{{ NgDocActions.playground("MaterialCheckboxExample") }}
+Material slide toggle for boolean values:
 
-## Material Submit Button
+{{ NgDocActions.demo("ToggleDemoComponent") }}
 
-Stylish action buttons with Material Design:
+### Textarea Field
 
-```typescript
-import { submitButton } from '@ng-forge/dynamic-form-material';
+Multi-line text input:
 
-const field = submitButton({
-  label: 'Create Account',
-  color: 'primary',
-  variant: 'raised', // 'basic' | 'raised' | 'stroked' | 'flat'
-  className: 'submit-btn',
-});
-```
+{{ NgDocActions.demo("TextareaDemoComponent") }}
 
-## Theming
+### Datepicker Field
+
+Date selection with Material calendar:
+
+{{ NgDocActions.demo("DatepickerDemoComponent") }}
+
+### Slider Field
+
+Numeric input with slider control:
+
+{{ NgDocActions.demo("SliderDemoComponent") }}
+
+### Submit Button
+
+Action buttons with Material Design styling:
+
+{{ NgDocActions.demo("SubmitDemoComponent") }}
+
+### Comprehensive Examples
+
+#### All Field Types Showcase
+
+Complete demonstration of every field type:
+
+{{ NgDocActions.demo("MaterialFieldTypesComponent") }}
+
+#### Theming & Appearances
+
+Material Design themes, colors, and styling options:
+
+{{ NgDocActions.demo("MaterialThemingComponent") }}
+
+#### Validation Examples
+
+Error handling and validation patterns:
+
+{{ NgDocActions.demo("MaterialValidationComponent") }}
+
+#### Control Field Types Implementation
+
+Type-safe implementation details:
+
+{{ NgDocActions.demo("ControlFieldTypesDemoComponent") }}
+
+## Type-Safe Implementation
+
+Material fields use specialized control field types for seamless Angular signal forms integration:
+
+- **ValueControlFieldType**: For single-value fields (input, select, textarea, datepicker, radio, slider, toggle)
+- **CheckboxControlFieldType**: For checkbox-style fields (checkbox, multi-checkbox)
+
+### Key Benefits
+
+- **Type Safety**: Full TypeScript support with interface enforcement
+- **Signal Forms**: Native Angular signal form integration
+- **No Boilerplate**: No ControlValueAccessor implementation needed
+- **Automatic Property Exclusion**: FormControl properties are handled automatically
+
+Explore the implementation details in the interactive examples above.
+
+## Theming & Styling
 
 Material fields automatically inherit your Angular Material theme. Customize appearance with:
 
-- **color**: `'primary' | 'accent' | 'warn'`
-- **appearance**: `'fill' | 'outline'` (for mat-form-field)
-- **variant**: `'basic' | 'raised' | 'stroked' | 'flat'` (for buttons)
+- **color**: `'primary' | 'accent' | 'warn'` - Theme color for interactive elements
+- **appearance**: `'fill' | 'outline'` - Form field container style
+- **labelPosition**: `'before' | 'after'` - Label placement for checkboxes/toggles
+- **variant**: `'basic' | 'raised' | 'stroked' | 'flat'` - Button styles
 
 ## Complete Material Form Example
 
-See a comprehensive form using all Material components:
+Comprehensive form using all Material components:
 
-{{ NgDocActions.playground("CompleteMaterialForm") }}
+{{ NgDocActions.demo("CompleteMaterialFormComponent") }}
 
 ## Advanced Features
 

@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatFormField, MatFormFieldAppearance, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatError, MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { DatepickerField } from '@ng-forge/dynamic-form';
+import { MatDatepickerField, MatDatepickerProps } from './mat-datepicker.type';
 
 /**
  * Material Design datepicker field component
@@ -25,7 +25,7 @@ import { DatepickerField } from '@ng-forge/dynamic-form';
     MatNativeDateModule,
   ],
   template: `
-    <mat-form-field [appearance]="appearance()" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
@@ -42,7 +42,7 @@ import { DatepickerField } from '@ng-forge/dynamic-form';
         (blur)="touched.set(true)"
       />
 
-      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker-toggle matIconSuffix [for]="$any(picker)"></mat-datepicker-toggle>
       <mat-datepicker #picker [startAt]="startAt()" [startView]="startView() || 'month'" [touchUi]="touchUi() || false"></mat-datepicker>
 
       @if (hint(); as hint) {
@@ -58,24 +58,26 @@ import { DatepickerField } from '@ng-forge/dynamic-form';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatDatepickerFieldComponent implements FormValueControl<Date | null>, DatepickerField {
+export class MatDatepickerFieldComponent implements FormValueControl<Date | null>, MatDatepickerField {
   // FormValueControl implementation
   readonly value = model<Date | null>(null);
-  readonly disabled = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
   readonly errors = model<readonly any[]>([]);
 
   // DatepickerField implementation
-  readonly label = input.required<string>();
-  readonly placeholder = input<string>('');
-  readonly minDate = input<Date | string | null>(null);
-  readonly maxDate = input<Date | string | null>(null);
-  readonly startAt = input<Date | null>(null);
-  readonly startView = input<'month' | 'year' | 'multi-year'>('month');
-  readonly touchUi = input<boolean>(false);
-  readonly hint = input<string>('');
-  readonly tabIndex = input<number>();
-  readonly className = input<string>('');
-  readonly appearance = input<MatFormFieldAppearance>('fill');
+  readonly label = input.required<MatDatepickerProps['label']>();
+  readonly placeholder = input<MatDatepickerProps['placeholder']>('');
+  readonly minDate = input<MatDatepickerProps['minDate']>(null);
+  readonly maxDate = input<MatDatepickerProps['maxDate']>(null);
+  readonly startAt = input<MatDatepickerProps['startAt']>(null);
+  readonly startView = input<MatDatepickerProps['startView']>('month');
+  readonly touchUi = input<MatDatepickerProps['touchUi']>(false);
+  readonly hint = input<MatDatepickerProps['hint']>('');
+  readonly tabIndex = input<MatDatepickerProps['tabIndex']>();
+  readonly className = input<MatDatepickerProps['className']>('');
+  readonly appearance = input<MatDatepickerProps['appearance']>('fill');
+  readonly color = input<MatDatepickerProps['color']>();
+  readonly disableRipple = input<MatDatepickerProps['disableRipple']>(false);
 }
