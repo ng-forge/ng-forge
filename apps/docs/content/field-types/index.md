@@ -30,7 +30,7 @@ The `input` field type handles text-based inputs with support for various HTML i
 
 **Basic Configuration:**
 
-```json
+```json lines
 {
   "key": "email",
   "type": "input",
@@ -64,7 +64,7 @@ The `select` field type provides dropdown selection with single or multiple choi
 
 **Basic Configuration:**
 
-```json
+```json lines
 {
   "key": "country",
   "type": "select",
@@ -105,7 +105,7 @@ The `checkbox` field type handles boolean values and can work with nested object
 
 **Basic Configuration:**
 
-```json
+```json lines
 {
   "key": "subscribe",
   "type": "checkbox",
@@ -122,7 +122,7 @@ The `checkbox` field type handles boolean values and can work with nested object
 
 **Nested Properties:**
 
-```json
+```json lines
 {
   "key": "preferences.notifications",
   "type": "checkbox",
@@ -157,7 +157,7 @@ const field = submitButton({
 
 **Manual Configuration:**
 
-```json
+```json lines
 {
   "key": "_submit",
   "type": "submit",
@@ -206,7 +206,7 @@ export const provideCustomInput = () => provideField('input', CustomInputCompone
 
 All field types automatically integrate with Angular's reactive forms validation system:
 
-```json
+```json lines
 {
   "key": "username",
   "type": "input",

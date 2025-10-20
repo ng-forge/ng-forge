@@ -43,8 +43,36 @@ const FIELD_ID_PREFIX = 'dynamic-field' as const;
 const DEFAULT_BINDING_PROPERTY = 'value' as const;
 const FIELD_CONTAINER_REF = 'fieldContainer' as const;
 
+/**
+ * The main dynamic form component that renders form fields based on configuration.
+ *
+ * This component provides a declarative way to build reactive forms using field configurations.
+ * It supports type-safe form models, dynamic field rendering, validation, and two-way data binding.
+ *
+ * @template TModel - The type of the form model
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * <dynamic-form
+ *   [fields]="fieldConfigs"
+ *   [value]="formModel"
+ *   (valueChange)="onFormChange($event)"
+ * />
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With options
+ * <dynamic-form
+ *   [fields]="fieldConfigs"
+ *   [value]="formModel"
+ *   [options]="{ validateOnChange: true }"
+ *   (valueChange)="onFormChange($event)"
+ * />
+ * ```
+ */
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'dynamic-form',
   template: `
     @for (field of processedFields(); track field.id || field.key) {
@@ -59,8 +87,21 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy {
 
   fieldContainers = viewChildren(FIELD_CONTAINER_REF, { read: ViewContainerRef });
 
+  /**
+   * Array of field configurations that define the form structure.
+   * Each field config specifies the field type, properties, validation rules, and other settings.
+   */
   fields = input.required<FieldConfig<TModel>[]>();
+
+  /**
+   * The current form model value. When provided, the form will be initialized with these values.
+   * Changes to this input will update the form fields accordingly.
+   */
   value = input<TModel>();
+
+  /**
+   * Optional form-wide configuration options such as validation settings.
+   */
   options = input<FormOptions>();
 
   private componentRefs: ComponentRef<unknown>[] = [];
@@ -71,7 +112,18 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy {
   // Output subject for forwarding changes
   private valueChange$ = new Subject<TModel>();
 
-  // Convert subject to output
+  /**
+   * Emits the updated form model whenever any field value changes.
+   * Use this for two-way data binding or to react to form changes.
+   *
+   * @example
+   * ```typescript
+   * onFormChange(newValue: MyFormModel) {
+   *   console.log('Form updated:', newValue);
+   *   this.formModel = newValue;
+   * }
+   * ```
+   */
   valueChange = outputFromObservable(this.valueChange$);
 
   // Computed current form state based on input value or form state
@@ -173,7 +225,7 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy {
       bindings.push(
         inputBinding(bindingProperty, () => {
           const currentVal = this.currentFormValue();
-          return currentVal ? this.getNestedValue(currentVal, field.key!) : undefined;
+          return currentVal && field.key ? this.getNestedValue(currentVal, field.key) : undefined;
         })
       );
 
@@ -181,7 +233,9 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy {
       const outputProperty = `${bindingProperty}Change`;
       bindings.push(
         outputBinding(outputProperty, (newValue: unknown) => {
-          this.handleFieldChange(field.key!, newValue);
+          if (field.key) {
+            this.handleFieldChange(field.key, newValue);
+          }
         })
       );
     }
@@ -211,7 +265,8 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy {
 
   private setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): void {
     const keys = path.split('.');
-    const lastKey = keys.pop()!;
+    const lastKey = keys.pop();
+    if (!lastKey) return;
     const target = keys.reduce((current: Record<string, unknown>, key: string) => {
       if (!current[key] || typeof current[key] !== 'object') {
         current[key] = {};

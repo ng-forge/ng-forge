@@ -12,6 +12,12 @@ const config: NgDocConfiguration = {
   guide: {
     anchorHeadings: ['h2', 'h3', 'h4'],
   },
+  shiki: {
+    themes: {
+      dark: 'material-theme-darker',
+      light: 'material-theme-lighter',
+    },
+  },
 };
 
 export default config;

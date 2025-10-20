@@ -19,7 +19,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     component: MatInputFieldComponent,
     defaultProps: {
       type: 'text',
-      appearance: 'fill',
+      appearance: 'outline',
     },
   },
   {
@@ -64,7 +64,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     component: MatSelectFieldComponent,
     defaultProps: {
       options: [],
-      appearance: 'fill',
+      appearance: 'outline',
     },
   },
   {
@@ -88,7 +88,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     defaultProps: {
       rows: 4,
       resize: 'vertical',
-      appearance: 'fill',
+      appearance: 'outline',
     },
   },
   {
@@ -97,7 +97,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     defaultProps: {
       color: 'primary',
       labelPosition: 'after',
-      appearance: 'fill',
+      appearance: 'outline',
       options: [],
     },
   },
