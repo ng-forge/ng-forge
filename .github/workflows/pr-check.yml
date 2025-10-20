@@ -1,0 +1,51 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  affected-check:
+    name: Check Affected Projects
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build affected libraries
+        run: pnpm nx affected -t build --base=origin/main
+      
+      - name: Lint affected projects
+        run: pnpm nx affected -t lint --base=origin/main
+      
+      - name: Test affected projects
+        run: pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
+      
+      - name: Build docs if affected
+        run: |
+          if pnpm nx show projects --affected --base=origin/main | grep -q docs; then
+            pnpm nx build docs --configuration=production
+          else
+            echo "Documentation not affected, skipping build"
+          fi
