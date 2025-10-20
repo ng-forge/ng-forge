@@ -13,6 +13,7 @@ import {
   computed,
   signal,
   Binding,
+  effect,
 } from '@angular/core';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
@@ -68,7 +69,7 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
   // Computed current form state based on input value or form state
   currentFormValue = computed(() => {
     const inputValue = this.value();
-    if (inputValue !== undefined) {
+    if (inputValue !== undefined && inputValue !== null) {
       return inputValue;
     }
     return this.formState();
@@ -99,6 +100,18 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
       return field;
     });
   });
+
+  constructor() {
+    // Re-render when fields change
+    effect(() => {
+      // Track the processed fields
+      this.processedFields();
+      // Re-render if view is initialized
+      if (this.fieldContainers().length > 0) {
+        void this.renderFields();
+      }
+    });
+  }
 
   ngAfterViewInit(): void {
     void this.renderFields();
@@ -223,4 +236,5 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
     const random = Math.random().toString(36).substring(2, 9);
     return `${FIELD_ID_PREFIX}-${key}-${random}`;
   }
+
 }
