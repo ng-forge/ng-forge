@@ -19,7 +19,7 @@
     "affected:test": "nx affected -t test",
     "affected:lint": "nx affected -t lint",
     "ci": "npm run build:libs && npm run test:ci",
-    "docs:rebuild": "nx ng-doc:rebuild docs",
+    "docs:rebuild": "rm -rf dist/ng-doc && ng build --project=docs --configuration=production || ng build apps/docs --configuration=production",
     "release:version": "nx release version",
     "release:version:patch": "nx release version patch",
     "release:version:minor": "nx release version minor",
