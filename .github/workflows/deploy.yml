@@ -99,9 +99,8 @@ jobs:
       
       - name: Build documentation
         run: |
-          rm -rf dist/ng-doc
-          pnpm nx build docs --configuration=production
-          ls -la dist/
+          pnpm nx run docs:ng-doc:rebuild
+          ls -la dist/apps/docs/
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
