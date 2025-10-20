@@ -33,7 +33,7 @@ jobs:
           cache: 'pnpm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       
       - name: Build libraries
         run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material
@@ -71,7 +71,7 @@ jobs:
           cache: 'pnpm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       
       - name: Restore build artifacts
         uses: actions/cache@v4
@@ -113,7 +113,7 @@ jobs:
           cache: 'pnpm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       
       - name: Restore build artifacts
         uses: actions/cache@v4
@@ -161,7 +161,7 @@ jobs:
           cache: 'pnpm'
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       
       - name: Restore build artifacts
         uses: actions/cache@v4
