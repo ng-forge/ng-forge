@@ -44,3 +44,6 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 
 .angular
+
+# Documentation files (auto-generated)
+docs/

@@ -1,12 +1,16 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0, patch, minor, major)'
+        required: false
+        default: 'patch'
+        type: string
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -44,6 +48,16 @@ jobs:
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      
+      - name: Version bump (if specified)
+        if: ${{ github.event.inputs.version != '' }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          pnpm run release:version ${{ github.event.inputs.version }}
+          git push --follow-tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Build libraries
         run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material
