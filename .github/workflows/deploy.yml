@@ -100,7 +100,7 @@ jobs:
       - name: Build documentation
         run: |
           echo "Building documentation with Angular version patch..."
-          pnpm run build:docs
+          pnpm run build:docs:prod
           ls -la dist/apps/docs/
 
       - name: Upload artifact
