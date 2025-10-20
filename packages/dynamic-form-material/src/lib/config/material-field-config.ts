@@ -13,6 +13,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     component: MatInputFieldComponent,
     defaultProps: {
       type: 'text',
+      appearance: 'fill',
     },
   },
   {
@@ -57,6 +58,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     component: MatSelectFieldComponent,
     defaultProps: {
       options: [],
+      appearance: 'fill',
     },
   },
   {

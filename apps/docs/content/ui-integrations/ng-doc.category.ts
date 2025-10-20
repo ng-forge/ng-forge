@@ -1,13 +1,9 @@
-import { NgDocPage } from '@ng-doc/core';
+import { NgDocCategory, NgDocPage } from '@ng-doc/core';
 
-const UIIntegrationsPage: NgDocPage = {
-  title: 'Overview',
-  mdFile: './index.md',
-  order: 0,
-  category: {
-    title: 'UI Integrations',
-    expandable: true,
-  }
+const UIIntegrationsCategory: NgDocCategory = {
+  title: 'UI Integrations',
+  order: 2,
+  expandable: true,
 };
 
-export default UIIntegrationsPage;
+export default UIIntegrationsCategory;

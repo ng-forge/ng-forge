@@ -2,11 +2,10 @@
   "name": "@ng-forge/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {
-    "postinstall": "node scripts/patch-ng-doc.js"
-  },
+  "scripts": {},
   "private": true,
   "devDependencies": {
+    "@angular-devkit/build-angular": "~21.0.0-next.8",
     "@angular-devkit/core": "~21.0.0-next.8",
     "@angular-devkit/schematics": "~21.0.0-next.8",
     "@angular/build": "~21.0.0-next.8",
@@ -87,6 +86,17 @@
     ],
     "ignoredBuiltDependencies": [
       "unrs-resolver"
-    ]
+    ],
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "@angular/core": "21",
+        "@angular/common": "21",
+        "@angular/compiler": "21",
+        "@angular/platform-browser": "21",
+        "@angular/platform-browser-dynamic": "21",
+        "@angular/router": "21",
+        "@angular/forms": "21"
+      }
+    }
   }
 }

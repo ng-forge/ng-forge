@@ -108,8 +108,7 @@ That's it! You now have a fully functional dynamic form with validation and Mate
 
 Try out ng-forge with this interactive demo:
 
-```typescript playground:DemoFormPlayground
-```
+{{ NgDocActions.playground("DemoFormPlayground") }}
 
 ## What Makes ng-forge Different?
 

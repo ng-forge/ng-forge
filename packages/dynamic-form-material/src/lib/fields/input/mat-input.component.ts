@@ -1,7 +1,7 @@
 import { Component, input, model, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatFormFieldModule, MatLabel, MatFormFieldAppearance } from '@angular/material/form-field';
 import { MatError, MatHint, MatInput, MatInputModule } from '@angular/material/input';
 import { InputField } from '@ng-forge/dynamic-form';
 
@@ -12,7 +12,7 @@ import { InputField } from '@ng-forge/dynamic-form';
   selector: 'df-mat-input',
   imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatError],
   template: `
-    <mat-form-field [class]="className() || ''">
+    <mat-form-field [appearance]="appearance()" [class]="className() || ''">
       @if (label()) {
       <mat-label>{{ label() }}</mat-label>
       }
@@ -57,4 +57,5 @@ export class MatInputFieldComponent implements FormValueControl<string>, InputFi
   readonly hint = input<string>('');
   readonly tabIndex = input<number>();
   readonly className = input<string>('');
+  readonly appearance = input<MatFormFieldAppearance>('fill');
 }

@@ -4,11 +4,11 @@ import { DemoFormComponent } from '../../src/app/components/demo-form.component'
 const GettingStartedPage: NgDocPage = {
   title: 'Getting Started',
   mdFile: './index.md',
-  order: 1,
+  order: 0,
   playgrounds: {
     DemoFormPlayground: {
       target: DemoFormComponent,
-      template: `<app-demo-form></app-demo-form>`
+      template: `<app-demo-form />`
     }
   }
 };

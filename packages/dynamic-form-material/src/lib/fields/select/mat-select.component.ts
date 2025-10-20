@@ -1,7 +1,7 @@
 import { Component, input, model, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatFormFieldModule, MatFormFieldAppearance } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { SelectField, SelectOption } from '@ng-forge/dynamic-form';
 
@@ -12,7 +12,7 @@ import { SelectField, SelectOption } from '@ng-forge/dynamic-form';
   selector: 'ng-forge-mat-select',
   imports: [FormsModule, MatFormFieldModule, MatSelectModule],
   template: `
-    <mat-form-field [class]="className() || ''">
+    <mat-form-field [appearance]="appearance()" [class]="className() || ''">
       @if (label()) {
       <mat-label>{{ label() }}</mat-label>
       }
@@ -61,6 +61,7 @@ export class MatSelectFieldComponent implements FormValueControl<any>, SelectFie
   readonly compareWith = input<((o1: unknown, o2: unknown) => boolean) | undefined>();
   readonly hint = input<string>('');
   readonly className = input<string>('');
+  readonly appearance = input<MatFormFieldAppearance>('fill');
 
   /**
    * Default comparison function

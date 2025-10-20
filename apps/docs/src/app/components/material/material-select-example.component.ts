@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicFormComponent, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicFormComponent, FieldConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 @Component({
   selector: 'material-select-example',

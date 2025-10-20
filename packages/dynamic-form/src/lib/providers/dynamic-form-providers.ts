@@ -1,4 +1,4 @@
-import { EnvironmentProviders, makeEnvironmentProviders, Provider } from '@angular/core';
+import { EnvironmentProviders, makeEnvironmentProviders, Provider, APP_INITIALIZER } from '@angular/core';
 import { FieldRegistry } from '../core/field-registry';
 import { ConfigMerger, DynamicFormConfig } from '../core/config-merger';
 import { FormBuilder } from '../core/form-builder';
@@ -40,21 +40,22 @@ export function withConfig(config: DynamicFormConfig): DynamicFormFeature {
         useValue: config,
       },
       {
-        provide: FieldRegistry,
+        provide: APP_INITIALIZER,
         useFactory: (registry: FieldRegistry, merger: ConfigMerger) => {
-          const mergedConfig = merger.merge(config);
-          
-          if (mergedConfig.types) {
-            registry.registerTypes(mergedConfig.types);
-          }
-          
-          if (mergedConfig.wrappers) {
-            registry.registerWrappers(mergedConfig.wrappers);
-          }
-          
-          return registry;
+          return () => {
+            const mergedConfig = merger.merge(config);
+            
+            if (mergedConfig.types) {
+              registry.registerTypes(mergedConfig.types);
+            }
+            
+            if (mergedConfig.wrappers) {
+              registry.registerWrappers(mergedConfig.wrappers);
+            }
+          };
         },
         deps: [FieldRegistry, ConfigMerger],
+        multi: true,
       },
     ],
   };

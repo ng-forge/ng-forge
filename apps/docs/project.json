@@ -19,31 +19,46 @@
           {
             "glob": "**/*",
             "input": "apps/docs/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "dist/ng-doc/docs/assets",
+            "output": "assets/ng-doc"
+          },
+          {
+            "glob": "**/*",
+            "input": "node_modules/@ng-doc/ui-kit/assets",
+            "output": "assets/ng-doc/ui-kit"
           }
         ],
-        "styles": ["apps/docs/src/styles.scss"],
-        "config": "apps/docs/ng-doc.config.ts"
+        "styles": ["apps/docs/src/styles.scss"]
       },
       "configurations": {
         "production": {
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "500kb",
-              "maximumError": "1mb"
+              "maximumWarning": "2mb",
+              "maximumError": "4mb"
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "4kb",
-              "maximumError": "8kb"
+              "maximumWarning": "20kb",
+              "maximumError": "40kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "ngDoc": {
+            "config": "apps/docs/ng-doc.config.ts"
+          }
         },
         "development": {
           "optimization": false,
           "extractLicenses": false,
-          "sourceMap": true
+          "sourceMap": true,
+          "ngDoc": {
+            "config": "apps/docs/ng-doc.config.ts"
+          }
         }
       },
       "defaultConfiguration": "production"
@@ -80,6 +95,18 @@
         "jestConfig": "apps/docs/jest.config.ts",
         "tsConfig": "apps/docs/tsconfig.spec.json"
       }
+    },
+    "ng-doc:rebuild": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "rm -rf dist/ng-doc",
+          "nx build docs"
+        ],
+        "cwd": "{workspaceRoot}",
+        "parallel": false
+      },
+      "outputs": ["{workspaceRoot}/dist/apps/docs"]
     },
     "serve-static": {
       "continuous": true,

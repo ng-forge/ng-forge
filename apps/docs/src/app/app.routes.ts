@@ -4,12 +4,12 @@ import { NG_DOC_ROUTING } from '@ng-doc/generated';
 export const appRoutes: Route[] = [
   {
     path: '',
-    redirectTo: 'docs',
+    redirectTo: '/getting-started',
     pathMatch: 'full'
   },
   ...NG_DOC_ROUTING,
   {
     path: '**',
-    redirectTo: 'docs'
+    redirectTo: '/getting-started'
   }
 ];
