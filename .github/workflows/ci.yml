@@ -85,7 +85,6 @@ jobs:
 
       - name: Lint all projects
         run: pnpm nx run-many -t lint --parallel=3
-        continue-on-error: true
 
       - name: Type check
         run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material --verbose
@@ -127,7 +126,6 @@ jobs:
 
       - name: Run tests
         run: pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage
-        continue-on-error: true
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4

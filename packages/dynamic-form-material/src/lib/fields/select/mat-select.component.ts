@@ -1,16 +1,17 @@
-import { Component, input, model, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatFormFieldModule, MatFormFieldAppearance } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { MatFormField, MatFormFieldAppearance, MatLabel } from '@angular/material/form-field';
 import { SelectField, SelectOption } from '@ng-forge/dynamic-form';
+import { MatOption, MatSelect } from '@angular/material/select';
+import { MatError, MatHint } from '@angular/material/input';
 
 /**
  * Material Design select field component
  */
 @Component({
-  selector: 'ng-forge-mat-select',
-  imports: [FormsModule, MatFormFieldModule, MatSelectModule],
+  selector: 'df-mat-select',
+  imports: [FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatError],
   template: `
     <mat-form-field [appearance]="appearance()" [class]="className() || ''">
       @if (label()) {

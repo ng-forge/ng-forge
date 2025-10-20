@@ -3,6 +3,7 @@ ng-forge provides a flexible architecture that allows you to integrate with any 
 ## Official Integrations
 
 ### Material Design
+
 Complete integration with Angular Material, providing beautiful Material Design components.
 
 - **Package**: `@ng-forge/dynamic-form-material`
@@ -12,10 +13,12 @@ Complete integration with Angular Material, providing beautiful Material Design 
 ### Coming Soon
 
 **PrimeNG Integration**
+
 - Rich set of UI components with advanced features
 - Package: `@ng-forge/dynamic-form-primeng` (in development)
 
-**Bootstrap Integration** 
+**Bootstrap Integration**
+
 - Bootstrap styling with utility classes
 - Package: `@ng-forge/dynamic-form-bootstrap` (in development)
 
@@ -35,14 +38,9 @@ import { provideField } from '@ng-forge/dynamic-form';
   template: `
     <div class="custom-field">
       <label>{{ props.label }}</label>
-      <input 
-        [value]="value()"
-        (input)="onInput($event)"
-        [placeholder]="props.placeholder"
-        [required]="props.required"
-      />
+      <input [value]="value()" (input)="onInput($event)" [placeholder]="props.placeholder" [required]="props.required" />
     </div>
-  `
+  `,
 })
 export class CustomInputComponent {
   // Implementation details...
@@ -60,10 +58,7 @@ export function withCustomFields() {
 
 // 3. Use in your app
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(),
-    withCustomFields()
-  ]
+  providers: [provideDynamicForm(), withCustomFields()],
 };
 ```
 
@@ -88,8 +83,8 @@ export function submitButton(props: SubmitButtonProps): FieldConfig {
     props: {
       label: 'Submit',
       variant: 'primary',
-      ...props
-    }
+      ...props,
+    },
   };
 }
 ```

@@ -3,10 +3,10 @@ import { FieldTypeDefinition } from '../models/field-type';
 
 // Helper functions for field processing (extracted from DynamicFormComponent logic)
 function processFields<TModel = unknown>(
-  fields: FieldConfig<TModel>[], 
+  fields: FieldConfig<TModel>[],
   getTypeDefaults: (typeName: string) => FieldTypeDefinition | undefined
 ): FieldConfig<TModel>[] {
-  return fields.map(field => processField(field, getTypeDefaults));
+  return fields.map((field) => processField(field, getTypeDefaults));
 }
 
 function processField<TModel = unknown>(
@@ -20,7 +20,7 @@ function processField<TModel = unknown>(
 
   // Handle field groups recursively
   if (field.fieldGroup && field.fieldGroup.length > 0) {
-    field.fieldGroup = field.fieldGroup.map(nestedField => {
+    field.fieldGroup = field.fieldGroup.map((nestedField) => {
       nestedField.parent = field;
       return processField(nestedField as FieldConfig<TModel>, getTypeDefaults);
     });
@@ -52,21 +52,27 @@ function generateFieldId(field: FieldConfig<any>): string {
 
 describe('Field Processing Logic', () => {
   const mockTypes = new Map<string, FieldTypeDefinition>([
-    ['input', {
-      name: 'input',
-      defaultProps: {
-        type: 'text',
-        placeholder: 'Enter value',
-        required: false
-      }
-    }],
-    ['select', {
-      name: 'select',
-      defaultProps: {
-        multiple: false,
-        options: []
-      }
-    }]
+    [
+      'input',
+      {
+        name: 'input',
+        defaultProps: {
+          type: 'text',
+          placeholder: 'Enter value',
+          required: false,
+        },
+      },
+    ],
+    [
+      'select',
+      {
+        name: 'select',
+        defaultProps: {
+          multiple: false,
+          options: [],
+        },
+      },
+    ],
   ]);
 
   const getTypeDefaults = (typeName: string) => mockTypes.get(typeName);
@@ -79,7 +85,7 @@ describe('Field Processing Logic', () => {
     it('should process multiple fields', () => {
       const fields: FieldConfig[] = [
         { key: 'firstName', type: 'input' },
-        { key: 'lastName', type: 'input' }
+        { key: 'lastName', type: 'input' },
       ];
 
       const result = processFields(fields, getTypeDefaults);
@@ -96,11 +102,11 @@ describe('Field Processing Logic', () => {
 
     it('should preserve original fields structure', () => {
       const fields: FieldConfig[] = [
-        { 
-          key: 'firstName', 
+        {
+          key: 'firstName',
           type: 'input',
-          props: { label: 'First Name' }
-        }
+          props: { label: 'First Name' },
+        },
       ];
 
       const result = processFields(fields, getTypeDefaults);
@@ -121,10 +127,10 @@ describe('Field Processing Logic', () => {
     });
 
     it('should preserve existing field ID', () => {
-      const field: FieldConfig = { 
-        key: 'firstName', 
+      const field: FieldConfig = {
+        key: 'firstName',
         type: 'input',
-        id: 'custom-id'
+        id: 'custom-id',
       };
 
       const result = processFields([field], getTypeDefaults)[0];
@@ -136,7 +142,7 @@ describe('Field Processing Logic', () => {
       const field: FieldConfig = {
         key: 'firstName',
         type: 'input',
-        props: { label: 'First Name' }
+        props: { label: 'First Name' },
       };
 
       const result = processFields([field], getTypeDefaults)[0];
@@ -145,7 +151,7 @@ describe('Field Processing Logic', () => {
         type: 'text',
         placeholder: 'Enter value',
         required: false,
-        label: 'First Name'
+        label: 'First Name',
       });
     });
 
@@ -153,10 +159,10 @@ describe('Field Processing Logic', () => {
       const field: FieldConfig = {
         key: 'firstName',
         type: 'input',
-        props: { 
+        props: {
           placeholder: 'Custom placeholder',
-          required: true 
-        }
+          required: true,
+        },
       };
 
       const result = processFields([field], getTypeDefaults)[0];
@@ -164,7 +170,7 @@ describe('Field Processing Logic', () => {
       expect(result.props).toEqual({
         type: 'text',
         placeholder: 'Custom placeholder',
-        required: true
+        required: true,
       });
     });
 
@@ -182,15 +188,17 @@ describe('Field Processing Logic', () => {
       const field: FieldConfig = {
         key: 'firstName',
         type: 'input',
-        hooks: { onInit: onInitSpy }
+        hooks: { onInit: onInitSpy },
       };
 
       processFields([field], getTypeDefaults);
 
-      expect(onInitSpy).toHaveBeenCalledWith(expect.objectContaining({
-        key: 'firstName',
-        type: 'input'
-      }));
+      expect(onInitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: 'firstName',
+          type: 'input',
+        })
+      );
     });
 
     it('should not call onInit hook if not provided', () => {
@@ -207,8 +215,8 @@ describe('Field Processing Logic', () => {
         type: 'fieldgroup',
         fieldGroup: [
           { key: 'firstName', type: 'input' },
-          { key: 'lastName', type: 'input' }
-        ]
+          { key: 'lastName', type: 'input' },
+        ],
       };
 
       const result = processFields([field], getTypeDefaults)[0];
@@ -222,9 +230,7 @@ describe('Field Processing Logic', () => {
       const field: FieldConfig = {
         key: 'userGroup',
         type: 'fieldgroup',
-        fieldGroup: [
-          { key: 'firstName', type: 'input' }
-        ]
+        fieldGroup: [{ key: 'firstName', type: 'input' }],
       };
 
       const result = processFields([field], getTypeDefaults)[0];
@@ -240,11 +246,9 @@ describe('Field Processing Logic', () => {
           {
             key: 'nestedGroup',
             type: 'fieldgroup',
-            fieldGroup: [
-              { key: 'firstName', type: 'input' }
-            ]
-          }
-        ]
+            fieldGroup: [{ key: 'firstName', type: 'input' }],
+          },
+        ],
       };
 
       const result = processFields([field], getTypeDefaults)[0];
@@ -257,7 +261,7 @@ describe('Field Processing Logic', () => {
       const field: FieldConfig = {
         key: 'emptyGroup',
         type: 'fieldgroup',
-        fieldGroup: []
+        fieldGroup: [],
       };
 
       const result = processFields([field], getTypeDefaults)[0];

@@ -8,19 +8,19 @@ import { FormOptions } from '../models/form-options';
 export interface DynamicFormConfig {
   /** Registered field types */
   types?: FieldTypeDefinition[];
-  
+
   /** Registered wrappers */
   wrappers?: FieldWrapperDefinition[];
-  
+
   /** Custom validators */
   validators?: Record<string, unknown>;
-  
+
   /** Default form options */
   defaultFormOptions?: Partial<FormOptions>;
-  
+
   /** Default field props */
   defaultFieldProps?: Record<string, unknown>;
-  
+
   /** Custom error messages */
   errorMessages?: Record<string, string | ((error: unknown, field: unknown) => string)>;
 }
@@ -76,14 +76,11 @@ export class ConfigMerger {
   /**
    * Merge field type arrays
    */
-  private mergeTypes(
-    target: FieldTypeDefinition[] = [],
-    source: FieldTypeDefinition[] = []
-  ): FieldTypeDefinition[] {
+  private mergeTypes(target: FieldTypeDefinition[] = [], source: FieldTypeDefinition[] = []): FieldTypeDefinition[] {
     const merged = [...target];
 
-    source.forEach(sourceType => {
-      const existingIndex = merged.findIndex(t => t.name === sourceType.name);
+    source.forEach((sourceType) => {
+      const existingIndex = merged.findIndex((t) => t.name === sourceType.name);
 
       if (existingIndex >= 0) {
         // Override existing type
@@ -100,14 +97,11 @@ export class ConfigMerger {
   /**
    * Merge wrapper arrays
    */
-  private mergeWrappers(
-    target: FieldWrapperDefinition[] = [],
-    source: FieldWrapperDefinition[] = []
-  ): FieldWrapperDefinition[] {
+  private mergeWrappers(target: FieldWrapperDefinition[] = [], source: FieldWrapperDefinition[] = []): FieldWrapperDefinition[] {
     const merged = [...target];
 
-    source.forEach(sourceWrapper => {
-      const existingIndex = merged.findIndex(w => w.name === sourceWrapper.name);
+    source.forEach((sourceWrapper) => {
+      const existingIndex = merged.findIndex((w) => w.name === sourceWrapper.name);
 
       if (existingIndex >= 0) {
         // Override existing wrapper

@@ -2,7 +2,7 @@ import { InputSignal } from '@angular/core';
 
 /**
  * Interface for input field components
- * Note: Some properties like 'pattern', 'min', 'max', etc. are omitted here 
+ * Note: Some properties like 'pattern', 'min', 'max', etc. are omitted here
  * because they conflict with FormValueControl's expectations
  */
 export interface InputField {

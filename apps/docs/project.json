@@ -32,14 +32,7 @@
           }
         ],
         "styles": ["apps/docs/src/styles.scss"],
-        "allowedCommonJsDependencies": [
-          "dayjs",
-          "@braintree/sanitize-url",
-          "dompurify",
-          "cytoscape-cose-bilkent",
-          "elkjs",
-          "@ng-doc/core"
-        ]
+        "allowedCommonJsDependencies": ["dayjs", "@braintree/sanitize-url", "dompurify", "cytoscape-cose-bilkent", "elkjs", "@ng-doc/core"]
       },
       "configurations": {
         "production": {
@@ -108,10 +101,7 @@
     "ng-doc:rebuild": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "rm -rf dist/ng-doc",
-          "nx build docs"
-        ],
+        "commands": ["rm -rf dist/ng-doc", "nx build docs"],
         "cwd": "{workspaceRoot}",
         "parallel": false
       },

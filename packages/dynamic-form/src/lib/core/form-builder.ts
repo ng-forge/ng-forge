@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { FieldConfig } from '../models/field-config';
 import { FieldRegistry } from './field-registry';
 
@@ -13,7 +13,7 @@ export class FormBuilder {
    * Process field configurations and apply defaults
    */
   processFields<TModel = unknown>(fields: FieldConfig<TModel>[]): FieldConfig<TModel>[] {
-    return fields.map(field => this.processField(field));
+    return fields.map((field) => this.processField(field));
   }
 
   /**
@@ -27,7 +27,7 @@ export class FormBuilder {
 
     // Handle field groups recursively
     if (field.fieldGroup && field.fieldGroup.length > 0) {
-      field.fieldGroup = field.fieldGroup.map(nestedField => {
+      field.fieldGroup = field.fieldGroup.map((nestedField) => {
         nestedField.parent = field;
         return this.processField(nestedField as FieldConfig<TModel>);
       });

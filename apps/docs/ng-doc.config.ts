@@ -7,11 +7,11 @@ const config: NgDocConfiguration = {
   repoConfig: {
     url: 'https://github.com/antimprisacaru/dynamic-form-lib',
     mainBranch: 'main',
-    releaseBranch: 'main'
+    releaseBranch: 'main',
   },
   guide: {
-    anchorHeadings: ['h2', 'h3', 'h4']
-  }
+    anchorHeadings: ['h2', 'h3', 'h4'],
+  },
 };
 
 export default config;

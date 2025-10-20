@@ -18,11 +18,7 @@ import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideAnimations(),
-    provideDynamicForm(),
-    withMaterialFields()
-  ]
+  providers: [provideAnimations(), provideDynamicForm(), withMaterialFields()],
 };
 ```
 
@@ -42,19 +38,19 @@ Enhanced text input with Material Design styling:
 
 ```json
 {
-  key: 'email',
-  type: 'input',
-  props: {
-    label: 'Email Address',
-    type: 'email',
-    placeholder: 'user@example.com',
-    hint: 'We will never share your email',
-    required: true,
-    appearance: 'outline' // 'fill' | 'outline'
+  "key": "email",
+  "type": "input",
+  "props": {
+    "label": "Email Address",
+    "type": "email",
+    "placeholder": "user@example.com",
+    "hint": "We will never share your email",
+    "required": true,
+    "appearance": "outline"
   },
-  validators: {
-    required: true,
-    email: true
+  "validators": {
+    "required": true,
+    "email": true
   }
 }
 ```
@@ -71,17 +67,17 @@ Material dropdown with search and multi-select capabilities:
 
 ```json
 {
-  key: 'country',
-  type: 'select',
-  props: {
-    label: 'Country',
-    placeholder: 'Select your country',
-    appearance: 'outline',
-    multiple: false,
-    options: [
-      { value: 'us', label: 'United States' },
-      { value: 'uk', label: 'United Kingdom' },
-      { value: 'ca', label: 'Canada' }
+  "key": "country",
+  "type": "select",
+  "props": {
+    "label": "Country",
+    "placeholder": "Select your country",
+    "appearance": "outline",
+    "multiple": false,
+    "options": [
+      { "value": "us", "label": "United States" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "ca", "label": "Canada" }
     ]
   }
 }
@@ -99,12 +95,12 @@ Material Design checkboxes with proper spacing and theming:
 
 ```json
 {
-  key: 'newsletter',
-  type: 'checkbox',
-  props: {
-    label: 'Subscribe to newsletter',
-    hint: 'Get updates about new features',
-    color: 'primary' // 'primary' | 'accent' | 'warn'
+  "key": "newsletter",
+  "type": "checkbox",
+  "props": {
+    "label": "Subscribe to newsletter",
+    "hint": "Get updates about new features",
+    "color": "primary"
   }
 }
 ```
@@ -126,7 +122,7 @@ const field = submitButton({
   label: 'Create Account',
   color: 'primary',
   variant: 'raised', // 'basic' | 'raised' | 'stroked' | 'flat'
-  className: 'submit-btn'
+  className: 'submit-btn',
 });
 ```
 

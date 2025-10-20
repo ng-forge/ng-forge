@@ -11,12 +11,7 @@ export * from './fields';
 export * from './core';
 
 // Providers
-export {
-  provideDynamicForm,
-  withConfig,
-  withValidation,
-  withTranslation
-} from './providers/dynamic-form-providers';
+export { provideDynamicForm, withConfig, withValidation, withTranslation } from './providers/dynamic-form-providers';
 export type { DynamicFormFeature } from './providers/dynamic-form-providers';
 
 // TODO: do proper exports

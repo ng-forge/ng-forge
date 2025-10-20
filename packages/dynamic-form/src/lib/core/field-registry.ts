@@ -24,7 +24,7 @@ export class FieldRegistry {
    * Register multiple field types
    */
   registerTypes(types: FieldTypeDefinition[]): void {
-    types.forEach(type => this.registerType(type));
+    types.forEach((type) => this.registerType(type));
   }
 
   /**
@@ -32,7 +32,7 @@ export class FieldRegistry {
    */
   getType(name: string): FieldTypeDefinition | undefined {
     let type = this.types.get(name);
-    
+
     // Resolve inheritance chain
     if (type?.extends) {
       const parentType = this.getType(type.extends);
@@ -40,7 +40,7 @@ export class FieldRegistry {
         type = this.mergeTypes(parentType, type);
       }
     }
-    
+
     return type;
   }
 
@@ -63,7 +63,7 @@ export class FieldRegistry {
    */
   async loadTypeComponent(name: string): Promise<Type<unknown>> {
     const type = this.getType(name);
-    
+
     if (!type) {
       throw new Error(`Field type "${name}" is not registered`);
     }
@@ -85,8 +85,7 @@ export class FieldRegistry {
       this.loadingCache.set(name, loadPromise);
 
       try {
-        const component = await loadPromise;
-        return component;
+        return await loadPromise;
       } catch (error) {
         this.loadingCache.delete(name);
         throw new Error(`Failed to load component for field type "${name}": ${error}`);
@@ -110,7 +109,7 @@ export class FieldRegistry {
    * Register multiple wrappers
    */
   registerWrappers(wrappers: FieldWrapperDefinition[]): void {
-    wrappers.forEach(wrapper => this.registerWrapper(wrapper));
+    wrappers.forEach((wrapper) => this.registerWrapper(wrapper));
   }
 
   /**
@@ -124,8 +123,7 @@ export class FieldRegistry {
    * Get all registered wrappers
    */
   getWrappers(): FieldWrapperDefinition[] {
-    return Array.from(this.wrappers.values())
-      .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+    return Array.from(this.wrappers.values()).sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   }
 
   /**
@@ -147,10 +145,7 @@ export class FieldRegistry {
   /**
    * Merge parent and child type definitions
    */
-  private mergeTypes(
-    parent: FieldTypeDefinition,
-    child: FieldTypeDefinition
-  ): FieldTypeDefinition {
+  private mergeTypes(parent: FieldTypeDefinition, child: FieldTypeDefinition): FieldTypeDefinition {
     return {
       ...parent,
       ...child,
@@ -158,14 +153,8 @@ export class FieldRegistry {
         ...parent.defaultProps,
         ...child.defaultProps,
       },
-      wrappers: [
-        ...(parent.wrappers ?? []),
-        ...(child.wrappers ?? []),
-      ],
-      validators: [
-        ...(parent.validators ?? []),
-        ...(child.validators ?? []),
-      ],
+      wrappers: [...(parent.wrappers ?? []), ...(child.wrappers ?? [])],
+      validators: [...(parent.validators ?? []), ...(child.validators ?? [])],
     };
   }
 }

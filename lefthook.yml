@@ -2,16 +2,13 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      glob: "*.{ts,js,json,md}"
-      run: pnpm nx run-many -t lint --files={staged_files}
+      glob: "packages/**/*.{ts,js}"
+      run: |
+        pnpm eslint packages/dynamic-form --fix
+        pnpm eslint packages/dynamic-form-material --fix
     format:
       glob: "*.{ts,js,json,md,html,scss,css}"
       run: pnpm prettier --write {staged_files}
-
-pre-push:
-  commands:
-    affected-lint:
-      run: pnpm nx affected -t lint
 
 commit-msg:
   commands:

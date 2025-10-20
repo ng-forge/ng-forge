@@ -10,9 +10,7 @@ export interface MaterialSubmitProps {
 /**
  * Helper function to create a submit button field configuration
  */
-export function submitButton<TModel = unknown>(
-  options: Partial<MaterialSubmitProps> = {}
-): FieldConfig<TModel> {
+export function submitButton<TModel = unknown>(options: Partial<MaterialSubmitProps> = {}): FieldConfig<TModel> {
   return {
     type: 'submit',
     props: {
@@ -20,17 +18,15 @@ export function submitButton<TModel = unknown>(
       color: options.color || 'primary',
       disabled: options.disabled || false,
       className: options.className || '',
-      ...options
-    }
+      ...options,
+    },
   } as FieldConfig<TModel>;
 }
 
 /**
  * Helper function to create an action button field configuration
  */
-export function actionButton<TModel = unknown>(
-  options: Partial<MaterialSubmitProps & { onClick?: () => void }> = {}
-): FieldConfig<TModel> {
+export function actionButton<TModel = unknown>(options: Partial<MaterialSubmitProps & { onClick?: () => void }> = {}): FieldConfig<TModel> {
   return {
     type: 'submit',
     props: {
@@ -39,7 +35,7 @@ export function actionButton<TModel = unknown>(
       disabled: options.disabled || false,
       className: options.className || '',
       onClick: options.onClick,
-      ...options
-    }
+      ...options,
+    },
   } as FieldConfig<TModel>;
 }

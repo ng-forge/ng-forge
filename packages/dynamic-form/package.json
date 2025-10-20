@@ -4,10 +4,9 @@
   "type": "module",
   "sideEffects": false,
   "peerDependencies": {
-    "@angular/common": "~21.0.0-next.8",
-    "@angular/compiler": "~21.0.0-next.8",
     "@angular/core": "~21.0.0-next.8",
     "@angular/forms": "~21.0.0-next.8",
-    "ngxtension": "^6.0.0"
+    "ngxtension": "^6.0.0",
+    "rxjs": "~7.8.0"
   }
 }

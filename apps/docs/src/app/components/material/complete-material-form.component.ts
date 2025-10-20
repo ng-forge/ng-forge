@@ -24,57 +24,53 @@ interface CompleteFormModel {
 }
 
 @Component({
-  selector: 'complete-material-form',
+  selector: 'app-complete-material-form',
   imports: [DynamicFormComponent, JsonPipe],
   template: `
     <div class="example-container">
       <h4>Complete Material Design Form</h4>
-      <p class="description">
-        A comprehensive form showcasing all Material components with proper theming and validation.
-      </p>
-      <dynamic-form
-        [fields]="fields"
-        [value]="model()"
-        (valueChange)="onValueChange($event)"
-      />
+      <p class="description">A comprehensive form showcasing all Material components with proper theming and validation.</p>
+      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)" />
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
       </div>
     </div>
   `,
-  styles: [`
-    .example-container {
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 2rem;
-      margin: 1rem 0;
-      max-width: 800px;
-    }
-    .description {
-      color: #666;
-      margin-bottom: 1.5rem;
-      font-style: italic;
-    }
-    .output {
-      margin-top: 2rem;
-      padding-top: 1rem;
-      border-top: 1px solid #e0e0e0;
-    }
-    pre {
-      background: #f5f5f5;
-      padding: 1rem;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      margin: 0.5rem 0;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    h4 {
-      margin-top: 0;
-      color: #1976d2;
-    }
-  `]
+  styles: [
+    `
+      .example-container {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 2rem;
+        margin: 1rem 0;
+        max-width: 800px;
+      }
+      .description {
+        color: #666;
+        margin-bottom: 1.5rem;
+        font-style: italic;
+      }
+      .output {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e0e0e0;
+      }
+      pre {
+        background: #f5f5f5;
+        padding: 1rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        margin: 0.5rem 0;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      h4 {
+        margin-top: 0;
+        color: #1976d2;
+      }
+    `,
+  ],
 })
 export class CompleteMaterialFormComponent {
   model = signal<CompleteFormModel>({
@@ -82,19 +78,19 @@ export class CompleteMaterialFormComponent {
       firstName: '',
       lastName: '',
       email: '',
-      phone: ''
+      phone: '',
     },
     preferences: {
       country: '',
       language: '',
       plan: '',
-      notifications: []
+      notifications: [],
     },
     agreements: {
       newsletter: false,
       terms: false,
-      privacy: false
-    }
+      privacy: false,
+    },
   });
 
   fields: FieldConfig[] = [
@@ -106,12 +102,12 @@ export class CompleteMaterialFormComponent {
         label: 'First Name',
         placeholder: 'Enter your first name',
         appearance: 'outline',
-        required: true
+        required: true,
       },
       validators: {
         required: true,
-        minLength: 2
-      }
+        minLength: 2,
+      },
     },
     {
       key: 'personalInfo.lastName',
@@ -120,12 +116,12 @@ export class CompleteMaterialFormComponent {
         label: 'Last Name',
         placeholder: 'Enter your last name',
         appearance: 'outline',
-        required: true
+        required: true,
       },
       validators: {
         required: true,
-        minLength: 2
-      }
+        minLength: 2,
+      },
     },
     {
       key: 'personalInfo.email',
@@ -136,12 +132,12 @@ export class CompleteMaterialFormComponent {
         placeholder: 'user@example.com',
         appearance: 'outline',
         required: true,
-        hint: 'We will never share your email'
+        hint: 'We will never share your email',
       },
       validators: {
         required: true,
-        email: true
-      }
+        email: true,
+      },
     },
     {
       key: 'personalInfo.phone',
@@ -151,8 +147,8 @@ export class CompleteMaterialFormComponent {
         type: 'tel',
         placeholder: '+1 (555) 123-4567',
         appearance: 'outline',
-        hint: 'Include country code'
-      }
+        hint: 'Include country code',
+      },
     },
 
     // Preferences Section
@@ -171,12 +167,12 @@ export class CompleteMaterialFormComponent {
           { value: 'au', label: 'Australia' },
           { value: 'de', label: 'Germany' },
           { value: 'fr', label: 'France' },
-          { value: 'jp', label: 'Japan' }
-        ]
+          { value: 'jp', label: 'Japan' },
+        ],
       },
       validators: {
-        required: true
-      }
+        required: true,
+      },
     },
     {
       key: 'preferences.language',
@@ -190,9 +186,9 @@ export class CompleteMaterialFormComponent {
           { value: 'es', label: 'Spanish' },
           { value: 'fr', label: 'French' },
           { value: 'de', label: 'German' },
-          { value: 'ja', label: 'Japanese' }
-        ]
-      }
+          { value: 'ja', label: 'Japanese' },
+        ],
+      },
     },
     {
       key: 'preferences.plan',
@@ -206,12 +202,12 @@ export class CompleteMaterialFormComponent {
         options: [
           { value: 'free', label: 'Free - $0/month', description: 'Basic features' },
           { value: 'pro', label: 'Pro - $10/month', description: 'Advanced features' },
-          { value: 'enterprise', label: 'Enterprise - $50/month', description: 'Full features + support' }
-        ]
+          { value: 'enterprise', label: 'Enterprise - $50/month', description: 'Full features + support' },
+        ],
       },
       validators: {
-        required: true
-      }
+        required: true,
+      },
     },
     {
       key: 'preferences.notifications',
@@ -226,9 +222,9 @@ export class CompleteMaterialFormComponent {
           { value: 'email', label: 'Email notifications' },
           { value: 'sms', label: 'SMS notifications' },
           { value: 'push', label: 'Push notifications' },
-          { value: 'newsletter', label: 'Newsletter' }
-        ]
-      }
+          { value: 'newsletter', label: 'Newsletter' },
+        ],
+      },
     },
 
     // Agreements Section
@@ -238,8 +234,8 @@ export class CompleteMaterialFormComponent {
       props: {
         label: 'Subscribe to newsletter',
         hint: 'Get updates about new features and tips',
-        color: 'primary'
-      }
+        color: 'primary',
+      },
     },
     {
       key: 'agreements.terms',
@@ -247,11 +243,11 @@ export class CompleteMaterialFormComponent {
       props: {
         label: 'I agree to the Terms and Conditions',
         color: 'primary',
-        required: true
+        required: true,
       },
       validators: {
-        required: true
-      }
+        required: true,
+      },
     },
     {
       key: 'agreements.privacy',
@@ -259,19 +255,19 @@ export class CompleteMaterialFormComponent {
       props: {
         label: 'I agree to the Privacy Policy',
         color: 'primary',
-        required: true
+        required: true,
       },
       validators: {
-        required: true
-      }
+        required: true,
+      },
     },
 
     // Submit Button
     submitButton({
       label: 'Create Account',
       color: 'primary',
-      className: 'submit-btn'
-    })
+      className: 'submit-btn',
+    }),
   ];
 
   onValueChange(newValue: CompleteFormModel) {

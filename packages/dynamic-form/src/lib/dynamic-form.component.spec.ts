@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { firstValueFrom } from 'rxjs';
 import { DynamicFormComponent } from './dynamic-form.component';
 import { FieldRegistry } from './core/field-registry';
 import { FieldConfig } from './models/field-config';
@@ -19,7 +20,7 @@ interface TestFormModel {
 }
 
 @Component({
-  selector: 'test-input',
+  selector: 'df-test-input',
   template: `
     <input
       [value]="value() || ''"
@@ -49,7 +50,7 @@ class TestInputComponent {
 }
 
 @Component({
-  selector: 'test-select',
+  selector: 'df-test-select',
   template: `
     <select
       [value]="value() || ''"
@@ -80,7 +81,7 @@ class TestSelectComponent {
 }
 
 @Component({
-  selector: 'test-checkbox',
+  selector: 'df-test-checkbox',
   template: `
     <input
       type="checkbox"
@@ -105,7 +106,7 @@ class TestCheckboxComponent {
 }
 
 @Component({
-  selector: 'test-submit',
+  selector: 'df-test-submit',
   template: `
     <button type="submit" [disabled]="disabled() || false" [id]="id() || ''" [attr.data-testid]="testId() || ''">
       {{ label() || 'Submit' }}
@@ -403,11 +404,11 @@ describe('DynamicFormComponent', () => {
           },
         },
       ];
-      const { component, fixture } = createComponent(fields);
+      const { fixture } = createComponent(fields);
       fixture.detectChanges();
 
       // Wait for async field rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       fixture.detectChanges();
 
       const inputElement = fixture.debugElement.query(By.css('[data-testid="first-name-input"]'));
@@ -421,11 +422,11 @@ describe('DynamicFormComponent', () => {
         { key: 'country', type: 'select', props: { testId: 'country-select', options: ['US', 'CA'] } },
         { key: 'isActive', type: 'checkbox', props: { testId: 'active-checkbox' } },
       ];
-      const { component, fixture } = createComponent(fields);
+      const { fixture } = createComponent(fields);
       fixture.detectChanges();
 
       // Wait for async field rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       fixture.detectChanges();
 
       expect(fixture.debugElement.query(By.css('[data-testid="first-name"]'))).toBeTruthy();
@@ -436,11 +437,11 @@ describe('DynamicFormComponent', () => {
     it('should handle rendering when field type is not registered', waitForAsync(async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       const fields: FieldConfig<TestFormModel>[] = [{ key: 'unknownField', type: 'non-existent-type' }];
-      const { component, fixture } = createComponent(fields);
+      const { fixture } = createComponent(fields);
       fixture.detectChanges();
 
       // Wait for async field rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       fixture.detectChanges();
 
       expect(consoleSpy).toHaveBeenCalledWith('Failed to render field type "non-existent-type":', expect.any(Error));
@@ -453,45 +454,43 @@ describe('DynamicFormComponent', () => {
     it('should emit value changes when field value updates', waitForAsync(async () => {
       const fields: FieldConfig<TestFormModel>[] = [{ key: 'firstName', type: 'input', props: { testId: 'first-name' } }];
       const { component, fixture } = createComponent(fields);
-      const valueChanges: TestFormModel[] = [];
-
-      component.valueChange.subscribe((value) => valueChanges.push(value));
 
       fixture.detectChanges();
 
       // Wait for async field rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       fixture.detectChanges();
+
+      const valueChangePromise = firstValueFrom((component as any).valueChange$);
 
       const inputElement = fixture.debugElement.query(By.css('[data-testid="first-name"]')).nativeElement as HTMLInputElement;
       inputElement.value = 'John';
       inputElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      expect(valueChanges).toHaveLength(1);
-      expect(valueChanges[0]).toEqual({ firstName: 'John' });
+      const emittedValue = await valueChangePromise;
+      expect(emittedValue).toEqual({ firstName: 'John' });
     }));
 
     it('should handle nested field paths', waitForAsync(async () => {
       const fields: FieldConfig<TestFormModel>[] = [{ key: 'nested.field', type: 'input', props: { testId: 'nested-field' } }];
       const { component, fixture } = createComponent(fields);
-      const valueChanges: TestFormModel[] = [];
-
-      component.valueChange.subscribe((value) => valueChanges.push(value));
 
       fixture.detectChanges();
 
       // Wait for async field rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       fixture.detectChanges();
+
+      const valueChangePromise = firstValueFrom((component as any).valueChange$);
 
       const inputElement = fixture.debugElement.query(By.css('[data-testid="nested-field"]')).nativeElement as HTMLInputElement;
       inputElement.value = 'nested value';
       inputElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      expect(valueChanges).toHaveLength(1);
-      expect(valueChanges[0]).toEqual({ nested: { field: 'nested value' } });
+      const emittedValue = await valueChangePromise;
+      expect(emittedValue).toEqual({ nested: { field: 'nested value' } });
     }));
 
     it('should preserve existing values when updating single field', waitForAsync(async () => {
@@ -501,23 +500,23 @@ describe('DynamicFormComponent', () => {
         { key: 'lastName', type: 'input', props: { testId: 'last-name' } },
       ];
       const { component, fixture } = createComponent(fields);
-      const valueChanges: TestFormModel[] = [];
 
-      component.valueChange.subscribe((value) => valueChanges.push(value));
       fixture.componentRef.setInput('value', initialValue);
       fixture.detectChanges();
 
       // Wait for async field rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       fixture.detectChanges();
+
+      const valueChangePromise = firstValueFrom((component as any).valueChange$);
 
       const firstNameInput = fixture.debugElement.query(By.css('[data-testid="first-name"]')).nativeElement as HTMLInputElement;
       firstNameInput.value = 'Jane';
       firstNameInput.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      expect(valueChanges).toHaveLength(1);
-      expect(valueChanges[0]).toEqual({ firstName: 'Jane', lastName: 'Doe' });
+      const emittedValue = await valueChangePromise;
+      expect(emittedValue).toEqual({ firstName: 'Jane', lastName: 'Doe' });
     }));
   });
 
@@ -559,11 +558,11 @@ describe('DynamicFormComponent', () => {
   describe('Component Lifecycle', () => {
     it('should clean up component references on destroy', waitForAsync(async () => {
       const fields: FieldConfig<TestFormModel>[] = [{ key: 'firstName', type: 'input', props: { testId: 'first-name' } }];
-      const { component, fixture } = createComponent(fields);
+      const { fixture } = createComponent(fields);
       fixture.detectChanges();
 
       // Wait for async field rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       fixture.detectChanges();
 
       expect(fixture.debugElement.query(By.css('[data-testid="first-name"]'))).toBeTruthy();
@@ -577,12 +576,12 @@ describe('DynamicFormComponent', () => {
     it('should handle re-rendering when fields change', waitForAsync(async () => {
       // Initial fields
       const initialFields: FieldConfig<TestFormModel>[] = [{ key: 'firstName', type: 'input', props: { testId: 'first-name' } }];
-      const { component, fixture } = createComponent(initialFields);
+      const { fixture } = createComponent(initialFields);
 
       fixture.detectChanges();
 
       // Wait for async field rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       fixture.detectChanges();
 
       expect(fixture.debugElement.query(By.css('[data-testid="first-name"]'))).toBeTruthy();
@@ -598,7 +597,7 @@ describe('DynamicFormComponent', () => {
       fixture.detectChanges();
 
       // Wait for async field rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       fixture.detectChanges();
 
       expect(fixture.debugElement.query(By.css('[data-testid="first-name"]'))).toBeTruthy();

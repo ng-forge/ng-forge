@@ -8,9 +8,9 @@ const GettingStartedPage: NgDocPage = {
   playgrounds: {
     DemoFormPlayground: {
       target: DemoFormComponent,
-      template: `<app-demo-form />`
-    }
-  }
+      template: `<app-demo-form />`,
+    },
+  },
 };
 
 export default GettingStartedPage;

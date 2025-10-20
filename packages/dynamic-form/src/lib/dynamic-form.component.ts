@@ -1,17 +1,17 @@
 import {
-  Component,
-  input,
-  inject,
-  ChangeDetectionStrategy,
-  OnDestroy,
-  ViewContainerRef,
-  viewChildren,
-  ComponentRef,
-  inputBinding,
-  outputBinding,
-  computed,
-  signal,
   Binding,
+  ChangeDetectionStrategy,
+  Component,
+  ComponentRef,
+  computed,
+  inject,
+  input,
+  inputBinding,
+  OnDestroy,
+  outputBinding,
+  signal,
+  viewChildren,
+  ViewContainerRef,
 } from '@angular/core';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
@@ -44,6 +44,7 @@ const DEFAULT_BINDING_PROPERTY = 'value' as const;
 const FIELD_CONTAINER_REF = 'fieldContainer' as const;
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'dynamic-form',
   template: `
     @for (field of processedFields(); track field.id || field.key) {

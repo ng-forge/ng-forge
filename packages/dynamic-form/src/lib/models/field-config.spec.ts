@@ -3,8 +3,7 @@ import { FieldConfig } from './field-config';
 
 describe('FieldConfig', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({})
-      .compileComponents();
+    await TestBed.configureTestingModule({}).compileComponents();
   });
   it('should create a field config with required type', () => {
     const fieldConfig: FieldConfig = {
@@ -12,8 +11,8 @@ describe('FieldConfig', () => {
       key: 'firstName',
       props: {
         label: 'First Name',
-        placeholder: 'Enter first name'
-      }
+        placeholder: 'Enter first name',
+      },
     };
 
     expect(fieldConfig.type).toBe('input');
@@ -24,7 +23,7 @@ describe('FieldConfig', () => {
 
   it('should support minimal configuration', () => {
     const fieldConfig: FieldConfig = {
-      type: 'submit'
+      type: 'submit',
     };
 
     expect(fieldConfig.type).toBe('submit');
@@ -37,8 +36,8 @@ describe('FieldConfig', () => {
       key: 'address',
       fieldGroup: [
         { type: 'input', key: 'street' },
-        { type: 'input', key: 'city' }
-      ]
+        { type: 'input', key: 'city' },
+      ],
     };
 
     expect(fieldConfig.fieldGroup).toHaveLength(2);
@@ -52,8 +51,8 @@ describe('FieldConfig', () => {
       key: 'email',
       validators: {
         required: true,
-        email: true
-      }
+        email: true,
+      },
     };
 
     expect(fieldConfig.validators?.['required']).toBe(true);
@@ -66,8 +65,8 @@ describe('FieldConfig', () => {
       key: 'confirmEmail',
       expressions: {
         hide: (model) => !model.email,
-        'props.required': (model) => Boolean(model.email)
-      }
+        'props.required': (model) => Boolean(model.email),
+      },
     };
 
     expect(fieldConfig.expressions?.hide).toBeInstanceOf(Function);
@@ -85,8 +84,8 @@ describe('FieldConfig', () => {
       hooks: {
         onInit: onInitSpy,
         onChange: onChangeSpy,
-        onDestroy: onDestroySpy
-      }
+        onDestroy: onDestroySpy,
+      },
     };
 
     expect(fieldConfig.hooks?.onInit).toBe(onInitSpy);

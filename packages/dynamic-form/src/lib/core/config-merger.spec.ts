@@ -13,22 +13,22 @@ describe('ConfigMerger', () => {
     component: MockInputComponent,
     defaultProps: {
       type: 'text',
-      placeholder: 'Enter value'
-    }
+      placeholder: 'Enter value',
+    },
   };
 
   const mockSelectType: FieldTypeDefinition = {
     name: 'select',
     component: MockSelectComponent,
     defaultProps: {
-      multiple: false
-    }
+      multiple: false,
+    },
   };
 
   const mockWrapper: FieldWrapperDefinition = {
     name: 'form-field',
     component: MockWrapperComponent,
-    priority: 10
+    priority: 10,
   };
 
   beforeEach(() => {
@@ -61,7 +61,7 @@ describe('ConfigMerger', () => {
       const config: Partial<DynamicFormConfig> = {
         types: [mockInputType],
         validators: { required: true },
-        defaultFieldProps: { className: 'form-control' }
+        defaultFieldProps: { className: 'form-control' },
       };
 
       const result = service.merge(config);
@@ -80,13 +80,13 @@ describe('ConfigMerger', () => {
       const config1: Partial<DynamicFormConfig> = {
         types: [mockInputType],
         validators: { required: true },
-        defaultFieldProps: { className: 'form-control' }
+        defaultFieldProps: { className: 'form-control' },
       };
 
       const config2: Partial<DynamicFormConfig> = {
         types: [mockSelectType],
         validators: { email: true },
-        defaultFieldProps: { disabled: false }
+        defaultFieldProps: { disabled: false },
       };
 
       const result = service.merge(config1, config2);
@@ -95,7 +95,7 @@ describe('ConfigMerger', () => {
       expect(result.validators).toEqual({ required: true, email: true });
       expect(result.defaultFieldProps).toEqual({
         className: 'form-control',
-        disabled: false
+        disabled: false,
       });
     });
 
@@ -103,16 +103,16 @@ describe('ConfigMerger', () => {
       const config1: Partial<DynamicFormConfig> = {
         defaultFormOptions: {
           showError: true,
-          validationStrategy: 'always'
+          validationStrategy: 'always',
         },
-        validators: { required: 'Required field' }
+        validators: { required: 'Required field' },
       };
 
       const config2: Partial<DynamicFormConfig> = {
         defaultFormOptions: {
-          validationStrategy: 'onDirty'
+          validationStrategy: 'onDirty',
         },
-        validators: { required: 'This field is required' }
+        validators: { required: 'This field is required' },
       };
 
       const result = service.merge(config1, config2);
@@ -146,11 +146,11 @@ describe('ConfigMerger', () => {
   describe('type merging', () => {
     it('should merge type arrays without duplicates', () => {
       const config1: Partial<DynamicFormConfig> = {
-        types: [mockInputType]
+        types: [mockInputType],
       };
 
       const config2: Partial<DynamicFormConfig> = {
-        types: [mockSelectType]
+        types: [mockSelectType],
       };
 
       const result = service.merge(config1, config2);
@@ -162,13 +162,13 @@ describe('ConfigMerger', () => {
       const inputType1: FieldTypeDefinition = {
         name: 'input',
         component: MockInputComponent,
-        defaultProps: { type: 'text' }
+        defaultProps: { type: 'text' },
       };
 
       const inputType2: FieldTypeDefinition = {
         name: 'input',
         component: MockSelectComponent, // Different component
-        defaultProps: { type: 'email' }
+        defaultProps: { type: 'email' },
       };
 
       const config1: Partial<DynamicFormConfig> = { types: [inputType1] };
@@ -195,7 +195,7 @@ describe('ConfigMerger', () => {
     it('should merge wrapper arrays without duplicates', () => {
       const wrapper1: FieldWrapperDefinition = {
         name: 'wrapper1',
-        component: MockWrapperComponent
+        component: MockWrapperComponent,
       };
 
       const config1: Partial<DynamicFormConfig> = { wrappers: [wrapper1] };
@@ -210,13 +210,13 @@ describe('ConfigMerger', () => {
       const wrapper1: FieldWrapperDefinition = {
         name: 'form-field',
         component: MockWrapperComponent,
-        priority: 5
+        priority: 5,
       };
 
       const wrapper2: FieldWrapperDefinition = {
         name: 'form-field',
         component: MockInputComponent, // Different component
-        priority: 15
+        priority: 15,
       };
 
       const config1: Partial<DynamicFormConfig> = { wrappers: [wrapper1] };
@@ -235,15 +235,15 @@ describe('ConfigMerger', () => {
       const config1: Partial<DynamicFormConfig> = {
         errorMessages: {
           required: 'This field is required',
-          email: 'Invalid email'
-        }
+          email: 'Invalid email',
+        },
       };
 
       const config2: Partial<DynamicFormConfig> = {
         errorMessages: {
           minLength: 'Too short',
-          email: 'Please enter a valid email' // Override
-        }
+          email: 'Please enter a valid email', // Override
+        },
       };
 
       const result = service.merge(config1, config2);
@@ -251,7 +251,7 @@ describe('ConfigMerger', () => {
       expect(result.errorMessages).toEqual({
         required: 'This field is required',
         email: 'Please enter a valid email',
-        minLength: 'Too short'
+        minLength: 'Too short',
       });
     });
 
@@ -260,8 +260,8 @@ describe('ConfigMerger', () => {
 
       const config: Partial<DynamicFormConfig> = {
         errorMessages: {
-          custom: errorFn
-        }
+          custom: errorFn,
+        },
       };
 
       const result = service.merge(config);

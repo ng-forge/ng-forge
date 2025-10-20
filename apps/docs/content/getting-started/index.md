@@ -17,10 +17,7 @@ import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(),
-    withMaterialFields()
-  ]
+  providers: [provideDynamicForm(), withMaterialFields()],
 };
 ```
 
@@ -34,20 +31,13 @@ import { DynamicFormComponent, FieldConfig } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'app-user-form',
   imports: [DynamicFormComponent],
-  template: `
-    <dynamic-form
-      [fields]="fields"
-      [model]="model"
-      (modelChange)="onModelChange($event)"
-      (formSubmit)="onSubmit($event)"
-    />
-  `
+  template: ` <dynamic-form [fields]="fields" [model]="model" (modelChange)="onModelChange($event)" (formSubmit)="onSubmit($event)" /> `,
 })
 export class UserFormComponent {
   model = signal({
     firstName: '',
     email: '',
-    newsletter: false
+    newsletter: false,
   });
 
   fields: FieldConfig[] = [
@@ -57,12 +47,12 @@ export class UserFormComponent {
       props: {
         label: 'First Name',
         placeholder: 'Enter your name',
-        required: true
+        required: true,
       },
       validators: {
         required: true,
-        minLength: 2
-      }
+        minLength: 2,
+      },
     },
     {
       key: 'email',
@@ -70,20 +60,20 @@ export class UserFormComponent {
       props: {
         label: 'Email',
         type: 'email',
-        required: true
+        required: true,
       },
       validators: {
         required: true,
-        email: true
-      }
+        email: true,
+      },
     },
     {
       key: 'newsletter',
       type: 'checkbox',
       props: {
-        label: 'Subscribe to newsletter'
-      }
-    }
+        label: 'Subscribe to newsletter',
+      },
+    },
   ];
 
   onModelChange(newModel: any) {
@@ -122,5 +112,4 @@ Try out ng-forge with this interactive demo:
 ## Next Steps
 
 - [Field Types](../field-types) - Explore all available field types
-- [Examples](../examples) - See real-world form examples  
 - [API Reference](../api-reference) - Complete API documentation

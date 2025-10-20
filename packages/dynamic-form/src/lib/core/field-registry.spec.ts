@@ -1,24 +1,24 @@
 import { TestBed } from '@angular/core/testing';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FieldRegistry } from './field-registry';
 import { FieldTypeDefinition, FieldWrapperDefinition } from '../models/field-type';
 
 @Component({
-  selector: 'mock-input',
+  selector: 'df-mock-input',
   template: '<input />',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class MockInputComponent {}
 
 @Component({
-  selector: 'mock-select',
+  selector: 'df-mock-select',
   template: '<select></select>',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class MockSelectComponent {}
 
 @Component({
-  selector: 'mock-wrapper',
+  selector: 'df-mock-wrapper',
   template: '<div><ng-content></ng-content></div>',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -32,10 +32,10 @@ describe('FieldRegistry', () => {
     component: MockInputComponent,
     defaultProps: {
       type: 'text',
-      placeholder: 'Enter value'
+      placeholder: 'Enter value',
     },
     validators: ['required'],
-    wrappers: ['form-field']
+    wrappers: ['form-field'],
   };
 
   const mockSelectType: FieldTypeDefinition = {
@@ -43,37 +43,37 @@ describe('FieldRegistry', () => {
     component: MockSelectComponent,
     defaultProps: {
       multiple: false,
-      options: []
-    }
+      options: [],
+    },
   };
 
   const mockEmailType: FieldTypeDefinition = {
     name: 'email',
     extends: 'input',
     defaultProps: {
-      type: 'email'
+      type: 'email',
     },
-    validators: ['required', 'email']
+    validators: ['required', 'email'],
   };
 
   const mockLazyType: FieldTypeDefinition = {
     name: 'lazy',
     loadComponent: () => Promise.resolve(MockInputComponent),
     defaultProps: {
-      type: 'text'
-    }
+      type: 'text',
+    },
   };
 
   const mockWrapper: FieldWrapperDefinition = {
     name: 'form-field',
     component: MockWrapperComponent,
-    priority: 10
+    priority: 10,
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MockInputComponent, MockSelectComponent, MockWrapperComponent],
-      providers: [FieldRegistry]
+      providers: [FieldRegistry],
     }).compileComponents();
 
     service = TestBed.inject(FieldRegistry);
@@ -101,9 +101,7 @@ describe('FieldRegistry', () => {
       service.registerType(mockInputType);
       service.registerType(mockInputType);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Field type "input" is already registered. Overwriting.'
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Field type "input" is already registered. Overwriting.');
 
       consoleSpy.mockRestore();
     });
@@ -111,7 +109,7 @@ describe('FieldRegistry', () => {
     it('should handle type without component', () => {
       const typeWithoutComponent: FieldTypeDefinition = {
         name: 'custom',
-        defaultProps: { label: 'Custom' }
+        defaultProps: { label: 'Custom' },
       };
 
       service.registerType(typeWithoutComponent);
@@ -161,17 +159,17 @@ describe('FieldRegistry', () => {
         component: MockInputComponent,
         defaultProps: {
           type: 'email',
-          placeholder: 'Enter value'
+          placeholder: 'Enter value',
         },
         validators: ['required', 'required', 'email'], // Arrays are concatenated as expected
-        wrappers: ['form-field']
+        wrappers: ['form-field'],
       });
     });
 
     it('should handle missing parent type in inheritance', () => {
       const orphanType: FieldTypeDefinition = {
         name: 'orphan',
-        extends: 'nonexistent'
+        extends: 'nonexistent',
       };
 
       service.registerType(orphanType);
@@ -201,32 +199,31 @@ describe('FieldRegistry', () => {
     });
 
     it('should throw error for unregistered type', async () => {
-      await expect(service.loadTypeComponent('unknown'))
-        .rejects.toThrow('Field type "unknown" is not registered');
+      await expect(service.loadTypeComponent('unknown')).rejects.toThrow('Field type "unknown" is not registered');
     });
 
     it('should throw error for type without component or loadComponent', async () => {
       const invalidType: FieldTypeDefinition = {
         name: 'invalid',
-        defaultProps: {}
+        defaultProps: {},
       };
 
       service.registerType(invalidType);
 
-      await expect(service.loadTypeComponent('invalid'))
-        .rejects.toThrow('Field type "invalid" has no component or loadComponent function');
+      await expect(service.loadTypeComponent('invalid')).rejects.toThrow('Field type "invalid" has no component or loadComponent function');
     });
 
     it('should handle lazy loading errors', async () => {
       const errorType: FieldTypeDefinition = {
         name: 'error',
-        loadComponent: () => Promise.reject(new Error('Load failed'))
+        loadComponent: () => Promise.reject(new Error('Load failed')),
       };
 
       service.registerType(errorType);
 
-      await expect(service.loadTypeComponent('error'))
-        .rejects.toThrow('Failed to load component for field type "error": Error: Load failed');
+      await expect(service.loadTypeComponent('error')).rejects.toThrow(
+        'Failed to load component for field type "error": Error: Load failed'
+      );
     });
   });
 
@@ -245,9 +242,7 @@ describe('FieldRegistry', () => {
 
       service.registerWrapper(mockWrapper);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Wrapper "form-field" is already registered. Overwriting.'
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Wrapper "form-field" is already registered. Overwriting.');
 
       consoleSpy.mockRestore();
     });
@@ -256,7 +251,7 @@ describe('FieldRegistry', () => {
       const wrapper2: FieldWrapperDefinition = {
         name: 'panel',
         component: MockWrapperComponent,
-        priority: 5
+        priority: 5,
       };
 
       service.registerWrappers([wrapper2]);
@@ -270,13 +265,13 @@ describe('FieldRegistry', () => {
       const lowPriority: FieldWrapperDefinition = {
         name: 'low',
         component: MockWrapperComponent,
-        priority: 1
+        priority: 1,
       };
 
       const highPriority: FieldWrapperDefinition = {
         name: 'high',
         component: MockWrapperComponent,
-        priority: 20
+        priority: 20,
       };
 
       service.registerWrappers([lowPriority, highPriority]);

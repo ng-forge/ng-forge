@@ -13,21 +13,21 @@ const MaterialPage: NgDocPage = {
   playgrounds: {
     MaterialExample: {
       target: MaterialExampleComponent,
-      template: `<material-example />`
+      template: `<material-example />`,
     },
     MaterialSelectExample: {
       target: MaterialSelectExampleComponent,
-      template: `<material-select-example />`
+      template: `<material-select-example />`,
     },
     MaterialCheckboxExample: {
       target: MaterialCheckboxExampleComponent,
-      template: `<material-checkbox-example />`
+      template: `<material-checkbox-example />`,
     },
     CompleteMaterialForm: {
       target: CompleteMaterialFormComponent,
-      template: `<complete-material-form />`
-    }
-  }
+      template: `<complete-material-form />`,
+    },
+  },
 };
 
 export default MaterialPage;
