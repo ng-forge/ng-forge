@@ -100,9 +100,7 @@ jobs:
       - name: Build documentation
         run: |
           rm -rf dist/ng-doc
-          cd apps/docs
-          npx @ng-doc/cli build --config ng-doc.config.ts
-          cd ../..
+          pnpm nx build docs --configuration=production
           ls -la dist/
       
       - name: Upload artifact
