@@ -42,18 +42,20 @@ import { MulticheckboxField, MulticheckboxOption } from '@ng-forge/dynamic-form'
       }
     </mat-form-field>
   `,
-  styles: [`
-    .checkbox-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 8px 0;
-    }
+  styles: [
+    `
+      .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px 0;
+      }
 
-    mat-checkbox {
-      margin: 0;
-    }
-  `],
+      mat-checkbox {
+        margin: 0;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatMultiCheckboxFieldComponent implements FormValueControl<any[]>, MulticheckboxField {

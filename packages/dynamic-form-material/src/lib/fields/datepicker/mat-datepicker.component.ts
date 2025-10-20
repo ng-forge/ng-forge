@@ -22,7 +22,7 @@ import { DatepickerField } from '@ng-forge/dynamic-form';
     MatDatepicker,
     MatDatepickerInput,
     MatDatepickerToggle,
-    MatNativeDateModule
+    MatNativeDateModule,
   ],
   template: `
     <mat-form-field [appearance]="appearance()" [class]="className() || ''">
@@ -43,12 +43,7 @@ import { DatepickerField } from '@ng-forge/dynamic-form';
       />
 
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker
-        #picker
-        [startAt]="startAt()"
-        [startView]="startView() || 'month'"
-        [touchUi]="touchUi() || false"
-      ></mat-datepicker>
+      <mat-datepicker #picker [startAt]="startAt()" [startView]="startView() || 'month'" [touchUi]="touchUi() || false"></mat-datepicker>
 
       @if (hint(); as hint) {
       <mat-hint>{{ hint }}</mat-hint>

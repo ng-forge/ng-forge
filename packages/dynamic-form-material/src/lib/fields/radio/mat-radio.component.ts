@@ -17,12 +17,7 @@ import { RadioField, RadioOption } from '@ng-forge/dynamic-form';
       <mat-label>{{ label() }}</mat-label>
       }
 
-      <mat-radio-group
-        [(ngModel)]="value"
-        [disabled]="disabled()"
-        [required]="required() || false"
-        (blur)="touched.set(true)"
-      >
+      <mat-radio-group [(ngModel)]="value" [disabled]="disabled()" [required]="required() || false" (blur)="touched.set(true)">
         @for (option of options(); track option.value) {
         <mat-radio-button
           [value]="option.value"
@@ -46,17 +41,19 @@ import { RadioField, RadioOption } from '@ng-forge/dynamic-form';
       }
     </mat-form-field>
   `,
-  styles: [`
-    mat-radio-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+  styles: [
+    `
+      mat-radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
 
-    mat-radio-button {
-      margin: 0;
-    }
-  `],
+      mat-radio-button {
+        margin: 0;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatRadioFieldComponent implements FormValueControl<any>, RadioField {

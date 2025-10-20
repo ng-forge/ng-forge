@@ -27,11 +27,7 @@ import { SliderField } from '@ng-forge/dynamic-form';
         [color]="color() || 'primary'"
         class="slider-container"
       >
-        <input
-          matSliderThumb
-          [(ngModel)]="value"
-          (blur)="touched.set(true)"
-        />
+        <input matSliderThumb [(ngModel)]="value" (blur)="touched.set(true)" />
       </mat-slider>
 
       @if (hint(); as hint) {
@@ -45,12 +41,14 @@ import { SliderField } from '@ng-forge/dynamic-form';
       }
     </mat-form-field>
   `,
-  styles: [`
-    .slider-container {
-      width: 100%;
-      margin: 16px 0;
-    }
-  `],
+  styles: [
+    `
+      .slider-container {
+        width: 100%;
+        margin: 16px 0;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatSliderFieldComponent implements FormValueControl<number>, SliderField {

@@ -40,12 +40,14 @@ import { ToggleField } from '@ng-forge/dynamic-form';
       }
     </mat-form-field>
   `,
-  styles: [`
-    .toggle-container {
-      width: 100%;
-      margin: 8px 0;
-    }
-  `],
+  styles: [
+    `
+      .toggle-container {
+        width: 100%;
+        margin: 8px 0;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatToggleFieldComponent implements FormValueControl<boolean>, ToggleField {
