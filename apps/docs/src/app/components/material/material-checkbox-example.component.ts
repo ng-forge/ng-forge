@@ -8,7 +8,7 @@ import { DynamicFormComponent, FieldConfig } from '@ng-forge/dynamic-form';
   template: `
     <div class="example-container">
       <h4>Material Checkbox Fields</h4>
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)" />
+      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
