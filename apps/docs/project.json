@@ -56,6 +56,7 @@
             }
           ],
           "outputHashing": "all",
+          "baseHref": "/ng-forge/",
           "ngDoc": {
             "config": "apps/docs/ng-doc.config.ts"
           }
