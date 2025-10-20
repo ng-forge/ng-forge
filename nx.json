@@ -65,6 +65,9 @@
   },
   "plugins": [
     {
+      "plugin": "@nx/angular/plugin"
+    },
+    {
       "plugin": "@nx/playwright/plugin",
       "options": {
         "targetName": "e2e"
