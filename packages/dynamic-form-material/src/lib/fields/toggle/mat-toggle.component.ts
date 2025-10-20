@@ -1,32 +1,33 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatFormField, MatFormFieldAppearance, MatLabel } from '@angular/material/form-field';
-import { MatError, MatHint, MatInput } from '@angular/material/input';
-import { InputField } from '@ng-forge/dynamic-form';
+import { MatError, MatFormField, MatFormFieldAppearance, MatHint, MatLabel } from '@angular/material/form-field';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { ToggleField } from '@ng-forge/dynamic-form';
 
 /**
- * Material Design input field component
+ * Material Design toggle field component
  */
 @Component({
-  selector: 'df-mat-input',
-  imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatError],
+  selector: 'df-mat-toggle',
+  imports: [FormsModule, MatFormField, MatLabel, MatHint, MatError, MatSlideToggle],
   template: `
     <mat-form-field [appearance]="appearance()" [class]="className() || ''">
-      @if (label()) {
-      <mat-label>{{ label() }}</mat-label>
+      @if (label(); as label) {
+      <mat-label>{{ label }}</mat-label>
       }
 
-      <input
-        matInput
+      <mat-slide-toggle
         [(ngModel)]="value"
-        [type]="type() || 'text'"
-        [placeholder]="placeholder() || ''"
         [disabled]="disabled()"
-        [attr.autocomplete]="autocomplete()"
-        [attr.tabindex]="tabIndex()"
+        [required]="required() || false"
+        [color]="color() || 'primary'"
+        [labelPosition]="labelPosition() || 'after'"
         (blur)="touched.set(true)"
-      />
+        class="toggle-container"
+      >
+        {{ label() }}
+      </mat-slide-toggle>
 
       @if (hint(); as hint) {
       <mat-hint>{{ hint }}</mat-hint>
@@ -39,23 +40,28 @@ import { InputField } from '@ng-forge/dynamic-form';
       }
     </mat-form-field>
   `,
+  styles: [`
+    .toggle-container {
+      width: 100%;
+      margin: 8px 0;
+    }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatInputFieldComponent implements FormValueControl<string>, InputField {
+export class MatToggleFieldComponent implements FormValueControl<boolean>, ToggleField {
   // FormValueControl implementation
-  readonly value = model<string>('');
+  readonly value = model<boolean>(false);
   readonly disabled = model<boolean>(false);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
   readonly errors = model<readonly any[]>([]);
 
-  // InputField implementation
+  // ToggleField implementation
   readonly label = input.required<string>();
-  readonly placeholder = input<string>('');
-  readonly type = input<'text' | 'email' | 'password' | 'number' | 'tel' | 'url'>('text');
-  readonly autocomplete = input<string>();
+  readonly labelPosition = input<'before' | 'after'>('after');
+  readonly required = input<boolean>(false);
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
   readonly hint = input<string>('');
-  readonly tabIndex = input<number>();
   readonly className = input<string>('');
   readonly appearance = input<MatFormFieldAppearance>('fill');
 }

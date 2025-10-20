@@ -3,30 +3,52 @@ import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatFormField, MatFormFieldAppearance, MatLabel } from '@angular/material/form-field';
 import { MatError, MatHint, MatInput } from '@angular/material/input';
-import { InputField } from '@ng-forge/dynamic-form';
+import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { DatepickerField } from '@ng-forge/dynamic-form';
 
 /**
- * Material Design input field component
+ * Material Design datepicker field component
  */
 @Component({
-  selector: 'df-mat-input',
-  imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatError],
+  selector: 'df-mat-datepicker',
+  imports: [
+    FormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatHint,
+    MatError,
+    MatDatepicker,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatNativeDateModule
+  ],
   template: `
     <mat-form-field [appearance]="appearance()" [class]="className() || ''">
-      @if (label()) {
-      <mat-label>{{ label() }}</mat-label>
+      @if (label(); as label) {
+      <mat-label>{{ label }}</mat-label>
       }
 
       <input
         matInput
+        [matDatepicker]="picker"
         [(ngModel)]="value"
-        [type]="type() || 'text'"
         [placeholder]="placeholder() || ''"
         [disabled]="disabled()"
-        [attr.autocomplete]="autocomplete()"
+        [min]="minDate()"
+        [max]="maxDate()"
         [attr.tabindex]="tabIndex()"
         (blur)="touched.set(true)"
       />
+
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker
+        #picker
+        [startAt]="startAt()"
+        [startView]="startView() || 'month'"
+        [touchUi]="touchUi() || false"
+      ></mat-datepicker>
 
       @if (hint(); as hint) {
       <mat-hint>{{ hint }}</mat-hint>
@@ -41,19 +63,22 @@ import { InputField } from '@ng-forge/dynamic-form';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatInputFieldComponent implements FormValueControl<string>, InputField {
+export class MatDatepickerFieldComponent implements FormValueControl<Date | null>, DatepickerField {
   // FormValueControl implementation
-  readonly value = model<string>('');
+  readonly value = model<Date | null>(null);
   readonly disabled = model<boolean>(false);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
   readonly errors = model<readonly any[]>([]);
 
-  // InputField implementation
+  // DatepickerField implementation
   readonly label = input.required<string>();
   readonly placeholder = input<string>('');
-  readonly type = input<'text' | 'email' | 'password' | 'number' | 'tel' | 'url'>('text');
-  readonly autocomplete = input<string>();
+  readonly minDate = input<Date | string | null>(null);
+  readonly maxDate = input<Date | string | null>(null);
+  readonly startAt = input<Date | null>(null);
+  readonly startView = input<'month' | 'year' | 'multi-year'>('month');
+  readonly touchUi = input<boolean>(false);
   readonly hint = input<string>('');
   readonly tabIndex = input<number>();
   readonly className = input<string>('');

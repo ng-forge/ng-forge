@@ -3,6 +3,12 @@ import { MatInputFieldComponent } from '../fields/input/mat-input.component';
 import { MatSelectFieldComponent } from '../fields/select/mat-select.component';
 import { MatCheckboxFieldComponent } from '../fields/checkbox/mat-checkbox.component';
 import { MatSubmitFieldComponent } from '../fields/submit/mat-submit.component';
+import { MatTextareaFieldComponent } from '../fields/textarea/mat-textarea.component';
+import { MatRadioFieldComponent } from '../fields/radio/mat-radio.component';
+import { MatMultiCheckboxFieldComponent } from '../fields/multi-checkbox/mat-multicheckbox.component';
+import { MatDatepickerFieldComponent } from '../fields/datepicker/mat-datepicker.component';
+import { MatSliderFieldComponent } from '../fields/slider/mat-slider.component';
+import { MatToggleFieldComponent } from '../fields/toggle/mat-toggle.component';
 
 /**
  * Material Design field type definitions
@@ -74,6 +80,65 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     component: MatSubmitFieldComponent,
     defaultProps: {
       color: 'primary',
+    },
+  },
+  {
+    name: 'textarea',
+    component: MatTextareaFieldComponent,
+    defaultProps: {
+      rows: 4,
+      resize: 'vertical',
+      appearance: 'fill',
+    },
+  },
+  {
+    name: 'radio',
+    component: MatRadioFieldComponent,
+    defaultProps: {
+      color: 'primary',
+      labelPosition: 'after',
+      appearance: 'fill',
+      options: [],
+    },
+  },
+  {
+    name: 'multicheckbox',
+    component: MatMultiCheckboxFieldComponent,
+    defaultProps: {
+      color: 'primary',
+      labelPosition: 'after',
+      appearance: 'fill',
+      options: [],
+    },
+  },
+  {
+    name: 'datepicker',
+    component: MatDatepickerFieldComponent,
+    defaultProps: {
+      startView: 'month',
+      touchUi: false,
+      appearance: 'fill',
+    },
+  },
+  {
+    name: 'slider',
+    component: MatSliderFieldComponent,
+    defaultProps: {
+      minValue: 0,
+      maxValue: 100,
+      step: 1,
+      thumbLabel: false,
+      color: 'primary',
+      appearance: 'fill',
+    },
+  },
+  {
+    name: 'toggle',
+    component: MatToggleFieldComponent,
+    defaultProps: {
+      labelPosition: 'after',
+      color: 'primary',
+      appearance: 'fill',
     },
   },
 ];
