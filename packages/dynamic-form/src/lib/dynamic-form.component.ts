@@ -81,7 +81,7 @@ const FIELD_CONTAINER_REF = 'fieldContainer' as const;
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicFormComponent<TModel = unknown> implements OnDestroy {
+export class DynamicForm<TModel = unknown> implements OnDestroy {
   private fieldRegistry = inject(FieldRegistry);
   private destroy$ = new Subject<void>();
 

@@ -1,20 +1,22 @@
-import { APP_INITIALIZER, EnvironmentProviders, makeEnvironmentProviders, Provider } from '@angular/core';
+import { EnvironmentProviders, inject, makeEnvironmentProviders, provideAppInitializer, Provider } from '@angular/core';
 import { FieldRegistry } from '../core/field-registry';
 import { ConfigMerger, DynamicFormConfig } from '../core/config-merger';
 import { FormBuilder } from '../core/form-builder';
+
+type Providers = (EnvironmentProviders | Provider)[];
 
 /**
  * Configuration feature for dynamic forms
  */
 export interface DynamicFormFeature {
-  providers: Provider[];
+  providers: Providers;
 }
 
 /**
  * Provide dynamic form functionality
  */
 export function provideDynamicForm(...features: DynamicFormFeature[]): EnvironmentProviders {
-  const providers: Provider[] = [
+  const providers: Providers = [
     // Core services
     FieldRegistry,
     ConfigMerger,
@@ -37,24 +39,20 @@ export function withConfig(config: DynamicFormConfig): DynamicFormFeature {
         provide: 'DYNAMIC_FORM_CONFIG',
         useValue: config,
       },
-      {
-        provide: APP_INITIALIZER,
-        useFactory: (registry: FieldRegistry, merger: ConfigMerger) => {
-          return () => {
-            const mergedConfig = merger.merge(config);
+      provideAppInitializer((): void => {
+        const registry = inject(FieldRegistry);
+        const merger = inject(ConfigMerger);
 
-            if (mergedConfig.types) {
-              registry.registerTypes(mergedConfig.types);
-            }
+        const mergedConfig = merger.merge(config);
 
-            if (mergedConfig.wrappers) {
-              registry.registerWrappers(mergedConfig.wrappers);
-            }
-          };
-        },
-        deps: [FieldRegistry, ConfigMerger],
-        multi: true,
-      },
+        if (mergedConfig.types) {
+          registry.registerTypes(mergedConfig.types);
+        }
+
+        if (mergedConfig.wrappers) {
+          registry.registerWrappers(mergedConfig.wrappers);
+        }
+      }),
     ],
   };
 }

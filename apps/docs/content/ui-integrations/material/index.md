@@ -36,7 +36,7 @@ Add to your `styles.scss`:
 
 Enhanced text input with Material Design styling:
 
-```json lines
+```jsonl
 {
   "key": "email",
   "type": "input",
@@ -65,7 +65,7 @@ Experience Material Design fields in action:
 
 Material dropdown with search and multi-select capabilities:
 
-```json lines
+```jsonl
 {
   "key": "country",
   "type": "select",
@@ -75,9 +75,18 @@ Material dropdown with search and multi-select capabilities:
     "appearance": "outline",
     "multiple": false,
     "options": [
-      { "value": "us", "label": "United States" },
-      { "value": "uk", "label": "United Kingdom" },
-      { "value": "ca", "label": "Canada" }
+      {
+        "value": "us",
+        "label": "United States"
+      },
+      {
+        "value": "uk",
+        "label": "United Kingdom"
+      },
+      {
+        "value": "ca",
+        "label": "Canada"
+      }
     ]
   }
 }
@@ -93,7 +102,7 @@ Try different select configurations:
 
 Material Design checkboxes with proper spacing and theming:
 
-```json lines
+```jsonl
 {
   "key": "newsletter",
   "type": "checkbox",

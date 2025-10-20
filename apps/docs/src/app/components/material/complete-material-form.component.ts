@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicFormComponent, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 
 interface CompleteFormModel {
@@ -25,7 +25,7 @@ interface CompleteFormModel {
 
 @Component({
   selector: 'app-complete-material-form',
-  imports: [DynamicFormComponent, JsonPipe],
+  imports: [DynamicForm, JsonPipe],
   template: `
     <div class="example-container">
       <h4>Complete Material Design Form</h4>

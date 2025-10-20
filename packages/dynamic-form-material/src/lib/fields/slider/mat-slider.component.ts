@@ -12,17 +12,17 @@ import { SliderField } from '@ng-forge/dynamic-form';
   selector: 'df-mat-slider',
   imports: [FormsModule, MatFormField, MatLabel, MatHint, MatError, MatSlider, MatSliderThumb],
   template: `
-    <mat-form-field [appearance]="appearance()" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance()" [class]="className()">
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
 
       <mat-slider
-        [min]="minValue() || 0"
-        [max]="maxValue() || 100"
-        [step]="step() || 1"
+        [min]="minValue()"
+        [max]="maxValue()"
+        [step]="step()"
         [disabled]="disabled()"
-        [discrete]="thumbLabel() || false"
+        [discrete]="thumbLabel()"
         [showTickMarks]="tickInterval() !== undefined"
         [color]="color() || 'primary'"
         class="slider-container"

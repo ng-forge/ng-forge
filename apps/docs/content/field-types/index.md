@@ -30,7 +30,7 @@ The `input` field type handles text-based inputs with support for various HTML i
 
 **Basic Configuration:**
 
-```json lines
+```jsonl
 {
   "key": "email",
   "type": "input",
@@ -64,7 +64,7 @@ The `select` field type provides dropdown selection with single or multiple choi
 
 **Basic Configuration:**
 
-```json lines
+```jsonl
 {
   "key": "country",
   "type": "select",
@@ -73,9 +73,18 @@ The `select` field type provides dropdown selection with single or multiple choi
     "placeholder": "Select your country",
     "multiple": false,
     "options": [
-      { "value": "us", "label": "United States" },
-      { "value": "uk", "label": "United Kingdom" },
-      { "value": "ca", "label": "Canada" }
+      {
+        "value": "us",
+        "label": "United States"
+      },
+      {
+        "value": "uk",
+        "label": "United Kingdom"
+      },
+      {
+        "value": "ca",
+        "label": "Canada"
+      }
     ]
   }
 }
@@ -105,7 +114,7 @@ The `checkbox` field type handles boolean values and can work with nested object
 
 **Basic Configuration:**
 
-```json lines
+```jsonl
 {
   "key": "subscribe",
   "type": "checkbox",
@@ -122,7 +131,7 @@ The `checkbox` field type handles boolean values and can work with nested object
 
 **Nested Properties:**
 
-```json lines
+```jsonl
 {
   "key": "preferences.notifications",
   "type": "checkbox",
@@ -157,7 +166,7 @@ const field = submitButton({
 
 **Manual Configuration:**
 
-```json lines
+```jsonl
 {
   "key": "_submit",
   "type": "submit",
@@ -206,13 +215,15 @@ export const provideCustomInput = () => provideField('input', CustomInputCompone
 
 All field types automatically integrate with Angular's reactive forms validation system:
 
-```json lines
+```jsonl
 {
   "key": "username",
   "type": "input",
-  "props": { "label": "Username" },
+  "props": {
+    "label": "Username"
+  },
   "validators": {
-    "required": true,
+    "required": "true",
     "minLength": 3,
     "maxLength": 20,
     "pattern": "^[a-zA-Z0-9_]+$"

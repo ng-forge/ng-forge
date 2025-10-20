@@ -12,15 +12,20 @@ Complete integration with Angular Material, providing beautiful Material Design 
 
 ### Coming Soon
 
+**Bootstrap Integration**
+
+- Bootstrap styling with utility classes
+- Package: `@ng-forge/dynamic-form-bootstrap` (in development)
+
 **PrimeNG Integration**
 
 - Rich set of UI components with advanced features
 - Package: `@ng-forge/dynamic-form-primeng` (in development)
 
-**Bootstrap Integration**
+**Ionic Integration**
 
-- Bootstrap styling with utility classes
-- Package: `@ng-forge/dynamic-form-bootstrap` (in development)
+- Ionic styling with utility classes
+- Package: `@ng-forge/dynamic-form-ionic` (in development)
 
 ## Creating Custom Integrations
 
@@ -58,7 +63,7 @@ export function withCustomFields() {
 
 // 3. Use in your app
 export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(), withCustomFields()],
+  providers: [provideDynamicForm(withCustomFields())],
 };
 ```
 

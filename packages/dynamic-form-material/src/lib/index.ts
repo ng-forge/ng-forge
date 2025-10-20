@@ -2,7 +2,7 @@
 export { MatInputFieldComponent } from './fields/input/mat-input.component';
 export { MatSelectFieldComponent } from './fields/select/mat-select.component';
 export { MatCheckboxFieldComponent } from './fields/checkbox/mat-checkbox.component';
-export { MatSubmitFieldComponent } from './fields/submit/mat-submit.component';
+export * from './fields/submit';
 export { MatTextareaFieldComponent } from './fields/textarea/mat-textarea.component';
 export { MatRadioFieldComponent } from './fields/radio/mat-radio.component';
 export { MatMultiCheckboxFieldComponent } from './fields/multi-checkbox/mat-multicheckbox.component';
@@ -15,6 +15,3 @@ export { MATERIAL_FIELD_TYPES } from './config/material-field-config';
 
 // Providers
 export { withMaterialFields } from './providers/material-providers';
-
-// Utilities
-export { submitButton, actionButton } from './utils/form-helpers';

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicFormComponent, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 
 interface UserFormModel {
@@ -16,7 +16,7 @@ interface UserFormModel {
 
 @Component({
   selector: 'app-demo-form',
-  imports: [DynamicFormComponent, JsonPipe],
+  imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
       <h1>ng-forge Dynamic Forms Demo</h1>
@@ -210,7 +210,7 @@ export class DemoFormComponent {
     },
     {
       key: 'bio',
-      type: 'input', // Note: would be 'textarea' if we had that field type
+      type: 'textarea',
       props: {
         label: 'Bio',
         placeholder: 'Tell us about yourself',

@@ -1,7 +1,4 @@
 @use '@ng-doc/app/styles/global';
-@import '@ng-doc/app/styles/themes/dark.css';
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@use '@ng-doc/app/styles/themes/dark.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import '@angular/material/prebuilt-themes/indigo-pink.css';

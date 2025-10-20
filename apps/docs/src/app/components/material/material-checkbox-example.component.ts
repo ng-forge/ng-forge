@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicFormComponent, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-material-checkbox-example',
-  imports: [DynamicFormComponent, JsonPipe],
+  imports: [DynamicForm, JsonPipe],
   template: `
     <div class="example-container">
       <h4>Material Checkbox Fields</h4>

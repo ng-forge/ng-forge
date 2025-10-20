@@ -6,7 +6,7 @@ import { CompleteMaterialFormComponent } from '../../../src/app/components/mater
 import UIIntegrationsCategory from '../ng-doc.category';
 
 const MaterialPage: NgDocPage = {
-  title: 'Material Design',
+  title: 'Material',
   mdFile: './index.md',
   order: 1,
   category: UIIntegrationsCategory,

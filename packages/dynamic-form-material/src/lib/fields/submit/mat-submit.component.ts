@@ -1,6 +1,6 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { SubmitField } from '@ng-forge/dynamic-form';
+import { MatSubmitField, MatSubmitProps } from './mat-submit.type';
 
 /**
  * Material Design submit button component
@@ -22,18 +22,18 @@ import { SubmitField } from '@ng-forge/dynamic-form';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSubmitFieldComponent implements SubmitField {
-  // SubmitField implementation
-  readonly label = input.required<string>();
+export class MatSubmitFieldComponent implements MatSubmitField {
+  readonly label = input.required<MatSubmitProps['label']>();
   readonly disabled = input<boolean>(false);
   readonly className = input<string>('');
-  readonly onClick = input<(() => void) | undefined>();
+  readonly onClick = input<MatSubmitProps['onClick']>();
 
   // Material specific props
-  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
+  readonly color = input<MatSubmitProps['color']>('primary');
 
   handleClick(): void {
     const clickHandler = this.onClick();
+
     if (clickHandler) {
       clickHandler();
     }

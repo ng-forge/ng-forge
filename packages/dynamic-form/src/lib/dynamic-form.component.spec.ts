@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
-import { DynamicFormComponent } from './dynamic-form.component';
+import { DynamicForm } from './dynamic-form.component';
 import { FieldRegistry } from './core/field-registry';
 import { FieldConfig } from './models/field-config';
 import { FormOptions } from './models/form-options';
@@ -122,12 +122,12 @@ class TestSubmitComponent {
 }
 
 describe('DynamicFormComponent', () => {
-  let component: DynamicFormComponent<TestFormModel>;
-  let fixture: ComponentFixture<DynamicFormComponent<TestFormModel>>;
+  let component: DynamicForm<TestFormModel>;
+  let fixture: ComponentFixture<DynamicForm<TestFormModel>>;
   let fieldRegistry: FieldRegistry;
 
   const createComponent = (fields: FieldConfig<TestFormModel>[] = []) => {
-    fixture = TestBed.createComponent(DynamicFormComponent<TestFormModel>);
+    fixture = TestBed.createComponent(DynamicForm<TestFormModel>);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('fields', fields);
     fixture.detectChanges();
@@ -187,7 +187,7 @@ describe('DynamicFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DynamicFormComponent, TestInputComponent, TestSelectComponent, TestCheckboxComponent, TestSubmitComponent],
+      imports: [DynamicForm, TestInputComponent, TestSelectComponent, TestCheckboxComponent, TestSubmitComponent],
       providers: [FieldRegistry],
     }).compileComponents();
 

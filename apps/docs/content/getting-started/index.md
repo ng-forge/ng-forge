@@ -10,27 +10,25 @@ npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material
 
 ### 1. Configure Providers
 
-```typescript
-// app.config.ts
+```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(), withMaterialFields()],
+  providers: [provideDynamicForm(withMaterialFields())],
 };
 ```
 
 ### 2. Create Your First Form
 
-```typescript
-// user-form.component.ts
+```typescript name="user-form.component.ts"
 import { Component, signal } from '@angular/core';
 import { DynamicFormComponent, FieldConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-user-form',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: ` <dynamic-form [fields]="fields" [model]="model" (modelChange)="onModelChange($event)" (formSubmit)="onSubmit($event)" /> `,
 })
 export class UserFormComponent {
