@@ -3,9 +3,7 @@ pre-commit:
   commands:
     lint:
       glob: "packages/**/*.{ts,js}"
-      run: |
-        pnpm eslint packages/dynamic-form --fix
-        pnpm eslint packages/dynamic-form-material --fix
+      run: pnpm eslint {staged_files} --fix
     format:
       glob: "*.{ts,js,json,md,html,scss,css}"
       run: pnpm prettier --write {staged_files}
