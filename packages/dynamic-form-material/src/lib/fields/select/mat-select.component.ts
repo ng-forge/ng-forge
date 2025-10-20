@@ -1,0 +1,69 @@
+import { Component, input, model, ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { FormValueControl } from '@angular/forms/signals';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { SelectField, SelectOption } from '@ng-forge/dynamic-form';
+
+/**
+ * Material Design select field component
+ */
+@Component({
+  selector: 'ng-forge-mat-select',
+  imports: [FormsModule, MatFormFieldModule, MatSelectModule],
+  template: `
+    <mat-form-field [class]="className() || ''">
+      @if (label()) {
+      <mat-label>{{ label() }}</mat-label>
+      }
+
+      <mat-select
+        [(ngModel)]="value"
+        [placeholder]="placeholder() || ''"
+        [multiple]="multiple() || false"
+        [disabled]="disabled()"
+        [compareWith]="compareWith() || defaultCompare"
+        (blur)="touched.set(true)"
+      >
+        @for (option of options(); track option.value) {
+        <mat-option [value]="option.value" [disabled]="option.disabled || false">
+          {{ option.label }}
+        </mat-option>
+        }
+      </mat-select>
+
+      @if (hint()) {
+      <mat-hint>{{ hint() }}</mat-hint>
+      } @if (invalid() && touched()) {
+      <mat-error>
+        @for (error of errors(); track error) {
+        <span>{{ error.message }}</span>
+        }
+      </mat-error>
+      }
+    </mat-form-field>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class MatSelectFieldComponent implements FormValueControl<any>, SelectField {
+  // FormValueControl implementation
+  readonly value = model<any>(null);
+  readonly disabled = model<boolean>(false);
+  readonly touched = model<boolean>(false);
+  readonly invalid = model<boolean>(false);
+  readonly errors = model<readonly any[]>([]);
+
+  // SelectField implementation
+  readonly label = input.required<string>();
+  readonly placeholder = input<string>('');
+  readonly options = input.required<SelectOption[]>();
+  readonly multiple = input<boolean>(false);
+  readonly compareWith = input<((o1: unknown, o2: unknown) => boolean) | undefined>();
+  readonly hint = input<string>('');
+  readonly className = input<string>('');
+
+  /**
+   * Default comparison function
+   */
+  defaultCompare = Object.is;
+}
