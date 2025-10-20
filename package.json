@@ -6,6 +6,8 @@
     "build": "nx run-many -t build",
     "build:libs": "nx run-many -t build -p dynamic-form,dynamic-form-material",
     "build:docs": "nx build docs",
+    "postinstall": "bash scripts/patch-angular-build.sh",
+    "patch:angular": "bash scripts/patch-angular-build.sh",
     "build:docs:prod": "nx build docs --configuration=production",
     "test": "nx run-many -t test",
     "test:ci": "nx run-many -t test --configuration=ci --coverage",
@@ -18,7 +20,7 @@
     "affected:build": "nx affected -t build",
     "affected:test": "nx affected -t test",
     "affected:lint": "nx affected -t lint",
-    "ci": "npm run build:libs && npm run test:ci",
+    "ci": "pnpm run build:libs && pnpm run test:ci",
     "docs:rebuild": "rm -rf dist/ng-doc && ng build --project=docs --configuration=production || ng build apps/docs --configuration=production",
     "release:version": "nx release version",
     "release:version:patch": "nx release version patch",
@@ -26,7 +28,7 @@
     "release:version:major": "nx release version major",
     "release:publish": "nx release publish",
     "release:publish:dry-run": "nx release publish --dry-run",
-    "release": "npm run build:libs && npm run test:ci && nx release version && nx release publish"
+    "release": "pnpm run build:libs && pnpm run test:ci && nx release version && nx release publish"
   },
   "private": true,
   "devDependencies": {
@@ -98,6 +100,7 @@
     "@ng-doc/ui-kit": "^20.1.0",
     "date-fns": "^4.1.0",
     "lodash-es": "^4.17.21",
+    "ngxtension": "^6.0.0",
     "rxjs": "~7.8.0",
     "zone.js": "~0.15.0"
   },

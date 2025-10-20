@@ -5,7 +5,6 @@ import { DynamicFormComponent } from './dynamic-form.component';
 import { FieldRegistry } from './core/field-registry';
 import { FieldConfig } from './models/field-config';
 import { FormOptions } from './models/form-options';
-import { FieldTypeDefinition } from './models/field-type';
 
 interface TestFormModel {
   firstName?: string;

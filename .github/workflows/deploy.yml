@@ -38,15 +38,15 @@ jobs:
               status: 'completed',
               per_page: 1
             });
-            
+
             if (runs.total_count === 0) {
               core.setFailed('No CI runs found');
               return;
             }
-            
+
             const latestRun = runs.workflow_runs[0];
             console.log(`Latest CI run: ${latestRun.conclusion} (${latestRun.html_url})`);
-            
+
             if (latestRun.conclusion === 'success') {
               core.setOutput('success', 'true');
             } else {
@@ -60,30 +60,30 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8.15.1
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Version bump (if specified)
         if: ${{ github.event.inputs.version != '' }}
         run: |
@@ -93,20 +93,21 @@ jobs:
           git push --follow-tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Build libraries
         run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material
-      
+
       - name: Build documentation
         run: |
-          pnpm nx run docs:ng-doc:rebuild
+          echo "Building documentation with Angular version patch..."
+          pnpm run build:docs
           ls -la dist/apps/docs/
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist/apps/docs/browser
-      
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

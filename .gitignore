@@ -46,4 +46,4 @@ Thumbs.db
 .angular
 
 # Documentation files (auto-generated)
-docs/
+/internal/

@@ -7,19 +7,18 @@ import {
   ViewContainerRef,
   viewChildren,
   ComponentRef,
-  AfterViewInit,
   inputBinding,
   outputBinding,
   computed,
   signal,
   Binding,
-  effect,
 } from '@angular/core';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
 import type { FieldConfig } from './models/field-config';
 import type { FormOptions } from './models/form-options';
 import { FieldRegistry } from './core/field-registry';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 const FIELD_TYPE_TO_PROPERTY = {
   checkbox: 'checked',
@@ -28,8 +27,16 @@ const FIELD_TYPE_TO_PROPERTY = {
 } as const;
 
 const VALIDATION_PROPS = [
-  'required', 'validators', 'validation', 'minLength', 'maxLength',
-  'min', 'max', 'pattern', 'email', 'custom'
+  'required',
+  'validators',
+  'validation',
+  'minLength',
+  'maxLength',
+  'min',
+  'max',
+  'pattern',
+  'email',
+  'custom',
 ] as const;
 
 const FIELD_ID_PREFIX = 'dynamic-field' as const;
@@ -40,12 +47,12 @@ const FIELD_CONTAINER_REF = 'fieldContainer' as const;
   selector: 'dynamic-form',
   template: `
     @for (field of processedFields(); track field.id || field.key) {
-      <ng-container #fieldContainer />
+    <ng-container #fieldContainer />
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterViewInit {
+export class DynamicFormComponent<TModel = unknown> implements OnDestroy {
   private fieldRegistry = inject(FieldRegistry);
   private destroy$ = new Subject<void>();
 
@@ -77,7 +84,7 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
 
   // Process fields with defaults and hooks
   processedFields = computed(() => {
-    return this.fields().map(field => {
+    return this.fields().map((field) => {
       // Generate field ID if not provided
       if (!field.id) {
         field.id = this.generateFieldId(field);
@@ -102,19 +109,11 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
   });
 
   constructor() {
-    // Re-render when fields change
-    effect(() => {
-      // Track the processed fields
-      this.processedFields();
-      // Re-render if view is initialized
-      if (this.fieldContainers().length > 0) {
-        void this.renderFields();
+    explicitEffect([this.processedFields, this.fieldContainers], ([fields, containers]) => {
+      if (containers.length > 0) {
+        void this.renderFields(fields, containers);
       }
     });
-  }
-
-  ngAfterViewInit(): void {
-    void this.renderFields();
   }
 
   ngOnDestroy(): void {
@@ -124,10 +123,7 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
     this.valueChange$.complete();
   }
 
-  private async renderFields(): Promise<void> {
-    const containers = this.fieldContainers();
-    const fields = this.processedFields();
-
+  private async renderFields(fields: FieldConfig<TModel>[], containers: readonly ViewContainerRef[]): Promise<void> {
     if (containers.length === 0 || fields.length === 0) {
       return;
     }
@@ -135,7 +131,7 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
     // Clear existing components
     this.componentRefs.forEach((ref) => ref.destroy());
     this.componentRefs = [];
-    containers.forEach(container => container.clear());
+    containers.forEach((container) => container.clear());
 
     // Render each field
     for (let i = 0; i < fields.length; i++) {
@@ -173,21 +169,24 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
       const bindingProperty = this.getBindingProperty(field.type);
 
       // Input binding for the current value
-      bindings.push(inputBinding(bindingProperty, () => {
-        const currentVal = this.currentFormValue();
-        return currentVal ? this.getNestedValue(currentVal, field.key!) : undefined;
-      }));
+      bindings.push(
+        inputBinding(bindingProperty, () => {
+          const currentVal = this.currentFormValue();
+          return currentVal ? this.getNestedValue(currentVal, field.key!) : undefined;
+        })
+      );
 
       // Output binding for value changes
       const outputProperty = `${bindingProperty}Change`;
-      bindings.push(outputBinding(outputProperty, (newValue: unknown) => {
-        this.handleFieldChange(field.key!, newValue);
-      }));
+      bindings.push(
+        outputBinding(outputProperty, (newValue: unknown) => {
+          this.handleFieldChange(field.key!, newValue);
+        })
+      );
     }
 
     return bindings;
   }
-
 
   private getNestedValue(obj: unknown, path: string): unknown {
     return path.split('.').reduce((current: unknown, key: string) => {
@@ -199,7 +198,7 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
   }
 
   private handleFieldChange(key: string, newValue: unknown): void {
-    const currentModel = this.currentFormValue() || {} as TModel;
+    const currentModel = this.currentFormValue() || ({} as TModel);
     const updatedModel = { ...currentModel } as Record<string, unknown>;
     this.setNestedValue(updatedModel, key, newValue);
     const finalModel = updatedModel as TModel;
@@ -221,13 +220,12 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
     target[lastKey] = value;
   }
 
-
   private getBindingProperty(fieldType: string): string {
     type FieldType = keyof typeof FIELD_TYPE_TO_PROPERTY;
     return FIELD_TYPE_TO_PROPERTY[fieldType as FieldType] ?? DEFAULT_BINDING_PROPERTY;
   }
 
-  private isValidationProp(key: string): key is typeof VALIDATION_PROPS[number] {
+  private isValidationProp(key: string): key is (typeof VALIDATION_PROPS)[number] {
     return (VALIDATION_PROPS as readonly string[]).includes(key);
   }
 
@@ -236,5 +234,4 @@ export class DynamicFormComponent<TModel = unknown> implements OnDestroy, AfterV
     const random = Math.random().toString(36).substring(2, 9);
     return `${FIELD_ID_PREFIX}-${key}-${random}`;
   }
-
 }

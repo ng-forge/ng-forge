@@ -1,5 +1,9 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "packages"
+  },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
@@ -64,9 +68,7 @@
     }
   },
   "plugins": [
-    {
-      "plugin": "@nx/angular/plugin"
-    },
+    "@nx/angular/plugin",
     {
       "plugin": "@nx/playwright/plugin",
       "options": {

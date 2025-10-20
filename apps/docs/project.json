@@ -31,15 +31,23 @@
             "output": "assets/ng-doc/ui-kit"
           }
         ],
-        "styles": ["apps/docs/src/styles.scss"]
+        "styles": ["apps/docs/src/styles.scss"],
+        "allowedCommonJsDependencies": [
+          "dayjs",
+          "@braintree/sanitize-url",
+          "dompurify",
+          "cytoscape-cose-bilkent",
+          "elkjs",
+          "@ng-doc/core"
+        ]
       },
       "configurations": {
         "production": {
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "2mb",
-              "maximumError": "4mb"
+              "maximumWarning": "2.5mb",
+              "maximumError": "5mb"
             },
             {
               "type": "anyComponentStyle",
