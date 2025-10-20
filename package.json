@@ -101,6 +101,11 @@
     "rxjs": "~7.8.0",
     "zone.js": "~0.15.0"
   },
+  "packageManager": "pnpm@8.15.1",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
   "nx": {
     "includedScripts": []
   },
