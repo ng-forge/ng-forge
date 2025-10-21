@@ -19,13 +19,13 @@ describe('MatRadioFieldComponent Integration Tests', () => {
   const defaultOptions: TestOption[] = [
     { value: 'option1', label: 'Option 1' },
     { value: 'option2', label: 'Option 2' },
-    { value: 'option3', label: 'Option 3' }
+    { value: 'option3', label: 'Option 3' },
   ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MatRadioFieldComponent],
-      providers: [provideAnimations()]
+      providers: [provideAnimations()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MatRadioFieldComponent<string>);
@@ -39,7 +39,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
         { value: 'small', label: 'Small Size' },
         { value: 'medium', label: 'Medium Size' },
         { value: 'large', label: 'Large Size', disabled: true },
-        { value: 'xlarge', label: 'Extra Large Size' }
+        { value: 'xlarge', label: 'Extra Large Size' },
       ];
 
       fixture.componentRef.setInput('label', 'Product Size');
@@ -84,29 +84,29 @@ describe('MatRadioFieldComponent Integration Tests', () => {
 
     it('should handle radio selection correctly', () => {
       expect(component.value()).toBeUndefined();
-      
+
       // Simulate selecting a radio button
       component.value.set('small');
       fixture.detectChanges();
-      
+
       expect(component.value()).toBe('small');
     });
 
     it('should handle touched state correctly', () => {
       const radioGroup = debugElement.query(By.directive(MatRadioGroup));
-      
+
       expect(component.touched()).toBe(false);
-      
+
       radioGroup.triggerEventHandler('blur', {});
       fixture.detectChanges();
-      
+
       expect(component.touched()).toBe(true);
     });
 
     it('should display disabled radio buttons correctly', () => {
       const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
       const largeRadioButton = radioButtons[2]; // large option is disabled
-      
+
       expect(largeRadioButton.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
     });
 
@@ -115,7 +115,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
       component.value.set('small');
       fixture.detectChanges();
       expect(component.value()).toBe('small');
-      
+
       // Select different option - should replace the previous selection
       component.value.set('medium');
       fixture.detectChanges();
@@ -170,7 +170,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
 
     it('should render radio group as disabled', () => {
       const radioGroup = debugElement.query(By.directive(MatRadioGroup));
-      
+
       expect(component.disabled()).toBe(true);
       expect(radioGroup.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
     });
@@ -178,7 +178,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
     it('should still allow programmatic value changes when disabled', () => {
       component.value.set('option1');
       fixture.detectChanges();
-      
+
       expect(component.value()).toBe('option1');
     });
   });
@@ -188,7 +188,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
       const optionsWithSomeDisabled: TestOption[] = [
         { value: 'option1', label: 'Option 1' },
         { value: 'option2', label: 'Option 2', disabled: true },
-        { value: 'option3', label: 'Option 3' }
+        { value: 'option3', label: 'Option 3' },
       ];
 
       fixture.componentRef.setInput('label', 'Mixed Disabled State');
@@ -198,7 +198,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
 
     it('should render only specific radio buttons as disabled', () => {
       const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      
+
       expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
       expect(radioButtons[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
       expect(radioButtons[2].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
@@ -247,10 +247,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
     it('should display multiple errors when invalid and touched', () => {
       component.invalid.set(true);
       component.touched.set(true);
-      component.errors.set([
-        { message: 'Please select an option' },
-        { message: 'Selection is required for this field' }
-      ]);
+      component.errors.set([{ message: 'Please select an option' }, { message: 'Selection is required for this field' }]);
       fixture.detectChanges();
 
       const errorElements = debugElement.queryAll(By.css('.mat-error'));
@@ -376,14 +373,14 @@ describe('MatRadioFieldComponent Integration Tests', () => {
       component.invalid.set(true);
       component.errors.set([{ message: 'Error occurred' }]);
       fixture.detectChanges();
-      
+
       const errorElements = debugElement.queryAll(By.css('.mat-error'));
       expect(errorElements.length).toBe(1);
 
       // Disable it
       component.disabled.set(true);
       fixture.detectChanges();
-      
+
       const radioGroup = debugElement.query(By.directive(MatRadioGroup));
       expect(radioGroup.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
 
@@ -401,7 +398,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
     it('should handle options changes', () => {
       const newOptions: TestOption[] = [
         { value: 'newOption1', label: 'New Option 1' },
-        { value: 'newOption2', label: 'New Option 2' }
+        { value: 'newOption2', label: 'New Option 2' },
       ];
 
       fixture.componentRef.setInput('options', newOptions);
@@ -441,7 +438,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
     it('should handle invalid value gracefully', () => {
       component.value.set('nonexistent_option' as any);
       fixture.detectChanges();
-      
+
       // Component should accept any value type T
       expect(component.value()).toBe('nonexistent_option');
     });
@@ -452,7 +449,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
       const complexOptions: TestOption[] = [
         { value: 'complex_value_1', label: 'Complex Label 1 with Special Characters !@#$%' },
         { value: 'value-with-dashes', label: 'Label with Dashes' },
-        { value: 'value_with_underscores', label: 'Label with Underscores' }
+        { value: 'value_with_underscores', label: 'Label with Underscores' },
       ];
 
       fixture.componentRef.setInput('label', 'Complex Options Test');
@@ -462,7 +459,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
 
     it('should handle complex option values and labels', () => {
       const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      
+
       expect(radioButtons[0].nativeElement.textContent.trim()).toBe('Complex Label 1 with Special Characters !@#$%');
       expect(radioButtons[1].nativeElement.textContent.trim()).toBe('Label with Dashes');
       expect(radioButtons[2].nativeElement.textContent.trim()).toBe('Label with Underscores');
@@ -493,7 +490,7 @@ describe('MatRadioFieldComponent Integration Tests', () => {
 
     it('should handle required validation state', () => {
       expect(component.required()).toBe(true);
-      
+
       // Initially no selection - should be invalid if touched
       component.touched.set(true);
       component.invalid.set(true);

@@ -1,13 +1,12 @@
 /**
  * Comprehensive test suite for Material Dynamic Form Components
- * 
+ *
  * This test suite focuses on testing the component contracts, interfaces,
  * and expected behaviors rather than Angular-specific implementation details.
  */
 
 describe('Material Dynamic Form Components', () => {
   describe('Component Contracts and Interfaces', () => {
-    
     describe('FormValueControl Interface', () => {
       it('should define the correct FormValueControl interface structure', () => {
         // Mock the expected interface structure
@@ -16,7 +15,7 @@ describe('Material Dynamic Form Components', () => {
           disabled: () => false,
           touched: () => false,
           invalid: () => false,
-          errors: () => []
+          errors: () => [],
         };
 
         expect(mockFormValueControl.value()).toBe('test-value');
@@ -35,7 +34,7 @@ describe('Material Dynamic Form Components', () => {
           disabled: () => false,
           touched: () => false,
           invalid: () => false,
-          errors: () => []
+          errors: () => [],
         };
 
         expect(mockFormCheckboxControl.checked()).toBe(false);
@@ -56,7 +55,7 @@ describe('Material Dynamic Form Components', () => {
         touched: () => false,
         invalid: () => false,
         errors: () => [],
-        
+
         // Input-specific properties
         label: () => 'Test Label',
         placeholder: () => 'Test Placeholder',
@@ -65,7 +64,7 @@ describe('Material Dynamic Form Components', () => {
         hint: () => 'Test hint',
         tabIndex: () => undefined,
         className: () => '',
-        appearance: () => 'fill' as const
+        appearance: () => 'fill' as const,
       };
 
       expect(mockInputComponent.label()).toBe('Test Label');
@@ -76,10 +75,10 @@ describe('Material Dynamic Form Components', () => {
 
     it('should support all input types', () => {
       const supportedTypes = ['text', 'email', 'password', 'number', 'tel', 'url'] as const;
-      
-      supportedTypes.forEach(type => {
+
+      supportedTypes.forEach((type) => {
         const mockInputComponent = {
-          type: () => type
+          type: () => type,
         };
         expect(supportedTypes.includes(mockInputComponent.type())).toBe(true);
       });
@@ -87,10 +86,10 @@ describe('Material Dynamic Form Components', () => {
 
     it('should support Material appearances', () => {
       const supportedAppearances = ['fill', 'outline'] as const;
-      
-      supportedAppearances.forEach(appearance => {
+
+      supportedAppearances.forEach((appearance) => {
         const mockInputComponent = {
-          appearance: () => appearance
+          appearance: () => appearance,
         };
         expect(supportedAppearances.includes(mockInputComponent.appearance())).toBe(true);
       });
@@ -106,7 +105,7 @@ describe('Material Dynamic Form Components', () => {
         touched: () => false,
         invalid: () => false,
         errors: () => [],
-        
+
         // Checkbox-specific properties
         label: () => 'Test Checkbox',
         labelPosition: () => 'after' as const,
@@ -116,7 +115,7 @@ describe('Material Dynamic Form Components', () => {
         className: () => '',
         disableRipple: () => false,
         tabIndex: () => undefined,
-        required: () => false
+        required: () => false,
       };
 
       expect(mockCheckboxComponent.label()).toBe('Test Checkbox');
@@ -127,10 +126,10 @@ describe('Material Dynamic Form Components', () => {
 
     it('should support all label positions', () => {
       const supportedPositions = ['before', 'after'] as const;
-      
-      supportedPositions.forEach(position => {
+
+      supportedPositions.forEach((position) => {
         const mockCheckboxComponent = {
-          labelPosition: () => position
+          labelPosition: () => position,
         };
         expect(supportedPositions.includes(mockCheckboxComponent.labelPosition())).toBe(true);
       });
@@ -138,10 +137,10 @@ describe('Material Dynamic Form Components', () => {
 
     it('should support all Material colors', () => {
       const supportedColors = ['primary', 'accent', 'warn'] as const;
-      
-      supportedColors.forEach(color => {
+
+      supportedColors.forEach((color) => {
         const mockCheckboxComponent = {
-          color: () => color
+          color: () => color,
         };
         expect(supportedColors.includes(mockCheckboxComponent.color())).toBe(true);
       });
@@ -157,13 +156,13 @@ describe('Material Dynamic Form Components', () => {
         touched: () => false,
         invalid: () => false,
         errors: () => [],
-        
+
         // Select-specific properties
         label: () => 'Test Select',
         placeholder: () => 'Choose option',
         options: () => [
           { label: 'Option 1', value: 'opt1' },
-          { label: 'Option 2', value: 'opt2' }
+          { label: 'Option 2', value: 'opt2' },
         ],
         multiple: () => false,
         compareWith: () => undefined,
@@ -171,7 +170,7 @@ describe('Material Dynamic Form Components', () => {
         className: () => '',
         appearance: () => 'fill' as const,
         required: () => false,
-        defaultCompare: Object.is
+        defaultCompare: Object.is,
       };
 
       expect(mockSelectComponent.label()).toBe('Test Select');
@@ -183,17 +182,17 @@ describe('Material Dynamic Form Components', () => {
     it('should handle different option types', () => {
       const stringOptions = [
         { label: 'Option 1', value: 'string1' },
-        { label: 'Option 2', value: 'string2' }
+        { label: 'Option 2', value: 'string2' },
       ];
-      
+
       const numberOptions = [
         { label: 'Option 1', value: 1 },
-        { label: 'Option 2', value: 2 }
+        { label: 'Option 2', value: 2 },
       ];
-      
+
       const objectOptions = [
         { label: 'Option 1', value: { id: 1, name: 'obj1' } },
-        { label: 'Option 2', value: { id: 2, name: 'obj2' } }
+        { label: 'Option 2', value: { id: 2, name: 'obj2' } },
       ];
 
       expect(stringOptions[0].value).toBe('string1');
@@ -204,7 +203,7 @@ describe('Material Dynamic Form Components', () => {
     it('should handle disabled options', () => {
       const optionsWithDisabled = [
         { label: 'Enabled Option', value: 'enabled' },
-        { label: 'Disabled Option', value: 'disabled', disabled: true }
+        { label: 'Disabled Option', value: 'disabled', disabled: true },
       ];
 
       expect(optionsWithDisabled[0].disabled).toBeUndefined();
@@ -220,7 +219,7 @@ describe('Material Dynamic Form Components', () => {
         className: () => '',
         color: () => 'primary' as const,
         onClick: () => undefined,
-        handleClick: jest.fn()
+        handleClick: jest.fn(),
       };
 
       expect(mockSubmitComponent.label()).toBe('Submit');
@@ -233,12 +232,12 @@ describe('Material Dynamic Form Components', () => {
       const clickHandler = jest.fn();
       const mockSubmitComponent = {
         onClick: () => clickHandler as (() => void) | undefined,
-        handleClick: function() {
+        handleClick: function () {
           const handler = this.onClick();
           if (handler) {
             handler();
           }
-        }
+        },
       };
 
       mockSubmitComponent.handleClick();
@@ -248,12 +247,12 @@ describe('Material Dynamic Form Components', () => {
     it('should handle missing click handler gracefully', () => {
       const mockSubmitComponent = {
         onClick: () => undefined as (() => void) | undefined,
-        handleClick: function() {
+        handleClick: function () {
           const handler = this.onClick();
           if (handler) {
             handler();
           }
-        }
+        },
       };
 
       expect(() => mockSubmitComponent.handleClick()).not.toThrow();
@@ -269,19 +268,19 @@ describe('Material Dynamic Form Components', () => {
         touched: () => false,
         invalid: () => false,
         errors: () => [],
-        
+
         // Radio-specific properties
         label: () => 'Test Radio Group',
         options: () => [
           { label: 'Option 1', value: 'radio1' },
-          { label: 'Option 2', value: 'radio2' }
+          { label: 'Option 2', value: 'radio2' },
         ],
         required: () => false,
         color: () => 'primary' as const,
         labelPosition: () => 'after' as const,
         hint: () => '',
         className: () => '',
-        appearance: () => 'fill' as const
+        appearance: () => 'fill' as const,
       };
 
       expect(mockRadioComponent.label()).toBe('Test Radio Group');
@@ -292,11 +291,11 @@ describe('Material Dynamic Form Components', () => {
 
     it('should handle exclusive selection behavior', () => {
       const radioState = { value: undefined as string | undefined };
-      
+
       // Simulate selecting first option
       radioState.value = 'radio1';
       expect(radioState.value).toBe('radio1');
-      
+
       // Simulate selecting second option (should replace first)
       radioState.value = 'radio2';
       expect(radioState.value).toBe('radio2');
@@ -312,7 +311,7 @@ describe('Material Dynamic Form Components', () => {
         touched: () => false,
         invalid: () => false,
         errors: () => [],
-        
+
         // Toggle-specific properties
         label: () => 'Test Toggle',
         labelPosition: () => 'after' as const,
@@ -320,7 +319,7 @@ describe('Material Dynamic Form Components', () => {
         color: () => 'primary' as const,
         hint: () => '',
         className: () => '',
-        appearance: () => 'fill' as const
+        appearance: () => 'fill' as const,
       };
 
       expect(mockToggleComponent.label()).toBe('Test Toggle');
@@ -330,11 +329,11 @@ describe('Material Dynamic Form Components', () => {
 
     it('should handle boolean toggle behavior', () => {
       const toggleState = { value: false };
-      
+
       // Simulate toggle on
       toggleState.value = true;
       expect(toggleState.value).toBe(true);
-      
+
       // Simulate toggle off
       toggleState.value = false;
       expect(toggleState.value).toBe(false);
@@ -347,34 +346,31 @@ describe('Material Dynamic Form Components', () => {
         {
           name: 'Required field validation',
           state: { value: '', invalid: true, touched: true, errors: [{ message: 'This field is required' }] },
-          expected: { shouldShowError: true, errorCount: 1 }
+          expected: { shouldShowError: true, errorCount: 1 },
         },
         {
           name: 'Valid field state',
           state: { value: 'valid input', invalid: false, touched: true, errors: [] },
-          expected: { shouldShowError: false, errorCount: 0 }
+          expected: { shouldShowError: false, errorCount: 0 },
         },
         {
           name: 'Untouched invalid field',
           state: { value: '', invalid: true, touched: false, errors: [{ message: 'Required' }] },
-          expected: { shouldShowError: false, errorCount: 1 }
+          expected: { shouldShowError: false, errorCount: 1 },
         },
         {
           name: 'Multiple validation errors',
-          state: { 
-            value: 'a', 
-            invalid: true, 
-            touched: true, 
-            errors: [
-              { message: 'Too short' },
-              { message: 'Must contain numbers' }
-            ] 
+          state: {
+            value: 'a',
+            invalid: true,
+            touched: true,
+            errors: [{ message: 'Too short' }, { message: 'Must contain numbers' }],
           },
-          expected: { shouldShowError: true, errorCount: 2 }
-        }
+          expected: { shouldShowError: true, errorCount: 2 },
+        },
       ];
 
-      validationScenarios.forEach(scenario => {
+      validationScenarios.forEach((scenario) => {
         const shouldShowError = scenario.state.invalid && scenario.state.touched;
         const errorCount = scenario.state.errors.length;
 
@@ -392,7 +388,7 @@ describe('Material Dynamic Form Components', () => {
         disabled: false,
         touched: false,
         invalid: false,
-        errors: [] as Array<{ message: string }>
+        errors: [] as Array<{ message: string }>,
       };
 
       // Initial state
@@ -422,7 +418,7 @@ describe('Material Dynamic Form Components', () => {
     it('should handle disabled state correctly', () => {
       const fieldState = {
         value: 'some value',
-        disabled: false
+        disabled: false,
       };
 
       // Enable -> Disable
@@ -439,16 +435,16 @@ describe('Material Dynamic Form Components', () => {
   describe('Material Design Integration', () => {
     it('should support all Material Design colors', () => {
       const supportedColors = ['primary', 'accent', 'warn'] as const;
-      
-      supportedColors.forEach(color => {
+
+      supportedColors.forEach((color) => {
         expect(['primary', 'accent', 'warn'].includes(color)).toBe(true);
       });
     });
 
     it('should support Material form field appearances', () => {
       const supportedAppearances = ['fill', 'outline'] as const;
-      
-      supportedAppearances.forEach(appearance => {
+
+      supportedAppearances.forEach((appearance) => {
         expect(['fill', 'outline'].includes(appearance)).toBe(true);
       });
     });
@@ -460,7 +456,7 @@ describe('Material Dynamic Form Components', () => {
         hasHint: true,
         hasError: true,
         appearance: 'fill' as const,
-        className: 'custom-class'
+        className: 'custom-class',
       };
 
       expect(formFieldStructure.hasLabel).toBe(true);
@@ -477,8 +473,8 @@ describe('Material Dynamic Form Components', () => {
         props: {
           label: 'Test Field',
           placeholder: 'Enter value',
-          required: true
-        }
+          required: true,
+        },
       };
 
       expect(mockFieldConfig.key).toBe('testField');

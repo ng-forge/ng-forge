@@ -19,13 +19,13 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
   const defaultOptions: TestOption[] = [
     { value: 'option1', label: 'Option 1' },
     { value: 'option2', label: 'Option 2' },
-    { value: 'option3', label: 'Option 3' }
+    { value: 'option3', label: 'Option 3' },
   ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MatMultiCheckboxFieldComponent],
-      providers: [provideAnimations()]
+      providers: [provideAnimations()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MatMultiCheckboxFieldComponent<string>);
@@ -39,7 +39,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
         { value: 'fruits', label: 'Fruits' },
         { value: 'vegetables', label: 'Vegetables' },
         { value: 'meat', label: 'Meat', disabled: true },
-        { value: 'dairy', label: 'Dairy Products' }
+        { value: 'dairy', label: 'Dairy Products' },
       ];
 
       fixture.componentRef.setInput('label', 'Food Preferences');
@@ -82,14 +82,14 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
 
     it('should handle checkbox selection correctly', () => {
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      
+
       expect(component.value()).toEqual([]);
       expect(component.isChecked('fruits')).toBe(false);
-      
+
       // Simulate checking the first checkbox
       component.onCheckboxChange('fruits', true);
       fixture.detectChanges();
-      
+
       expect(component.value()).toEqual(['fruits']);
       expect(component.isChecked('fruits')).toBe(true);
       expect(component.touched()).toBe(true);
@@ -97,12 +97,12 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
 
     it('should handle multiple selections correctly', () => {
       expect(component.value()).toEqual([]);
-      
+
       // Select multiple options
       component.onCheckboxChange('fruits', true);
       component.onCheckboxChange('vegetables', true);
       fixture.detectChanges();
-      
+
       expect(component.value()).toEqual(['fruits', 'vegetables']);
       expect(component.isChecked('fruits')).toBe(true);
       expect(component.isChecked('vegetables')).toBe(true);
@@ -115,13 +115,13 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
       component.onCheckboxChange('vegetables', true);
       component.onCheckboxChange('dairy', true);
       fixture.detectChanges();
-      
+
       expect(component.value()).toEqual(['fruits', 'vegetables', 'dairy']);
-      
+
       // Uncheck one option
       component.onCheckboxChange('vegetables', false);
       fixture.detectChanges();
-      
+
       expect(component.value()).toEqual(['fruits', 'dairy']);
       expect(component.isChecked('fruits')).toBe(true);
       expect(component.isChecked('vegetables')).toBe(false);
@@ -131,7 +131,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
     it('should display disabled checkboxes correctly', () => {
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
       const meatCheckbox = checkboxes[2]; // meat option is disabled
-      
+
       expect(meatCheckbox.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
     });
   });
@@ -181,9 +181,9 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
 
     it('should render all checkboxes as disabled', () => {
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      
+
       expect(component.disabled()).toBe(true);
-      
+
       checkboxes.forEach((checkbox) => {
         expect(checkbox.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
       });
@@ -192,7 +192,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
     it('should still allow programmatic value changes when disabled', () => {
       component.onCheckboxChange('option1', true);
       fixture.detectChanges();
-      
+
       expect(component.value()).toEqual(['option1']);
       expect(component.isChecked('option1')).toBe(true);
     });
@@ -203,7 +203,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
       const optionsWithSomeDisabled: TestOption[] = [
         { value: 'option1', label: 'Option 1' },
         { value: 'option2', label: 'Option 2', disabled: true },
-        { value: 'option3', label: 'Option 3' }
+        { value: 'option3', label: 'Option 3' },
       ];
 
       fixture.componentRef.setInput('label', 'Mixed Disabled State');
@@ -213,7 +213,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
 
     it('should render only specific checkboxes as disabled', () => {
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      
+
       expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
       expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
       expect(checkboxes[2].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
@@ -262,10 +262,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
     it('should display multiple errors when invalid and touched', () => {
       component.invalid.set(true);
       component.touched.set(true);
-      component.errors.set([
-        { message: 'At least one option must be selected' },
-        { message: 'Maximum 2 options allowed' }
-      ]);
+      component.errors.set([{ message: 'At least one option must be selected' }, { message: 'Maximum 2 options allowed' }]);
       fixture.detectChanges();
 
       const errorElements = debugElement.queryAll(By.css('.mat-error'));
@@ -381,7 +378,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
       component.onCheckboxChange('option1', true);
       component.onCheckboxChange('option3', true);
       fixture.detectChanges();
-      
+
       expect(component.value()).toEqual(['option1', 'option3']);
       expect(component.touched()).toBe(true);
 
@@ -389,14 +386,14 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
       component.invalid.set(true);
       component.errors.set([{ message: 'Error occurred' }]);
       fixture.detectChanges();
-      
+
       const errorElements = debugElement.queryAll(By.css('.mat-error'));
       expect(errorElements.length).toBe(1);
 
       // Disable it
       component.disabled.set(true);
       fixture.detectChanges();
-      
+
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
       checkboxes.forEach((checkbox) => {
         expect(checkbox.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
@@ -416,7 +413,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
     it('should handle options changes', () => {
       const newOptions: TestOption[] = [
         { value: 'newOption1', label: 'New Option 1' },
-        { value: 'newOption2', label: 'New Option 2' }
+        { value: 'newOption2', label: 'New Option 2' },
       ];
 
       fixture.componentRef.setInput('options', newOptions);
@@ -456,7 +453,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
 
     it('should handle removing non-existent values gracefully', () => {
       component.value.set(['option1', 'option2']);
-      
+
       // Try to remove a value that doesn't exist
       component.onCheckboxChange('option3', false);
       fixture.detectChanges();
@@ -483,7 +480,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
       const complexOptions: TestOption[] = [
         { value: 'complex_value_1', label: 'Complex Label 1 with Special Characters !@#$%' },
         { value: 'value-with-dashes', label: 'Label with Dashes' },
-        { value: 'value_with_underscores', label: 'Label with Underscores' }
+        { value: 'value_with_underscores', label: 'Label with Underscores' },
       ];
 
       fixture.componentRef.setInput('label', 'Complex Options Test');
@@ -493,7 +490,7 @@ describe('MatMultiCheckboxFieldComponent Integration Tests', () => {
 
     it('should handle complex option values and labels', () => {
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      
+
       expect(checkboxes[0].nativeElement.textContent.trim()).toBe('Complex Label 1 with Special Characters !@#$%');
       expect(checkboxes[1].nativeElement.textContent.trim()).toBe('Label with Dashes');
       expect(checkboxes[2].nativeElement.textContent.trim()).toBe('Label with Underscores');

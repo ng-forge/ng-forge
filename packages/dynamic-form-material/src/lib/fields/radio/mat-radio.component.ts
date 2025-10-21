@@ -32,7 +32,8 @@ import { MatRadioField, MatRadioProps } from './mat-radio.type';
       @if (hint()) {
       <div class="mat-hint">{{ hint() }}</div>
       } @if (invalid() && touched()) { @for (error of errors(); track error) {
-      <div class="mat-error">{{ error.message }}</div> } }
+      <div class="mat-error">{{ error.message }}</div>
+      } }
     </div>
   `,
   styles: [

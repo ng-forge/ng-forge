@@ -32,7 +32,8 @@ import { MatSliderField, MatSliderProps } from './mat-slider.type';
       @if (hint(); as hint) {
       <div class="mat-hint">{{ hint }}</div>
       } @if (invalid() && touched()) { @for (error of errors(); track error) {
-      <div class="mat-error">{{ error.message }}</div> } }
+      <div class="mat-error">{{ error.message }}</div>
+      } }
     </div>
   `,
   styles: [
