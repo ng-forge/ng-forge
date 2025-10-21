@@ -1,27 +1,11 @@
-import { TestBed } from '@angular/core/testing';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FieldRegistry } from './field-registry';
 import { FieldTypeDefinition, FieldWrapperDefinition } from '../models/field-type';
 
-@Component({
-  selector: 'df-mock-input',
-  template: '<input />',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
+// Mock Component/Class Definitions
+// In a pure service test, we only need a placeholder for the component reference.
+// We don't need the Angular @Component decorators or imports.
 class MockInputComponent {}
-
-@Component({
-  selector: 'df-mock-select',
-  template: '<select></select>',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
 class MockSelectComponent {}
-
-@Component({
-  selector: 'df-mock-wrapper',
-  template: '<div><ng-content></ng-content></div>',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
 class MockWrapperComponent {}
 
 describe('FieldRegistry', () => {
@@ -70,13 +54,8 @@ describe('FieldRegistry', () => {
     priority: 10,
   };
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [MockInputComponent, MockSelectComponent, MockWrapperComponent],
-      providers: [FieldRegistry],
-    }).compileComponents();
-
-    service = TestBed.inject(FieldRegistry);
+  beforeEach(() => {
+    service = new FieldRegistry();
   });
 
   afterEach(() => {
@@ -96,9 +75,10 @@ describe('FieldRegistry', () => {
     });
 
     it('should warn when overwriting existing type', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'warn');
 
       service.registerType(mockInputType);
+      // Registering again to trigger the warning
       service.registerType(mockInputType);
 
       expect(consoleSpy).toHaveBeenCalledWith('Field type "input" is already registered. Overwriting.');
@@ -125,6 +105,7 @@ describe('FieldRegistry', () => {
 
       expect(service.hasType('input')).toBe(true);
       expect(service.hasType('select')).toBe(true);
+      // toHaveLength and expect are standard in Vitest (via compatible APIs like `chai` or `jest-expect`)
       expect(service.getTypes()).toHaveLength(2);
     });
 
@@ -161,7 +142,7 @@ describe('FieldRegistry', () => {
           type: 'email',
           placeholder: 'Enter value',
         },
-        validators: ['required', 'required', 'email'], // Arrays are concatenated as expected
+        validators: ['required', 'required', 'email'],
         wrappers: ['form-field'],
       });
     });
@@ -238,7 +219,7 @@ describe('FieldRegistry', () => {
     });
 
     it('should warn when overwriting existing wrapper', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'warn');
 
       service.registerWrapper(mockWrapper);
 

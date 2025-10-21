@@ -1,5 +1,3 @@
-# Type Inference
-
 The dynamic form library provides powerful compile-time type inference that automatically determines the result type of your forms based on the field configurations you provide. This eliminates the need to manually define types and ensures type safety throughout your application.
 
 ## Overview

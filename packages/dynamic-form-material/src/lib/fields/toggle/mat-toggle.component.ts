@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FormValueControl } from '@angular/forms/signals';
+import { FormCheckboxControl } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 @Component({
@@ -9,7 +9,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
   template: `
     <div [class]="className() || ''">
       <mat-slide-toggle
-        [(ngModel)]="value"
+        [(ngModel)]="checked"
         [disabled]="disabled()"
         [required]="required() || false"
         [color]="color() || 'primary'"
@@ -53,8 +53,8 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatToggleFieldComponent implements FormValueControl<boolean> {
-  readonly value = model<boolean>(false);
+export class MatToggleFieldComponent implements FormCheckboxControl {
+  readonly checked = model<boolean>(false);
   readonly disabled = input<boolean>(false);
   readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);

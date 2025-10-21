@@ -35,10 +35,10 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
   });
 
   describe('Happy Flow - Full Configuration', () => {
-    let onClickSpy: jest.Mock;
+    let onClickSpy: any;
 
     beforeEach(() => {
-      onClickSpy = jest.fn();
+      onClickSpy = vi.fn();
 
       const fields: FieldConfig<TestFormModel>[] = [
         {
@@ -129,12 +129,12 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
   });
 
   describe('Multiple Submit Buttons', () => {
-    let onSaveSpy: jest.Mock;
-    let onCancelSpy: jest.Mock;
+    let onSaveSpy: any;
+    let onCancelSpy: any;
 
     beforeEach(() => {
-      onSaveSpy = jest.fn();
-      onCancelSpy = jest.fn();
+      onSaveSpy = vi.fn();
+      onCancelSpy = vi.fn();
 
       const fields: FieldConfig<TestFormModel>[] = [
         {
@@ -218,10 +218,10 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
   });
 
   describe('Disabled State through Dynamic Form', () => {
-    let onClickSpy: jest.Mock;
+    let onClickSpy: any;
 
     beforeEach(() => {
-      onClickSpy = jest.fn();
+      onClickSpy = vi.fn();
 
       const fields: FieldConfig<TestFormModel>[] = [
         {
@@ -339,10 +339,10 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
   });
 
   describe('Form Integration', () => {
-    let onSubmitSpy: jest.Mock;
+    let onSubmitSpy: any;
 
     beforeEach(() => {
-      onSubmitSpy = jest.fn();
+      onSubmitSpy = vi.fn();
 
       const fields: FieldConfig<TestFormModel>[] = [
         {
@@ -516,7 +516,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
   describe('onClick Callback Contexts', () => {
     it('should handle onClick callback that throws error', () => {
-      const errorCallback = jest.fn().mockImplementation(() => {
+      const errorCallback = vi.fn().mockImplementation(() => {
         throw new Error('Test error');
       });
 

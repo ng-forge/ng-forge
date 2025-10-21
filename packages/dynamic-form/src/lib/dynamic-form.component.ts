@@ -22,12 +22,6 @@ import { FieldRegistry } from './core/field-registry';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import type { ProvidedFormResult } from './providers/dynamic-form-providers';
 
-const FIELD_TYPE_TO_PROPERTY = {
-  checkbox: 'checked',
-  input: 'value',
-  select: 'value',
-} as const;
-
 const VALIDATION_PROPS = [
   'required',
   'validators',
@@ -42,7 +36,6 @@ const VALIDATION_PROPS = [
 ] as const;
 
 const FIELD_ID_PREFIX = 'dynamic-field' as const;
-const DEFAULT_BINDING_PROPERTY = 'value' as const;
 const FIELD_CONTAINER_REF = 'fieldContainer' as const;
 
 /**
@@ -217,7 +210,7 @@ export class DynamicForm<TModel = unknown> implements OnDestroy {
 
       try {
         const component = await this.fieldRegistry.loadTypeComponent(field.type);
-        const bindings = this.createFieldBindings(field);
+        const bindings = this.createFieldBindings(field, component);
         const componentRef = container.createComponent(component, { bindings });
         this.componentRefs.push(componentRef);
       } catch (error) {
@@ -226,7 +219,7 @@ export class DynamicForm<TModel = unknown> implements OnDestroy {
     }
   }
 
-  private createFieldBindings(field: FieldConfig<TModel>): Binding[] {
+  private createFieldBindings(field: FieldConfig<TModel>, component: Type<unknown>): Binding[] {
     const bindings: Binding[] = [];
 
     if (field.props) {
@@ -241,25 +234,27 @@ export class DynamicForm<TModel = unknown> implements OnDestroy {
 
     // Bind field value using input binding for the value
     if (field.key) {
-      const bindingProperty = this.getBindingProperty(field.type);
+      const bindingProperty = this.getBindingProperty(component);
 
-      // Input binding for the current value
-      bindings.push(
-        inputBinding(bindingProperty, () => {
-          const currentVal = this.currentFormValue();
-          return currentVal && field.key ? this.getNestedValue(currentVal, field.key) : undefined;
-        })
-      );
+      if (bindingProperty) {
+        // Input binding for the current value
+        bindings.push(
+          inputBinding(bindingProperty, () => {
+            const currentVal = this.currentFormValue();
+            return currentVal && field.key ? this.getNestedValue(currentVal, field.key) : undefined;
+          })
+        );
 
-      // Output binding for value changes
-      const outputProperty = `${bindingProperty}Change`;
-      bindings.push(
-        outputBinding(outputProperty, (newValue: unknown) => {
-          if (field.key) {
-            this.handleFieldChange(field.key, newValue);
-          }
-        })
-      );
+        // Output binding for value changes
+        const outputProperty = `${bindingProperty}Change`;
+        bindings.push(
+          outputBinding(outputProperty, (newValue: unknown) => {
+            if (field.key) {
+              this.handleFieldChange(field.key, newValue);
+            }
+          })
+        );
+      }
     }
 
     return bindings;
@@ -298,9 +293,19 @@ export class DynamicForm<TModel = unknown> implements OnDestroy {
     target[lastKey] = value;
   }
 
-  private getBindingProperty(fieldType: string): string {
-    type FieldType = keyof typeof FIELD_TYPE_TO_PROPERTY;
-    return FIELD_TYPE_TO_PROPERTY[fieldType as FieldType] ?? DEFAULT_BINDING_PROPERTY;
+  private getBindingProperty(component: Type<unknown>): string | null {
+    // TODO: find better way to read component metadata
+    // ts-disable-next-line @typescript-eslint/no-explicit-any
+    if ('checked' in (component as any).propDecorators) {
+      return 'checked';
+    }
+
+    // ts-disable-next-line @typescript-eslint/no-explicit-any
+    if ('value' in (component as any).propDecorators) {
+      return 'value';
+    }
+
+    return null;
   }
 
   private isValidationProp(key: string): key is (typeof VALIDATION_PROPS)[number] {

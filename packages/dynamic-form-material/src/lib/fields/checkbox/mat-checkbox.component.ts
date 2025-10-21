@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FormValueControl } from '@angular/forms/signals';
+import { FormCheckboxControl } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
@@ -9,7 +9,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
   template: `
     <div [class]="className() || ''">
       <mat-checkbox
-        [(ngModel)]="value"
+        [(ngModel)]="checked"
         [labelPosition]="labelPosition() || 'after'"
         [indeterminate]="indeterminate() || false"
         [color]="color() || 'primary'"
@@ -47,8 +47,8 @@ import { MatCheckbox } from '@angular/material/checkbox';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatCheckboxFieldComponent implements FormValueControl<boolean> {
-  readonly value = model<boolean>(false);
+export class MatCheckboxFieldComponent implements FormCheckboxControl {
+  readonly checked = model<boolean>(false);
   readonly disabled = input<boolean>(false);
   readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);

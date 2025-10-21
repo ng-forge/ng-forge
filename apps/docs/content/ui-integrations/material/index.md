@@ -23,10 +23,9 @@ pnpm add @ng-forge/dynamic-form-material @angular/material @angular/cdk
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterialFields } from '@ng-forge/dynamic-form-material';
-import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideAnimations(), provideDynamicForm(), withMaterialFields()],
+  providers: [provideDynamicForm(withMaterialFields())],
 };
 ```
 

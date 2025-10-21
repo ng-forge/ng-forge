@@ -12,7 +12,6 @@
       "options": {
         "outputPath": "dist/apps/docs",
         "browser": "apps/docs/src/main.ts",
-        "polyfills": ["zone.js"],
         "tsConfig": "apps/docs/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -91,11 +90,10 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "@analogjs/vitest-angular:test",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/docs/jest.config.ts",
-        "tsConfig": "apps/docs/tsconfig.spec.json"
+        "configFile": "vite.config.ts"
       }
     },
     "ng-doc:rebuild": {

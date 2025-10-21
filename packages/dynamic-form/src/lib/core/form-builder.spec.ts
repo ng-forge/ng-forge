@@ -1,14 +1,23 @@
 import { FieldConfig } from '../models/field-config';
 import { FieldTypeDefinition } from '../models/field-type';
 
-// Helper functions for field processing (extracted from DynamicFormComponent logic)
-function processFields<TModel = unknown>(
-  fields: FieldConfig<TModel>[],
-  getTypeDefaults: (typeName: string) => FieldTypeDefinition | undefined
-): FieldConfig<TModel>[] {
-  return fields.map((field) => processField(field, getTypeDefaults));
+// The functions under test (assuming they are in the same file or imported)
+
+/**
+ * Helper function to generate a unique ID for a field.
+ */
+function generateFieldId(field: FieldConfig<any>): string {
+  const prefix = 'dynamic-field';
+  // Use key first, fallback to type
+  const key = field.key || field.type || 'unknown';
+  const random = Math.random().toString(36).substring(2, 9);
+  return `${prefix}-${key}-${random}`;
 }
 
+/**
+ * Processes a single field configuration, handling ID generation, groups,
+ * default props merging, and onInit hooks.
+ */
 function processField<TModel = unknown>(
   field: FieldConfig<TModel>,
   getTypeDefaults: (typeName: string) => FieldTypeDefinition | undefined
@@ -21,8 +30,10 @@ function processField<TModel = unknown>(
   // Handle field groups recursively
   if (field.fieldGroup && field.fieldGroup.length > 0) {
     field.fieldGroup = field.fieldGroup.map((nestedField) => {
-      nestedField.parent = field;
-      return processField(nestedField as FieldConfig<TModel>, getTypeDefaults);
+      // Must cast the nested field to FieldConfig<TModel> for type safety
+      const processedNestedField = nestedField as FieldConfig<TModel>;
+      processedNestedField.parent = field;
+      return processField(processedNestedField, getTypeDefaults);
     });
   }
 
@@ -43,11 +54,14 @@ function processField<TModel = unknown>(
   return field;
 }
 
-function generateFieldId(field: FieldConfig<any>): string {
-  const prefix = 'dynamic-field';
-  const key = field.key || field.type;
-  const random = Math.random().toString(36).substring(2, 9);
-  return `${prefix}-${key}-${random}`;
+/**
+ * Processes an array of fields.
+ */
+function processFields<TModel = unknown>(
+  fields: FieldConfig<TModel>[],
+  getTypeDefaults: (typeName: string) => FieldTypeDefinition | undefined
+): FieldConfig<TModel>[] {
+  return fields.map((field) => processField(field, getTypeDefaults));
 }
 
 describe('Field Processing Logic', () => {
@@ -71,6 +85,12 @@ describe('Field Processing Logic', () => {
           multiple: false,
           options: [],
         },
+      },
+    ],
+    [
+      'submit', // Added for ID generation test
+      {
+        name: 'submit',
       },
     ],
   ]);
@@ -116,6 +136,8 @@ describe('Field Processing Logic', () => {
       expect(result[0].props?.label).toBe('First Name');
     });
   });
+
+  // --------------------------------------------------------------------------------
 
   describe('field processing', () => {
     it('should generate field ID when not provided', () => {
@@ -184,7 +206,7 @@ describe('Field Processing Logic', () => {
     });
 
     it('should call onInit hook if provided', () => {
-      const onInitSpy = jest.fn();
+      const onInitSpy = vi.fn();
       const field: FieldConfig = {
         key: 'firstName',
         type: 'input',
@@ -197,6 +219,7 @@ describe('Field Processing Logic', () => {
         expect.objectContaining({
           key: 'firstName',
           type: 'input',
+          id: expect.any(String),
         })
       );
     });
@@ -222,6 +245,7 @@ describe('Field Processing Logic', () => {
       const result = processFields([field], getTypeDefaults)[0];
 
       expect(result.fieldGroup).toHaveLength(2);
+
       expect(result.fieldGroup![0]).toHaveProperty('id');
       expect(result.fieldGroup![1]).toHaveProperty('id');
     });
@@ -253,8 +277,11 @@ describe('Field Processing Logic', () => {
 
       const result = processFields([field], getTypeDefaults)[0];
 
-      expect(result.fieldGroup![0].fieldGroup![0]).toHaveProperty('id');
-      expect(result.fieldGroup![0].fieldGroup![0].parent).toBe(result.fieldGroup![0]);
+      const deepestField = result.fieldGroup![0].fieldGroup![0];
+      const nestedGroup = result.fieldGroup![0];
+
+      expect(deepestField).toHaveProperty('id');
+      expect(deepestField.parent).toBe(nestedGroup);
     });
 
     it('should handle empty field groups', () => {
@@ -280,6 +307,7 @@ describe('Field Processing Logic', () => {
 
       expect(result1.id).toMatch(/^dynamic-field-firstName-\w+$/);
       expect(result2.id).toMatch(/^dynamic-field-firstName-\w+$/);
+
       expect(result1.id).not.toBe(result2.id);
     });
 
