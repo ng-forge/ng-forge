@@ -23,6 +23,12 @@ export interface DynamicFormConfig {
 
   /** Custom error messages */
   errorMessages?: Record<string, string | ((error: unknown, field: unknown) => string)>;
+
+  /** Field configurations for type inference (optional) */
+  fields?: readonly unknown[];
+
+  /** Model type for inference (optional) */
+  model?: unknown;
 }
 
 /**

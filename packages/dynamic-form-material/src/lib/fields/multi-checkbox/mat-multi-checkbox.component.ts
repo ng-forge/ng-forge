@@ -2,11 +2,9 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatMultiCheckboxField, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 
-/**
- * Material Design multi-checkbox field component
- */
+type Option<T> = { value: T; label: string; disabled?: boolean };
+
 @Component({
   selector: 'df-mat-multi-checkbox',
   imports: [FormsModule, MatCheckbox],
@@ -75,22 +73,21 @@ import { MatMultiCheckboxField, MatMultiCheckboxProps } from './mat-multi-checkb
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatMultiCheckboxFieldComponent<T> implements FormValueControl<T[]>, MatMultiCheckboxField<T> {
+export class MatMultiCheckboxFieldComponent<T> implements FormValueControl<T[]> {
   readonly value = model<T[]>([]);
-  readonly disabled = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly errors = model<readonly any[]>([]);
 
-  // MultiCheckboxField implementation
-  readonly label = input.required<MatMultiCheckboxProps<T>['label']>();
-  readonly options = input.required<MatMultiCheckboxProps<T>['options']>();
+  readonly label = input.required<string>();
+  readonly options = input.required<Option<T>[]>();
   readonly required = input<boolean>(false);
-  readonly color = input<MatMultiCheckboxProps<T>['color']>('primary');
-  readonly labelPosition = input<MatMultiCheckboxProps<T>['labelPosition']>('after');
-  readonly hint = input<MatMultiCheckboxProps<T>['hint']>('');
-  readonly className = input<MatMultiCheckboxProps<T>['className']>('');
-  readonly appearance = input<MatMultiCheckboxProps<T>['appearance']>('fill');
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
+  readonly labelPosition = input<'before' | 'after'>('after');
+  readonly hint = input<string>('');
+  readonly className = input<string>('');
+  readonly appearance = input<'fill' | 'outline'>('fill');
 
   isChecked(optionValue: T): boolean {
     return this.value().includes(optionValue);

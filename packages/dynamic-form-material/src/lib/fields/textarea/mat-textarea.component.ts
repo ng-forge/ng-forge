@@ -3,11 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatError, MatHint, MatInput } from '@angular/material/input';
-import { MatTextareaField, MatTextareaProps } from './mat-textarea.type';
 
-/**
- * Material Design textarea field component
- */
 @Component({
   selector: 'df-mat-textarea',
   imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatError],
@@ -43,22 +39,20 @@ import { MatTextareaField, MatTextareaProps } from './mat-textarea.type';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatTextareaFieldComponent implements FormValueControl<string>, MatTextareaField {
+export class MatTextareaFieldComponent implements FormValueControl<string> {
   readonly value = model<string>('');
-  readonly disabled = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly errors = model<readonly any[]>([]);
-
-  // TextareaField implementation
-  readonly label = input.required<MatTextareaProps['label']>();
-  readonly placeholder = input<MatTextareaProps['placeholder']>('');
-  readonly rows = input<MatTextareaProps['rows']>(4);
-  readonly cols = input<MatTextareaProps['cols']>();
-  readonly maxlength = input<MatTextareaProps['maxlength']>();
-  readonly hint = input<MatTextareaProps['hint']>('');
-  readonly tabIndex = input<MatTextareaProps['tabIndex']>();
-  readonly className = input<MatTextareaProps['className']>('');
-  readonly resize = input<MatTextareaProps['resize']>('vertical');
-  readonly appearance = input<MatTextareaProps['appearance']>('fill');
+  readonly label = input.required<string>();
+  readonly placeholder = input<string>('');
+  readonly rows = input<number>(4);
+  readonly cols = input<number>();
+  readonly maxlength = input<number>();
+  readonly hint = input<string>('');
+  readonly tabIndex = input<number>();
+  readonly className = input<string>('');
+  readonly resize = input<'none' | 'both' | 'horizontal' | 'vertical'>('vertical');
+  readonly appearance = input<'fill' | 'outline'>('fill');
 }

@@ -5,11 +5,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatError, MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepickerField, MatDatepickerProps } from './mat-datepicker.type';
 
-/**
- * Material Design datepicker field component
- */
 @Component({
   selector: 'df-mat-datepicker',
   imports: [
@@ -58,26 +54,22 @@ import { MatDatepickerField, MatDatepickerProps } from './mat-datepicker.type';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatDatepickerFieldComponent implements FormValueControl<Date | null>, MatDatepickerField {
-  // FormValueControl implementation
+export class MatDatepickerFieldComponent implements FormValueControl<Date | null> {
   readonly value = model<Date | null>(null);
   readonly disabled = input<boolean>(false);
+  readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly errors = model<readonly any[]>([]);
 
-  // DatepickerField implementation
-  readonly label = input.required<MatDatepickerProps['label']>();
-  readonly placeholder = input<MatDatepickerProps['placeholder']>('');
-  readonly minDate = input<MatDatepickerProps['minDate']>(null);
-  readonly maxDate = input<MatDatepickerProps['maxDate']>(null);
-  readonly startAt = input<MatDatepickerProps['startAt']>(null);
-  readonly startView = input<MatDatepickerProps['startView']>('month');
-  readonly touchUi = input<MatDatepickerProps['touchUi']>(false);
-  readonly hint = input<MatDatepickerProps['hint']>('');
-  readonly tabIndex = input<MatDatepickerProps['tabIndex']>();
-  readonly className = input<MatDatepickerProps['className']>('');
-  readonly appearance = input<MatDatepickerProps['appearance']>('fill');
-  readonly color = input<MatDatepickerProps['color']>();
-  readonly disableRipple = input<MatDatepickerProps['disableRipple']>(false);
+  readonly label = input.required<string>();
+  readonly placeholder = input<string>('');
+  readonly minDate = input<Date | null>(null);
+  readonly maxDate = input<Date | null>(null);
+  readonly startAt = input<Date | null>(null);
+  readonly startView = input<'month' | 'year' | 'multi-year'>('month');
+  readonly touchUi = input<boolean>(false);
+  readonly hint = input<string>('');
+  readonly tabIndex = input<number>();
+  readonly className = input<string>('');
+  readonly appearance = input<'fill' | 'outline'>('fill');
 }

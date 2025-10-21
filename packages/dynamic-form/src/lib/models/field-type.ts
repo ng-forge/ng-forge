@@ -1,5 +1,4 @@
 import { Provider, Type } from '@angular/core';
-import { FieldConfig } from './field-config';
 
 /**
  * Field type definition
@@ -42,27 +41,4 @@ export interface FieldWrapperDefinition {
 
   /** Priority for ordering wrappers (higher = outer) */
   priority?: number;
-}
-
-/**
- * Field component interface (deprecated - use FormValueControl/FormCheckboxControl directly)
- * @deprecated Use Angular's FormValueControl or FormCheckboxControl interfaces instead
- */
-export interface FieldComponent<TProps = unknown> {
-  /** Field configuration */
-  field: FieldConfig<unknown, TProps>;
-
-  /** Form model signal */
-  model: unknown;
-
-  /** On value change callback */
-  onValueChange?: (value: unknown) => void;
-}
-
-/**
- * Wrapper component interface
- */
-export interface WrapperComponent {
-  /** Field configuration */
-  field: FieldConfig;
 }

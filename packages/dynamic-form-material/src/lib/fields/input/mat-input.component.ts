@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatError, MatHint, MatInput } from '@angular/material/input';
-import { MatInputField, MatInputProps } from './mat-input.type';
 
 /**
  * Material Design input field component
@@ -12,7 +11,7 @@ import { MatInputField, MatInputProps } from './mat-input.type';
   selector: 'df-mat-input',
   imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatError],
   template: `
-    <mat-form-field [appearance]="appearance() ?? 'fill'" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance()" [class]="className() || ''">
       @if (label()) {
       <mat-label>{{ label() }}</mat-label>
       }
@@ -41,20 +40,19 @@ import { MatInputField, MatInputProps } from './mat-input.type';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatInputFieldComponent implements FormValueControl<string>, MatInputField {
+export class MatInputFieldComponent implements FormValueControl<string> {
   readonly value = model<string>('');
-  readonly disabled = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly errors = model<readonly any[]>([]);
 
-  // InputField implementation
-  readonly label = input.required<MatInputProps['label']>();
-  readonly placeholder = input<MatInputProps['placeholder']>('');
-  readonly type = input<MatInputProps['type']>('text');
-  readonly autocomplete = input<MatInputProps['autocomplete']>();
-  readonly hint = input<MatInputProps['hint']>('');
-  readonly tabIndex = input<MatInputProps['tabIndex']>();
-  readonly className = input<MatInputProps['className']>('');
-  readonly appearance = input<MatInputProps['appearance']>('fill');
+  readonly label = input.required<string>();
+  readonly placeholder = input<string>('');
+  readonly type = input<'text' | 'email' | 'password' | 'number' | 'tel' | 'url'>('text');
+  readonly autocomplete = input<string>();
+  readonly hint = input<string>('');
+  readonly tabIndex = input<number>();
+  readonly className = input<string>('');
+  readonly appearance = input<'fill' | 'outline'>('fill');
 }

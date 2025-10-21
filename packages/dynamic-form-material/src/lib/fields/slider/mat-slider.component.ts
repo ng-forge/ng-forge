@@ -2,11 +2,7 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { MatSliderField, MatSliderProps } from './mat-slider.type';
 
-/**
- * Material Design slider field component
- */
 @Component({
   selector: 'df-mat-slider',
   imports: [FormsModule, MatSlider, MatSliderThumb],
@@ -69,25 +65,24 @@ import { MatSliderField, MatSliderProps } from './mat-slider.type';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSliderFieldComponent implements FormValueControl<number>, MatSliderField {
+export class MatSliderFieldComponent implements FormValueControl<number> {
   readonly value = model<number>(0);
-  readonly disabled = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly errors = model<readonly any[]>([]);
 
-  // SliderField implementation
-  readonly label = input.required<MatSliderProps['label']>();
-  readonly minValue = input<MatSliderProps['minValue']>(0);
-  readonly maxValue = input<MatSliderProps['maxValue']>(100);
-  readonly step = input<MatSliderProps['step']>(1);
-  readonly thumbLabel = input<MatSliderProps['thumbLabel']>(false);
+  readonly label = input.required<string>();
+  readonly minValue = input<number>(0);
+  readonly maxValue = input<number>(100);
+  readonly step = input<number>(1);
+  readonly thumbLabel = input<boolean>(false);
   readonly showThumbLabel = input<boolean>(false);
-  readonly tickInterval = input<MatSliderProps['tickInterval']>();
-  readonly vertical = input<MatSliderProps['vertical']>(false);
-  readonly invert = input<MatSliderProps['invert']>(false);
-  readonly color = input<MatSliderProps['color']>('primary');
-  readonly hint = input<MatSliderProps['hint']>('');
-  readonly className = input<MatSliderProps['className']>('');
-  readonly appearance = input<MatSliderProps['appearance']>('fill');
+  readonly tickInterval = input<number>();
+  readonly vertical = input<boolean>(false);
+  readonly invert = input<boolean>(false);
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
+  readonly hint = input<string>('');
+  readonly className = input<string>('');
+  readonly appearance = input<'fill' | 'outline'>('fill');
 }

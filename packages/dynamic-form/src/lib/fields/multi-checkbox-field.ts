@@ -1,20 +1,12 @@
-/**
- * Option interface for multi-checkbox field
- */
-export interface MulticheckboxOption<T = unknown> {
+export interface MultiCheckboxOption<T = unknown> {
   label: string;
   value: T;
   disabled?: boolean;
 }
 
-/**
- * Interface for multi-checkbox field components
- * Allows selection of multiple options through checkboxes
- */
-export interface MultiCheckboxField<T = unknown> {
+export interface MultiCheckboxField<T> {
   label: string;
-  options: MulticheckboxOption<T>[];
-  required?: boolean;
+  options: MultiCheckboxOption<T>[];
   color?: 'primary' | 'accent' | 'warn';
   labelPosition?: 'before' | 'after';
   hint?: string;

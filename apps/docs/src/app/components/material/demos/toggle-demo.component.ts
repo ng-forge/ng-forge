@@ -50,7 +50,7 @@ export class ToggleDemoComponent {
       type: 'toggle',
       props: {
         label: 'Enable Notifications',
-        appearance: 'outline',
+        // appearance: 'outline',
         color: 'primary',
         labelPosition: 'before',
         hint: 'Receive email notifications',
@@ -61,7 +61,7 @@ export class ToggleDemoComponent {
       type: 'toggle',
       props: {
         label: 'Dark Mode',
-        appearance: 'outline',
+        // appearance: 'outline',
         color: 'accent',
         labelPosition: 'after',
         hint: 'Switch to dark theme',
@@ -72,7 +72,7 @@ export class ToggleDemoComponent {
       type: 'toggle',
       props: {
         label: 'Auto Save',
-        appearance: 'outline',
+        // appearance: 'outline',
         color: 'primary',
         labelPosition: 'before',
         hint: 'Automatically save changes',

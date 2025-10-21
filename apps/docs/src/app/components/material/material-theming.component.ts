@@ -124,7 +124,7 @@ export class MaterialThemingComponent {
       type: 'toggle',
       props: {
         label: 'Primary Toggle',
-        appearance: 'outline',
+        // appearance: 'outline',
         color: 'primary',
         hint: 'Toggle with primary theme color',
         labelPosition: 'before',
@@ -135,7 +135,7 @@ export class MaterialThemingComponent {
       type: 'toggle',
       props: {
         label: 'Accent Toggle',
-        appearance: 'outline',
+        // appearance: 'outline',
         color: 'accent',
         hint: 'Toggle with accent theme color',
         labelPosition: 'after',

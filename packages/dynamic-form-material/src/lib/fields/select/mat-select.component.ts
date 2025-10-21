@@ -4,11 +4,9 @@ import { FormValueControl } from '@angular/forms/signals';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatError, MatHint } from '@angular/material/input';
-import { MatSelectField, MatSelectProps } from './mat-select.type';
 
-/**
- * Material Design select field component
- */
+type Option<T> = { value: T; label: string; disabled?: boolean };
+
 @Component({
   selector: 'df-mat-select',
   imports: [FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatError],
@@ -46,26 +44,21 @@ import { MatSelectField, MatSelectProps } from './mat-select.type';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSelectFieldComponent<T> implements FormValueControl<T>, MatSelectField<T> {
+export class MatSelectFieldComponent<T> implements FormValueControl<T> {
   readonly value = model<T>(undefined as T);
-  readonly disabled = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly errors = model<readonly any[]>([]);
 
-  // SelectField implementation
-  readonly label = input.required<MatSelectProps['label']>();
-  readonly placeholder = input<MatSelectProps['placeholder']>('');
-  readonly options = input.required<MatSelectProps['options']>();
-  readonly multiple = input<MatSelectProps['multiple']>(false);
-  readonly compareWith = input<MatSelectProps['compareWith']>();
-  readonly hint = input<MatSelectProps['hint']>('');
-  readonly className = input<MatSelectProps['className']>('');
-  readonly appearance = input<MatSelectProps['appearance']>('fill');
+  readonly label = input.required<string>();
+  readonly placeholder = input<string>('');
+  readonly options = input.required<Option<T>[]>();
+  readonly multiple = input<boolean>(false);
+  readonly compareWith = input<((o1: T, o2: T) => boolean) | undefined>();
+  readonly hint = input<string>('');
+  readonly className = input<string>('');
+  readonly appearance = input<'fill' | 'outline'>('fill');
   readonly required = input<boolean>(false);
-
-  /**
-   * Default comparison function
-   */
   defaultCompare = Object.is;
 }

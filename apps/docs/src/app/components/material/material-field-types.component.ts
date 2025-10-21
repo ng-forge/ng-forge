@@ -220,7 +220,7 @@ export class MaterialFieldTypesComponent {
       type: 'toggle',
       props: {
         label: 'Toggle Switch',
-        appearance: 'outline',
+        // appearance: 'outline',
         hint: 'Material slide toggle for boolean values',
         color: 'accent',
         labelPosition: 'before',

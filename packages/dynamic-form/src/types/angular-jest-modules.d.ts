@@ -1,0 +1,1 @@
+../../../../patches/angular-jest-modules.d.ts

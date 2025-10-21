@@ -215,7 +215,7 @@ export class ControlFieldTypesDemoComponent {
       type: 'toggle',
       props: {
         label: 'Toggle Field (ValueControlFieldType)',
-        appearance: 'outline',
+        // appearance: 'outline',
         hint: 'Uses ValueControlFieldType<MatToggleProps, boolean>',
         color: 'accent',
         labelPosition: 'before',

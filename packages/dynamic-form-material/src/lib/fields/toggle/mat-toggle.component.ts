@@ -2,11 +2,7 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MatToggleField, MatToggleProps } from './mat-toggle.type';
 
-/**
- * Material Design toggle field component
- */
 @Component({
   selector: 'df-mat-toggle',
   imports: [FormsModule, MatSlideToggle],
@@ -57,19 +53,20 @@ import { MatToggleField, MatToggleProps } from './mat-toggle.type';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatToggleFieldComponent implements FormValueControl<boolean>, MatToggleField {
+export class MatToggleFieldComponent implements FormValueControl<boolean> {
   readonly value = model<boolean>(false);
-  readonly disabled = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly errors = model<readonly any[]>([]);
 
-  // ToggleField implementation
-  readonly label = input.required<MatToggleProps['label']>();
-  readonly labelPosition = input<MatToggleProps['labelPosition']>('after');
+  readonly label = input.required<string>();
+  readonly labelPosition = input<'before' | 'after'>('after');
   readonly required = input<boolean>(false);
-  readonly color = input<MatToggleProps['color']>('primary');
-  readonly hint = input<MatToggleProps['hint']>('');
-  readonly className = input<MatToggleProps['className']>('');
-  readonly appearance = input<MatToggleProps['appearance']>('fill');
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
+  readonly hint = input<string>('');
+  readonly className = input<string>('');
+  readonly hideIcon = input<boolean>(false);
+  readonly disableRipple = input<boolean>(false);
+  readonly tabIndex = input<number>();
 }

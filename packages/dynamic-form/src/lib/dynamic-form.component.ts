@@ -10,6 +10,7 @@ import {
   OnDestroy,
   outputBinding,
   signal,
+  Type,
   viewChildren,
   ViewContainerRef,
 } from '@angular/core';
@@ -19,6 +20,7 @@ import type { FieldConfig } from './models/field-config';
 import type { FormOptions } from './models/form-options';
 import { FieldRegistry } from './core/field-registry';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import type { ProvidedFormResult } from './providers/dynamic-form-providers';
 
 const FIELD_TYPE_TO_PROPERTY = {
   checkbox: 'checked',
@@ -86,6 +88,26 @@ export class DynamicForm<TModel = unknown> implements OnDestroy {
   private destroy$ = new Subject<void>();
 
   fieldContainers = viewChildren(FIELD_CONTAINER_REF, { read: ViewContainerRef });
+
+  /**
+   * Creates a typed version of DynamicForm based on provider configuration
+   *
+   * @param providers The providers that contain the type information
+   * @returns A typed component class
+   *
+   * @example
+   * ```typescript
+   * const providers = provideDynamicForm(withConfig({
+   *   fields: [{ key: 'name', type: 'input' }] as const
+   * }));
+   *
+   * const TypedForm = DynamicForm.withTypes(providers);
+   * // Use TypedForm in your component template
+   * ```
+   */
+  static withTypes<T>(providers: T): Type<DynamicForm<ProvidedFormResult<T>>> {
+    return DynamicForm as Type<DynamicForm<ProvidedFormResult<T>>>;
+  }
 
   /**
    * Array of field configurations that define the form structure.

@@ -17,6 +17,9 @@
     "typeCheckHostBindings": true,
     "strictTemplates": true
   },
+  "paths": {
+    "@ng-dynamic-forms/core": ["dist/packages/dynamic-form"]
+  },
   "files": [],
   "include": [],
   "references": [

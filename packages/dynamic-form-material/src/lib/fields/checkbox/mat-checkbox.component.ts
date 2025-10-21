@@ -1,19 +1,15 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FormCheckboxControl } from '@angular/forms/signals';
+import { FormValueControl } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatCheckboxField, MatCheckboxProps } from './mat-checkbox.type';
 
-/**
- * Material Design checkbox field component
- */
 @Component({
   selector: 'df-mat-checkbox',
   imports: [MatCheckbox, FormsModule],
   template: `
     <div [class]="className() || ''">
       <mat-checkbox
-        [(ngModel)]="checked"
+        [(ngModel)]="value"
         [labelPosition]="labelPosition() || 'after'"
         [indeterminate]="indeterminate() || false"
         [color]="color() || 'primary'"
@@ -51,22 +47,20 @@ import { MatCheckboxField, MatCheckboxProps } from './mat-checkbox.type';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatCheckboxFieldComponent implements FormCheckboxControl, MatCheckboxField {
-  // FormCheckboxControl implementation
-  readonly checked = model<boolean>(false);
-  readonly disabled = model<boolean>(false);
+export class MatCheckboxFieldComponent implements FormValueControl<boolean> {
+  readonly value = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly errors = model<readonly any[]>([]);
 
-  // CheckboxField implementation
-  readonly label = input.required<MatCheckboxProps['label']>();
-  readonly labelPosition = input<MatCheckboxProps['labelPosition']>('after');
-  readonly indeterminate = input<MatCheckboxProps['indeterminate']>(false);
-  readonly color = input<MatCheckboxProps['color']>('primary');
-  readonly hint = input<MatCheckboxProps['hint']>('');
-  readonly className = input<MatCheckboxProps['className']>('');
-  readonly disableRipple = input<boolean | undefined>(false);
-  readonly tabIndex = input<number | undefined>();
+  readonly label = input.required<string>();
+  readonly labelPosition = input<'before' | 'after'>('after');
+  readonly indeterminate = input<boolean>(false);
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
+  readonly hint = input<string>('');
+  readonly className = input<string>('');
+  readonly disableRipple = input<boolean>(false);
+  readonly tabIndex = input<number>();
   readonly required = input<boolean>(false);
 }

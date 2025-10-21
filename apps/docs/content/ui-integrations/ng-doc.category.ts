@@ -1,8 +1,8 @@
-import { NgDocCategory, NgDocPage } from '@ng-doc/core';
+import { NgDocCategory } from '@ng-doc/core';
 
 const UIIntegrationsCategory: NgDocCategory = {
   title: 'UI Integrations',
-  order: 2,
+  order: 3,
   expandable: true,
 };
 

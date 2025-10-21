@@ -2,6 +2,7 @@ import { EnvironmentProviders, inject, makeEnvironmentProviders, provideAppIniti
 import { FieldRegistry } from '../core/field-registry';
 import { ConfigMerger, DynamicFormConfig } from '../core/config-merger';
 import { FormBuilder } from '../core/form-builder';
+import type { InferenceFieldConfig, InferFormResult, Prettify } from '../utils/field.type';
 
 type Providers = (EnvironmentProviders | Provider)[];
 
@@ -13,9 +14,36 @@ export interface DynamicFormFeature {
 }
 
 /**
- * Provide dynamic form functionality
+ * Phantom-typed feature that can carry inferred result type
  */
-export function provideDynamicForm(...features: DynamicFormFeature[]): EnvironmentProviders {
+export type DynamicFormFeatureWithModel<TResult = unknown> = DynamicFormFeature & {
+  /** Phantom property used only for type inference of output result */
+  __result?: TResult;
+};
+
+/**
+ * Extract a result type from a single feature
+ */
+export type InferFeatureResult<F> = F extends { __result?: infer R } ? R : unknown;
+
+/**
+ * Extract the union of results from an array of features
+ */
+export type InferFeaturesResult<Features extends readonly DynamicFormFeature[]> = InferFeatureResult<Features[number]> extends never
+  ? unknown
+  : InferFeatureResult<Features[number]>;
+
+/**
+ * Provide dynamic form functionality
+ *
+ * The return value carries a phantom `__result` type if any feature provides it,
+ * allowing consumers to extract the inferred type via `ProvidedFormResult`.
+ */
+export function provideDynamicForm<Features extends readonly DynamicFormFeature[]>(
+  ...features: Features
+): EnvironmentProviders & {
+  __result?: InferFeaturesResult<Features>;
+} {
   const providers: Providers = [
     // Core services
     FieldRegistry,
@@ -26,13 +54,22 @@ export function provideDynamicForm(...features: DynamicFormFeature[]): Environme
     ...features.flatMap((feature) => feature.providers),
   ];
 
-  return makeEnvironmentProviders(providers);
+  // runtime value is still EnvironmentProviders; the phantom types are compile-time only
+  return makeEnvironmentProviders(providers) as EnvironmentProviders & {
+    __result?: InferFeaturesResult<Features>;
+  };
 }
 
 /**
  * Configure dynamic forms with custom configuration
+ *
+ * If the provided `config` includes a `fields` property, the result type will be inferred.
  */
-export function withConfig(config: DynamicFormConfig): DynamicFormFeature {
+export function withConfig<TConfig extends DynamicFormConfig>(
+  config: TConfig
+): DynamicFormFeatureWithModel<
+  TConfig extends { fields: infer F } ? (F extends readonly InferenceFieldConfig[] ? Prettify<InferFormResult<F>> : unknown) : unknown
+> {
   return {
     providers: [
       {
@@ -54,7 +91,20 @@ export function withConfig(config: DynamicFormConfig): DynamicFormFeature {
         }
       }),
     ],
-  };
+  } as DynamicFormFeatureWithModel<
+    TConfig extends { fields: infer F } ? (F extends readonly InferenceFieldConfig[] ? Prettify<InferFormResult<F>> : unknown) : unknown
+  >;
+}
+
+/**
+ * Enhanced configuration with type inference support
+ */
+export function withTypedConfig<TFields extends readonly InferenceFieldConfig[]>(
+  config: DynamicFormConfig & {
+    fields: TFields;
+  }
+): DynamicFormFeatureWithModel<Prettify<InferFormResult<TFields>>> {
+  return withConfig(config) as DynamicFormFeatureWithModel<Prettify<InferFormResult<TFields>>>;
 }
 
 /**
@@ -91,3 +141,13 @@ export function withTranslation(config: {
     ],
   };
 }
+
+/**
+ * Helper: extract the inferred result type from the value returned by `provideDynamicForm`
+ *
+ * Example usage:
+ * const providers = provideDynamicForm(withConfig({ fields: [...] as const }));
+ * type FormResult = ProvidedFormResult<typeof providers>;
+ * // This gives you the typed result based on field configurations
+ */
+export type ProvidedFormResult<T> = T extends { __result?: infer R } ? R : unknown;

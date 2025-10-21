@@ -1,6 +1,3 @@
-/**
- * Interface for textarea field components
- */
 export interface TextareaField {
   label: string;
   placeholder?: string;

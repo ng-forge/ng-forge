@@ -2,11 +2,9 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
-import { MatRadioField, MatRadioProps } from './mat-radio.type';
 
-/**
- * Material Design radio field component
- */
+type Option<T> = { value: T; label: string; disabled?: boolean };
+
 @Component({
   selector: 'df-mat-radio',
   imports: [FormsModule, MatRadioGroup, MatRadioButton],
@@ -74,20 +72,19 @@ import { MatRadioField, MatRadioProps } from './mat-radio.type';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatRadioFieldComponent<T> implements FormValueControl<T>, MatRadioField<T> {
+export class MatRadioFieldComponent<T> implements FormValueControl<T> {
   readonly value = model<T>(undefined as T);
-  readonly disabled = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly errors = model<readonly any[]>([]);
 
-  // RadioField implementation
-  readonly label = input.required<MatRadioProps<T>['label']>();
-  readonly options = input.required<MatRadioProps<T>['options']>();
+  readonly label = input.required<string>();
+  readonly options = input.required<Option<T>[]>();
   readonly required = input<boolean>(false);
-  readonly color = input<MatRadioProps<T>['color']>('primary');
-  readonly labelPosition = input<MatRadioProps<T>['labelPosition']>('after');
-  readonly hint = input<MatRadioProps<T>['hint']>('');
-  readonly className = input<MatRadioProps<T>['className']>('');
-  readonly appearance = input<MatRadioProps<T>['appearance']>('fill');
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
+  readonly labelPosition = input<'before' | 'after'>('after');
+  readonly hint = input<string>('');
+  readonly className = input<string>('');
+  readonly appearance = input<'fill' | 'outline'>('fill');
 }

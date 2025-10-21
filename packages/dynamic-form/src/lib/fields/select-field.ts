@@ -1,7 +1,4 @@
-/**
- * Option for select field
- */
-export interface SelectOption<T = unknown> {
+export interface SelectOption<T> {
   label: string;
   value: T;
   disabled?: boolean;
@@ -10,12 +7,11 @@ export interface SelectOption<T = unknown> {
 /**
  * Interface for select field components
  */
-export interface SelectField<T = unknown> {
+export interface SelectField<T> {
   label: string;
   placeholder?: string;
   options: SelectOption<T>[];
   multiple?: boolean;
-  required?: boolean;
   compareWith?: ((o1: T, o2: T) => boolean) | undefined;
   hint?: string;
   className?: string;

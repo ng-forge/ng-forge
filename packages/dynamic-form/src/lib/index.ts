@@ -1,5 +1,6 @@
 // Main component
 export { DynamicForm } from './dynamic-form.component';
+export { TypedDynamicForm, createTypedDynamicForm } from './typed-dynamic-form.component';
 
 // Models
 export * from './models';
@@ -11,8 +12,8 @@ export * from './fields';
 export * from './core';
 
 // Providers
-export { provideDynamicForm, withConfig, withValidation, withTranslation } from './providers/dynamic-form-providers';
-export type { DynamicFormFeature } from './providers/dynamic-form-providers';
+export { provideDynamicForm, withConfig, withValidation, withTranslation, withTypedConfig } from './providers/dynamic-form-providers';
+export type { DynamicFormFeature, DynamicFormFeatureWithModel, ProvidedFormResult } from './providers/dynamic-form-providers';
 
 // Helpers
 export * from './utils';
