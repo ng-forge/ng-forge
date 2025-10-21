@@ -46,7 +46,7 @@ import { MatSelectField, MatSelectProps } from './mat-select.type';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSelectFieldComponent<T > implements FormValueControl<T>, MatSelectField<T> {
+export class MatSelectFieldComponent<T> implements FormValueControl<T>, MatSelectField<T> {
   readonly value = model<T>(undefined as T);
   readonly disabled = model<boolean>(false);
   readonly touched = model<boolean>(false);

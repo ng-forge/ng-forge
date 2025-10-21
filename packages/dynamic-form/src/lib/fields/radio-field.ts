@@ -1,7 +1,7 @@
 /**
  * Option interface for radio field
  */
-export interface RadioOption<T > {
+export interface RadioOption<T> {
   label: string;
   value: T;
   disabled?: boolean;

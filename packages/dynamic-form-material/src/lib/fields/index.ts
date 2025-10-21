@@ -9,3 +9,4 @@ export * from './select';
 export * from './slider';
 export * from './submit';
 export * from './textarea';
+export * from './toggle';

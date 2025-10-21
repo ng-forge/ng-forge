@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { MatSliderField, MatSliderProps } from './mat-slider.type';
 
@@ -10,11 +9,11 @@ import { MatSliderField, MatSliderProps } from './mat-slider.type';
  */
 @Component({
   selector: 'df-mat-slider',
-  imports: [FormsModule, MatFormField, MatLabel, MatHint, MatError, MatSlider, MatSliderThumb],
+  imports: [FormsModule, MatSlider, MatSliderThumb],
   template: `
-    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className()">
+    <div [class]="className() || ''">
       @if (label(); as label) {
-      <mat-label>{{ label }}</mat-label>
+      <div class="slider-label">{{ label }}</div>
       }
 
       <mat-slider
@@ -22,7 +21,7 @@ import { MatSliderField, MatSliderProps } from './mat-slider.type';
         [max]="maxValue()"
         [step]="step()"
         [disabled]="disabled()"
-        [discrete]="thumbLabel()"
+        [discrete]="thumbLabel() || showThumbLabel()"
         [showTickMarks]="tickInterval() !== undefined"
         [color]="color() || 'primary'"
         class="slider-container"
@@ -31,21 +30,39 @@ import { MatSliderField, MatSliderProps } from './mat-slider.type';
       </mat-slider>
 
       @if (hint(); as hint) {
-      <mat-hint>{{ hint }}</mat-hint>
-      } @if (invalid() && touched()) {
-      <mat-error>
-        @for (error of errors(); track error) {
-        <span>{{ error.message }}</span>
-        }
-      </mat-error>
-      }
-    </mat-form-field>
+      <div class="mat-hint">{{ hint }}</div>
+      } @if (invalid() && touched()) { @for (error of errors(); track error) {
+      <div class="mat-error">{{ error.message }}</div> } }
+    </div>
   `,
   styles: [
     `
+      :host {
+        display: block;
+      }
+
+      .slider-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.87);
+        margin-bottom: 8px;
+      }
+
       .slider-container {
         width: 100%;
-        margin: 16px 0;
+        margin: 8px 0;
+      }
+
+      .mat-hint {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        margin-top: 4px;
+      }
+
+      .mat-error {
+        font-size: 12px;
+        color: #f44336;
+        margin-top: 4px;
       }
     `,
   ],
@@ -64,6 +81,7 @@ export class MatSliderFieldComponent implements FormValueControl<number>, MatSli
   readonly maxValue = input<MatSliderProps['maxValue']>(100);
   readonly step = input<MatSliderProps['step']>(1);
   readonly thumbLabel = input<MatSliderProps['thumbLabel']>(false);
+  readonly showThumbLabel = input<boolean>(false);
   readonly tickInterval = input<MatSliderProps['tickInterval']>();
   readonly vertical = input<MatSliderProps['vertical']>(false);
   readonly invert = input<MatSliderProps['invert']>(false);

@@ -102,7 +102,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     },
   },
   {
-    name: 'multicheckbox',
+    name: 'multi-checkbox',
     component: MatMultiCheckboxFieldComponent,
     defaultProps: {
       color: 'primary',

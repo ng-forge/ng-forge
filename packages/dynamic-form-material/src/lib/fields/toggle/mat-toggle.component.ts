@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatToggleField, MatToggleProps } from './mat-toggle.type';
 
@@ -10,13 +9,9 @@ import { MatToggleField, MatToggleProps } from './mat-toggle.type';
  */
 @Component({
   selector: 'df-mat-toggle',
-  imports: [FormsModule, MatFormField, MatLabel, MatHint, MatError, MatSlideToggle],
+  imports: [FormsModule, MatSlideToggle],
   template: `
-    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
-      @if (label(); as label) {
-      <mat-label>{{ label }}</mat-label>
-      }
-
+    <div [class]="className() || ''">
       <mat-slide-toggle
         [(ngModel)]="value"
         [disabled]="disabled()"
@@ -30,21 +25,32 @@ import { MatToggleField, MatToggleProps } from './mat-toggle.type';
       </mat-slide-toggle>
 
       @if (hint(); as hint) {
-      <mat-hint>{{ hint }}</mat-hint>
-      } @if (invalid() && touched()) {
-      <mat-error>
-        @for (error of errors(); track error) {
-        <span>{{ error.message }}</span>
-        }
-      </mat-error>
-      }
-    </mat-form-field>
+      <div class="mat-hint">{{ hint }}</div>
+      } @if (invalid() && touched()) { @for (error of errors(); track error) {
+      <div class="mat-error">{{ error.message }}</div> } }
+    </div>
   `,
   styles: [
     `
+      :host {
+        display: block;
+      }
+
       .toggle-container {
         width: 100%;
         margin: 8px 0;
+      }
+
+      .mat-hint {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        margin-top: 4px;
+      }
+
+      .mat-error {
+        font-size: 12px;
+        color: #f44336;
+        margin-top: 4px;
       }
     `,
   ],

@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormCheckboxControl } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatError, MatHint } from '@angular/material/input';
 import { MatCheckboxField, MatCheckboxProps } from './mat-checkbox.type';
 
 /**
@@ -10,7 +9,7 @@ import { MatCheckboxField, MatCheckboxProps } from './mat-checkbox.type';
  */
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, FormsModule, MatHint, MatError],
+  imports: [MatCheckbox, FormsModule],
   template: `
     <div [class]="className() || ''">
       <mat-checkbox
@@ -25,9 +24,9 @@ import { MatCheckboxField, MatCheckboxProps } from './mat-checkbox.type';
       </mat-checkbox>
 
       @if (hint()) {
-      <mat-hint class="mat-hint">{{ hint() }}</mat-hint>
+      <div class="mat-hint">{{ hint() }}</div>
       } @if (invalid() && touched()) { @for (error of errors(); track error) {
-      <mat-error class="mat-error">{{ error.message }}</mat-error> } }
+      <div class="mat-error">{{ error.message }}</div> } }
     </div>
   `,
   styles: [

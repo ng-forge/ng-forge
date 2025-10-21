@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
-import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatMultiCheckboxField, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 
@@ -10,11 +9,11 @@ import { MatMultiCheckboxField, MatMultiCheckboxProps } from './mat-multi-checkb
  */
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [FormsModule, MatFormField, MatLabel, MatHint, MatError, MatCheckbox],
+  imports: [FormsModule, MatCheckbox],
   template: `
-    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
+    <div [class]="className() || ''">
       @if (label(); as label) {
-      <mat-label>{{ label }}</mat-label>
+      <div class="checkbox-group-label">{{ label }}</div>
       }
 
       <div class="checkbox-group">
@@ -32,33 +31,50 @@ import { MatMultiCheckboxField, MatMultiCheckboxProps } from './mat-multi-checkb
       </div>
 
       @if (hint(); as hint) {
-      <mat-hint>{{ hint }}</mat-hint>
-      } @if (invalid() && touched()) {
-      <mat-error>
-        @for (error of errors(); track error) {
-        <span>{{ error.message }}</span>
-        }
-      </mat-error>
-      }
-    </mat-form-field>
+      <div class="mat-hint">{{ hint }}</div>
+      } @if (invalid() && touched()) { @for (error of errors(); track error) {
+      <div class="mat-error">{{ error.message }}</div> } }
+    </div>
   `,
   styles: [
     `
+      :host {
+        display: block;
+      }
+
+      .checkbox-group-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.87);
+        margin-bottom: 8px;
+      }
+
       .checkbox-group {
         display: flex;
         flex-direction: column;
         gap: 8px;
-        padding: 8px 0;
       }
 
       mat-checkbox {
         margin: 0;
       }
+
+      .mat-hint {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        margin-top: 4px;
+      }
+
+      .mat-error {
+        font-size: 12px;
+        color: #f44336;
+        margin-top: 4px;
+      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatMultiCheckboxFieldComponent<T > implements FormValueControl<T[]>, MatMultiCheckboxField<T> {
+export class MatMultiCheckboxFieldComponent<T> implements FormValueControl<T[]>, MatMultiCheckboxField<T> {
   readonly value = model<T[]>([]);
   readonly disabled = model<boolean>(false);
   readonly touched = model<boolean>(false);

@@ -7,4 +7,4 @@ export interface MatRadioProps<T> extends RadioField<T> {
   tabIndex?: number;
 }
 
-export type MatRadioField<T > = ValueControlFieldType<MatRadioProps<T>, T>;
+export type MatRadioField<T> = ValueControlFieldType<MatRadioProps<T>, T>;
