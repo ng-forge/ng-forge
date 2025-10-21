@@ -86,7 +86,7 @@ export type InferFormResultAdvanced<T extends readonly InferenceFieldConfig[]> =
       : ParseNestedKey<First['key']> extends { [K in First['key']]: unknown }
       ? { [K in First['key']]: First['type'] extends keyof FieldTypeMap ? FieldTypeMap[First['type']] : unknown }
       : ParseNestedKey<First['key']>
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    : {}
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  : {};
+    : // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+      {}
+  : // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    {};
