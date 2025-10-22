@@ -2,7 +2,6 @@
   "name": "@ng-forge/dynamic-form",
   "type": "module",
   "version": "0.0.1",
-  "sideEffects": false,
   "peerDependencies": {
     "@angular/core": "~21.0.0-next.8",
     "@angular/forms": "~21.0.0-next.8",

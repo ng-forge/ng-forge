@@ -2,7 +2,6 @@
   "name": "@ng-forge/dynamic-form-material",
   "type": "module",
   "version": "0.0.1",
-  "sideEffects": false,
   "peerDependencies": {
     "@angular/animations": "^21.0.0-next.8",
     "@angular/core": "^21.0.0-next.8",

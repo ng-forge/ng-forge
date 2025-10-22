@@ -5,7 +5,13 @@ import angular from '@analogjs/vite-plugin-angular';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
 export default defineConfig(({ mode }) => ({
-  plugins: [angular({ tsconfig: './tsconfig.app.json' }), nxViteTsPaths()],
+  plugins: [
+    angular({
+      tsconfig: './tsconfig.app.json',
+      workspaceRoot: '../../',
+    }),
+    nxViteTsPaths(),
+  ],
   test: {
     globals: true,
     setupFiles: ['src/test-setup.ts'],

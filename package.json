@@ -5,10 +5,10 @@
   "scripts": {
     "build": "nx run-many -t build",
     "build:libs": "nx run-many -t build -p dynamic-form,dynamic-form-material",
-    "build:docs": "ng-doc api && nx build docs",
+    "build:docs": "nx build-deps docs && nx build docs",
     "postinstall": "bash scripts/postinstall.sh",
     "patch:angular": "bash scripts/patch-angular-build.sh",
-    "build:docs:prod": "ng-doc api && nx build docs --configuration=production",
+    "build:docs:prod": "nx build-deps docs && nx build docs --configuration=production",
     "test": "nx run-many -t test",
     "test:ci": "nx run-many -t test --configuration=ci --coverage",
     "test:watch": "nx run-many -t test --watch",
