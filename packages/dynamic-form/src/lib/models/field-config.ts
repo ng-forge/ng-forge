@@ -23,6 +23,9 @@ export interface FieldConfig<TModel = unknown, TProps = unknown> {
   /** Async validators */
   asyncValidators?: AsyncValidatorConfig;
 
+  /** Custom error messages for validators */
+  errorMessages?: ErrorMessageConfig;
+
   /** Expression-based rules for visibility, disabled state, etc. */
   expressions?: FieldExpressions<TModel>;
 
@@ -111,6 +114,35 @@ export type ValidatorFn = (control: FormControlState<unknown>) => ValidationErro
 
 export interface ValidationErrors {
   [key: string]: unknown;
+}
+
+/**
+ * Error message configuration for validators
+ */
+export interface ErrorMessageConfig {
+  /** Error message for required validator */
+  required?: string;
+
+  /** Error message for email validator */
+  email?: string;
+
+  /** Error message for min validator */
+  min?: string;
+
+  /** Error message for max validator */
+  max?: string;
+
+  /** Error message for minLength validator */
+  minLength?: string;
+
+  /** Error message for maxLength validator */
+  maxLength?: string;
+
+  /** Error message for pattern validator */
+  pattern?: string;
+
+  /** Custom error messages for any validator */
+  [validatorName: string]: string | undefined;
 }
 
 /**

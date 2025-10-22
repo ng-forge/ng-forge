@@ -57,7 +57,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 export class MatDatepickerFieldComponent implements FormValueControl<Date | null> {
   readonly value = model<Date | null>(null);
   readonly disabled = input<boolean>(false);
-  readonly errors = input<readonly any[]>([]);
+  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
 

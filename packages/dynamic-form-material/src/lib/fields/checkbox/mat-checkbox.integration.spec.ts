@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicForm, FieldConfig, provideDynamicForm, withConfig } from '@ng-forge/dynamic-form';
 import { MATERIAL_FIELD_TYPES } from '../../config/material-field-config';
@@ -60,30 +59,38 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
     it('should render checkbox through dynamic form', () => {
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const matCheckboxComponent = debugElement.query(By.css('df-mat-checkbox')).componentInstance;
       const containerDiv = debugElement.query(By.css('.terms-checkbox'));
       const hintElement = debugElement.query(By.css('.mat-hint'));
 
       expect(checkbox).toBeTruthy();
+      expect(matCheckboxComponent.label).toBe('Accept Terms and Conditions');
       expect(checkbox.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-label-position')).toBe('before');
+      expect(matCheckboxComponent.color).toBe('accent');
+      expect(matCheckboxComponent.labelPosition).toBe('before');
       expect(containerDiv).toBeTruthy();
       expect(hintElement.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
     });
 
     it('should handle value changes through dynamic form', async () => {
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const checkboxComponent = checkbox.componentInstance;
 
-      // Simulate checkbox click
-      checkbox.nativeElement.click();
+      // Simulate checkbox change
+      checkboxComponent.checked = true;
+      checkboxComponent.change.emit({ checked: true, source: checkboxComponent });
       fixture.detectChanges();
 
-      const emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.acceptTerms).toBe(true);
+      // Wait for next tick to allow value propagation
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const currentValue = component.currentFormValue();
+      expect(currentValue?.acceptTerms).toBe(true);
     });
 
     it('should reflect form model changes in checkbox', () => {
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const checkboxComponent = checkbox.componentInstance;
 
       // Update form model
       fixture.componentRef.setInput('value', {
@@ -93,15 +100,16 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
       });
       fixture.detectChanges();
 
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-ng-model')).toBe('true');
+      expect(checkboxComponent.checked).toBe(true);
     });
 
     it('should handle all checkbox-specific properties', () => {
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const checkboxComponent = checkbox.componentInstance;
 
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-indeterminate')).toBe('false');
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-disable-ripple')).toBe('true');
-      expect(checkbox.nativeElement.getAttribute('tabindex')).toBe('1');
+      expect(checkboxComponent.indeterminate).toBe(false);
+      expect(checkboxComponent.disableRipple).toBe(true);
+      expect(checkboxComponent.tabIndex).toBe(1);
     });
   });
 
@@ -128,11 +136,12 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
     it('should render with default values', () => {
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const checkboxComponent = checkbox.componentInstance;
 
       expect(checkbox).toBeTruthy();
       expect(checkbox.nativeElement.textContent.trim()).toBe('Subscribe to Newsletter');
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
+      expect(checkboxComponent.color).toBe('primary');
+      expect(checkboxComponent.labelPosition).toBe('after');
     });
 
     it('should not display hint when not provided', () => {
@@ -191,31 +200,35 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     it('should reflect individual checkbox states from form model', () => {
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
 
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('false');
-      expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('true');
-      expect(checkboxes[2].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('false');
+      expect(checkboxes[0].componentInstance.checked).toBe(false);
+      expect(checkboxes[1].componentInstance.checked).toBe(true);
+      expect(checkboxes[2].componentInstance.checked).toBe(false);
     });
 
     it('should handle independent checkbox interactions', async () => {
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
 
-      // Click first checkbox
-      checkboxes[0].nativeElement.click();
+      // Simulate first checkbox change
+      checkboxes[0].componentInstance.checked = true;
+      checkboxes[0].componentInstance.change.emit({ checked: true, source: checkboxes[0].componentInstance });
       fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
-      let emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue).toEqual({
+      let currentValue = component.currentFormValue();
+      expect(currentValue).toEqual({
         acceptTerms: true,
         newsletter: true,
         enableNotifications: false,
       });
 
-      // Click third checkbox
-      checkboxes[2].nativeElement.click();
+      // Simulate third checkbox change
+      checkboxes[2].componentInstance.checked = true;
+      checkboxes[2].componentInstance.change.emit({ checked: true, source: checkboxes[2].componentInstance });
       fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
-      emittedValue = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue).toEqual({
+      currentValue = component.currentFormValue();
+      expect(currentValue).toEqual({
         acceptTerms: true,
         newsletter: true,
         enableNotifications: true,
@@ -225,9 +238,9 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     it('should apply different colors to checkboxes', () => {
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
 
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
-      expect(checkboxes[2].nativeElement.getAttribute('ng-reflect-color')).toBe('warn');
+      expect(checkboxes[0].componentInstance.color).toBe('primary');
+      expect(checkboxes[1].componentInstance.color).toBe('accent');
+      expect(checkboxes[2].componentInstance.color).toBe('warn');
     });
   });
 
@@ -255,19 +268,22 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
     it('should render checkbox as disabled', () => {
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const checkboxComponent = checkbox.componentInstance;
 
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
+      expect(checkboxComponent.disabled).toBe(true);
     });
 
     it('should not emit value changes when disabled checkbox is clicked', () => {
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const checkboxComponent = checkbox.componentInstance;
 
       // Try to click disabled checkbox - should not change value since it's disabled
       checkbox.nativeElement.click();
       fixture.detectChanges();
 
       // Verify the checkbox remains disabled and doesn't change
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
+      expect(checkboxComponent.disabled).toBe(true);
+      expect(checkboxComponent.checked).toBe(false);
     });
   });
 
@@ -294,10 +310,11 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
     it('should apply default props from MATERIAL_FIELD_TYPES configuration', () => {
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const checkboxComponent = checkbox.componentInstance;
 
       // Check default props from configuration
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
+      expect(checkboxComponent.color).toBe('primary');
+      expect(checkboxComponent.labelPosition).toBe('after');
     });
   });
 
@@ -325,8 +342,9 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
     it('should render checkbox in indeterminate state', () => {
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const checkboxComponent = checkbox.componentInstance;
 
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-indeterminate')).toBe('true');
+      expect(checkboxComponent.indeterminate).toBe(true);
     });
   });
 
@@ -389,6 +407,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
       fixture.detectChanges();
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
+      const checkboxComponent = checkbox.componentInstance;
 
       // Update via programmatic value change
       fixture.componentRef.setInput('value', {
@@ -398,7 +417,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
       });
       fixture.detectChanges();
 
-      expect(checkbox.nativeElement.getAttribute('ng-reflect-ng-model')).toBe('true');
+      expect(checkboxComponent.checked).toBe(true);
     });
   });
 

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FormValueControl } from '@angular/forms/signals';
+import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 
 type Option<T> = { value: T; label: string; disabled?: boolean };
@@ -75,7 +75,7 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
 export class MatRadioFieldComponent<T> implements FormValueControl<T> {
   readonly value = model<T>(undefined as T);
   readonly disabled = input<boolean>(false);
-  readonly errors = input<readonly any[]>([]);
+  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
 

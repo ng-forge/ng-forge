@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FormCheckboxControl } from '@angular/forms/signals';
+import { FormCheckboxControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
@@ -50,7 +50,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 export class MatCheckboxFieldComponent implements FormCheckboxControl {
   readonly checked = model<boolean>(false);
   readonly disabled = input<boolean>(false);
-  readonly errors = input<readonly any[]>([]);
+  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
 

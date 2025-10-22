@@ -212,6 +212,10 @@ export class DynamicForm<TModel = unknown> implements OnDestroy {
         const component = await this.fieldRegistry.loadTypeComponent(field.type);
         const bindings = this.createFieldBindings(field, component);
         const componentRef = container.createComponent(component, { bindings });
+
+        // Set properties directly on the component instance as a fallback
+        this.setComponentProperties(componentRef, field);
+
         this.componentRefs.push(componentRef);
       } catch (error) {
         console.error(`Failed to render field type "${field.type}":`, error);
@@ -222,9 +226,9 @@ export class DynamicForm<TModel = unknown> implements OnDestroy {
   private createFieldBindings(field: FieldConfig<TModel>, component: Type<unknown>): Binding[] {
     const bindings: Binding[] = [];
 
+    // Still create input bindings for compatibility
     if (field.props) {
       Object.entries(field.props).forEach(([key, value]) => {
-        // Skip validation and form-related props that aren't component inputs
         if (this.isValidationProp(key)) {
           return;
         }
@@ -256,6 +260,13 @@ export class DynamicForm<TModel = unknown> implements OnDestroy {
         );
       }
     }
+
+    // Add error and validation bindings with custom error messages
+    bindings.push(
+      inputBinding('errors', () => this.getFieldErrors(field)),
+      inputBinding('touched', () => false),
+      inputBinding('invalid', () => this.getFieldErrors(field).length > 0)
+    );
 
     return bindings;
   }
@@ -294,27 +305,141 @@ export class DynamicForm<TModel = unknown> implements OnDestroy {
   }
 
   private getBindingProperty(component: Type<unknown>): string | null {
-    // TODO: find better way to read component metadata
+    // Check for traditional @Input decorators
     // ts-disable-next-line @typescript-eslint/no-explicit-any
-    if ('checked' in (component as any).propDecorators) {
+    const propDecorators = (component as any).propDecorators;
+
+    if (propDecorators && 'checked' in propDecorators) {
       return 'checked';
     }
 
-    // ts-disable-next-line @typescript-eslint/no-explicit-any
-    if ('value' in (component as any).propDecorators) {
+    if (propDecorators && 'value' in propDecorators) {
       return 'value';
     }
 
-    return null;
+    // Fallback to checking component name patterns
+    const componentName = component.name;
+    if (componentName.includes('Checkbox') || componentName.includes('Toggle')) {
+      return 'checked';
+    }
+
+    // Default to 'value' for most form controls
+    return 'value';
   }
 
   private isValidationProp(key: string): key is (typeof VALIDATION_PROPS)[number] {
     return (VALIDATION_PROPS as readonly string[]).includes(key);
   }
 
+  private setComponentProperties(componentRef: ComponentRef<unknown>, field: FieldConfig<TModel>): void {
+    const instance = componentRef.instance as Record<string, unknown>;
+
+    // Set props from field configuration
+    if (field.props) {
+      Object.entries(field.props).forEach(([key, value]) => {
+        if (!this.isValidationProp(key)) {
+          instance[key] = value;
+        }
+      });
+    }
+
+    // Set field value
+    if (field.key) {
+      const bindingProperty = this.getBindingProperty(componentRef.componentType);
+      if (bindingProperty) {
+        const currentVal = this.currentFormValue();
+        const fieldValue = currentVal && field.key ? this.getNestedValue(currentVal, field.key) : undefined;
+        instance[bindingProperty] = fieldValue;
+      }
+    }
+
+    // Set validation properties with error mapping
+    instance['errors'] = this.getFieldErrors(field);
+    instance['touched'] = false;
+    instance['invalid'] = this.getFieldErrors(field).length > 0;
+
+    // Trigger change detection
+    componentRef.changeDetectorRef.markForCheck();
+  }
+
   private generateFieldId(field: FieldConfig<TModel>): string {
     const key = field.key || field.type;
     const random = Math.random().toString(36).substring(2, 9);
     return `${FIELD_ID_PREFIX}-${key}-${random}`;
+  }
+
+  private getFieldErrors(field: FieldConfig<TModel>): Array<{ message: string; type: string }> {
+    const errors: Array<{ message: string; type: string }> = [];
+
+    // Only show errors if errorMessages are explicitly provided
+    if (!field.errorMessages) {
+      return errors;
+    }
+
+    // Get field value for validation
+    const currentVal = this.currentFormValue();
+    const fieldValue = currentVal && field.key ? this.getNestedValue(currentVal, field.key) : undefined;
+
+    // Validate field based on validators
+    if (field.validators) {
+      Object.entries(field.validators).forEach(([validatorName, validatorConfig]) => {
+        const validationError = this.validateField(validatorName, validatorConfig, fieldValue);
+        if (validationError) {
+          // Only use custom error message if provided
+          const customMessage = field.errorMessages?.[validatorName];
+          if (customMessage) {
+            errors.push({
+              message: customMessage,
+              type: validatorName,
+            });
+          }
+        }
+      });
+    }
+
+    return errors;
+  }
+
+  private validateField(validatorName: string, validatorConfig: unknown, fieldValue: unknown): boolean {
+    /* eslint-disable no-case-declarations */
+    switch (validatorName) {
+      case 'required':
+        return !!validatorConfig && (!fieldValue || (typeof fieldValue === 'string' && !fieldValue.trim()));
+
+      case 'email':
+        if (!validatorConfig || !fieldValue) return false;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return typeof fieldValue === 'string' && !emailRegex.test(fieldValue);
+
+      case 'min':
+        if (!validatorConfig || fieldValue === null || fieldValue === undefined) return false;
+        const minValue = typeof validatorConfig === 'number' ? validatorConfig : Number(validatorConfig);
+        return typeof fieldValue === 'number' && fieldValue < minValue;
+
+      case 'max':
+        if (!validatorConfig || fieldValue === null || fieldValue === undefined) return false;
+        const maxValue = typeof validatorConfig === 'number' ? validatorConfig : Number(validatorConfig);
+        return typeof fieldValue === 'number' && fieldValue > maxValue;
+
+      case 'minLength':
+        if (!validatorConfig || !fieldValue) return false;
+        const minLength = typeof validatorConfig === 'number' ? validatorConfig : Number(validatorConfig);
+        return typeof fieldValue === 'string' && fieldValue.length < minLength;
+
+      case 'maxLength':
+        if (!validatorConfig || !fieldValue) return false;
+        const maxLength = typeof validatorConfig === 'number' ? validatorConfig : Number(validatorConfig);
+        return typeof fieldValue === 'string' && fieldValue.length > maxLength;
+
+      case 'pattern':
+        if (!validatorConfig || !fieldValue) return false;
+        const pattern =
+          typeof validatorConfig === 'string' ? new RegExp(validatorConfig.replace(/^\/|\/$/g, '')) : (validatorConfig as RegExp);
+        return typeof fieldValue === 'string' && !pattern.test(fieldValue);
+
+      default:
+        return false;
+    }
+    /* eslint-enable no-case-declarations */
   }
 }

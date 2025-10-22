@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FormValueControl } from '@angular/forms/signals';
+import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 
 @Component({
@@ -68,7 +68,7 @@ import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 export class MatSliderFieldComponent implements FormValueControl<number> {
   readonly value = model<number>(0);
   readonly disabled = input<boolean>(false);
-  readonly errors = input<readonly any[]>([]);
+  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
 
