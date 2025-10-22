@@ -1,21 +1,33 @@
-// Main component
+// Core components following Angular Architects pattern
 export { DynamicForm } from './dynamic-form.component';
-export { TypedDynamicForm, createTypedDynamicForm } from './typed-dynamic-form.component';
+export { TypedDynamicForm } from './typed-dynamic-form.component';
 
-// Models
-export * from './models';
+// Core interfaces and types - clean signal forms API
+export type {
+  FieldDef,
+  FormConfig,
+  ValidationRules,
+  ValidationError,
+  ValidationMessages,
+  FieldState,
+  FormState,
+  ConditionalRules,
+  CustomValidator,
+  InferFormValue,
+  FormOptions,
+} from './models';
 
-// Field Interfaces
+// Builder functions for type-safe form definitions
+export { defineField, defineForm, createFormSchema } from './models';
+
+// Provider system for dependency injection
+export { provideDynamicForm, withConfig, type ProvidedFormResult, type DynamicFormFeature, type DynamicFormConfig } from './providers';
+
+// Field registry for custom field types
+export { FieldRegistry } from './core/field-registry';
+
+// Signal-based form state management
+export { SignalFormState } from './core/signal-form-state';
+
+// Field interfaces for custom field components
 export * from './fields';
-
-// Core services
-export * from './core';
-
-// Providers
-export { provideDynamicForm, withConfig, withValidation, withTranslation, withTypedConfig } from './providers/dynamic-form-providers';
-export type { DynamicFormFeature, DynamicFormFeatureWithModel, ProvidedFormResult } from './providers/dynamic-form-providers';
-
-// Helpers
-export * from './utils';
-
-// TODO: do proper exports

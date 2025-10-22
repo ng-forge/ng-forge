@@ -1,11 +1,9 @@
-import { ChangeDetectionStrategy, Component, DebugElement, input, output, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { firstValueFrom } from 'rxjs';
-import { DynamicForm } from './dynamic-form.component';
+import { DynamicFormComponent } from './dynamic-form.component';
 import { FieldRegistry } from './core/field-registry';
-import { FieldConfig } from './models/field-config';
-import { FormOptions } from './models/form-options';
+import { FormConfig } from './models/field-config';
 
 interface TestFormModel {
   firstName?: string;
@@ -14,16 +12,13 @@ interface TestFormModel {
   email?: string;
   isActive?: boolean;
   country?: string;
-  nested?: {
-    field?: string;
-  };
 }
 
 @Component({
   selector: 'df-test-input',
   template: `
     <input
-      [value]="value() || ''"
+      [value]="field()?.value() || ''"
       (input)="onChange($event.target)"
       [type]="type() || 'text'"
       [placeholder]="placeholder() || ''"
@@ -35,17 +30,32 @@ interface TestFormModel {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestInputComponent {
-  value = input<string>('');
+  field = input<any>();
   type = input<string>('text');
   placeholder = input<string>('');
   required = input<boolean>(false);
   label = input<string>('');
   id = input<string>('');
   testId = input<string>('');
-  valueChange = output<string>();
+  fieldChange = output<string>();
+
+  constructor() {
+    // Set up effect to sync field value changes
+    effect(() => {
+      const fieldValue = this.field()?.value();
+      if (fieldValue !== undefined) {
+        this.fieldChange.emit(fieldValue);
+      }
+    });
+  }
 
   onChange(e: EventTarget | null) {
-    this.valueChange.emit((e as HTMLInputElement).value);
+    const value = (e as HTMLInputElement).value;
+    const fieldState = this.field();
+    if (fieldState) {
+      fieldState.value.set(value);
+    }
+    this.fieldChange.emit(value);
   }
 }
 
@@ -53,7 +63,7 @@ class TestInputComponent {
   selector: 'df-test-select',
   template: `
     <select
-      [value]="value() || ''"
+      [value]="field()?.value() || ''"
       (change)="onChange($event.target)"
       [multiple]="multiple() || false"
       [id]="id() || ''"
@@ -67,16 +77,31 @@ class TestInputComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestSelectComponent {
-  value = input<string>('');
+  field = input<any>();
   multiple = input<boolean>(false);
   options = input<string[]>([]);
   label = input<string>('');
   id = input<string>('');
   testId = input<string>('');
-  valueChange = output<string>();
+  fieldChange = output<string>();
+
+  constructor() {
+    // Set up effect to sync field value changes
+    effect(() => {
+      const fieldValue = this.field()?.value();
+      if (fieldValue !== undefined) {
+        this.fieldChange.emit(fieldValue);
+      }
+    });
+  }
 
   onChange(e: EventTarget | null) {
-    this.valueChange.emit((e as HTMLInputElement).value);
+    const value = (e as HTMLInputElement).value;
+    const fieldState = this.field();
+    if (fieldState) {
+      fieldState.value.set(value);
+    }
+    this.fieldChange.emit(value);
   }
 }
 
@@ -85,7 +110,7 @@ class TestSelectComponent {
   template: `
     <input
       type="checkbox"
-      [checked]="checked() || false"
+      [checked]="field()?.value() || false"
       (change)="onChange($event.target)"
       [id]="id() || ''"
       [attr.data-testid]="testId() || ''"
@@ -94,42 +119,44 @@ class TestSelectComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestCheckboxComponent {
-  checked = input<boolean>(false);
+  field = input<any>();
   label = input<string>('');
   id = input<string>('');
   testId = input<string>('');
-  checkedChange = output<boolean>();
+  fieldChange = output<boolean>();
+
+  constructor() {
+    // Set up effect to sync field value changes
+    effect(() => {
+      const fieldValue = this.field()?.value();
+      if (fieldValue !== undefined) {
+        this.fieldChange.emit(fieldValue);
+      }
+    });
+  }
 
   onChange(e: EventTarget | null) {
-    this.checkedChange.emit((e as HTMLInputElement).checked);
+    const checked = (e as HTMLInputElement).checked;
+    const fieldState = this.field();
+    if (fieldState) {
+      fieldState.value.set(checked);
+    }
+    this.fieldChange.emit(checked);
   }
 }
 
-@Component({
-  selector: 'df-test-submit',
-  template: `
-    <button type="submit" [disabled]="disabled() || false" [id]="id() || ''" [attr.data-testid]="testId() || ''">
-      {{ label() || 'Submit' }}
-    </button>
-  `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-class TestSubmitComponent {
-  label = input<string>('Submit');
-  disabled = input<boolean>(false);
-  id = input<string>('');
-  testId = input<string>('');
-}
-
-describe('DynamicFormComponent', () => {
-  let component: DynamicForm<TestFormModel>;
-  let fixture: ComponentFixture<DynamicForm<TestFormModel>>;
+describe('DynamicFormComponent (df.component)', () => {
+  let component: DynamicFormComponent<TestFormModel>;
+  let fixture: ComponentFixture<DynamicFormComponent<TestFormModel>>;
   let fieldRegistry: FieldRegistry;
 
-  const createComponent = (fields: FieldConfig<TestFormModel>[] = []) => {
-    fixture = TestBed.createComponent(DynamicForm<TestFormModel> as Type<DynamicForm<TestFormModel>>);
+  const createComponent = (config: FormConfig = { fields: [] }, initialValue?: TestFormModel) => {
+    fixture = TestBed.createComponent(DynamicFormComponent<TestFormModel>);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('fields', fields);
+    fixture.componentRef.setInput('config', config);
+    if (initialValue !== undefined) {
+      fixture.componentRef.setInput('value', initialValue);
+    }
     fixture.detectChanges();
     return { component, fixture };
   };
@@ -137,7 +164,6 @@ describe('DynamicFormComponent', () => {
   const setupFieldRegistry = () => {
     fieldRegistry = TestBed.inject(FieldRegistry);
 
-    // Register test field types with realistic defaults
     fieldRegistry.registerType({
       name: 'input',
       component: TestInputComponent,
@@ -174,20 +200,11 @@ describe('DynamicFormComponent', () => {
         checked: false,
       },
     });
-
-    fieldRegistry.registerType({
-      name: 'submit',
-      component: TestSubmitComponent,
-      defaultProps: {
-        label: 'Submit',
-        disabled: false,
-      },
-    });
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DynamicForm, TestInputComponent, TestSelectComponent, TestCheckboxComponent, TestSubmitComponent],
+      imports: [DynamicFormComponent, TestInputComponent, TestSelectComponent, TestCheckboxComponent],
       providers: [FieldRegistry],
     }).compileComponents();
 
@@ -200,395 +217,333 @@ describe('DynamicFormComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should have required inputs defined', () => {
+    it('should have required inputs and computed properties defined', () => {
       const { component } = createComponent();
-      expect(component.fields).toBeDefined();
+      expect(component.config).toBeDefined();
       expect(component.value).toBeDefined();
-      expect(component.options).toBeDefined();
+      expect(component.valid).toBeDefined();
+      expect(component.errors).toBeDefined();
+      expect(component.defaultValues).toBeDefined();
     });
 
-    it('should initialize with empty processed fields when no fields provided', () => {
-      const { component } = createComponent([]);
-
-      expect(component.processedFields()).toEqual([]);
-    });
-
-    it('should initialize currentFormValue as empty object when no value provided', () => {
-      const { component } = createComponent([]);
-
-      expect(component.currentFormValue()).toEqual({});
+    it('should initialize value with default values when no fields provided', () => {
+      const { component } = createComponent();
+      expect(component.value()).toEqual({});
     });
   });
 
-  describe('Field Processing', () => {
-    it('should process empty field array', () => {
-      const { component } = createComponent([]);
+  describe('Form Value - Basic Functionality', () => {
+    it('should initialize form value as empty object with no fields', () => {
+      const config: FormConfig = { fields: [] };
+      const { component } = createComponent(config);
 
-      const result = component.processedFields();
-
-      expect(result).toEqual([]);
+      expect(component.value()).toEqual({});
     });
 
-    it('should generate unique field IDs when not provided', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        { key: 'firstName', type: 'input' },
-        { key: 'lastName', type: 'input' },
-      ];
-      const { component } = createComponent(fields);
+    it('should track single field value in form', async () => {
+      const config: FormConfig = {
+        fields: [{ key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' }],
+      };
+      const { component, fixture } = createComponent(config);
 
-      const result = component.processedFields();
+      // Wait for async field rendering
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      fixture.detectChanges();
 
-      expect(result[0].id).toMatch(/^dynamic-field-firstName-\w{7}$/);
-      expect(result[1].id).toMatch(/^dynamic-field-lastName-\w{7}$/);
-      expect(result[0].id).not.toBe(result[1].id);
+      expect(component.value()).toEqual({ firstName: 'John' });
     });
 
-    it('should preserve existing field IDs', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        { key: 'firstName', type: 'input', id: 'custom-first-name' },
-        { key: 'lastName', type: 'input', id: 'custom-last-name' },
-      ];
-      const { component } = createComponent(fields);
+    it('should track multiple field values in form', async () => {
+      const config: FormConfig = {
+        fields: [
+          { key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' },
+          { key: 'lastName', type: 'input', label: 'Last Name', props: { testId: 'last-name' }, defaultValue: 'Doe' },
+          { key: 'age', type: 'input', label: 'Age', props: { testId: 'age' }, defaultValue: 30 },
+        ],
+      };
+      const { component, fixture } = createComponent(config);
 
-      const result = component.processedFields();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      fixture.detectChanges();
 
-      expect(result[0].id).toBe('custom-first-name');
-      expect(result[1].id).toBe('custom-last-name');
-    });
-
-    it('should merge field props with registered type defaults', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'firstName',
-          type: 'input',
-          props: { label: 'First Name', testId: 'first-name-input' },
-        },
-      ];
-      const { component } = createComponent(fields);
-
-      const result = component.processedFields();
-
-      expect(result[0].props).toEqual({
-        type: 'text',
-        placeholder: 'Enter value',
-        required: false,
-        label: 'First Name',
-        testId: 'first-name-input',
+      expect(component.value()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+        age: 30,
       });
     });
 
-    it('should allow field props to override type defaults', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'email',
-          type: 'email',
-          props: {
-            placeholder: 'Your email address',
-            required: false,
-          },
-        },
-      ];
-      const { component } = createComponent(fields);
+    it('should exclude undefined values from form value', async () => {
+      const config: FormConfig = {
+        fields: [
+          { key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' },
+          { key: 'lastName', type: 'input', label: 'Last Name', props: { testId: 'last-name' } }, // no defaultValue
+          { key: 'age', type: 'input', label: 'Age', props: { testId: 'age' }, defaultValue: 25 },
+        ],
+      };
+      const { component, fixture } = createComponent(config);
 
-      const result = component.processedFields();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      fixture.detectChanges();
 
-      expect(result[0].props).toEqual({
-        type: 'email',
-        placeholder: 'Your email address',
-        required: false,
+      expect(component.value()).toEqual({
+        firstName: 'John',
+        age: 25,
+      });
+    });
+  });
+
+  describe('Form Value - Field Type Handling', () => {
+    it('should handle checkbox fields with checked property', async () => {
+      const config: FormConfig = {
+        fields: [
+          { key: 'isActive', type: 'checkbox', label: 'Is Active', props: { testId: 'active-checkbox' }, defaultValue: true },
+          { key: 'isVerified', type: 'checkbox', label: 'Is Verified', props: { testId: 'verified-checkbox' }, defaultValue: false },
+        ],
+      };
+      const { component, fixture } = createComponent(config);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      fixture.detectChanges();
+
+      expect(component.value()).toEqual({
+        isActive: true,
+        isVerified: false,
       });
     });
 
-    it('should execute onInit hooks during field processing', () => {
-      const onInitSpy = vi.fn();
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'firstName',
-          type: 'input',
-          hooks: { onInit: onInitSpy },
-          props: { label: 'First Name' },
-        },
-      ];
-      const { component } = createComponent(fields);
+    it('should handle mixed field types correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          { key: 'name', type: 'input', label: 'Name', props: { testId: 'name' }, defaultValue: 'John Doe' },
+          { key: 'country', type: 'select', label: 'Country', props: { testId: 'country', options: ['US', 'CA'] }, defaultValue: 'US' },
+          { key: 'subscribe', type: 'checkbox', label: 'Subscribe', props: { testId: 'subscribe' }, defaultValue: true },
+        ],
+      };
+      const { component, fixture } = createComponent(config);
 
-      component.processedFields();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      fixture.detectChanges();
 
-      expect(onInitSpy).toHaveBeenCalledTimes(1);
-      expect(onInitSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          key: 'firstName',
-          type: 'input',
-          props: expect.objectContaining({ label: 'First Name' }),
-        })
-      );
-    });
-
-    it('should handle fields with unregistered types gracefully', () => {
-      const fields: FieldConfig<TestFormModel>[] = [{ key: 'unknownField', type: 'unknown-type', props: { custom: 'value' } }];
-      const { component } = createComponent(fields);
-
-      const result = component.processedFields();
-
-      expect(result).toHaveLength(1);
-      expect(result[0].type).toBe('unknown-type');
-      expect(result[0].props).toEqual({ custom: 'value' });
-    });
-
-    it('should generate field ID using type when key is not provided', () => {
-      const fields: FieldConfig<TestFormModel>[] = [{ type: 'submit', props: { label: 'Save' } }];
-      const { component } = createComponent(fields);
-
-      const result = component.processedFields();
-
-      expect(result[0].id).toMatch(/^dynamic-field-submit-\w{7}$/);
+      expect(component.value()).toEqual({
+        name: 'John Doe',
+        country: 'US',
+        subscribe: true,
+      });
     });
   });
 
-  describe('Form Value Management', () => {
-    it('should return provided input value', () => {
-      const inputValue: TestFormModel = { firstName: 'John', lastName: 'Doe', age: 30 };
-      const { component, fixture } = createComponent([]);
-      fixture.componentRef.setInput('value', inputValue);
+  describe('Form Value - Dynamic Updates', () => {
+    it('should update form value when field value changes', async () => {
+      const config: FormConfig = {
+        fields: [{ key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' }],
+      };
+      const { component, fixture } = createComponent(config);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
       fixture.detectChanges();
 
-      const result = component.currentFormValue();
+      expect(component.value()).toEqual({ firstName: 'John' });
 
-      expect(result).toBe(inputValue);
-      expect(result).toEqual({ firstName: 'John', lastName: 'Doe', age: 30 });
-    });
-
-    it('should return empty object when no input value provided', () => {
-      const { component, fixture } = createComponent([]);
-      fixture.componentRef.setInput('value', undefined);
-      fixture.detectChanges();
-
-      const result = component.currentFormValue();
-
-      expect(result).toEqual({});
-    });
-
-    it('should prioritize input value over internal form state', () => {
-      const inputValue: TestFormModel = { firstName: 'John From Input' };
-      const { component, fixture } = createComponent([]);
-
-      fixture.componentRef.setInput('value', inputValue);
-      fixture.detectChanges();
-
-      const result = component.currentFormValue();
-
-      expect(result).toBe(inputValue);
-      expect(result.firstName).toBe('John From Input');
-    });
-
-    it('should handle null input value', () => {
-      const { component, fixture } = createComponent([]);
-      fixture.componentRef.setInput('value', null);
-      fixture.detectChanges();
-
-      const result = component.currentFormValue();
-
-      expect(result).toEqual({});
-    });
-  });
-
-  describe('Field Rendering', () => {
-    it('should render single input field', async () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'firstName',
-          type: 'input',
-          props: {
-            placeholder: 'Enter your first name',
-            testId: 'first-name-input',
-          },
-        },
-      ];
-      const { fixture } = createComponent(fields);
-      fixture.detectChanges();
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      fixture.detectChanges();
-
-      const inputElement: DebugElement | null = fixture.debugElement.query(By.css('[data-testid="first-name-input"]'));
-      expect(inputElement).toBeTruthy();
-      expect(inputElement!.nativeElement.placeholder).toBe('Enter your first name');
-    });
-
-    it('should render multiple fields of different types', async () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        { key: 'firstName', type: 'input', props: { testId: 'first-name' } },
-        { key: 'country', type: 'select', props: { testId: 'country-select', options: ['US', 'CA'] } },
-        { key: 'isActive', type: 'checkbox', props: { testId: 'active-checkbox' } },
-      ];
-      const { fixture } = createComponent(fields);
-      fixture.detectChanges();
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      fixture.detectChanges();
-
-      expect(fixture.debugElement.query(By.css('[data-testid="first-name"]'))).toBeTruthy();
-      expect(fixture.debugElement.query(By.css('[data-testid="country-select"]'))).toBeTruthy();
-      expect(fixture.debugElement.query(By.css('[data-testid="active-checkbox"]'))).toBeTruthy();
-    });
-
-    it('should handle rendering when field type is not registered', async () => {
-      const consoleSpy = vi.spyOn(console, 'error');
-      const fields: FieldConfig<TestFormModel>[] = [{ key: 'unknownField', type: 'non-existent-type' }];
-      const { fixture } = createComponent(fields);
-      fixture.detectChanges();
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      fixture.detectChanges();
-
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to render field type "non-existent-type":', expect.any(Error));
-
-      consoleSpy.mockRestore();
-    });
-  });
-
-  describe('Form Value Changes', () => {
-    it('should emit value changes when field value updates', async () => {
-      const fields: FieldConfig<TestFormModel>[] = [{ key: 'firstName', type: 'input', props: { testId: 'first-name' } }];
-      const { component, fixture } = createComponent(fields);
-
-      fixture.detectChanges();
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      fixture.detectChanges();
-
-      const valueChangePromise = firstValueFrom((component as any).valueChange$);
-
+      // Simulate field value change
       const inputElement = fixture.debugElement.query(By.css('[data-testid="first-name"]'))!.nativeElement as HTMLInputElement;
-      inputElement.value = 'John';
+      inputElement.value = 'Jane';
       inputElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      const emittedValue = await valueChangePromise;
-      expect(emittedValue).toEqual({ firstName: 'John' });
+      // Wait for signal update
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(component.value()).toEqual({ firstName: 'Jane' });
     });
 
-    it('should handle nested field paths', async () => {
-      const fields: FieldConfig<TestFormModel>[] = [{ key: 'nested.field', type: 'input', props: { testId: 'nested-field' } }];
-      const { component, fixture } = createComponent(fields);
+    it('should update form value when multiple field values change', async () => {
+      const config: FormConfig = {
+        fields: [
+          { key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' },
+          { key: 'lastName', type: 'input', label: 'Last Name', props: { testId: 'last-name' }, defaultValue: 'Doe' },
+        ],
+      };
+      const { component, fixture } = createComponent(config);
 
+      await new Promise((resolve) => setTimeout(resolve, 10));
       fixture.detectChanges();
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      fixture.detectChanges();
+      expect(component.value()).toEqual({ firstName: 'John', lastName: 'Doe' });
 
-      const valueChangePromise = firstValueFrom((component as any).valueChange$);
-
-      const inputElement = fixture.debugElement.query(By.css('[data-testid="nested-field"]'))!.nativeElement as HTMLInputElement;
-      inputElement.value = 'nested value';
-      inputElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
-
-      const emittedValue = await valueChangePromise;
-      expect(emittedValue).toEqual({ nested: { field: 'nested value' } });
-    });
-
-    it('should preserve existing values when updating single field', async () => {
-      const initialValue: TestFormModel = { firstName: 'John', lastName: 'Doe' };
-      const fields: FieldConfig<TestFormModel>[] = [
-        { key: 'firstName', type: 'input', props: { testId: 'first-name' } },
-        { key: 'lastName', type: 'input', props: { testId: 'last-name' } },
-      ];
-      const { component, fixture } = createComponent(fields);
-
-      fixture.componentRef.setInput('value', initialValue);
-      fixture.detectChanges();
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      fixture.detectChanges();
-
-      const valueChangePromise = firstValueFrom((component as any).valueChange$);
-
+      // Change first name
       const firstNameInput = fixture.debugElement.query(By.css('[data-testid="first-name"]'))!.nativeElement as HTMLInputElement;
       firstNameInput.value = 'Jane';
       firstNameInput.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      const emittedValue = await valueChangePromise;
-      expect(emittedValue).toEqual({ firstName: 'Jane', lastName: 'Doe' });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(component.value()).toEqual({ firstName: 'Jane', lastName: 'Doe' });
+
+      // Change last name
+      const lastNameInput = fixture.debugElement.query(By.css('[data-testid="last-name"]'))!.nativeElement as HTMLInputElement;
+      lastNameInput.value = 'Smith';
+      lastNameInput.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(component.value()).toEqual({ firstName: 'Jane', lastName: 'Smith' });
+    });
+
+    it('should update form value when checkbox changes', async () => {
+      const config: FormConfig = {
+        fields: [{ key: 'isActive', type: 'checkbox', label: 'Is Active', props: { testId: 'active-checkbox' }, defaultValue: false }],
+      };
+      const { component, fixture } = createComponent(config);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      fixture.detectChanges();
+
+      expect(component.value()).toEqual({ isActive: false });
+
+      // Toggle checkbox
+      const checkboxElement = fixture.debugElement.query(By.css('[data-testid="active-checkbox"]'))!.nativeElement as HTMLInputElement;
+      checkboxElement.checked = true;
+      checkboxElement.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(component.value()).toEqual({ isActive: true });
     });
   });
 
-  describe('Form Options', () => {
-    it('should accept and store form options', () => {
-      const { component, fixture } = createComponent([]);
-      const options: FormOptions = {
-        showError: false,
-        validationStrategy: 'onSubmit',
+  describe('Form Value - Reactivity to Configuration Changes', () => {
+    it('should update form value when fields are added', async () => {
+      const initialConfig: FormConfig = {
+        fields: [{ key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' }],
       };
+      const { component, fixture } = createComponent(initialConfig);
 
-      fixture.componentRef.setInput('options', options);
+      await new Promise((resolve) => setTimeout(resolve, 10));
       fixture.detectChanges();
 
-      expect(component.options()).toBe(options);
-      expect(component.options()).toEqual({
-        showError: false,
-        validationStrategy: 'onSubmit',
+      expect(component.value()).toEqual({ firstName: 'John' });
+
+      // Add more fields
+      const updatedConfig: FormConfig = {
+        fields: [
+          { key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' },
+          { key: 'lastName', type: 'input', label: 'Last Name', props: { testId: 'last-name' }, defaultValue: 'Doe' },
+          { key: 'age', type: 'input', label: 'Age', props: { testId: 'age' }, defaultValue: 30 },
+        ],
+      };
+
+      fixture.componentRef.setInput('config', updatedConfig);
+      fixture.detectChanges();
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      fixture.detectChanges();
+
+      expect(component.value()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+        age: 30,
       });
     });
 
-    it('should handle undefined form options gracefully', () => {
-      const { component, fixture } = createComponent([]);
-      fixture.componentRef.setInput('options', undefined);
+    it('should update form value when fields are removed', async () => {
+      const initialConfig: FormConfig = {
+        fields: [
+          { key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' },
+          { key: 'lastName', type: 'input', label: 'Last Name', props: { testId: 'last-name' }, defaultValue: 'Doe' },
+          { key: 'age', type: 'input', label: 'Age', props: { testId: 'age' }, defaultValue: 30 },
+        ],
+      };
+      const { component, fixture } = createComponent(initialConfig);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
       fixture.detectChanges();
 
-      expect(component.options()).toBeUndefined();
+      expect(component.value()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+        age: 30,
+      });
+
+      // Remove some fields
+      const updatedConfig: FormConfig = {
+        fields: [{ key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' }],
+      };
+
+      fixture.componentRef.setInput('config', updatedConfig);
+      fixture.detectChanges();
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      fixture.detectChanges();
+
+      expect(component.value()).toEqual({ firstName: 'John' });
     });
 
-    it('should handle null form options gracefully', () => {
-      const { component, fixture } = createComponent([]);
-      fixture.componentRef.setInput('options', null);
+    it('should clear form value when all fields are removed', async () => {
+      const initialConfig: FormConfig = {
+        fields: [
+          { key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'John' },
+          { key: 'lastName', type: 'input', label: 'Last Name', props: { testId: 'last-name' }, defaultValue: 'Doe' },
+        ],
+      };
+      const { component, fixture } = createComponent(initialConfig);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
       fixture.detectChanges();
 
-      expect(component.options()).toBeNull();
+      expect(component.value()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+      });
+
+      // Remove all fields
+      const emptyConfig: FormConfig = { fields: [] };
+      fixture.componentRef.setInput('config', emptyConfig);
+      fixture.detectChanges();
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      fixture.detectChanges();
+
+      expect(component.value()).toEqual({});
     });
   });
 
-  describe('Component Lifecycle', () => {
-    it('should clean up component references on destroy', async () => {
-      const fields: FieldConfig<TestFormModel>[] = [{ key: 'firstName', type: 'input', props: { testId: 'first-name' } }];
-      const { fixture } = createComponent(fields);
+  describe('Form Value - Integration with Input Value', () => {
+    it('should work independently of input value prop', async () => {
+      const initialInputValue: TestFormModel = { firstName: 'InputValue' };
+      const config: FormConfig = {
+        fields: [{ key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'DefaultValue' }],
+      };
+
+      const { component, fixture } = createComponent(config, initialInputValue);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
       fixture.detectChanges();
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      fixture.detectChanges();
-
-      expect(fixture.debugElement.query(By.css('[data-testid="first-name"]'))).toBeTruthy();
-
-      fixture.destroy();
-
-      expect(() => fixture.detectChanges()).not.toThrow();
+      // form value should track field state with defaults, and defaultValues should show the defaults
+      expect(component.value()).toEqual({ firstName: 'DefaultValue' });
+      expect(component.defaultValues()).toEqual({ firstName: 'DefaultValue' });
     });
 
-    it('should handle re-rendering when fields change', async () => {
-      const initialFields: FieldConfig<TestFormModel>[] = [{ key: 'firstName', type: 'input', props: { testId: 'first-name' } }];
-      const { fixture } = createComponent(initialFields);
+    it('should maintain its own state when input value changes', async () => {
+      const config: FormConfig = {
+        fields: [{ key: 'firstName', type: 'input', label: 'First Name', props: { testId: 'first-name' }, defaultValue: 'FieldDefault' }],
+      };
 
+      const { component, fixture } = createComponent(config);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
       fixture.detectChanges();
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(component.value()).toEqual({ firstName: 'FieldDefault' });
+
+      // Change input value prop
+      fixture.componentRef.setInput('value', { firstName: 'NewInputValue' });
       fixture.detectChanges();
 
-      expect(fixture.debugElement.query(By.css('[data-testid="first-name"]'))).toBeTruthy();
-      expect(fixture.debugElement.query(By.css('[data-testid="last-name"]'))).toBeFalsy();
-
-      const updatedFields: FieldConfig<TestFormModel>[] = [
-        { key: 'firstName', type: 'input', props: { testId: 'first-name' } },
-        { key: 'lastName', type: 'input', props: { testId: 'last-name' } },
-      ];
-
-      fixture.componentRef.setInput('fields', updatedFields);
-      fixture.detectChanges();
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      fixture.detectChanges();
-
-      expect(fixture.debugElement.query(By.css('[data-testid="first-name"]'))).toBeTruthy();
-      expect(fixture.debugElement.query(By.css('[data-testid="last-name"]'))).toBeTruthy();
+      // form value should maintain its own state based on defaults
+      expect(component.value()).toEqual({ firstName: 'FieldDefault' });
+      expect(component.defaultValues()).toEqual({ firstName: 'FieldDefault' });
     });
   });
 });

@@ -1,206 +1,190 @@
 import { Signal } from '@angular/core';
-import { FormControlState } from '@angular/forms';
+import { UnwrapField } from '../utils';
+import { FormUiControl } from '@angular/forms/signals';
 
 /**
- * Base field configuration interface
+ * Field definition following Angular Architects signal forms pattern
+ * Clean, minimal interface inspired by the example implementation
  */
-export interface FieldConfig<TModel = unknown, TProps = unknown> {
-  /** Unique identifier for the field */
-  key?: string;
+export interface FieldDef<TKey extends string = string, TValue = unknown> extends UnwrapField<FormUiControl> {
+  /** Unique field identifier - required for form binding */
+  readonly key: TKey;
 
-  /** Field type (input, select, checkbox, etc.) */
-  type: string;
+  /** Field type for component selection (input, select, checkbox, etc.) */
+  readonly type: string;
 
-  /** Default value for the field */
-  defaultValue?: unknown;
+  /** Human-readable field label */
+  readonly label: string;
 
-  /** Type-specific props */
-  props?: TProps & BaseFieldProps & Record<string, unknown>;
+  /** Default field value */
+  readonly defaultValue?: TValue;
 
-  /** Validation rules */
-  validators?: ValidatorConfig;
+  /** Validation rules using signal forms pattern */
+  readonly validation?: ValidationRules<TValue>;
 
-  /** Async validators */
-  asyncValidators?: AsyncValidatorConfig;
+  /** Field-specific properties (placeholder, options, etc.) */
+  readonly props?: Record<string, unknown>;
 
-  /** Custom error messages for validators */
-  errorMessages?: ErrorMessageConfig;
+  /** Conditional field behavior */
+  readonly conditionals?: ConditionalRules;
 
-  /** Expression-based rules for visibility, disabled state, etc. */
-  expressions?: FieldExpressions<TModel>;
-
-  /** Custom CSS classes */
-  className?: string;
-
-  /** Wrappers to apply to this field */
-  wrappers?: string[];
-
-  /** Child fields for field groups */
-  fieldGroup?: FieldConfig<TModel>[];
-
-  /** Field group configuration */
-  fieldGroupClassName?: string;
-
-  /** Hide field from rendering */
-  hide?: boolean;
-
-  /** Template options for backward compatibility */
-  templateOptions?: Partial<TProps>;
-
-  /** Hooks for field lifecycle events */
-  hooks?: FieldHooks<TModel>;
-
-  /** Custom data to pass to field */
-  data?: Record<string, unknown>;
-
-  /** Field ID (auto-generated if not provided) */
-  id?: string;
-
-  /** Parent field reference */
-  parent?: FieldConfig<TModel>;
+  /** Additional CSS classes */
+  readonly className?: string;
 }
 
 /**
- * Base props available to all field types
+ * Form configuration containing field definitions
  */
-export interface BaseFieldProps {
-  /** Field label */
-  label?: string;
+export interface FormConfig<TFields extends readonly FieldDef[] = readonly FieldDef[]> {
+  readonly fields: TFields;
+  readonly options?: FormOptions;
+}
 
-  /** Placeholder text */
-  placeholder?: string;
-
-  /** Description or help text */
-  description?: string;
-
-  /** Hint text for additional guidance */
-  hint?: string;
-
-  /** Is field required */
+/**
+ * Validation rules following Angular Architects pattern
+ */
+export interface ValidationRules<TValue = unknown> {
+  /** Field is required */
   required?: boolean;
 
-  /** Is field disabled */
-  disabled?: boolean;
+  /** Email validation */
+  email?: boolean;
 
-  /** Is field readonly */
-  readonly?: boolean;
+  /** Minimum value for numbers */
+  min?: number;
 
-  /** Attributes to pass to the input element */
-  attributes?: Record<string, unknown>;
+  /** Maximum value for numbers */
+  max?: number;
 
-  /** Tab index */
-  tabIndex?: number;
+  /** Minimum length for strings */
+  minLength?: number;
 
-  /** Focus field on init */
-  focus?: boolean;
+  /** Maximum length for strings */
+  maxLength?: number;
 
-  /** Custom CSS classes */
-  className?: string;
+  /** Pattern validation */
+  pattern?: string | RegExp;
 
-  /** Allow additional properties for field-specific props */
-  [key: string]: unknown;
+  /** Custom validation functions */
+  custom?: CustomValidator<TValue>[];
+
+  /** Custom error messages in user's language */
+  messages?: ValidationMessages;
 }
 
 /**
- * Validator configuration
+ * Custom error messages following Angular Architects approach
  */
-export interface ValidatorConfig {
-  [key: string]: ValidatorOption;
-}
-
-export type ValidatorOption = boolean | number | string | ValidatorFn | { value: unknown; message?: string };
-
-export type ValidatorFn = (control: FormControlState<unknown>) => ValidationErrors | null;
-
-export interface ValidationErrors {
-  [key: string]: unknown;
-}
-
-/**
- * Error message configuration for validators
- */
-export interface ErrorMessageConfig {
-  /** Error message for required validator */
+export interface ValidationMessages {
   required?: string;
-
-  /** Error message for email validator */
   email?: string;
-
-  /** Error message for min validator */
   min?: string;
-
-  /** Error message for max validator */
   max?: string;
-
-  /** Error message for minLength validator */
   minLength?: string;
-
-  /** Error message for maxLength validator */
   maxLength?: string;
-
-  /** Error message for pattern validator */
   pattern?: string;
-
-  /** Custom error messages for any validator */
-  [validatorName: string]: string | undefined;
+  [key: string]: string | undefined;
 }
 
 /**
- * Async validator configuration
+ * Custom validator function following signal forms pattern
  */
-export interface AsyncValidatorConfig {
-  [key: string]: AsyncValidatorFn;
-}
-
-export type AsyncValidatorFn = (control: FormControlState<unknown>) => Promise<ValidationErrors | null>;
+export type CustomValidator<TValue = unknown> = (value: TValue, formValue: unknown) => ValidationError | null;
 
 /**
- * Expression-based field behavior
+ * Validation error structure
  */
-export interface FieldExpressions<TModel = unknown> {
-  /** Expression to control field visibility */
-  hide?: string | ((model: TModel) => boolean);
-
-  /** Expression to control disabled state */
-  'props.disabled'?: string | ((model: TModel) => boolean);
-
-  /** Expression to control required state */
-  'props.required'?: string | ((model: TModel) => boolean);
-
-  /** Custom expressions */
-  [key: string]: string | ((model: TModel) => unknown) | undefined;
+export interface ValidationError {
+  readonly type: string;
+  readonly message: string;
+  readonly params?: Record<string, unknown>;
 }
 
 /**
- * Field lifecycle hooks
+ * Conditional field behavior rules
  */
-export interface FieldHooks<TModel = unknown> {
-  /** Called when field is initialized */
-  onInit?: (field: FieldConfig<TModel>) => void;
+export interface ConditionalRules {
+  /** Show field when condition is true */
+  show?: (formValue: unknown) => boolean;
 
-  /** Called when field value changes */
-  onChange?: (field: FieldConfig<TModel>, value: unknown) => void;
+  /** Hide field when condition is true */
+  hide?: (formValue: unknown) => boolean;
 
-  /** Called when field is destroyed */
-  onDestroy?: (field: FieldConfig<TModel>) => void;
+  /** Enable field when condition is true */
+  enable?: (formValue: unknown) => boolean;
+
+  /** Disable field when condition is true */
+  disable?: (formValue: unknown) => boolean;
 }
 
 /**
- * Field state tracking
+ * Form options for global form behavior
  */
-export interface FieldState {
-  /** Field touched state */
-  touched: Signal<boolean>;
+export interface FormOptions {
+  readonly validateOnChange?: boolean;
+  readonly validateOnBlur?: boolean;
+  readonly disabled?: boolean;
+}
 
-  /** Field dirty state */
-  dirty: Signal<boolean>;
+/**
+ * Field state signals for reactive form management
+ */
+export interface FieldState<TValue = unknown> {
+  readonly value: Signal<TValue>;
+  readonly errors: Signal<ValidationError[]>;
+  readonly valid: Signal<boolean>;
+  readonly touched: Signal<boolean>;
+  readonly dirty: Signal<boolean>;
+  readonly disabled: Signal<boolean>;
+  readonly visible: Signal<boolean>;
+}
 
-  /** Field valid state */
-  valid: Signal<boolean>;
+/**
+ * Form state signals for reactive form management
+ */
+export interface FormState<TValue = unknown> {
+  readonly value: Signal<TValue>;
+  readonly errors: Signal<ValidationError[]>;
+  readonly valid: Signal<boolean>;
+  readonly dirty: Signal<boolean>;
+  readonly submitted: Signal<boolean>;
+  readonly disabled: Signal<boolean>;
+}
 
-  /** Field errors */
-  errors: Signal<ValidationErrors | null>;
+/**
+ * Type inference helper for form values from field definitions
+ */
+export type InferFormValue<TFields extends readonly FieldDef[]> = {
+  readonly [K in TFields[number]['key']]: ExtractFieldValue<Extract<TFields[number], { key: K }>>;
+};
 
-  /** Field value */
-  value: Signal<unknown>;
+/**
+ * Extract field value type from field definition
+ */
+type ExtractFieldValue<TField extends FieldDef> = TField extends FieldDef<string, infer TValue> ? TValue : unknown;
+
+/**
+ * Helper function to create strongly typed field definitions
+ * Following the pattern from Angular Architects examples
+ */
+export function defineField<TKey extends string, TValue = unknown>(config: FieldDef<TKey, TValue>): FieldDef<TKey, TValue> {
+  return config;
+}
+
+/**
+ * Helper function to create strongly typed form configurations
+ * Following the pattern from Angular Architects examples
+ */
+export function defineForm<TFields extends readonly FieldDef[]>(config: FormConfig<TFields>): FormConfig<TFields> {
+  return config;
+}
+
+/**
+ * Schema creation helper following Angular Architects pattern
+ * This will be used to bridge with Angular signal forms when stable
+ */
+export function createFormSchema<TFields extends readonly FieldDef[]>(fields: TFields): ValidationRules {
+  // This can be enhanced to create actual signal forms schema
+  // when Angular signal forms become stable
+  return {};
 }

@@ -4,442 +4,165 @@ import {
   Component,
   ComponentRef,
   computed,
+  effect,
   inject,
   input,
   inputBinding,
-  OnDestroy,
-  outputBinding,
-  signal,
-  Type,
-  viewChildren,
+  linkedSignal,
+  output,
+  twoWayBinding,
   ViewContainerRef,
 } from '@angular/core';
-import { outputFromObservable } from '@angular/core/rxjs-interop';
-import { Subject } from 'rxjs';
-import type { FieldConfig } from './models/field-config';
-import type { FormOptions } from './models/form-options';
+import { FieldDef, FormConfig } from './models/field-config';
 import { FieldRegistry } from './core/field-registry';
-import { explicitEffect } from 'ngxtension/explicit-effect';
-import type { ProvidedFormResult } from './providers/dynamic-form-providers';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { combineLatest, map, switchMap } from 'rxjs';
+import { NgComponentOutlet } from '@angular/common';
+import { form } from '@angular/forms/signals';
+import { keyBy, mapValues } from 'lodash-es';
 
-const VALIDATION_PROPS = [
-  'required',
-  'validators',
-  'validation',
-  'minLength',
-  'maxLength',
-  'min',
-  'max',
-  'pattern',
-  'email',
-  'custom',
-] as const;
-
-const FIELD_ID_PREFIX = 'dynamic-field' as const;
-const FIELD_CONTAINER_REF = 'fieldContainer' as const;
-
-/**
- * The main dynamic form component that renders form fields based on configuration.
- *
- * This component provides a declarative way to build reactive forms using field configurations.
- * It supports type-safe form models, dynamic field rendering, validation, and two-way data binding.
- *
- * @template TModel - The type of the form model
- *
- * @example
- * ```typescript
- * // Basic usage
- * <dynamic-form
- *   [fields]="fieldConfigs"
- *   [value]="formModel"
- *   (valueChange)="onFormChange($event)"
- * />
- * ```
- *
- * @example
- * ```typescript
- * // With options
- * <dynamic-form
- *   [fields]="fieldConfigs"
- *   [value]="formModel"
- *   [options]="{ validateOnChange: true }"
- *   (valueChange)="onFormChange($event)"
- * />
- * ```
- */
 @Component({
   selector: 'dynamic-form',
-  template: `
-    @for (field of processedFields(); track field.id || field.key) {
-    <ng-container #fieldContainer />
+  imports: [NgComponentOutlet],
+  template: `<form>
+    @for (field of fields(); track $index) {
+    <ng-container [ngComponentOutlet]="field.componentType" [ngComponentOutletInjector]="field.injector" />
     }
-  `,
+  </form>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TModel = unknown> implements OnDestroy {
-  private fieldRegistry = inject(FieldRegistry);
-  private destroy$ = new Subject<void>();
+export class DynamicFormComponent<TModel = unknown> {
+  private readonly fieldRegistry = inject(FieldRegistry);
+  private vcr = inject(ViewContainerRef);
 
-  fieldContainers = viewChildren(FIELD_CONTAINER_REF, { read: ViewContainerRef });
-
-  /**
-   * Creates a typed version of DynamicForm based on provider configuration
-   *
-   * @param providers The providers that contain the type information
-   * @returns A typed component class
-   *
-   * @example
-   * ```typescript
-   * const providers = provideDynamicForm(withConfig({
-   *   fields: [{ key: 'name', type: 'input' }] as const
-   * }));
-   *
-   * const TypedForm = DynamicForm.withTypes(providers);
-   * // Use TypedForm in your component template
-   * ```
-   */
-  static withTypes<T>(providers: T): Type<DynamicForm<ProvidedFormResult<T>>> {
-    return DynamicForm as Type<DynamicForm<ProvidedFormResult<T>>>;
-  }
+  config = input.required<FormConfig>();
 
   /**
-   * Array of field configurations that define the form structure.
-   * Each field config specifies the field type, properties, validation rules, and other settings.
+   * Linked signal that creates default values object from field definitions
    */
-  fields = input.required<FieldConfig<TModel>[]>();
+  readonly defaultValues = linkedSignal(() => {
+    const config = this.config();
+    const fieldsById = keyBy(config.fields, 'key');
 
-  /**
-   * The current form model value. When provided, the form will be initialized with these values.
-   * Changes to this input will update the form fields accordingly.
-   */
-  value = input<TModel>();
-
-  /**
-   * Optional form-wide configuration options such as validation settings.
-   */
-  options = input<FormOptions>();
-
-  private componentRefs: ComponentRef<unknown>[] = [];
-
-  // Simple signal to hold current form state
-  private formState = signal<TModel>({} as TModel);
-
-  // Output subject for forwarding changes
-  private valueChange$ = new Subject<TModel>();
-
-  /**
-   * Emits the updated form model whenever any field value changes.
-   * Use this for two-way data binding or to react to form changes.
-   *
-   * @example
-   * ```typescript
-   * onFormChange(newValue: MyFormModel) {
-   *   console.log('Form updated:', newValue);
-   *   this.formModel = newValue;
-   * }
-   * ```
-   */
-  valueChange = outputFromObservable(this.valueChange$);
-
-  // Computed current form state based on input value or form state
-  currentFormValue = computed(() => {
-    const inputValue = this.value();
-    if (inputValue !== undefined && inputValue !== null) {
-      return inputValue;
-    }
-    return this.formState();
+    return mapValues(fieldsById, (field) => field.defaultValue) as TModel;
   });
 
-  // Process fields with defaults and hooks
-  processedFields = computed(() => {
-    return this.fields().map((field) => {
-      // Generate field ID if not provided
-      if (!field.id) {
-        field.id = this.generateFieldId(field);
-      }
+  /**
+   * Signal forms integration using the linkedSignal as the model
+   */
+  private readonly form = form(this.defaultValues);
 
-      // Merge field props with type defaults
-      if (field.type) {
-        const fieldType = this.fieldRegistry.getType(field.type);
-        if (fieldType?.defaultProps) {
-          field.props = {
-            ...fieldType.defaultProps,
-            ...field.props,
-          };
-        }
-      }
+  /**
+   * Computed signals that expose form properties
+   */
+  readonly value = computed(() => this.form().value());
+  readonly valid = computed(() => this.form().valid());
+  readonly invalid = computed(() => this.form().invalid());
+  readonly dirty = computed(() => this.form().dirty());
+  readonly touched = computed(() => this.form().touched());
+  readonly errors = computed(() => this.form().errors());
+  readonly errorSummary = computed(() => this.form().errorSummary());
+  readonly disabled = computed(() => this.form().disabled());
 
-      // Call onInit hook
-      field.hooks?.onInit?.(field);
-
-      return field;
-    });
-  });
+  /**
+   * Output events for form state changes
+   */
+  readonly valueChange = output<TModel>();
+  readonly validityChange = output<boolean>();
+  readonly dirtyChange = output<boolean>();
 
   constructor() {
-    explicitEffect([this.processedFields, this.fieldContainers], ([fields, containers]) => {
-      if (containers.length > 0) {
-        void this.renderFields(fields, containers);
-      }
+    // Set up reactive effects to emit output events when form state changes
+    effect(() => {
+      const currentValue = this.value();
+      this.valueChange.emit(currentValue);
+    });
+
+    effect(() => {
+      const currentValid = this.valid();
+      this.validityChange.emit(currentValid);
+    });
+
+    effect(() => {
+      const currentDirty = this.dirty();
+      this.dirtyChange.emit(currentDirty);
     });
   }
 
-  ngOnDestroy(): void {
-    this.componentRefs.forEach((ref) => ref.destroy());
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.valueChange$.complete();
-  }
+  config$ = toObservable(this.config);
 
-  private async renderFields(fields: FieldConfig<TModel>[], containers: readonly ViewContainerRef[]): Promise<void> {
-    if (containers.length === 0 || fields.length === 0) {
-      return;
-    }
+  fields = toSignal(
+    this.config$.pipe(
+      switchMap((config) => {
+        return combineLatest(
+          config.fields.map(async (fieldDef) => {
+            const componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type).catch(() => undefined);
 
-    // Clear existing components
-    this.componentRefs.forEach((ref) => ref.destroy());
-    this.componentRefs = [];
-    containers.forEach((container) => container.clear());
-
-    // Render each field
-    for (let i = 0; i < fields.length; i++) {
-      const field = fields[i];
-      const container = containers[i];
-
-      if (!container) continue;
-
-      try {
-        const component = await this.fieldRegistry.loadTypeComponent(field.type);
-        const bindings = this.createFieldBindings(field, component);
-        const componentRef = container.createComponent(component, { bindings });
-
-        // Set properties directly on the component instance as a fallback
-        this.setComponentProperties(componentRef, field);
-
-        this.componentRefs.push(componentRef);
-      } catch (error) {
-        console.error(`Failed to render field type "${field.type}":`, error);
-      }
-    }
-  }
-
-  private createFieldBindings(field: FieldConfig<TModel>, component: Type<unknown>): Binding[] {
-    const bindings: Binding[] = [];
-
-    // Still create input bindings for compatibility
-    if (field.props) {
-      Object.entries(field.props).forEach(([key, value]) => {
-        if (this.isValidationProp(key)) {
-          return;
-        }
-        bindings.push(inputBinding(key, () => value));
-      });
-    }
-
-    // Bind field value using input binding for the value
-    if (field.key) {
-      const bindingProperty = this.getBindingProperty(component);
-
-      if (bindingProperty) {
-        // Input binding for the current value
-        bindings.push(
-          inputBinding(bindingProperty, () => {
-            const currentVal = this.currentFormValue();
-            return currentVal && field.key ? this.getNestedValue(currentVal, field.key) : undefined;
-          })
-        );
-
-        // Output binding for value changes
-        const outputProperty = `${bindingProperty}Change`;
-        bindings.push(
-          outputBinding(outputProperty, (newValue: unknown) => {
-            if (field.key) {
-              this.handleFieldChange(field.key, newValue);
+            if (!componentType) {
+              return undefined;
             }
+
+            const bindings: Binding[] = [];
+
+            // value binding
+            const valueProp = this.getValueProp(fieldDef);
+
+            if (valueProp) {
+              // Access the field control through the form FieldTree
+              const fieldControl = (this.form as any)[fieldDef.key];
+              bindings.push(twoWayBinding('field', fieldControl));
+            }
+
+            // Create input bindings map
+            const inputBindingsMap = {
+              // Base properties
+              label: () => fieldDef.label,
+              conditionals: () => fieldDef.conditionals,
+              className: () => fieldDef.className,
+              // Angular specific properties
+              validation: () => fieldDef.validation,
+              disabled: () => fieldDef.disabled,
+              disabledReasons: () => fieldDef.disabledReasons,
+              readonly: () => fieldDef.readonly,
+              hidden: () => fieldDef.hidden,
+              name: () => fieldDef.name,
+              required: () => fieldDef.required,
+              min: () => fieldDef.min,
+              minLength: () => fieldDef.minLength,
+              max: () => fieldDef.max,
+              maxLength: () => fieldDef.maxLength,
+              pattern: () => fieldDef.pattern,
+            };
+
+            // Apply input bindings from map - only if property exists in fieldDef
+            Object.entries(inputBindingsMap).forEach(([key, valueFn]) => {
+              if (key in fieldDef && (fieldDef as any)[key] !== undefined) {
+                bindings.push(inputBinding(key, valueFn));
+              }
+            });
+
+            // Add custom properties from fieldDef.props
+            if (fieldDef.props) {
+              Object.entries(fieldDef.props).forEach(([key, value]) => {
+                bindings.push(inputBinding(key, () => value));
+              });
+            }
+
+            return this.vcr.createComponent(componentType, { bindings });
           })
         );
-      }
-    }
+      }),
+      map((fields) => fields.filter((field): field is ComponentRef<unknown> => !!field))
+    )
+  );
 
-    // Add error and validation bindings with custom error messages
-    bindings.push(
-      inputBinding('errors', () => this.getFieldErrors(field)),
-      inputBinding('touched', () => false),
-      inputBinding('invalid', () => this.getFieldErrors(field).length > 0)
-    );
-
-    return bindings;
-  }
-
-  private getNestedValue(obj: unknown, path: string): unknown {
-    return path.split('.').reduce((current: unknown, key: string) => {
-      if (current && typeof current === 'object' && key in current) {
-        return (current as Record<string, unknown>)[key];
-      }
-      return undefined;
-    }, obj);
-  }
-
-  private handleFieldChange(key: string, newValue: unknown): void {
-    const currentModel = this.currentFormValue() || ({} as TModel);
-    const updatedModel = { ...currentModel } as Record<string, unknown>;
-    this.setNestedValue(updatedModel, key, newValue);
-    const finalModel = updatedModel as TModel;
-
-    // Update form state and forward the change
-    this.formState.set(finalModel);
-    this.valueChange$.next(finalModel);
-  }
-
-  private setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): void {
-    const keys = path.split('.');
-    const lastKey = keys.pop();
-    if (!lastKey) return;
-    const target = keys.reduce((current: Record<string, unknown>, key: string) => {
-      if (!current[key] || typeof current[key] !== 'object') {
-        current[key] = {};
-      }
-      return current[key] as Record<string, unknown>;
-    }, obj);
-    target[lastKey] = value;
-  }
-
-  private getBindingProperty(component: Type<unknown>): string | null {
-    // Check for traditional @Input decorators
-    // ts-disable-next-line @typescript-eslint/no-explicit-any
-    const propDecorators = (component as any).propDecorators;
-
-    if (propDecorators && 'checked' in propDecorators) {
+  getValueProp(fieldDef: FieldDef): 'checked' | 'value' | undefined {
+    // For checkbox/toggle types, use 'checked'
+    if (fieldDef.type.includes('checkbox') || fieldDef.type.includes('toggle')) {
       return 'checked';
     }
 
-    if (propDecorators && 'value' in propDecorators) {
-      return 'value';
-    }
-
-    // Fallback to checking component name patterns
-    const componentName = component.name;
-    if (componentName.includes('Checkbox') || componentName.includes('Toggle')) {
-      return 'checked';
-    }
-
-    // Default to 'value' for most form controls
+    // For all other field types, default to 'value'
     return 'value';
-  }
-
-  private isValidationProp(key: string): key is (typeof VALIDATION_PROPS)[number] {
-    return (VALIDATION_PROPS as readonly string[]).includes(key);
-  }
-
-  private setComponentProperties(componentRef: ComponentRef<unknown>, field: FieldConfig<TModel>): void {
-    const instance = componentRef.instance as Record<string, unknown>;
-
-    // Set props from field configuration
-    if (field.props) {
-      Object.entries(field.props).forEach(([key, value]) => {
-        if (!this.isValidationProp(key)) {
-          instance[key] = value;
-        }
-      });
-    }
-
-    // Set field value
-    if (field.key) {
-      const bindingProperty = this.getBindingProperty(componentRef.componentType);
-      if (bindingProperty) {
-        const currentVal = this.currentFormValue();
-        const fieldValue = currentVal && field.key ? this.getNestedValue(currentVal, field.key) : undefined;
-        instance[bindingProperty] = fieldValue;
-      }
-    }
-
-    // Set validation properties with error mapping
-    instance['errors'] = this.getFieldErrors(field);
-    instance['touched'] = false;
-    instance['invalid'] = this.getFieldErrors(field).length > 0;
-
-    // Trigger change detection
-    componentRef.changeDetectorRef.markForCheck();
-  }
-
-  private generateFieldId(field: FieldConfig<TModel>): string {
-    const key = field.key || field.type;
-    const random = Math.random().toString(36).substring(2, 9);
-    return `${FIELD_ID_PREFIX}-${key}-${random}`;
-  }
-
-  private getFieldErrors(field: FieldConfig<TModel>): Array<{ message: string; type: string }> {
-    const errors: Array<{ message: string; type: string }> = [];
-
-    // Only show errors if errorMessages are explicitly provided
-    if (!field.errorMessages) {
-      return errors;
-    }
-
-    // Get field value for validation
-    const currentVal = this.currentFormValue();
-    const fieldValue = currentVal && field.key ? this.getNestedValue(currentVal, field.key) : undefined;
-
-    // Validate field based on validators
-    if (field.validators) {
-      Object.entries(field.validators).forEach(([validatorName, validatorConfig]) => {
-        const validationError = this.validateField(validatorName, validatorConfig, fieldValue);
-        if (validationError) {
-          // Only use custom error message if provided
-          const customMessage = field.errorMessages?.[validatorName];
-          if (customMessage) {
-            errors.push({
-              message: customMessage,
-              type: validatorName,
-            });
-          }
-        }
-      });
-    }
-
-    return errors;
-  }
-
-  private validateField(validatorName: string, validatorConfig: unknown, fieldValue: unknown): boolean {
-    /* eslint-disable no-case-declarations */
-    switch (validatorName) {
-      case 'required':
-        return !!validatorConfig && (!fieldValue || (typeof fieldValue === 'string' && !fieldValue.trim()));
-
-      case 'email':
-        if (!validatorConfig || !fieldValue) return false;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return typeof fieldValue === 'string' && !emailRegex.test(fieldValue);
-
-      case 'min':
-        if (!validatorConfig || fieldValue === null || fieldValue === undefined) return false;
-        const minValue = typeof validatorConfig === 'number' ? validatorConfig : Number(validatorConfig);
-        return typeof fieldValue === 'number' && fieldValue < minValue;
-
-      case 'max':
-        if (!validatorConfig || fieldValue === null || fieldValue === undefined) return false;
-        const maxValue = typeof validatorConfig === 'number' ? validatorConfig : Number(validatorConfig);
-        return typeof fieldValue === 'number' && fieldValue > maxValue;
-
-      case 'minLength':
-        if (!validatorConfig || !fieldValue) return false;
-        const minLength = typeof validatorConfig === 'number' ? validatorConfig : Number(validatorConfig);
-        return typeof fieldValue === 'string' && fieldValue.length < minLength;
-
-      case 'maxLength':
-        if (!validatorConfig || !fieldValue) return false;
-        const maxLength = typeof validatorConfig === 'number' ? validatorConfig : Number(validatorConfig);
-        return typeof fieldValue === 'string' && fieldValue.length > maxLength;
-
-      case 'pattern':
-        if (!validatorConfig || !fieldValue) return false;
-        const pattern =
-          typeof validatorConfig === 'string' ? new RegExp(validatorConfig.replace(/^\/|\/$/g, '')) : (validatorConfig as RegExp);
-        return typeof fieldValue === 'string' && !pattern.test(fieldValue);
-
-      default:
-        return false;
-    }
-    /* eslint-enable no-case-declarations */
   }
 }

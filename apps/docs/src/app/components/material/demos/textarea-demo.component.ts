@@ -7,7 +7,7 @@ import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>

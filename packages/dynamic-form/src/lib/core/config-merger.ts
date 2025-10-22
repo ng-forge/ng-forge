@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { FieldTypeDefinition, FieldWrapperDefinition } from '../models/field-type';
-import { FormOptions } from '../models/form-options';
 
 /**
  * Configuration object for the dynamic form
@@ -14,9 +13,6 @@ export interface DynamicFormConfig {
 
   /** Custom validators */
   validators?: Record<string, unknown>;
-
-  /** Default form options */
-  defaultFormOptions?: Partial<FormOptions>;
 
   /** Default field props */
   defaultFieldProps?: Record<string, unknown>;
@@ -45,10 +41,6 @@ export class ConfigMerger {
         types: this.mergeTypes(merged.types, config.types),
         wrappers: this.mergeWrappers(merged.wrappers, config.wrappers),
         validators: { ...merged.validators, ...config.validators },
-        defaultFormOptions: {
-          ...merged.defaultFormOptions,
-          ...config.defaultFormOptions,
-        },
         defaultFieldProps: {
           ...merged.defaultFieldProps,
           ...config.defaultFieldProps,
@@ -69,11 +61,6 @@ export class ConfigMerger {
       types: [],
       wrappers: [],
       validators: {},
-      defaultFormOptions: {
-        showError: true,
-        validationStrategy: 'onTouched',
-        updateOn: 'change',
-      },
       defaultFieldProps: {},
       errorMessages: {},
     };
