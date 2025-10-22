@@ -1,4 +1,7 @@
-export interface DatepickerField {
+import { UnwrapField } from '../utils';
+import { FormValueControl } from '@angular/forms/signals';
+
+export interface DatepickerField extends UnwrapField<FormValueControl<Date | null>> {
   label: string;
   placeholder?: string;
   minDate?: Date | string | null;

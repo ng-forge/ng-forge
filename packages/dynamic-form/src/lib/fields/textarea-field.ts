@@ -1,4 +1,7 @@
-export interface TextareaField {
+import { UnwrapField } from '../utils';
+import { FormValueControl } from '@angular/forms/signals';
+
+export interface TextareaField extends UnwrapField<FormValueControl<string>> {
   label: string;
   placeholder?: string;
   rows?: number;

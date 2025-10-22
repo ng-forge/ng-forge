@@ -1,4 +1,7 @@
-export interface SliderField {
+import { UnwrapField } from '../utils';
+import { FormValueControl } from '@angular/forms/signals';
+
+export interface SliderField extends UnwrapField<FormValueControl<string>> {
   label: string;
   minValue: number;
   maxValue: number;
