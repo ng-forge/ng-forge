@@ -850,13 +850,13 @@ describe('DynamicFormComponent', () => {
     it('should have validityChange output available', () => {
       const { component } = createComponent();
       expect(component.validityChange).toBeDefined();
-      expect(typeof component.validityChange.subscribe).toBe('function');
+      expect(typeof component.validityChange).toBe('function');
     });
 
     it('should have dirtyChange output available', () => {
       const { component } = createComponent();
       expect(component.dirtyChange).toBeDefined();
-      expect(typeof component.dirtyChange.subscribe).toBe('function');
+      expect(typeof component.dirtyChange).toBe('function');
     });
   });
 

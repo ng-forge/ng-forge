@@ -20,7 +20,7 @@ import {
 
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, switchMap } from 'rxjs';
 import { keyBy, mapValues } from 'lodash-es';
 
@@ -37,6 +37,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       <!-- Fields will be automatically rendered by the fieldRenderer directive -->
     </form>
   `,
+  styleUrl: './dynamic-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef[], TModel = InferFormValue<TFields>> {
@@ -158,24 +159,12 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   /**
    * Output events for form state changes (excluding value which is now a model)
    */
-  readonly validityChange = signal<boolean>(false);
-  readonly dirtyChange = signal<boolean>(false);
+  readonly validityChange = outputFromObservable(toObservable(this.valid));
+  readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
 
-  constructor() {
-    // Initialize internal form state from entity
-    explicitEffect([this.entity], ([entityValue]) => {
-      this._internalFormValue.set(entityValue);
-    });
-
-    // Update validity and dirty state signals
-    explicitEffect([this.valid], ([valid]) => {
-      this.validityChange.set(valid);
-    });
-
-    explicitEffect([this.dirty], ([dirty]) => {
-      this.dirtyChange.set(dirty);
-    });
-  }
+  readonly entityUpdateEffect = explicitEffect([this.entity], ([entityValue]) => {
+    this._internalFormValue.set(entityValue);
+  });
 
   // Method to update field values and sync to model
   private updateFieldValue(key: string, value: unknown): void {
@@ -200,63 +189,67 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
           return of([]);
         }
 
-        return combineLatest(
-          fieldArray.map(async (fieldDef) => {
-            const componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type).catch(() => undefined);
-
-            if (!componentType) {
-              return undefined;
-            }
-
-            const bindings: Binding[] = [];
-            const valueProp = this.getValueProp(fieldDef);
-
-            if (valueProp) {
-              // Create a writable signal for the field that syncs with internal state
-              const currentInternalValue = this._internalFormValue();
-              const initialValue = (currentInternalValue as any)?.[fieldDef.key] ?? this.getFieldDefaultValue(fieldDef);
-              const formFieldValue = signal(initialValue);
-
-              // Listen for field changes and update internal form state
-              runInInjectionContext(this.injector, () => {
-                effect(() => {
-                  const fieldValue = formFieldValue();
-                  untracked(() => {
-                    this.updateFieldValue(fieldDef.key, fieldValue);
-                  });
-                });
-              });
-
-              bindings.push(twoWayBinding(valueProp, formFieldValue));
-            }
-
-            // Add standard bindings that most components support
-            if (fieldDef.label) {
-              bindings.push(inputBinding('label', () => fieldDef.label));
-            }
-
-            if (fieldDef.className) {
-              bindings.push(inputBinding('className', () => fieldDef.className));
-            }
-
-            // Add custom properties from fieldDef.props
-            if (fieldDef.props) {
-              const propKeys = Object.keys(fieldDef.props);
-              propKeys.forEach((key) => {
-                const value = fieldDef.props![key];
-                bindings.push(inputBinding(key, () => value));
-              });
-            }
-
-            return this.vcr.createComponent(componentType, { bindings });
-          })
-        );
+        return combineLatest(this.mapFields(fieldArray));
       }),
-      map((fields) => (fields as ComponentRef<FormUiControl>[]).filter((field): field is ComponentRef<FormUiControl> => !!field))
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
     )
   );
 
-  getValueProp(fieldDef: FieldDef): 'checked' | 'value' | undefined {
+  private mapFields(fields: readonly FieldDef[]): Promise<ComponentRef<FormUiControl>>[] {
+    return fields
+      .map(async (fieldDef) => {
+        const componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type).catch(() => undefined);
+
+        if (!componentType) {
+          return undefined;
+        }
+
+        const bindings: Binding[] = [];
+        const valueProp = this.getValueProp(fieldDef);
+
+        if (valueProp) {
+          // Create a writable signal for the field that syncs with internal state
+          const currentInternalValue = this._internalFormValue();
+          const initialValue = (currentInternalValue as any)?.[fieldDef.key] ?? this.getFieldDefaultValue(fieldDef);
+          const formFieldValue = signal(initialValue);
+
+          // Listen for field changes and update internal form state
+          runInInjectionContext(this.injector, () => {
+            effect(() => {
+              const fieldValue = formFieldValue();
+              untracked(() => {
+                this.updateFieldValue(fieldDef.key, fieldValue);
+              });
+            });
+          });
+
+          bindings.push(twoWayBinding(valueProp, formFieldValue));
+        }
+
+        // Add standard bindings that most components support
+        if (fieldDef.label) {
+          bindings.push(inputBinding('label', () => fieldDef.label));
+        }
+
+        if (fieldDef.className) {
+          bindings.push(inputBinding('className', () => fieldDef.className));
+        }
+
+        // Add custom properties from fieldDef.props
+        if (fieldDef.props) {
+          const propKeys = Object.keys(fieldDef.props);
+          propKeys.forEach((key) => {
+            const value = fieldDef.props![key];
+            bindings.push(inputBinding(key, () => value));
+          });
+        }
+
+        return this.vcr.createComponent(componentType, { bindings });
+      })
+      .filter((field): field is Promise<ComponentRef<FormUiControl>> => !!field);
+  }
+
+  private getValueProp(fieldDef: FieldDef): 'checked' | 'value' | undefined {
     // TODO: improve solution for determining value binding based on field type
 
     // Submit buttons don't have value bindings

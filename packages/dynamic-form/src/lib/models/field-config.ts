@@ -150,8 +150,9 @@ export interface ConditionalRules {
  * Form options for global form behavior
  */
 export interface FormOptions {
-  readonly validateOnChange?: boolean;
-  readonly validateOnBlur?: boolean;
+  // TODO: implement these options
+  readonly validateOnChange?: undefined;
+  readonly validateOnBlur?: undefined;
   readonly disabled?: boolean;
 }
 
