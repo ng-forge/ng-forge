@@ -271,5 +271,4 @@ export class CompleteMaterialFormComponent {
       }),
     ],
   };
-
 }

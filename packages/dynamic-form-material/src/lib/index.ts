@@ -5,14 +5,14 @@ export * from './fields';
 export { MATERIAL_FIELD_TYPES } from './config/material-field-config';
 
 // Field type constants and types
-export { 
-  MatField, 
-  type MatFieldType, 
-  type MatFieldTypeMap, 
+export {
+  MatField,
+  type MatFieldType,
+  type MatFieldTypeMap,
   type MatFieldValueType,
   getAllMatFieldTypes,
   isMatFieldType,
-  getMatFieldValueTypeName 
+  getMatFieldValueTypeName,
 } from './types/material-field-types.enum';
 
 // Providers

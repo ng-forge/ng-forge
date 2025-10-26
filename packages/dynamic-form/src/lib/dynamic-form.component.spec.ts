@@ -673,7 +673,7 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
       // Find the test input component and simulate user input
-      const testInput = fixture.debugElement.query(by => by.componentInstance instanceof TestInputHarness);
+      const testInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestInputHarness);
       expect(testInput).toBeTruthy();
 
       // Simulate user typing new value
@@ -710,7 +710,7 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({ isActive: false });
 
       // Find the test checkbox component and simulate user interaction
-      const testCheckbox = fixture.debugElement.query(by => by.componentInstance instanceof TestCheckboxHarness);
+      const testCheckbox = fixture.debugElement.query((by) => by.componentInstance instanceof TestCheckboxHarness);
       expect(testCheckbox).toBeTruthy();
 
       // Simulate user checking the checkbox
@@ -763,7 +763,7 @@ describe('DynamicFormComponent', () => {
       });
 
       // Update first name
-      const firstNameInput = fixture.debugElement.queryAll(by => by.componentInstance instanceof TestInputHarness)[0];
+      const firstNameInput = fixture.debugElement.queryAll((by) => by.componentInstance instanceof TestInputHarness)[0];
       const firstNameElement = firstNameInput.nativeElement.querySelector('input');
       firstNameElement.value = 'Jane';
       firstNameElement.dispatchEvent(new Event('input'));
@@ -779,7 +779,7 @@ describe('DynamicFormComponent', () => {
       });
 
       // Update checkbox
-      const checkboxInput = fixture.debugElement.query(by => by.componentInstance instanceof TestCheckboxHarness);
+      const checkboxInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestCheckboxHarness);
       const checkboxElement = checkboxInput.nativeElement.querySelector('input[type="checkbox"]');
       checkboxElement.checked = true;
       checkboxElement.dispatchEvent(new Event('change'));
@@ -828,7 +828,7 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
       // Simulate user input
-      const testInput = fixture.debugElement.query(by => by.componentInstance instanceof TestInputHarness);
+      const testInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestInputHarness);
       const inputElement = testInput.nativeElement.querySelector('input');
       inputElement.value = 'Jane';
       inputElement.dispatchEvent(new Event('input'));
@@ -1081,7 +1081,7 @@ describe('DynamicFormComponent', () => {
       expect(initialValue).toEqual({ firstName: 'John' });
 
       // Simulate user input to test state tracking
-      const testInput = fixture.debugElement.query(by => by.componentInstance instanceof TestInputHarness);
+      const testInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestInputHarness);
       if (testInput) {
         const inputElement = testInput.nativeElement.querySelector('input');
         if (inputElement) {
@@ -1190,7 +1190,7 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      const testInput = fixture.debugElement.query(by => by.componentInstance instanceof TestInputHarness);
+      const testInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestInputHarness);
       const inputElement = testInput.nativeElement.querySelector('input');
 
       // Rapid changes

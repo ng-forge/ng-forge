@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
-import { MatField, submitButton } from '@ng-forge/dynamic-form-material';
+import { MatField } from '../lib/types/material-field-types.enum';
 
 interface UserFormModel {
   firstName: string;

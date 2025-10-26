@@ -41,7 +41,7 @@ export const MatField = {
 /**
  * Type representing all Material field type values
  */
-export type MatFieldType = typeof MatField[keyof typeof MatField];
+export type MatFieldType = (typeof MatField)[keyof typeof MatField];
 
 /**
  * Mapping of field types to their expected value types
@@ -71,9 +71,7 @@ export interface MatFieldTypeMap {
 /**
  * Helper type to extract the value type for a given field type
  */
-export type MatFieldValueType<T extends MatFieldType> = T extends keyof MatFieldTypeMap 
-  ? MatFieldTypeMap[T] 
-  : unknown;
+export type MatFieldValueType<T extends MatFieldType> = T extends keyof MatFieldTypeMap ? MatFieldTypeMap[T] : unknown;
 
 /**
  * Utility function to get all available Material field types
@@ -115,6 +113,6 @@ export function getMatFieldValueTypeName(type: MatFieldType): string {
     [MatField.MULTI_CHECKBOX]: 'string[]',
     [MatField.SUBMIT]: 'void',
   };
-  
+
   return typeMap[type];
 }
