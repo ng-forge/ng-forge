@@ -14,8 +14,6 @@ export interface SelectField<T> extends UnwrapField<FormValueControl<T[]>> {
   label: string;
   placeholder?: string;
   options: SelectOption<T>[];
-  multiple?: boolean;
-  compareWith?: ((o1: T, o2: T) => boolean) | undefined;
   hint?: string;
   className?: string;
 }

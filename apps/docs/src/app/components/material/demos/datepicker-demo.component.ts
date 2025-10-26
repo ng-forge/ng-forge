@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'datepicker-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -44,42 +44,44 @@ export class DatepickerDemoComponent {
     dueDate: null,
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'birthdate',
-      type: 'datepicker',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'birthdate',
+        type: 'datepicker',
         label: 'Birth Date',
-        placeholder: 'Select your birth date',
-        appearance: 'outline',
-        hint: 'Used for age verification',
+        props: {
+          placeholder: 'Select your birth date',
+          appearance: 'outline',
+          hint: 'Used for age verification',
+        },
       },
-    },
-    {
-      key: 'startDate',
-      type: 'datepicker',
-      props: {
+      {
+        key: 'startDate',
+        type: 'datepicker',
         label: 'Project Start Date',
-        placeholder: 'Select start date',
-        appearance: 'fill',
-        hint: 'When does the project begin?',
-        required: true,
+        props: {
+          placeholder: 'Select start date',
+          appearance: 'fill',
+          hint: 'When does the project begin?',
+          required: true,
+        },
+        validation: {
+          required: true,
+        },
       },
-      validators: {
-        required: true,
-      },
-    },
-    {
-      key: 'dueDate',
-      type: 'datepicker',
-      props: {
+      {
+        key: 'dueDate',
+        type: 'datepicker',
         label: 'Due Date',
-        placeholder: 'Select due date',
-        appearance: 'outline',
-        hint: 'Project completion deadline',
+        props: {
+          placeholder: 'Select due date',
+          appearance: 'outline',
+          hint: 'Project completion deadline',
+        },
       },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

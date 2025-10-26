@@ -1,6 +1,6 @@
 import { Signal } from '@angular/core';
 import { UnwrapField } from '../utils';
-import { FormUiControl } from '@angular/forms/signals';
+import { FormUiControl, Schema } from '@angular/forms/signals';
 
 /**
  * Field definition following Angular Architects signal forms pattern
@@ -19,8 +19,17 @@ export interface FieldDef<TKey extends string = string, TValue = unknown> extend
   /** Default field value */
   readonly defaultValue?: TValue;
 
-  /** Validation rules using signal forms pattern */
+  /** Explicit validation rules (advanced usage) */
   readonly validation?: ValidationRules<TValue>;
+
+  /** Simple validation properties that auto-create validators */
+  readonly required?: boolean;
+  readonly email?: boolean;
+  readonly min?: number;
+  readonly max?: number;
+  readonly minLength?: number;
+  readonly maxLength?: number;
+  readonly patternRule?: string | RegExp;
 
   /** Field-specific properties (placeholder, options, etc.) */
   readonly props?: Record<string, unknown>;
@@ -33,11 +42,31 @@ export interface FieldDef<TKey extends string = string, TValue = unknown> extend
 }
 
 /**
- * Form configuration containing field definitions
+ * Form configuration with two approaches:
+ * 1. JSON-based: Simple field definitions with JSON validators (for API configs)
+ * 2. Schema-based: Explicit Angular signal forms schema (for manual design)
  */
-export interface FormConfig<TFields extends readonly FieldDef[] = readonly FieldDef[]> {
-  readonly fields: TFields;
+export interface FormConfig<TFields extends readonly FieldDef[] = readonly FieldDef[], TValue = unknown> {
+  // Option 1: JSON-based field definitions (typically from API)
+  readonly fields?: TFields;
+  
+  // Option 2: Explicit schema design (manual form configs)
+  readonly schema?: FormSchema<TValue>;
+  
+  // Form-level options
   readonly options?: FormOptions;
+}
+
+/**
+ * Explicit form schema using Angular signal forms
+ */
+export interface FormSchema<TValue = unknown> {
+  /** Field definitions that make up this schema */
+  readonly fieldDefs: readonly FieldDef[];
+  /** Angular signal forms schema */
+  readonly definition?: Schema<TValue>;
+  /** Optional metadata */
+  readonly metadata?: SchemaMetadata;
 }
 
 /**
@@ -149,6 +178,53 @@ export interface FormState<TValue = unknown> {
   readonly dirty: Signal<boolean>;
   readonly submitted: Signal<boolean>;
   readonly disabled: Signal<boolean>;
+}
+
+// Schema-related types for FormConfig integration
+/**
+ * Schema definition with metadata for enhanced form functionality
+ */
+export interface DynamicFormSchemaDefinition<TValue = unknown> {
+  /** Field definitions that generated this schema */
+  readonly fieldDefs: readonly FieldDef[];
+  /** Schema metadata for debugging and tooling */
+  readonly metadata?: SchemaMetadata;
+}
+
+/**
+ * Schema metadata for enhanced schema functionality
+ */
+export interface SchemaMetadata {
+  readonly name?: string;
+  readonly version?: string;
+  readonly description?: string;
+  readonly createdAt?: Date;
+  readonly [key: string]: unknown;
+}
+
+/**
+ * Utility function to build validation rules from field properties
+ */
+export function buildValidationRules<T>(field: FieldDef): ValidationRules<T> {
+  // If explicit validation is provided, use it
+  if (field.validation) {
+    return field.validation as ValidationRules<T>;
+  }
+  
+  // Otherwise, build from implicit properties
+  const rules: ValidationRules<T> = {};
+  
+  if (field.required) rules.required = true;
+  if (field.email) rules.email = true;
+  if (field.min !== undefined) rules.min = field.min;
+  if (field.max !== undefined) rules.max = field.max;
+  if (field.minLength !== undefined) rules.minLength = field.minLength;
+  if (field.maxLength !== undefined) rules.maxLength = field.maxLength;
+  if (field.patternRule) {
+    rules.pattern = typeof field.patternRule === 'string' ? new RegExp(field.patternRule) : field.patternRule;
+  }
+  
+  return rules;
 }
 
 /**

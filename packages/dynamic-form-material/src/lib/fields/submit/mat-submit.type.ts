@@ -1,7 +1,7 @@
-import { FieldType, SubmitField } from '@ng-forge/dynamic-form';
+import { SubmitField } from '@ng-forge/dynamic-form';
 
 export interface MatSubmitProps extends SubmitField {
   color: 'primary' | 'accent' | 'warn';
 }
 
-export type MatSubmitField = FieldType<MatSubmitProps>;
+export type MatSubmitField = MatSubmitProps;

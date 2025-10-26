@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'toggle-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -44,41 +44,43 @@ export class ToggleDemoComponent {
     autoSave: false,
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'notifications',
-      type: 'toggle',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'notifications',
+        type: 'toggle',
         label: 'Enable Notifications',
-        // appearance: 'outline',
-        color: 'primary',
-        labelPosition: 'before',
-        hint: 'Receive email notifications',
+        props: {
+          // appearance: 'outline',
+          color: 'primary',
+          labelPosition: 'before',
+          hint: 'Receive email notifications',
+        },
       },
-    },
-    {
-      key: 'darkMode',
-      type: 'toggle',
-      props: {
+      {
+        key: 'darkMode',
+        type: 'toggle',
         label: 'Dark Mode',
-        // appearance: 'outline',
-        color: 'accent',
-        labelPosition: 'after',
-        hint: 'Switch to dark theme',
+        props: {
+          // appearance: 'outline',
+          color: 'accent',
+          labelPosition: 'after',
+          hint: 'Switch to dark theme',
+        },
       },
-    },
-    {
-      key: 'autoSave',
-      type: 'toggle',
-      props: {
+      {
+        key: 'autoSave',
+        type: 'toggle',
         label: 'Auto Save',
-        // appearance: 'outline',
-        color: 'primary',
-        labelPosition: 'before',
-        hint: 'Automatically save changes',
+        props: {
+          // appearance: 'outline',
+          color: 'primary',
+          labelPosition: 'before',
+          hint: 'Automatically save changes',
+        },
       },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

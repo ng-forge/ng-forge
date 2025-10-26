@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
+import { MatErrorsComponent } from '../../shared/mat-errors.component';
 
 type Option<T> = { value: T; label: string; disabled?: boolean };
 
 @Component({
   selector: 'df-mat-radio',
-  imports: [FormsModule, MatRadioGroup, MatRadioButton],
+  imports: [FormsModule, MatRadioGroup, MatRadioButton, MatErrorsComponent],
   template: `
     <div [class]="className() || ''">
       @if (label()) {
@@ -29,9 +30,8 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
 
       @if (hint()) {
       <div class="mat-hint">{{ hint() }}</div>
-      } @if (invalid() && touched()) { @for (error of errors(); track error) {
-      <div class="mat-error">{{ error.message }}</div>
-      } }
+      }
+      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
     </div>
   `,
   styles: [
@@ -63,11 +63,6 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
         margin-top: 4px;
       }
 
-      .mat-error {
-        font-size: 12px;
-        color: #f44336;
-        margin-top: 4px;
-      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

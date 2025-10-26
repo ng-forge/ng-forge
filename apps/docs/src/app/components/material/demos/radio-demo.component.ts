@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'radio-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -43,39 +43,41 @@ export class RadioDemoComponent {
     priority: '',
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'plan',
-      type: 'radio',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'plan',
+        type: 'radio',
         label: 'Select Plan',
-        appearance: 'outline',
-        color: 'primary',
-        hint: 'Choose your subscription plan',
-        options: [
-          { value: 'free', label: 'Free - $0/month' },
-          { value: 'pro', label: 'Pro - $10/month' },
-          { value: 'enterprise', label: 'Enterprise - $50/month' },
-        ],
+        props: {
+          appearance: 'outline',
+          color: 'primary',
+          hint: 'Choose your subscription plan',
+          options: [
+            { value: 'free', label: 'Free - $0/month' },
+            { value: 'pro', label: 'Pro - $10/month' },
+            { value: 'enterprise', label: 'Enterprise - $50/month' },
+          ],
+        },
       },
-    },
-    {
-      key: 'priority',
-      type: 'radio',
-      props: {
+      {
+        key: 'priority',
+        type: 'radio',
         label: 'Priority Level',
-        appearance: 'outline',
-        color: 'accent',
-        hint: 'Select task priority',
-        options: [
-          { value: 'low', label: 'Low Priority' },
-          { value: 'medium', label: 'Medium Priority' },
-          { value: 'high', label: 'High Priority' },
-          { value: 'urgent', label: 'Urgent' },
-        ],
+        props: {
+          appearance: 'outline',
+          color: 'accent',
+          hint: 'Select task priority',
+          options: [
+            { value: 'low', label: 'Low Priority' },
+            { value: 'medium', label: 'Medium Priority' },
+            { value: 'high', label: 'High Priority' },
+            { value: 'urgent', label: 'Urgent' },
+          ],
+        },
       },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

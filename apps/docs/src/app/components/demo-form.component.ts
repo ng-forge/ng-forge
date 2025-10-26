@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 
 interface UserFormModel {
@@ -24,7 +24,7 @@ interface UserFormModel {
 
       <div class="form-section">
         <h2>User Registration Form</h2>
-        <dynamic-form [fields]="userFormFields" [value]="userModel()" (valueChange)="onValueChange($event)" />
+        <dynamic-form [config]="userFormFields" [value]="userModel()" (valueChange)="onValueChange($event)" />
       </div>
 
       <div class="output-section">
@@ -108,131 +108,133 @@ export class DemoFormComponent {
     bio: '',
   });
 
-  userFormFields: FieldConfig[] = [
-    // Personal Info
-    {
-      key: 'firstName',
-      type: 'input',
-      props: {
-        label: 'First Name',
-        placeholder: 'Enter your first name',
-        required: true,
+  userFormFields: FormConfig = {
+    fields: [
+      // Personal Info
+      {
+        key: 'firstName',
+        type: 'input',
+        props: {
+          label: 'First Name',
+          placeholder: 'Enter your first name',
+          required: true,
+        },
+        validators: {
+          required: true,
+          minLength: 2,
+        },
       },
-      validators: {
-        required: true,
-        minLength: 2,
+      {
+        key: 'lastName',
+        type: 'input',
+        props: {
+          label: 'Last Name',
+          placeholder: 'Enter your last name',
+          required: true,
+        },
+        validators: {
+          required: true,
+          minLength: 2,
+        },
       },
-    },
-    {
-      key: 'lastName',
-      type: 'input',
-      props: {
-        label: 'Last Name',
-        placeholder: 'Enter your last name',
-        required: true,
+      {
+        key: 'email',
+        type: 'input',
+        props: {
+          label: 'Email Address',
+          type: 'email',
+          placeholder: 'user@example.com',
+          hint: 'We will never share your email',
+          required: true,
+        },
+        validators: {
+          required: true,
+          email: true,
+        },
       },
-      validators: {
-        required: true,
-        minLength: 2,
-      },
-    },
-    {
-      key: 'email',
-      type: 'input',
-      props: {
-        label: 'Email Address',
-        type: 'email',
-        placeholder: 'user@example.com',
-        hint: 'We will never share your email',
-        required: true,
-      },
-      validators: {
-        required: true,
-        email: true,
-      },
-    },
 
-    // Demographics
-    {
-      key: 'age',
-      type: 'input',
-      props: {
-        label: 'Age',
-        type: 'number',
-        placeholder: '18',
-        required: true,
+      // Demographics
+      {
+        key: 'age',
+        type: 'input',
+        props: {
+          label: 'Age',
+          type: 'number',
+          placeholder: '18',
+          required: true,
+        },
+        validators: {
+          required: true,
+          min: 18,
+          max: 120,
+        },
       },
-      validators: {
-        required: true,
-        min: 18,
-        max: 120,
+      {
+        key: 'country',
+        type: 'select',
+        props: {
+          label: 'Country',
+          placeholder: 'Select your country',
+          options: [
+            { value: 'us', label: 'United States' },
+            { value: 'uk', label: 'United Kingdom' },
+            { value: 'ca', label: 'Canada' },
+            { value: 'au', label: 'Australia' },
+            { value: 'de', label: 'Germany' },
+            { value: 'fr', label: 'France' },
+            { value: 'jp', label: 'Japan' },
+          ],
+          required: true,
+        },
+        validators: {
+          required: true,
+        },
       },
-    },
-    {
-      key: 'country',
-      type: 'select',
-      props: {
-        label: 'Country',
-        placeholder: 'Select your country',
-        options: [
-          { value: 'us', label: 'United States' },
-          { value: 'uk', label: 'United Kingdom' },
-          { value: 'ca', label: 'Canada' },
-          { value: 'au', label: 'Australia' },
-          { value: 'de', label: 'Germany' },
-          { value: 'fr', label: 'France' },
-          { value: 'jp', label: 'Japan' },
-        ],
-        required: true,
-      },
-      validators: {
-        required: true,
-      },
-    },
 
-    // Preferences
-    {
-      key: 'plan',
-      type: 'select',
-      props: {
-        label: 'Subscription Plan',
-        placeholder: 'Choose a plan',
-        options: [
-          { value: 'free', label: 'Free - $0/month' },
-          { value: 'pro', label: 'Pro - $10/month' },
-          { value: 'enterprise', label: 'Enterprise - $50/month' },
-        ],
-        required: true,
+      // Preferences
+      {
+        key: 'plan',
+        type: 'select',
+        props: {
+          label: 'Subscription Plan',
+          placeholder: 'Choose a plan',
+          options: [
+            { value: 'free', label: 'Free - $0/month' },
+            { value: 'pro', label: 'Pro - $10/month' },
+            { value: 'enterprise', label: 'Enterprise - $50/month' },
+          ],
+          required: true,
+        },
+        validators: {
+          required: true,
+        },
       },
-      validators: {
-        required: true,
+      {
+        key: 'bio',
+        type: 'textarea',
+        props: {
+          label: 'Bio',
+          placeholder: 'Tell us about yourself',
+          hint: 'Optional - share a bit about yourself',
+        },
       },
-    },
-    {
-      key: 'bio',
-      type: 'textarea',
-      props: {
-        label: 'Bio',
-        placeholder: 'Tell us about yourself',
-        hint: 'Optional - share a bit about yourself',
+      {
+        key: 'newsletter',
+        type: 'checkbox',
+        props: {
+          label: 'Subscribe to newsletter',
+          hint: 'Get updates about new features and special offers',
+        },
       },
-    },
-    {
-      key: 'newsletter',
-      type: 'checkbox',
-      props: {
-        label: 'Subscribe to newsletter',
-        hint: 'Get updates about new features and special offers',
-      },
-    },
 
-    // Submit button
-    submitButton({
-      label: 'Create Account',
-      color: 'primary',
-      className: 'submit-btn',
-    }),
-  ];
+      // Submit button
+      submitButton({
+        label: 'Create Account',
+        color: 'primary',
+        className: 'submit-btn',
+      }),
+    ],
+  };
 
   onValueChange(newValue: UserFormModel) {
     this.userModel.set(newValue);

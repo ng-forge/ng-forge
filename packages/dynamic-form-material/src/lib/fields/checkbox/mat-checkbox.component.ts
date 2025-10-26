@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormCheckboxControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatErrorsComponent } from '../../shared/mat-errors.component';
 
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, FormsModule],
+  imports: [MatCheckbox, FormsModule, MatErrorsComponent],
   template: `
     <div [class]="className() || ''">
       <mat-checkbox
@@ -21,9 +22,8 @@ import { MatCheckbox } from '@angular/material/checkbox';
 
       @if (hint()) {
       <div class="mat-hint">{{ hint() }}</div>
-      } @if (invalid() && touched()) { @for (error of errors(); track error) {
-      <div class="mat-error">{{ error.message }}</div>
-      } }
+      }
+      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
     </div>
   `,
   styles: [
@@ -35,12 +35,6 @@ import { MatCheckbox } from '@angular/material/checkbox';
       .mat-hint {
         font-size: 12px;
         color: rgba(0, 0, 0, 0.6);
-        margin-top: 4px;
-      }
-
-      .mat-error {
-        font-size: 12px;
-        color: #f44336;
         margin-top: 4px;
       }
     `,

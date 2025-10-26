@@ -1,0 +1,1 @@
+export { MatErrorsComponent } from './mat-errors.component';

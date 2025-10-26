@@ -1,10 +1,18 @@
-import { ToggleField, ValueControlFieldType } from '@ng-forge/dynamic-form';
+import { ToggleField } from '@ng-forge/dynamic-form';
 import { MatFormFieldAppearance } from '@angular/material/form-field';
+import { ThemePalette } from '@angular/material/core';
 
-export interface MatToggleProps extends ToggleField {
+/**
+ * Material Design toggle field interface
+ * Extends the base ToggleField with Material-specific properties
+ */
+export interface MatToggleField extends ToggleField {
+  /** Material form field appearance */
+  appearance?: MatFormFieldAppearance;
+  /** Material color theme */
+  color?: ThemePalette;
+  /** Label position relative to toggle */
+  labelPosition?: 'before' | 'after';
+  /** Disable ripple effect */
   disableRipple?: boolean;
-  tabIndex?: number;
-  appearance: MatFormFieldAppearance;
 }
-
-export type MatToggleField = ValueControlFieldType<MatToggleProps, boolean>;

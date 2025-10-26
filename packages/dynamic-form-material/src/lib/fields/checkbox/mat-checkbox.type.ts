@@ -1,8 +1,8 @@
-import { CheckboxControlFieldType, CheckboxField } from '@ng-forge/dynamic-form';
+import { CheckboxField } from '@ng-forge/dynamic-form';
 
 export interface MatCheckboxProps extends CheckboxField {
   disableRipple?: boolean;
   tabIndex?: number;
 }
 
-export type MatCheckboxField = CheckboxControlFieldType<MatCheckboxProps>;
+// export type MatCheckboxField = CheckboxControlFieldType<MatCheckboxProps>;

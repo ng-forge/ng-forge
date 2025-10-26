@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'slider-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -45,60 +45,62 @@ export class SliderDemoComponent {
     rating: 3,
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'volume',
-      type: 'slider',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'volume',
+        type: 'slider',
         label: 'Volume Level',
-        color: 'primary',
-        min: 0,
-        max: 100,
-        step: 5,
-        showThumbLabel: true,
-        hint: 'Adjust the volume (0-100)',
+        props: {
+          color: 'primary',
+          min: 0,
+          max: 100,
+          step: 5,
+          showThumbLabel: true,
+          hint: 'Adjust the volume (0-100)',
+        },
       },
-    },
-    {
-      key: 'brightness',
-      type: 'slider',
-      props: {
+      {
+        key: 'brightness',
+        type: 'slider',
         label: 'Screen Brightness',
-        color: 'accent',
-        min: 0,
-        max: 100,
-        step: 1,
-        showThumbLabel: true,
-        hint: 'Screen brightness percentage',
+        props: {
+          color: 'accent',
+          min: 0,
+          max: 100,
+          step: 1,
+          showThumbLabel: true,
+          hint: 'Screen brightness percentage',
+        },
       },
-    },
-    {
-      key: 'temperature',
-      type: 'slider',
-      props: {
+      {
+        key: 'temperature',
+        type: 'slider',
         label: 'Temperature (°C)',
-        color: 'primary',
-        min: -10,
-        max: 40,
-        step: 1,
-        showThumbLabel: true,
-        hint: 'Set the temperature',
+        props: {
+          color: 'primary',
+          min: -10,
+          max: 40,
+          step: 1,
+          showThumbLabel: true,
+          hint: 'Set the temperature',
+        },
       },
-    },
-    {
-      key: 'rating',
-      type: 'slider',
-      props: {
+      {
+        key: 'rating',
+        type: 'slider',
         label: 'Rating',
-        color: 'accent',
-        min: 1,
-        max: 5,
-        step: 1,
-        showThumbLabel: true,
-        hint: 'Rate from 1 to 5 stars',
+        props: {
+          color: 'accent',
+          min: 1,
+          max: 5,
+          step: 1,
+          showThumbLabel: true,
+          hint: 'Rate from 1 to 5 stars',
+        },
       },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

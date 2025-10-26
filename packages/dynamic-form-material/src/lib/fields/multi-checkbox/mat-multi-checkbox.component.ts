@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatErrorsComponent } from '../../shared/mat-errors.component';
 
 type Option<T> = { value: T; label: string; disabled?: boolean };
 
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [FormsModule, MatCheckbox],
+  imports: [FormsModule, MatCheckbox, MatErrorsComponent],
   template: `
     <div [class]="className() || ''">
       @if (label(); as label) {
@@ -30,9 +31,9 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
 
       @if (hint(); as hint) {
       <div class="mat-hint">{{ hint }}</div>
-      } @if (invalid() && touched()) { @for (error of errors(); track error) {
-      <div class="mat-error">{{ error.message }}</div>
-      } }
+      }
+      
+      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
     </div>
   `,
   styles: [
@@ -61,12 +62,6 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
       .mat-hint {
         font-size: 12px;
         color: rgba(0, 0, 0, 0.6);
-        margin-top: 4px;
-      }
-
-      .mat-error {
-        font-size: 12px;
-        color: #f44336;
         margin-top: 4px;
       }
     `,

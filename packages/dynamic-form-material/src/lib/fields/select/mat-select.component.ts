@@ -3,13 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
-import { MatError, MatHint } from '@angular/material/input';
+import { MatHint } from '@angular/material/input';
+import { MatErrorsComponent } from '../../shared/mat-errors.component';
 
 type Option<T> = { value: T; label: string; disabled?: boolean };
 
 @Component({
   selector: 'df-mat-select',
-  imports: [FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatError],
+  imports: [FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatErrorsComponent],
   template: `
     <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
       @if (label(); as label) {
@@ -33,13 +34,9 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
 
       @if (hint()) {
       <mat-hint>{{ hint() }}</mat-hint>
-      } @if (invalid() && touched()) {
-      <mat-error>
-        @for (error of errors(); track error) {
-        <span>{{ error.message }}</span>
-        }
-      </mat-error>
       }
+      
+      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
     </mat-form-field>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'textarea-demo',
@@ -44,44 +44,46 @@ export class TextareaDemoComponent {
     description: '',
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'bio',
-      type: 'textarea',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'bio',
+        type: 'textarea',
         label: 'Biography',
-        placeholder: 'Tell us about yourself...',
-        appearance: 'outline',
-        rows: 3,
-        hint: 'Brief personal bio',
+        props: {
+          placeholder: 'Tell us about yourself...',
+          appearance: 'outline',
+          rows: 3,
+          hint: 'Brief personal bio',
+        },
       },
-    },
-    {
-      key: 'feedback',
-      type: 'textarea',
-      props: {
+      {
+        key: 'feedback',
+        type: 'textarea',
         label: 'Feedback',
-        placeholder: 'Share your thoughts...',
-        appearance: 'fill',
-        rows: 4,
-        hint: 'Your feedback helps us improve',
+        props: {
+          placeholder: 'Share your thoughts...',
+          appearance: 'fill',
+          rows: 4,
+          hint: 'Your feedback helps us improve',
+        },
       },
-    },
-    {
-      key: 'description',
-      type: 'textarea',
-      props: {
+      {
+        key: 'description',
+        type: 'textarea',
         label: 'Project Description',
-        placeholder: 'Describe your project...',
-        appearance: 'outline',
-        rows: 5,
-        hint: 'Detailed project description',
+        props: {
+          placeholder: 'Describe your project...',
+          appearance: 'outline',
+          rows: 5,
+          hint: 'Detailed project description',
+        },
+        validation: {
+          maxLength: 500,
+        },
       },
-      validators: {
-        maxLength: 500,
-      },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

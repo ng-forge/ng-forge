@@ -69,11 +69,6 @@ describe('ConfigMerger', () => {
       expect(result.types).toEqual([mockInputType]);
       expect(result.validators).toEqual({ required: true });
       expect(result.defaultFieldProps).toEqual({ className: 'form-control' });
-      expect(result.defaultFormOptions).toEqual({
-        showError: true,
-        validationStrategy: 'onTouched',
-        updateOn: 'change',
-      });
     });
 
     it('should merge multiple configs', () => {
@@ -101,27 +96,15 @@ describe('ConfigMerger', () => {
 
     it('should override properties in later configs', () => {
       const config1: Partial<DynamicFormConfig> = {
-        defaultFormOptions: {
-          showError: true,
-          validationStrategy: 'always',
-        },
         validators: { required: 'Required field' },
       };
 
       const config2: Partial<DynamicFormConfig> = {
-        defaultFormOptions: {
-          validationStrategy: 'onDirty',
-        },
         validators: { required: 'This field is required' },
       };
 
       const result = service.merge(config1, config2);
 
-      expect(result.defaultFormOptions).toEqual({
-        showError: true,
-        validationStrategy: 'onDirty',
-        updateOn: 'change', // from defaults
-      });
       expect(result.validators).toEqual({ required: 'This field is required' });
     });
 

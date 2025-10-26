@@ -1,4 +1,4 @@
-import { RadioField, ValueControlFieldType } from '@ng-forge/dynamic-form';
+import { RadioField } from '@ng-forge/dynamic-form';
 import { MatFormFieldAppearance } from '@angular/material/form-field';
 
 export interface MatRadioProps<T> extends RadioField<T> {
@@ -7,4 +7,4 @@ export interface MatRadioProps<T> extends RadioField<T> {
   tabIndex?: number;
 }
 
-export type MatRadioField<T> = ValueControlFieldType<MatRadioProps<T>, T>;
+// export type MatRadioField<T> = ValueControlFieldType<MatRadioProps<T>, T>;

@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'select-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -43,42 +43,44 @@ export class SelectDemoComponent {
     multiSelect: [],
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'singleSelect',
-      type: 'select',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'singleSelect',
+        type: 'select',
         label: 'Single Selection',
-        placeholder: 'Choose an option...',
-        appearance: 'outline',
-        hint: 'Select one option',
-        options: [
-          { value: 'angular', label: 'Angular' },
-          { value: 'react', label: 'React' },
-          { value: 'vue', label: 'Vue.js' },
-          { value: 'svelte', label: 'Svelte' },
-        ],
+        props: {
+          placeholder: 'Choose an option...',
+          appearance: 'outline',
+          hint: 'Select one option',
+          options: [
+            { value: 'angular', label: 'Angular' },
+            { value: 'react', label: 'React' },
+            { value: 'vue', label: 'Vue.js' },
+            { value: 'svelte', label: 'Svelte' },
+          ],
+        },
       },
-    },
-    {
-      key: 'multiSelect',
-      type: 'select',
-      props: {
+      {
+        key: 'multiSelect',
+        type: 'select',
         label: 'Multiple Selection',
-        placeholder: 'Choose multiple options...',
-        appearance: 'outline',
-        multiple: true,
-        hint: 'Select multiple technologies',
-        options: [
-          { value: 'typescript', label: 'TypeScript' },
-          { value: 'javascript', label: 'JavaScript' },
-          { value: 'html', label: 'HTML' },
-          { value: 'css', label: 'CSS' },
-          { value: 'scss', label: 'SCSS' },
-        ],
+        props: {
+          placeholder: 'Choose multiple options...',
+          appearance: 'outline',
+          multiple: true,
+          hint: 'Select multiple technologies',
+          options: [
+            { value: 'typescript', label: 'TypeScript' },
+            { value: 'javascript', label: 'JavaScript' },
+            { value: 'html', label: 'HTML' },
+            { value: 'css', label: 'CSS' },
+            { value: 'scss', label: 'SCSS' },
+          ],
+        },
       },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

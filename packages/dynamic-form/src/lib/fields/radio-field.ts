@@ -10,8 +10,6 @@ export interface RadioOption<T> {
 export interface RadioField<T> extends UnwrapField<FormValueControl<T[]>> {
   label: string;
   options: RadioOption<T>[];
-  color?: 'primary' | 'accent' | 'warn';
-  labelPosition?: 'before' | 'after';
   hint?: string;
   className?: string;
 }

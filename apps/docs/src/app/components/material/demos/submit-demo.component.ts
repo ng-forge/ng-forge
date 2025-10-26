@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 
 @Component({
@@ -8,7 +8,7 @@ import { submitButton } from '@ng-forge/dynamic-form-material';
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -44,59 +44,61 @@ export class SubmitDemoComponent {
     agree: false,
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'email',
-      type: 'input',
-      props: {
-        label: 'Email Address',
-        type: 'email',
-        placeholder: 'user@example.com',
-        appearance: 'outline',
-        required: true,
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'email',
+        type: 'input',
+        props: {
+          label: 'Email Address',
+          type: 'email',
+          placeholder: 'user@example.com',
+          appearance: 'outline',
+          required: true,
+        },
+        validators: {
+          required: true,
+          email: true,
+        },
       },
-      validators: {
-        required: true,
-        email: true,
+      {
+        key: 'agree',
+        type: 'checkbox',
+        props: {
+          label: 'I agree to the terms and conditions',
+          color: 'primary',
+          required: true,
+        },
+        validators: {
+          required: true,
+        },
       },
-    },
-    {
-      key: 'agree',
-      type: 'checkbox',
-      props: {
-        label: 'I agree to the terms and conditions',
+
+      // Primary raised button
+      submitButton({
+        label: 'Submit Form',
         color: 'primary',
-        required: true,
-      },
-      validators: {
-        required: true,
-      },
-    },
+        // variant: 'raised',
+        className: 'submit-btn',
+      }),
 
-    // Primary raised button
-    submitButton({
-      label: 'Submit Form',
-      color: 'primary',
-      // variant: 'raised',
-      className: 'submit-btn',
-    }),
+      // Accent stroked button
+      submitButton({
+        label: 'Save Draft',
+        color: 'accent',
+        // variant: 'stroked',
+        className: 'draft-btn',
+      }),
 
-    // Accent stroked button
-    submitButton({
-      label: 'Save Draft',
-      color: 'accent',
-      // variant: 'stroked',
-      className: 'draft-btn',
-    }),
-
-    // Basic button
-    submitButton({
-      label: 'Cancel',
-      color: 'warn',
-      // variant: 'basic',
-      className: 'cancel-btn',
-    }),
-  ];
+      // Basic button
+      submitButton({
+        label: 'Cancel',
+        color: 'warn',
+        // variant: 'basic',
+        className: 'cancel-btn',
+      }),
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

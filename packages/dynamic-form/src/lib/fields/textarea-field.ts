@@ -10,5 +10,4 @@ export interface TextareaField extends UnwrapField<FormValueControl<string>> {
   hint?: string;
   tabIndex?: number | undefined;
   className?: string;
-  resize?: 'none' | 'both' | 'horizontal' | 'vertical';
 }

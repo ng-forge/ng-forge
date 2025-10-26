@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { MatSubmitField, MatSubmitProps } from './mat-submit.type';
+import { MatSubmitProps } from './mat-submit.type';
 
 /**
  * Material Design submit button component
@@ -22,7 +22,7 @@ import { MatSubmitField, MatSubmitProps } from './mat-submit.type';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSubmitFieldComponent implements MatSubmitField {
+export class MatSubmitFieldComponent  {
   readonly label = input.required<MatSubmitProps['label']>();
   readonly disabled = input<MatSubmitProps['disabled']>(false);
   readonly className = input<MatSubmitProps['className']>('');

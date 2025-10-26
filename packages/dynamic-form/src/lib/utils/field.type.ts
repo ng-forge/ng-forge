@@ -58,35 +58,13 @@ export type InferFormResult<T extends readonly InferenceFieldConfig[]> = Prettif
 }>;
 
 /**
- * Utility type to extract nested object types from dot notation keys
+ * Simplified form result inference with nested key support
+ * Handles basic dot notation like 'user.name' -> { user: { name: string } }
  */
-export type ParseNestedKey<T extends string> = T extends `${infer Head}.${infer Tail}`
-  ? { [K in Head]: ParseNestedKey<Tail> }
-  : { [K in T]: unknown };
-
-/**
- * Merge nested object types
- */
-export type MergeObjects<T, U> = {
-  [K in keyof T | keyof U]: K extends keyof U ? U[K] : K extends keyof T ? T[K] : never;
+export type InferFormResultAdvanced<T extends readonly InferenceFieldConfig[]> = {
+  [K in T[number] as K['key'] extends `${infer Head}.${string}` ? Head : K['key']]: K['key'] extends `${string}.${infer Tail}`
+    ? { [P in Tail]: K['type'] extends keyof FieldTypeMap ? FieldTypeMap[K['type']] : unknown }
+    : K['type'] extends keyof FieldTypeMap 
+    ? FieldTypeMap[K['type']] 
+    : unknown;
 };
-
-/**
- * Advanced form result inference that handles nested keys
- */
-export type InferFormResultAdvanced<T extends readonly InferenceFieldConfig[]> = T extends readonly [infer First, ...infer Rest]
-  ? First extends InferenceFieldConfig
-    ? Rest extends readonly InferenceFieldConfig[]
-      ? MergeObjects<
-          ParseNestedKey<First['key']> extends { [K in First['key']]: unknown }
-            ? { [K in First['key']]: First['type'] extends keyof FieldTypeMap ? FieldTypeMap[First['type']] : unknown }
-            : ParseNestedKey<First['key']>,
-          InferFormResultAdvanced<Rest>
-        >
-      : ParseNestedKey<First['key']> extends { [K in First['key']]: unknown }
-      ? { [K in First['key']]: First['type'] extends keyof FieldTypeMap ? FieldTypeMap[First['type']] : unknown }
-      : ParseNestedKey<First['key']>
-    : // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-      {}
-  : // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    {};

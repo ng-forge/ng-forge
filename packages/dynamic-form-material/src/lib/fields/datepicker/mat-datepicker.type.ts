@@ -1,4 +1,4 @@
-import { DatepickerField, ValueControlFieldType } from '@ng-forge/dynamic-form';
+import { DatepickerField } from '@ng-forge/dynamic-form';
 import { MatFormFieldAppearance } from '@angular/material/form-field';
 
 export interface MatDatepickerProps extends DatepickerField {
@@ -8,4 +8,4 @@ export interface MatDatepickerProps extends DatepickerField {
   tabIndex?: number;
 }
 
-export type MatDatepickerField = ValueControlFieldType<MatDatepickerProps, Date | null>;
+// export type MatDatepickerField = ValueControlFieldType<MatDatepickerProps, Date | null>;

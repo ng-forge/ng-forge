@@ -10,8 +10,6 @@ export interface MultiCheckboxOption<T = unknown> {
 export interface MultiCheckboxField<T> extends UnwrapField<FormValueControl<T[]>> {
   label: string;
   options: MultiCheckboxOption<T>[];
-  color?: 'primary' | 'accent' | 'warn';
-  labelPosition?: 'before' | 'after';
   hint?: string;
   className?: string;
 }

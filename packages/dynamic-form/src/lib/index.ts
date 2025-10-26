@@ -1,6 +1,12 @@
-// Core components following Angular Architects pattern
 export { DynamicForm } from './dynamic-form.component';
-export { TypedDynamicForm } from './typed-dynamic-form.component';
+export { FieldRendererDirective } from './directives/dynamic-form.directive';
+
+// Schema interfaces and types (now integrated into FormConfig)
+import type { DynamicFormSchemaDefinition } from './models/field-config';
+
+export type { DynamicFormSchemaDefinition, SchemaMetadata } from './models/field-config';
+
+export { buildValidationRules } from './models/field-config';
 
 // Core interfaces and types - clean signal forms API
 export type {
@@ -15,6 +21,8 @@ export type {
   CustomValidator,
   InferFormValue,
   FormOptions,
+  FieldTypeDefinition,
+  FieldWrapperDefinition,
 } from './models';
 
 // Builder functions for type-safe form definitions
@@ -31,3 +39,7 @@ export { SignalFormState } from './core/signal-form-state';
 
 // Field interfaces for custom field components
 export * from './fields';
+
+// Type helpers
+export type InferSchemaFormValue<T extends DynamicFormSchemaDefinition<any>> =
+  T extends DynamicFormSchemaDefinition<infer U> ? U : unknown;

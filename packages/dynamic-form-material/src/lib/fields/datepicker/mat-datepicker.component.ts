@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatError, MatHint, MatInput } from '@angular/material/input';
+import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatErrorsComponent } from '../../shared/mat-errors.component';
 
 @Component({
   selector: 'df-mat-datepicker',
@@ -14,7 +15,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatLabel,
     MatInput,
     MatHint,
-    MatError,
+    MatErrorsComponent,
     MatDatepicker,
     MatDatepickerInput,
     MatDatepickerToggle,
@@ -43,13 +44,9 @@ import { MatNativeDateModule } from '@angular/material/core';
 
       @if (hint(); as hint) {
       <mat-hint>{{ hint }}</mat-hint>
-      } @if (invalid() && touched()) {
-      <mat-error>
-        @for (error of errors(); track error) {
-        <span>{{ error.message }}</span>
-        }
-      </mat-error>
       }
+
+      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
     </mat-form-field>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

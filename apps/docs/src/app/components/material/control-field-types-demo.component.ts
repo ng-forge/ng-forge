@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-control-field-types-demo',
@@ -12,7 +12,7 @@ import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
         This example demonstrates how Material components implement both FormControl interfaces and field interfaces using the new control
         field type utilities. Each field showcases type-safe implementation with automatic property exclusion and signal compatibility.
       </p>
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="implementation-notes">
         <h5>Implementation Details:</h5>
         <ul>
@@ -107,151 +107,153 @@ export class ControlFieldTypesDemoComponent {
     multiCheckbox: [],
   });
 
-  fields: FieldConfig[] = [
-    // === ValueControlFieldType<MatInputProps, string> ===
-    {
-      key: 'textInput',
-      type: 'input',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      // === ValueControlFieldType<MatInputProps, string> ===
+      {
+        key: 'textInput',
+        type: 'input',
         label: 'Text Input (ValueControlFieldType)',
-        placeholder: 'Implements FormValueControl<string> + MatInputField',
-        appearance: 'outline',
-        hint: 'Uses ValueControlFieldType<MatInputProps, string>',
+        props: {
+          placeholder: 'Implements FormValueControl<string> + MatInputField',
+          appearance: 'outline',
+          hint: 'Uses ValueControlFieldType<MatInputProps, string>',
+        },
       },
-    },
-    {
-      key: 'emailInput',
-      type: 'input',
-      props: {
+      {
+        key: 'emailInput',
+        type: 'input',
         label: 'Email Input (ValueControlFieldType)',
-        type: 'email',
-        placeholder: 'user@example.com',
-        appearance: 'outline',
-        hint: 'Type-safe email input with automatic validation',
-        required: true,
+        props: {
+          type: 'email',
+          placeholder: 'user@example.com',
+          appearance: 'outline',
+          hint: 'Type-safe email input with automatic validation',
+          required: true,
+        },
+        validation: {
+          required: true,
+          email: true,
+        },
       },
-      validators: {
-        required: true,
-        email: true,
-      },
-    },
 
-    // === ValueControlFieldType<MatSelectProps, T> ===
-    {
-      key: 'selectValue',
-      type: 'select',
-      props: {
+      // === ValueControlFieldType<MatSelectProps, T> ===
+      {
+        key: 'selectValue',
+        type: 'select',
         label: 'Select Field (ValueControlFieldType)',
-        placeholder: 'Implements FormValueControl<T> + MatSelectField<T>',
-        appearance: 'outline',
-        hint: 'Uses ValueControlFieldType<MatSelectProps, T>',
-        options: [
-          { value: 'typescript', label: 'TypeScript' },
-          { value: 'angular', label: 'Angular' },
-          { value: 'material', label: 'Material Design' },
-        ],
+        props: {
+          placeholder: 'Implements FormValueControl<T> + MatSelectField<T>',
+          appearance: 'outline',
+          hint: 'Uses ValueControlFieldType<MatSelectProps, T>',
+          options: [
+            { value: 'typescript', label: 'TypeScript' },
+            { value: 'angular', label: 'Angular' },
+            { value: 'material', label: 'Material Design' },
+          ],
+        },
       },
-    },
 
-    // === ValueControlFieldType<MatTextareaProps, string> ===
-    {
-      key: 'textareaValue',
-      type: 'textarea',
-      props: {
+      // === ValueControlFieldType<MatTextareaProps, string> ===
+      {
+        key: 'textareaValue',
+        type: 'textarea',
         label: 'Textarea Field (ValueControlFieldType)',
-        placeholder: 'Implements FormValueControl<string> + MatTextareaField',
-        appearance: 'outline',
-        rows: 3,
-        hint: 'Uses ValueControlFieldType<MatTextareaProps, string>',
+        props: {
+          placeholder: 'Implements FormValueControl<string> + MatTextareaField',
+          appearance: 'outline',
+          rows: 3,
+          hint: 'Uses ValueControlFieldType<MatTextareaProps, string>',
+        },
       },
-    },
 
-    // === ValueControlFieldType<MatDatepickerProps, Date | null> ===
-    {
-      key: 'dateValue',
-      type: 'datepicker',
-      props: {
+      // === ValueControlFieldType<MatDatepickerProps, Date | null> ===
+      {
+        key: 'dateValue',
+        type: 'datepicker',
         label: 'Date Picker (ValueControlFieldType)',
-        placeholder: 'Implements FormValueControl<Date | null> + MatDatepickerField',
-        appearance: 'outline',
-        hint: 'Uses ValueControlFieldType<MatDatepickerProps, Date | null>',
+        props: {
+          placeholder: 'Implements FormValueControl<Date | null> + MatDatepickerField',
+          appearance: 'outline',
+          hint: 'Uses ValueControlFieldType<MatDatepickerProps, Date | null>',
+        },
       },
-    },
 
-    // === ValueControlFieldType<MatRadioProps<T>, T> ===
-    {
-      key: 'radioValue',
-      type: 'radio',
-      props: {
+      // === ValueControlFieldType<MatRadioProps<T>, T> ===
+      {
+        key: 'radioValue',
+        type: 'radio',
         label: 'Radio Group (ValueControlFieldType)',
-        appearance: 'outline',
-        hint: 'Uses ValueControlFieldType<MatRadioProps<T>, T>',
-        options: [
-          { value: 'beginner', label: 'Beginner Level' },
-          { value: 'intermediate', label: 'Intermediate Level' },
-          { value: 'advanced', label: 'Advanced Level' },
-        ],
+        props: {
+          appearance: 'outline',
+          hint: 'Uses ValueControlFieldType<MatRadioProps<T>, T>',
+          options: [
+            { value: 'beginner', label: 'Beginner Level' },
+            { value: 'intermediate', label: 'Intermediate Level' },
+            { value: 'advanced', label: 'Advanced Level' },
+          ],
+        },
       },
-    },
 
-    // === ValueControlFieldType<MatSliderProps, number> ===
-    {
-      key: 'sliderValue',
-      type: 'slider',
-      props: {
+      // === ValueControlFieldType<MatSliderProps, number> ===
+      {
+        key: 'sliderValue',
+        type: 'slider',
         label: 'Slider Field (ValueControlFieldType)',
-        hint: 'Uses ValueControlFieldType with FormValueControl<number>',
-        color: 'primary',
-        min: 0,
-        max: 100,
-        step: 10,
-        showThumbLabel: true,
+        props: {
+          hint: 'Uses ValueControlFieldType with FormValueControl<number>',
+          color: 'primary',
+          min: 0,
+          max: 100,
+          step: 10,
+          showThumbLabel: true,
+        },
       },
-    },
 
-    // === ValueControlFieldType<MatToggleProps, boolean> ===
-    {
-      key: 'toggleValue',
-      type: 'toggle',
-      props: {
+      // === ValueControlFieldType<MatToggleProps, boolean> ===
+      {
+        key: 'toggleValue',
+        type: 'toggle',
         label: 'Toggle Field (ValueControlFieldType)',
-        // appearance: 'outline',
-        hint: 'Uses ValueControlFieldType<MatToggleProps, boolean>',
-        color: 'accent',
-        labelPosition: 'before',
+        props: {
+          // appearance: 'outline',
+          hint: 'Uses ValueControlFieldType<MatToggleProps, boolean>',
+          color: 'accent',
+          labelPosition: 'before',
+        },
       },
-    },
 
-    // === CheckboxControlFieldType<MatCheckboxProps> ===
-    {
-      key: 'singleCheckbox',
-      type: 'checkbox',
-      props: {
+      // === CheckboxControlFieldType<MatCheckboxProps> ===
+      {
+        key: 'singleCheckbox',
+        type: 'checkbox',
         label: 'Checkbox Field (CheckboxControlFieldType)',
-        hint: 'Implements FormCheckboxControl + CheckboxControlFieldType<MatCheckboxProps>',
-        color: 'primary',
-        labelPosition: 'after',
+        props: {
+          hint: 'Implements FormCheckboxControl + CheckboxControlFieldType<MatCheckboxProps>',
+          color: 'primary',
+          labelPosition: 'after',
+        },
       },
-    },
 
-    // === ValueControlFieldType<MatMultiCheckboxProps<T>, T[]> ===
-    {
-      key: 'multiCheckbox',
-      type: 'multi-checkbox',
-      props: {
+      // === ValueControlFieldType<MatMultiCheckboxProps<T>, T[]> ===
+      {
+        key: 'multiCheckbox',
+        type: 'multi-checkbox',
         label: 'Multi-Checkbox (ValueControlFieldType)',
-        appearance: 'outline',
-        hint: 'Uses ValueControlFieldType<MatMultiCheckboxProps<T>, T[]>',
-        color: 'primary',
-        options: [
-          { value: 'signals', label: 'Angular Signals' },
-          { value: 'forms', label: 'Signal Forms' },
-          { value: 'control', label: 'Form Controls' },
-          { value: 'types', label: 'Type Utilities' },
-        ],
+        props: {
+          appearance: 'outline',
+          hint: 'Uses ValueControlFieldType<MatMultiCheckboxProps<T>, T[]>',
+          color: 'primary',
+          options: [
+            { value: 'signals', label: 'Angular Signals' },
+            { value: 'forms', label: 'Signal Forms' },
+            { value: 'control', label: 'Form Controls' },
+            { value: 'types', label: 'Type Utilities' },
+          ],
+        },
       },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

@@ -96,6 +96,13 @@ export class FieldRegistry {
   }
 
   /**
+   * Check if a field type is registered
+   */
+  isTypeRegistered(name: string): boolean {
+    return this.types.has(name);
+  }
+
+  /**
    * Register a field wrapper
    */
   registerWrapper(wrapper: FieldWrapperDefinition): void {

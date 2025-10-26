@@ -1,4 +1,4 @@
-import { FieldType, SliderField } from '@ng-forge/dynamic-form';
+import { SliderField } from '@ng-forge/dynamic-form';
 import { MatFormFieldAppearance } from '@angular/material/form-field';
 
 export interface MatSliderProps extends SliderField {
@@ -6,4 +6,4 @@ export interface MatSliderProps extends SliderField {
   appearance: MatFormFieldAppearance;
 }
 
-export type MatSliderField = FieldType<MatSliderProps>;
+// export type MatSliderField = FieldType<MatSliderProps>;

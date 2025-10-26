@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'input-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -45,56 +45,58 @@ export class InputDemoComponent {
     numberInput: null,
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'textInput',
-      type: 'input',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'textInput',
+        type: 'input',
         label: 'Text Input',
-        placeholder: 'Enter some text...',
-        appearance: 'outline',
-        hint: 'Basic text input field',
+        props: {
+          placeholder: 'Enter some text...',
+          appearance: 'outline',
+          hint: 'Basic text input field',
+        },
       },
-    },
-    {
-      key: 'emailInput',
-      type: 'input',
-      props: {
+      {
+        key: 'emailInput',
+        type: 'input',
         label: 'Email Input',
-        type: 'email',
-        placeholder: 'user@example.com',
-        appearance: 'outline',
-        hint: 'Email validation included',
-        required: true,
+        props: {
+          type: 'email',
+          placeholder: 'user@example.com',
+          appearance: 'outline',
+          hint: 'Email validation included',
+          required: true,
+        },
+        validation: {
+          required: true,
+          email: true,
+        },
       },
-      validators: {
-        required: true,
-        email: true,
-      },
-    },
-    {
-      key: 'passwordInput',
-      type: 'input',
-      props: {
+      {
+        key: 'passwordInput',
+        type: 'input',
         label: 'Password Input',
-        type: 'password',
-        placeholder: 'Enter password...',
-        appearance: 'outline',
-        hint: 'Hidden character input',
+        props: {
+          type: 'password',
+          placeholder: 'Enter password...',
+          appearance: 'outline',
+          hint: 'Hidden character input',
+        },
       },
-    },
-    {
-      key: 'numberInput',
-      type: 'input',
-      props: {
+      {
+        key: 'numberInput',
+        type: 'input',
         label: 'Number Input',
-        type: 'number',
-        placeholder: '123',
-        appearance: 'outline',
-        hint: 'Numeric input only',
+        props: {
+          type: 'number',
+          placeholder: '123',
+          appearance: 'outline',
+          hint: 'Numeric input only',
+        },
       },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

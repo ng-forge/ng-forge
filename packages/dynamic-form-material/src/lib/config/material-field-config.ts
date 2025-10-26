@@ -1,4 +1,4 @@
-import { FieldTypeDefinition } from '@ng-forge/dynamic-form';
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-form';
 import { MatInputFieldComponent } from '../fields/input/mat-input.component';
 import { MatSelectFieldComponent } from '../fields/select/mat-select.component';
 import { MatCheckboxFieldComponent } from '../fields/checkbox/mat-checkbox.component';
@@ -12,6 +12,7 @@ import { MatToggleFieldComponent } from '../fields/toggle/mat-toggle.component';
 
 /**
  * Material Design field type definitions
+ * Follows the FieldTypeDefinition interface for proper registry integration
  */
 export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
   {

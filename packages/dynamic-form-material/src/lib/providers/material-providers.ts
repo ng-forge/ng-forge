@@ -1,21 +1,25 @@
-import { DynamicFormConfig, withConfig } from '@ng-forge/dynamic-form';
+import { inject, provideAppInitializer } from '@angular/core';
+import { DynamicFormFeature, FieldRegistry } from '@ng-forge/dynamic-form';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
 
 /**
- * Provide Material Design field types for dynamic forms.
- *
- * If you pass a config that includes a `fields` property, the result type will be inferred.
+ * Configure dynamic forms with Material Design field types
+ * Registers all Material Design field components with the FieldRegistry
  */
-export function withMaterialFields(config?: DynamicFormConfig): DynamicFormConfig {
-  return withConfig({
-    types: MATERIAL_FIELD_TYPES,
-    ...(config ?? {}),
-  });
+export function withMaterial(): DynamicFormFeature {
+  return {
+    providers: [
+      provideAppInitializer((): void => {
+        const registry = inject(FieldRegistry);
+
+        // Register material field types directly
+        registry.registerTypes(MATERIAL_FIELD_TYPES);
+      }),
+    ],
+  };
 }
 
 /**
- * Enhanced Material provider with full type inference
+ * Alias for better naming consistency with the app usage
  */
-export function withTypedMaterialFields(config: DynamicFormConfig): DynamicFormConfig {
-  return withMaterialFields(config);
-}
+export const withMaterialFields = withMaterial;

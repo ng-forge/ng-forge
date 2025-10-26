@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'checkbox-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -44,38 +44,40 @@ export class CheckboxDemoComponent {
     accentCheckbox: false,
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'basicCheckbox',
-      type: 'checkbox',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'basicCheckbox',
+        type: 'checkbox',
         label: 'Basic Checkbox',
-        hint: 'Default checkbox styling',
-        color: 'primary',
-        labelPosition: 'after',
+        props: {
+          hint: 'Default checkbox styling',
+          color: 'primary',
+          labelPosition: 'after',
+        },
       },
-    },
-    {
-      key: 'primaryCheckbox',
-      type: 'checkbox',
-      props: {
+      {
+        key: 'primaryCheckbox',
+        type: 'checkbox',
         label: 'Primary Color',
-        hint: 'Primary theme color',
-        color: 'primary',
-        labelPosition: 'after',
+        props: {
+          hint: 'Primary theme color',
+          color: 'primary',
+          labelPosition: 'after',
+        },
       },
-    },
-    {
-      key: 'accentCheckbox',
-      type: 'checkbox',
-      props: {
+      {
+        key: 'accentCheckbox',
+        type: 'checkbox',
         label: 'Accent Color',
-        hint: 'Accent theme color',
-        color: 'accent',
-        labelPosition: 'after',
+        props: {
+          hint: 'Accent theme color',
+          color: 'accent',
+          labelPosition: 'after',
+        },
       },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

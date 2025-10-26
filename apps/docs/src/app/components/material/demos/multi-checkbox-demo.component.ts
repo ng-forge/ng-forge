@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'multi-checkbox-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -43,41 +43,43 @@ export class MultiCheckboxDemoComponent {
     technologies: [],
   });
 
-  fields: FieldConfig[] = [
-    {
-      key: 'features',
-      type: 'multi-checkbox',
-      props: {
+  fields: FormConfig = {
+    fields: [
+      {
+        key: 'features',
+        type: 'multi-checkbox',
         label: 'Select Features',
-        appearance: 'outline',
-        color: 'primary',
-        hint: 'Choose multiple features',
-        options: [
-          { value: 'dashboard', label: 'Dashboard' },
-          { value: 'analytics', label: 'Analytics' },
-          { value: 'reporting', label: 'Reporting' },
-          { value: 'api', label: 'API Access' },
-        ],
+        props: {
+          appearance: 'outline',
+          color: 'primary',
+          hint: 'Choose multiple features',
+          options: [
+            { value: 'dashboard', label: 'Dashboard' },
+            { value: 'analytics', label: 'Analytics' },
+            { value: 'reporting', label: 'Reporting' },
+            { value: 'api', label: 'API Access' },
+          ],
+        },
       },
-    },
-    {
-      key: 'technologies',
-      type: 'multi-checkbox',
-      props: {
+      {
+        key: 'technologies',
+        type: 'multi-checkbox',
         label: 'Technologies',
-        appearance: 'outline',
-        color: 'accent',
-        hint: 'Select technologies you use',
-        options: [
-          { value: 'angular', label: 'Angular' },
-          { value: 'typescript', label: 'TypeScript' },
-          { value: 'material', label: 'Material Design' },
-          { value: 'rxjs', label: 'RxJS' },
-          { value: 'signals', label: 'Angular Signals' },
-        ],
+        props: {
+          appearance: 'outline',
+          color: 'accent',
+          hint: 'Select technologies you use',
+          options: [
+            { value: 'angular', label: 'Angular' },
+            { value: 'typescript', label: 'TypeScript' },
+            { value: 'material', label: 'Material Design' },
+            { value: 'rxjs', label: 'RxJS' },
+            { value: 'signals', label: 'Angular Signals' },
+          ],
+        },
       },
-    },
-  ];
+    ],
+  };
 
   onValueChange(newValue: any) {
     this.model.set(newValue);

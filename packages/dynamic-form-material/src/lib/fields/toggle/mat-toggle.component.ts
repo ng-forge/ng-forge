@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { FormCheckboxControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatErrorsComponent } from '../../shared/mat-errors.component';
 
 @Component({
   selector: 'df-mat-toggle',
-  imports: [FormsModule, MatSlideToggle],
+  imports: [FormsModule, MatSlideToggle, MatErrorsComponent],
   template: `
     <div [class]="className() || ''">
       <mat-slide-toggle
@@ -22,9 +23,8 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 
       @if (hint(); as hint) {
       <div class="mat-hint">{{ hint }}</div>
-      } @if (invalid() && touched()) { @for (error of errors(); track error) {
-      <div class="mat-error">{{ error.message }}</div>
-      } }
+      }
+      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
     </div>
   `,
   styles: [
@@ -41,12 +41,6 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
       .mat-hint {
         font-size: 12px;
         color: rgba(0, 0, 0, 0.6);
-        margin-top: 4px;
-      }
-
-      .mat-error {
-        font-size: 12px;
-        color: #f44336;
         margin-top: 4px;
       }
     `,

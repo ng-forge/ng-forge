@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FieldConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 
 interface CompleteFormModel {
@@ -30,7 +30,7 @@ interface CompleteFormModel {
     <div class="example-container">
       <h4>Complete Material Design Form</h4>
       <p class="description">A comprehensive form showcasing all Material components with proper theming and validation.</p>
-      <dynamic-form [fields]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="config" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -93,182 +93,184 @@ export class CompleteMaterialFormComponent {
     },
   });
 
-  fields: FieldConfig[] = [
-    // Personal Information Section
-    {
-      key: 'personalInfo.firstName',
-      type: 'input',
-      props: {
+  config: FormConfig = {
+    fields: [
+      // Personal Information Section
+      {
+        key: 'personalInfo.firstName',
+        type: 'input',
         label: 'First Name',
-        placeholder: 'Enter your first name',
-        appearance: 'outline',
-        required: true,
+        props: {
+          placeholder: 'Enter your first name',
+          appearance: 'outline',
+          required: true,
+        },
+        validation: {
+          required: true,
+          minLength: 2,
+        },
       },
-      validators: {
-        required: true,
-        minLength: 2,
+      {
+        key: 'personalInfo.lastName',
+        type: 'input',
+        props: {
+          label: 'Last Name',
+          placeholder: 'Enter your last name',
+          appearance: 'outline',
+          required: true,
+        },
+        validation: {
+          required: true,
+          minLength: 2,
+        },
       },
-    },
-    {
-      key: 'personalInfo.lastName',
-      type: 'input',
-      props: {
-        label: 'Last Name',
-        placeholder: 'Enter your last name',
-        appearance: 'outline',
-        required: true,
-      },
-      validators: {
-        required: true,
-        minLength: 2,
-      },
-    },
-    {
-      key: 'personalInfo.email',
-      type: 'input',
-      props: {
+      {
+        key: 'personalInfo.email',
+        type: 'input',
         label: 'Email Address',
-        type: 'email',
-        placeholder: 'user@example.com',
-        appearance: 'outline',
-        required: true,
-        hint: 'We will never share your email',
+        props: {
+          type: 'email',
+          placeholder: 'user@example.com',
+          appearance: 'outline',
+          required: true,
+          hint: 'We will never share your email',
+        },
+        validation: {
+          required: true,
+          email: true,
+        },
       },
-      validators: {
-        required: true,
-        email: true,
-      },
-    },
-    {
-      key: 'personalInfo.phone',
-      type: 'input',
-      props: {
+      {
+        key: 'personalInfo.phone',
+        type: 'input',
         label: 'Phone Number',
-        type: 'tel',
-        placeholder: '+1 (555) 123-4567',
-        appearance: 'outline',
-        hint: 'Include country code',
+        props: {
+          type: 'tel',
+          placeholder: '+1 (555) 123-4567',
+          appearance: 'outline',
+          hint: 'Include country code',
+        },
       },
-    },
 
-    // Preferences Section
-    {
-      key: 'preferences.country',
-      type: 'select',
-      props: {
+      // Preferences Section
+      {
+        key: 'preferences.country',
+        type: 'select',
         label: 'Country',
-        placeholder: 'Select your country',
-        appearance: 'outline',
-        required: true,
-        options: [
-          { value: 'us', label: 'United States' },
-          { value: 'uk', label: 'United Kingdom' },
-          { value: 'ca', label: 'Canada' },
-          { value: 'au', label: 'Australia' },
-          { value: 'de', label: 'Germany' },
-          { value: 'fr', label: 'France' },
-          { value: 'jp', label: 'Japan' },
-        ],
+        props: {
+          placeholder: 'Select your country',
+          appearance: 'outline',
+          required: true,
+          options: [
+            { value: 'us', label: 'United States' },
+            { value: 'uk', label: 'United Kingdom' },
+            { value: 'ca', label: 'Canada' },
+            { value: 'au', label: 'Australia' },
+            { value: 'de', label: 'Germany' },
+            { value: 'fr', label: 'France' },
+            { value: 'jp', label: 'Japan' },
+          ],
+        },
+        validation: {
+          required: true,
+        },
       },
-      validators: {
-        required: true,
-      },
-    },
-    {
-      key: 'preferences.language',
-      type: 'select',
-      props: {
+      {
+        key: 'preferences.language',
+        type: 'select',
         label: 'Language',
-        placeholder: 'Select your language',
-        appearance: 'outline',
-        options: [
-          { value: 'en', label: 'English' },
-          { value: 'es', label: 'Spanish' },
-          { value: 'fr', label: 'French' },
-          { value: 'de', label: 'German' },
-          { value: 'ja', label: 'Japanese' },
-        ],
+        props: {
+          placeholder: 'Select your language',
+          appearance: 'outline',
+          options: [
+            { value: 'en', label: 'English' },
+            { value: 'es', label: 'Spanish' },
+            { value: 'fr', label: 'French' },
+            { value: 'de', label: 'German' },
+            { value: 'ja', label: 'Japanese' },
+          ],
+        },
       },
-    },
-    {
-      key: 'preferences.plan',
-      type: 'select',
-      props: {
+      {
+        key: 'preferences.plan',
+        type: 'select',
         label: 'Subscription Plan',
-        placeholder: 'Choose your plan',
-        appearance: 'outline',
-        required: true,
-        hint: 'You can upgrade or downgrade anytime',
-        options: [
-          { value: 'free', label: 'Free - $0/month', description: 'Basic features' },
-          { value: 'pro', label: 'Pro - $10/month', description: 'Advanced features' },
-          { value: 'enterprise', label: 'Enterprise - $50/month', description: 'Full features + support' },
-        ],
+        props: {
+          placeholder: 'Choose your plan',
+          appearance: 'outline',
+          required: true,
+          hint: 'You can upgrade or downgrade anytime',
+          options: [
+            { value: 'free', label: 'Free - $0/month', description: 'Basic features' },
+            { value: 'pro', label: 'Pro - $10/month', description: 'Advanced features' },
+            { value: 'enterprise', label: 'Enterprise - $50/month', description: 'Full features + support' },
+          ],
+        },
+        validation: {
+          required: true,
+        },
       },
-      validators: {
-        required: true,
-      },
-    },
-    {
-      key: 'preferences.notifications',
-      type: 'select',
-      props: {
+      {
+        key: 'preferences.notifications',
+        type: 'select',
         label: 'Notification Types',
-        placeholder: 'Select notification preferences',
-        appearance: 'outline',
-        multiple: true,
-        hint: 'Select all that apply',
-        options: [
-          { value: 'email', label: 'Email notifications' },
-          { value: 'sms', label: 'SMS notifications' },
-          { value: 'push', label: 'Push notifications' },
-          { value: 'newsletter', label: 'Newsletter' },
-        ],
+        props: {
+          placeholder: 'Select notification preferences',
+          appearance: 'outline',
+          multiple: true,
+          hint: 'Select all that apply',
+          options: [
+            { value: 'email', label: 'Email notifications' },
+            { value: 'sms', label: 'SMS notifications' },
+            { value: 'push', label: 'Push notifications' },
+            { value: 'newsletter', label: 'Newsletter' },
+          ],
+        },
       },
-    },
 
-    // Agreements Section
-    {
-      key: 'agreements.newsletter',
-      type: 'checkbox',
-      props: {
+      // Agreements Section
+      {
+        key: 'agreements.newsletter',
+        type: 'checkbox',
         label: 'Subscribe to newsletter',
-        hint: 'Get updates about new features and tips',
-        color: 'primary',
+        props: {
+          hint: 'Get updates about new features and tips',
+          color: 'primary',
+        },
       },
-    },
-    {
-      key: 'agreements.terms',
-      type: 'checkbox',
-      props: {
+      {
+        key: 'agreements.terms',
+        type: 'checkbox',
         label: 'I agree to the Terms and Conditions',
-        color: 'primary',
-        required: true,
+        props: {
+          color: 'primary',
+          required: true,
+        },
+        validation: {
+          required: true,
+        },
       },
-      validators: {
-        required: true,
-      },
-    },
-    {
-      key: 'agreements.privacy',
-      type: 'checkbox',
-      props: {
+      {
+        key: 'agreements.privacy',
+        type: 'checkbox',
         label: 'I agree to the Privacy Policy',
-        color: 'primary',
-        required: true,
+        props: {
+          color: 'primary',
+          required: true,
+        },
+        validation: {
+          required: true,
+        },
       },
-      validators: {
-        required: true,
-      },
-    },
 
-    // Submit Button
-    submitButton({
-      label: 'Create Account',
-      color: 'primary',
-      className: 'submit-btn',
-    }),
-  ];
+      // Submit Button
+      submitButton({
+        label: 'Create Account',
+        color: 'primary',
+        className: 'submit-btn',
+      }),
+    ],
+  };
 
   onValueChange(newValue: CompleteFormModel) {
     this.model.set(newValue);
