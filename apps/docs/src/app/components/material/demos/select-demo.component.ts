@@ -7,10 +7,10 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" (valueChange)="formOutput.set($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
-        <pre>{{ model() | json }}</pre>
+        <pre>{{ formOutput() | json }}</pre>
       </div>
     </div>
   `,
@@ -38,12 +38,9 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
   ],
 })
 export class SelectDemoComponent {
-  model = signal({
-    singleSelect: '',
-    multiSelect: [],
-  });
+  formOutput = signal({});
 
-  fields: FormConfig = {
+  fields = {
     fields: [
       {
         key: 'singleSelect',
@@ -80,9 +77,5 @@ export class SelectDemoComponent {
         },
       },
     ],
-  };
-
-  onValueChange(newValue: any) {
-    this.model.set(newValue);
-  }
+  } as const satisfies FormConfig;
 }

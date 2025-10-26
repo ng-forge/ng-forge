@@ -4,6 +4,7 @@ import {
   Component,
   ComponentRef,
   computed,
+  effect,
   inject,
   Injector,
   input,
@@ -22,7 +23,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, switchMap } from 'rxjs';
 import { keyBy, mapValues } from 'lodash-es';
 
-import { buildValidationRules, FieldDef, FormConfig } from './models/field-config';
+import { buildValidationRules, FieldDef, FormConfig, InferFormValue } from './models/field-config';
 import { FieldRegistry } from './core/field-registry';
 import { createSchemaFromFields } from './core/schema-factory';
 
@@ -36,14 +37,14 @@ import { createSchemaFromFields } from './core/schema-factory';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TModel = unknown> {
+export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef[], TModel = InferFormValue<TFields>> {
   private readonly fieldRegistry = inject(FieldRegistry);
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
 
-  config = input.required<FormConfig>();
+  config = input.required<FormConfig<TFields>>();
 
-  // Form value input
+  // Form value input/output for two-way binding
   value = input<Partial<TModel> | undefined>(undefined);
 
   /**
@@ -154,6 +155,14 @@ export class DynamicForm<TModel = unknown> {
   readonly valueChange = output<TModel>();
   readonly validityChange = output<boolean>();
   readonly dirtyChange = output<boolean>();
+
+  constructor() {
+    // Emit value changes for two-way binding
+    effect(() => {
+      const currentValue = this.formValue();
+      this.valueChange.emit(currentValue);
+    });
+  }
 
   // TODO: Apply validation timing options (validateOnChange, validateOnBlur)
   // These options would need to be implemented at the field component level
