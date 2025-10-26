@@ -119,8 +119,8 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John'
-          }
+            defaultValue: 'John',
+          },
         ],
       };
 
@@ -140,8 +140,8 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true
-          }
+            defaultValue: true,
+          },
         ],
       };
 
@@ -161,14 +161,14 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John'
+            defaultValue: 'John',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: false
-          }
+            defaultValue: false,
+          },
         ],
       };
 
@@ -180,7 +180,7 @@ describe('DynamicFormComponent - Simple Tests', () => {
 
       expect(component.formValue()).toEqual({
         firstName: 'John',
-        isActive: false
+        isActive: false,
       });
     });
   });
@@ -194,8 +194,8 @@ describe('DynamicFormComponent - Simple Tests', () => {
             type: 'input',
             label: 'First Name',
             defaultValue: 'John',
-            required: true
-          }
+            required: true,
+          },
         ],
       };
 
@@ -217,8 +217,8 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John'
-          }
+            defaultValue: 'John',
+          },
         ],
       };
 
@@ -242,8 +242,8 @@ describe('DynamicFormComponent - Simple Tests', () => {
             type: 'input',
             label: 'Email',
             required: true,
-            defaultValue: ''
-          }
+            defaultValue: '',
+          },
         ],
       };
 
@@ -263,15 +263,15 @@ describe('DynamicFormComponent - Simple Tests', () => {
             type: 'input',
             label: 'First Name',
             required: true,
-            defaultValue: 'John'
+            defaultValue: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
             required: true,
-            defaultValue: ''
-          }
+            defaultValue: '',
+          },
         ],
       };
 
@@ -291,15 +291,15 @@ describe('DynamicFormComponent - Simple Tests', () => {
             type: 'input',
             label: 'First Name',
             required: true,
-            defaultValue: 'John'
+            defaultValue: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
             required: true,
-            defaultValue: 'Doe'
-          }
+            defaultValue: 'Doe',
+          },
         ],
       };
 
@@ -319,13 +319,13 @@ describe('DynamicFormComponent - Simple Tests', () => {
           {
             key: 'firstName',
             type: 'input',
-            label: 'First Name'
+            label: 'First Name',
           },
           {
             key: 'isActive',
             type: 'checkbox',
-            label: 'Is Active'
-          }
+            label: 'Is Active',
+          },
         ],
       };
 
@@ -335,7 +335,7 @@ describe('DynamicFormComponent - Simple Tests', () => {
 
       expect(component.formValue()).toEqual({
         firstName: '',
-        isActive: false
+        isActive: false,
       });
     });
 
@@ -346,26 +346,26 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John'
+            defaultValue: 'John',
           },
           {
             key: 'age',
             type: 'input',
             label: 'Age',
-            defaultValue: '25'
+            defaultValue: '25',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true
+            defaultValue: true,
           },
           {
             key: 'isAdmin',
             type: 'checkbox',
             label: 'Is Admin',
-            defaultValue: false
-          }
+            defaultValue: false,
+          },
         ],
       };
 
@@ -377,7 +377,7 @@ describe('DynamicFormComponent - Simple Tests', () => {
         firstName: 'John',
         age: '25',
         isActive: true,
-        isAdmin: false
+        isAdmin: false,
       });
     });
 
@@ -391,9 +391,9 @@ describe('DynamicFormComponent - Simple Tests', () => {
             placeholder: 'Enter your email',
             defaultValue: 'test@example.com',
             props: {
-              type: 'email'
-            }
-          }
+              type: 'email',
+            },
+          },
         ],
       };
 
@@ -414,8 +414,8 @@ describe('DynamicFormComponent - Simple Tests', () => {
             type: 'input',
             label: 'Email',
             required: true,
-            defaultValue: ''
-          }
+            defaultValue: '',
+          },
         ],
       };
 
@@ -433,8 +433,8 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John'
-          }
+            defaultValue: 'John',
+          },
         ],
       };
 
@@ -452,14 +452,14 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John'
+            defaultValue: 'John',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true
-          }
+            defaultValue: true,
+          },
         ],
       };
 
@@ -467,7 +467,7 @@ describe('DynamicFormComponent - Simple Tests', () => {
 
       expect(component.defaultValues()).toEqual({
         firstName: 'John',
-        isActive: true
+        isActive: true,
       });
     });
   });
@@ -481,52 +481,52 @@ describe('DynamicFormComponent - Simple Tests', () => {
             type: 'input',
             label: 'First Name',
             defaultValue: 'John',
-            required: true
+            required: true,
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
             defaultValue: 'Doe',
-            required: true
+            required: true,
           },
           {
             key: 'email',
             type: 'input',
             label: 'Email',
             defaultValue: 'john.doe@example.com',
-            required: true
+            required: true,
           },
           {
             key: 'age',
             type: 'input',
             label: 'Age',
-            defaultValue: '30'
+            defaultValue: '30',
           },
           {
             key: 'country',
             type: 'input',
             label: 'Country',
-            defaultValue: 'USA'
+            defaultValue: 'USA',
           },
           {
             key: 'bio',
             type: 'input',
             label: 'Biography',
-            defaultValue: 'Software developer'
+            defaultValue: 'Software developer',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true
+            defaultValue: true,
           },
           {
             key: 'isAdmin',
             type: 'checkbox',
             label: 'Is Admin',
-            defaultValue: false
-          }
+            defaultValue: false,
+          },
         ],
       };
 
@@ -542,7 +542,7 @@ describe('DynamicFormComponent - Simple Tests', () => {
         country: 'USA',
         bio: 'Software developer',
         isActive: true,
-        isAdmin: false
+        isAdmin: false,
       });
 
       expect(component.valid()).toBe(true);
@@ -556,28 +556,28 @@ describe('DynamicFormComponent - Simple Tests', () => {
             type: 'input',
             label: 'First Name',
             defaultValue: 'John',
-            required: true
+            required: true,
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
             defaultValue: '',
-            required: true
+            required: true,
           },
           {
             key: 'email',
             type: 'input',
             label: 'Email',
             defaultValue: 'john@example.com',
-            required: false
+            required: false,
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true
-          }
+            defaultValue: true,
+          },
         ],
       };
 
@@ -589,7 +589,7 @@ describe('DynamicFormComponent - Simple Tests', () => {
         firstName: 'John',
         lastName: '',
         email: 'john@example.com',
-        isActive: true
+        isActive: true,
       });
 
       // Should be invalid due to empty required lastName
@@ -612,8 +612,8 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John'
-          }
+            defaultValue: 'John',
+          },
         ],
       };
 
@@ -630,14 +630,14 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'Jane'
+            defaultValue: 'Jane',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: 'Smith'
-          }
+            defaultValue: 'Smith',
+          },
         ],
       };
 
@@ -647,7 +647,7 @@ describe('DynamicFormComponent - Simple Tests', () => {
 
       expect(component.formValue()).toEqual({
         firstName: 'Jane',
-        lastName: 'Smith'
+        lastName: 'Smith',
       });
     });
   });
@@ -660,14 +660,14 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: null as any
+            defaultValue: null as any,
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: undefined as any
-          }
+            defaultValue: undefined as any,
+          },
         ],
       };
 
@@ -686,14 +686,14 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'field-with-dashes',
             type: 'input',
             label: 'Field with Dashes',
-            defaultValue: 'test'
+            defaultValue: 'test',
           },
           {
             key: 'field_with_underscores',
             type: 'input',
             label: 'Field with Underscores',
-            defaultValue: 'test2'
-          }
+            defaultValue: 'test2',
+          },
         ],
       };
 
@@ -703,7 +703,7 @@ describe('DynamicFormComponent - Simple Tests', () => {
 
       expect(component.formValue()).toEqual({
         'field-with-dashes': 'test',
-        'field_with_underscores': 'test2'
+        field_with_underscores: 'test2',
       });
     });
 
@@ -715,8 +715,8 @@ describe('DynamicFormComponent - Simple Tests', () => {
             key: 'longText',
             type: 'input',
             label: 'Long Text',
-            defaultValue: longValue
-          }
+            defaultValue: longValue,
+          },
         ],
       };
 

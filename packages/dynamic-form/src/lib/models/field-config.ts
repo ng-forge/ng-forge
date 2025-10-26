@@ -49,10 +49,10 @@ export interface FieldDef<TKey extends string = string, TValue = unknown> extend
 export interface FormConfig<TFields extends readonly FieldDef[] = readonly FieldDef[], TValue = unknown> {
   // Option 1: JSON-based field definitions (typically from API)
   readonly fields?: TFields;
-  
+
   // Option 2: Explicit schema design (manual form configs)
   readonly schema?: FormSchema<TValue>;
-  
+
   // Form-level options
   readonly options?: FormOptions;
 }
@@ -210,10 +210,10 @@ export function buildValidationRules<T>(field: FieldDef): ValidationRules<T> {
   if (field.validation) {
     return field.validation as ValidationRules<T>;
   }
-  
+
   // Otherwise, build from implicit properties
   const rules: ValidationRules<T> = {};
-  
+
   if (field.required) rules.required = true;
   if (field.email) rules.email = true;
   if (field.min !== undefined) rules.min = field.min;
@@ -223,7 +223,7 @@ export function buildValidationRules<T>(field: FieldDef): ValidationRules<T> {
   if (field.patternRule) {
     rules.pattern = typeof field.patternRule === 'string' ? new RegExp(field.patternRule) : field.patternRule;
   }
-  
+
   return rules;
 }
 

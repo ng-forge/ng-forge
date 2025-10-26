@@ -11,11 +11,11 @@ import { MatError } from '@angular/material/input';
   imports: [MatError],
   template: `
     @if (shouldShowErrors()) {
-      <mat-error>
-        @for (error of errors(); track error) {
-          <span>{{ error.message }}</span>
-        }
-      </mat-error>
+    <mat-error>
+      @for (error of errors(); track error) {
+      <span>{{ error.message }}</span>
+      }
+    </mat-error>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

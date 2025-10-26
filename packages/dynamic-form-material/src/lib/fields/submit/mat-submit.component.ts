@@ -22,7 +22,7 @@ import { MatSubmitProps } from './mat-submit.type';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSubmitFieldComponent  {
+export class MatSubmitFieldComponent {
   readonly label = input.required<MatSubmitProps['label']>();
   readonly disabled = input<MatSubmitProps['disabled']>(false);
   readonly className = input<MatSubmitProps['className']>('');

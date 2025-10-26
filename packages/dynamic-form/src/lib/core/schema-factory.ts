@@ -21,7 +21,6 @@ export function createSchemaFromFields<TModel = unknown>(fields: readonly FieldD
   });
 }
 
-
 /**
  * Builds validation rules from a field definition
  */
@@ -35,9 +34,7 @@ function buildValidationRulesFromField(fieldDef: FieldDef): ValidationRules {
   if (fieldDef.minLength !== undefined) rules.minLength = fieldDef.minLength;
   if (fieldDef.maxLength !== undefined) rules.maxLength = fieldDef.maxLength;
   if (fieldDef.patternRule) {
-    rules.pattern = typeof fieldDef.patternRule === 'string'
-      ? new RegExp(fieldDef.patternRule)
-      : fieldDef.patternRule;
+    rules.pattern = typeof fieldDef.patternRule === 'string' ? new RegExp(fieldDef.patternRule) : fieldDef.patternRule;
   }
 
   // Merge with explicit validation if provided

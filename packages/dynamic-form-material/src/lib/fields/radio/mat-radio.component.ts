@@ -62,7 +62,6 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
         color: rgba(0, 0, 0, 0.6);
         margin-top: 4px;
       }
-
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

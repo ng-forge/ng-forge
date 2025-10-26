@@ -64,7 +64,7 @@ export type InferFormResult<T extends readonly InferenceFieldConfig[]> = Prettif
 export type InferFormResultAdvanced<T extends readonly InferenceFieldConfig[]> = {
   [K in T[number] as K['key'] extends `${infer Head}.${string}` ? Head : K['key']]: K['key'] extends `${string}.${infer Tail}`
     ? { [P in Tail]: K['type'] extends keyof FieldTypeMap ? FieldTypeMap[K['type']] : unknown }
-    : K['type'] extends keyof FieldTypeMap 
-    ? FieldTypeMap[K['type']] 
+    : K['type'] extends keyof FieldTypeMap
+    ? FieldTypeMap[K['type']]
     : unknown;
 };

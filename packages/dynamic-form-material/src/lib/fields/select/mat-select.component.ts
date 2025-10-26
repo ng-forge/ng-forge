@@ -35,7 +35,7 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
       @if (hint()) {
       <mat-hint>{{ hint() }}</mat-hint>
       }
-      
+
       <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
     </mat-form-field>
   `,

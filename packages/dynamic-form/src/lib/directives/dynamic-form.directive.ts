@@ -44,10 +44,7 @@ export class FieldRendererDirective implements OnDestroy {
     fields.forEach((fieldComponent) => {
       if (fieldComponent && fieldComponent.location) {
         // Append the field component's DOM element to the form
-        this.renderer.appendChild(
-          this.elementRef.nativeElement,
-          fieldComponent.location.nativeElement
-        );
+        this.renderer.appendChild(this.elementRef.nativeElement, fieldComponent.location.nativeElement);
 
         // Keep track for cleanup
         this.renderedComponents.push(fieldComponent);
@@ -59,10 +56,7 @@ export class FieldRendererDirective implements OnDestroy {
     // Remove field components from DOM (but don't destroy them - they're managed by the parent)
     this.renderedComponents.forEach((fieldComponent) => {
       if (fieldComponent.location?.nativeElement?.parentNode === this.elementRef.nativeElement) {
-        this.renderer.removeChild(
-          this.elementRef.nativeElement,
-          fieldComponent.location.nativeElement
-        );
+        this.renderer.removeChild(this.elementRef.nativeElement, fieldComponent.location.nativeElement);
       }
     });
 

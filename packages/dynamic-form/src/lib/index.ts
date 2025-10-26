@@ -41,5 +41,4 @@ export { SignalFormState } from './core/signal-form-state';
 export * from './fields';
 
 // Type helpers
-export type InferSchemaFormValue<T extends DynamicFormSchemaDefinition<any>> =
-  T extends DynamicFormSchemaDefinition<infer U> ? U : unknown;
+export type InferSchemaFormValue<T extends DynamicFormSchemaDefinition<any>> = T extends DynamicFormSchemaDefinition<infer U> ? U : unknown;
