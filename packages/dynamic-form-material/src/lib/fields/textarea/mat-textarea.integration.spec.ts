@@ -57,7 +57,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: 'Initial description text',
         comments: '',
@@ -136,7 +136,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: '',
         comments: '',
@@ -194,7 +194,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: 'Initial description',
         comments: 'Initial comments',
@@ -286,7 +286,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: 'Cannot edit this',
         comments: '',
@@ -353,7 +353,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: '',
         comments: '',
@@ -394,7 +394,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: '',
         comments: '',
@@ -426,7 +426,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: '',
         comments: '',
@@ -470,7 +470,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: '',
         comments: '',
@@ -500,7 +500,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: '',
         comments: '',
@@ -533,7 +533,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       // Don't set initial value
       fixture.detectChanges();
 
@@ -552,7 +552,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', null as any);
       fixture.detectChanges();
 
@@ -571,7 +571,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: '',
         comments: '',
@@ -603,7 +603,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: '',
         comments: '',
@@ -637,7 +637,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         description: 'Initial content',
         comments: '',
@@ -683,7 +683,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
       ];
 
       expect(() => {
-        fixture.componentRef.setInput('fields', fields);
+        fixture.componentRef.setInput('config', { fields });
         fixture.detectChanges();
       }).not.toThrow();
 
@@ -702,7 +702,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.detectChanges();
 
       // Field should have auto-generated ID

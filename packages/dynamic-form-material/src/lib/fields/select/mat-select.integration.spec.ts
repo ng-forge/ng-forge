@@ -53,7 +53,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: 'US',
         languages: [],
@@ -134,7 +134,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: '',
         languages: ['en', 'es'],
@@ -199,7 +199,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: '',
         languages: [],
@@ -265,7 +265,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: 'US',
         languages: [],
@@ -355,7 +355,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: '',
         languages: [],
@@ -397,7 +397,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: '',
         languages: [],
@@ -433,7 +433,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: '',
         languages: [],
@@ -468,7 +468,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: 'opt1',
         languages: [],
@@ -499,7 +499,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: '',
         languages: [],
@@ -532,7 +532,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       // Don't set initial value
       fixture.detectChanges();
 
@@ -552,7 +552,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', null as any);
       fixture.detectChanges();
 
@@ -575,7 +575,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: 'non-existent-value',
         languages: [],
@@ -605,7 +605,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         country: '',
         languages: [],
@@ -632,7 +632,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
       ];
 
       expect(() => {
-        fixture.componentRef.setInput('fields', fields);
+        fixture.componentRef.setInput('config', { fields });
         fixture.detectChanges();
       }).not.toThrow();
 
@@ -652,7 +652,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.detectChanges();
 
       // Field should have auto-generated ID

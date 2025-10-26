@@ -42,7 +42,7 @@ export class MatTextareaFieldComponent implements FormValueControl<string> {
   readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly label = input.required<string>();
+  readonly label = input<string>('');
   readonly placeholder = input<string>('');
   readonly rows = input<number>(4);
   readonly cols = input<number>();
@@ -52,4 +52,5 @@ export class MatTextareaFieldComponent implements FormValueControl<string> {
   readonly className = input<string>('');
   readonly resize = input<'none' | 'both' | 'horizontal' | 'vertical'>('vertical');
   readonly appearance = input<'fill' | 'outline'>('fill');
+  readonly required = input<boolean>(false);
 }

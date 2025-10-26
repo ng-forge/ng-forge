@@ -11,7 +11,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
       <p class="description">
         Comprehensive examples of all available Material Design field components with their type-safe configurations.
       </p>
-      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [(value)]="model"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -262,8 +262,4 @@ export class MaterialFieldTypesComponent {
       },
     ],
   };
-
-  onValueChange(newValue: any) {
-    this.model.set(newValue);
-  }
 }

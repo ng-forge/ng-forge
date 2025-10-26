@@ -48,7 +48,7 @@ export class MatSelectFieldComponent<T> implements FormValueControl<T> {
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
 
-  readonly label = input.required<string>();
+  readonly label = input<string>('');
   readonly placeholder = input<string>('');
   readonly options = input.required<Option<T>[]>();
   readonly multiple = input<boolean>(false);

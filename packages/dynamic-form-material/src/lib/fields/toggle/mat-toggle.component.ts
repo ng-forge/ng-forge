@@ -54,7 +54,7 @@ export class MatToggleFieldComponent implements FormCheckboxControl {
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
 
-  readonly label = input.required<string>();
+  readonly label = input<string>('');
   readonly labelPosition = input<'before' | 'after'>('after');
   readonly required = input<boolean>(false);
   readonly color = input<'primary' | 'accent' | 'warn'>('primary');

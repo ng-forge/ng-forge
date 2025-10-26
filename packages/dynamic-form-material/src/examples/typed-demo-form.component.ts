@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
-import { submitButton } from '@ng-forge/dynamic-form-material';
+import { MatField, submitButton } from '@ng-forge/dynamic-form-material';
 
 interface UserFormModel {
   firstName: string;
@@ -15,16 +15,16 @@ interface UserFormModel {
 }
 
 @Component({
-  selector: 'app-demo-form',
+  selector: 'app-typed-demo-form',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
-      <h1>ng-forge Dynamic Forms Demo</h1>
-      <p class="description">Showcase of ng-forge dynamic forms library built with Angular 21 signal forms architecture.</p>
+      <h1>ng-forge Dynamic Forms Demo (Type-Safe)</h1>
+      <p class="description">Using MatField enum for better type safety and autocompletion</p>
 
       <div class="form-section">
         <h2>User Registration Form</h2>
-        <dynamic-form [config]="userFormFields" [(value)]="userModel" />
+        <dynamic-form [config]="userFormFields" [value]="userModel()" (valueChange)="onValueChange($event)" />
       </div>
 
       <div class="output-section">
@@ -96,7 +96,7 @@ interface UserFormModel {
     `,
   ],
 })
-export class DemoFormComponent {
+export class TypedDemoFormComponent {
   userModel = signal<UserFormModel>({
     firstName: '',
     lastName: '',
@@ -110,59 +110,68 @@ export class DemoFormComponent {
 
   userFormFields: FormConfig = {
     fields: [
-      // Personal Info
+      // Personal Info - using MatField enum for type safety
       {
         key: 'firstName',
-        type: 'input',
-        label: 'First Name',
-        required: true,
-        minLength: 2,
+        type: MatField.INPUT, // Type-safe!
         props: {
+          label: 'First Name',
           placeholder: 'Enter your first name',
+          required: true,
+        },
+        validators: {
+          required: true,
+          minLength: 2,
         },
       },
       {
         key: 'lastName',
-        type: 'input',
-        label: 'Last Name',
-        required: true,
-        minLength: 2,
+        type: MatField.INPUT, // Type-safe!
         props: {
+          label: 'Last Name',
           placeholder: 'Enter your last name',
+          required: true,
+        },
+        validators: {
+          required: true,
+          minLength: 2,
         },
       },
       {
         key: 'email',
-        type: 'input',
-        label: 'Email Address',
-        required: true,
-        email: true,
+        type: MatField.EMAIL, // Type-safe with specific email validation!
         props: {
-          type: 'email',
+          label: 'Email Address',
           placeholder: 'user@example.com',
           hint: 'We will never share your email',
+          required: true,
+        },
+        validators: {
+          required: true,
+          email: true,
         },
       },
 
       // Demographics
       {
         key: 'age',
-        type: 'input',
-        label: 'Age',
-        required: true,
-        min: 18,
-        max: 120,
+        type: MatField.NUMBER, // Type-safe number input!
         props: {
-          type: 'number',
+          label: 'Age',
           placeholder: '18',
+          required: true,
+        },
+        validators: {
+          required: true,
+          min: 18,
+          max: 120,
         },
       },
       {
         key: 'country',
-        type: 'select',
-        label: 'Country',
-        required: true,
+        type: MatField.SELECT, // Type-safe select!
         props: {
+          label: 'Country',
           placeholder: 'Select your country',
           options: [
             { value: 'us', label: 'United States' },
@@ -173,38 +182,45 @@ export class DemoFormComponent {
             { value: 'fr', label: 'France' },
             { value: 'jp', label: 'Japan' },
           ],
+          required: true,
+        },
+        validators: {
+          required: true,
         },
       },
 
       // Preferences
       {
         key: 'plan',
-        type: 'select',
-        label: 'Subscription Plan',
-        required: true,
+        type: MatField.SELECT, // Type-safe select!
         props: {
+          label: 'Subscription Plan',
           placeholder: 'Choose a plan',
           options: [
             { value: 'free', label: 'Free - $0/month' },
             { value: 'pro', label: 'Pro - $10/month' },
             { value: 'enterprise', label: 'Enterprise - $50/month' },
           ],
+          required: true,
+        },
+        validators: {
+          required: true,
         },
       },
       {
         key: 'bio',
-        type: 'textarea',
-        label: 'Bio',
+        type: MatField.TEXTAREA, // Type-safe textarea!
         props: {
+          label: 'Bio',
           placeholder: 'Tell us about yourself',
           hint: 'Optional - share a bit about yourself',
         },
       },
       {
         key: 'newsletter',
-        type: 'checkbox',
-        label: 'Subscribe to newsletter',
+        type: MatField.CHECKBOX, // Type-safe checkbox!
         props: {
+          label: 'Subscribe to newsletter',
           hint: 'Get updates about new features and special offers',
         },
       },
@@ -218,4 +234,7 @@ export class DemoFormComponent {
     ],
   };
 
+  onValueChange(newValue: UserFormModel) {
+    this.userModel.set(newValue);
+  }
 }

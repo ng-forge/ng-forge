@@ -54,7 +54,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         birthDate: null,
         startDate: null,
@@ -127,7 +127,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         birthDate: null,
         startDate: null,
@@ -181,7 +181,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         birthDate: null,
         startDate: new Date(2024, 0, 1),
@@ -246,7 +246,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         birthDate: null,
         startDate: null,
@@ -294,7 +294,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         birthDate: null,
         startDate: null,
@@ -325,7 +325,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         birthDate: null,
         startDate: null,
@@ -358,7 +358,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         birthDate: null,
         startDate: null,
@@ -388,7 +388,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       // Don't set initial value
       fixture.detectChanges();
 
@@ -407,7 +407,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', null as any);
       fixture.detectChanges();
 
@@ -426,7 +426,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         birthDate: null,
         startDate: null,
@@ -463,7 +463,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
       ];
 
       expect(() => {
-        fixture.componentRef.setInput('fields', fields);
+        fixture.componentRef.setInput('config', { fields });
         fixture.detectChanges();
       }).not.toThrow();
 
@@ -482,7 +482,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.detectChanges();
 
       // Field should have auto-generated ID

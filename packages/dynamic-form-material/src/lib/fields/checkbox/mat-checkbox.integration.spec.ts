@@ -48,7 +48,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         acceptTerms: false,
         newsletter: false,
@@ -125,7 +125,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         acceptTerms: false,
         newsletter: false,
@@ -179,7 +179,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         acceptTerms: false,
         newsletter: true,
@@ -257,7 +257,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         acceptTerms: false,
         newsletter: false,
@@ -299,7 +299,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         acceptTerms: false,
         newsletter: false,
@@ -331,7 +331,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         acceptTerms: false,
         newsletter: false,
@@ -360,7 +360,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       // Don't set initial value
       fixture.detectChanges();
 
@@ -379,7 +379,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', null as any);
       fixture.detectChanges();
 
@@ -398,7 +398,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         acceptTerms: false,
         newsletter: false,
@@ -433,7 +433,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
       ];
 
       expect(() => {
-        fixture.componentRef.setInput('fields', fields);
+        fixture.componentRef.setInput('config', { fields });
         fixture.detectChanges();
       }).not.toThrow();
 
@@ -452,7 +452,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.detectChanges();
 
       // Field should have auto-generated ID

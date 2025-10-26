@@ -14,8 +14,8 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
       }
 
       <mat-slider
-        [min]="minValue()"
-        [max]="maxValue()"
+        [min]="min()"
+        [max]="max()"
         [step]="step()"
         [disabled]="disabled()"
         [discrete]="thumbLabel() || showThumbLabel()"
@@ -65,10 +65,10 @@ export class MatSliderFieldComponent implements FormValueControl<number> {
   readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
+  readonly min = input<number>();
+  readonly max = input<number>();
 
-  readonly label = input.required<string>();
-  readonly minValue = input<number>(0);
-  readonly maxValue = input<number>(100);
+  readonly label = input<string>('');
   readonly step = input<number>(1);
   readonly thumbLabel = input<boolean>(false);
   readonly showThumbLabel = input<boolean>(false);
@@ -79,4 +79,5 @@ export class MatSliderFieldComponent implements FormValueControl<number> {
   readonly hint = input<string>('');
   readonly className = input<string>('');
   readonly appearance = input<'fill' | 'outline'>('fill');
+  readonly required = input<boolean>(false);
 }

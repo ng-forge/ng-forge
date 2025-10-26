@@ -50,7 +50,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: true,
         darkMode: false,
@@ -126,7 +126,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: false,
         darkMode: false,
@@ -182,7 +182,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: true,
         darkMode: false,
@@ -260,7 +260,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: true,
         darkMode: false,
@@ -309,7 +309,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: false,
         darkMode: false,
@@ -348,7 +348,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: false,
         darkMode: false,
@@ -387,7 +387,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: false,
         darkMode: false,
@@ -427,7 +427,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: false,
         darkMode: false,
@@ -468,7 +468,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: false,
         darkMode: false,
@@ -498,7 +498,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: false,
         darkMode: false,
@@ -560,7 +560,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: false,
         darkMode: false,
@@ -593,7 +593,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       // Don't set initial value
       fixture.detectChanges();
 
@@ -612,7 +612,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', null as any);
       fixture.detectChanges();
 
@@ -631,7 +631,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
 
       // Test with truthy value (1)
       fixture.componentRef.setInput('value', {
@@ -668,7 +668,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.componentRef.setInput('value', {
         notifications: false,
         darkMode: false,
@@ -704,7 +704,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
       ];
 
       expect(() => {
-        fixture.componentRef.setInput('fields', fields);
+        fixture.componentRef.setInput('config', { fields });
         fixture.detectChanges();
       }).not.toThrow();
 
@@ -723,7 +723,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         },
       ];
 
-      fixture.componentRef.setInput('fields', fields);
+      fixture.componentRef.setInput('config', { fields });
       fixture.detectChanges();
 
       // Field should have auto-generated ID

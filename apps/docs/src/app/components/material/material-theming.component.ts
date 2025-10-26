@@ -9,7 +9,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
     <div class="example-container">
       <h4>Material Theming & Appearances</h4>
       <p class="description">Showcase of different Material Design appearances, colors, and theming options for form fields.</p>
-      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [(value)]="model"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -206,8 +206,4 @@ export class MaterialThemingComponent {
       },
     ],
   };
-
-  onValueChange(newValue: any) {
-    this.model.set(newValue);
-  }
 }

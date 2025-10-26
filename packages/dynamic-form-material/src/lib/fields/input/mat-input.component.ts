@@ -44,7 +44,7 @@ export class MatInputFieldComponent implements FormValueControl<string> {
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
 
-  readonly label = input.required<string>();
+  readonly label = input<string>('');
   readonly placeholder = input<string>('');
   readonly type = input<'text' | 'email' | 'password' | 'number' | 'tel' | 'url'>('text');
   readonly autocomplete = input<string>();
@@ -52,4 +52,5 @@ export class MatInputFieldComponent implements FormValueControl<string> {
   readonly tabIndex = input<number>();
   readonly className = input<string>('');
   readonly appearance = input<'fill' | 'outline'>('fill');
+  readonly required = input<boolean>(false);
 }

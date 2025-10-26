@@ -57,8 +57,9 @@ export class MatDatepickerFieldComponent implements FormValueControl<Date | null
   readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
+  readonly required = input<boolean>(false);
 
-  readonly label = input.required<string>();
+  readonly label = input<string>('');
   readonly placeholder = input<string>('');
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);

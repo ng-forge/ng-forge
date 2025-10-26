@@ -10,8 +10,9 @@ import {
   input,
   inputBinding,
   linkedSignal,
-  output,
+  model,
   runInInjectionContext,
+  signal,
   twoWayBinding,
   untracked,
   ViewContainerRef,
@@ -23,9 +24,10 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, switchMap } from 'rxjs';
 import { keyBy, mapValues } from 'lodash-es';
 
-import { buildValidationRules, FieldDef, FormConfig, InferFormValue } from './models/field-config';
+import { FieldDef, FormConfig, InferFormValue } from './models/field-config';
 import { FieldRegistry } from './core/field-registry';
 import { createSchemaFromFields } from './core/schema-factory';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'dynamic-form',
@@ -44,8 +46,11 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
 
   config = input.required<FormConfig<TFields>>();
 
-  // Form value input/output for two-way binding
-  value = input<Partial<TModel> | undefined>(undefined);
+  // Form value model for two-way binding
+  value = model<Partial<TModel> | undefined>(undefined);
+
+  // Internal form state - separate from model to avoid loops
+  private readonly _internalFormValue = signal<TModel>({} as TModel);
 
   /**
    * Computed that determines the form approach and prepares form data
@@ -141,7 +146,8 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
    * Computed signals that expose form properties
    * These maintain the reactive connection to the underlying Angular signal form
    */
-  readonly formValue = computed(() => this.entity());
+  readonly formValue = computed(() => this._internalFormValue());
+
   readonly valid = computed(() => this.form()().valid());
   readonly invalid = computed(() => this.form()().invalid());
   readonly dirty = computed(() => this.form()().dirty());
@@ -150,18 +156,33 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   readonly disabled = computed(() => this.form()().disabled());
 
   /**
-   * Output events for form state changes
+   * Output events for form state changes (excluding value which is now a model)
    */
-  readonly valueChange = output<TModel>();
-  readonly validityChange = output<boolean>();
-  readonly dirtyChange = output<boolean>();
+  readonly validityChange = signal<boolean>(false);
+  readonly dirtyChange = signal<boolean>(false);
 
   constructor() {
-    // Emit value changes for two-way binding
-    effect(() => {
-      const currentValue = this.formValue();
-      this.valueChange.emit(currentValue);
+    // Initialize internal form state from entity
+    explicitEffect([this.entity], ([entityValue]) => {
+      this._internalFormValue.set(entityValue);
     });
+
+    // Update validity and dirty state signals
+    explicitEffect([this.valid], ([valid]) => {
+      this.validityChange.set(valid);
+    });
+
+    explicitEffect([this.dirty], ([dirty]) => {
+      this.dirtyChange.set(dirty);
+    });
+  }
+
+  // Method to update field values and sync to model
+  private updateFieldValue(key: string, value: unknown): void {
+    const currentValue = this._internalFormValue();
+    const newValue = { ...currentValue, [key]: value } as TModel;
+    this._internalFormValue.set(newValue);
+    this.value.set(newValue);
   }
 
   // TODO: Apply validation timing options (validateOnChange, validateOnBlur)
@@ -191,34 +212,32 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
             const valueProp = this.getValueProp(fieldDef);
 
             if (valueProp) {
-              // Create a linkedSignal for this specific field that syncs with the entity
-              const formFieldValue = linkedSignal(() => {
-                const entityValue = this.entity();
-                return (entityValue as any)?.[fieldDef.key] ?? this.getFieldDefaultValue(fieldDef);
+              // Create a writable signal for the field that syncs with internal state
+              const currentInternalValue = this._internalFormValue();
+              const initialValue = (currentInternalValue as any)?.[fieldDef.key] ?? this.getFieldDefaultValue(fieldDef);
+              const formFieldValue = signal(initialValue);
+
+              // Listen for field changes and update internal form state
+              runInInjectionContext(this.injector, () => {
+                effect(() => {
+                  const fieldValue = formFieldValue();
+                  untracked(() => {
+                    this.updateFieldValue(fieldDef.key, fieldValue);
+                  });
+                });
               });
 
               bindings.push(twoWayBinding(valueProp, formFieldValue));
             }
 
-            // Build validation rules from field properties
-            const validationRules = buildValidationRules(fieldDef);
+            // Add standard bindings that most components support
+            if (fieldDef.label) {
+              bindings.push(inputBinding('label', () => fieldDef.label));
+            }
 
-            // Create input bindings map
-            const inputBindingsMap = {
-              // Base properties
-              label: () => fieldDef.label,
-              className: () => fieldDef.className,
-              // Validation rules (built from implicit properties)
-              validation: () => validationRules,
-            };
-
-            // Apply input bindings from map - only if property exists in fieldDef
-            const entries = Object.keys(inputBindingsMap) as (keyof typeof inputBindingsMap)[];
-            entries.forEach((key) => {
-              if (key in fieldDef && (fieldDef as any)[key] !== undefined) {
-                bindings.push(inputBinding(key as string, inputBindingsMap[key]));
-              }
-            });
+            if (fieldDef.className) {
+              bindings.push(inputBinding('className', () => fieldDef.className));
+            }
 
             // Add custom properties from fieldDef.props
             if (fieldDef.props) {
@@ -238,8 +257,20 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   );
 
   getValueProp(fieldDef: FieldDef): 'checked' | 'value' | undefined {
-    // For checkbox/toggle types, use 'checked'
-    if (fieldDef.type.indexOf('checkbox') !== -1 || fieldDef.type.indexOf('toggle') !== -1) {
+    // TODO: improve solution for determining value binding based on field type
+
+    // Submit buttons don't have value bindings
+    if (fieldDef.type === 'submit') {
+      return undefined;
+    }
+
+    // Multi-checkbox uses 'value' (array of selected values)
+    if (fieldDef.type === 'multi-checkbox') {
+      return 'value';
+    }
+
+    // Single checkbox/toggle types use 'checked'
+    if (fieldDef.type === 'checkbox' || fieldDef.type === 'toggle') {
       return 'checked';
     }
 
@@ -251,13 +282,20 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
    * Gets appropriate default value for a field based on its type
    */
   private getFieldDefaultValue(field: FieldDef): unknown {
+    // TODO: improve the solution by binding default value logic to field type definitions
+
     // If field has explicit default value, use it
     if (field.defaultValue !== undefined) {
       return field.defaultValue;
     }
 
-    // For checkbox/toggle types, default to false
-    if (field.type.indexOf('checkbox') !== -1 || field.type.indexOf('toggle') !== -1) {
+    // Multi-checkbox defaults to empty array
+    if (field.type === 'multi-checkbox') {
+      return [];
+    }
+
+    // Single checkbox/toggle types default to false
+    if (field.type === 'checkbox' || field.type === 'toggle') {
       return false;
     }
 

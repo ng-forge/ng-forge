@@ -1,5 +1,6 @@
-import { ComponentRef, Directive, effect, ElementRef, inject, input, OnDestroy, Renderer2 } from '@angular/core';
+import { ComponentRef, Directive, ElementRef, inject, input, OnDestroy, Renderer2 } from '@angular/core';
 import { FormUiControl } from '@angular/forms/signals';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 /**
  * Utility directive that takes ComponentRef fields and appends them to a form element
@@ -23,12 +24,7 @@ export class FieldRendererDirective implements OnDestroy {
   // Input that accepts the ComponentRef fields array
   fieldRenderer = input<ComponentRef<FormUiControl>[] | null>();
 
-  constructor() {
-    // Watch for changes to fields and render them
-    effect(() => {
-      this.renderFields();
-    });
-  }
+  renderFieldsEffect = explicitEffect([this.fieldRenderer], () => this.renderFields());
 
   private renderFields(): void {
     // Clear existing field components from DOM

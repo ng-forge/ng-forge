@@ -12,7 +12,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
         This example demonstrates how Material components implement both FormControl interfaces and field interfaces using the new control
         field type utilities. Each field showcases type-safe implementation with automatic property exclusion and signal compatibility.
       </p>
-      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [(value)]="model"></dynamic-form>
       <div class="implementation-notes">
         <h5>Implementation Details:</h5>
         <ul>
@@ -254,8 +254,4 @@ export class ControlFieldTypesDemoComponent {
       },
     ],
   };
-
-  onValueChange(newValue: any) {
-    this.model.set(newValue);
-  }
 }

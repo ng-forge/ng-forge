@@ -13,7 +13,7 @@ import { submitButton } from '@ng-forge/dynamic-form-material';
         Examples of form validation with Material Design error styling and messaging. Try interacting with fields to see validation in
         action.
       </p>
-      <dynamic-form [config]="fields" [value]="model()" (valueChange)="onValueChange($event)"></dynamic-form>
+      <dynamic-form [config]="fields" [(value)]="model"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -235,8 +235,4 @@ export class MaterialValidationComponent {
       }),
     ],
   };
-
-  onValueChange(newValue: any) {
-    this.model.set(newValue);
-  }
 }
