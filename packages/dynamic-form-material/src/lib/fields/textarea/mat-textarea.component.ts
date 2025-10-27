@@ -9,7 +9,7 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
   selector: 'df-mat-textarea',
   imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent],
   template: `
-    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance() || 'fill'" [subscriptSizing]="subscriptSizing()" [class]="className() || ''">
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
@@ -53,4 +53,5 @@ export class MatTextareaFieldComponent implements FormValueControl<string> {
   readonly resize = input<'none' | 'both' | 'horizontal' | 'vertical'>('vertical');
   readonly appearance = input<'fill' | 'outline'>('fill');
   readonly required = input<boolean>(false);
+  readonly subscriptSizing = input<'fixed' | 'dynamic'>('fixed');
 }

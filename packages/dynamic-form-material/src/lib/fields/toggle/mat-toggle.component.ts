@@ -15,6 +15,9 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
         [required]="required() || false"
         [color]="color() || 'primary'"
         [labelPosition]="labelPosition() || 'after'"
+        [hideIcon]="hideIcon() || false"
+        [disableRipple]="disableRipple() || false"
+        [attr.tabindex]="tabIndex()"
         (blur)="touched.set(true)"
         class="toggle-container"
       >

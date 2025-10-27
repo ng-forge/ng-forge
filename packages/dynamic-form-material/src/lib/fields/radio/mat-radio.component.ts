@@ -80,5 +80,5 @@ export class MatRadioFieldComponent<T> implements FormValueControl<T> {
   readonly labelPosition = input<'before' | 'after'>('after');
   readonly hint = input<string>('');
   readonly className = input<string>('');
-  readonly appearance = input<'fill' | 'outline'>('fill');
+  readonly tabIndex = input<number>();
 }

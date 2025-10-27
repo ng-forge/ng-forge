@@ -15,6 +15,8 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
         [indeterminate]="indeterminate() || false"
         [color]="color() || 'primary'"
         [disabled]="disabled()"
+        [disableRipple]="disableRipple() || false"
+        [attr.tabindex]="tabIndex()"
         (blur)="touched.set(true)"
       >
         {{ label() }}

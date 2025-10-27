@@ -12,7 +12,7 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
   selector: 'df-mat-select',
   imports: [FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatErrorsComponent],
   template: `
-    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance() || 'fill'" [subscriptSizing]="subscriptSizing()" [class]="className() || ''">
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
@@ -57,5 +57,6 @@ export class MatSelectFieldComponent<T> implements FormValueControl<T> {
   readonly className = input<string>('');
   readonly appearance = input<'fill' | 'outline'>('fill');
   readonly required = input<boolean>(false);
+  readonly subscriptSizing = input<'fixed' | 'dynamic'>('fixed');
   defaultCompare = Object.is;
 }

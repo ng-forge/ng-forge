@@ -23,7 +23,7 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
         [color]="color() || 'primary'"
         class="slider-container"
       >
-        <input matSliderThumb [(ngModel)]="value" (blur)="touched.set(true)" />
+        <input matSliderThumb [(ngModel)]="value" [attr.tabindex]="tabIndex()" (blur)="touched.set(true)" />
       </mat-slider>
 
       @if (hint(); as hint) {
@@ -75,9 +75,9 @@ export class MatSliderFieldComponent implements FormValueControl<number> {
   readonly tickInterval = input<number>();
   readonly vertical = input<boolean>(false);
   readonly invert = input<boolean>(false);
+  readonly tabIndex = input<number>();
   readonly color = input<'primary' | 'accent' | 'warn'>('primary');
   readonly hint = input<string>('');
   readonly className = input<string>('');
-  readonly appearance = input<'fill' | 'outline'>('fill');
   readonly required = input<boolean>(false);
 }

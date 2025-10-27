@@ -22,7 +22,7 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
     MatNativeDateModule,
   ],
   template: `
-    <mat-form-field [appearance]="appearance() || 'fill'" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance() || 'fill'" [subscriptSizing]="subscriptSizing()" [class]="className() || ''">
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
@@ -70,4 +70,5 @@ export class MatDatepickerFieldComponent implements FormValueControl<Date | null
   readonly tabIndex = input<number>();
   readonly className = input<string>('');
   readonly appearance = input<'fill' | 'outline'>('fill');
+  readonly subscriptSizing = input<'fixed' | 'dynamic'>('fixed');
 }

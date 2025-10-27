@@ -185,7 +185,7 @@ export interface FormState<TValue = unknown> {
 /**
  * Schema definition with metadata for enhanced form functionality
  */
-export interface DynamicFormSchemaDefinition<TValue = unknown> {
+export interface DynamicFormSchemaDefinition {
   /** Field definitions that generated this schema */
   readonly fieldDefs: readonly FieldDef[];
   /** Schema metadata for debugging and tooling */

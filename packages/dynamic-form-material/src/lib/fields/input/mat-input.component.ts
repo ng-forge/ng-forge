@@ -12,7 +12,7 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
   selector: 'df-mat-input',
   imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent],
   template: `
-    <mat-form-field [appearance]="appearance()" [class]="className() || ''">
+    <mat-form-field [appearance]="appearance()" [subscriptSizing]="subscriptSizing()" [class]="className() || ''">
       @if (label()) {
       <mat-label>{{ label() }}</mat-label>
       }
@@ -53,4 +53,5 @@ export class MatInputFieldComponent implements FormValueControl<string> {
   readonly className = input<string>('');
   readonly appearance = input<'fill' | 'outline'>('fill');
   readonly required = input<boolean>(false);
+  readonly subscriptSizing = input<'fixed' | 'dynamic'>('fixed');
 }
