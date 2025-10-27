@@ -4,7 +4,6 @@ import {
   Component,
   ComponentRef,
   computed,
-  effect,
   inject,
   Injector,
   input,
@@ -16,18 +15,17 @@ import {
   twoWayBinding,
   untracked,
   ViewContainerRef,
+  WritableSignal,
 } from '@angular/core';
-
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, switchMap } from 'rxjs';
-import { keyBy, mapValues } from 'lodash-es';
-
+import { get, keyBy, mapValues, set } from 'lodash-es';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldDef, FormConfig, InferFormValue } from './models/field-config';
 import { FieldRegistry } from './core/field-registry';
 import { createSchemaFromFields } from './core/schema-factory';
-import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'dynamic-form',
@@ -50,14 +48,14 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   // Form value model for two-way binding
   value = model<Partial<TModel> | undefined>(undefined);
 
-  // Internal form state - separate from model to avoid loops
-  private readonly _internalFormValue = signal<TModel>({} as TModel);
-
   /**
    * Computed that determines the form approach and prepares form data
    */
   private readonly formSetup = computed(() => {
     const config = this.config();
+
+    // Clear field signals when config changes to ensure fresh bindings
+    this.fieldSignals.clear();
 
     if (config.fields && config.fields.length > 0) {
       const fieldsById = keyBy(config.fields, 'key');
@@ -111,6 +109,42 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   });
 
   /**
+   * Deep signal map for field properties
+   * Each field gets its own signal that's bound to the entity property
+   */
+  private readonly fieldSignals = new Map<string, WritableSignal<any>>();
+
+  /**
+   * Gets or creates a signal for a specific field property
+   */
+  private getFieldSignal(fieldKey: string, initialValue: any): WritableSignal<any> {
+    if (!this.fieldSignals.has(fieldKey)) {
+      // Create a signal for this field property
+      const fieldSignal = runInInjectionContext(this.injector, () => signal(initialValue));
+      this.fieldSignals.set(fieldKey, fieldSignal);
+
+      // Set up explicit effect to propagate field changes back to the main model
+      runInInjectionContext(this.injector, () => {
+        explicitEffect([fieldSignal], ([fieldValue]) => {
+          untracked(() => {
+            const currentModel = this.value() || ({} as TModel);
+            const currentFieldValue = get(currentModel, fieldKey);
+
+            // Only update if the value is actually different to prevent loops
+            if (currentFieldValue !== fieldValue) {
+              const newModel = { ...currentModel };
+              set(newModel, fieldKey, fieldValue);
+              this.value.set(newModel as Partial<TModel>);
+            }
+          });
+        });
+      });
+    }
+
+    return this.fieldSignals.get(fieldKey)!;
+  }
+
+  /**
    * Computed form options from config - exposed for consumers
    */
   readonly formOptions = computed(() => {
@@ -147,7 +181,7 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
    * Computed signals that expose form properties
    * These maintain the reactive connection to the underlying Angular signal form
    */
-  readonly formValue = computed(() => this._internalFormValue());
+  readonly formValue = computed(() => this.entity());
 
   readonly valid = computed(() => this.form()().valid());
   readonly invalid = computed(() => this.form()().invalid());
@@ -161,18 +195,6 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
    */
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
-
-  readonly entityUpdateEffect = explicitEffect([this.entity], ([entityValue]) => {
-    this._internalFormValue.set(entityValue);
-  });
-
-  // Method to update field values and sync to model
-  private updateFieldValue(key: string, value: unknown): void {
-    const currentValue = this._internalFormValue();
-    const newValue = { ...currentValue, [key]: value } as TModel;
-    this._internalFormValue.set(newValue);
-    this.value.set(newValue);
-  }
 
   // TODO: Apply validation timing options (validateOnChange, validateOnBlur)
   // These options would need to be implemented at the field component level
@@ -208,22 +230,27 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
         const valueProp = this.getValueProp(fieldDef);
 
         if (valueProp) {
-          // Create a writable signal for the field that syncs with internal state
-          const currentInternalValue = this._internalFormValue();
-          const initialValue = (currentInternalValue as any)?.[fieldDef.key] ?? this.getFieldDefaultValue(fieldDef);
-          const formFieldValue = signal(initialValue);
+          // Get the current entity value and default for this field
+          const currentEntity = this.entity();
+          const initialValue = get(currentEntity, fieldDef.key) ?? this.getFieldDefaultValue(fieldDef);
 
-          // Listen for field changes and update internal form state
+          // Get or create a field signal for this property
+          const fieldSignal = this.getFieldSignal(fieldDef.key, initialValue);
+
+          // Sync the field signal with the current entity value when entity changes
           runInInjectionContext(this.injector, () => {
-            effect(() => {
-              const fieldValue = formFieldValue();
-              untracked(() => {
-                this.updateFieldValue(fieldDef.key, fieldValue);
-              });
+            explicitEffect([this.entity], ([entityValue]) => {
+              const currentFieldValue = get(entityValue, fieldDef.key);
+              const fieldSignalValue = fieldSignal();
+
+              // Only update field signal if entity value is different to prevent loops
+              if (currentFieldValue !== fieldSignalValue) {
+                fieldSignal.set(currentFieldValue ?? this.getFieldDefaultValue(fieldDef));
+              }
             });
           });
 
-          bindings.push(twoWayBinding(valueProp, formFieldValue));
+          bindings.push(twoWayBinding(valueProp, fieldSignal));
         }
 
         // Add standard bindings that most components support

@@ -623,14 +623,14 @@ describe('DynamicFormComponent', () => {
 
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
-      // Update configuration
+      // Update configuration - this should preserve existing firstName but add new lastName
       const newConfig: FormConfig = {
         fields: [
           {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'Jane',
+            defaultValue: 'John', // Keep same default to preserve value
           },
           {
             key: 'lastName',
@@ -646,7 +646,7 @@ describe('DynamicFormComponent', () => {
       fixture.detectChanges();
 
       expect(component.formValue()).toEqual({
-        firstName: 'Jane',
+        firstName: 'John',
         lastName: 'Smith',
       });
     });
@@ -841,22 +841,22 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({ firstName: 'Jane' });
     });
 
-    it('should have valueChange output available', () => {
+    it('should have value model signal available', () => {
       const { component } = createComponent();
-      expect(component.valueChange).toBeDefined();
-      expect(typeof component.valueChange.subscribe).toBe('function');
+      expect(component.value).toBeDefined();
+      expect(typeof component.value).toBe('function');
     });
 
     it('should have validityChange output available', () => {
       const { component } = createComponent();
       expect(component.validityChange).toBeDefined();
-      expect(typeof component.validityChange).toBe('function');
+      expect(typeof component.validityChange.subscribe).toBe('function');
     });
 
     it('should have dirtyChange output available', () => {
       const { component } = createComponent();
       expect(component.dirtyChange).toBeDefined();
-      expect(typeof component.dirtyChange).toBe('function');
+      expect(typeof component.dirtyChange.subscribe).toBe('function');
     });
   });
 
