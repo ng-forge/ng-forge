@@ -39,8 +39,8 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
         (blur)="touched.set(true)"
       />
 
-      <mat-datepicker-toggle matIconSuffix [for]="$any(picker)"></mat-datepicker-toggle>
-      <mat-datepicker #picker [startAt]="startAt()" [startView]="startView() || 'month'" [touchUi]="touchUi() || false"></mat-datepicker>
+      <mat-datepicker-toggle matIconSuffix [for]="$any(picker)" />
+      <mat-datepicker #picker [startAt]="startAt()" [startView]="startView() || 'month'" [touchUi]="touchUi()" />
 
       @if (hint(); as hint) {
       <mat-hint>{{ hint }}</mat-hint>
@@ -71,4 +71,5 @@ export class MatDatepickerFieldComponent implements FormValueControl<Date | null
   readonly className = input<string>('');
   readonly appearance = input<'fill' | 'outline'>('fill');
   readonly subscriptSizing = input<'fixed' | 'dynamic'>('fixed');
+  readonly disableRipple = input<boolean>(false);
 }

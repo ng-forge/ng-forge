@@ -2,590 +2,747 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicForm, FieldConfig, provideDynamicForm, withConfig } from '@ng-forge/dynamic-form';
-import { MATERIAL_FIELD_TYPES } from '../../config/material-field-config';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterial } from '../../providers/material-providers';
+import { delay, waitForDynamicFormInitialized } from '../../testing/delay';
 
 interface TestFormModel {
+  hobbies: string[];
   skills: string[];
-  interests: number[];
-  features: string[];
-  permissions: string[];
+  preferences: number[];
 }
 
 describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
-  let fixture: ComponentFixture<DynamicForm<TestFormModel>>;
-  let component: DynamicForm<TestFormModel>;
+  let component: DynamicForm;
+  let fixture: ComponentFixture<DynamicForm>;
   let debugElement: DebugElement;
+
+  const createComponent = (config: FormConfig, initialValue?: Partial<TestFormModel>) => {
+    fixture = TestBed.createComponent(DynamicForm<any>);
+    component = fixture.componentInstance;
+    debugElement = fixture.debugElement;
+
+    fixture.componentRef.setInput('config', config);
+    if (initialValue !== undefined) {
+      fixture.componentRef.setInput('value', initialValue);
+    }
+    fixture.detectChanges();
+
+    return { component, fixture, debugElement };
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
-      providers: [provideAnimations(), provideDynamicForm(withConfig({ types: MATERIAL_FIELD_TYPES }))],
+      providers: [provideAnimations(), provideDynamicForm(withMaterial())],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(DynamicForm<TestFormModel>);
-    component = fixture.componentInstance;
-    debugElement = fixture.debugElement;
   });
 
-  describe('Happy Flow - Full Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Technical Skills',
-            hint: 'Select all skills that apply to you',
-            required: true,
-            color: 'primary',
-            labelPosition: 'after',
-            className: 'skills-checkboxes',
-            appearance: 'outline',
-            disableRipple: true,
-            tabIndex: 1,
-            options: [
-              { label: 'JavaScript', value: 'javascript' },
-              { label: 'TypeScript', value: 'typescript' },
-              { label: 'Angular', value: 'angular' },
-              { label: 'React', value: 'react', disabled: true },
-            ],
+  describe('Basic Multi-Checkbox Integration', () => {
+    it('should render multi-checkbox with full configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading' },
+                { value: 'gaming', label: 'Gaming' },
+                { value: 'cooking', label: 'Cooking' },
+              ],
+              hint: 'Select all that apply',
+              required: true,
+              color: 'primary',
+              labelPosition: 'after',
+              className: 'hobbies-checkbox',
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        skills: ['javascript'],
-        interests: [],
-        features: [],
-        permissions: [],
-      });
-      fixture.detectChanges();
-    });
-
-    it('should render multi-checkbox through dynamic form', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      const formField = debugElement.query(By.css('mat-form-field'));
-      const label = debugElement.query(By.css('mat-label'));
-      const hint = debugElement.query(By.css('mat-hint'));
-
-      expect(checkboxes.length).toBe(4);
-      expect(checkboxes[0].nativeElement.textContent.trim()).toBe('JavaScript');
-      expect(checkboxes[1].nativeElement.textContent.trim()).toBe('TypeScript');
-      expect(checkboxes[2].nativeElement.textContent.trim()).toBe('Angular');
-      expect(checkboxes[3].nativeElement.textContent.trim()).toBe('React');
-      expect(formField.nativeElement.className).toContain('skills-checkboxes');
-      expect(formField.nativeElement.getAttribute('ng-reflect-appearance')).toBe('outline');
-      expect(label.nativeElement.textContent.trim()).toBe('Technical Skills');
-      expect(hint.nativeElement.textContent.trim()).toBe('Select all skills that apply to you');
-    });
-
-    it('should handle value changes through dynamic form', async () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      // Click TypeScript checkbox
-      checkboxes[1].nativeElement.click();
-      fixture.detectChanges();
-
-      const emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.skills).toEqual(['javascript', 'typescript']);
-    });
-
-    it('should reflect form model changes in checkboxes', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      // Update form model
-      fixture.componentRef.setInput('value', {
-        skills: ['typescript', 'angular'],
-        interests: [],
-        features: [],
-        permissions: [],
-      });
-      fixture.detectChanges();
-
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('false');
-      expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('true');
-      expect(checkboxes[2].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('true');
-      expect(checkboxes[3].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('false');
-    });
-
-    it('should handle all multi-checkbox-specific properties', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-disable-ripple')).toBe('true');
-      expect(checkboxes[0].nativeElement.getAttribute('tabindex')).toBe('1');
-    });
-
-    it('should handle disabled options', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      const reactCheckbox = checkboxes[3];
-
-      expect(reactCheckbox.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-    });
-  });
-
-  describe('Minimal Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'interests',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Interests',
-            options: [
-              { label: 'Sports', value: 1 },
-              { label: 'Music', value: 2 },
-              { label: 'Technology', value: 3 },
-            ],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
+      createComponent(config, {
+        hobbies: [],
         skills: [],
-        interests: [],
-        features: [],
-        permissions: [],
+        preferences: [],
       });
-      fixture.detectChanges();
-    });
 
-    it('should render with default values from configuration', () => {
+      await waitForDynamicFormInitialized(component, fixture);
+
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      const formField = debugElement.query(By.css('mat-form-field'));
+      const label = debugElement.query(By.css('.checkbox-group-label'));
+      const hint = debugElement.query(By.css('.mat-hint'));
+      const wrapper = debugElement.query(By.css('df-mat-multi-checkbox'));
 
       expect(checkboxes.length).toBe(3);
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-      expect(formField.nativeElement.getAttribute('ng-reflect-appearance')).toBe('fill');
+      expect(label.nativeElement.textContent.trim()).toBe('Hobbies');
+      expect(hint.nativeElement.textContent.trim()).toBe('Select all that apply');
+      expect(wrapper.nativeElement.className).toContain('hobbies-checkbox');
+
+      // Check individual checkbox properties
+      expect(checkboxes[0].componentInstance.labelPosition).toBe('after');
+      expect(checkboxes[0].componentInstance.color).toBe('primary');
+      expect(checkboxes[0].nativeElement.textContent.trim()).toBe('Reading');
+      expect(checkboxes[1].nativeElement.textContent.trim()).toBe('Gaming');
+      expect(checkboxes[2].nativeElement.textContent.trim()).toBe('Cooking');
     });
 
-    it('should not display hint when not provided', () => {
-      const hint = debugElement.query(By.css('mat-hint'));
+    it('should handle user checkbox selection and update form value', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading' },
+                { value: 'gaming', label: 'Gaming' },
+                { value: 'cooking', label: 'Cooking' },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, {
+        hobbies: [],
+        skills: [],
+        preferences: [],
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      // Initial value check
+      expect(component.formValue().hobbies).toEqual([]);
+
+      // Simulate checking first checkbox
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+      checkboxes[0].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      // Verify form value updated
+      expect(component.formValue().hobbies).toEqual(['reading']);
+
+      // Check second checkbox
+      checkboxes[1].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().hobbies).toEqual(['reading', 'gaming']);
+    });
+
+    it('should reflect external value changes in checkbox states', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading' },
+                { value: 'gaming', label: 'Gaming' },
+                { value: 'cooking', label: 'Cooking' },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, {
+        hobbies: [],
+        skills: [],
+        preferences: [],
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      // Update form model programmatically
+      fixture.componentRef.setInput('value', {
+        hobbies: ['reading', 'cooking'],
+        skills: [],
+        preferences: [],
+      });
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().hobbies).toEqual(['reading', 'cooking']);
+
+      // Check that checkboxes reflect the state
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+      expect(checkboxes[0].componentInstance.checked).toBe(true); // reading
+      expect(checkboxes[1].componentInstance.checked).toBe(false); // gaming
+      expect(checkboxes[2].componentInstance.checked).toBe(true); // cooking
+    });
+  });
+
+  describe('Different Option Types Integration', () => {
+    it('should handle string and number options correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'skills',
+            type: 'multi-checkbox',
+            label: 'Skills',
+            props: {
+              options: [
+                { value: 'typescript', label: 'TypeScript' },
+                { value: 'angular', label: 'Angular' },
+                { value: 'react', label: 'React' },
+              ],
+            },
+          },
+          {
+            key: 'preferences',
+            type: 'multi-checkbox',
+            label: 'Preferences',
+            props: {
+              options: [
+                { value: 1, label: 'Option 1' },
+                { value: 2, label: 'Option 2' },
+                { value: 3, label: 'Option 3' },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, {
+        hobbies: [],
+        skills: [],
+        preferences: [],
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const checkboxGroups = debugElement.queryAll(By.css('df-mat-multi-checkbox'));
+      const skillsCheckboxes = checkboxGroups[0].queryAll(By.directive(MatCheckbox));
+      const preferencesCheckboxes = checkboxGroups[1].queryAll(By.directive(MatCheckbox));
+
+      expect(skillsCheckboxes.length).toBe(3);
+      expect(preferencesCheckboxes.length).toBe(3);
+
+      // Test string options
+      skillsCheckboxes[0].nativeElement.click();
+      skillsCheckboxes[2].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().skills).toEqual(['typescript', 'react']);
+
+      // Test number options
+      preferencesCheckboxes[0].nativeElement.click();
+      preferencesCheckboxes[1].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().preferences).toEqual([1, 2]);
+    });
+
+    it('should handle disabled options correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading' },
+                { value: 'gaming', label: 'Gaming', disabled: true },
+                { value: 'cooking', label: 'Cooking' },
+              ],
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { hobbies: [] });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+
+      expect(checkboxes[0].componentInstance.disabled).toBe(false);
+      expect(checkboxes[1].componentInstance.disabled).toBe(true);
+      expect(checkboxes[2].componentInstance.disabled).toBe(false);
+    });
+
+    it('should handle field-level disabled state', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            disabled: true,
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading' },
+                { value: 'gaming', label: 'Gaming' },
+                { value: 'cooking', label: 'Cooking' },
+              ],
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { hobbies: [] });
+
+      await delay();
+      fixture.detectChanges();
+      await delay();
+      fixture.detectChanges();
+
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+
+      checkboxes.forEach(checkbox => {
+        expect(checkbox.componentInstance.disabled).toBe(true);
+      });
+    });
+  });
+
+  describe('Different Material Configurations', () => {
+    it('should apply different color themes correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Primary Color',
+            props: {
+              options: [{ value: 'reading', label: 'Reading' }],
+              color: 'primary',
+            },
+          },
+          {
+            key: 'skills',
+            type: 'multi-checkbox',
+            label: 'Accent Color',
+            props: {
+              options: [{ value: 'typescript', label: 'TypeScript' }],
+              color: 'accent',
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { hobbies: [], skills: [] });
+
+      await delay();
+      fixture.detectChanges();
+
+      const checkboxGroups = debugElement.queryAll(By.css('df-mat-multi-checkbox'));
+      const primaryCheckbox = checkboxGroups[0].query(By.directive(MatCheckbox));
+      const accentCheckbox = checkboxGroups[1].query(By.directive(MatCheckbox));
+
+      expect(primaryCheckbox.componentInstance.color).toBe('primary');
+      expect(accentCheckbox.componentInstance.color).toBe('accent');
+    });
+
+    it('should apply different label positions correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'After Position',
+            props: {
+              options: [{ value: 'reading', label: 'Reading' }],
+              labelPosition: 'after',
+            },
+          },
+          {
+            key: 'skills',
+            type: 'multi-checkbox',
+            label: 'Before Position',
+            props: {
+              options: [{ value: 'typescript', label: 'TypeScript' }],
+              labelPosition: 'before',
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { hobbies: [], skills: [] });
+
+      await delay();
+      fixture.detectChanges();
+
+      const checkboxGroups = debugElement.queryAll(By.css('df-mat-multi-checkbox'));
+      const afterCheckbox = checkboxGroups[0].query(By.directive(MatCheckbox));
+      const beforeCheckbox = checkboxGroups[1].query(By.directive(MatCheckbox));
+
+      expect(afterCheckbox.componentInstance.labelPosition).toBe('after');
+      expect(beforeCheckbox.componentInstance.labelPosition).toBe('before');
+    });
+  });
+
+  describe('Minimal Configuration Tests', () => {
+    it('should render with default Material configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading' },
+                { value: 'gaming', label: 'Gaming' },
+              ],
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { hobbies: [] });
+
+      await delay();
+      fixture.detectChanges();
+
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+      expect(checkboxes[0].componentInstance.color).toBe('primary');
+      expect(checkboxes[0].componentInstance.labelPosition).toBe('after');
+    });
+
+    it('should not display hint when not provided', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [{ value: 'reading', label: 'Reading' }],
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { hobbies: [] });
+
+      await delay();
+      fixture.detectChanges();
+
+      const hint = debugElement.query(By.css('.mat-hint'));
       expect(hint).toBeNull();
     });
+
+    it('should not display label when not provided', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            props: {
+              options: [{ value: 'reading', label: 'Reading' }],
+            },
+          },
+        ],
+      } as any;
+
+      createComponent(config, { hobbies: [] });
+
+      await delay();
+      fixture.detectChanges();
+
+      const label = debugElement.query(By.css('.checkbox-group-label'));
+      expect(label).toBeNull();
+    });
   });
 
-  describe('Multiple Multi-Checkbox Fields', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
+  describe('Complex Interaction Tests', () => {
+    it('should handle checking and unchecking multiple checkboxes', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading' },
+                { value: 'gaming', label: 'Gaming' },
+                { value: 'cooking', label: 'Cooking' },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, { hobbies: [] });
+
+      await delay();
+      fixture.detectChanges();
+
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+
+      // Check all checkboxes
+      checkboxes[0].nativeElement.click();
+      checkboxes[1].nativeElement.click();
+      checkboxes[2].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().hobbies).toEqual(['reading', 'gaming', 'cooking']);
+
+      // Uncheck middle checkbox
+      checkboxes[1].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().hobbies).toEqual(['reading', 'cooking']);
+
+      // Uncheck all remaining
+      checkboxes[0].nativeElement.click();
+      checkboxes[2].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().hobbies).toEqual([]);
+    });
+
+    it('should handle multiple checkbox groups independently', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading' },
+                { value: 'gaming', label: 'Gaming' },
+              ],
+            },
+          },
+          {
+            key: 'skills',
+            type: 'multi-checkbox',
             label: 'Skills',
-            color: 'primary',
-            options: [
-              { label: 'JavaScript', value: 'js' },
-              { label: 'TypeScript', value: 'ts' },
-            ],
+            props: {
+              options: [
+                { value: 'typescript', label: 'TypeScript' },
+                { value: 'angular', label: 'Angular' },
+              ],
+            },
           },
-        },
-        {
-          key: 'features',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Features',
-            color: 'accent',
-            options: [
-              { label: 'Dark Mode', value: 'dark' },
-              { label: 'Notifications', value: 'notifications' },
-            ],
-          },
-        },
-        {
-          key: 'permissions',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Permissions',
-            color: 'warn',
-            options: [
-              { label: 'Read', value: 'read' },
-              { label: 'Write', value: 'write' },
-              { label: 'Admin', value: 'admin' },
-            ],
-          },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        skills: ['js'],
-        interests: [],
-        features: ['dark'],
-        permissions: [],
-      });
-      fixture.detectChanges();
-    });
-
-    it('should render multiple multi-checkbox fields correctly', () => {
-      const labels = debugElement.queryAll(By.css('mat-label'));
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      expect(labels.length).toBe(3);
-      expect(labels[0].nativeElement.textContent.trim()).toBe('Skills');
-      expect(labels[1].nativeElement.textContent.trim()).toBe('Features');
-      expect(labels[2].nativeElement.textContent.trim()).toBe('Permissions');
-      expect(checkboxes.length).toBe(7); // 2 + 2 + 3
-    });
-
-    it('should reflect individual field states from form model', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      // Skills checkboxes
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('true');
-      expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('false');
-
-      // Features checkboxes
-      expect(checkboxes[2].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('true');
-      expect(checkboxes[3].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('false');
-
-      // Permissions checkboxes
-      expect(checkboxes[4].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('false');
-      expect(checkboxes[5].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('false');
-      expect(checkboxes[6].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('false');
-    });
-
-    it('should handle independent field interactions', async () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      // Click TypeScript checkbox in skills
-      checkboxes[1].nativeElement.click();
-      fixture.detectChanges();
-
-      let emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue).toEqual({
-        skills: ['js', 'ts'],
-        interests: [],
-        features: ['dark'],
-        permissions: [],
+      const { component } = createComponent(config, {
+        hobbies: ['reading'],
+        skills: ['typescript'],
       });
 
-      // Click Admin checkbox in permissions
-      checkboxes[6].nativeElement.click();
+      await delay();
       fixture.detectChanges();
 
-      emittedValue = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue).toEqual({
-        skills: ['js', 'ts'],
-        interests: [],
-        features: ['dark'],
-        permissions: ['admin'],
-      });
-    });
+      // Initial values
+      expect(component.formValue().hobbies).toEqual(['reading']);
+      expect(component.formValue().skills).toEqual(['typescript']);
 
-    it('should apply different colors to checkbox groups', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxGroups = debugElement.queryAll(By.css('df-mat-multi-checkbox'));
+      const hobbiesCheckboxes = checkboxGroups[0].queryAll(By.directive(MatCheckbox));
+      const skillsCheckboxes = checkboxGroups[1].queryAll(By.directive(MatCheckbox));
 
-      // Skills (primary)
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
+      // Change hobbies
+      hobbiesCheckboxes[1].nativeElement.click(); // Add gaming
+      fixture.detectChanges();
 
-      // Features (accent)
-      expect(checkboxes[2].nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
-      expect(checkboxes[3].nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
+      await delay();
+      fixture.detectChanges();
 
-      // Permissions (warn)
-      expect(checkboxes[4].nativeElement.getAttribute('ng-reflect-color')).toBe('warn');
-      expect(checkboxes[5].nativeElement.getAttribute('ng-reflect-color')).toBe('warn');
-      expect(checkboxes[6].nativeElement.getAttribute('ng-reflect-color')).toBe('warn');
+      let formValue = component.formValue();
+      expect(formValue.hobbies).toEqual(['reading', 'gaming']);
+      expect(formValue.skills).toEqual(['typescript']); // Should remain unchanged
+
+      // Change skills
+      skillsCheckboxes[1].nativeElement.click(); // Add angular
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      formValue = component.formValue();
+      expect(formValue.hobbies).toEqual(['reading', 'gaming']); // Should remain unchanged
+      expect(formValue.skills).toEqual(['typescript', 'angular']);
     });
   });
 
-  describe('Disabled State through Dynamic Form', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Disabled Skills',
-            disabled: true,
-            options: [
-              { label: 'JavaScript', value: 'js' },
-              { label: 'TypeScript', value: 'ts' },
-            ],
+  describe('Edge Cases and Robustness Tests', () => {
+    it('should handle undefined form values gracefully', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [{ value: 'reading', label: 'Reading' }],
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        skills: [],
-        interests: [],
-        features: [],
-        permissions: [],
-      });
-      fixture.detectChanges();
-    });
+      createComponent(config); // No initial value provided
 
-    it('should render all checkboxes as disabled', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-      expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-    });
-
-    it('should not emit value changes when disabled checkboxes are clicked', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      // Try to click disabled checkboxes - should not change values since they're disabled
-      checkboxes[0].nativeElement.click();
-      checkboxes[1].nativeElement.click();
+      await delay();
       fixture.detectChanges();
 
-      // Verify checkboxes remain disabled
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-      expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+      expect(checkboxes).toBeTruthy();
+      expect(checkboxes.length).toBe(1);
     });
-  });
 
-  describe('Empty Options Array', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
-            label: 'No Options',
-            options: [],
+    it('should handle null form values gracefully', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [{ value: 'reading', label: 'Reading' }],
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        skills: [],
-        interests: [],
-        features: [],
-        permissions: [],
-      });
+      createComponent(config, null as unknown as TestFormModel);
+
+      await delay();
       fixture.detectChanges();
+
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+      expect(checkboxes).toBeTruthy();
+      expect(checkboxes.length).toBe(1);
     });
 
-    it('should render without checkboxes when options array is empty', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      const label = debugElement.query(By.css('mat-label'));
+    it('should handle empty options array', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [],
+            },
+          },
+        ],
+      };
 
+      const { component } = createComponent(config, { hobbies: [] });
+
+      await delay();
+      fixture.detectChanges();
+
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
       expect(checkboxes.length).toBe(0);
-      expect(label.nativeElement.textContent.trim()).toBe('No Options');
+      expect(component.formValue().hobbies).toEqual([]);
     });
-  });
 
-  describe('Label Position Variations', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Before Label',
-            labelPosition: 'before',
-            options: [
-              { label: 'Option 1', value: 'opt1' },
-              { label: 'Option 2', value: 'opt2' },
-            ],
+    it('should handle duplicate values in options gracefully', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading Books' },
+                { value: 'reading', label: 'Reading Articles' },
+                { value: 'gaming', label: 'Gaming' },
+              ],
+            },
           },
-        },
-        {
-          key: 'features',
-          type: 'multi-checkbox',
-          props: {
-            label: 'After Label',
-            labelPosition: 'after',
-            options: [
-              { label: 'Option 3', value: 'opt3' },
-              { label: 'Option 4', value: 'opt4' },
-            ],
-          },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        skills: [],
-        interests: [],
-        features: [],
-        permissions: [],
-      });
-      fixture.detectChanges();
-    });
+      const { component } = createComponent(config, { hobbies: [] });
 
-    it('should apply different label positions to checkbox groups', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      // Before label position
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-label-position')).toBe('before');
-      expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-label-position')).toBe('before');
-
-      // After label position
-      expect(checkboxes[2].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-      expect(checkboxes[3].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-    });
-  });
-
-  describe('Default Props from Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Test Multi-Checkbox',
-            options: [{ label: 'Option 1', value: 'opt1' }],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        skills: [],
-        interests: [],
-        features: [],
-        permissions: [],
-      });
-      fixture.detectChanges();
-    });
-
-    it('should apply default props from MATERIAL_FIELD_TYPES configuration', () => {
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      const formField = debugElement.query(By.css('mat-form-field'));
-
-      // Check default props from configuration
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-      expect(formField.nativeElement.getAttribute('ng-reflect-appearance')).toBe('fill');
-    });
-  });
-
-  describe('Form Value Binding Edge Cases', () => {
-    it('should handle undefined form values', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Test Multi-Checkbox',
-            options: [{ label: 'Option 1', value: 'opt1' }],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      // Don't set initial value
+      await delay();
       fixture.detectChanges();
 
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      expect(checkboxes.length).toBe(1);
-    });
+      expect(checkboxes.length).toBe(3);
 
-    it('should handle null form values', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Test Multi-Checkbox',
-            options: [{ label: 'Option 1', value: 'opt1' }],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', null as any);
-      fixture.detectChanges();
-
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      expect(checkboxes.length).toBe(1);
-    });
-
-    it('should handle selection and deselection', async () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Test Multi-Checkbox',
-            options: [
-              { label: 'Option 1', value: 'opt1' },
-              { label: 'Option 2', value: 'opt2' },
-            ],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        skills: ['opt1'],
-        interests: [],
-        features: [],
-        permissions: [],
-      });
-      fixture.detectChanges();
-
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-
-      // Select second option
-      checkboxes[1].nativeElement.click();
-      fixture.detectChanges();
-
-      let emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.skills).toEqual(['opt1', 'opt2']);
-
-      // Deselect first option
+      // Click first "reading" option
       checkboxes[0].nativeElement.click();
       fixture.detectChanges();
 
-      emittedValue = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.skills).toEqual(['opt2']);
-    });
-  });
-
-  describe('Field Configuration Validation', () => {
-    it('should handle missing key gracefully', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          type: 'multi-checkbox',
-          props: {
-            label: 'Multi-checkbox without key',
-            options: [{ label: 'Option 1', value: 'opt1' }],
-          },
-        },
-      ];
-
-      expect(() => {
-        fixture.componentRef.setInput('config', { fields });
-        fixture.detectChanges();
-      }).not.toThrow();
-
-      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
-      expect(checkboxes.length).toBe(1);
-    });
-
-    it('should auto-generate field IDs', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'skills',
-          type: 'multi-checkbox',
-          props: {
-            label: 'Test Multi-Checkbox',
-            options: [{ label: 'Option 1', value: 'opt1' }],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
+      await delay();
       fixture.detectChanges();
 
-      // Field should have auto-generated ID
-      expect(component.processedFields()[0].id).toBeDefined();
-      expect(component.processedFields()[0].id).toContain('dynamic-field');
+      // Both "reading" checkboxes should be checked due to duplicate values
+      expect(checkboxes[0].componentInstance.checked).toBe(true);
+      expect(checkboxes[1].componentInstance.checked).toBe(true);
+      expect(checkboxes[2].componentInstance.checked).toBe(false);
+      expect(component.formValue().hobbies).toEqual(['reading']);
+    });
+
+    it('should handle rapid checkbox clicking correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: 'Hobbies',
+            props: {
+              options: [
+                { value: 'reading', label: 'Reading' },
+                { value: 'gaming', label: 'Gaming' },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, { hobbies: [] });
+
+      await delay();
+      fixture.detectChanges();
+
+      const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
+
+      // Rapid clicking
+      checkboxes[0].nativeElement.click();
+      checkboxes[1].nativeElement.click();
+      checkboxes[0].nativeElement.click(); // Uncheck
+      checkboxes[1].nativeElement.click(); // Uncheck
+      checkboxes[0].nativeElement.click(); // Check again
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      // Should have the final state
+      expect(component.formValue().hobbies).toEqual(['reading']);
+      expect(checkboxes[0].componentInstance.checked).toBe(true);
+      expect(checkboxes[1].componentInstance.checked).toBe(false);
     });
   });
 });

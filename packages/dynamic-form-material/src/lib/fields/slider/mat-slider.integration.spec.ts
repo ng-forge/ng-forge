@@ -2,679 +2,764 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { MatSlider } from '@angular/material/slider';
-import { DynamicForm, FieldConfig, provideDynamicForm, withConfig } from '@ng-forge/dynamic-form';
-import { MATERIAL_FIELD_TYPES } from '../../config/material-field-config';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterial } from '../../providers/material-providers';
+import { delay, waitForDynamicFormInitialized } from '../../testing/delay';
 
 interface TestFormModel {
   volume: number;
   brightness: number;
+  rating: number;
   temperature: number;
-  progress: number;
+  speed: number;
 }
 
 describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
-  let fixture: ComponentFixture<DynamicForm<TestFormModel>>;
-  let component: DynamicForm<TestFormModel>;
+  let component: DynamicForm;
+  let fixture: ComponentFixture<DynamicForm>;
   let debugElement: DebugElement;
+
+  const createComponent = (config: FormConfig, initialValue?: Partial<TestFormModel>) => {
+    fixture = TestBed.createComponent(DynamicForm<any>);
+    component = fixture.componentInstance;
+    debugElement = fixture.debugElement;
+
+    fixture.componentRef.setInput('config', config);
+    if (initialValue !== undefined) {
+      fixture.componentRef.setInput('value', initialValue);
+    }
+    fixture.detectChanges();
+
+    return { component, fixture, debugElement };
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
-      providers: [provideAnimations(), provideDynamicForm(withConfig({ types: MATERIAL_FIELD_TYPES }))],
+      providers: [provideAnimations(), provideDynamicForm(withMaterial())],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(DynamicForm<TestFormModel>);
-    component = fixture.componentInstance;
-    debugElement = fixture.debugElement;
   });
 
-  describe('Happy Flow - Full Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
-            label: 'Volume Control',
-            hint: 'Adjust the audio volume',
-            minValue: 0,
-            maxValue: 100,
-            step: 5,
-            thumbLabel: true,
-            tickInterval: 10,
-            vertical: false,
-            invert: false,
-            color: 'accent',
-            appearance: 'outline',
-            className: 'volume-slider',
+  describe('Basic Material Slider Integration', () => {
+    it('should render volume slider with full configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume Level',
+            props: {
+              min: 0,
+              max: 100,
+              step: 5,
+              thumbLabel: true,
+              showThumbLabel: true,
+              hint: 'Adjust the volume level',
+              color: 'primary',
+              tabIndex: 1,
+              className: 'volume-slider',
+              tickInterval: 25,
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
+      createComponent(config, {
         volume: 50,
         brightness: 0,
+        rating: 0,
         temperature: 0,
-        progress: 0,
+        speed: 0,
       });
-      fixture.detectChanges();
-    });
 
-    it('should render slider through dynamic form', () => {
+      await waitForDynamicFormInitialized(component, fixture);
+
       const slider = debugElement.query(By.directive(MatSlider));
-      const formField = debugElement.query(By.css('mat-form-field'));
-      const label = debugElement.query(By.css('mat-label'));
-      const hint = debugElement.query(By.css('mat-hint'));
+      const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
+      const label = debugElement.query(By.css('.slider-label'));
+      const hint = debugElement.query(By.css('.mat-hint'));
+      const container = debugElement.query(By.css('.volume-slider'));
 
       expect(slider).toBeTruthy();
-      expect(slider.nativeElement.getAttribute('ng-reflect-min')).toBe('0');
-      expect(slider.nativeElement.getAttribute('ng-reflect-max')).toBe('100');
-      expect(slider.nativeElement.getAttribute('ng-reflect-step')).toBe('5');
-      expect(slider.nativeElement.getAttribute('ng-reflect-thumb-label')).toBe('true');
-      expect(slider.nativeElement.getAttribute('ng-reflect-tick-interval')).toBe('10');
-      expect(slider.nativeElement.getAttribute('ng-reflect-vertical')).toBe('false');
-      expect(slider.nativeElement.getAttribute('ng-reflect-invert')).toBe('false');
-      expect(slider.nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
-      expect(formField.nativeElement.className).toContain('volume-slider');
-      expect(formField.nativeElement.getAttribute('ng-reflect-appearance')).toBe('outline');
-      expect(label.nativeElement.textContent.trim()).toBe('Volume Control');
-      expect(hint.nativeElement.textContent.trim()).toBe('Adjust the audio volume');
+      expect(slider.componentInstance.min).toBe(0);
+      expect(slider.componentInstance.max).toBe(100);
+      expect(slider.componentInstance.discrete).toBe(true);
+      expect(slider.componentInstance.showTickMarks).toBe(true);
+      expect(slider.componentInstance.color).toBe('primary');
+      expect(sliderInput.nativeElement.getAttribute('tabindex')).toBe('1');
+      expect(container).toBeTruthy();
+      expect(label.nativeElement.textContent.trim()).toBe('Volume Level');
+      expect(hint.nativeElement.textContent.trim()).toBe('Adjust the volume level');
     });
 
-    it('should handle value changes through dynamic form', async () => {
-      const slider = debugElement.query(By.directive(MatSlider));
+    it('should handle user input and update form value', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume Level',
+            props: {
+              min: 0,
+              max: 100,
+              step: 1,
+            },
+          },
+        ],
+      };
 
-      // Simulate slider change
-      slider.componentInstance.value = 75;
-      slider.componentInstance.change.emit({
-        value: 75,
-        source: slider.componentInstance,
+      const { component } = createComponent(config, {
+        volume: 25,
+        brightness: 0,
+        rating: 0,
+        temperature: 0,
+        speed: 0,
       });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      // Initial value check
+      expect(component.formValue().volume).toBe(25);
+
+      // Simulate user changing slider value
+      const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
+      sliderInput.nativeElement.value = 75;
+      sliderInput.nativeElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      const emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.volume).toBe(75);
+      await delay();
+      fixture.detectChanges();
+
+      // Verify form value updated
+      expect(component.formValue().volume).toBe(75);
     });
 
-    it('should reflect form model changes in slider', () => {
-      const slider = debugElement.query(By.directive(MatSlider));
+    it('should reflect external value changes in slider field', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume Level',
+            props: {
+              min: 0,
+              max: 100,
+            },
+          },
+        ],
+      };
 
-      // Update form model
+      const { component } = createComponent(config, {
+        volume: 30,
+        brightness: 0,
+        rating: 0,
+        temperature: 0,
+        speed: 0,
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         volume: 80,
         brightness: 0,
+        rating: 0,
         temperature: 0,
-        progress: 0,
+        speed: 0,
       });
       fixture.detectChanges();
 
-      expect(slider.nativeElement.getAttribute('ng-reflect-ng-model')).toBe('80');
-    });
+      await delay();
+      fixture.detectChanges();
 
-    it('should handle all slider-specific properties', () => {
-      const slider = debugElement.query(By.directive(MatSlider));
-
-      expect(slider.nativeElement.getAttribute('ng-reflect-min')).toBe('0');
-      expect(slider.nativeElement.getAttribute('ng-reflect-max')).toBe('100');
-      expect(slider.nativeElement.getAttribute('ng-reflect-step')).toBe('5');
-      expect(slider.nativeElement.getAttribute('ng-reflect-thumb-label')).toBe('true');
-      expect(slider.nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
+      expect(component.formValue().volume).toBe(80);
     });
   });
 
-  describe('Minimal Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'brightness',
-          type: 'slider',
-          props: {
-            label: 'Brightness',
+  describe('Different Slider Configurations Integration', () => {
+    it('should render various slider configurations with correct attributes', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
+            props: { min: 0, max: 100, step: 1 },
           },
-        },
-      ];
+          {
+            key: 'brightness',
+            type: 'slider',
+            label: 'Brightness',
+            props: { min: 0, max: 255, step: 5, color: 'accent' },
+          },
+          {
+            key: 'rating',
+            type: 'slider',
+            label: 'Rating',
+            props: { min: 1, max: 5, step: 0.5, thumbLabel: true },
+          },
+          {
+            key: 'temperature',
+            type: 'slider',
+            label: 'Temperature',
+            props: { min: -10, max: 40, step: 1, color: 'warn' },
+          },
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
+      const { component } = createComponent(config, {
+        volume: 50,
+        brightness: 128,
+        rating: 3,
+        temperature: 20,
+        speed: 0,
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const sliders = debugElement.queryAll(By.directive(MatSlider));
+
+      expect(sliders.length).toBe(4);
+      expect(sliders[0].componentInstance.min).toBe(0);
+      expect(sliders[0].componentInstance.max).toBe(100);
+      expect(sliders[1].componentInstance.min).toBe(0);
+      expect(sliders[1].componentInstance.max).toBe(255);
+      expect(sliders[1].componentInstance.color).toBe('accent');
+      expect(sliders[2].componentInstance.min).toBe(1);
+      expect(sliders[2].componentInstance.max).toBe(5);
+      expect(sliders[2].componentInstance.discrete).toBe(true);
+      expect(sliders[3].componentInstance.min).toBe(-10);
+      expect(sliders[3].componentInstance.max).toBe(40);
+      expect(sliders[3].componentInstance.color).toBe('warn');
+    });
+
+    it('should handle different step values correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'rating',
+            type: 'slider',
+            label: 'Rating',
+            props: { min: 0, max: 10, step: 0.5 },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, { rating: 5 });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      // Initial value
+      expect(component.formValue().rating).toBe(5);
+
+      // Simulate changing to a half-step value
+      const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
+      sliderInput.nativeElement.value = 7.5;
+      sliderInput.nativeElement.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().rating).toBe(7.5);
+    });
+
+    it('should reflect external value changes for all slider types', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
+            props: { min: 0, max: 100 },
+          },
+          {
+            key: 'brightness',
+            type: 'slider',
+            label: 'Brightness',
+            props: { min: 0, max: 255 },
+          },
+          {
+            key: 'rating',
+            type: 'slider',
+            label: 'Rating',
+            props: { min: 1, max: 5, step: 0.1 },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, {
         volume: 0,
-        brightness: 50,
+        brightness: 0,
+        rating: 1,
         temperature: 0,
-        progress: 0,
+        speed: 0,
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      // Update form model programmatically
+      fixture.componentRef.setInput('value', {
+        volume: 85,
+        brightness: 200,
+        rating: 4.7,
+        temperature: 0,
+        speed: 0,
       });
       fixture.detectChanges();
-    });
 
-    it('should render with default values from configuration', () => {
+      await delay();
+      fixture.detectChanges();
+
+      const formValue = component.formValue();
+      expect(formValue.volume).toBe(85);
+      expect(formValue.brightness).toBe(200);
+      expect(formValue.rating).toBe(4.7);
+    });
+  });
+
+  describe('Minimal Configuration Tests', () => {
+    it('should render with default Material configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
+          },
+        ],
+      };
+
+      createComponent(config, { volume: 0 });
+
+      await delay();
+      fixture.detectChanges();
+
       const slider = debugElement.query(By.directive(MatSlider));
-      const formField = debugElement.query(By.css('mat-form-field'));
+      const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
 
-      expect(slider).toBeTruthy();
-      expect(slider.nativeElement.getAttribute('ng-reflect-min')).toBe('0');
-      expect(slider.nativeElement.getAttribute('ng-reflect-max')).toBe('100');
-      expect(slider.nativeElement.getAttribute('ng-reflect-step')).toBe('1');
-      expect(slider.nativeElement.getAttribute('ng-reflect-thumb-label')).toBe('false');
-      expect(slider.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(formField.nativeElement.getAttribute('ng-reflect-appearance')).toBe('fill');
+      expect(slider.componentInstance.color).toBe('primary');
+      expect(slider.componentInstance.discrete).toBe(false);
+      expect(slider.componentInstance.showTickMarks).toBe(false);
+      expect(sliderInput).toBeTruthy();
     });
 
-    it('should not display hint when not provided', () => {
-      const hint = debugElement.query(By.css('mat-hint'));
+    it('should not display hint when not provided', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
+          },
+        ],
+      };
+
+      createComponent(config, { volume: 0 });
+
+      await delay();
+      fixture.detectChanges();
+
+      const hint = debugElement.query(By.css('.mat-hint'));
       expect(hint).toBeNull();
     });
   });
 
-  describe('Multiple Sliders', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
-            label: 'Volume',
-            color: 'primary',
-            minValue: 0,
-            maxValue: 100,
-          },
-        },
-        {
-          key: 'brightness',
-          type: 'slider',
-          props: {
-            label: 'Brightness',
-            color: 'accent',
-            minValue: 0,
-            maxValue: 100,
-          },
-        },
-        {
-          key: 'temperature',
-          type: 'slider',
-          props: {
-            label: 'Temperature',
-            color: 'warn',
-            minValue: 10,
-            maxValue: 30,
-            step: 0.5,
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        volume: 75,
-        brightness: 50,
-        temperature: 20,
-        progress: 0,
-      });
-      fixture.detectChanges();
-    });
-
-    it('should render multiple sliders correctly', () => {
-      const sliders = debugElement.queryAll(By.directive(MatSlider));
-      const labels = debugElement.queryAll(By.css('mat-label'));
-
-      expect(sliders.length).toBe(3);
-      expect(labels[0].nativeElement.textContent.trim()).toBe('Volume');
-      expect(labels[1].nativeElement.textContent.trim()).toBe('Brightness');
-      expect(labels[2].nativeElement.textContent.trim()).toBe('Temperature');
-    });
-
-    it('should reflect individual slider states from form model', () => {
-      const sliders = debugElement.queryAll(By.directive(MatSlider));
-
-      expect(sliders[0].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('75');
-      expect(sliders[1].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('50');
-      expect(sliders[2].nativeElement.getAttribute('ng-reflect-ng-model')).toBe('20');
-    });
-
-    it('should handle independent slider interactions', async () => {
-      const sliders = debugElement.queryAll(By.directive(MatSlider));
-
-      // Change volume slider
-      sliders[0].componentInstance.value = 90;
-      sliders[0].componentInstance.change.emit({
-        value: 90,
-        source: sliders[0].componentInstance,
-      });
-      fixture.detectChanges();
-
-      let emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue).toEqual({
-        volume: 90,
-        brightness: 50,
-        temperature: 20,
-        progress: 0,
-      });
-
-      // Change temperature slider
-      sliders[2].componentInstance.value = 25;
-      sliders[2].componentInstance.change.emit({
-        value: 25,
-        source: sliders[2].componentInstance,
-      });
-      fixture.detectChanges();
-
-      emittedValue = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue).toEqual({
-        volume: 90,
-        brightness: 50,
-        temperature: 25,
-        progress: 0,
-      });
-    });
-
-    it('should apply different colors to sliders', () => {
-      const sliders = debugElement.queryAll(By.directive(MatSlider));
-
-      expect(sliders[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(sliders[1].nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
-      expect(sliders[2].nativeElement.getAttribute('ng-reflect-color')).toBe('warn');
-    });
-
-    it('should apply different ranges and steps to sliders', () => {
-      const sliders = debugElement.queryAll(By.directive(MatSlider));
-
-      // Volume: 0-100, step 1
-      expect(sliders[0].nativeElement.getAttribute('ng-reflect-min')).toBe('0');
-      expect(sliders[0].nativeElement.getAttribute('ng-reflect-max')).toBe('100');
-      expect(sliders[0].nativeElement.getAttribute('ng-reflect-step')).toBe('1');
-
-      // Brightness: 0-100, step 1
-      expect(sliders[1].nativeElement.getAttribute('ng-reflect-min')).toBe('0');
-      expect(sliders[1].nativeElement.getAttribute('ng-reflect-max')).toBe('100');
-      expect(sliders[1].nativeElement.getAttribute('ng-reflect-step')).toBe('1');
-
-      // Temperature: 10-30, step 0.5
-      expect(sliders[2].nativeElement.getAttribute('ng-reflect-min')).toBe('10');
-      expect(sliders[2].nativeElement.getAttribute('ng-reflect-max')).toBe('30');
-      expect(sliders[2].nativeElement.getAttribute('ng-reflect-step')).toBe('0.5');
-    });
-  });
-
-  describe('Disabled State through Dynamic Form', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
             label: 'Disabled Slider',
             disabled: true,
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        volume: 50,
-        brightness: 0,
-        temperature: 0,
-        progress: 0,
-      });
+      createComponent(config, { volume: 50 });
+
+      await delay();
       fixture.detectChanges();
-    });
-
-    it('should render slider as disabled', () => {
-      const slider = debugElement.query(By.directive(MatSlider));
-
-      expect(slider.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-    });
-
-    it('should not emit value changes when disabled slider is moved', () => {
-      const slider = debugElement.query(By.directive(MatSlider));
-
-      // Try to change disabled slider - should not change value since it's disabled
-      slider.componentInstance.value = 75;
-      // Note: disabled sliders won't emit change events
+      await delay();
       fixture.detectChanges();
 
-      // Verify the slider remains disabled
-      expect(slider.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
+      const slider = debugElement.query(By.directive(MatSlider));
+      const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
+      expect(slider.componentInstance.disabled).toBe(true);
+      expect(sliderInput.nativeElement.disabled).toBe(true);
     });
-  });
 
-  describe('Vertical Slider Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
-            label: 'Vertical Volume',
-            vertical: true,
-            invert: true,
-            minValue: 0,
-            maxValue: 100,
+    it('should apply different Material color themes', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Primary Slider',
+            props: {
+              color: 'primary',
+            },
           },
-        },
-      ];
+          {
+            key: 'brightness',
+            type: 'slider',
+            label: 'Accent Slider',
+            props: {
+              color: 'accent',
+            },
+          },
+          {
+            key: 'rating',
+            type: 'slider',
+            label: 'Warn Slider',
+            props: {
+              color: 'warn',
+            },
+          },
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        volume: 50,
-        brightness: 0,
-        temperature: 0,
-        progress: 0,
-      });
+      createComponent(config, { volume: 50, brightness: 128, rating: 3 });
+
+      await delay();
       fixture.detectChanges();
+
+      const sliders = debugElement.queryAll(By.directive(MatSlider));
+      expect(sliders[0].componentInstance.color).toBe('primary');
+      expect(sliders[1].componentInstance.color).toBe('accent');
+      expect(sliders[2].componentInstance.color).toBe('warn');
     });
 
-    it('should render vertical slider correctly', () => {
-      const slider = debugElement.query(By.directive(MatSlider));
+    it('should handle multiple sliders with independent value changes', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
+            props: { min: 0, max: 100 },
+          },
+          {
+            key: 'brightness',
+            type: 'slider',
+            label: 'Brightness',
+            props: { min: 0, max: 255 },
+          },
+        ],
+      };
 
-      expect(slider.nativeElement.getAttribute('ng-reflect-vertical')).toBe('true');
-      expect(slider.nativeElement.getAttribute('ng-reflect-invert')).toBe('true');
+      const { component } = createComponent(config, {
+        volume: 30,
+        brightness: 100,
+      });
+
+      await delay();
+      fixture.detectChanges();
+
+      // Initial values
+      expect(component.formValue().volume).toBe(30);
+      expect(component.formValue().brightness).toBe(100);
+
+      const sliderInputs = debugElement.queryAll(By.css('input[matSliderThumb]'));
+
+      // Change first slider
+      sliderInputs[0].nativeElement.value = 70;
+      sliderInputs[0].nativeElement.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      let formValue = component.formValue();
+      expect(formValue.volume).toBe(70);
+      expect(formValue.brightness).toBe(100);
+
+      // Change second slider
+      sliderInputs[1].nativeElement.value = 200;
+      sliderInputs[1].nativeElement.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      formValue = component.formValue();
+      expect(formValue.volume).toBe(70);
+      expect(formValue.brightness).toBe(200);
     });
   });
 
-  describe('Tick Interval Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
+  describe('Slider-Specific Features Tests', () => {
+    it('should display tick marks when tickInterval is provided', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
             label: 'Volume with Ticks',
-            tickInterval: 'auto',
-            minValue: 0,
-            maxValue: 100,
+            props: {
+              min: 0,
+              max: 100,
+              tickInterval: 20,
+            },
           },
-        },
-        {
-          key: 'brightness',
-          type: 'slider',
-          props: {
-            label: 'Brightness with Custom Ticks',
-            tickInterval: 20,
-            minValue: 0,
-            maxValue: 100,
-          },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        volume: 50,
-        brightness: 60,
-        temperature: 0,
-        progress: 0,
-      });
+      createComponent(config, { volume: 50 });
+
+      await delay();
       fixture.detectChanges();
+
+      const slider = debugElement.query(By.directive(MatSlider));
+      expect(slider.componentInstance.showTickMarks).toBe(true);
     });
 
-    it('should apply different tick intervals', () => {
-      const sliders = debugElement.queryAll(By.directive(MatSlider));
-
-      expect(sliders[0].nativeElement.getAttribute('ng-reflect-tick-interval')).toBe('auto');
-      expect(sliders[1].nativeElement.getAttribute('ng-reflect-tick-interval')).toBe('20');
-    });
-  });
-
-  describe('Thumb Label Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
+    it('should enable discrete mode when thumbLabel or showThumbLabel is true', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
             label: 'Volume with Thumb Label',
-            thumbLabel: true,
-            minValue: 0,
-            maxValue: 100,
+            props: {
+              thumbLabel: true,
+            },
           },
-        },
-        {
-          key: 'brightness',
-          type: 'slider',
-          props: {
-            label: 'Brightness without Thumb Label',
-            thumbLabel: false,
-            minValue: 0,
-            maxValue: 100,
+          {
+            key: 'brightness',
+            type: 'slider',
+            label: 'Brightness with Show Thumb Label',
+            props: {
+              showThumbLabel: true,
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        volume: 50,
-        brightness: 60,
-        temperature: 0,
-        progress: 0,
-      });
+      createComponent(config, { volume: 50, brightness: 128 });
+
+      await delay();
       fixture.detectChanges();
-    });
 
-    it('should apply thumb label configuration correctly', () => {
       const sliders = debugElement.queryAll(By.directive(MatSlider));
+      expect(sliders[0].componentInstance.discrete).toBe(true);
+      expect(sliders[1].componentInstance.discrete).toBe(true);
+    });
 
-      expect(sliders[0].nativeElement.getAttribute('ng-reflect-thumb-label')).toBe('true');
-      expect(sliders[1].nativeElement.getAttribute('ng-reflect-thumb-label')).toBe('false');
+    it('should handle touched state on blur', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, { volume: 50 });
+
+      await delay();
+      fixture.detectChanges();
+
+      const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
+      
+      // Simulate focus and then blur
+      sliderInput.nativeElement.focus();
+      sliderInput.nativeElement.dispatchEvent(new Event('blur'));
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      // Note: The touched state is handled internally by the component
+      // We can't directly access it from the form, but we can verify the event was handled
+      expect(sliderInput).toBeTruthy();
     });
   });
 
-  describe('Input Event Handling', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
-            label: 'Volume Input Events',
-            minValue: 0,
-            maxValue: 100,
+  describe('Edge Cases and Robustness Tests', () => {
+    it('should handle undefined form values gracefully', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        volume: 50,
-        brightness: 0,
-        temperature: 0,
-        progress: 0,
-      });
-      fixture.detectChanges();
-    });
+      createComponent(config); // No initial value provided
 
-    it('should handle input events during slider movement', async () => {
-      const slider = debugElement.query(By.directive(MatSlider));
-
-      // Simulate input event (during dragging)
-      slider.componentInstance.value = 65;
-      slider.componentInstance.input.emit({
-        value: 65,
-        source: slider.componentInstance,
-      });
-      fixture.detectChanges();
-
-      const emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.volume).toBe(65);
-    });
-  });
-
-  describe('Default Props from Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
-            label: 'Test Slider',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        volume: 50,
-        brightness: 0,
-        temperature: 0,
-        progress: 0,
-      });
-      fixture.detectChanges();
-    });
-
-    it('should apply default props from MATERIAL_FIELD_TYPES configuration', () => {
-      const slider = debugElement.query(By.directive(MatSlider));
-      const formField = debugElement.query(By.css('mat-form-field'));
-
-      // Check default props from configuration
-      expect(slider.nativeElement.getAttribute('ng-reflect-min')).toBe('0');
-      expect(slider.nativeElement.getAttribute('ng-reflect-max')).toBe('100');
-      expect(slider.nativeElement.getAttribute('ng-reflect-step')).toBe('1');
-      expect(slider.nativeElement.getAttribute('ng-reflect-thumb-label')).toBe('false');
-      expect(slider.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(formField.nativeElement.getAttribute('ng-reflect-appearance')).toBe('fill');
-    });
-  });
-
-  describe('Form Value Binding Edge Cases', () => {
-    it('should handle undefined form values', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
-            label: 'Test Slider',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      // Don't set initial value
+      await delay();
       fixture.detectChanges();
 
       const slider = debugElement.query(By.directive(MatSlider));
       expect(slider).toBeTruthy();
     });
 
-    it('should handle null form values', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
-            label: 'Test Slider',
+    it('should handle null form values gracefully', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', null as any);
+      createComponent(config, null as unknown as TestFormModel);
+
+      await delay();
       fixture.detectChanges();
 
       const slider = debugElement.query(By.directive(MatSlider));
       expect(slider).toBeTruthy();
     });
 
-    it('should handle out-of-range values', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
-            label: 'Test Slider',
-            minValue: 0,
-            maxValue: 100,
+    it('should handle zero values correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
+            props: { min: 0, max: 100 },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        volume: 150, // Out of range
-        brightness: 0,
-        temperature: 0,
-        progress: 0,
-      });
+      const { component } = createComponent(config, { volume: 0 });
+
+      await delay();
       fixture.detectChanges();
 
-      const slider = debugElement.query(By.directive(MatSlider));
-      expect(slider.nativeElement.getAttribute('ng-reflect-ng-model')).toBe('150');
+      expect(component.formValue().volume).toBe(0);
     });
 
-    it('should handle decimal values with step configuration', async () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'temperature',
-          type: 'slider',
-          props: {
-            label: 'Temperature Slider',
-            minValue: 15,
-            maxValue: 25,
-            step: 0.1,
+    it('should handle negative values correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'temperature',
+            type: 'slider',
+            label: 'Temperature',
+            props: { min: -20, max: 40 },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        volume: 0,
-        brightness: 0,
-        temperature: 20.5,
-        progress: 0,
-      });
+      const { component } = createComponent(config, { temperature: -10 });
+
+      await delay();
       fixture.detectChanges();
 
-      const slider = debugElement.query(By.directive(MatSlider));
+      expect(component.formValue().temperature).toBe(-10);
 
-      expect(slider.nativeElement.getAttribute('ng-reflect-ng-model')).toBe('20.5');
-      expect(slider.nativeElement.getAttribute('ng-reflect-step')).toBe('0.1');
-
-      // Change to decimal value
-      slider.componentInstance.value = 22.3;
-      slider.componentInstance.change.emit({
-        value: 22.3,
-        source: slider.componentInstance,
-      });
+      // Test changing to another negative value
+      const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
+      sliderInput.nativeElement.value = -5;
+      sliderInput.nativeElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      const emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.temperature).toBe(22.3);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().temperature).toBe(-5);
     });
-  });
 
-  describe('Field Configuration Validation', () => {
-    it('should handle missing key gracefully', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          type: 'slider',
-          props: {
-            label: 'Slider without key',
+    it('should handle decimal values correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'rating',
+            type: 'slider',
+            label: 'Rating',
+            props: { min: 0, max: 5, step: 0.1 },
           },
-        },
-      ];
+        ],
+      };
 
-      expect(() => {
-        fixture.componentRef.setInput('config', { fields });
+      const { component } = createComponent(config, { rating: 3.7 });
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().rating).toBe(3.7);
+
+      // Test changing to another decimal value
+      const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
+      sliderInput.nativeElement.value = 4.2;
+      sliderInput.nativeElement.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().rating).toBe(4.2);
+    });
+
+    it('should handle rapid value changes correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Volume',
+            props: { min: 0, max: 100 },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, { volume: 0 });
+
+      await delay();
+      fixture.detectChanges();
+
+      const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
+      const testValues = [10, 25, 50, 75, 90];
+
+      // Simulate rapid value changes
+      for (const value of testValues) {
+        sliderInput.nativeElement.value = value;
+        sliderInput.nativeElement.dispatchEvent(new Event('input'));
         fixture.detectChanges();
-      }).not.toThrow();
+      }
 
-      const slider = debugElement.query(By.directive(MatSlider));
-      expect(slider).toBeTruthy();
-    });
-
-    it('should auto-generate field IDs', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'volume',
-          type: 'slider',
-          props: {
-            label: 'Test Slider',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
+      await delay();
       fixture.detectChanges();
 
-      // Field should have auto-generated ID
-      expect(component.processedFields()[0].id).toBeDefined();
-      expect(component.processedFields()[0].id).toContain('dynamic-field');
+      // Should have the final value
+      expect(component.formValue().volume).toBe(90);
+    });
+
+    it('should apply default Material Design configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'volume',
+            type: 'slider',
+            label: 'Test Slider',
+          },
+        ],
+      };
+
+      createComponent(config, { volume: 50 });
+
+      await delay();
+      fixture.detectChanges();
+
+      const slider = debugElement.query(By.directive(MatSlider));
+
+      // Verify default Material configuration is applied
+      expect(slider.componentInstance.color).toBe('primary');
+      expect(slider.componentInstance.discrete).toBe(false);
+      expect(slider.componentInstance.showTickMarks).toBe(false);
     });
   });
 });

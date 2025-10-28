@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatError } from '@angular/material/input';
 
@@ -25,7 +25,5 @@ export class MatErrorsComponent {
   readonly invalid = input<boolean>(false);
   readonly touched = input<boolean>(false);
 
-  shouldShowErrors(): boolean {
-    return this.invalid() && this.touched() && this.errors().length > 0;
-  }
+  shouldShowErrors = computed(() => this.invalid() && this.touched() && this.errors().length > 0);
 }

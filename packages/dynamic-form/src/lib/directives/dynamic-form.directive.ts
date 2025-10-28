@@ -1,6 +1,8 @@
 import { ComponentRef, Directive, ElementRef, inject, input, OnDestroy, Renderer2 } from '@angular/core';
 import { FormUiControl } from '@angular/forms/signals';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { outputFromObservable } from '@angular/core/rxjs-interop';
+import { Subject } from 'rxjs';
 
 /**
  * Utility directive that takes ComponentRef fields and appends them to a form element
@@ -21,6 +23,12 @@ export class FieldRendererDirective implements OnDestroy {
 
   private renderedComponents: ComponentRef<FormUiControl>[] = [];
 
+  // Subject that emits when fields are fully rendered and initialized
+  private readonly fieldsInitializedSubject = new Subject<void>();
+
+  // Output that emits when all fields are rendered and initialized
+  readonly fieldsInitialized = outputFromObservable(this.fieldsInitializedSubject.asObservable());
+
   // Input that accepts the ComponentRef fields array
   fieldRenderer = input<ComponentRef<FormUiControl>[] | null>();
 
@@ -33,6 +41,7 @@ export class FieldRendererDirective implements OnDestroy {
     const fields = this.fieldRenderer();
 
     if (!fields || fields.length === 0) {
+      this.fieldsInitializedSubject.next();
       return;
     }
 
@@ -46,6 +55,12 @@ export class FieldRendererDirective implements OnDestroy {
         this.renderedComponents.push(fieldComponent);
       }
     });
+
+    // Emit that fields are now rendered and initialized
+    // Use setTimeout to ensure DOM is updated and components are properly initialized
+    setTimeout(() => {
+      this.fieldsInitializedSubject.next();
+    }, 0);
   }
 
   private clearFields(): void {
@@ -61,5 +76,6 @@ export class FieldRendererDirective implements OnDestroy {
 
   ngOnDestroy(): void {
     this.clearFields();
+    this.fieldsInitializedSubject.complete();
   }
 }

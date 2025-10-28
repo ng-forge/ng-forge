@@ -39,6 +39,9 @@ export interface FieldDef<TKey extends string = string, TValue = unknown> extend
 
   /** Additional CSS classes */
   readonly className?: string;
+
+  /** Whether the field is disabled */
+  readonly disabled?: boolean;
 }
 
 /**

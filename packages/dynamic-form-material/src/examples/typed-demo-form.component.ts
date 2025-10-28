@@ -113,7 +113,7 @@ export class TypedDemoFormComponent {
       // Personal Info - using MatField enum for type safety
       {
         key: 'firstName',
-        type: MatField.INPUT, // Type-safe!
+        type: MatField.Input, // Type-safe!
         props: {
           label: 'First Name',
           placeholder: 'Enter your first name',
@@ -126,7 +126,7 @@ export class TypedDemoFormComponent {
       },
       {
         key: 'lastName',
-        type: MatField.INPUT, // Type-safe!
+        type: MatField.Input, // Type-safe!
         props: {
           label: 'Last Name',
           placeholder: 'Enter your last name',
@@ -139,7 +139,7 @@ export class TypedDemoFormComponent {
       },
       {
         key: 'email',
-        type: MatField.EMAIL, // Type-safe with specific email validation!
+        type: MatField.Email, // Type-safe with specific email validation!
         props: {
           label: 'Email Address',
           placeholder: 'user@example.com',
@@ -155,7 +155,7 @@ export class TypedDemoFormComponent {
       // Demographics
       {
         key: 'age',
-        type: MatField.NUMBER, // Type-safe number input!
+        type: MatField.Number, // Type-safe number input!
         props: {
           label: 'Age',
           placeholder: '18',
@@ -169,7 +169,7 @@ export class TypedDemoFormComponent {
       },
       {
         key: 'country',
-        type: MatField.SELECT, // Type-safe select!
+        type: MatField.Select, // Type-safe select!
         props: {
           label: 'Country',
           placeholder: 'Select your country',
@@ -192,7 +192,7 @@ export class TypedDemoFormComponent {
       // Preferences
       {
         key: 'plan',
-        type: MatField.SELECT, // Type-safe select!
+        type: MatField.Select, // Type-safe select!
         props: {
           label: 'Subscription Plan',
           placeholder: 'Choose a plan',
@@ -209,7 +209,7 @@ export class TypedDemoFormComponent {
       },
       {
         key: 'bio',
-        type: MatField.TEXTAREA, // Type-safe textarea!
+        type: MatField.Textarea, // Type-safe textarea!
         props: {
           label: 'Bio',
           placeholder: 'Tell us about yourself',
@@ -218,7 +218,7 @@ export class TypedDemoFormComponent {
       },
       {
         key: 'newsletter',
-        type: MatField.CHECKBOX, // Type-safe checkbox!
+        type: MatField.Checkbox, // Type-safe checkbox!
         props: {
           label: 'Subscribe to newsletter',
           hint: 'Get updates about new features and special offers',

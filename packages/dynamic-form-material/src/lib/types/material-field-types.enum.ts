@@ -4,38 +4,38 @@
  */
 export const MatField = {
   // Input variants
-  INPUT: 'input',
-  EMAIL: 'email',
-  PASSWORD: 'password',
-  NUMBER: 'number',
-  TEL: 'tel',
-  URL: 'url',
-  SEARCH: 'search',
+  Input: 'input',
+  Email: 'email',
+  Password: 'password',
+  Number: 'number',
+  Tel: 'tel',
+  Url: 'url',
+  Search: 'search',
 
   // Text area
-  TEXTAREA: 'textarea',
+  Textarea: 'textarea',
 
   // Selection
-  SELECT: 'select',
-  MULTI_SELECT: 'multi-select',
-  RADIO: 'radio',
+  Select: 'select',
+  MultiSelect: 'multi-select',
+  Radio: 'radio',
 
   // Boolean
-  CHECKBOX: 'checkbox',
-  TOGGLE: 'toggle',
+  Checkbox: 'checkbox',
+  Toggle: 'toggle',
 
   // Date/Time
-  DATEPICKER: 'datepicker',
-  DATETIME_LOCAL: 'datetime-local',
+  Datepicker: 'datepicker',
+  DateTimeLocal: 'datetime-local',
 
   // Numeric
-  SLIDER: 'slider',
+  Slider: 'slider',
 
   // Multi-value
-  MULTI_CHECKBOX: 'multi-checkbox',
+  MultiCheckbox: 'multi-checkbox',
 
   // Action
-  SUBMIT: 'submit',
+  Submit: 'submit',
 } as const;
 
 /**
@@ -48,24 +48,24 @@ export type MatFieldType = (typeof MatField)[keyof typeof MatField];
  * This ensures type safety when working with form values
  */
 export interface MatFieldTypeMap {
-  [MatField.INPUT]: string;
-  [MatField.EMAIL]: string;
-  [MatField.PASSWORD]: string;
-  [MatField.NUMBER]: number;
-  [MatField.TEL]: string;
-  [MatField.URL]: string;
-  [MatField.SEARCH]: string;
-  [MatField.TEXTAREA]: string;
-  [MatField.SELECT]: string;
-  [MatField.MULTI_SELECT]: string[];
-  [MatField.RADIO]: string;
-  [MatField.CHECKBOX]: boolean;
-  [MatField.TOGGLE]: boolean;
-  [MatField.DATEPICKER]: Date;
-  [MatField.DATETIME_LOCAL]: Date;
-  [MatField.SLIDER]: number;
-  [MatField.MULTI_CHECKBOX]: string[];
-  [MatField.SUBMIT]: void;
+  [MatField.Input]: string;
+  [MatField.Email]: string;
+  [MatField.Password]: string;
+  [MatField.Number]: number;
+  [MatField.Tel]: string;
+  [MatField.Url]: string;
+  [MatField.Search]: string;
+  [MatField.Textarea]: string;
+  [MatField.Select]: string;
+  [MatField.MultiSelect]: string[];
+  [MatField.Radio]: string;
+  [MatField.Checkbox]: boolean;
+  [MatField.Toggle]: boolean;
+  [MatField.Datepicker]: Date;
+  [MatField.DateTimeLocal]: Date;
+  [MatField.Slider]: number;
+  [MatField.MultiCheckbox]: string[];
+  [MatField.Submit]: void;
 }
 
 /**
@@ -94,24 +94,24 @@ export function isMatFieldType(type: string): type is MatFieldType {
  */
 export function getMatFieldValueTypeName(type: MatFieldType): string {
   const typeMap: Record<MatFieldType, string> = {
-    [MatField.INPUT]: 'string',
-    [MatField.EMAIL]: 'string',
-    [MatField.PASSWORD]: 'string',
-    [MatField.NUMBER]: 'number',
-    [MatField.TEL]: 'string',
-    [MatField.URL]: 'string',
-    [MatField.SEARCH]: 'string',
-    [MatField.TEXTAREA]: 'string',
-    [MatField.SELECT]: 'string',
-    [MatField.MULTI_SELECT]: 'string[]',
-    [MatField.RADIO]: 'string',
-    [MatField.CHECKBOX]: 'boolean',
-    [MatField.TOGGLE]: 'boolean',
-    [MatField.DATEPICKER]: 'Date',
-    [MatField.DATETIME_LOCAL]: 'Date',
-    [MatField.SLIDER]: 'number',
-    [MatField.MULTI_CHECKBOX]: 'string[]',
-    [MatField.SUBMIT]: 'void',
+    [MatField.Input]: 'string',
+    [MatField.Email]: 'string',
+    [MatField.Password]: 'string',
+    [MatField.Number]: 'number',
+    [MatField.Tel]: 'string',
+    [MatField.Url]: 'string',
+    [MatField.Search]: 'string',
+    [MatField.Textarea]: 'string',
+    [MatField.Select]: 'string',
+    [MatField.MultiSelect]: 'string[]',
+    [MatField.Radio]: 'string',
+    [MatField.Checkbox]: 'boolean',
+    [MatField.Toggle]: 'boolean',
+    [MatField.Datepicker]: 'Date',
+    [MatField.DateTimeLocal]: 'Date',
+    [MatField.Slider]: 'number',
+    [MatField.MultiCheckbox]: 'string[]',
+    [MatField.Submit]: 'void',
   };
 
   return typeMap[type];

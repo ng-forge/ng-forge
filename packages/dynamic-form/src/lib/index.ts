@@ -40,5 +40,5 @@ export { SignalFormState } from './core/signal-form-state';
 // Field interfaces for custom field components
 export * from './fields';
 
-// Type helpers  
+// Type helpers
 export type InferSchemaFormValue<T extends DynamicFormSchemaDefinition> = T extends DynamicFormSchemaDefinition ? T['fieldDefs'] : unknown;

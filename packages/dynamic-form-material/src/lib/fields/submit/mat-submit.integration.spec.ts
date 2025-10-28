@@ -3,617 +3,572 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { DynamicForm, FieldConfig, provideDynamicForm, withConfig } from '@ng-forge/dynamic-form';
-import { MATERIAL_FIELD_TYPES } from '../../config/material-field-config';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterial } from '../../providers/material-providers';
+import { delay, waitForDynamicFormInitialized } from '../../testing/delay';
 
 interface TestFormModel {
   email: string;
-  password: string;
+  firstName: string;
 }
 
 describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
-  let fixture: ComponentFixture<DynamicForm<TestFormModel>>;
-  let component: DynamicForm<TestFormModel>;
+  let component: DynamicForm;
+  let fixture: ComponentFixture<DynamicForm>;
   let debugElement: DebugElement;
+
+  const createComponent = (config: FormConfig, initialValue?: Partial<TestFormModel>) => {
+    fixture = TestBed.createComponent(DynamicForm<any>);
+    component = fixture.componentInstance;
+    debugElement = fixture.debugElement;
+
+    fixture.componentRef.setInput('config', config);
+    if (initialValue !== undefined) {
+      fixture.componentRef.setInput('value', initialValue);
+    }
+    fixture.detectChanges();
+
+    return { component, fixture, debugElement };
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
-      providers: [
-        provideAnimations(),
-        provideDynamicForm(
-          withConfig({
-            types: MATERIAL_FIELD_TYPES,
-          })
-        ),
-      ],
+      providers: [provideAnimations(), provideDynamicForm(withMaterial())],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(DynamicForm<TestFormModel>);
-    component = fixture.componentInstance;
-    debugElement = fixture.debugElement;
   });
 
-  describe('Happy Flow - Full Configuration', () => {
-    let onClickSpy: any;
-
-    beforeEach(() => {
-      onClickSpy = vi.fn();
-
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
+  describe('Basic Material Submit Button Integration', () => {
+    it('should render submit button with full configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
             label: 'Submit Form',
-            color: 'primary',
-            disabled: false,
-            className: 'submit-button',
-            onClick: onClickSpy,
+            props: {
+              color: 'primary',
+              className: 'submit-button',
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-    });
+      createComponent(config);
 
-    it('should render submit button through dynamic form', () => {
+      await waitForDynamicFormInitialized(component, fixture);
+
       const button = debugElement.query(By.directive(MatButton));
+      const buttonElement = debugElement.query(By.css('button'));
 
       expect(button).toBeTruthy();
-      expect(button.nativeElement.textContent.trim()).toBe('Submit Form');
-      expect(button.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(button.nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
-      expect(button.nativeElement.className).toContain('submit-button');
+      expect(buttonElement.nativeElement.textContent.trim()).toBe('Submit Form');
+      expect(buttonElement.nativeElement.getAttribute('type')).toBe('button');
+      expect(buttonElement.nativeElement.className).toContain('submit-button');
+      expect(buttonElement.nativeElement.className).toContain('mat-mdc-raised-button');
+      expect(buttonElement.nativeElement.className).toContain('mat-primary');
     });
 
-    it('should handle button clicks', () => {
-      const button = debugElement.query(By.directive(MatButton));
+    it('should handle click events', async () => {
+      let clickCount = 0;
+      const handleClick = () => {
+        clickCount++;
+      };
 
-      button.nativeElement.click();
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Click Me',
+            props: {
+              onClick: handleClick,
+            },
+          },
+        ],
+      };
+
+      createComponent(config);
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const buttonElement = debugElement.query(By.css('button'));
+
+      // Initial state
+      expect(clickCount).toBe(0);
+
+      // Simulate button click
+      buttonElement.nativeElement.click();
       fixture.detectChanges();
 
-      expect(onClickSpy).toHaveBeenCalled();
+      expect(clickCount).toBe(1);
+
+      // Click again
+      buttonElement.nativeElement.click();
+      fixture.detectChanges();
+
+      expect(clickCount).toBe(2);
     });
 
-    it('should apply all submit button-specific properties', () => {
-      const button = debugElement.query(By.directive(MatButton));
+    it('should handle disabled state correctly', async () => {
+      let clickCount = 0;
+      const handleClick = () => {
+        clickCount++;
+      };
 
-      expect(button.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(button.nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Disabled Button',
+            disabled: true,
+            props: {
+              onClick: handleClick,
+            },
+          },
+        ],
+      };
+
+      createComponent(config);
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const buttonElement = debugElement.query(By.css('button'));
+
+      expect(buttonElement.nativeElement.disabled).toBe(true);
+
+      // Try to click disabled button
+      buttonElement.nativeElement.click();
+      fixture.detectChanges();
+
+      // Click handler should not be called for disabled button
+      expect(clickCount).toBe(0);
     });
   });
 
-  describe('Minimal Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'Submit',
+  describe('Material Design Color Variants', () => {
+    it('should render different Material color variants', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'primarySubmit',
+            type: 'submit',
+            label: 'Primary',
+            props: {
+              color: 'primary',
+            },
           },
-        },
-      ];
+          {
+            key: 'accentSubmit',
+            type: 'submit',
+            label: 'Accent',
+            props: {
+              color: 'accent',
+            },
+          },
+          {
+            key: 'warnSubmit',
+            type: 'submit',
+            label: 'Warn',
+            props: {
+              color: 'warn',
+            },
+          },
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
+      createComponent(config);
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const buttons = debugElement.queryAll(By.css('button'));
+
+      expect(buttons.length).toBe(3);
+      expect(buttons[0].nativeElement.className).toContain('mat-primary');
+      expect(buttons[1].nativeElement.className).toContain('mat-accent');
+      expect(buttons[2].nativeElement.className).toContain('mat-warn');
+    });
+
+    it('should default to primary color when not specified', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Default Color',
+          },
+        ],
+      };
+
+      createComponent(config);
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const buttonElement = debugElement.query(By.css('button'));
+      expect(buttonElement.nativeElement.className).toContain('mat-primary');
+    });
+  });
+
+  describe('Form Integration Tests', () => {
+    it('should work alongside form inputs', async () => {
+      let submittedData: any = null;
+      const handleSubmit = () => {
+        submittedData = component.formValue();
+      };
+
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            props: {
+              type: 'email',
+              required: true,
+            },
+          },
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+          },
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Submit Form',
+            props: {
+              onClick: handleSubmit,
+            },
+          },
+        ],
+      };
+
+      createComponent(config, {
+        email: 'test@example.com',
+        firstName: 'John',
       });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const submitButton = debugElement.query(By.css('button'));
+
+      // Click submit button
+      submitButton.nativeElement.click();
       fixture.detectChanges();
+
+      expect(submittedData).toEqual({
+        email: 'test@example.com',
+        firstName: 'John',
+        submit: '',
+      });
     });
 
-    it('should render with default values from configuration', () => {
-      const button = debugElement.query(By.directive(MatButton));
+    it('should handle form validation state', async () => {
+      let submitAttempts = 0;
+      const handleSubmit = () => {
+        submitAttempts++;
+      };
 
-      expect(button).toBeTruthy();
-      expect(button.nativeElement.textContent.trim()).toBe('Submit');
-      expect(button.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(button.nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            props: {
+              type: 'email',
+              required: true,
+            },
+          },
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Submit',
+            props: {
+              onClick: handleSubmit,
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { email: '' });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const submitButton = debugElement.query(By.css('button'));
+
+      // Submit with empty required field
+      submitButton.nativeElement.click();
+      fixture.detectChanges();
+
+      // Submit handler should still be called (validation is form-level responsibility)
+      expect(submitAttempts).toBe(1);
     });
 
-    it('should handle clicks without onClick handler', () => {
-      const button = debugElement.query(By.directive(MatButton));
+    it('should maintain button state during form updates', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+          },
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Save Changes',
+            props: {
+              color: 'accent',
+            },
+          },
+        ],
+      };
 
+      createComponent(config, { firstName: 'John' });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      let buttonElement = debugElement.query(By.css('button'));
+      expect(buttonElement.nativeElement.textContent.trim()).toBe('Save Changes');
+      expect(buttonElement.nativeElement.className).toContain('mat-accent');
+
+      // Update form value programmatically
+      fixture.componentRef.setInput('value', { firstName: 'Jane' });
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      // Button should maintain its properties
+      buttonElement = debugElement.query(By.css('button'));
+      expect(buttonElement.nativeElement.textContent.trim()).toBe('Save Changes');
+      expect(buttonElement.nativeElement.className).toContain('mat-accent');
+    });
+  });
+
+  describe('Edge Cases and Robustness Tests', () => {
+    it('should handle submit button without click handler', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'No Handler',
+          },
+        ],
+      };
+
+      createComponent(config);
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const buttonElement = debugElement.query(By.css('button'));
+
+      // Should not throw error when clicked without handler
       expect(() => {
-        button.nativeElement.click();
+        buttonElement.nativeElement.click();
         fixture.detectChanges();
       }).not.toThrow();
     });
-  });
 
-  describe('Multiple Submit Buttons', () => {
-    let onSaveSpy: any;
-    let onCancelSpy: any;
+    it('should handle long button labels', async () => {
+      const longLabel = 'This is a very long button label that might cause layout issues';
 
-    beforeEach(() => {
-      onSaveSpy = vi.fn();
-      onCancelSpy = vi.fn();
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: longLabel,
+          },
+        ],
+      };
 
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'save',
-          type: 'submit',
-          props: {
+      createComponent(config);
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const buttonElement = debugElement.query(By.css('button'));
+      expect(buttonElement.nativeElement.textContent.trim()).toBe(longLabel);
+    });
+
+    it('should handle special characters in button labels', async () => {
+      const specialLabel = 'Save & Continue → 💾';
+
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: specialLabel,
+          },
+        ],
+      };
+
+      createComponent(config);
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const buttonElement = debugElement.query(By.css('button'));
+      expect(buttonElement.nativeElement.textContent.trim()).toBe(specialLabel);
+    });
+
+    it('should handle multiple submit buttons', async () => {
+      let primaryClicks = 0;
+      let secondaryClicks = 0;
+
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'primarySubmit',
+            type: 'submit',
             label: 'Save',
-            color: 'primary',
-            onClick: onSaveSpy,
+            props: {
+              color: 'primary',
+              onClick: () => primaryClicks++,
+            },
           },
-        },
-        {
-          key: 'cancel',
-          type: 'submit',
-          props: {
+          {
+            key: 'secondarySubmit',
+            type: 'submit',
             label: 'Cancel',
-            color: 'warn',
-            onClick: onCancelSpy,
+            props: {
+              color: 'warn',
+              onClick: () => secondaryClicks++,
+            },
           },
-        },
-        {
-          key: 'draft',
-          type: 'submit',
-          props: {
-            label: 'Save as Draft',
-            color: 'accent',
-            disabled: true,
-          },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-    });
+      createComponent(config);
 
-    it('should render multiple submit buttons correctly', () => {
-      const buttons = debugElement.queryAll(By.directive(MatButton));
+      await waitForDynamicFormInitialized(component, fixture);
 
-      expect(buttons.length).toBe(3);
-      expect(buttons[0].nativeElement.textContent.trim()).toBe('Save');
-      expect(buttons[1].nativeElement.textContent.trim()).toBe('Cancel');
-      expect(buttons[2].nativeElement.textContent.trim()).toBe('Save as Draft');
-    });
+      const buttons = debugElement.queryAll(By.css('button'));
 
-    it('should handle independent button interactions', () => {
-      const buttons = debugElement.queryAll(By.directive(MatButton));
+      expect(buttons.length).toBe(2);
 
-      // Click Save button
+      // Click first button
       buttons[0].nativeElement.click();
       fixture.detectChanges();
 
-      expect(onSaveSpy).toHaveBeenCalled();
-      expect(onCancelSpy).not.toHaveBeenCalled();
+      expect(primaryClicks).toBe(1);
+      expect(secondaryClicks).toBe(0);
 
-      // Click Cancel button
+      // Click second button
       buttons[1].nativeElement.click();
       fixture.detectChanges();
 
-      expect(onCancelSpy).toHaveBeenCalled();
+      expect(primaryClicks).toBe(1);
+      expect(secondaryClicks).toBe(1);
     });
 
-    it('should apply different colors to buttons', () => {
-      const buttons = debugElement.queryAll(By.directive(MatButton));
-
-      expect(buttons[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(buttons[1].nativeElement.getAttribute('ng-reflect-color')).toBe('warn');
-      expect(buttons[2].nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
-    });
-
-    it('should handle disabled state correctly', () => {
-      const buttons = debugElement.queryAll(By.directive(MatButton));
-
-      expect(buttons[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
-      expect(buttons[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
-      expect(buttons[2].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-    });
-  });
-
-  describe('Disabled State through Dynamic Form', () => {
-    let onClickSpy: any;
-
-    beforeEach(() => {
-      onClickSpy = vi.fn();
-
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'Disabled Submit',
-            disabled: true,
-            onClick: onClickSpy,
+    it('should apply custom CSS classes correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Custom Button',
+            props: {
+              className: 'custom-class another-class',
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
+      createComponent(config);
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const buttonElement = debugElement.query(By.css('button'));
+      expect(buttonElement.nativeElement.className).toContain('custom-class');
+      expect(buttonElement.nativeElement.className).toContain('another-class');
     });
 
-    it('should render button as disabled', () => {
-      const button = debugElement.query(By.directive(MatButton));
+    it('should handle rapid consecutive clicks', async () => {
+      let clickCount = 0;
+      const handleClick = () => {
+        clickCount++;
+      };
 
-      expect(button.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-      expect(button.nativeElement.disabled).toBe(true);
-    });
-
-    it('should not execute onClick when disabled button is clicked', () => {
-      const button = debugElement.query(By.directive(MatButton));
-
-      // Try to click disabled button
-      button.nativeElement.click();
-      fixture.detectChanges();
-
-      // Should not execute onClick
-      expect(onClickSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Button Colors', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'primary',
-          type: 'submit',
-          props: {
-            label: 'Primary Button',
-            color: 'primary',
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Rapid Click Test',
+            props: {
+              onClick: handleClick,
+            },
           },
-        },
-        {
-          key: 'accent',
-          type: 'submit',
-          props: {
-            label: 'Accent Button',
-            color: 'accent',
-          },
-        },
-        {
-          key: 'warn',
-          type: 'submit',
-          props: {
-            label: 'Warn Button',
-            color: 'warn',
-          },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-    });
+      createComponent(config);
 
-    it('should apply different color themes to buttons', () => {
-      const buttons = debugElement.queryAll(By.directive(MatButton));
+      await waitForDynamicFormInitialized(component, fixture);
 
-      expect(buttons[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(buttons[1].nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
-      expect(buttons[2].nativeElement.getAttribute('ng-reflect-color')).toBe('warn');
-    });
-  });
+      const buttonElement = debugElement.query(By.css('button'));
 
-  describe('Custom CSS Classes', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'Styled Button',
-            className: 'custom-submit large-button primary-action',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-    });
-
-    it('should apply custom CSS classes to button', () => {
-      const button = debugElement.query(By.directive(MatButton));
-
-      expect(button.nativeElement.className).toContain('custom-submit');
-      expect(button.nativeElement.className).toContain('large-button');
-      expect(button.nativeElement.className).toContain('primary-action');
-    });
-  });
-
-  describe('Form Integration', () => {
-    let onSubmitSpy: any;
-
-    beforeEach(() => {
-      onSubmitSpy = vi.fn();
-
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'email',
-          type: 'email',
-          props: {
-            label: 'Email',
-            required: true,
-          },
-        },
-        {
-          key: 'password',
-          type: 'password',
-          props: {
-            label: 'Password',
-            required: true,
-          },
-        },
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'Login',
-            onClick: onSubmitSpy,
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: 'user@example.com',
-        password: 'password123',
-      });
-      fixture.detectChanges();
-    });
-
-    it('should work alongside form inputs', () => {
-      const button = debugElement.query(By.directive(MatButton));
-      const inputs = debugElement.queryAll(By.css('input'));
-
-      expect(inputs.length).toBe(2);
-      expect(button).toBeTruthy();
-      expect(button.nativeElement.textContent.trim()).toBe('Login');
-    });
-
-    it('should execute onClick with access to form data', () => {
-      const button = debugElement.query(By.directive(MatButton));
-
-      button.nativeElement.click();
-      fixture.detectChanges();
-
-      expect(onSubmitSpy).toHaveBeenCalled();
-
-      // The current form values should be accessible through the component
-      expect(component.value()).toEqual({
-        email: 'user@example.com',
-        password: 'password123',
-      });
-    });
-  });
-
-  describe('Button Type Attribute', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'Submit Button',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-    });
-
-    it('should have button type by default', () => {
-      const button = debugElement.query(By.directive(MatButton));
-
-      // Material buttons should be type="button" by default to prevent form submission
-      expect(button.nativeElement.getAttribute('type')).toBe('button');
-    });
-  });
-
-  describe('Default Props from Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'Test Submit',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-    });
-
-    it('should apply default props from MATERIAL_FIELD_TYPES configuration', () => {
-      const button = debugElement.query(By.directive(MatButton));
-
-      // Check default props from configuration
-      expect(button.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-    });
-  });
-
-  describe('Long Text Labels', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'This is a very long button label that might wrap or truncate',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-    });
-
-    it('should handle long text labels gracefully', () => {
-      const button = debugElement.query(By.directive(MatButton));
-
-      expect(button.nativeElement.textContent.trim()).toBe('This is a very long button label that might wrap or truncate');
-    });
-  });
-
-  describe('Special Characters in Labels', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'Submit & Save 💾 (Ctrl+S)',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-    });
-
-    it('should handle special characters and emojis in labels', () => {
-      const button = debugElement.query(By.directive(MatButton));
-
-      expect(button.nativeElement.textContent.trim()).toBe('Submit & Save 💾 (Ctrl+S)');
-    });
-  });
-
-  describe('onClick Callback Contexts', () => {
-    it('should handle onClick callback that throws error', () => {
-      const errorCallback = vi.fn().mockImplementation(() => {
-        throw new Error('Test error');
-      });
-
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'Error Button',
-            onClick: errorCallback,
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-
-      const button = debugElement.query(By.directive(MatButton));
-
-      expect(() => {
-        button.nativeElement.click();
+      // Simulate rapid clicks
+      for (let i = 0; i < 5; i++) {
+        buttonElement.nativeElement.click();
         fixture.detectChanges();
-      }).toThrow();
+      }
 
-      expect(errorCallback).toHaveBeenCalled();
+      expect(clickCount).toBe(5);
     });
   });
 
-  describe('Field Configuration Validation', () => {
-    it('should handle missing key gracefully', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          type: 'submit',
-          props: {
-            label: 'Submit without key',
+  describe('Minimal Configuration Tests', () => {
+    it('should render with minimal configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Submit',
           },
-        },
-      ];
+        ],
+      };
 
-      expect(() => {
-        fixture.componentRef.setInput('config', { fields });
-        fixture.detectChanges();
-      }).not.toThrow();
+      createComponent(config);
 
-      const button = debugElement.query(By.directive(MatButton));
-      expect(button).toBeTruthy();
-    });
-
-    it('should auto-generate field IDs', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: 'Test Submit',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
+      await delay();
       fixture.detectChanges();
 
-      // Field should have auto-generated ID
-      expect(component.processedFields()[0].id).toBeDefined();
-      expect(component.processedFields()[0].id).toContain('dynamic-field');
-    });
-  });
-
-  describe('Empty Label', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'submit',
-          type: 'submit',
-          props: {
-            label: '',
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        email: '',
-        password: '',
-      });
-      fixture.detectChanges();
-    });
-
-    it('should handle empty label gracefully', () => {
       const button = debugElement.query(By.directive(MatButton));
+      const buttonElement = debugElement.query(By.css('button'));
 
       expect(button).toBeTruthy();
-      expect(button.nativeElement.textContent.trim()).toBe('');
+      expect(buttonElement.nativeElement.textContent.trim()).toBe('Submit');
+      expect(buttonElement.nativeElement.getAttribute('type')).toBe('button');
+      expect(buttonElement.nativeElement.disabled).toBe(false);
+      expect(buttonElement.nativeElement.className).toContain('mat-primary');
+    });
+
+    it('should not apply className when not provided', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'submit',
+            type: 'submit',
+            label: 'Simple Button',
+          },
+        ],
+      };
+
+      createComponent(config);
+
+      await delay();
+      fixture.detectChanges();
+
+      const buttonElement = debugElement.query(By.css('button'));
+      // Should not have custom classes, only Material Design classes
+      expect(buttonElement.nativeElement.className).not.toContain('undefined');
+      expect(buttonElement.nativeElement.className).not.toContain('null');
     });
   });
 });

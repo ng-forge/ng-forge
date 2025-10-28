@@ -19,7 +19,7 @@ import {
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, map, of, switchMap } from 'rxjs';
+import { combineLatest, map, of, Subject, switchMap } from 'rxjs';
 import { get, isEqual, keyBy, mapValues, set } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldDef, FormConfig, InferFormValue } from './models/field-config';
@@ -30,7 +30,7 @@ import { createSchemaFromFields } from './core/schema-factory';
   selector: 'dynamic-form',
   imports: [FieldRendererDirective],
   template: `
-    <form [class.disabled]="formOptions().disabled" [fieldRenderer]="fields()">
+    <form [class.disabled]="formOptions().disabled" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
       <!-- Fields will be automatically rendered by the fieldRenderer directive -->
     </form>
   `,
@@ -161,6 +161,12 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
 
+  // Subject that emits when all fields are initialized
+  private readonly fieldsInitializedSubject = new Subject<void>();
+
+  // Observable that emits when all fields are rendered and initialized
+  readonly initialized$ = this.fieldsInitializedSubject.asObservable();
+
   fields$ = toObservable(computed(() => this.formSetup().fields));
 
   fields = toSignal(
@@ -202,8 +208,12 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
           bindings.push(inputBinding('label', () => fieldDef.label));
         }
 
-        if (fieldDef.className) {
-          bindings.push(inputBinding('className', () => fieldDef.className));
+        if (fieldDef.required) {
+          bindings.push(inputBinding('required', () => fieldDef.required));
+        }
+
+        if (fieldDef.disabled) {
+          bindings.push(inputBinding('disabled', () => fieldDef.disabled));
         }
 
         if (fieldDef.props) {
@@ -247,5 +257,9 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
     }
 
     return '';
+  }
+
+  onFieldsInitialized(): void {
+    this.fieldsInitializedSubject.next();
   }
 }

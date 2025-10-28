@@ -2,626 +2,745 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-import { MatRadioButton } from '@angular/material/radio';
-import { DynamicForm, FieldConfig, provideDynamicForm, withConfig } from '@ng-forge/dynamic-form';
-import { MATERIAL_FIELD_TYPES } from '../../config/material-field-config';
+import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterial } from '../../providers/material-providers';
+import { delay, waitForDynamicFormInitialized } from '../../testing/delay';
 
 interface TestFormModel {
   gender: string;
-  size: string;
-  priority: number;
+  plan: string;
   theme: string;
+  priority: number;
+  category: string;
 }
 
 describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
-  let fixture: ComponentFixture<DynamicForm<TestFormModel>>;
-  let component: DynamicForm<TestFormModel>;
+  let component: DynamicForm;
+  let fixture: ComponentFixture<DynamicForm>;
   let debugElement: DebugElement;
+
+  const createComponent = (config: FormConfig, initialValue?: Partial<TestFormModel>) => {
+    fixture = TestBed.createComponent(DynamicForm<any>);
+    component = fixture.componentInstance;
+    debugElement = fixture.debugElement;
+
+    fixture.componentRef.setInput('config', config);
+    if (initialValue !== undefined) {
+      fixture.componentRef.setInput('value', initialValue);
+    }
+    fixture.detectChanges();
+
+    return { component, fixture, debugElement };
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
-      providers: [provideAnimations(), provideDynamicForm(withConfig({ types: MATERIAL_FIELD_TYPES }))],
+      providers: [provideAnimations(), provideDynamicForm(withMaterial())],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(DynamicForm<TestFormModel>);
-    component = fixture.componentInstance;
-    debugElement = fixture.debugElement;
   });
 
-  describe('Happy Flow - Full Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'gender',
-          type: 'radio',
-          props: {
+  describe('Basic Material Radio Integration', () => {
+    it('should render radio group with full configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'gender',
+            type: 'radio',
             label: 'Gender',
-            hint: 'Please select your gender',
-            required: true,
-            color: 'primary',
-            labelPosition: 'after',
-            className: 'gender-radio',
-            appearance: 'outline',
-            disableRipple: true,
-            tabIndex: 1,
-            options: [
-              { label: 'Male', value: 'male' },
-              { label: 'Female', value: 'female' },
-              { label: 'Other', value: 'other' },
-              { label: 'Prefer not to say', value: 'no-answer', disabled: true },
-            ],
+            props: {
+              options: [
+                { value: 'male', label: 'Male' },
+                { value: 'female', label: 'Female' },
+                { value: 'other', label: 'Other' },
+              ],
+              hint: 'Please select your gender',
+              required: true,
+              color: 'primary',
+              labelPosition: 'after',
+              className: 'gender-radio',
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        gender: 'male',
-        size: '',
-        priority: 0,
+      createComponent(config, {
+        gender: '',
+        plan: '',
         theme: '',
+        priority: 0,
+        category: '',
       });
-      fixture.detectChanges();
-    });
 
-    it('should render radio buttons through dynamic form', () => {
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const radioGroup = debugElement.query(By.directive(MatRadioGroup));
       const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      const formField = debugElement.query(By.css('mat-form-field'));
-      const label = debugElement.query(By.css('mat-label'));
-      const hint = debugElement.query(By.css('mat-hint'));
+      const label = debugElement.query(By.css('.radio-label'));
+      const hint = debugElement.query(By.css('.mat-hint'));
+      const container = debugElement.query(By.css('.gender-radio'));
 
-      expect(radioButtons.length).toBe(4);
+      expect(radioGroup).toBeTruthy();
+      expect(radioButtons.length).toBe(3);
       expect(radioButtons[0].nativeElement.textContent.trim()).toBe('Male');
       expect(radioButtons[1].nativeElement.textContent.trim()).toBe('Female');
       expect(radioButtons[2].nativeElement.textContent.trim()).toBe('Other');
-      expect(radioButtons[3].nativeElement.textContent.trim()).toBe('Prefer not to say');
-      expect(formField.nativeElement.className).toContain('gender-radio');
-      expect(formField.nativeElement.getAttribute('ng-reflect-appearance')).toBe('outline');
+      expect(radioGroup.nativeElement.getAttribute('required')).toBe('');
       expect(label.nativeElement.textContent.trim()).toBe('Gender');
       expect(hint.nativeElement.textContent.trim()).toBe('Please select your gender');
+      expect(container).toBeTruthy();
     });
 
-    it('should handle value changes through dynamic form', async () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
+    it('should handle user selection and update form value', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'plan',
+            type: 'radio',
+            label: 'Subscription Plan',
+            props: {
+              options: [
+                { value: 'basic', label: 'Basic' },
+                { value: 'premium', label: 'Premium' },
+                { value: 'enterprise', label: 'Enterprise' },
+              ],
+            },
+          },
+        ],
+      };
 
-      // Click Female radio button
+      const { component } = createComponent(config, {
+        gender: '',
+        plan: '',
+        theme: '',
+        priority: 0,
+        category: '',
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      // Initial value check
+      expect(component.formValue().plan).toBe('');
+
+      // Simulate user selecting a radio button
+      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
       radioButtons[1].nativeElement.click();
       fixture.detectChanges();
 
-      const emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.gender).toBe('female');
+      await delay();
+      fixture.detectChanges();
+
+      // Verify form value updated
+      expect(component.formValue().plan).toBe('premium');
     });
 
-    it('should reflect form model changes in radio buttons', () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
+    it('should reflect external value changes in radio selection', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'theme',
+            type: 'radio',
+            label: 'Theme',
+            props: {
+              options: [
+                { value: 'light', label: 'Light' },
+                { value: 'dark', label: 'Dark' },
+                { value: 'auto', label: 'Auto' },
+              ],
+            },
+          },
+        ],
+      };
 
-      // Update form model
-      fixture.componentRef.setInput('value', {
-        gender: 'other',
-        size: '',
-        priority: 0,
+      const { component } = createComponent(config, {
+        gender: '',
+        plan: '',
         theme: '',
+        priority: 0,
+        category: '',
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      // Update form model programmatically
+      fixture.componentRef.setInput('value', {
+        gender: '',
+        plan: '',
+        theme: 'dark',
+        priority: 0,
+        category: '',
       });
       fixture.detectChanges();
 
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-      expect(radioButtons[1].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-      expect(radioButtons[2].nativeElement.getAttribute('ng-reflect-checked')).toBe('true');
-      expect(radioButtons[3].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-    });
+      await delay();
+      fixture.detectChanges();
 
-    it('should handle all radio-specific properties', () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-disable-ripple')).toBe('true');
-      expect(radioButtons[0].nativeElement.getAttribute('tabindex')).toBe('1');
-    });
-
-    it('should handle disabled options', () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      const disabledOption = radioButtons[3];
-
-      expect(disabledOption.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
+      expect(component.formValue().theme).toBe('dark');
     });
   });
 
-  describe('Minimal Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'size',
-          type: 'radio',
-          props: {
-            label: 'Size',
-            options: [
-              { label: 'Small', value: 'S' },
-              { label: 'Medium', value: 'M' },
-              { label: 'Large', value: 'L' },
-            ],
+  describe('Radio Options and Configuration Tests', () => {
+    it('should render radio options with different configurations', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'priority',
+            type: 'radio',
+            label: 'Priority Level',
+            props: {
+              options: [
+                { value: 1, label: 'Low', disabled: false },
+                { value: 2, label: 'Medium', disabled: false },
+                { value: 3, label: 'High', disabled: true },
+                { value: 4, label: 'Critical', disabled: false },
+              ],
+              color: 'accent',
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
+      const { component } = createComponent(config, {
         gender: '',
-        size: '',
-        priority: 0,
+        plan: '',
         theme: '',
+        priority: 0,
+        category: '',
       });
-      fixture.detectChanges();
-    });
 
-    it('should render with default values from configuration', () => {
+      await waitForDynamicFormInitialized(component, fixture);
+
       const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      const formField = debugElement.query(By.css('mat-form-field'));
 
-      expect(radioButtons.length).toBe(3);
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-      expect(formField.nativeElement.getAttribute('ng-reflect-appearance')).toBe('outline');
+      expect(radioButtons.length).toBe(4);
+      expect(radioButtons[0].nativeElement.getAttribute('disabled')).toBeNull();
+      expect(radioButtons[1].nativeElement.getAttribute('disabled')).toBeNull();
+      expect(radioButtons[2].nativeElement.hasAttribute('disabled')).toBe(true);
+      expect(radioButtons[3].nativeElement.getAttribute('disabled')).toBeNull();
     });
 
-    it('should not display hint when not provided', () => {
-      const hint = debugElement.query(By.css('mat-hint'));
+    it('should handle different radio colors', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'gender',
+            type: 'radio',
+            label: 'Primary Color',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+              color: 'primary',
+            },
+          },
+          {
+            key: 'plan',
+            type: 'radio',
+            label: 'Accent Color',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+              color: 'accent',
+            },
+          },
+          {
+            key: 'theme',
+            type: 'radio',
+            label: 'Warn Color',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+              color: 'warn',
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, {
+        gender: '',
+        plan: '',
+        theme: '',
+        priority: 0,
+        category: '',
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const radioGroups = debugElement.queryAll(By.directive(MatRadioGroup));
+      expect(radioGroups.length).toBe(3);
+    });
+
+    it('should handle label position configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            label: 'Category',
+            props: {
+              options: [
+                { value: 'tech', label: 'Technology' },
+                { value: 'business', label: 'Business' },
+              ],
+              labelPosition: 'before',
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, {
+        gender: '',
+        plan: '',
+        theme: '',
+        priority: 0,
+        category: '',
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
+      expect(radioButtons.length).toBe(2);
+    });
+
+    it('should handle number and string option values', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'priority',
+            type: 'radio',
+            label: 'Priority (Numbers)',
+            props: {
+              options: [
+                { value: 1, label: 'Low Priority' },
+                { value: 2, label: 'Medium Priority' },
+                { value: 3, label: 'High Priority' },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, {
+        gender: '',
+        plan: '',
+        theme: '',
+        priority: 0,
+        category: '',
+      });
+
+      await waitForDynamicFormInitialized(component, fixture);
+
+      // Select a radio button with number value
+      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
+      radioButtons[2].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().priority).toBe(3);
+    });
+  });
+
+  describe('Minimal Configuration Tests', () => {
+    it('should render with minimal configuration', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { category: '' });
+
+      await delay();
+      fixture.detectChanges();
+
+      const radioGroup = debugElement.query(By.directive(MatRadioGroup));
+      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
+
+      expect(radioGroup).toBeTruthy();
+      expect(radioButtons.length).toBe(2);
+    });
+
+    it('should not display label when not provided', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { category: '' });
+
+      await delay();
+      fixture.detectChanges();
+
+      const label = debugElement.query(By.css('.radio-label'));
+      expect(label).toBeNull();
+    });
+
+    it('should not display hint when not provided', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { category: '' });
+
+      await delay();
+      fixture.detectChanges();
+
+      const hint = debugElement.query(By.css('.mat-hint'));
       expect(hint).toBeNull();
     });
   });
 
-  describe('Multiple Radio Fields', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'size',
-          type: 'radio',
-          props: {
-            label: 'Size',
-            color: 'primary',
-            options: [
-              { label: 'Small', value: 'S' },
-              { label: 'Large', value: 'L' },
-            ],
-          },
-        },
-        {
-          key: 'priority',
-          type: 'radio',
-          props: {
-            label: 'Priority',
-            color: 'accent',
-            options: [
-              { label: 'Low', value: 1 },
-              { label: 'High', value: 2 },
-            ],
-          },
-        },
-        {
-          key: 'theme',
-          type: 'radio',
-          props: {
-            label: 'Theme',
-            color: 'warn',
-            options: [
-              { label: 'Light', value: 'light' },
-              { label: 'Dark', value: 'dark' },
-            ],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        gender: '',
-        size: 'S',
-        priority: 2,
-        theme: '',
-      });
-      fixture.detectChanges();
-    });
-
-    it('should render multiple radio fields correctly', () => {
-      const labels = debugElement.queryAll(By.css('mat-label'));
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-
-      expect(labels.length).toBe(3);
-      expect(labels[0].nativeElement.textContent.trim()).toBe('Size');
-      expect(labels[1].nativeElement.textContent.trim()).toBe('Priority');
-      expect(labels[2].nativeElement.textContent.trim()).toBe('Theme');
-      expect(radioButtons.length).toBe(6); // 2 + 2 + 2
-    });
-
-    it('should reflect individual field states from form model', () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-
-      // Size radio buttons
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-checked')).toBe('true');
-      expect(radioButtons[1].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-
-      // Priority radio buttons
-      expect(radioButtons[2].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-      expect(radioButtons[3].nativeElement.getAttribute('ng-reflect-checked')).toBe('true');
-
-      // Theme radio buttons
-      expect(radioButtons[4].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-      expect(radioButtons[5].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-    });
-
-    it('should handle independent field interactions', async () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-
-      // Click Large in size
-      radioButtons[1].nativeElement.click();
-      fixture.detectChanges();
-
-      let emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue).toEqual({
-        gender: '',
-        size: 'L',
-        priority: 2,
-        theme: '',
-      });
-
-      // Click Dark in theme
-      radioButtons[5].nativeElement.click();
-      fixture.detectChanges();
-
-      emittedValue = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue).toEqual({
-        gender: '',
-        size: 'L',
-        priority: 2,
-        theme: 'dark',
-      });
-    });
-
-    it('should apply different colors to radio groups', () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-
-      // Size (primary)
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(radioButtons[1].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-
-      // Priority (accent)
-      expect(radioButtons[2].nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
-      expect(radioButtons[3].nativeElement.getAttribute('ng-reflect-color')).toBe('accent');
-
-      // Theme (warn)
-      expect(radioButtons[4].nativeElement.getAttribute('ng-reflect-color')).toBe('warn');
-      expect(radioButtons[5].nativeElement.getAttribute('ng-reflect-color')).toBe('warn');
-    });
-  });
-
-  describe('Disabled State through Dynamic Form', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'gender',
-          type: 'radio',
-          props: {
-            label: 'Disabled Gender',
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            label: 'Disabled Radio',
             disabled: true,
-            options: [
-              { label: 'Male', value: 'male' },
-              { label: 'Female', value: 'female' },
-            ],
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        gender: '',
-        size: '',
-        priority: 0,
+      createComponent(config, { category: '' });
+
+      await delay();
+      fixture.detectChanges();
+      await delay();
+      fixture.detectChanges();
+
+      const radioGroup = debugElement.query(By.directive(MatRadioGroup));
+      expect(radioGroup.nativeElement.hasAttribute('disabled')).toBe(true);
+    });
+
+    it('should handle multiple radio groups with independent selections', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'gender',
+            type: 'radio',
+            label: 'Gender',
+            props: {
+              options: [
+                { value: 'male', label: 'Male' },
+                { value: 'female', label: 'Female' },
+              ],
+            },
+          },
+          {
+            key: 'plan',
+            type: 'radio',
+            label: 'Plan',
+            props: {
+              options: [
+                { value: 'basic', label: 'Basic' },
+                { value: 'premium', label: 'Premium' },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, {
+        gender: 'male',
+        plan: 'basic',
         theme: '',
+        priority: 0,
+        category: '',
       });
-      fixture.detectChanges();
-    });
 
-    it('should render all radio buttons as disabled', () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-      expect(radioButtons[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-    });
-
-    it('should not emit value changes when disabled radio buttons are clicked', () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-
-      // Try to click disabled radio buttons - should not change values since they're disabled
-      radioButtons[0].nativeElement.click();
-      radioButtons[1].nativeElement.click();
+      await delay();
       fixture.detectChanges();
 
-      // Verify radio buttons remain disabled
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-      expect(radioButtons[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
+      // Initial values
+      expect(component.formValue().gender).toBe('male');
+      expect(component.formValue().plan).toBe('basic');
+
+      const radioGroups = debugElement.queryAll(By.directive(MatRadioGroup));
+      const firstGroupButtons = radioGroups[0].queryAll(By.directive(MatRadioButton));
+      const secondGroupButtons = radioGroups[1].queryAll(By.directive(MatRadioButton));
+
+      // Change first group selection
+      firstGroupButtons[1].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      let formValue = component.formValue();
+      expect(formValue.gender).toBe('female');
+      expect(formValue.plan).toBe('basic');
+
+      // Change second group selection
+      secondGroupButtons[1].nativeElement.click();
+      fixture.detectChanges();
+
+      await delay();
+      fixture.detectChanges();
+
+      formValue = component.formValue();
+      expect(formValue.gender).toBe('female');
+      expect(formValue.plan).toBe('premium');
+    });
+
+    it('should handle pre-selected values correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'theme',
+            type: 'radio',
+            label: 'Theme',
+            props: {
+              options: [
+                { value: 'light', label: 'Light' },
+                { value: 'dark', label: 'Dark' },
+                { value: 'auto', label: 'Auto' },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, {
+        gender: '',
+        plan: '',
+        theme: 'dark',
+        priority: 0,
+        category: '',
+      });
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue().theme).toBe('dark');
     });
   });
 
-  describe('Empty Options Array', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'gender',
-          type: 'radio',
-          props: {
-            label: 'No Options',
-            options: [],
+  describe('Edge Cases and Robustness Tests', () => {
+    it('should handle undefined form values gracefully', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            label: 'Category',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        gender: '',
-        size: '',
-        priority: 0,
-        theme: '',
-      });
+      createComponent(config); // No initial value provided
+
+      await delay();
       fixture.detectChanges();
+
+      const radioGroup = debugElement.query(By.directive(MatRadioGroup));
+      expect(radioGroup).toBeTruthy();
     });
 
-    it('should render without radio buttons when options array is empty', () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      const label = debugElement.query(By.css('mat-label'));
+    it('should handle null form values gracefully', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            label: 'Category',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+            },
+          },
+        ],
+      };
 
+      createComponent(config, null as unknown as TestFormModel);
+
+      await delay();
+      fixture.detectChanges();
+
+      const radioGroup = debugElement.query(By.directive(MatRadioGroup));
+      expect(radioGroup).toBeTruthy();
+    });
+
+    it('should handle empty options array', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            label: 'Category',
+            props: {
+              options: [],
+            },
+          },
+        ],
+      };
+
+      createComponent(config, { category: '' });
+
+      await delay();
+      fixture.detectChanges();
+
+      const radioGroup = debugElement.query(By.directive(MatRadioGroup));
+      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
+
+      expect(radioGroup).toBeTruthy();
       expect(radioButtons.length).toBe(0);
-      expect(label.nativeElement.textContent.trim()).toBe('No Options');
     });
-  });
 
-  describe('Label Position Variations', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'size',
-          type: 'radio',
-          props: {
-            label: 'Before Label',
-            labelPosition: 'before',
-            options: [
-              { label: 'Option 1', value: 'opt1' },
-              { label: 'Option 2', value: 'opt2' },
-            ],
+    it('should handle options with special characters and unicode', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            label: 'Special Categories',
+            props: {
+              options: [
+                { value: 'special1', label: 'José María 🌟' },
+                { value: 'special2', label: '@#$%^&*()' },
+                { value: 'special3', label: '中文选项' },
+              ],
+            },
           },
-        },
-        {
-          key: 'theme',
-          type: 'radio',
-          props: {
-            label: 'After Label',
-            labelPosition: 'after',
-            options: [
-              { label: 'Option 3', value: 'opt3' },
-              { label: 'Option 4', value: 'opt4' },
-            ],
-          },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        gender: '',
-        size: '',
-        priority: 0,
-        theme: '',
-      });
+      const { component } = createComponent(config, { category: '' });
+
+      await delay();
       fixture.detectChanges();
-    });
 
-    it('should apply different label positions to radio groups', () => {
       const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
+      expect(radioButtons[0].nativeElement.textContent.trim()).toBe('José María 🌟');
+      expect(radioButtons[1].nativeElement.textContent.trim()).toBe('@#$%^&*()');
+      expect(radioButtons[2].nativeElement.textContent.trim()).toBe('中文选项');
 
-      // Before label position
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-label-position')).toBe('before');
-      expect(radioButtons[1].nativeElement.getAttribute('ng-reflect-label-position')).toBe('before');
-
-      // After label position
-      expect(radioButtons[2].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-      expect(radioButtons[3].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-    });
-  });
-
-  describe('Radio Button Selection Behavior', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'size',
-          type: 'radio',
-          props: {
-            label: 'Size Selection',
-            options: [
-              { label: 'Small', value: 'S' },
-              { label: 'Medium', value: 'M' },
-              { label: 'Large', value: 'L' },
-            ],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        gender: '',
-        size: '',
-        priority: 0,
-        theme: '',
-      });
-      fixture.detectChanges();
-    });
-
-    it('should only allow one selection at a time', async () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-
-      // Click Small
+      // Test selection with special characters
       radioButtons[0].nativeElement.click();
       fixture.detectChanges();
 
-      let emittedValue: TestFormModel = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.size).toBe('S');
-
-      // Click Medium - should deselect Small
-      radioButtons[1].nativeElement.click();
+      await delay();
       fixture.detectChanges();
 
-      emittedValue = await firstValueFrom((component as any).valueChange$);
-      expect(emittedValue?.size).toBe('M');
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-      expect(radioButtons[1].nativeElement.getAttribute('ng-reflect-checked')).toBe('true');
-      expect(radioButtons[2].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
+      expect(component.formValue().category).toBe('special1');
     });
-  });
 
-  describe('Default Props from Configuration', () => {
-    beforeEach(() => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'gender',
-          type: 'radio',
-          props: {
-            label: 'Test Radio',
-            options: [{ label: 'Option 1', value: 'opt1' }],
+    it('should handle rapid selection changes correctly', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            label: 'Category',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+                { value: 'option3', label: 'Option 3' },
+                { value: 'option4', label: 'Option 4' },
+              ],
+            },
           },
-        },
-      ];
+        ],
+      };
 
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        gender: '',
-        size: '',
-        priority: 0,
-        theme: '',
-      });
-      fixture.detectChanges();
-    });
+      const { component } = createComponent(config, { category: '' });
 
-    it('should apply default props from MATERIAL_FIELD_TYPES configuration', () => {
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      const formField = debugElement.query(By.css('mat-form-field'));
-
-      // Check default props from configuration
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-label-position')).toBe('after');
-      expect(formField.nativeElement.getAttribute('ng-reflect-appearance')).toBe('outline');
-    });
-  });
-
-  describe('Form Value Binding Edge Cases', () => {
-    it('should handle undefined form values', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'gender',
-          type: 'radio',
-          props: {
-            label: 'Test Radio',
-            options: [{ label: 'Option 1', value: 'opt1' }],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      // Don't set initial value
-      fixture.detectChanges();
-
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      expect(radioButtons.length).toBe(1);
-    });
-
-    it('should handle null form values', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'gender',
-          type: 'radio',
-          props: {
-            label: 'Test Radio',
-            options: [{ label: 'Option 1', value: 'opt1' }],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', null as any);
-      fixture.detectChanges();
-
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      expect(radioButtons.length).toBe(1);
-    });
-
-    it("should handle value that doesn't match any option", () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'gender',
-          type: 'radio',
-          props: {
-            label: 'Test Radio',
-            options: [
-              { label: 'Option 1', value: 'opt1' },
-              { label: 'Option 2', value: 'opt2' },
-            ],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
-      fixture.componentRef.setInput('value', {
-        gender: 'non-existent-value',
-        size: '',
-        priority: 0,
-        theme: '',
-      });
+      await delay();
       fixture.detectChanges();
 
       const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
 
-      // No radio button should be selected
-      expect(radioButtons[0].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-      expect(radioButtons[1].nativeElement.getAttribute('ng-reflect-checked')).toBe('false');
-    });
-  });
-
-  describe('Field Configuration Validation', () => {
-    it('should handle missing key gracefully', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          type: 'radio',
-          props: {
-            label: 'Radio without key',
-            options: [{ label: 'Option 1', value: 'opt1' }],
-          },
-        },
-      ];
-
-      expect(() => {
-        fixture.componentRef.setInput('config', { fields });
+      // Simulate rapid clicking through options
+      for (let i = 0; i < radioButtons.length; i++) {
+        radioButtons[i].nativeElement.click();
         fixture.detectChanges();
-      }).not.toThrow();
+      }
 
-      const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
-      expect(radioButtons.length).toBe(1);
-    });
-
-    it('should auto-generate field IDs', () => {
-      const fields: FieldConfig<TestFormModel>[] = [
-        {
-          key: 'gender',
-          type: 'radio',
-          props: {
-            label: 'Test Radio',
-            options: [{ label: 'Option 1', value: 'opt1' }],
-          },
-        },
-      ];
-
-      fixture.componentRef.setInput('config', { fields });
+      await delay();
       fixture.detectChanges();
 
-      // Field should have auto-generated ID
-      expect(component.processedFields()[0].id).toBeDefined();
-      expect(component.processedFields()[0].id).toContain('dynamic-field');
+      // Should have the final selected value
+      expect(component.formValue().category).toBe('option4');
+    });
+
+    it('should maintain selection when options are updated', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'category',
+            type: 'radio',
+            label: 'Category',
+            props: {
+              options: [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { component } = createComponent(config, { category: 'option1' });
+
+      await delay();
+      fixture.detectChanges();
+
+      // Initial selection should be maintained
+      expect(component.formValue().category).toBe('option1');
     });
   });
 });

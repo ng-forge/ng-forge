@@ -17,7 +17,7 @@ import { MatToggleFieldComponent } from '../fields/toggle/mat-toggle.component';
  */
 export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
   {
-    name: MatField.INPUT,
+    name: MatField.Input,
     component: MatInputFieldComponent,
     defaultProps: {
       type: 'text',
@@ -25,44 +25,44 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     },
   },
   {
-    name: MatField.EMAIL,
-    extends: MatField.INPUT,
+    name: MatField.Email,
+    extends: MatField.Input,
     defaultProps: {
       type: 'email',
     },
     validators: ['email'],
   },
   {
-    name: MatField.PASSWORD,
-    extends: MatField.INPUT,
+    name: MatField.Password,
+    extends: MatField.Input,
     defaultProps: {
       type: 'password',
       autocomplete: 'current-password',
     },
   },
   {
-    name: MatField.NUMBER,
-    extends: MatField.INPUT,
+    name: MatField.Number,
+    extends: MatField.Input,
     defaultProps: {
       type: 'number',
     },
   },
   {
-    name: MatField.TEL,
-    extends: MatField.INPUT,
+    name: MatField.Tel,
+    extends: MatField.Input,
     defaultProps: {
       type: 'tel',
     },
   },
   {
-    name: MatField.URL,
-    extends: MatField.INPUT,
+    name: MatField.Url,
+    extends: MatField.Input,
     defaultProps: {
       type: 'url',
     },
   },
   {
-    name: MatField.SELECT,
+    name: MatField.Select,
     component: MatSelectFieldComponent,
     defaultProps: {
       options: [],
@@ -70,7 +70,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     },
   },
   {
-    name: MatField.CHECKBOX,
+    name: MatField.Checkbox,
     component: MatCheckboxFieldComponent,
     defaultProps: {
       color: 'primary',
@@ -78,14 +78,14 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     },
   },
   {
-    name: MatField.SUBMIT,
+    name: MatField.Submit,
     component: MatSubmitFieldComponent,
     defaultProps: {
       color: 'primary',
     },
   },
   {
-    name: MatField.TEXTAREA,
+    name: MatField.Textarea,
     component: MatTextareaFieldComponent,
     defaultProps: {
       rows: 4,
@@ -94,7 +94,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     },
   },
   {
-    name: MatField.RADIO,
+    name: MatField.Radio,
     component: MatRadioFieldComponent,
     defaultProps: {
       color: 'primary',
@@ -104,7 +104,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     },
   },
   {
-    name: MatField.MULTI_CHECKBOX,
+    name: MatField.MultiCheckbox,
     component: MatMultiCheckboxFieldComponent,
     defaultProps: {
       color: 'primary',
@@ -114,7 +114,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     },
   },
   {
-    name: MatField.DATEPICKER,
+    name: MatField.Datepicker,
     component: MatDatepickerFieldComponent,
     defaultProps: {
       startView: 'month',
@@ -123,7 +123,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     },
   },
   {
-    name: MatField.SLIDER,
+    name: MatField.Slider,
     component: MatSliderFieldComponent,
     defaultProps: {
       minValue: 0,
@@ -135,7 +135,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     },
   },
   {
-    name: MatField.TOGGLE,
+    name: MatField.Toggle,
     component: MatToggleFieldComponent,
     defaultProps: {
       labelPosition: 'after',
