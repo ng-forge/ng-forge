@@ -47,11 +47,6 @@ describe('ConfigMerger', () => {
         types: [],
         wrappers: [],
         validators: {},
-        defaultFormOptions: {
-          showError: true,
-          validationStrategy: 'onTouched',
-          updateOn: 'change',
-        },
         defaultFieldProps: {},
         errorMessages: {},
       });
@@ -115,11 +110,6 @@ describe('ConfigMerger', () => {
         types: [],
         wrappers: [],
         validators: {},
-        defaultFormOptions: {
-          showError: true,
-          validationStrategy: 'onTouched',
-          updateOn: 'change',
-        },
         defaultFieldProps: {},
         errorMessages: {},
       });
@@ -160,8 +150,8 @@ describe('ConfigMerger', () => {
       const result = service.merge(config1, config2);
 
       expect(result.types).toHaveLength(1);
-      expect(result.types![0]).toBe(inputType2);
-      expect(result.types![0].component).toBe(MockSelectComponent);
+      expect(result.types?.[0]).toBe(inputType2);
+      expect(result.types?.[0].component).toBe(MockSelectComponent);
     });
 
     it('should handle empty type arrays', () => {
@@ -208,8 +198,8 @@ describe('ConfigMerger', () => {
       const result = service.merge(config1, config2);
 
       expect(result.wrappers).toHaveLength(1);
-      expect(result.wrappers![0]).toBe(wrapper2);
-      expect(result.wrappers![0].priority).toBe(15);
+      expect(result.wrappers?.[0]).toBe(wrapper2);
+      expect(result.wrappers?.[0].priority).toBe(15);
     });
   });
 
@@ -249,7 +239,7 @@ describe('ConfigMerger', () => {
 
       const result = service.merge(config);
 
-      expect(result.errorMessages!['custom']).toBe(errorFn);
+      expect(result.errorMessages?.['custom']).toBe(errorFn);
     });
   });
 });

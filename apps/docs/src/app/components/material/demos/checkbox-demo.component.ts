@@ -3,7 +3,7 @@ import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
-  selector: 'checkbox-demo',
+  selector: 'app-checkbox-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">

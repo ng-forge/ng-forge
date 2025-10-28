@@ -15,6 +15,7 @@ import { Subject } from 'rxjs';
  * ```
  */
 @Directive({
+  // eslint-disable-next-line @angular-eslint/directive-selector
   selector: 'form[fieldRenderer]',
 })
 export class FieldRendererDirective implements OnDestroy {

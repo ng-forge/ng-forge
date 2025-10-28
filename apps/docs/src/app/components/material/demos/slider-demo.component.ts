@@ -3,7 +3,7 @@ import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
-  selector: 'slider-demo',
+  selector: 'app-slider-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">

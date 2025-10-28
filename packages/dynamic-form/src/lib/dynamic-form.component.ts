@@ -27,6 +27,7 @@ import { FieldRegistry } from './core/field-registry';
 import { createSchemaFromFields } from './core/schema-factory';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'dynamic-form',
   imports: [FieldRendererDirective],
   template: `

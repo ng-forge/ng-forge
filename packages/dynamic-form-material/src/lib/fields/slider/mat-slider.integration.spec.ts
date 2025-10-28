@@ -560,7 +560,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
         ],
       };
 
-      const { component } = createComponent(config, { volume: 50 });
+      createComponent(config, { volume: 50 });
 
       await delay();
       fixture.detectChanges();

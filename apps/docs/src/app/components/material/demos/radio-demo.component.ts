@@ -3,7 +3,7 @@ import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
-  selector: 'radio-demo',
+  selector: 'app-radio-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">

@@ -169,7 +169,6 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
 
       const radioGroup = debugElement.query(By.directive(MatRadioGroup));
       const radioGroupComponent = radioGroup.componentInstance;
-      const matRadioComponent = debugElement.query(By.css('df-mat-radio'))?.componentInstance;
 
       // Update form model programmatically
       fixture.componentRef.setInput('value', {
@@ -434,8 +433,6 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
       await delay();
       fixture.detectChanges();
 
-      const radioGroups = debugElement.queryAll(By.directive(MatRadioGroup));
-
       // Get all radio buttons from first group
       const firstGroupRadios = debugElement.queryAll(By.css('df-mat-radio:first-child mat-radio-button'));
       const secondGroupRadios = debugElement.queryAll(By.css('df-mat-radio:last-child mat-radio-button'));
@@ -565,9 +562,7 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             type: 'radio',
             label: 'Test Radio',
             props: {
-              options: [
-                { value: 'option1', label: 'Option 1' },
-              ],
+              options: [{ value: 'option1', label: 'Option 1' }],
             },
           },
         ],
@@ -592,9 +587,7 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             type: 'radio',
             label: 'Test Radio',
             props: {
-              options: [
-                { value: 'option1', label: 'Option 1' },
-              ],
+              options: [{ value: 'option1', label: 'Option 1' }],
             },
           },
         ],
@@ -616,9 +609,7 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             type: 'radio',
             label: 'Test Radio',
             props: {
-              options: [
-                { value: 'option1', label: 'Option 1' },
-              ],
+              options: [{ value: 'option1', label: 'Option 1' }],
             },
           },
         ],

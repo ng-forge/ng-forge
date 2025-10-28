@@ -7,8 +7,7 @@ import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 export default defineConfig(({ mode }) => ({
   plugins: [
     angular({
-      tsconfig: './tsconfig.app.json',
-      workspaceRoot: '../../',
+      workspaceRoot: '../',
     }),
     nxViteTsPaths(),
   ],
@@ -19,7 +18,7 @@ export default defineConfig(({ mode }) => ({
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
-      reportsDirectory: '../../coverage/apps/docs',
+      reportsDirectory: '../coverage/apps/docs',
       provider: 'v8',
     },
   },

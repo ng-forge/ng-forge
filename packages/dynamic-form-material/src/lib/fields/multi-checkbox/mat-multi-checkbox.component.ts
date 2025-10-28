@@ -91,14 +91,17 @@ export class MatMultiCheckboxFieldComponent<T> implements FormValueControl<T[]> 
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  valueViewModel = linkedSignal<Option<T>[]>(() => {
-    const currentValues = this.value();
-    return this.options().filter(option => currentValues.includes(option.value));
-  }, { equal: isEqual });
+  valueViewModel = linkedSignal<Option<T>[]>(
+    () => {
+      const currentValues = this.value();
+      return this.options().filter((option) => currentValues.includes(option.value));
+    },
+    { equal: isEqual }
+  );
 
   constructor() {
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
-      const selectedValues = selectedOptions.map(option => option.value);
+      const selectedValues = selectedOptions.map((option) => option.value);
 
       if (!isEqual(selectedValues, this.value())) {
         this.value.set(selectedValues);
@@ -106,7 +109,7 @@ export class MatMultiCheckboxFieldComponent<T> implements FormValueControl<T[]> 
     });
 
     explicitEffect([this.options], ([options]) => {
-      const values = options.map(option => option.value);
+      const values = options.map((option) => option.value);
       const uniqueValues = new Set(values);
 
       if (values.length !== uniqueValues.size) {
@@ -119,11 +122,9 @@ export class MatMultiCheckboxFieldComponent<T> implements FormValueControl<T[]> 
   onCheckboxChange(option: Option<T>, checked: boolean): void {
     this.valueViewModel.update((currentOptions) => {
       if (checked) {
-        return currentOptions.some(opt => opt.value === option.value)
-          ? currentOptions
-          : [...currentOptions, option];
+        return currentOptions.some((opt) => opt.value === option.value) ? currentOptions : [...currentOptions, option];
       } else {
-        return currentOptions.filter(opt => opt.value !== option.value);
+        return currentOptions.filter((opt) => opt.value !== option.value);
       }
     });
   }

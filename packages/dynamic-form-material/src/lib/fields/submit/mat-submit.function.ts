@@ -1,7 +1,7 @@
 // import { FieldConfig } from '@ng-forge/dynamic-form';
 import { MatSubmitProps } from './mat-submit.type';
 
-export function submitButton<TModel = unknown>(options: Partial<MatSubmitProps> = {}): any {
+export function submitButton(options: Partial<MatSubmitProps> = {}): any {
   return {
     type: 'submit',
     props: {

@@ -8,13 +8,14 @@ import { delay } from './testing/delay';
 
 // Simple test harness components that properly implement the form control interfaces
 @Component({
-  selector: 'test-input',
+  selector: 'df-test-input',
   template: `<input [value]="value()" (input)="value.set($any($event.target).value)" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestInputHarness implements FormValueControl<string> {
   readonly value = model<string>('');
   readonly disabled = input<boolean>(false);
+  readonly required = input<boolean>(false);
   readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
@@ -26,13 +27,14 @@ class TestInputHarness implements FormValueControl<string> {
 }
 
 @Component({
-  selector: 'test-checkbox',
+  selector: 'df-test-checkbox',
   template: `<input type="checkbox" [checked]="checked()" (change)="checked.set($any($event.target).checked)" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestCheckboxHarness implements FormCheckboxControl {
   readonly checked = model<boolean>(false);
   readonly disabled = input<boolean>(false);
+  readonly required = input<boolean>(false);
   readonly errors = input<readonly any[]>([]);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
@@ -41,24 +43,13 @@ class TestCheckboxHarness implements FormCheckboxControl {
   readonly label = input<string>('');
 }
 
-interface TestFormModel {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  age?: number;
-  isActive?: boolean;
-  isAdmin?: boolean;
-  country?: string;
-  bio?: string;
-}
-
 describe('DynamicFormComponent', () => {
-  let component: DynamicForm<TestFormModel>;
-  let fixture: ComponentFixture<DynamicForm<TestFormModel>>;
+  let component: DynamicForm<any>;
+  let fixture: ComponentFixture<DynamicForm>;
   let fieldRegistry: FieldRegistry;
 
   const createComponent = (config: FormConfig = { fields: [] }) => {
-    fixture = TestBed.createComponent(DynamicForm<TestFormModel>);
+    fixture = TestBed.createComponent(DynamicForm<any>);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('config', config);
     fixture.detectChanges();
@@ -395,7 +386,7 @@ describe('DynamicFormComponent', () => {
             },
           },
         ],
-      };
+      } as any;
 
       const { component } = createComponent(config);
       await delay();

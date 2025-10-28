@@ -34,9 +34,6 @@ export { provideDynamicForm, withConfig, type ProvidedFormResult, type DynamicFo
 // Field registry for custom field types
 export { FieldRegistry } from './core/field-registry';
 
-// Signal-based form state management
-export { SignalFormState } from './core/signal-form-state';
-
 // Field interfaces for custom field components
 export * from './fields';
 

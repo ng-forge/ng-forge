@@ -41,7 +41,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
   describe('Basic Material Checkbox Integration', () => {
     it('should render checkbox with full configuration', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -127,7 +127,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should reflect external value changes in checkbox', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -166,7 +166,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle Material-specific checkbox properties', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -197,7 +197,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
   describe('Minimal Configuration Tests', () => {
     it('should render with default Material configuration', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'newsletter',
@@ -227,7 +227,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should not display hint when not provided', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'newsletter',
@@ -250,7 +250,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
   describe('Multiple Checkbox Integration Tests', () => {
     it('should render multiple checkboxes with different configurations', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -296,7 +296,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should reflect individual checkbox states from form model', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -332,7 +332,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle independent checkbox interactions', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -387,7 +387,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should apply different Material colors to checkboxes', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -426,7 +426,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
   describe('Checkbox State and Edge Cases', () => {
     it('should handle disabled state correctly', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -464,7 +464,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should apply default Material Design configuration', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -489,7 +489,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle indeterminate state correctly', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -513,7 +513,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle undefined form values gracefully', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -534,7 +534,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle null form values gracefully', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -555,7 +555,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle programmatic value updates correctly', async () => {
-      const config: FormConfig ={
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',

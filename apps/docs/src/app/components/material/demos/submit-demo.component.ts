@@ -4,7 +4,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 
 @Component({
-  selector: 'submit-demo',
+  selector: 'app-submit-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
