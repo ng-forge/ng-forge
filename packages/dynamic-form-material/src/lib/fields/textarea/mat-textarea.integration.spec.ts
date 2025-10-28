@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterial } from '../../providers/material-providers';
-import { delay, waitForDynamicFormInitialized } from '../../testing/delay';
+import { delay, waitForDFInit } from '../../testing';
 
 interface TestFormModel {
   comments: string;
@@ -72,7 +72,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         notes: '',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const textarea = debugElement.query(By.css('textarea[matInput]'));
       const formField = debugElement.query(By.css('mat-form-field'));
@@ -112,7 +112,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         notes: '',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial value check
       expect(component.formValue().comments).toBe('');
@@ -150,7 +150,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         notes: '',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Update form model programmatically
       fixture.componentRef.setInput('value', {
@@ -202,7 +202,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
         notes: '',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const textareas = debugElement.queryAll(By.css('textarea[matInput]'));
 
@@ -228,7 +228,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { comments: '' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const textarea = debugElement.query(By.css('textarea[matInput]'));
       expect(textarea.nativeElement.getAttribute('rows')).toBe('4'); // Default rows
@@ -248,7 +248,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { comments: '' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const textarea = debugElement.query(By.css('textarea[matInput]'));
       expect(textarea.nativeElement.getAttribute('maxlength')).toBe('100');

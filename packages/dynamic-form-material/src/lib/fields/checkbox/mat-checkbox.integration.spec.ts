@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { delay, waitForDynamicFormInitialized } from '../../testing';
+import { delay, waitForDFInit } from '../../testing';
 import { withMaterial } from '../../providers/material-providers';
 
 interface TestFormModel {
@@ -18,7 +18,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
   let fixture: ComponentFixture<DynamicForm>;
   let debugElement: DebugElement;
 
-  const createComponent = (config: { fields: FormConfig[] }, initialValue?: Partial<TestFormModel>) => {
+  const createComponent = (config: FormConfig, initialValue?: Partial<TestFormModel>) => {
     fixture = TestBed.createComponent(DynamicForm<any>);
     component = fixture.componentInstance;
     debugElement = fixture.debugElement;
@@ -41,7 +41,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
   describe('Basic Material Checkbox Integration', () => {
     it('should render checkbox with full configuration', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -67,7 +67,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         enableNotifications: false,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       const matCheckboxComponent = debugElement.query(By.css('df-mat-checkbox'))?.componentInstance;
@@ -88,7 +88,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle user interactions and update form value', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'acceptTerms',
@@ -106,7 +106,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         enableNotifications: false,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial value check
       expect(component.formValue()['acceptTerms']).toBe(false);
@@ -127,7 +127,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should reflect external value changes in checkbox', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -145,7 +145,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         enableNotifications: false,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       const checkboxComponent = checkbox.componentInstance;
@@ -166,7 +166,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle Material-specific checkbox properties', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -183,7 +183,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { acceptTerms: false });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       const checkboxComponent = checkbox.componentInstance;
@@ -197,7 +197,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
   describe('Minimal Configuration Tests', () => {
     it('should render with default Material configuration', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'newsletter',
@@ -215,7 +215,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         enableNotifications: false,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       const checkboxComponent = checkbox.componentInstance;
@@ -227,7 +227,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should not display hint when not provided', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'newsletter',
@@ -241,7 +241,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { newsletter: false });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const hintElement = debugElement.query(By.css('.mat-hint'));
       expect(hintElement).toBeNull();
@@ -250,7 +250,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
   describe('Multiple Checkbox Integration Tests', () => {
     it('should render multiple checkboxes with different configurations', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -285,7 +285,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         enableNotifications: false,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
 
@@ -296,7 +296,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should reflect individual checkbox states from form model', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -322,7 +322,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         enableNotifications: false,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
 
@@ -332,7 +332,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle independent checkbox interactions', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -387,7 +387,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should apply different Material colors to checkboxes', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -426,7 +426,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
   describe('Checkbox State and Edge Cases', () => {
     it('should handle disabled state correctly', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -464,7 +464,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should apply default Material Design configuration', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -478,7 +478,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { acceptTerms: false });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       const checkboxComponent = checkbox.componentInstance;
@@ -489,7 +489,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle indeterminate state correctly', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -504,7 +504,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { acceptTerms: false });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       const checkboxComponent = checkbox.componentInstance;
@@ -513,7 +513,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle undefined form values gracefully', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -527,14 +527,14 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config); // No initial value provided
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       expect(checkbox).toBeTruthy();
     });
 
     it('should handle null form values gracefully', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -548,14 +548,14 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, null as unknown as TestFormModel);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       expect(checkbox).toBeTruthy();
     });
 
     it('should handle programmatic value updates correctly', async () => {
-      const config = {
+      const config: FormConfig ={
         fields: [
           {
             key: 'acceptTerms',
@@ -569,7 +569,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
       const { component } = createComponent(config, { acceptTerms: false });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       const checkboxComponent = checkbox.componentInstance;

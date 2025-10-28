@@ -5,7 +5,7 @@ import { DebugElement } from '@angular/core';
 import { MatDatepickerInput } from '@angular/material/datepicker';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterial } from '../../providers/material-providers';
-import { delay, waitForDynamicFormInitialized } from '../../testing/delay';
+import { delay, waitForDFInit } from '../../testing';
 
 interface TestFormModel {
   birthDate: Date | null;
@@ -72,7 +72,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         appointmentDate: null,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       const formField = debugElement.query(By.css('mat-form-field'));
@@ -107,7 +107,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         appointmentDate: null,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial value check
       expect(component.formValue().birthDate).toBe('');
@@ -145,7 +145,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         appointmentDate: null,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const testDate = new Date(1995, 5, 15);
 
@@ -183,7 +183,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { birthDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       expect(datepickerInput).toBeTruthy();
@@ -205,7 +205,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { startDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       const formField = debugElement.query(By.css('mat-form-field'));
@@ -227,7 +227,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { startDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const hint = debugElement.query(By.css('mat-hint'));
       expect(hint).toBeNull();
@@ -266,7 +266,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         appointmentDate: null,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickers = debugElement.queryAll(By.directive(MatDatepickerInput));
       const labels = debugElement.queryAll(By.css('mat-label'));
@@ -304,7 +304,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         appointmentDate: null,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const formValue = component.formValue();
       expect(formValue.startDate).toEqual(new Date(2024, 0, 1));
@@ -339,7 +339,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         appointmentDate: null,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickers = debugElement.queryAll(By.directive(MatDatepickerInput));
       const newDate = new Date(2024, 6, 15);
@@ -378,7 +378,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { startDate: null, endDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const formFields = debugElement.queryAll(By.css('mat-form-field'));
       expect(formFields[0].nativeElement.className).toContain('mat-form-field-appearance-outline');
@@ -401,7 +401,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { birthDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       expect(datepickerInput.nativeElement.disabled).toBe(true);
@@ -427,7 +427,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { startDate: null, endDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const formFields = debugElement.queryAll(By.css('mat-form-field'));
       expect(formFields[0].nativeElement.className).toContain('mat-form-field-appearance-fill');
@@ -455,7 +455,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
         endDate: new Date(2024, 11, 31),
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial values
       expect(component.formValue().startDate).toEqual(new Date(2024, 0, 1));
@@ -514,7 +514,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { appointmentDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       const hint = debugElement.query(By.css('mat-hint'));
@@ -537,7 +537,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { birthDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       expect(datepickerInput).toBeTruthy();
@@ -559,7 +559,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config); // No initial value provided
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       expect(datepickerInput).toBeTruthy();
@@ -578,7 +578,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, null as unknown as TestFormModel);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       expect(datepickerInput).toBeTruthy();
@@ -597,7 +597,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       const { component } = createComponent(config, { birthDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       expect(component.formValue().birthDate).toBe('');
 
@@ -626,7 +626,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { birthDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       const formField = debugElement.query(By.css('mat-form-field'));
@@ -654,7 +654,7 @@ describe('MatDatepickerFieldComponent - Dynamic Form Integration', () => {
 
       const { component } = createComponent(config, { birthDate: null });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const datepickerInput = debugElement.query(By.directive(MatDatepickerInput));
       const testDate = new Date(1995, 5, 15);

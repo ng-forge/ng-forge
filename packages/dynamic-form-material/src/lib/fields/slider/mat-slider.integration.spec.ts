@@ -5,7 +5,7 @@ import { DebugElement } from '@angular/core';
 import { MatSlider } from '@angular/material/slider';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterial } from '../../providers/material-providers';
-import { delay, waitForDynamicFormInitialized } from '../../testing/delay';
+import { delay, waitForDFInit } from '../../testing';
 
 interface TestFormModel {
   volume: number;
@@ -73,7 +73,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
         speed: 0,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const slider = debugElement.query(By.directive(MatSlider));
       const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
@@ -117,7 +117,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
         speed: 0,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial value check
       expect(component.formValue().volume).toBe(25);
@@ -158,7 +158,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
         speed: 0,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Update form model programmatically
       fixture.componentRef.setInput('value', {
@@ -216,7 +216,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
         speed: 0,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const sliders = debugElement.queryAll(By.directive(MatSlider));
 
@@ -248,7 +248,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
 
       const { component } = createComponent(config, { rating: 5 });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial value
       expect(component.formValue().rating).toBe(5);
@@ -297,7 +297,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
         speed: 0,
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Update form model programmatically
       fixture.componentRef.setInput('value', {
@@ -566,7 +566,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
       fixture.detectChanges();
 
       const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));
-      
+
       // Simulate focus and then blur
       sliderInput.nativeElement.focus();
       sliderInput.nativeElement.dispatchEvent(new Event('blur'));

@@ -1,2 +1,2 @@
 export { delay } from './delay';
-export { waitForDynamicFormInitialized } from './wait-for-df';
+export { waitForDFInit } from './wait-for-df';

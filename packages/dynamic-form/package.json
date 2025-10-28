@@ -3,8 +3,8 @@
   "type": "module",
   "version": "0.0.1",
   "peerDependencies": {
-    "@angular/core": "~21.0.0-next.8",
-    "@angular/forms": "~21.0.0-next.8",
+    "@angular/core": "~21.0.0-next.9",
+    "@angular/forms": "~21.0.0-next.9",
     "ngxtension": "^6.0.0",
     "rxjs": "~7.8.0"
   }

@@ -5,7 +5,7 @@ import { DebugElement } from '@angular/core';
 import { MatSelect } from '@angular/material/select';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterial } from '../../providers/material-providers';
-import { delay, waitForDynamicFormInitialized } from '../../testing';
+import { delay, waitForDFInit } from '../../testing';
 
 interface TestFormModel {
   country: string;
@@ -19,7 +19,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
   let fixture: ComponentFixture<DynamicForm>;
   let debugElement: DebugElement;
 
-  const createComponent = (config: { fields: FormConfig[] }, initialValue?: Partial<TestFormModel>) => {
+  const createComponent = (config: FormConfig, initialValue?: Partial<TestFormModel>) => {
     fixture = TestBed.createComponent(DynamicForm<any>);
     component = fixture.componentInstance;
     debugElement = fixture.debugElement;
@@ -42,7 +42,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
   describe('Basic Material Select Integration', () => {
     it('should render select with full configuration', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
@@ -72,7 +72,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         categories: [],
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       const formField = debugElement.query(By.css('mat-form-field'));
@@ -88,13 +88,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle user selection and update form value', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Country',
             props: {
-              label: 'Country',
               options: [
                 { label: 'United States', value: 'US' },
                 { label: 'Canada', value: 'CA' },
@@ -112,7 +112,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         categories: [],
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial value check
       expect(component.formValue().country).toBe('');
@@ -134,13 +134,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should reflect external value changes in select field', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Country',
             props: {
-              label: 'Country',
               options: [
                 { label: 'United States', value: 'US' },
                 { label: 'Canada', value: 'CA' },
@@ -158,7 +158,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         categories: [],
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Update form model programmatically
       fixture.componentRef.setInput('value', {
@@ -176,13 +176,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle select options with disabled states', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Country',
             props: {
-              label: 'Country',
               options: [
                 { label: 'United States', value: 'US' },
                 { label: 'Canada', value: 'CA' },
@@ -195,7 +195,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { country: 'US' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       expect(select).toBeTruthy();
@@ -205,13 +205,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
   describe('Multi-Select Configuration Tests', () => {
     it('should render multi-select correctly', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'languages',
             type: 'select',
+            label: 'Languages',
             props: {
-              label: 'Languages',
               multiple: true,
               hint: 'Select all languages you speak',
               options: [
@@ -232,7 +232,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         categories: [],
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       const hint = debugElement.query(By.css('mat-hint'));
@@ -242,13 +242,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle multi-select value changes', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'languages',
             type: 'select',
+            label: 'Languages',
             props: {
-              label: 'Languages',
               multiple: true,
               options: [
                 { label: 'English', value: 'en' },
@@ -265,7 +265,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         languages: ['en', 'es'],
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial value check
       expect(component.formValue().languages).toEqual(['en', 'es']);
@@ -286,13 +286,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should reflect multi-select form model changes', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'languages',
             type: 'select',
+            label: 'Languages',
             props: {
-              label: 'Languages',
               multiple: true,
               options: [
                 { label: 'English', value: 'en' },
@@ -309,7 +309,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         languages: ['en', 'es'],
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Update form model programmatically
       fixture.componentRef.setInput('value', {
@@ -329,13 +329,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
   describe('Minimal Configuration Tests', () => {
     it('should render with default Material configuration', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Simple Select',
             props: {
-              label: 'Simple Select',
               options: [
                 { label: 'Option 1', value: 'opt1' },
                 { label: 'Option 2', value: 'opt2' },
@@ -347,7 +347,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { country: '' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       const formField = debugElement.query(By.css('mat-form-field'));
@@ -358,13 +358,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should not display hint when not provided', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Simple Select',
             props: {
-              label: 'Simple Select',
               options: [
                 { label: 'Option 1', value: 'opt1' },
                 { label: 'Option 2', value: 'opt2' },
@@ -376,7 +376,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { country: '' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const hint = debugElement.query(By.css('mat-hint'));
       expect(hint).toBeNull();
@@ -385,13 +385,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
   describe('Multiple Select Integration Tests', () => {
     it('should render multiple select fields with different configurations', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Country',
             props: {
-              label: 'Country',
               appearance: 'outline',
               options: [
                 { label: 'US', value: 'US' },
@@ -402,8 +402,8 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'priority',
             type: 'select',
+            label: 'Priority',
             props: {
-              label: 'Priority',
               appearance: 'fill',
               options: [
                 { label: 'Low', value: 1 },
@@ -414,8 +414,8 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'categories',
             type: 'select',
+            label: 'Categories',
             props: {
-              label: 'Categories',
               multiple: true,
               options: [
                 { label: 'Tech', value: 'tech' },
@@ -433,7 +433,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         categories: ['tech'],
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const selects = debugElement.queryAll(By.directive(MatSelect));
       const labels = debugElement.queryAll(By.css('mat-label'));
@@ -445,13 +445,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should reflect individual field states from form model', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Country',
             props: {
-              label: 'Country',
               options: [
                 { label: 'US', value: 'US' },
                 { label: 'CA', value: 'CA' },
@@ -461,8 +461,8 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'priority',
             type: 'select',
+            label: 'Priority',
             props: {
-              label: 'Priority',
               options: [
                 { label: 'Low', value: 1 },
                 { label: 'High', value: 2 },
@@ -472,8 +472,8 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'categories',
             type: 'select',
+            label: 'Categories',
             props: {
-              label: 'Categories',
               multiple: true,
               options: [
                 { label: 'Tech', value: 'tech' },
@@ -490,7 +490,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         categories: ['tech'],
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const formValue = component.formValue();
       expect(formValue.country).toBe('US');
@@ -499,13 +499,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle independent field interactions', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Country',
             props: {
-              label: 'Country',
               options: [
                 { label: 'US', value: 'US' },
                 { label: 'CA', value: 'CA' },
@@ -515,8 +515,8 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'categories',
             type: 'select',
+            label: 'Categories',
             props: {
-              label: 'Categories',
               multiple: true,
               options: [
                 { label: 'Tech', value: 'tech' },
@@ -532,7 +532,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         categories: ['tech'],
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const selects = debugElement.queryAll(By.directive(MatSelect));
 
@@ -570,14 +570,14 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
   describe('Select State and Edge Cases', () => {
     it('should handle disabled state correctly', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Disabled Select',
             disabled: true,
             props: {
-              label: 'Disabled Select',
               options: [
                 { label: 'Option 1', value: 'opt1' },
                 { label: 'Option 2', value: 'opt2' },
@@ -614,13 +614,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should apply default Material Design configuration', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Test Select',
             props: {
-              label: 'Test Select',
               options: [{ label: 'Option 1', value: 'opt1' }],
             },
           },
@@ -629,7 +629,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { country: '' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       const selectComponent = select.componentInstance;
@@ -639,13 +639,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
     });
 
     it('should handle undefined form values gracefully', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Test Select',
             props: {
-              label: 'Test Select',
               options: [{ label: 'Option 1', value: 'opt1' }],
             },
           },
@@ -654,20 +654,20 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config); // No initial value provided
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       expect(select).toBeTruthy();
     });
 
     it('should handle null form values gracefully', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Test Select',
             props: {
-              label: 'Test Select',
               options: [{ label: 'Option 1', value: 'opt1' }],
             },
           },
@@ -676,20 +676,20 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, null as unknown as TestFormModel);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       expect(select).toBeTruthy();
     });
 
     it('should handle programmatic value updates correctly', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Test Select',
             props: {
-              label: 'Test Select',
               options: [
                 { label: 'Option 1', value: 'opt1' },
                 { label: 'Option 2', value: 'opt2' },
@@ -701,7 +701,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       const { component } = createComponent(config, { country: 'opt1' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       const selectComponent = select.componentInstance;
@@ -723,12 +723,12 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
   describe('Field Configuration Validation', () => {
     it('should handle missing key gracefully', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             type: 'select',
+            label: 'Select without key',
             props: {
-              label: 'Select without key',
               options: [{ label: 'Option 1', value: 'opt1' }],
             },
           },
@@ -737,20 +737,20 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       expect(select).toBeTruthy();
     });
 
     it('should auto-generate field IDs', async () => {
-      const config = {
+      const config: FormConfig = {
         fields: [
           {
             key: 'country',
             type: 'select',
+            label: 'Test Select',
             props: {
-              label: 'Test Select',
               options: [{ label: 'Option 1', value: 'opt1' }],
             },
           },
@@ -759,7 +759,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       expect(select).toBeTruthy();

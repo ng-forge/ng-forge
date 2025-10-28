@@ -5,7 +5,7 @@ import { DebugElement } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterial } from '../../providers/material-providers';
-import { delay, waitForDynamicFormInitialized } from '../../testing/delay';
+import { delay, waitForDFInit } from '../../testing';
 
 interface TestFormModel {
   email: string;
@@ -56,7 +56,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const button = debugElement.query(By.directive(MatButton));
       const buttonElement = debugElement.query(By.css('button'));
@@ -90,7 +90,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttonElement = debugElement.query(By.css('button'));
 
@@ -132,7 +132,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttonElement = debugElement.query(By.css('button'));
 
@@ -180,7 +180,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttons = debugElement.queryAll(By.css('button'));
 
@@ -203,7 +203,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttonElement = debugElement.query(By.css('button'));
       expect(buttonElement.nativeElement.className).toContain('mat-primary');
@@ -249,7 +249,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
         firstName: 'John',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const submitButton = debugElement.query(By.css('button'));
 
@@ -294,7 +294,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { email: '' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const submitButton = debugElement.query(By.css('button'));
 
@@ -327,7 +327,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { firstName: 'John' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       let buttonElement = debugElement.query(By.css('button'));
       expect(buttonElement.nativeElement.textContent.trim()).toBe('Save Changes');
@@ -361,7 +361,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttonElement = debugElement.query(By.css('button'));
 
@@ -387,7 +387,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttonElement = debugElement.query(By.css('button'));
       expect(buttonElement.nativeElement.textContent.trim()).toBe(longLabel);
@@ -408,7 +408,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttonElement = debugElement.query(By.css('button'));
       expect(buttonElement.nativeElement.textContent.trim()).toBe(specialLabel);
@@ -443,7 +443,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttons = debugElement.queryAll(By.css('button'));
 
@@ -480,7 +480,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttonElement = debugElement.query(By.css('button'));
       expect(buttonElement.nativeElement.className).toContain('custom-class');
@@ -508,7 +508,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config);
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const buttonElement = debugElement.query(By.css('button'));
 

@@ -1,28 +1,34 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, linkedSignal, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import { ValueInArrayPipe } from './value-in-array.pipe';
+import { isEqual } from 'lodash-es';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 type Option<T> = { value: T; label: string; disabled?: boolean };
 
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [FormsModule, MatCheckbox, MatErrorsComponent],
+  imports: [FormsModule, MatCheckbox, MatErrorsComponent, ValueInArrayPipe],
+  host: {
+    '[class]': 'className() || ""',
+  },
   template: `
-    <div [class]="className() || ''">
+    <div>
       @if (label(); as label) {
       <div class="checkbox-group-label">{{ label }}</div>
       }
 
       <div class="checkbox-group">
-        @for (option of options(); track option.value) {
+        @for (option of options(); track option.value; let $idx = $index) {
         <mat-checkbox
-          [checked]="isChecked(option.value)"
-          [disabled]="option.disabled || disabled()"
+          [checked]="option | inArray : valueViewModel()"
+          [disabled]="disabled() || option.disabled"
           [color]="color() || 'primary'"
           [labelPosition]="labelPosition() || 'after'"
-          (change)="onCheckboxChange(option.value, $event.checked)"
+          (change)="onCheckboxChange(option, $event.checked)"
         >
           {{ option.label }}
         </mat-checkbox>
@@ -66,6 +72,7 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
       }
     `,
   ],
+  providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatMultiCheckboxFieldComponent<T> implements FormValueControl<T[]> {
@@ -84,25 +91,40 @@ export class MatMultiCheckboxFieldComponent<T> implements FormValueControl<T[]> 
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  isChecked(optionValue: T): boolean {
-    return this.value().includes(optionValue);
+  valueViewModel = linkedSignal<Option<T>[]>(() => {
+    const currentValues = this.value();
+    return this.options().filter(option => currentValues.includes(option.value));
+  }, { equal: isEqual });
+
+  constructor() {
+    explicitEffect([this.valueViewModel], ([selectedOptions]) => {
+      const selectedValues = selectedOptions.map(option => option.value);
+
+      if (!isEqual(selectedValues, this.value())) {
+        this.value.set(selectedValues);
+      }
+    });
+
+    explicitEffect([this.options], ([options]) => {
+      const values = options.map(option => option.value);
+      const uniqueValues = new Set(values);
+
+      if (values.length !== uniqueValues.size) {
+        const duplicates = values.filter((value, index) => values.indexOf(value) !== index);
+        throw new Error(`Duplicate option values detected in mat-multi-checkbox: ${duplicates.join(', ')}`);
+      }
+    });
   }
 
-  onCheckboxChange(optionValue: T, checked: boolean): void {
-    const currentValue = [...this.value()];
-
-    if (checked) {
-      if (!currentValue.includes(optionValue)) {
-        currentValue.push(optionValue);
+  onCheckboxChange(option: Option<T>, checked: boolean): void {
+    this.valueViewModel.update((currentOptions) => {
+      if (checked) {
+        return currentOptions.some(opt => opt.value === option.value)
+          ? currentOptions
+          : [...currentOptions, option];
+      } else {
+        return currentOptions.filter(opt => opt.value !== option.value);
       }
-    } else {
-      const index = currentValue.indexOf(optionValue);
-      if (index > -1) {
-        currentValue.splice(index, 1);
-      }
-    }
-
-    this.value.set(currentValue);
-    this.touched.set(true);
+    });
   }
 }

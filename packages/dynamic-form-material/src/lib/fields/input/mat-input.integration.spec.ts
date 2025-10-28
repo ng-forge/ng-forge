@@ -5,7 +5,7 @@ import { DebugElement } from '@angular/core';
 import { MatInput } from '@angular/material/input';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterial } from '../../providers/material-providers';
-import { delay, waitForDynamicFormInitialized } from '../../testing/delay';
+import { delay, waitForDFInit } from '../../testing';
 
 interface TestFormModel {
   email: string;
@@ -73,7 +73,7 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
         phone: '',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const input = debugElement.query(By.directive(MatInput));
       const formField = debugElement.query(By.css('mat-form-field'));
@@ -113,7 +113,7 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
         phone: '',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial value check
       expect(component.formValue().email).toBe('');
@@ -152,7 +152,7 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
         phone: '',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Update form model programmatically
       fixture.componentRef.setInput('value', {
@@ -218,7 +218,7 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
         phone: '',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const inputs = debugElement.queryAll(By.directive(MatInput));
 
@@ -244,7 +244,7 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { password: '' });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       const passwordInput = debugElement.query(By.directive(MatInput));
       expect(passwordInput.nativeElement.getAttribute('autocomplete')).toBe('current-password');
@@ -264,7 +264,7 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
 
       const { component } = createComponent(config, { age: 0 });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Initial value
       expect(component.formValue().age).toBe(0);
@@ -325,7 +325,7 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
         phone: '',
       });
 
-      await waitForDynamicFormInitialized(component, fixture);
+      await waitForDFInit(component, fixture);
 
       // Update form model programmatically
       fixture.componentRef.setInput('value', {
