@@ -1,5 +1,4 @@
 import {
-  Binding,
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
@@ -7,11 +6,9 @@ import {
   inject,
   Injector,
   input,
-  inputBinding,
   linkedSignal,
   model,
   runInInjectionContext,
-  twoWayBinding,
   untracked,
   ViewContainerRef,
   WritableSignal,
@@ -20,14 +17,17 @@ import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs';
-import { get, isEqual, keyBy, mapValues, set } from 'lodash-es';
-import { explicitEffect } from 'ngxtension/explicit-effect';
-import { FieldDef, FormConfig, InferFormValue } from './models/field-config';
-import { FieldRegistry } from './core/field-registry';
+import { keyBy, mapValues } from 'lodash-es';
+import { FieldSignalContext, getFieldDefaultValue } from './mappers/utils/field-signal-utils';
+import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
+import { FormConfig, RegisteredFieldTypes } from './models';
+import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { createSchemaFromFields } from './core/schema-factory';
-import { flattenFields } from './utils/field-flattener';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
+import { InferGlobalFormValue } from './models/global-types';
+import { flattenFields } from './utils';
+import { FieldDef } from './definitions';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -42,8 +42,8 @@ import { SubmitEvent } from './events/constants/submit.event';
   providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef[], TModel = InferFormValue<TFields>> {
-  private readonly fieldRegistry = inject(FieldRegistry);
+export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TModel = InferGlobalFormValue> {
+  private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
@@ -59,10 +59,9 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
     this.fieldSignals.clear();
 
     if (config.fields && config.fields.length > 0) {
-      // Flatten definitions to handle row and group field types
       const flattenedFields = flattenFields(config.fields);
       const fieldsById = keyBy(flattenedFields, 'key');
-      const defaultValues = mapValues(fieldsById, (field) => this.getFieldDefaultValue(field)) as TModel;
+      const defaultValues = mapValues(fieldsById, (field) => getFieldDefaultValue(field)) as TModel;
 
       return {
         approach: 'fields' as const,
@@ -70,21 +69,6 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
         originalFields: config.fields,
         defaultValues,
         schema: undefined,
-      };
-    }
-
-    if (config.schema?.fieldDefs) {
-      // Flatten definitions to handle row and group field types
-      const flattenedFields = flattenFields(config.schema.fieldDefs);
-      const fieldsById = keyBy(flattenedFields, 'key');
-      const defaultValues = mapValues(fieldsById, (field) => this.getFieldDefaultValue(field)) as TModel;
-
-      return {
-        approach: 'schema' as const,
-        fields: flattenedFields,
-        originalFields: config.schema.fieldDefs,
-        defaultValues,
-        schema: config.schema.definition,
       };
     }
 
@@ -107,41 +91,6 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   });
 
   private readonly fieldSignals = new Map<string, WritableSignal<unknown>>();
-
-  private createFieldSignal(fieldKey: string, defaultValue: unknown): WritableSignal<unknown> {
-    return runInInjectionContext(this.injector, () => {
-      const fieldSignal = linkedSignal({
-        source: this.value,
-        computation: (valueData: Partial<TModel> | undefined) => {
-          const defaults = this.defaultValues();
-          const mergedData = { ...defaults, ...valueData };
-          return get(mergedData, fieldKey) ?? defaultValue;
-        },
-        equal: isEqual,
-      });
-
-      explicitEffect([fieldSignal], ([fieldValue]: [unknown]) => {
-        const currentModel = this.value() || ({} as TModel);
-        const currentFieldValue = get(currentModel, fieldKey);
-
-        if (!isEqual(fieldValue, currentFieldValue)) {
-          const newModel = { ...currentModel };
-          set(newModel, fieldKey, fieldValue);
-          this.value.set(newModel as Partial<TModel>);
-        }
-      });
-
-      return fieldSignal;
-    });
-  }
-
-  private getFieldSignal(fieldKey: string, defaultValue: unknown): WritableSignal<unknown> {
-    if (!this.fieldSignals.has(fieldKey)) {
-      const fieldSignal = this.createFieldSignal(fieldKey, defaultValue);
-      this.fieldSignals.set(fieldKey, fieldSignal);
-    }
-    return this.fieldSignals.get(fieldKey)!;
-  }
 
   readonly formOptions = computed(() => {
     const config = this.config();
@@ -183,89 +132,42 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   fields = toSignal(
     this.fields$.pipe(
       switchMap((fields) => {
-        const fieldArray = fields as readonly FieldDef[];
-
-        if (!fieldArray || fieldArray.length === 0) {
+        if (!fields || fields.length === 0) {
           return of([]);
         }
 
-        return combineLatest(this.mapFields(fieldArray));
+        return combineLatest(this.mapFields(fields));
       }),
       map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
     )
   );
 
-  private mapFields(fields: readonly FieldDef[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: readonly FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map(async (fieldDef) => {
-        const componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type).catch(() => undefined);
-
-        if (!componentType) {
+        let componentType;
+        try {
+          componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type);
+        } catch (error) {
+          console.error(error);
           return undefined;
         }
 
-        const bindings: Binding[] = [];
-        const valueProp = this.getValueProp(fieldDef);
+        const fieldSignalContext: FieldSignalContext<TModel> = {
+          injector: this.injector,
+          value: this.value,
+          defaultValues: this.defaultValues,
+        };
 
-        if (valueProp) {
-          const defaultValue = this.getFieldDefaultValue(fieldDef);
-
-          const fieldSignal = this.getFieldSignal(fieldDef.key, defaultValue);
-
-          bindings.push(twoWayBinding(valueProp, fieldSignal));
-        }
-
-        if (fieldDef.label) {
-          bindings.push(inputBinding('label', () => fieldDef.label));
-        }
-
-        if (fieldDef.required) {
-          bindings.push(inputBinding('required', () => fieldDef.required));
-        }
-
-        if (fieldDef.disabled) {
-          bindings.push(inputBinding('disabled', () => fieldDef.disabled));
-        }
-
-        if (fieldDef.props) {
-          Object.entries(fieldDef.props).forEach(([key, value]) => {
-            bindings.push(inputBinding(key, () => value));
-          });
-        }
+        const bindings = mapFieldToBindings(fieldDef, {
+          fieldSignalContext,
+          fieldSignals: this.fieldSignals,
+          fieldRegistry: this.fieldRegistry.raw,
+        });
 
         return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
       })
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
-  }
-
-  private getValueProp(fieldDef: FieldDef): 'checked' | 'value' | undefined {
-    // TODO: refactor this into a more deterministic way
-    if (fieldDef.type === 'multi-checkbox') {
-      return 'value';
-    }
-
-    if (fieldDef.type === 'checkbox' || fieldDef.type === 'toggle') {
-      return 'checked';
-    }
-
-    return undefined;
-  }
-
-  private getFieldDefaultValue(field: FieldDef): unknown {
-    // TODO: refactor this into a more deterministic way
-    if (field.defaultValue !== undefined) {
-      return field.defaultValue;
-    }
-
-    if (field.type === 'multi-checkbox') {
-      return [];
-    }
-
-    if (field.type === 'checkbox' || field.type === 'toggle') {
-      return false;
-    }
-
-    return '';
   }
 
   onFieldsInitialized(): void {

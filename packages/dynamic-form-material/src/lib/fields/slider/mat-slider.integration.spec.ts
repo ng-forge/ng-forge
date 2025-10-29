@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 import { MatSlider } from '@angular/material/slider';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterial } from '../../providers/material-providers';
+import { withMaterialFields } from '../../providers/material-providers';
 import { delay, waitForDFInit } from '../../testing';
 
 interface TestFormModel {
@@ -37,7 +37,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
-      providers: [provideAnimations(), provideDynamicForm(withMaterial())],
+      providers: [provideAnimations(), provideDynamicForm(...withMaterialFields())],
     }).compileComponents();
   });
 

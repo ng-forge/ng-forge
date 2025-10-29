@@ -5,7 +5,7 @@ import { DebugElement } from '@angular/core';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
 import { delay, waitForDFInit } from '../../testing';
-import { withMaterial } from '../../providers/material-providers';
+import { withMaterialFields } from '../../providers/material-providers';
 
 interface TestFormModel {
   gender: string;
@@ -35,7 +35,7 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
-      providers: [provideAnimations(), provideDynamicForm(withMaterial())],
+      providers: [provideAnimations(), provideDynamicForm(...withMaterialFields())],
     }).compileComponents();
   });
 

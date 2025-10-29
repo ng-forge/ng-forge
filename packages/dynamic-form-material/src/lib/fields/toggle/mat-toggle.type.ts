@@ -8,6 +8,7 @@ export interface MatToggleProps extends Record<string, unknown> {
   color?: ThemePalette;
   labelPosition?: 'before' | 'after';
   disableRipple?: boolean;
+  hideIcon?: boolean;
 }
 
 export type MatToggleField = ToggleField<MatToggleProps>;

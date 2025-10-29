@@ -22,4 +22,15 @@ export function isRowField<TFields extends readonly FieldDef<Record<string, unkn
   return field.type === 'row' && 'fields' in field && isArray((field as { fields: TFields }).fields);
 }
 
-export type RowComponent = FieldComponent<RowField>;
+export type RowComponent = FieldComponent<RowField<readonly FieldDef<Record<string, unknown>>[]>>;
+
+/**
+ * Row child field with column layout properties
+ */
+export interface RowChildField extends Omit<FieldDef<Record<string, unknown>>, 'col'> {
+  col?: {
+    span?: number;
+    start?: number;
+    end?: number;
+  };
+}

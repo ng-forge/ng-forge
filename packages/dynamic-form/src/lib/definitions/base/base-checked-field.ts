@@ -4,16 +4,16 @@ import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
 
 export interface BaseCheckedField<TProps extends Record<string, unknown>> extends FieldDef<TProps>, FieldWithValidation {
-  checked: boolean;
+  checked?: boolean;
 
   defaultValue?: boolean;
 
   placeholder?: string;
+
+  required?: boolean;
 }
 
-export function isCheckedField<TProps extends Record<string, unknown>>(
-  field: FieldDef<TProps>
-): field is BaseCheckedField<TProps> {
+export function isCheckedField<TProps extends Record<string, unknown>>(field: FieldDef<TProps>): field is BaseCheckedField<TProps> {
   return 'checked' in field && typeof (field as { checked: unknown }).checked === 'boolean';
 }
 

@@ -1,114 +1,69 @@
-import { EnvironmentProviders, inject, makeEnvironmentProviders, provideAppInitializer, Provider } from '@angular/core';
-import { FieldRegistry } from '../core/field-registry';
-import { FieldDef, InferFormValue } from '../models/field-config';
-import { ConfigMerger } from '../core';
-import { withBuiltInFields } from './built-in-fields';
+import { EnvironmentProviders, makeEnvironmentProviders, Provider } from '@angular/core';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
+import { BUILT_IN_FIELDS } from './built-in-fields';
+import { FieldDef } from '../definitions/base';
 
-type Providers = (EnvironmentProviders | Provider)[];
-
-/**
- * Configuration feature for dynamic forms following Angular Architects pattern
- */
-export interface DynamicFormFeature {
-  providers: Providers;
-}
+// Re-export global types for module augmentation
+export type { DynamicFormFieldRegistry, RegisteredFieldTypes, InferGlobalFormValue, AvailableFieldTypes } from '../models/global-types';
 
 /**
- * Phantom-typed feature that can carry inferred result type
+ * Extract FieldDef type from FieldTypeDefinition
  */
-export type DynamicFormFeatureWithModel<TResult = unknown> = DynamicFormFeature & {
-  /** Phantom property used only for type inference of output result */
-  __result?: TResult;
+type ExtractFieldDef<T> = T extends FieldTypeDefinition<infer F> ? F : never;
+
+/**
+ * Union of all FieldDef types from provided field types
+ */
+type FieldDefUnion<T extends readonly FieldTypeDefinition[]> = ExtractFieldDef<T[number]>;
+
+/**
+ * Infer form value type from field definitions
+ */
+type InferFormValue<TFieldDefs extends FieldDef<Record<string, unknown>>[]> = {
+  [K in TFieldDefs[number]['key']]: any; // TODO: extract actual value type from field
 };
 
 /**
- * Dynamic form configuration following Angular Architects pattern
+ * Provider result with type inference
  */
-export interface DynamicFormConfig<TFields extends readonly FieldDef[] = readonly FieldDef[]> {
-  readonly fields: TFields;
-}
+type ProvideDynamicFormResult<T extends readonly FieldTypeDefinition[]> = EnvironmentProviders & {
+  __fieldDefs?: FieldDefUnion<T>;
+  __formValue?: InferFormValue<FieldDefUnion<T>[]>;
+};
 
 /**
- * Extract a result type from a single feature
+ * Provide dynamic form functionality with field type definitions
+ * Simple provider setup that accepts field types directly and infers types
  */
-export type InferFeatureResult<F> = F extends { __result?: infer R } ? R : unknown;
+export function provideDynamicForm<const T extends readonly FieldTypeDefinition[]>(...fieldTypes: T): ProvideDynamicFormResult<T> {
+  const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
 
-/**
- * Extract the union of results from an array of features
- */
-export type InferFeaturesResult<Features extends readonly DynamicFormFeature[]> = InferFeatureResult<Features[number]> extends never
-  ? unknown
-  : InferFeatureResult<Features[number]>;
-
-/**
- * Provide dynamic form functionality following Angular Architects pattern
- * Clean, minimal provider setup
- */
-export function provideDynamicForm<Features extends readonly DynamicFormFeature[]>(
-  ...features: Features
-): EnvironmentProviders & {
-  __result?: InferFeaturesResult<Features>;
-} {
-  const providers: Providers = [
-    // Core services - simplified
-    FieldRegistry,
-
-    // Built-in field types - always included
-    ...withBuiltInFields().providers,
-
-    // Feature providers
-    ...features.flatMap((feature) => feature.providers),
+  const providers: Provider[] = [
+    {
+      provide: FIELD_REGISTRY,
+      useFactory: () => {
+        const registry = new Map();
+        // Add custom field types
+        fields.forEach((fieldType) => {
+          if (registry.has(fieldType.name)) {
+            console.warn(`Field type "${fieldType.name}" is already registered. Overwriting.`);
+          }
+          registry.set(fieldType.name, fieldType);
+        });
+        return registry;
+      },
+    },
   ];
 
-  return makeEnvironmentProviders(providers) as EnvironmentProviders & {
-    __result?: InferFeaturesResult<Features>;
-  };
+  return makeEnvironmentProviders(providers) as ProvideDynamicFormResult<T>;
 }
 
 /**
- * Configure dynamic forms with field definitions
- * Following Angular Architects signal forms pattern
+ * Extract FieldDef types from provider result
  */
-export function withConfig<TFields extends readonly FieldDef[]>(
-  config: DynamicFormConfig<TFields>
-): DynamicFormFeatureWithModel<InferFormValue<TFields>> {
-  return {
-    providers: [
-      {
-        provide: 'DYNAMIC_FORM_CONFIG',
-        useValue: config,
-      },
-      provideAppInitializer((): void => {
-        const registry = inject(FieldRegistry);
-        const merger = inject(ConfigMerger);
-
-        const mergedConfig = merger.merge(config);
-
-        if (mergedConfig.types) {
-          registry.registerTypes(mergedConfig.types);
-        }
-
-        if (mergedConfig.wrappers) {
-          registry.registerWrappers(mergedConfig.wrappers);
-        }
-      }),
-    ],
-  } as DynamicFormFeatureWithModel<InferFormValue<TFields>>;
-}
+export type ExtractFieldDefs<T> = T extends { __fieldDefs?: infer F } ? F : never;
 
 /**
- * Helper: extract the inferred result type from the value returned by `provideDynamicForm`
- *
- * Example usage:
- * ```typescript
- * const providers = provideDynamicForm(withConfig({
- *   definitions: [
- *     { key: 'name', type: 'input', label: 'Name' },
- *     { key: 'email', type: 'input', label: 'Email' }
- *   ] as const
- * }));
- * type FormResult = ProvidedFormResult<typeof providers>;
- * // FormResult = { name: unknown; email: unknown; }
- * ```
+ * Extract form value type from provider result
  */
-export type ProvidedFormResult<T> = T extends { __result?: infer R } ? R : unknown;
+export type ExtractFormValue<T> = T extends { __formValue?: infer V } ? V : never;

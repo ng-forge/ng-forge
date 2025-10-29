@@ -30,7 +30,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(),
     provideAnimations(),
-    provideDynamicForm(withMaterialFields()),
+    provideDynamicForm(...withMaterialFields()),
     provideNgDocContext(),
     provideNgDocApp({
       shiki: {

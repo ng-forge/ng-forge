@@ -1,4 +1,5 @@
-import { ConditionalRules, WithInputSignals } from '@ng-forge/dynamic-form';
+import { ConditionalRules } from '../../models/field-config';
+import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
 
 export interface FieldDef<TProps extends Record<string, unknown>> {
@@ -35,6 +36,6 @@ export interface FieldDef<TProps extends Record<string, unknown>> {
   readonly col?: number;
 }
 
-type ExcludedKeys = 'type' | 'key' | 'conditionals';
+type IncludedKeys = 'type' | 'label' | 'className' | 'hidden' | 'tabIndex';
 
-export type FieldComponent<T extends FieldDef<any>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;
+export type FieldComponent<T extends FieldDef<any>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;

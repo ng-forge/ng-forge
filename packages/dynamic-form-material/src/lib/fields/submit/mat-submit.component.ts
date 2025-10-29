@@ -26,9 +26,9 @@ import { EventBus, SubmitEvent } from '@ng-forge/dynamic-form';
 export class MatSubmitFieldComponent implements MatSubmitComponent {
   private readonly eventBus = inject(EventBus);
 
-  readonly label = input.required<MatSubmitProps['label']>();
-  readonly disabled = input<MatSubmitProps['disabled']>(false);
-  readonly className = input<MatSubmitProps['className']>('');
+  readonly label = input.required<string>();
+  readonly disabled = input<boolean>(false);
+  readonly className = input<string>('');
 
   // Material specific props
   readonly color = input<MatSubmitProps['color']>('primary' as const);

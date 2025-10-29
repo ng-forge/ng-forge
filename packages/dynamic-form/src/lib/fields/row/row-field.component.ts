@@ -1,5 +1,4 @@
 import {
-  Binding,
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
@@ -7,65 +6,120 @@ import {
   inject,
   Injector,
   input,
-  inputBinding,
+  linkedSignal,
+  model,
+  runInInjectionContext,
+  untracked,
   ViewContainerRef,
+  WritableSignal,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, map, of, switchMap } from 'rxjs';
-import { RowComponent, RowField } from '../../definitions/default/row-field';
-import { FieldRegistry } from '../../core/field-registry';
+import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { combineLatest, map, of, Subject, switchMap } from 'rxjs';
+import { keyBy, mapValues } from 'lodash-es';
+import { RowChildField, RowField } from '../../definitions/default/row-field';
+import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { FormUiControl } from '@angular/forms/signals';
-import { get } from 'lodash-es';
+import { form, FormUiControl } from '@angular/forms/signals';
+import { FieldSignalContext, getFieldDefaultValue } from '../../mappers/utils/field-signal-utils';
+import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
+import { createSchemaFromFields } from '../../core/schema-factory';
+import { EventBus } from '../../events/event.bus';
+import { SubmitEvent } from '../../events/constants/submit.event';
+import { flattenFields } from '../../utils';
 
 @Component({
-  selector: 'lib-row-field',
-  template: ` <form [class]="containerClasses()" [style]="containerStyles()" [fieldRenderer]="fields()"></form> `,
+  // eslint-disable-next-line @angular-eslint/component-selector
+  selector: 'row-field',
+  template: `
+    <form [class.disabled]="disabled()" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+      <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+    </form>
+  `,
   styleUrl: './row-field.component.scss',
   host: {
-    class: 'lib-row-field',
+    class: 'lib-row-field field__container lib-row-field__responsive',
   },
+  providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
-export default class RowFieldComponent implements RowComponent {
-  field = input.required<RowField<never>>();
-
-  formValue = input.required<any>();
-
-  private readonly fieldRegistry = inject(FieldRegistry);
+export default class RowFieldComponent {
+  private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
+  private readonly eventBus = inject(EventBus);
 
-  /** Computed CSS classes for the container */
-  containerClasses = computed(() => {
-    const field = this.field();
-    const baseClasses = ['lib-row-field__container', 'lib-row-field__responsive'];
+  field = input.required<RowField<any>>();
 
-    if (field.className) {
-      baseClasses.push(field.className);
+  // Form value model for two-way binding
+  value = model<any>(undefined);
+
+  private readonly formSetup = computed(() => {
+    const rowField = this.field();
+
+    this.fieldSignals.clear();
+
+    if (rowField.fields && rowField.fields.length > 0) {
+      const flattenedFields = flattenFields(rowField.fields);
+      const fieldsById = keyBy(flattenedFields, 'key');
+      const defaultValues = mapValues(fieldsById, (field) => getFieldDefaultValue(field));
+
+      return {
+        fields: flattenedFields,
+        originalFields: rowField.fields,
+        defaultValues,
+      };
     }
 
-    const stackAt = field.breakpoints?.stackAt || 'sm';
-    baseClasses.push(`lib-row-field__stack-at-${stackAt}`);
-
-    return baseClasses.join(' ');
-  });
-
-  containerStyles = computed(() => {
-    const field = this.field();
-    const gap = field.gap || DEFAULT_ROW_GAPS;
-
     return {
-      '--row-gap-width': gap.horizontal || DEFAULT_ROW_GAPS.horizontal,
-      '--row-gap-height': gap.vertical || DEFAULT_ROW_GAPS.vertical,
-      display: 'flex',
-      'flex-wrap': 'wrap',
-      gap: `var(--row-gap-height) var(--row-gap-width)`,
+      fields: [],
+      originalFields: [],
+      defaultValues: {},
     };
   });
 
-  fields$ = toObservable(computed(() => this.field().fields));
+  readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
+
+  private readonly entity = linkedSignal(() => {
+    const inputValue = this.value();
+    const defaults = this.defaultValues();
+
+    return { ...defaults, ...inputValue };
+  });
+
+  private readonly fieldSignals = new Map<string, WritableSignal<unknown>>();
+
+  private readonly form = computed(() => {
+    return runInInjectionContext(this.injector, () => {
+      const setup = this.formSetup();
+
+      if (setup.fields.length > 0) {
+        const schema = createSchemaFromFields(setup.fields);
+        return untracked(() => form(this.entity, schema));
+      }
+
+      return untracked(() => form(this.entity));
+    });
+  });
+
+  readonly formValue = computed(() => this.entity());
+
+  readonly valid = computed(() => this.form()().valid());
+  readonly invalid = computed(() => this.form()().invalid());
+  readonly dirty = computed(() => this.form()().dirty());
+  readonly touched = computed(() => this.form()().touched());
+  readonly errors = computed(() => this.form()().errors());
+  readonly disabled = computed(() => this.form()().disabled());
+
+  readonly validityChange = outputFromObservable(toObservable(this.valid));
+  readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
+  readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit'));
+
+  private readonly fieldsInitializedSubject = new Subject<void>();
+
+  readonly initialized$ = this.fieldsInitializedSubject.asObservable();
+
+  fields$ = toObservable(computed(() => this.formSetup().fields));
 
   fields = toSignal(
     this.fields$.pipe(
@@ -77,79 +131,64 @@ export default class RowFieldComponent implements RowComponent {
         return combineLatest(this.mapFields(fields));
       }),
       map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
-    )
+    ),
+    { initialValue: [] }
   );
 
   private mapFields(fields: readonly any[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map(async (fieldDef) => {
-        const componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type).catch(() => undefined);
-
-        if (!componentType) {
+        let componentType;
+        try {
+          componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type);
+        } catch (error) {
+          console.error(error);
           return undefined;
         }
 
-        const bindings: Binding[] = [];
-        const valueProp = this.getValueProp(fieldDef);
+        const fieldSignalContext: FieldSignalContext<any> = {
+          injector: this.injector,
+          value: this.value,
+          defaultValues: this.defaultValues,
+        };
 
-        if (valueProp) {
-          const fieldSignal = computed(() => {
-            const formValue = this.formValue();
-            return get(formValue, fieldDef.key);
-          });
+        const bindings = mapFieldToBindings(fieldDef, {
+          fieldSignalContext,
+          fieldSignals: this.fieldSignals,
+          fieldRegistry: this.fieldRegistry.raw,
+        });
 
-          bindings.push(inputBinding(valueProp, fieldSignal));
-        }
+        const componentRef = this.vcr.createComponent(componentType, { bindings, injector: this.injector });
 
-        if (fieldDef.label) {
-          bindings.push(inputBinding('label', () => fieldDef.label));
-        }
-
-        if (fieldDef.required) {
-          bindings.push(inputBinding('required', () => fieldDef.required));
-        }
-
-        if (fieldDef.disabled) {
-          bindings.push(inputBinding('disabled', () => fieldDef.disabled));
-        }
-
-        if (fieldDef.props) {
-          Object.entries(fieldDef.props).forEach(([key, value]) => {
-            bindings.push(inputBinding(key, () => value));
-          });
-        }
-
+        // Apply column styles if field has col property
         const rowChildField = fieldDef as RowChildField;
         if (rowChildField.col) {
-          const componentRef = this.vcr.createComponent(componentType, { bindings });
-          this.applyColumnStyles(componentRef, rowChildField);
-          return componentRef;
+          this.applyColumnStyles(componentRef as ComponentRef<FormUiControl>, rowChildField);
         }
 
-        return this.vcr.createComponent(componentType, { bindings });
+        return componentRef;
       })
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
   }
 
-  private getValueProp(fieldDef: any): string | undefined {
-    return 'value';
+  private applyColumnStyles(componentRef: ComponentRef<FormUiControl>, field: RowChildField): void {
+    if (field.col && componentRef.location.nativeElement) {
+      const element = componentRef.location.nativeElement as HTMLElement;
+      if (field.col.span) {
+        element.style.gridColumn = `span ${field.col.span}`;
+      }
+      if (field.col.start) {
+        element.style.gridColumnStart = field.col.start.toString();
+      }
+      if (field.col.end) {
+        element.style.gridColumnEnd = field.col.end.toString();
+      }
+    }
   }
 
-  private applyColumnStyles(componentRef: ComponentRef<unknown>, field: RowChildField) {
-    const element = componentRef.location.nativeElement as HTMLElement;
-    const col = field.col;
-
-    if (!col) {
-      element.style.flex = '1 1 100%';
-      return;
-    }
-
-    element.classList.add('lib-row-field__column');
-
-    // Default span
-    if (col.span) {
-      element.style.setProperty('--col-span', col.span.toString());
-      element.style.flex = `0 0 calc(${(col.span / 12) * 100}% - var(--row-gap-width))`;
-    }
+  onFieldsInitialized(): void {
+    this.fieldsInitializedSubject.next();
   }
 }
+
+export { RowFieldComponent };

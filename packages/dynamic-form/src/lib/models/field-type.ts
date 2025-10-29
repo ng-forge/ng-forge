@@ -1,15 +1,16 @@
-import { FieldDef } from '@ng-forge/dynamic-form';
+import { InjectionToken } from '@angular/core';
+import { FieldDef } from '../definitions';
+import { MapperFn } from '../mappers';
 
-export interface FieldTypeDefinition<T extends FieldDef<Record<string, unknown>>> {
-  loadComponent?: () => Promise<T>;
-
+export interface FieldTypeDefinition<T extends FieldDef<Record<string, unknown>> = any> {
+  name: string;
   _fieldDef?: T;
+  loadComponent?: () => Promise<any>;
+  mapper: MapperFn<T>;
 }
 
-export type DynamicFormConfigMap<T extends FieldDef<Record<string, unknown>>> = Record<string, FieldTypeDefinition<T>>;
-
-export type FieldDefFromConfig<
-  T extends FieldDef<Record<string, unknown>>,
-  TMap extends DynamicFormConfigMap<T>,
-  TType extends keyof TMap
-> = NonNullable<TMap[TType]['_fieldDef']>;
+// Field Registry injection token
+export const FIELD_REGISTRY = new InjectionToken<Map<string, FieldTypeDefinition>>('FIELD_REGISTRY', {
+  providedIn: 'root',
+  factory: () => new Map(),
+});

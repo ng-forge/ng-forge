@@ -1,11 +1,12 @@
 import { max, maxLength, min, minLength, required, schema, Schema } from '@angular/forms/signals';
-import { FieldDef, ValidationRules } from '../models/field-config';
+import { ValidationRules } from '../models/field-config';
+import { FieldDef } from '../definitions';
 
 /**
  * Creates an Angular signal forms schema from field definitions
  * Following the pattern from the examples
  */
-export function createSchemaFromFields<TModel = unknown>(fields: readonly FieldDef[]): Schema<TModel> {
+export function createSchemaFromFields<TModel = unknown>(fields: readonly FieldDef<Record<string, unknown>>[]): Schema<TModel> {
   return schema<TModel>((path) => {
     for (const fieldDef of fields) {
       const fieldPath = (path as any)[fieldDef.key];
@@ -23,24 +24,29 @@ export function createSchemaFromFields<TModel = unknown>(fields: readonly FieldD
 
 /**
  * Builds validation rules from a field definition
+ * TODO: Re-enable when validation properties are added to FieldDef
  */
-function buildValidationRulesFromField(fieldDef: FieldDef): ValidationRules {
+function buildValidationRulesFromField(fieldDef: FieldDef<Record<string, unknown>>): ValidationRules {
   const rules: ValidationRules = {};
 
-  if (fieldDef.required) rules.required = true;
-  if (fieldDef.email) rules.email = true;
-  if (fieldDef.min !== undefined) rules.min = fieldDef.min;
-  if (fieldDef.max !== undefined) rules.max = fieldDef.max;
-  if (fieldDef.minLength !== undefined) rules.minLength = fieldDef.minLength;
-  if (fieldDef.maxLength !== undefined) rules.maxLength = fieldDef.maxLength;
-  if (fieldDef.patternRule) {
-    rules.pattern = typeof fieldDef.patternRule === 'string' ? new RegExp(fieldDef.patternRule) : fieldDef.patternRule;
+  // Check for validation in props
+  if (fieldDef.props?.required) rules.required = true;
+  if (fieldDef.props?.email) rules.email = true;
+  if (fieldDef.props?.min !== undefined) rules.min = fieldDef.props.min;
+  if (fieldDef.props?.max !== undefined) rules.max = fieldDef.props.max;
+  if (fieldDef.props?.minLength !== undefined) rules.minLength = fieldDef.props.minLength;
+  if (fieldDef.props?.maxLength !== undefined) rules.maxLength = fieldDef.props.maxLength;
+  if (fieldDef.props?.pattern) {
+    rules.pattern = typeof fieldDef.props.pattern === 'string' ? new RegExp(fieldDef.props.pattern) : fieldDef.props.pattern;
   }
 
-  // Merge with explicit validation if provided
-  if (fieldDef.validation) {
-    Object.assign(rules, fieldDef.validation);
-  }
+  // Also check for direct properties on fieldDef (for backwards compatibility)
+  if ((fieldDef as any).required) rules.required = true;
+  if ((fieldDef as any).email) rules.email = true;
+  if ((fieldDef as any).min !== undefined) rules.min = (fieldDef as any).min;
+  if ((fieldDef as any).max !== undefined) rules.max = (fieldDef as any).max;
+  if ((fieldDef as any).minLength !== undefined) rules.minLength = (fieldDef as any).minLength;
+  if ((fieldDef as any).maxLength !== undefined) rules.maxLength = (fieldDef as any).maxLength;
 
   return rules;
 }
@@ -76,14 +82,15 @@ function applyValidationRules(fieldPath: any, rules: ValidationRules): void {
 /**
  * Utility to convert field definitions to default values object
  */
-export function fieldsToDefaultValues<TModel = unknown>(fields: readonly FieldDef[]): TModel {
+export function fieldsToDefaultValues<TModel = unknown>(fields: readonly FieldDef<Record<string, unknown>>[]): TModel {
   const defaultValues: Record<string, any> = {};
 
-  for (const field of fields) {
-    if (field.defaultValue !== undefined) {
-      defaultValues[field.key] = field.defaultValue;
-    }
-  }
+  // TODO: Re-enable when defaultValue property is added to FieldDef
+  // for (const field of fields) {
+  //   if (field.defaultValue !== undefined) {
+  //     defaultValues[field.key] = field.defaultValue;
+  //   }
+  // }
 
   return defaultValues as TModel;
 }

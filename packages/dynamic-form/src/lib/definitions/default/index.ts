@@ -8,7 +8,5 @@ export type { MultiCheckboxField, MultiCheckboxOption } from './multi-checkbox-f
 export type { DatepickerField } from './datepicker-field';
 export type { SliderField } from './slider-field';
 export type { ToggleField } from './toggle-field';
-export type { RowField, RowChildField, DEFAULT_ROW_GAPS, BREAKPOINTS } from './row-field';
-export type { GroupField, DEFAULT_GROUP_GAPS } from './group-field';
-export { defineRowField, defineFieldWithCol } from './row-field';
-export { defineGroupField } from './group-field';
+export type { RowField } from './row-field';
+export type { GroupField } from './group-field';

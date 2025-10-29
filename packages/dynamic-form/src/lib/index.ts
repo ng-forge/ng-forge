@@ -6,10 +6,10 @@ export * from './models';
 export * from './definitions';
 
 // Provider system for dependency injection
-export { provideDynamicForm, withConfig, type ProvidedFormResult, type DynamicFormFeature, type DynamicFormConfig } from './providers';
+export * from './providers';
 
-// Field registry for custom field types
-export { FieldRegistry } from './core/field-registry';
+// Field injection utility
+export { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 
 // Field fields
 export * from './fields';
@@ -17,3 +17,8 @@ export * from './fields';
 // Events
 export * from './events';
 
+// Mappers
+export * from './mappers';
+
+// Testing utilities
+export * from './testing';

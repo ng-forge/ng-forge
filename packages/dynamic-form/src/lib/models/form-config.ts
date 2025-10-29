@@ -1,15 +1,14 @@
-import { FieldDef } from '../definitions/base';
 import { Schema } from '@angular/forms/signals';
+import { RegisteredFieldTypes } from './global-types';
 
 /**
- * JSON-based: Simple field definitions with JSON validators (for API configs)
+ * Form configuration interface that uses registered field types for type safety
  */
-export interface FormConfig<TFields extends readonly FieldDef<Record<string, unknown>>[] = readonly FieldDef<Record<string, unknown>>[], TValue = unknown> {
+export interface FormConfig<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TValue = unknown> {
   readonly fields: TFields;
   readonly schema?: Schema<TValue>;
   readonly options?: FormOptions;
 }
-
 
 /**
  * Form options for global form behavior

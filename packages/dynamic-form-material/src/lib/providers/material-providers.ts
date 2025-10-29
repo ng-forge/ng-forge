@@ -1,25 +1,41 @@
-import { inject, provideAppInitializer } from '@angular/core';
-import { DynamicFormFeature, FieldRegistry } from '@ng-forge/dynamic-form';
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-form';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
+import {
+  MatCheckboxField,
+  MatDatepickerField,
+  MatInputField,
+  MatMultiCheckboxField,
+  MatRadioField,
+  MatSelectField,
+  MatSliderField,
+  MatTextareaField,
+  MatToggleField
+} from '../fields';
+import { MatSubmitField } from '../fields/submit/mat-submit.type';
 
 /**
  * Configure dynamic forms with Material Design field types
- * Registers all Material Design field fields with the FieldRegistry
+ * Provides all Material Design field types for use with provideDynamicForm
  */
-export function withMaterial(): DynamicFormFeature {
-  return {
-    providers: [
-      provideAppInitializer((): void => {
-        const registry = inject(FieldRegistry);
-
-        // Register material field types directly
-        registry.registerTypes(MATERIAL_FIELD_TYPES);
-      }),
-    ],
-  };
+export function withMaterialFields(): FieldTypeDefinition[] {
+  return MATERIAL_FIELD_TYPES;
 }
 
 /**
- * Alias for better naming consistency with the app usage
+ * Module augmentation to extend the global DynamicFormFieldRegistry
+ * with Material Design field types
  */
-export const withMaterialFields = withMaterial;
+declare module '@ng-forge/dynamic-form' {
+  interface DynamicFormFieldRegistry {
+    input: MatInputField;
+    select: MatSelectField<any>;
+    checkbox: MatCheckboxField;
+    submit: MatSubmitField;
+    textarea: MatTextareaField;
+    radio: MatRadioField<any>;
+    'multi-checkbox': MatMultiCheckboxField<any>;
+    datepicker: MatDatepickerField;
+    slider: MatSliderField;
+    toggle: MatToggleField;
+  }
+}

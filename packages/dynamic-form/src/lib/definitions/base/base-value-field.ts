@@ -6,13 +6,16 @@ import { Prettify } from '../../models/prettify';
 export const ValueType = ['string', 'number', 'boolean', 'object', 'array', 'date'] as const;
 export type ValueType = (typeof ValueType)[number];
 
-export interface BaseValueField<TProps extends Record<string, unknown>, TValue>
-  extends FieldDef<TProps>,
-    FieldWithValidation {
-  value: TValue;
+export interface BaseValueField<TProps extends Record<string, unknown>, TValue> extends FieldDef<TProps>, FieldWithValidation {
+  value?: TValue;
+
   defaultValue?: TValue;
-  valueType: ValueType;
+
+  valueType?: ValueType;
+
   placeholder?: string;
+
+  required?: boolean;
 }
 
 export function isValueField<TProps extends Record<string, unknown>, TValue extends ValueType>(

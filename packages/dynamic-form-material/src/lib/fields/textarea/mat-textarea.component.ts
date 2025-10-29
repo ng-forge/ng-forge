@@ -12,7 +12,7 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
   template: `
     <mat-form-field
       [appearance]="props()?.appearance || 'fill'"
-      [subscriptSizing]="props()?.subscriptSizing ?? 'fixed"
+      [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'"
       [class]="className() || ''"
     >
       @if (label(); as label) {

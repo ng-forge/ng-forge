@@ -2,9 +2,8 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormCheckboxControl, FormValueControl } from '@angular/forms/signals';
 import { DynamicForm } from './dynamic-form.component';
-import { FieldRegistry } from './core/field-registry';
-import { FormConfig } from './models/field-config';
-import { delay } from './testing/delay';
+import { FormConfig } from './models';
+import { delay, SimpleTestUtils } from './testing';
 
 // Simple test harness fields that properly implement the form control interfaces
 @Component({
@@ -44,41 +43,27 @@ class TestCheckboxHarness implements FormCheckboxControl {
 }
 
 describe('DynamicFormComponent', () => {
-  let component: DynamicForm<any>;
-  let fixture: ComponentFixture<DynamicForm>;
-  let fieldRegistry: FieldRegistry;
+  const createComponent = (config: FormConfig = { fields: [] }, initialValue?: any) => {
+    return SimpleTestUtils.createComponent(config, initialValue);
+  };
 
-  const createComponent = (config: FormConfig = { fields: [] }) => {
-    fixture = TestBed.createComponent(DynamicForm<any>);
-    component = fixture.componentInstance;
-    fixture.componentRef.setInput('config', config);
-    fixture.detectChanges();
-    return { component, fixture };
+  const waitForInit = async (fixture: ComponentFixture<any>) => {
+    return SimpleTestUtils.waitForInit(fixture);
+  };
+
+  const simulateInput = async (fixture: ComponentFixture<any>, selector: string, value: string) => {
+    return SimpleTestUtils.simulateInput(fixture, selector, value);
+  };
+
+  const assertFormValue = <T>(component: DynamicForm<T>, expectedValue: T) => {
+    return SimpleTestUtils.assertFormValue(component, expectedValue);
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DynamicForm, TestInputHarness, TestCheckboxHarness],
-      providers: [FieldRegistry],
+      providers: [],
     }).compileComponents();
-
-    fieldRegistry = TestBed.inject(FieldRegistry);
-
-    // Register test fields
-    fieldRegistry.registerType({
-      name: 'input',
-      component: TestInputHarness,
-      defaultProps: {
-        type: 'text',
-        placeholder: 'Enter value',
-      },
-    });
-
-    fieldRegistry.registerType({
-      name: 'checkbox',
-      component: TestCheckboxHarness,
-      defaultProps: {},
-    });
   });
 
   describe('Basic Functionality', () => {
