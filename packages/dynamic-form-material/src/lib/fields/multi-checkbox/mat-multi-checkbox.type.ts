@@ -1,10 +1,11 @@
-import { MultiCheckboxField } from '@ng-forge/dynamic-form';
-import { MatFormFieldAppearance } from '@angular/material/form-field';
+import { MultiCheckboxField, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-form';
 
-export interface MatMultiCheckboxProps<T = unknown> extends MultiCheckboxField<T> {
-  appearance?: MatFormFieldAppearance;
+export interface MatMultiCheckboxProps extends Record<string, unknown> {
   disableRipple?: boolean;
   tabIndex?: number;
+  hint?: string;
 }
 
-// export type MatMultiCheckboxField<T = unknown> = ValueControlFieldType<MatMultiCheckboxProps<T>, T[]>;
+export type MatMultiCheckboxField<T extends ValueType> = MultiCheckboxField<T, MatMultiCheckboxProps>;
+
+export type MatMultiCheckboxComponent<T extends ValueType> = ValueFieldComponent<MatMultiCheckboxField<T>>;

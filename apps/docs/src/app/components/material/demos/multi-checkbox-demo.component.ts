@@ -47,7 +47,6 @@ export class MultiCheckboxDemoComponent {
         type: 'multi-checkbox',
         label: 'Select Features',
         props: {
-          appearance: 'outline',
           color: 'primary',
           hint: 'Choose multiple features',
           options: [
@@ -63,7 +62,6 @@ export class MultiCheckboxDemoComponent {
         type: 'multi-checkbox',
         label: 'Technologies',
         props: {
-          appearance: 'outline',
           color: 'accent',
           hint: 'Select technologies you use',
           options: [

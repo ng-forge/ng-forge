@@ -1,4 +1,4 @@
-// Individual field type demo components
+// Individual field type demo fields
 export { InputDemoComponent } from './input-demo.component';
 export { SelectDemoComponent } from './select-demo.component';
 export { CheckboxDemoComponent } from './checkbox-demo.component';

@@ -47,17 +47,17 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'gender',
             type: 'radio',
             label: 'Select Gender',
+            required: true,
+            className: 'gender-radio',
+            options: [
+              { value: 'male', label: 'Male' },
+              { value: 'female', label: 'Female' },
+              { value: 'other', label: 'Other' },
+            ],
             props: {
               hint: 'Choose your gender',
-              required: true,
               color: 'accent',
               labelPosition: 'before',
-              className: 'gender-radio',
-              options: [
-                { value: 'male', label: 'Male' },
-                { value: 'female', label: 'Female' },
-                { value: 'other', label: 'Other' },
-              ],
             },
           },
         ],
@@ -104,13 +104,11 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'preference',
             type: 'radio',
             label: 'Select Preference',
-            props: {
-              options: [
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-                { value: 'option3', label: 'Option 3' },
-              ],
-            },
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+              { value: 'option3', label: 'Option 3' },
+            ],
           },
         ],
       };
@@ -148,13 +146,11 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'preference',
             type: 'radio',
             label: 'Select Preference',
-            props: {
-              options: [
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-                { value: 'option3', label: 'Option 3' },
-              ],
-            },
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+              { value: 'option3', label: 'Option 3' },
+            ],
           },
         ],
       };
@@ -192,12 +188,11 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'preference',
             type: 'radio',
             label: 'Test Radio',
-            props: {
-              options: [
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2', disabled: true },
-              ],
-            },
+
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2', disabled: true },
+            ],
           },
         ],
       };
@@ -221,12 +216,10 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'preference',
             type: 'radio',
             label: 'Simple Radio',
-            props: {
-              options: [
-                { value: 'yes', label: 'Yes' },
-                { value: 'no', label: 'No' },
-              ],
-            },
+            options: [
+              { value: 'yes', label: 'Yes' },
+              { value: 'no', label: 'No' },
+            ],
           },
         ],
       };
@@ -255,12 +248,10 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'preference',
             type: 'radio',
             label: 'Simple Radio',
-            props: {
-              options: [
-                { value: 'yes', label: 'Yes' },
-                { value: 'no', label: 'No' },
-              ],
-            },
+            options: [
+              { value: 'yes', label: 'Yes' },
+              { value: 'no', label: 'No' },
+            ],
           },
         ],
       };
@@ -306,36 +297,36 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'gender',
             type: 'radio',
             label: 'Gender',
+            options: [
+              { value: 'male', label: 'Male' },
+              { value: 'female', label: 'Female' },
+            ],
             props: {
               required: true,
-              options: [
-                { value: 'male', label: 'Male' },
-                { value: 'female', label: 'Female' },
-              ],
             },
           },
           {
             key: 'preference',
             type: 'radio',
             label: 'Preference',
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+            ],
             props: {
               color: 'accent',
-              options: [
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-              ],
             },
           },
           {
             key: 'priority',
             type: 'radio',
             label: 'Priority',
+            options: [
+              { value: 'high', label: 'High' },
+              { value: 'low', label: 'Low' },
+            ],
             props: {
               color: 'warn',
-              options: [
-                { value: 'high', label: 'High' },
-                { value: 'low', label: 'Low' },
-              ],
             },
           },
         ],
@@ -361,23 +352,19 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'gender',
             type: 'radio',
             label: 'Gender',
-            props: {
-              options: [
-                { value: 'male', label: 'Male' },
-                { value: 'female', label: 'Female' },
-              ],
-            },
+            options: [
+              { value: 'male', label: 'Male' },
+              { value: 'female', label: 'Female' },
+            ],
           },
           {
             key: 'preference',
             type: 'radio',
             label: 'Preference',
-            props: {
-              options: [
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-              ],
-            },
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+            ],
           },
         ],
       };
@@ -403,23 +390,21 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'gender',
             type: 'radio',
             label: 'Gender',
-            props: {
-              options: [
-                { value: 'male', label: 'Male' },
-                { value: 'female', label: 'Female' },
-              ],
-            },
+
+            options: [
+              { value: 'male', label: 'Male' },
+              { value: 'female', label: 'Female' },
+            ],
           },
           {
             key: 'preference',
             type: 'radio',
             label: 'Preference',
-            props: {
-              options: [
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-              ],
-            },
+
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+            ],
           },
         ],
       };
@@ -465,26 +450,24 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'gender',
             type: 'radio',
             label: 'Gender',
-            props: {
-              options: [{ value: 'male', label: 'Male' }],
-            }, // Default primary
+            options: [{ value: 'male', label: 'Male' }],
           },
           {
             key: 'preference',
             type: 'radio',
             label: 'Preference',
+            options: [{ value: 'option1', label: 'Option 1' }],
             props: {
               color: 'accent',
-              options: [{ value: 'option1', label: 'Option 1' }],
             },
           },
           {
             key: 'priority',
             type: 'radio',
             label: 'Priority',
+            options: [{ value: 'high', label: 'High' }],
             props: {
               color: 'warn',
-              options: [{ value: 'high', label: 'High' }],
             },
           },
         ],
@@ -516,12 +499,11 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             type: 'radio',
             label: 'Disabled Radio',
             disabled: true,
-            props: {
-              options: [
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-              ],
-            },
+
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+            ],
           },
         ],
       };
@@ -561,9 +543,7 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'preference',
             type: 'radio',
             label: 'Test Radio',
-            props: {
-              options: [{ value: 'option1', label: 'Option 1' }],
-            },
+            options: [{ value: 'option1', label: 'Option 1' }],
           },
         ],
       };
@@ -586,9 +566,7 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'preference',
             type: 'radio',
             label: 'Test Radio',
-            props: {
-              options: [{ value: 'option1', label: 'Option 1' }],
-            },
+            options: [{ value: 'option1', label: 'Option 1' }],
           },
         ],
       };
@@ -608,9 +586,7 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
             key: 'preference',
             type: 'radio',
             label: 'Test Radio',
-            props: {
-              options: [{ value: 'option1', label: 'Option 1' }],
-            },
+            options: [{ value: 'option1', label: 'Option 1' }],
           },
         ],
       };
@@ -629,13 +605,11 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'preference',
             type: 'radio',
-            props: {
-              label: 'Test Radio',
-              options: [
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2' },
-              ],
-            },
+            label: 'Test Radio',
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2' },
+            ],
           },
         ],
       } as any;
@@ -667,14 +641,12 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'preference',
             type: 'radio',
-            props: {
-              label: 'Test Radio',
-              options: [
-                { value: 'option1', label: 'Option 1' },
-                { value: 'option2', label: 'Option 2', disabled: true },
-                { value: 'option3', label: 'Option 3' },
-              ],
-            },
+            label: 'Test Radio',
+            options: [
+              { value: 'option1', label: 'Option 1' },
+              { value: 'option2', label: 'Option 2', disabled: true },
+              { value: 'option3', label: 'Option 3' },
+            ],
           },
         ],
       } as any;

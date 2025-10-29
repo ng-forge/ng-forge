@@ -166,7 +166,6 @@ export class MaterialThemingComponent {
         type: 'radio',
         label: 'Accent Radio Group',
         props: {
-          appearance: 'outline',
           color: 'accent',
           hint: 'Radio buttons with accent theme color',
           options: [

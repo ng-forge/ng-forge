@@ -1,11 +1,14 @@
-import { InputField } from '@ng-forge/dynamic-form';
-import { MatFormFieldAppearance } from '@angular/material/form-field';
+import { InputField, ValueFieldComponent } from '@ng-forge/dynamic-form';
+import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
-/**
- * Material Design input field interface
- * Extends the base InputField with Material-specific properties
- */
-export interface MatInputField extends InputField {
-  /** Material form field appearance */
+export interface MatInputProps extends Record<string, unknown> {
   appearance?: MatFormFieldAppearance;
+  disableRipple?: boolean;
+  subscriptSizing?: SubscriptSizing;
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+  hint?: string;
 }
+
+export type MatInputField = InputField<MatInputProps>;
+
+export type MatInputComponent = ValueFieldComponent<MatInputField>;

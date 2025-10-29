@@ -3,11 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
-import { ValueInArrayPipe } from './value-in-array.pipe';
+import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-
-type Option<T> = { value: T; label: string; disabled?: boolean };
+import { MatMultiCheckboxComponent, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
+import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
@@ -16,80 +16,63 @@ type Option<T> = { value: T; label: string; disabled?: boolean };
     '[class]': 'className() || ""',
   },
   template: `
-    <div>
-      @if (label(); as label) {
-      <div class="checkbox-group-label">{{ label }}</div>
+    @if (label(); as label) {
+    <div class="checkbox-group-label">{{ label }}</div>
+    }
+
+    <div class="checkbox-group">
+      @for (option of options(); track option.value; let $idx = $index) {
+      <mat-checkbox
+        [checked]="option | inArray : valueViewModel()"
+        [disabled]="disabled() || option.disabled"
+        [color]="color() || 'primary'"
+        [labelPosition]="labelPosition() || 'after'"
+        (change)="onCheckboxChange(option, $event.checked)"
+      >
+        {{ option.label }}
+      </mat-checkbox>
       }
-
-      <div class="checkbox-group">
-        @for (option of options(); track option.value; let $idx = $index) {
-        <mat-checkbox
-          [checked]="option | inArray : valueViewModel()"
-          [disabled]="disabled() || option.disabled"
-          [color]="color() || 'primary'"
-          [labelPosition]="labelPosition() || 'after'"
-          (change)="onCheckboxChange(option, $event.checked)"
-        >
-          {{ option.label }}
-        </mat-checkbox>
-        }
-      </div>
-
-      @if (hint(); as hint) {
-      <div class="mat-hint">{{ hint }}</div>
-      }
-
-      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
     </div>
+
+    @if (props()?.hint; as hint) {
+    <div class="mat-hint">{{ hint }}</div>
+    }
+
+    <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
   `,
   styles: [
     `
       :host {
         display: block;
       }
-
-      .checkbox-group-label {
-        font-size: 14px;
-        font-weight: 500;
-        color: rgba(0, 0, 0, 0.87);
-        margin-bottom: 8px;
-      }
-
-      .checkbox-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      mat-checkbox {
-        margin: 0;
-      }
-
-      .mat-hint {
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.6);
-        margin-top: 4px;
-      }
     `,
   ],
+  host: {
+    class: 'className()',
+  },
   providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatMultiCheckboxFieldComponent<T> implements FormValueControl<T[]> {
-  readonly value = model<T[]>([]);
+export class MatMultiCheckboxFieldComponent<T extends ValueType> implements FormValueControl<T[]>, MatMultiCheckboxComponent<T> {
+  readonly value = model.required<T[]>();
+
+  readonly required = input<boolean>(false);
   readonly disabled = input<boolean>(false);
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
 
+  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+
   readonly label = input<string>('');
-  readonly options = input.required<Option<T>[]>();
-  readonly required = input<boolean>(false);
-  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
-  readonly labelPosition = input<'before' | 'after'>('after');
-  readonly hint = input<string>('');
+  readonly placeholder = input<string>('');
+
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
+
+  readonly options = input<readonly MultiCheckboxOption<T>[]>([]);
+  readonly props = input<MatMultiCheckboxProps>();
 
   valueViewModel = linkedSignal<Option<T>[]>(
     () => {

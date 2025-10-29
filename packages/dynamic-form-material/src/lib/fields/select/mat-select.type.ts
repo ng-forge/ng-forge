@@ -1,15 +1,15 @@
-import { SelectField } from '@ng-forge/dynamic-form';
-import { MatFormFieldAppearance } from '@angular/material/form-field';
+import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
+import { SelectField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-/**
- * Material Design select field interface
- * Extends the base SelectField with Material-specific properties
- */
-export interface MatSelectField<T = any> extends SelectField<T> {
-  /** Material form field appearance */
+export interface MatSelectProps<T> extends Record<string, unknown> {
   appearance?: MatFormFieldAppearance;
-  /** Multiple selection */
   multiple?: boolean;
-  /** Select panel max height */
   panelMaxHeight?: string;
+  subscriptSizing?: SubscriptSizing;
+  compareWith?: (o1: T, o2: T) => boolean;
+  hint?: string;
 }
+
+export type MatSelectField<T> = SelectField<T, MatSelectProps<T>>;
+
+export type MatSelectComponent<T> = ValueFieldComponent<MatSelectField<T>>;

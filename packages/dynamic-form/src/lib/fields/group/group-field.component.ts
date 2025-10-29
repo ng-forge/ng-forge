@@ -12,11 +12,12 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, switchMap } from 'rxjs';
-import { DEFAULT_GROUP_GAPS, GroupField } from '../../definitions/group-field';
+import { DEFAULT_GROUP_GAPS, GroupComponent, GroupField } from '../../definitions/default/group-field';
 import { FieldRegistry } from '../../core/field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
 import { FormUiControl } from '@angular/forms/signals';
 import { get } from 'lodash-es';
+import { FieldDef } from '../../definitions';
 
 @Component({
   selector: 'lib-group-field',
@@ -36,9 +37,9 @@ import { get } from 'lodash-es';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
-export class GroupFieldComponent {
+export default class GroupFieldComponent<T extends Record<string, FieldDef<Record<string, unknown>>>> implements GroupComponent<T> {
   /** Field configuration input */
-  field = input.required<GroupField>();
+  field = input.required<GroupField<T>>();
 
   /** Parent form value signal for accessing field values */
   formValue = input.required<any>();

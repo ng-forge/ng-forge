@@ -6,6 +6,7 @@ import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.type';
 
 @Component({
   selector: 'df-mat-datepicker',
@@ -22,7 +23,11 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
     MatNativeDateModule,
   ],
   template: `
-    <mat-form-field [appearance]="appearance() || 'fill'" [subscriptSizing]="subscriptSizing()" [class]="className() || ''">
+    <mat-form-field
+      [appearance]="props()?.appearance || 'fill'"
+      [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'"
+      [class]="className() || ''"
+    >
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
@@ -40,9 +45,9 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
       />
 
       <mat-datepicker-toggle matIconSuffix [for]="$any(picker)" />
-      <mat-datepicker #picker [startAt]="startAt()" [startView]="startView() || 'month'" [touchUi]="touchUi()" />
+      <mat-datepicker #picker [startAt]="startAt()" [startView]="props()?.startView || 'month'" [touchUi]="props()?.touchUi ?? false" />
 
-      @if (hint(); as hint) {
+      @if (props()?.hint; as hint) {
       <mat-hint>{{ hint }}</mat-hint>
       }
 
@@ -51,25 +56,26 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatDatepickerFieldComponent implements FormValueControl<Date | null> {
+export class MatDatepickerFieldComponent implements FormValueControl<Date | null>, MatDatepickerComponent {
   readonly value = model<Date | null>(null);
+
+  readonly required = input<boolean>(false);
   readonly disabled = input<boolean>(false);
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
-  readonly required = input<boolean>(false);
+
+  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
 
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
+
+  readonly className = input<string>('');
+  readonly tabIndex = input<number>();
+
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
-  readonly startView = input<'month' | 'year' | 'multi-year'>('month');
-  readonly touchUi = input<boolean>(false);
-  readonly hint = input<string>('');
-  readonly tabIndex = input<number>();
-  readonly className = input<string>('');
-  readonly appearance = input<'fill' | 'outline'>('fill');
-  readonly subscriptSizing = input<'fixed' | 'dynamic'>('fixed');
-  readonly disableRipple = input<boolean>(false);
+  readonly props = input<MatDatepickerProps>();
 }

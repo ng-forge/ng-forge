@@ -47,18 +47,18 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
+            required: true,
+            className: 'hobbies-checkbox',
             props: {
-              options: [
-                { value: 'reading', label: 'Reading' },
-                { value: 'gaming', label: 'Gaming' },
-                { value: 'cooking', label: 'Cooking' },
-              ],
               hint: 'Select all that apply',
-              required: true,
               color: 'primary',
               labelPosition: 'after',
-              className: 'hobbies-checkbox',
             },
+            options: [
+              { value: 'reading', label: 'Reading' },
+              { value: 'gaming', label: 'Gaming' },
+              { value: 'cooking', label: 'Cooking' },
+            ],
           },
         ],
       };
@@ -96,13 +96,11 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [
-                { value: 'reading', label: 'Reading' },
-                { value: 'gaming', label: 'Gaming' },
-                { value: 'cooking', label: 'Cooking' },
-              ],
-            },
+            options: [
+              { value: 'reading', label: 'Reading' },
+              { value: 'gaming', label: 'Gaming' },
+              { value: 'cooking', label: 'Cooking' },
+            ],
           },
         ],
       };
@@ -148,13 +146,12 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [
-                { value: 'reading', label: 'Reading' },
-                { value: 'gaming', label: 'Gaming' },
-                { value: 'cooking', label: 'Cooking' },
-              ],
-            },
+
+            options: [
+              { value: 'reading', label: 'Reading' },
+              { value: 'gaming', label: 'Gaming' },
+              { value: 'cooking', label: 'Cooking' },
+            ],
           },
         ],
       };
@@ -196,25 +193,22 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'skills',
             type: 'multi-checkbox',
             label: 'Skills',
-            props: {
-              options: [
-                { value: 'typescript', label: 'TypeScript' },
-                { value: 'angular', label: 'Angular' },
-                { value: 'react', label: 'React' },
-              ],
-            },
+            options: [
+              { value: 'typescript', label: 'TypeScript' },
+              { value: 'angular', label: 'Angular' },
+              { value: 'react', label: 'React' },
+            ],
           },
           {
             key: 'preferences',
             type: 'multi-checkbox',
             label: 'Preferences',
-            props: {
-              options: [
-                { value: 1, label: 'Option 1' },
-                { value: 2, label: 'Option 2' },
-                { value: 3, label: 'Option 3' },
-              ],
-            },
+
+            options: [
+              { value: 1, label: 'Option 1' },
+              { value: 2, label: 'Option 2' },
+              { value: 3, label: 'Option 3' },
+            ],
           },
         ],
       };
@@ -262,13 +256,11 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [
-                { value: 'reading', label: 'Reading' },
-                { value: 'gaming', label: 'Gaming', disabled: true },
-                { value: 'cooking', label: 'Cooking' },
-              ],
-            },
+            options: [
+              { value: 'reading', label: 'Reading' },
+              { value: 'gaming', label: 'Gaming', disabled: true },
+              { value: 'cooking', label: 'Cooking' },
+            ],
           },
         ],
       };
@@ -292,13 +284,11 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             type: 'multi-checkbox',
             label: 'Hobbies',
             disabled: true,
-            props: {
-              options: [
-                { value: 'reading', label: 'Reading' },
-                { value: 'gaming', label: 'Gaming' },
-                { value: 'cooking', label: 'Cooking' },
-              ],
-            },
+            options: [
+              { value: 'reading', label: 'Reading' },
+              { value: 'gaming', label: 'Gaming' },
+              { value: 'cooking', label: 'Cooking' },
+            ],
           },
         ],
       };
@@ -326,8 +316,8 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Primary Color',
+            options: [{ value: 'reading', label: 'Reading' }],
             props: {
-              options: [{ value: 'reading', label: 'Reading' }],
               color: 'primary',
             },
           },
@@ -335,8 +325,8 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'skills',
             type: 'multi-checkbox',
             label: 'Accent Color',
+            options: [{ value: 'typescript', label: 'TypeScript' }],
             props: {
-              options: [{ value: 'typescript', label: 'TypeScript' }],
               color: 'accent',
             },
           },
@@ -363,8 +353,8 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'After Position',
+            options: [{ value: 'reading', label: 'Reading' }],
             props: {
-              options: [{ value: 'reading', label: 'Reading' }],
               labelPosition: 'after',
             },
           },
@@ -372,8 +362,8 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'skills',
             type: 'multi-checkbox',
             label: 'Before Position',
+            options: [{ value: 'typescript', label: 'TypeScript' }],
             props: {
-              options: [{ value: 'typescript', label: 'TypeScript' }],
               labelPosition: 'before',
             },
           },
@@ -402,12 +392,10 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [
-                { value: 'reading', label: 'Reading' },
-                { value: 'gaming', label: 'Gaming' },
-              ],
-            },
+            options: [
+              { value: 'reading', label: 'Reading' },
+              { value: 'gaming', label: 'Gaming' },
+            ],
           },
         ],
       };
@@ -429,9 +417,7 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [{ value: 'reading', label: 'Reading' }],
-            },
+            options: [{ value: 'reading', label: 'Reading' }],
           },
         ],
       };
@@ -451,9 +437,7 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'hobbies',
             type: 'multi-checkbox',
-            props: {
-              options: [{ value: 'reading', label: 'Reading' }],
-            },
+            options: [{ value: 'reading', label: 'Reading' }],
           },
         ],
       } as any;
@@ -476,13 +460,11 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [
-                { value: 'reading', label: 'Reading' },
-                { value: 'gaming', label: 'Gaming' },
-                { value: 'cooking', label: 'Cooking' },
-              ],
-            },
+            options: [
+              { value: 'reading', label: 'Reading' },
+              { value: 'gaming', label: 'Gaming' },
+              { value: 'cooking', label: 'Cooking' },
+            ],
           },
         ],
       };
@@ -532,23 +514,19 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [
-                { value: 'reading', label: 'Reading' },
-                { value: 'gaming', label: 'Gaming' },
-              ],
-            },
+            options: [
+              { value: 'reading', label: 'Reading' },
+              { value: 'gaming', label: 'Gaming' },
+            ],
           },
           {
             key: 'skills',
             type: 'multi-checkbox',
             label: 'Skills',
-            props: {
-              options: [
-                { value: 'typescript', label: 'TypeScript' },
-                { value: 'angular', label: 'Angular' },
-              ],
-            },
+            options: [
+              { value: 'typescript', label: 'TypeScript' },
+              { value: 'angular', label: 'Angular' },
+            ],
           },
         ],
       };
@@ -601,9 +579,7 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [{ value: 'reading', label: 'Reading' }],
-            },
+            options: [{ value: 'reading', label: 'Reading' }],
           },
         ],
       };
@@ -625,9 +601,7 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [{ value: 'reading', label: 'Reading' }],
-            },
+            options: [{ value: 'reading', label: 'Reading' }],
           },
         ],
       };
@@ -649,9 +623,7 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [],
-            },
+            options: [],
           },
         ],
       };
@@ -677,13 +649,11 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [
-                { value: 'reading', label: 'Reading Books' },
-                { value: 'reading', label: 'Reading Articles' },
-                { value: 'gaming', label: 'Gaming' },
-              ],
-            },
+            options: [
+              { value: 'reading', label: 'Reading Books' },
+              { value: 'reading', label: 'Reading Articles' },
+              { value: 'gaming', label: 'Gaming' },
+            ],
           },
         ],
       };
@@ -704,12 +674,10 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
             key: 'hobbies',
             type: 'multi-checkbox',
             label: 'Hobbies',
-            props: {
-              options: [
-                { value: 'reading', label: 'Reading' },
-                { value: 'gaming', label: 'Gaming' },
-              ],
-            },
+            options: [
+              { value: 'reading', label: 'Reading' },
+              { value: 'gaming', label: 'Gaming' },
+            ],
           },
         ],
       };

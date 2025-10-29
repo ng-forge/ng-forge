@@ -1,0 +1,22 @@
+import { FieldDef } from './field-def';
+import { FieldWithValidation } from './field-with-validation';
+import { WithInputSignals } from '../../models/component-type';
+import { Prettify } from '../../models/prettify';
+
+export interface BaseCheckedField<TProps extends Record<string, unknown>> extends FieldDef<TProps>, FieldWithValidation {
+  checked: boolean;
+
+  defaultValue?: boolean;
+
+  placeholder?: string;
+}
+
+export function isCheckedField<TProps extends Record<string, unknown>>(
+  field: FieldDef<TProps>
+): field is BaseCheckedField<TProps> {
+  return 'checked' in field && typeof (field as { checked: unknown }).checked === 'boolean';
+}
+
+type ExcludedKeys = 'type' | 'key' | 'conditionals' | 'defaultValue' | 'checked' | 'col' | keyof FieldWithValidation;
+
+export type CheckedFieldComponent<T extends BaseCheckedField<any>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

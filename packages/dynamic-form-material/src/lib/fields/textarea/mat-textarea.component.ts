@@ -4,12 +4,17 @@ import { FormValueControl, ValidationError, WithOptionalField } from '@angular/f
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 
 @Component({
   selector: 'df-mat-textarea',
   imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent],
   template: `
-    <mat-form-field [appearance]="appearance() || 'fill'" [subscriptSizing]="subscriptSizing()" [class]="className() || ''">
+    <mat-form-field
+      [appearance]="props()?.appearance || 'fill'"
+      [subscriptSizing]="props()?.subscriptSizing ?? 'fixed"
+      [class]="className() || ''"
+    >
       @if (label(); as label) {
       <mat-label>{{ label }}</mat-label>
       }
@@ -19,15 +24,15 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
         [(ngModel)]="value"
         [placeholder]="placeholder() || ''"
         [disabled]="disabled()"
-        [rows]="rows() || 4"
-        [cols]="cols()"
-        [maxlength]="maxlength() || null"
+        [rows]="props()?.rows || 4"
+        [cols]="props()?.cols"
+        [maxlength]="maxLength() || null"
         [attr.tabindex]="tabIndex()"
-        [style.resize]="resize() || 'vertical'"
+        [style.resize]="props()?.resize || 'vertical'"
         (blur)="touched.set(true)"
       ></textarea>
 
-      @if (hint(); as hint) {
+      @if (props()?.hint; as hint) {
       <mat-hint>{{ hint }}</mat-hint>
       }
 
@@ -36,22 +41,24 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatTextareaFieldComponent implements FormValueControl<string> {
+export class MatTextareaFieldComponent implements FormValueControl<string>, MatTextareaComponent {
   readonly value = model<string>('');
+
+  readonly required = input<boolean>(false);
   readonly disabled = input<boolean>(false);
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
+
+  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
-  readonly rows = input<number>(4);
-  readonly cols = input<number>();
-  readonly maxlength = input<number>();
-  readonly hint = input<string>('');
-  readonly tabIndex = input<number>();
+
   readonly className = input<string>('');
-  readonly resize = input<'none' | 'both' | 'horizontal' | 'vertical'>('vertical');
-  readonly appearance = input<'fill' | 'outline'>('fill');
-  readonly required = input<boolean>(false);
-  readonly subscriptSizing = input<'fixed' | 'dynamic'>('fixed');
+  readonly tabIndex = input<number>();
+  readonly maxLength = input<number>();
+
+  readonly props = input<MatTextareaProps>();
 }

@@ -55,21 +55,21 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 })
 export class MaterialFieldTypesComponent {
   model = signal({
-    // Input fields
+    // Input definitions
     basicInput: '',
     emailInput: '',
     passwordInput: '',
     textareaInput: '',
 
-    // Date/time fields
+    // Date/time definitions
     dateInput: null,
 
-    // Selection fields
+    // Selection definitions
     basicSelect: '',
     multiSelect: [],
     radioSelection: '',
 
-    // Boolean fields
+    // Boolean definitions
     basicCheckbox: false,
     toggleSwitch: false,
 
@@ -193,7 +193,6 @@ export class MaterialFieldTypesComponent {
         type: 'radio',
         label: 'Radio Group',
         props: {
-          appearance: 'outline',
           hint: 'Single selection from radio buttons',
           options: [
             { value: 'small', label: 'Small Size' },
@@ -234,7 +233,6 @@ export class MaterialFieldTypesComponent {
         type: 'multi-checkbox',
         label: 'Multi Checkbox',
         props: {
-          appearance: 'outline',
           hint: 'Multiple selections with checkboxes',
           color: 'primary',
           options: [

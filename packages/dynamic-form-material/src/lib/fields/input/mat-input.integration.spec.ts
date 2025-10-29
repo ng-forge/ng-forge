@@ -50,14 +50,13 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
             key: 'email',
             type: 'input',
             label: 'Email Address',
+            required: true,
+            tabIndex: 1,
+            className: 'email-input',
             props: {
               placeholder: 'Enter your email',
               hint: 'We will never share your email',
-              required: true,
               type: 'email',
-              autocomplete: 'email',
-              tabIndex: 1,
-              className: 'email-input',
               appearance: 'outline',
             },
           },
@@ -228,26 +227,6 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
       expect(inputs[2].nativeElement.getAttribute('type')).toBe('number');
       expect(inputs[3].nativeElement.getAttribute('type')).toBe('url');
       expect(inputs[4].nativeElement.getAttribute('type')).toBe('tel');
-    });
-
-    it('should apply default autocomplete for password field', async () => {
-      const config: FormConfig = {
-        fields: [
-          {
-            key: 'password',
-            type: 'input',
-            label: 'Password',
-            props: { type: 'password', autocomplete: 'current-password' },
-          },
-        ],
-      };
-
-      createComponent(config, { password: '' });
-
-      await waitForDFInit(component, fixture);
-
-      const passwordInput = debugElement.query(By.directive(MatInput));
-      expect(passwordInput.nativeElement.getAttribute('autocomplete')).toBe('current-password');
     });
 
     it('should handle number input value changes', async () => {

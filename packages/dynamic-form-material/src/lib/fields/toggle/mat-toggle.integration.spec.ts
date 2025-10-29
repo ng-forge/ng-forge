@@ -46,8 +46,8 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'darkMode',
             type: 'toggle',
+            label: 'Enable Dark Mode',
             props: {
-              label: 'Enable Dark Mode',
               hint: 'Toggle between light and dark themes',
               required: true,
               color: 'accent',
@@ -93,9 +93,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'darkMode',
             type: 'toggle',
-            props: {
-              label: 'Dark Mode',
-            },
+            label: 'Dark Mode',
           },
         ] as any[],
       };

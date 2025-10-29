@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { RowFieldComponent } from './row-field.component';
 import { FieldRegistry } from '../../core/field-registry';
-import { RowField } from '../../definitions/row-field';
+import { RowField } from '../../definitions/default/row-field';
 import { provideDynamicForm } from '../../providers/dynamic-form-providers';
 
 // Mock field component for testing

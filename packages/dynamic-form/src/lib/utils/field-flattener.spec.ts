@@ -1,7 +1,7 @@
 import { flattenFields, getFieldLayoutClasses, getFieldLayoutStyles, groupFieldsByContainer } from './field-flattener';
 import { FieldDef } from '../models/field-config';
-import { RowField } from '../definitions/row-field';
-import { GroupField } from '../definitions/group-field';
+import { RowField } from '../definitions/default/row-field';
+import { GroupField } from '../definitions/default/group-field';
 
 describe('Field Flattener', () => {
   describe('flattenFields', () => {

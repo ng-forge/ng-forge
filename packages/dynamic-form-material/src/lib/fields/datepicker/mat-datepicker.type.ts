@@ -1,11 +1,18 @@
-import { DatepickerField } from '@ng-forge/dynamic-form';
-import { MatFormFieldAppearance } from '@angular/material/form-field';
+import { DatepickerField, ValueFieldComponent } from '@ng-forge/dynamic-form';
+import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
-export interface MatDatepickerProps extends DatepickerField {
+export interface MatDatepickerProps extends Record<string, unknown> {
   appearance?: MatFormFieldAppearance;
   color?: 'primary' | 'accent' | 'warn';
   disableRipple?: boolean;
-  tabIndex?: number;
+  subscriptSizing?: SubscriptSizing;
+  startView?: 'month' | 'year' | 'multi-year';
+  touchUi?: boolean;
+  hint?: string;
 }
 
-// export type MatDatepickerField = ValueControlFieldType<MatDatepickerProps, Date | null>;
+export type MatDatepickerField = DatepickerField<MatDatepickerProps>;
+
+export type MatDatepickerComponent = ValueFieldComponent<MatDatepickerField>;
+
+

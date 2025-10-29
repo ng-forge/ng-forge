@@ -1,44 +1,15 @@
-import { Provider, Type } from '@angular/core';
+import { FieldDef } from '@ng-forge/dynamic-form';
 
-/**
- * Field type definition
- */
-export interface FieldTypeDefinition<TProps = unknown> {
-  /** Unique name for the field type */
-  name: string;
+export interface FieldTypeDefinition<T extends FieldDef<Record<string, unknown>>> {
+  loadComponent?: () => Promise<T>;
 
-  /** Component to render this field type (eager loading) */
-  component?: Type<unknown>;
-
-  /** Lazy load function for the component */
-  loadComponent?: () => Promise<Type<unknown>>;
-
-  /** Extend another field type */
-  extends?: string;
-
-  /** Default props for this field type */
-  defaultProps?: Partial<TProps>;
-
-  /** Default wrappers to apply */
-  wrappers?: string[];
-
-  /** Default validators */
-  validators?: string[];
-
-  /** Additional providers for this field type */
-  providers?: Provider[];
+  _fieldDef?: T;
 }
 
-/**
- * Field wrapper definition
- */
-export interface FieldWrapperDefinition {
-  /** Unique name for the wrapper */
-  name: string;
+export type DynamicFormConfigMap<T extends FieldDef<Record<string, unknown>>> = Record<string, FieldTypeDefinition<T>>;
 
-  /** Component to render this wrapper */
-  component: Type<unknown>;
-
-  /** Priority for ordering wrappers (higher = outer) */
-  priority?: number;
-}
+export type FieldDefFromConfig<
+  T extends FieldDef<Record<string, unknown>>,
+  TMap extends DynamicFormConfigMap<T>,
+  TType extends keyof TMap
+> = NonNullable<TMap[TType]['_fieldDef']>;

@@ -48,21 +48,21 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Country',
+            required: true,
+            className: 'country-select',
+            options: [
+              { label: 'United States', value: 'US' },
+              { label: 'Canada', value: 'CA' },
+              { label: 'United Kingdom', value: 'UK' },
+              { label: 'Germany', value: 'DE', disabled: true },
+            ],
             props: {
               placeholder: 'Select your country',
               hint: 'Choose the country you live in',
-              required: true,
               appearance: 'outline',
-              className: 'country-select',
-              options: [
-                { label: 'United States', value: 'US' },
-                { label: 'Canada', value: 'CA' },
-                { label: 'United Kingdom', value: 'UK' },
-                { label: 'Germany', value: 'DE', disabled: true },
-              ],
             },
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, {
@@ -94,15 +94,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Country',
-            props: {
-              options: [
-                { label: 'United States', value: 'US' },
-                { label: 'Canada', value: 'CA' },
-                { label: 'United Kingdom', value: 'UK' },
-              ],
-            },
+            options: [
+              { label: 'United States', value: 'US' },
+              { label: 'Canada', value: 'CA' },
+              { label: 'United Kingdom', value: 'UK' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       const { component } = createComponent(config, {
@@ -140,15 +138,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Country',
-            props: {
-              options: [
-                { label: 'United States', value: 'US' },
-                { label: 'Canada', value: 'CA' },
-                { label: 'United Kingdom', value: 'UK' },
-              ],
-            },
+            options: [
+              { label: 'United States', value: 'US' },
+              { label: 'Canada', value: 'CA' },
+              { label: 'United Kingdom', value: 'UK' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       const { component } = createComponent(config, {
@@ -182,15 +178,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Country',
-            props: {
-              options: [
-                { label: 'United States', value: 'US' },
-                { label: 'Canada', value: 'CA' },
-                { label: 'Germany', value: 'DE', disabled: true },
-              ],
-            },
+            options: [
+              { label: 'United States', value: 'US' },
+              { label: 'Canada', value: 'CA' },
+              { label: 'Germany', value: 'DE', disabled: true },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, { country: 'US' });
@@ -211,18 +205,18 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'languages',
             type: 'select',
             label: 'Languages',
+            options: [
+              { label: 'English', value: 'en' },
+              { label: 'Spanish', value: 'es' },
+              { label: 'French', value: 'fr' },
+              { label: 'German', value: 'de' },
+            ],
             props: {
               multiple: true,
               hint: 'Select all languages you speak',
-              options: [
-                { label: 'English', value: 'en' },
-                { label: 'Spanish', value: 'es' },
-                { label: 'French', value: 'fr' },
-                { label: 'German', value: 'de' },
-              ],
             },
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, {
@@ -250,15 +244,15 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             label: 'Languages',
             props: {
               multiple: true,
-              options: [
-                { label: 'English', value: 'en' },
-                { label: 'Spanish', value: 'es' },
-                { label: 'French', value: 'fr' },
-                { label: 'German', value: 'de' },
-              ],
             },
+            options: [
+              { label: 'English', value: 'en' },
+              { label: 'Spanish', value: 'es' },
+              { label: 'French', value: 'fr' },
+              { label: 'German', value: 'de' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       const { component } = createComponent(config, {
@@ -294,15 +288,15 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             label: 'Languages',
             props: {
               multiple: true,
-              options: [
-                { label: 'English', value: 'en' },
-                { label: 'Spanish', value: 'es' },
-                { label: 'French', value: 'fr' },
-                { label: 'German', value: 'de' },
-              ],
             },
+            options: [
+              { label: 'English', value: 'en' },
+              { label: 'Spanish', value: 'es' },
+              { label: 'French', value: 'fr' },
+              { label: 'German', value: 'de' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       const { component } = createComponent(config, {
@@ -335,14 +329,12 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Simple Select',
-            props: {
-              options: [
-                { label: 'Option 1', value: 'opt1' },
-                { label: 'Option 2', value: 'opt2' },
-              ],
-            },
+            options: [
+              { label: 'Option 1', value: 'opt1' },
+              { label: 'Option 2', value: 'opt2' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, { country: '' });
@@ -364,14 +356,12 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Simple Select',
-            props: {
-              options: [
-                { label: 'Option 1', value: 'opt1' },
-                { label: 'Option 2', value: 'opt2' },
-              ],
-            },
+            options: [
+              { label: 'Option 1', value: 'opt1' },
+              { label: 'Option 2', value: 'opt2' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, { country: '' });
@@ -393,11 +383,11 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             label: 'Country',
             props: {
               appearance: 'outline',
-              options: [
-                { label: 'US', value: 'US' },
-                { label: 'CA', value: 'CA' },
-              ],
             },
+            options: [
+              { label: 'US', value: 'US' },
+              { label: 'CA', value: 'CA' },
+            ],
           },
           {
             key: 'priority',
@@ -405,11 +395,11 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             label: 'Priority',
             props: {
               appearance: 'fill',
-              options: [
-                { label: 'Low', value: 1 },
-                { label: 'High', value: 2 },
-              ],
             },
+            options: [
+              { label: 'Low', value: 1 },
+              { label: 'High', value: 2 },
+            ],
           },
           {
             key: 'categories',
@@ -417,13 +407,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             label: 'Categories',
             props: {
               multiple: true,
-              options: [
-                { label: 'Tech', value: 'tech' },
-                { label: 'Business', value: 'business' },
-              ],
             },
+            options: [
+              { label: 'Tech', value: 'tech' },
+              { label: 'Business', value: 'business' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, {
@@ -451,23 +441,19 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Country',
-            props: {
-              options: [
-                { label: 'US', value: 'US' },
-                { label: 'CA', value: 'CA' },
-              ],
-            },
+            options: [
+              { label: 'US', value: 'US' },
+              { label: 'CA', value: 'CA' },
+            ],
           },
           {
             key: 'priority',
             type: 'select',
             label: 'Priority',
-            props: {
-              options: [
-                { label: 'Low', value: 1 },
-                { label: 'High', value: 2 },
-              ],
-            },
+            options: [
+              { label: 'Low', value: 1 },
+              { label: 'High', value: 2 },
+            ],
           },
           {
             key: 'categories',
@@ -475,13 +461,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             label: 'Categories',
             props: {
               multiple: true,
-              options: [
-                { label: 'Tech', value: 'tech' },
-                { label: 'Business', value: 'business' },
-              ],
             },
+            options: [
+              { label: 'Tech', value: 'tech' },
+              { label: 'Business', value: 'business' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, {
@@ -505,12 +491,10 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Country',
-            props: {
-              options: [
-                { label: 'US', value: 'US' },
-                { label: 'CA', value: 'CA' },
-              ],
-            },
+            options: [
+              { label: 'US', value: 'US' },
+              { label: 'CA', value: 'CA' },
+            ],
           },
           {
             key: 'categories',
@@ -518,13 +502,13 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             label: 'Categories',
             props: {
               multiple: true,
-              options: [
-                { label: 'Tech', value: 'tech' },
-                { label: 'Business', value: 'business' },
-              ],
             },
+            options: [
+              { label: 'Tech', value: 'tech' },
+              { label: 'Business', value: 'business' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       const { component } = createComponent(config, {
@@ -577,14 +561,12 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             type: 'select',
             label: 'Disabled Select',
             disabled: true,
-            props: {
-              options: [
-                { label: 'Option 1', value: 'opt1' },
-                { label: 'Option 2', value: 'opt2' },
-              ],
-            },
+            options: [
+              { label: 'Option 1', value: 'opt1' },
+              { label: 'Option 2', value: 'opt2' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, {
@@ -620,11 +602,9 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Test Select',
-            props: {
-              options: [{ label: 'Option 1', value: 'opt1' }],
-            },
+            options: [{ label: 'Option 1', value: 'opt1' }],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, { country: '' });
@@ -645,11 +625,9 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Test Select',
-            props: {
-              options: [{ label: 'Option 1', value: 'opt1' }],
-            },
+            options: [{ label: 'Option 1', value: 'opt1' }],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config); // No initial value provided
@@ -667,11 +645,9 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Test Select',
-            props: {
-              options: [{ label: 'Option 1', value: 'opt1' }],
-            },
+            options: [{ label: 'Option 1', value: 'opt1' }],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config, null as unknown as TestFormModel);
@@ -689,14 +665,12 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Test Select',
-            props: {
-              options: [
-                { label: 'Option 1', value: 'opt1' },
-                { label: 'Option 2', value: 'opt2' },
-              ],
-            },
+            options: [
+              { label: 'Option 1', value: 'opt1' },
+              { label: 'Option 2', value: 'opt2' },
+            ],
           },
-        ] as any[],
+        ],
       };
 
       const { component } = createComponent(config, { country: 'opt1' });
@@ -728,11 +702,9 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
           {
             type: 'select',
             label: 'Select without key',
-            props: {
-              options: [{ label: 'Option 1', value: 'opt1' }],
-            },
+            options: [{ label: 'Option 1', value: 'opt1' }],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config);
@@ -750,11 +722,9 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
             key: 'country',
             type: 'select',
             label: 'Test Select',
-            props: {
-              options: [{ label: 'Option 1', value: 'opt1' }],
-            },
+            options: [{ label: 'Option 1', value: 'opt1' }],
           },
-        ] as any[],
+        ],
       };
 
       createComponent(config);

@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, switchMap } from 'rxjs';
-import { DEFAULT_ROW_GAPS, RowChildField, RowField } from '../../definitions/row-field';
+import { RowComponent, RowField } from '../../definitions/default/row-field';
 import { FieldRegistry } from '../../core/field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
 import { FormUiControl } from '@angular/forms/signals';
@@ -28,8 +28,8 @@ import { get } from 'lodash-es';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
-export class RowFieldComponent {
-  field = input.required<RowField>();
+export default class RowFieldComponent implements RowComponent {
+  field = input.required<RowField<never>>();
 
   formValue = input.required<any>();
 

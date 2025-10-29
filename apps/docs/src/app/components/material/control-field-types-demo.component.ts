@@ -185,7 +185,6 @@ export class ControlFieldTypesDemoComponent {
         type: 'radio',
         label: 'Radio Group (ValueControlFieldType)',
         props: {
-          appearance: 'outline',
           hint: 'Uses ValueControlFieldType<MatRadioProps<T>, T>',
           options: [
             { value: 'beginner', label: 'Beginner Level' },
@@ -241,7 +240,6 @@ export class ControlFieldTypesDemoComponent {
         type: 'multi-checkbox',
         label: 'Multi-Checkbox (ValueControlFieldType)',
         props: {
-          appearance: 'outline',
           hint: 'Uses ValueControlFieldType<MatMultiCheckboxProps<T>, T[]>',
           color: 'primary',
           options: [

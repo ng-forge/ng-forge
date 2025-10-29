@@ -1,6 +1,6 @@
 import { FieldDef } from '../models/field-config';
-import { RowChildField, RowField } from '../definitions/row-field';
-import { GroupField } from '../definitions/group-field';
+import { RowChildField, RowField } from '../definitions/default/row-field';
+import { GroupField } from '../definitions/default/group-field';
 
 /**
  * Flattened field definition with layout information

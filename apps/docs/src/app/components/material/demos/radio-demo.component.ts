@@ -47,7 +47,6 @@ export class RadioDemoComponent {
         type: 'radio',
         label: 'Select Plan',
         props: {
-          appearance: 'outline',
           color: 'primary',
           hint: 'Choose your subscription plan',
           options: [
@@ -62,7 +61,6 @@ export class RadioDemoComponent {
         type: 'radio',
         label: 'Priority Level',
         props: {
-          appearance: 'outline',
           color: 'accent',
           hint: 'Select task priority',
           options: [

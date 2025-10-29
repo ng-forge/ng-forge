@@ -4,6 +4,7 @@ import { FormValueControl, ValidationError, WithOptionalField } from '@angular/f
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import { MatInputComponent, MatInputProps } from './mat-input.type';
 
 /**
  * Material Design input field component
@@ -12,7 +13,7 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
   selector: 'df-mat-input',
   imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent],
   template: `
-    <mat-form-field [appearance]="appearance()" [subscriptSizing]="subscriptSizing()" [class]="className() || ''">
+    <mat-form-field [appearance]="props()?.appearance ?? 'outline'" [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'" [class]="className() || ''">
       @if (label()) {
       <mat-label>{{ label() }}</mat-label>
       }
@@ -20,15 +21,14 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
       <input
         matInput
         [(ngModel)]="value"
-        [type]="type() || 'text'"
+        [type]="props()?.type || 'text'"
         [placeholder]="placeholder() || ''"
         [disabled]="disabled()"
-        [attr.autocomplete]="autocomplete()"
         [attr.tabindex]="tabIndex()"
         (blur)="touched.set(true)"
       />
 
-      @if (hint(); as hint) {
+      @if (props()?.hint; as hint) {
       <mat-hint>{{ hint }}</mat-hint>
       }
 
@@ -37,21 +37,23 @@ import { MatErrorsComponent } from '../../shared/mat-errors.component';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatInputFieldComponent implements FormValueControl<string> {
-  readonly value = model<string>('');
+export class MatInputFieldComponent implements FormValueControl<string>, MatInputComponent {
+  readonly value = model.required<string>();
+
+  readonly required = input<boolean>(false);
   readonly disabled = input<boolean>(false);
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
   readonly touched = model<boolean>(false);
   readonly invalid = model<boolean>(false);
 
+  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
-  readonly type = input<'text' | 'email' | 'password' | 'number' | 'tel' | 'url'>('text');
-  readonly autocomplete = input<string>();
-  readonly hint = input<string>('');
-  readonly tabIndex = input<number>();
+
   readonly className = input<string>('');
-  readonly appearance = input<'fill' | 'outline'>('fill');
-  readonly required = input<boolean>(false);
-  readonly subscriptSizing = input<'fixed' | 'dynamic'>('fixed');
+  readonly tabIndex = input<number>();
+
+  readonly props = input<MatInputProps>();
 }

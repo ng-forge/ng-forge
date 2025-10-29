@@ -46,16 +46,16 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
+            label: 'Accept Terms and Conditions',
+            required: true,
+            className: 'terms-checkbox',
+            tabIndex: 1,
             props: {
-              label: 'Accept Terms and Conditions',
               hint: 'Please read and accept our terms',
-              required: true,
               color: 'accent',
               labelPosition: 'before',
-              className: 'terms-checkbox',
               indeterminate: false,
               disableRipple: true,
-              tabIndex: 1,
             },
           },
         ] as any[],
@@ -93,9 +93,8 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: {
-              label: 'Accept Terms',
-            },
+
+            label: 'Accept Terms',
           },
         ] as any[],
       };
@@ -132,9 +131,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: {
-              label: 'Accept Terms',
-            },
+            label: 'Accept Terms',
           },
         ] as any[],
       };
@@ -171,11 +168,11 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
+            label: 'Test Checkbox',
+            tabIndex: 1,
             props: {
-              label: 'Test Checkbox',
               indeterminate: false,
               disableRipple: true,
-              tabIndex: 1,
             },
           },
         ] as any[],
@@ -232,9 +229,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'newsletter',
             type: 'checkbox',
-            props: {
-              label: 'Subscribe to Newsletter',
-            },
+            label: 'Subscribe to Newsletter',
           },
         ] as any[],
       };
@@ -255,24 +250,22 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: {
-              label: 'Accept Terms',
-              required: true,
-            },
+            label: 'Accept Terms',
+            required: true,
           },
           {
             key: 'newsletter',
             type: 'checkbox',
+            label: 'Newsletter',
             props: {
-              label: 'Newsletter',
               color: 'accent',
             },
           },
           {
             key: 'enableNotifications',
             type: 'checkbox',
+            label: 'Enable Notifications',
             props: {
-              label: 'Enable Notifications',
               color: 'warn',
             },
           },
@@ -301,17 +294,17 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: { label: 'Accept Terms' },
+            label: 'Accept Terms',
           },
           {
             key: 'newsletter',
             type: 'checkbox',
-            props: { label: 'Newsletter' },
+            label: 'Newsletter',
           },
           {
             key: 'enableNotifications',
             type: 'checkbox',
-            props: { label: 'Enable Notifications' },
+            label: 'Enable Notifications',
           },
         ] as any[],
       };
@@ -337,17 +330,17 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: { label: 'Accept Terms' },
+            label: 'Accept Terms',
           },
           {
             key: 'newsletter',
             type: 'checkbox',
-            props: { label: 'Newsletter' },
+            label: 'Newsletter',
           },
           {
             key: 'enableNotifications',
             type: 'checkbox',
-            props: { label: 'Enable Notifications' },
+            label: 'Enable Notifications',
           },
         ] as any[],
       };
@@ -392,17 +385,19 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: { label: 'Accept Terms' }, // Default primary
+            label: 'Accept Terms',
           },
           {
             key: 'newsletter',
             type: 'checkbox',
-            props: { label: 'Newsletter', color: 'accent' },
+            label: 'Newsletter',
+            props: { color: 'accent' },
           },
           {
             key: 'enableNotifications',
             type: 'checkbox',
-            props: { label: 'Enable Notifications', color: 'warn' },
+            label: 'Enable Notifications',
+            props: { color: 'warn' },
           },
         ] as any[],
       };
@@ -469,9 +464,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: {
-              label: 'Test Checkbox',
-            },
+            label: 'Test Checkbox',
           },
         ] as any[],
       };
@@ -494,8 +487,8 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
+            label: 'Indeterminate Checkbox',
             props: {
-              label: 'Indeterminate Checkbox',
               indeterminate: true,
             },
           },
@@ -518,9 +511,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: {
-              label: 'Test Checkbox',
-            },
+            label: 'Test Checkbox',
           },
         ] as any[],
       };
@@ -539,9 +530,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: {
-              label: 'Test Checkbox',
-            },
+            label: 'Test Checkbox',
           },
         ] as any[],
       };
@@ -560,9 +549,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
           {
             key: 'acceptTerms',
             type: 'checkbox',
-            props: {
-              label: 'Test Checkbox',
-            },
+            label: 'Test Checkbox',
           },
         ] as any[],
       };

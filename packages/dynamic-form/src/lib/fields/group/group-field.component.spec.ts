@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { GroupFieldComponent } from './group-field.component';
 import { FieldRegistry } from '../../core/field-registry';
-import { GroupField } from '../../definitions/group-field';
+import { GroupField } from '../../definitions/default/group-field';
 import { provideDynamicForm } from '../../providers/dynamic-form-providers';
 
 // Mock field component for testing
