@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatSubmitProps } from './mat-submit.type';
+import { EventBus, SubmitEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Material Design submit button component
@@ -15,7 +16,7 @@ import { MatSubmitProps } from './mat-submit.type';
       [color]="color() || 'primary'"
       [class]="className() || ''"
       [disabled]="disabled() || false"
-      (click)="handleClick()"
+      (click)="submit()"
     >
       {{ label() }}
     </button>
@@ -23,6 +24,8 @@ import { MatSubmitProps } from './mat-submit.type';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatSubmitFieldComponent {
+  private readonly eventBus = inject(EventBus);
+
   readonly label = input.required<MatSubmitProps['label']>();
   readonly disabled = input<MatSubmitProps['disabled']>(false);
   readonly className = input<MatSubmitProps['className']>('');
@@ -31,11 +34,7 @@ export class MatSubmitFieldComponent {
   // Material specific props
   readonly color = input<MatSubmitProps['color']>('primary' as const);
 
-  handleClick(): void {
-    const clickHandler = this.onClick();
-
-    if (clickHandler) {
-      clickHandler();
-    }
+  submit(): void {
+    this.eventBus.dispatch(new SubmitEvent());
   }
 }

@@ -26,6 +26,8 @@ import { FieldDef, FormConfig, InferFormValue } from './models/field-config';
 import { FieldRegistry } from './core/field-registry';
 import { createSchemaFromFields } from './core/schema-factory';
 import { flattenFields } from './utils/field-flattener';
+import { EventBus } from './events/event.bus';
+import { SubmitEvent } from './events/constants/submit.event';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -37,12 +39,14 @@ import { flattenFields } from './utils/field-flattener';
     </form>
   `,
   styleUrl: './dynamic-form.component.scss',
+  providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef[], TModel = InferFormValue<TFields>> {
   private readonly fieldRegistry = inject(FieldRegistry);
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
+  private readonly eventBus = inject(EventBus);
 
   config = input.required<FormConfig<TFields>>();
 
@@ -168,6 +172,7 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
 
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
+  readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit'));
 
   private readonly fieldsInitializedSubject = new Subject<void>();
 

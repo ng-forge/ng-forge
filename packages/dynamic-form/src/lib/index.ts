@@ -40,5 +40,8 @@ export * from './definitions';
 // Field fields
 export * from './fields';
 
+// Events
+export * from './events';
+
 // Type helpers
 export type InferSchemaFormValue<T extends DynamicFormSchemaDefinition> = T extends DynamicFormSchemaDefinition ? T['fieldDefs'] : unknown;
