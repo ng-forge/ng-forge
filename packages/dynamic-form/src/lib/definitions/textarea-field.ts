@@ -1,4 +1,4 @@
-import { UnwrapField } from '../utils';
+import { UnwrapField } from '../models';
 import { FormValueControl } from '@angular/forms/signals';
 
 export interface TextareaField extends UnwrapField<FormValueControl<string>> {

@@ -1,5 +1,5 @@
 import { FormCheckboxControl } from '@angular/forms/signals';
-import { UnwrapField } from '../utils';
+import { UnwrapField } from '../models';
 
 export interface CheckboxField extends UnwrapField<FormCheckboxControl> {
   label: string;

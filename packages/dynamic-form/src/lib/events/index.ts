@@ -1,3 +1,3 @@
 export * from './constants';
-export { Event } from './interfaces/event';
+export type { FormEvent } from './interfaces/form-event';
 export { EventBus } from './event.bus';

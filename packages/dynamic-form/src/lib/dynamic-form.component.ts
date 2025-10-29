@@ -233,7 +233,7 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
           });
         }
 
-        return this.vcr.createComponent(componentType, { bindings });
+        return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
       })
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
   }
