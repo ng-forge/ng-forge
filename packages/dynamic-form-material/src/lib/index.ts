@@ -1,4 +1,4 @@
-// Field components
+// Field fields
 export * from './fields';
 
 // Configuration

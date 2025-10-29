@@ -4,7 +4,7 @@ import { MatError } from '@angular/material/input';
 
 /**
  * Generic error display component for Material Design forms
- * Provides consistent error messaging across all material form fields
+ * Provides consistent error messaging across all material form definitions
  */
 @Component({
   selector: 'df-mat-errors',

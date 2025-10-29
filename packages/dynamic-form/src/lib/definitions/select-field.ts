@@ -8,7 +8,7 @@ export interface SelectOption<T> {
 }
 
 /**
- * Interface for select field components
+ * Interface for select field fields
  */
 export interface SelectField<T> extends UnwrapField<FormValueControl<T[]>> {
   label: string;

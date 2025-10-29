@@ -1,0 +1,117 @@
+// Row Field Component Styles
+.lib-row-field {
+  &__container {
+    display: flex;
+    flex-wrap: wrap;
+
+    // Default mobile-first approach - stack on small screens
+    flex-direction: column;
+
+    // Responsive breakpoints for horizontal layout
+    @media (min-width: 576px) {
+      &.lib-row-field__stack-at-sm {
+        flex-direction: row;
+      }
+    }
+
+    @media (min-width: 768px) {
+      &.lib-row-field__stack-at-md {
+        flex-direction: row;
+      }
+    }
+
+    @media (min-width: 992px) {
+      &.lib-row-field__stack-at-lg {
+        flex-direction: row;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      &.lib-row-field__stack-at-xl {
+        flex-direction: row;
+      }
+    }
+  }
+
+  &__column {
+    // Ensure columns don't shrink below their content
+    min-width: 0;
+
+    // On mobile, take full width
+    flex: 1 1 100%;
+
+    // On larger screens, respect column configuration
+    @media (min-width: 576px) {
+      .lib-row-field__stack-at-sm & {
+        flex: 0 0 auto;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .lib-row-field__stack-at-md & {
+        flex: 0 0 auto;
+      }
+    }
+
+    @media (min-width: 992px) {
+      .lib-row-field__stack-at-lg & {
+        flex: 0 0 auto;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .lib-row-field__stack-at-xl & {
+        flex: 0 0 auto;
+      }
+    }
+  }
+
+  // Ensure proper spacing and overflow handling
+  &__responsive {
+    box-sizing: border-box;
+
+    * {
+      box-sizing: border-box;
+    }
+  }
+}
+
+// Utility classes for common column spans
+.lib-row-field__column {
+  &--span-1 {
+    flex: 0 0 calc(8.333333% - var(--row-gap-width, 1rem));
+  }
+  &--span-2 {
+    flex: 0 0 calc(16.666667% - var(--row-gap-width, 1rem));
+  }
+  &--span-3 {
+    flex: 0 0 calc(25% - var(--row-gap-width, 1rem));
+  }
+  &--span-4 {
+    flex: 0 0 calc(33.333333% - var(--row-gap-width, 1rem));
+  }
+  &--span-5 {
+    flex: 0 0 calc(41.666667% - var(--row-gap-width, 1rem));
+  }
+  &--span-6 {
+    flex: 0 0 calc(50% - var(--row-gap-width, 1rem));
+  }
+  &--span-7 {
+    flex: 0 0 calc(58.333333% - var(--row-gap-width, 1rem));
+  }
+  &--span-8 {
+    flex: 0 0 calc(66.666667% - var(--row-gap-width, 1rem));
+  }
+  &--span-9 {
+    flex: 0 0 calc(75% - var(--row-gap-width, 1rem));
+  }
+  &--span-10 {
+    flex: 0 0 calc(83.333333% - var(--row-gap-width, 1rem));
+  }
+  &--span-11 {
+    flex: 0 0 calc(91.666667% - var(--row-gap-width, 1rem));
+  }
+  &--span-12 {
+    flex: 0 0 calc(100% - var(--row-gap-width, 1rem));
+  }
+}

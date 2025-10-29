@@ -2,6 +2,7 @@ import { EnvironmentProviders, inject, makeEnvironmentProviders, provideAppIniti
 import { FieldRegistry } from '../core/field-registry';
 import { FieldDef, InferFormValue } from '../models/field-config';
 import { ConfigMerger } from '../core';
+import { withBuiltInFields } from './built-in-fields';
 
 type Providers = (EnvironmentProviders | Provider)[];
 
@@ -52,6 +53,9 @@ export function provideDynamicForm<Features extends readonly DynamicFormFeature[
     // Core services - simplified
     FieldRegistry,
 
+    // Built-in field types - always included
+    ...withBuiltInFields().providers,
+
     // Feature providers
     ...features.flatMap((feature) => feature.providers),
   ];
@@ -98,7 +102,7 @@ export function withConfig<TFields extends readonly FieldDef[]>(
  * Example usage:
  * ```typescript
  * const providers = provideDynamicForm(withConfig({
- *   fields: [
+ *   definitions: [
  *     { key: 'name', type: 'input', label: 'Name' },
  *     { key: 'email', type: 'input', label: 'Email' }
  *   ] as const

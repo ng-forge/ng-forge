@@ -5,11 +5,11 @@ import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
 
 /**
- * Utility directive that takes ComponentRef fields and appends them to a form element
+ * Utility directive that takes ComponentRef definitions and appends them to a form element
  *
  * Usage within DynamicFormComponent:
  * ```html
- * <form [fieldRenderer]="fields()">
+ * <form [fieldRenderer]="definitions()">
  *   <!-- Fields will be automatically rendered here -->
  * </form>
  * ```
@@ -24,19 +24,15 @@ export class FieldRendererDirective implements OnDestroy {
 
   private renderedComponents: ComponentRef<FormUiControl>[] = [];
 
-  // Subject that emits when fields are fully rendered and initialized
   private readonly fieldsInitializedSubject = new Subject<void>();
 
-  // Output that emits when all fields are rendered and initialized
   readonly fieldsInitialized = outputFromObservable(this.fieldsInitializedSubject.asObservable());
 
-  // Input that accepts the ComponentRef fields array
   fieldRenderer = input<ComponentRef<FormUiControl>[] | null>();
 
   renderFieldsEffect = explicitEffect([this.fieldRenderer], () => this.renderFields());
 
   private renderFields(): void {
-    // Clear existing field components from DOM
     this.clearFields();
 
     const fields = this.fieldRenderer();
@@ -57,15 +53,12 @@ export class FieldRendererDirective implements OnDestroy {
       }
     });
 
-    // Emit that fields are now rendered and initialized
-    // Use setTimeout to ensure DOM is updated and components are properly initialized
     setTimeout(() => {
       this.fieldsInitializedSubject.next();
     }, 0);
   }
 
   private clearFields(): void {
-    // Remove field components from DOM (but don't destroy them - they're managed by the parent)
     this.renderedComponents.forEach((fieldComponent) => {
       if (fieldComponent.location?.nativeElement?.parentNode === this.elementRef.nativeElement) {
         this.renderer.removeChild(this.elementRef.nativeElement, fieldComponent.location.nativeElement);

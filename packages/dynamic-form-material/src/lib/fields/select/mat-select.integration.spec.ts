@@ -384,7 +384,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
   });
 
   describe('Multiple Select Integration Tests', () => {
-    it('should render multiple select fields with different configurations', async () => {
+    it('should render multiple select definitions with different configurations', async () => {
       const config: FormConfig = {
         fields: [
           {

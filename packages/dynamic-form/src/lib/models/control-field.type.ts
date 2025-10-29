@@ -36,11 +36,11 @@ export type ControlFieldType<T extends object> = {
 };
 
 /**
- * For components that implement both FormValueControl and field interfaces
+ * For fields that implement both FormValueControl and field interfaces
  */
 export type ValueControlFieldType<T extends object, TValue = unknown> = ControlFieldType<T>;
 
 /**
- * For components that implement both FormCheckboxControl and field interfaces
+ * For fields that implement both FormCheckboxControl and field interfaces
  */
 export type CheckboxControlFieldType<T extends object> = ControlFieldType<T>;

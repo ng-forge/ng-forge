@@ -1,5 +1,5 @@
 /**
- * Interface for submit button field components
+ * Interface for submit button field fields
  */
 export interface SubmitField {
   label: string;

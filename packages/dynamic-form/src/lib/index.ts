@@ -34,7 +34,10 @@ export { provideDynamicForm, withConfig, type ProvidedFormResult, type DynamicFo
 // Field registry for custom field types
 export { FieldRegistry } from './core/field-registry';
 
-// Field interfaces for custom field components
+// Field interfaces for custom field fields
+export * from './definitions';
+
+// Field fields
 export * from './fields';
 
 // Type helpers

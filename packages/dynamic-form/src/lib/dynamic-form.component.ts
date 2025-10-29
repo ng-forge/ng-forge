@@ -25,6 +25,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldDef, FormConfig, InferFormValue } from './models/field-config';
 import { FieldRegistry } from './core/field-registry';
 import { createSchemaFromFields } from './core/schema-factory';
+import { flattenFields } from './utils/field-flattener';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -54,24 +55,30 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
     this.fieldSignals.clear();
 
     if (config.fields && config.fields.length > 0) {
-      const fieldsById = keyBy(config.fields, 'key');
+      // Flatten definitions to handle row and group field types
+      const flattenedFields = flattenFields(config.fields);
+      const fieldsById = keyBy(flattenedFields, 'key');
       const defaultValues = mapValues(fieldsById, (field) => this.getFieldDefaultValue(field)) as TModel;
 
       return {
         approach: 'fields' as const,
-        fields: config.fields,
+        fields: flattenedFields,
+        originalFields: config.fields,
         defaultValues,
         schema: undefined,
       };
     }
 
     if (config.schema?.fieldDefs) {
-      const fieldsById = keyBy(config.schema.fieldDefs, 'key');
+      // Flatten definitions to handle row and group field types
+      const flattenedFields = flattenFields(config.schema.fieldDefs);
+      const fieldsById = keyBy(flattenedFields, 'key');
       const defaultValues = mapValues(fieldsById, (field) => this.getFieldDefaultValue(field)) as TModel;
 
       return {
         approach: 'schema' as const,
-        fields: config.schema.fieldDefs,
+        fields: flattenedFields,
+        originalFields: config.schema.fieldDefs,
         defaultValues,
         schema: config.schema.definition,
       };
@@ -162,10 +169,8 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
 
-  // Subject that emits when all fields are initialized
   private readonly fieldsInitializedSubject = new Subject<void>();
 
-  // Observable that emits when all fields are rendered and initialized
   readonly initialized$ = this.fieldsInitializedSubject.asObservable();
 
   fields$ = toObservable(computed(() => this.formSetup().fields));
@@ -229,10 +234,7 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
   }
 
   private getValueProp(fieldDef: FieldDef): 'checked' | 'value' | undefined {
-    if (fieldDef.type === 'submit') {
-      return undefined;
-    }
-
+    // TODO: refactor this into a more deterministic way
     if (fieldDef.type === 'multi-checkbox') {
       return 'value';
     }
@@ -241,10 +243,11 @@ export class DynamicForm<TFields extends readonly FieldDef[] = readonly FieldDef
       return 'checked';
     }
 
-    return 'value';
+    return undefined;
   }
 
   private getFieldDefaultValue(field: FieldDef): unknown {
+    // TODO: refactor this into a more deterministic way
     if (field.defaultValue !== undefined) {
       return field.defaultValue;
     }

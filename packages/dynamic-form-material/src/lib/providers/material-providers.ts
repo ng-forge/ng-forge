@@ -4,7 +4,7 @@ import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
 
 /**
  * Configure dynamic forms with Material Design field types
- * Registers all Material Design field components with the FieldRegistry
+ * Registers all Material Design field fields with the FieldRegistry
  */
 export function withMaterial(): DynamicFormFeature {
   return {
