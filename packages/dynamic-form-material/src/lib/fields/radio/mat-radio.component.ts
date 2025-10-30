@@ -40,7 +40,7 @@ import { RadioOption } from '@ng-forge/dynamic-form';
     `,
   ],
   host: {
-    class: 'className()',
+    '[class]': 'className() || ""',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -61,6 +61,6 @@ export class MatRadioFieldComponent<T> implements FormValueControl<T>, MatRadioC
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<RadioOption<T>[]>();
+  readonly options = input<RadioOption<T>[]>([]);
   readonly props = input<MatRadioProps>();
 }

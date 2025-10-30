@@ -74,9 +74,9 @@ export class TextareaDemoComponent {
           rows: 5,
           hint: 'Detailed project description',
         },
-        validation: {
-          maxLength: 500,
-        },
+        // validation: {
+        //   maxLength: 500,
+        // },
       },
     ],
   } as const satisfies FormConfig;

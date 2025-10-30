@@ -1,18 +1,24 @@
 import { RowField } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
-import { baseFieldMapper } from '../base/base-field-mapper';
 import { FieldMapperOptions } from '../types';
 
 /**
  * Maps a row field definition to Angular bindings
  * Row field components handle child field mapping internally using the same pattern as dynamic-form.component.ts
+ * Note: Row components are layout containers, so they don't need UI bindings like label, disabled, etc.
  */
 export function rowFieldMapper(fieldDef: RowField<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
-  const bindings = baseFieldMapper(fieldDef);
+  const bindings: Binding[] = [];
 
-  // Add the formValue binding if we have a field signal context
-  if (options?.fieldSignalContext) {
-    bindings.push(inputBinding('formValue', () => options.fieldSignalContext.value()));
+  // Row fields need the field definition
+  bindings.push(inputBinding('field', () => fieldDef));
+
+  // Add value binding for two-way binding with fieldSignals
+  if (options?.fieldSignals) {
+    const fieldSignal = options.fieldSignals.get(fieldDef.key);
+    if (fieldSignal) {
+      bindings.push(inputBinding('value', fieldSignal));
+    }
   }
 
   return bindings;

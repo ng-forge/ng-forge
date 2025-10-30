@@ -104,10 +104,10 @@ export class MaterialFieldTypesComponent {
           hint: 'Email input with validation',
           required: true,
         },
-        validation: {
-          required: true,
-          email: true,
-        },
+        // validation: {
+        //   required: true,
+        //   email: true,
+        // },
       },
       {
         key: 'passwordInput',
@@ -120,10 +120,10 @@ export class MaterialFieldTypesComponent {
           hint: 'Password field with hidden characters',
           required: true,
         },
-        validation: {
-          required: true,
-          minLength: 6,
-        },
+        // validation: {
+        //   required: true,
+        //   minLength: 6,
+        // },
       },
 
       // === TEXTAREA ===

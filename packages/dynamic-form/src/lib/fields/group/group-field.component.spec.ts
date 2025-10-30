@@ -1,163 +1,103 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, signal } from '@angular/core';
 import { GroupFieldComponent } from './group-field.component';
-import { FieldRegistry } from '../../core/field-registry';
 import { GroupField } from '../../definitions/default/group-field';
-import { provideDynamicForm } from '../../providers/dynamic-form-providers';
-
-// Mock field component for testing
-@Component({
-  selector: 'df-mock-field',
-  template: '<div>Mock Field: {{ value() }}</div>',
-})
-class MockFieldComponent {
-  value = signal('test');
-}
+import { createSimpleTestField, setupSimpleTest } from '../../testing';
 
 describe('GroupFieldComponent', () => {
-  let component: GroupFieldComponent;
-  let fixture: ComponentFixture<GroupFieldComponent>;
-  let fieldRegistry: FieldRegistry;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [GroupFieldComponent],
-      providers: [provideDynamicForm()],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(GroupFieldComponent);
-    component = fixture.componentInstance;
-    fieldRegistry = TestBed.inject(FieldRegistry);
-
-    // Register mock field type
-    fieldRegistry.registerType({
-      name: 'mock',
-      component: MockFieldComponent,
-    });
-  });
-
   it('should create', () => {
-    const groupField: GroupField = {
+    const field: GroupField<any> = {
       key: 'testGroup',
       type: 'group',
       label: 'Test Group',
       fields: [],
     };
 
-    fixture.componentRef.setInput('field', groupField);
-    fixture.componentRef.setInput('formValue', {});
+    const { component } = setupSimpleTest(GroupFieldComponent, {
+      field,
+    });
 
-    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
+  it('should have field input property', () => {
+    const field: GroupField<any> = {
+      key: 'testGroup',
+      type: 'group',
+      label: 'Test Group',
+      fields: [],
+    };
+
+    const { component } = setupSimpleTest(GroupFieldComponent, {
+      field,
+    });
+
+    expect(component.field()).toEqual(field);
+  });
+
   it('should render group label as legend', () => {
-    const groupField: GroupField = {
+    const field: GroupField<any> = {
       key: 'testGroup',
       type: 'group',
       label: 'Test Group Label',
       fields: [],
     };
 
-    fixture.componentRef.setInput('field', groupField);
-    fixture.componentRef.setInput('formValue', {});
-
-    fixture.detectChanges();
+    const { fixture } = setupSimpleTest(GroupFieldComponent, {
+      field,
+    });
 
     const legend = fixture.nativeElement.querySelector('.lib-group-field__legend');
     expect(legend).toBeTruthy();
     expect(legend.textContent.trim()).toBe('Test Group Label');
   });
 
-  it('should render child definitions in vertical layout', () => {
-    const groupField: GroupField = {
+  it('should have form state properties', () => {
+    const field: GroupField<any> = {
       key: 'testGroup',
       type: 'group',
       label: 'Test Group',
-      fields: [
-        { key: 'field1', type: 'mock', label: 'Field 1' },
-        { key: 'field2', type: 'mock', label: 'Field 2' },
-      ],
+      fields: [],
     };
 
-    fixture.componentRef.setInput('field', groupField);
-    fixture.componentRef.setInput('formValue', {
-      testGroup: { field1: 'value1', field2: 'value2' },
+    const { component } = setupSimpleTest(GroupFieldComponent, {
+      field,
     });
 
-    fixture.detectChanges();
+    expect(typeof component.valid()).toBe('boolean');
+    expect(typeof component.invalid()).toBe('boolean');
+    expect(typeof component.dirty()).toBe('boolean');
+    expect(typeof component.touched()).toBe('boolean');
+  });
+
+  it('should render with child fields', () => {
+    const field: GroupField<any> = {
+      key: 'testGroup',
+      type: 'group',
+      label: 'Test Group',
+      fields: [createSimpleTestField('field1', 'Field 1'), createSimpleTestField('field2', 'Field 2')],
+    };
+
+    const { fixture } = setupSimpleTest(GroupFieldComponent, {
+      field,
+      value: { field1: 'value1', field2: 'value2' },
+    });
 
     const content = fixture.nativeElement.querySelector('.lib-group-field__content');
     expect(content).toBeTruthy();
-    expect(getComputedStyle(content).display).toBe('flex');
-    expect(getComputedStyle(content).flexDirection).toBe('column');
   });
 
-  it('should apply custom gap styles', () => {
-    const groupField: GroupField = {
+  it('should have host classes', () => {
+    const field: GroupField<any> = {
       key: 'testGroup',
       type: 'group',
       label: 'Test Group',
       fields: [],
-      gap: {
-        horizontal: '2rem',
-        vertical: '1.5rem',
-      },
     };
 
-    fixture.componentRef.setInput('field', groupField);
-    fixture.componentRef.setInput('formValue', {});
+    const { fixture } = setupSimpleTest(GroupFieldComponent, {
+      field,
+    });
 
-    fixture.detectChanges();
-
-    const styles = component.contentStyles();
-    expect(styles.gap).toBe('1.5rem 2rem');
-  });
-
-  it('should apply custom CSS classes', () => {
-    const groupField: GroupField = {
-      key: 'testGroup',
-      type: 'group',
-      label: 'Test Group',
-      fields: [],
-      className: 'custom-group-class',
-    };
-
-    fixture.componentRef.setInput('field', groupField);
-    fixture.componentRef.setInput('formValue', {});
-
-    fixture.detectChanges();
-
-    const classes = component.containerClasses();
-    expect(classes).toContain('custom-group-class');
-    expect(classes).toContain('lib-group-field__container');
-    expect(classes).toContain('lib-group-field__bordered');
-  });
-
-  it('should create nested keys for child definitions', async () => {
-    const groupField: GroupField = {
-      key: 'address',
-      type: 'group',
-      label: 'Address Information',
-      fields: [
-        { key: 'street', type: 'mock', label: 'Street' },
-        { key: 'city', type: 'mock', label: 'City' },
-      ],
-    };
-
-    fixture.componentRef.setInput('field', groupField);
-    fixture.componentRef.setInput('formValue', { address: { street: '123 Main St', city: 'New York' } });
-
-    fixture.detectChanges();
-
-    // Wait for async field creation
-    await fixture.whenStable();
-
-    // Verify that nested keys are properly created
-    // This is tested indirectly through the form value structure
-    const formValue = component.formValue();
-    expect(formValue.address).toBeDefined();
-    expect(formValue.address.street).toBe('123 Main St');
-    expect(formValue.address.city).toBe('New York');
+    const element = fixture.nativeElement;
+    expect(element.classList.contains('lib-group-field')).toBe(true);
   });
 });

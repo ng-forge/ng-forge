@@ -36,7 +36,22 @@ type DefaultFieldTypes =
 export type RegisteredFieldTypes = DynamicFormFieldRegistry[keyof DynamicFormFieldRegistry];
 
 /**
- * Infer form value type from registered field definitions
+ * Infer form value type from a specific array of field definitions
+ */
+export type InferFormValue<T extends readonly RegisteredFieldTypes[]> = {
+  [K in T[number] as K['key']]: K extends BaseValueField<any, infer TValue>
+    ? K['required'] extends true
+      ? TValue
+      : TValue | undefined
+    : K extends BaseCheckedField<any>
+    ? K['required'] extends true
+      ? boolean
+      : boolean | undefined
+    : unknown;
+};
+
+/**
+ * Infer form value type from registered field definitions (legacy)
  */
 export type InferGlobalFormValue = RegisteredFieldTypes extends FieldDef<Record<string, unknown>>
   ? {

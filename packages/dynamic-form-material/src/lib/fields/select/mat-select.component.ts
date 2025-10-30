@@ -63,7 +63,7 @@ export class MatSelectFieldComponent<T> implements FormValueControl<T>, MatSelec
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<readonly SelectOption<T>[]>([]);
+  readonly options = input<SelectOption<T>[]>([]);
   readonly props = input<MatSelectProps<T>>();
 
   defaultCompare = Object.is;

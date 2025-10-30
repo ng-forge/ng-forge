@@ -36,6 +36,6 @@ export interface FieldDef<TProps extends Record<string, unknown>> {
   readonly col?: number;
 }
 
-type IncludedKeys = 'type' | 'label' | 'className' | 'hidden' | 'tabIndex';
+type IncludedKeys =  'label' | 'className' | 'hidden' | 'tabIndex';
 
 export type FieldComponent<T extends FieldDef<any>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;

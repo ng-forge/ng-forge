@@ -6,4 +6,5 @@ export interface FieldWithValidation {
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly patternRule?: string | RegExp;
+  readonly validation?: Record<string, unknown>;
 }

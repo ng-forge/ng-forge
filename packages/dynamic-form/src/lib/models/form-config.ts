@@ -1,10 +1,10 @@
 import { Schema } from '@angular/forms/signals';
-import { RegisteredFieldTypes } from './global-types';
+import { InferFormValue, RegisteredFieldTypes } from './global-types';
 
 /**
  * Form configuration interface that uses registered field types for type safety
  */
-export interface FormConfig<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TValue = unknown> {
+export interface FormConfig<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TValue = InferFormValue<TFields>> {
   readonly fields: TFields;
   readonly schema?: Schema<TValue>;
   readonly options?: FormOptions;

@@ -12,9 +12,6 @@ import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'df-mat-multi-checkbox',
   imports: [FormsModule, MatCheckbox, MatErrorsComponent, ValueInArrayPipe],
-  host: {
-    '[class]': 'className() || ""',
-  },
   template: `
     @if (label(); as label) {
     <div class="checkbox-group-label">{{ label }}</div>
@@ -25,8 +22,8 @@ import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
       <mat-checkbox
         [checked]="option | inArray : valueViewModel()"
         [disabled]="disabled() || option.disabled"
-        [color]="color() || 'primary'"
-        [labelPosition]="labelPosition() || 'after'"
+        [color]="props()?.color || 'primary'"
+        [labelPosition]="props()?.labelPosition || 'after'"
         (change)="onCheckboxChange(option, $event.checked)"
       >
         {{ option.label }}
@@ -48,7 +45,7 @@ import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
     `,
   ],
   host: {
-    class: 'className()',
+    '[class]': 'className() || ""',
   },
   providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -71,10 +68,10 @@ export class MatMultiCheckboxFieldComponent<T extends ValueType> implements Form
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<readonly MultiCheckboxOption<T>[]>([]);
+  readonly options = input<MultiCheckboxOption<T>[]>([]);
   readonly props = input<MatMultiCheckboxProps>();
 
-  valueViewModel = linkedSignal<Option<T>[]>(
+  valueViewModel = linkedSignal<MultiCheckboxOption<T>[]>(
     () => {
       const currentValues = this.value();
       return this.options().filter((option) => currentValues.includes(option.value));
@@ -102,7 +99,7 @@ export class MatMultiCheckboxFieldComponent<T extends ValueType> implements Form
     });
   }
 
-  onCheckboxChange(option: Option<T>, checked: boolean): void {
+  onCheckboxChange(option: MultiCheckboxOption<T>, checked: boolean): void {
     this.valueViewModel.update((currentOptions) => {
       if (checked) {
         return currentOptions.some((opt) => opt.value === option.value) ? currentOptions : [...currentOptions, option];

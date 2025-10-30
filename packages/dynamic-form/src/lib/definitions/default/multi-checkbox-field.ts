@@ -1,4 +1,4 @@
-import { BaseValueField, ValueType } from '../base';
+import { BaseValueField } from '../base';
 
 export interface MultiCheckboxOption<T> {
   label: string;
@@ -6,7 +6,7 @@ export interface MultiCheckboxOption<T> {
   disabled?: boolean;
 }
 
-export interface MultiCheckboxField<TValue extends ValueType, TProps extends Record<string, unknown>>
+export interface MultiCheckboxField<TValue, TProps extends Record<string, unknown>>
   extends BaseValueField<TProps, TValue> {
   type: 'multi-checkbox';
 

@@ -19,6 +19,3 @@ export * from './events';
 
 // Mappers
 export * from './mappers';
-
-// Testing utilities
-export * from './testing';

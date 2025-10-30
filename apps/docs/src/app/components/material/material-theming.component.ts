@@ -9,7 +9,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
     <div class="example-container">
       <h4>Material Theming & Appearances</h4>
       <p class="description">Showcase of different Material Design appearances, colors, and theming options for form fields.</p>
-      <dynamic-form [config]="fields" [(value)]="model"></dynamic-form>
+      <dynamic-form [config]="config" [(value)]="model"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -66,7 +66,7 @@ export class MaterialThemingComponent {
     accentSlider: 75,
   });
 
-  fields: FormConfig = {
+  config: FormConfig = {
     fields: [
       // === APPEARANCE VARIANTS ===
       {
@@ -152,12 +152,12 @@ export class MaterialThemingComponent {
           placeholder: 'Choose an option...',
           appearance: 'outline',
           hint: 'Select with primary theme styling',
-          options: [
-            { value: 'opt1', label: 'Option 1' },
-            { value: 'opt2', label: 'Option 2' },
-            { value: 'opt3', label: 'Option 3' },
-          ],
         },
+        options: [
+          { value: 'opt1', label: 'Option 1' },
+          { value: 'opt2', label: 'Option 2' },
+          { value: 'opt3', label: 'Option 3' },
+        ],
       },
 
       // === COLOR VARIANTS - RADIO ===
@@ -168,12 +168,12 @@ export class MaterialThemingComponent {
         props: {
           color: 'accent',
           hint: 'Radio buttons with accent theme color',
-          options: [
-            { value: 'choice1', label: 'First Choice' },
-            { value: 'choice2', label: 'Second Choice' },
-            { value: 'choice3', label: 'Third Choice' },
-          ],
         },
+        options: [
+          { value: 'choice1', label: 'First Choice' },
+          { value: 'choice2', label: 'Second Choice' },
+          { value: 'choice3', label: 'Third Choice' },
+        ],
       },
 
       // === COLOR VARIANTS - SLIDERS ===

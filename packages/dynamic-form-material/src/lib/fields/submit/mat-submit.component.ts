@@ -28,6 +28,8 @@ export class MatSubmitFieldComponent implements MatSubmitComponent {
 
   readonly label = input.required<string>();
   readonly disabled = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
+  readonly tabIndex = input<number>();
   readonly className = input<string>('');
 
   // Material specific props

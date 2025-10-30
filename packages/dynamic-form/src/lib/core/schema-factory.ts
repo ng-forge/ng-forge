@@ -28,17 +28,17 @@ export function createSchemaFromFields<TModel = unknown>(fields: readonly FieldD
  */
 function buildValidationRulesFromField(fieldDef: FieldDef<Record<string, unknown>>): ValidationRules {
   const rules: ValidationRules = {};
-
-  // Check for validation in props
-  if (fieldDef.props?.required) rules.required = true;
-  if (fieldDef.props?.email) rules.email = true;
-  if (fieldDef.props?.min !== undefined) rules.min = fieldDef.props.min;
-  if (fieldDef.props?.max !== undefined) rules.max = fieldDef.props.max;
-  if (fieldDef.props?.minLength !== undefined) rules.minLength = fieldDef.props.minLength;
-  if (fieldDef.props?.maxLength !== undefined) rules.maxLength = fieldDef.props.maxLength;
-  if (fieldDef.props?.pattern) {
-    rules.pattern = typeof fieldDef.props.pattern === 'string' ? new RegExp(fieldDef.props.pattern) : fieldDef.props.pattern;
-  }
+  //
+  // // Check for validation in props
+  // if (fieldDef.props?.required) rules.required = true;
+  // if (fieldDef.props?.email) rules.email = true;
+  // if (fieldDef.props?.min !== undefined) rules.min = fieldDef.props.min;
+  // if (fieldDef.props?.max !== undefined) rules.max = fieldDef.props.max;
+  // if (fieldDef.props?.minLength !== undefined) rules.minLength = fieldDef.props.minLength;
+  // if (fieldDef.props?.maxLength !== undefined) rules.maxLength = fieldDef.props.maxLength;
+  // if (fieldDef.props?.pattern) {
+  //   rules.pattern = typeof fieldDef.props.pattern === 'string' ? new RegExp(fieldDef.props.pattern) : fieldDef.props.pattern;
+  // }
 
   // Also check for direct properties on fieldDef (for backwards compatibility)
   if ((fieldDef as any).required) rules.required = true;
