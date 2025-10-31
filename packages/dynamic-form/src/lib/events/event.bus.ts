@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { filter, Observable, Subject } from 'rxjs';
-import { FormEvent } from './interfaces/form-event';
+import { FormEvent, FormEventConstructor } from './interfaces/form-event';
 import { isArray } from 'lodash-es';
 
 @Injectable()
@@ -9,8 +9,8 @@ export class EventBus {
 
   events$ = this.pipeline$.asObservable();
 
-  dispatch(event: FormEvent): void {
-    this.pipeline$.next(event);
+  dispatch<T extends FormEventConstructor>(eventConstructor: T): void {
+    this.pipeline$.next(new eventConstructor());
   }
 
   subscribe<T extends FormEvent>(eventType: T['type']): Observable<T>;

@@ -41,7 +41,7 @@ import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatToggleFieldComponent implements FormCheckboxControl, MatToggleComponent {
+export default class MatToggleFieldComponent implements FormCheckboxControl, MatToggleComponent {
   readonly checked = model<boolean>(false);
 
   readonly required = input<boolean>(false);

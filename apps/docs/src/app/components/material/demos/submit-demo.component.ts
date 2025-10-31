@@ -4,7 +4,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 
 @Component({
-  selector: 'app-submit-demo',
+  selector: 'app-button-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">
@@ -53,10 +53,10 @@ export class SubmitDemoComponent {
           appearance: 'outline',
           required: true,
         },
-        validators: {
-          required: true,
-          email: true,
-        },
+        // validators: {
+        //   required: true,
+        //   email: true,
+        // },
       },
       {
         key: 'agree',
@@ -66,31 +66,40 @@ export class SubmitDemoComponent {
           color: 'primary',
           required: true,
         },
-        validators: {
-          required: true,
-        },
+        // validators: {
+        //   required: true,
+        // },
       },
 
       // Primary raised button
       submitButton({
+        key: 'submit',
         label: 'Submit Form',
-        color: 'primary',
         // variant: 'raised',
-        className: 'submit-btn',
+        className: 'button-btn',
+        props: {
+          color: 'primary',
+        },
       }),
 
       // Accent stroked button
       submitButton({
+        key: 'draft',
         label: 'Save Draft',
-        color: 'accent',
         // variant: 'stroked',
         className: 'draft-btn',
+        props: {
+          color: 'accent',
+        },
       }),
 
       // Basic button
       submitButton({
+        key: 'cancel',
         label: 'Cancel',
-        color: 'warn',
+        props: {
+          color: 'warn',
+        },
         // variant: 'basic',
         className: 'cancel-btn',
       }),

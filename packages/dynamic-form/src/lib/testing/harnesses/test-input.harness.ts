@@ -3,7 +3,7 @@ import { FormValueControl } from '@angular/forms/signals';
 
 @Component({
   selector: 'df-test-input',
-  template: `<input [value]="value()" (input)="value.set($any($event.target).value)" />`,
+  template: `<input [type]="type()" [value]="value()" (input)="value.set($any($event.target).value)" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class TestInputHarness implements FormValueControl<string> {
@@ -18,4 +18,5 @@ export default class TestInputHarness implements FormValueControl<string> {
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
   readonly type = input<string>('text');
+  readonly props = input<Record<string, any>>({});
 }

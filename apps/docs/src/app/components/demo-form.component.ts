@@ -211,9 +211,12 @@ export class DemoFormComponent {
 
       // Submit button
       submitButton({
+        key: 'submit',
         label: 'Create Account',
-        color: 'primary',
-        className: 'submit-btn',
+        className: 'button-btn',
+        props: {
+          color: 'primary',
+        },
       }),
     ],
   };

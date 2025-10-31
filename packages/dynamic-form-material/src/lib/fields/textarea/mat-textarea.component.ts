@@ -41,7 +41,7 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatTextareaFieldComponent implements FormValueControl<string>, MatTextareaComponent {
+export default class MatTextareaFieldComponent implements FormValueControl<string>, MatTextareaComponent {
   readonly value = model<string>('');
 
   readonly required = input<boolean>(false);

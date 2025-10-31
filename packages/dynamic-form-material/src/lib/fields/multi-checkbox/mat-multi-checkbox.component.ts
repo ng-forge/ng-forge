@@ -50,7 +50,7 @@ import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
   providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatMultiCheckboxFieldComponent<T extends ValueType> implements FormValueControl<T[]>, MatMultiCheckboxComponent<T> {
+export default class MatMultiCheckboxFieldComponent<T extends ValueType> implements FormValueControl<T[]>, MatMultiCheckboxComponent<T> {
   readonly value = model.required<T[]>();
 
   readonly required = input<boolean>(false);

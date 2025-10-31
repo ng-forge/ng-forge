@@ -45,7 +45,7 @@ import { SelectOption } from '@ng-forge/dynamic-form';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSelectFieldComponent<T> implements FormValueControl<T>, MatSelectComponent<T> {
+export default class MatSelectFieldComponent<T> implements FormValueControl<T>, MatSelectComponent<T> {
   readonly value = model<T>(undefined as T);
 
   readonly required = input<boolean>(false);

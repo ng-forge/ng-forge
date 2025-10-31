@@ -30,7 +30,7 @@ interface CompleteFormModel {
     <div class="example-container">
       <h4>Complete Material Design Form</h4>
       <p class="description">A comprehensive form showcasing all Material components with proper theming and validation.</p>
-      <dynamic-form [config]="config" [(value)]="model"></dynamic-form>
+      <dynamic-form [config]="config" [(value)]="model" (submitted)="submitted($event)"></dynamic-form>
       <div class="output">
         <strong>Form Data:</strong>
         <pre>{{ model() | json }}</pre>
@@ -92,6 +92,10 @@ export class CompleteMaterialFormComponent {
       privacy: false,
     },
   });
+
+  submitted(value: any): void {
+    console.log('Form Submitted!', value);
+  }
 
   config: FormConfig = {
     fields: [
@@ -265,9 +269,12 @@ export class CompleteMaterialFormComponent {
 
       // Submit Button
       submitButton({
+        key: 'submit',
         label: 'Create Account',
-        color: 'primary',
-        className: 'submit-btn',
+        className: 'button-btn',
+        props: {
+          color: 'primary',
+        },
       }),
     ],
   };

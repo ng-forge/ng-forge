@@ -43,7 +43,7 @@ import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSliderFieldComponent implements FormValueControl<number>, MatSliderComponent {
+export default class MatSliderFieldComponent implements FormValueControl<number>, MatSliderComponent {
   readonly value = model.required<number>();
 
   readonly required = input<boolean>(false);

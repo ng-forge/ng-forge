@@ -121,7 +121,7 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
-  readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit'));
+  readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit').pipe(map(() => this.value())));
 
   private readonly fieldsInitializedSubject = new Subject<void>();
 

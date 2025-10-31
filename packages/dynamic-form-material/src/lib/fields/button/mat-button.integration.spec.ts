@@ -12,7 +12,7 @@ interface TestFormModel {
   firstName: string;
 }
 
-describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
+describe('MatButtonFieldComponent - Dynamic Form Integration', () => {
   let component: DynamicForm;
   let fixture: ComponentFixture<DynamicForm>;
   let debugElement: DebugElement;
@@ -38,17 +38,17 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
     }).compileComponents();
   });
 
-  describe('Basic Material Submit Button Integration', () => {
-    it('should render submit button with full configuration', async () => {
+  describe('Basic Material Button Button Integration', () => {
+    it('should render button button with full configuration', async () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
-            label: 'Submit Form',
+            key: 'button',
+            type: 'button',
+            label: 'Button Form',
             props: {
               color: 'primary',
-              className: 'submit-button',
+              className: 'button-button',
             },
           },
         ],
@@ -62,9 +62,9 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const buttonElement = debugElement.query(By.css('button'));
 
       expect(button).toBeTruthy();
-      expect(buttonElement.nativeElement.textContent.trim()).toBe('Submit Form');
+      expect(buttonElement.nativeElement.textContent.trim()).toBe('Button Form');
       expect(buttonElement.nativeElement.getAttribute('type')).toBe('button');
-      expect(buttonElement.nativeElement.className).toContain('submit-button');
+      expect(buttonElement.nativeElement.className).toContain('button-button');
       expect(buttonElement.nativeElement.className).toContain('mat-mdc-raised-button');
       expect(buttonElement.nativeElement.className).toContain('mat-primary');
     });
@@ -78,8 +78,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: 'Click Me',
             props: {
               onClick: handleClick,
@@ -119,8 +119,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: 'Disabled Button',
             disabled: true,
             props: {
@@ -152,24 +152,24 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'primarySubmit',
-            type: 'submit',
+            key: 'primaryButton',
+            type: 'button',
             label: 'Primary',
             props: {
               color: 'primary',
             },
           },
           {
-            key: 'accentSubmit',
-            type: 'submit',
+            key: 'accentButton',
+            type: 'button',
             label: 'Accent',
             props: {
               color: 'accent',
             },
           },
           {
-            key: 'warnSubmit',
-            type: 'submit',
+            key: 'warnButton',
+            type: 'button',
             label: 'Warn',
             props: {
               color: 'warn',
@@ -194,8 +194,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: 'Default Color',
           },
         ],
@@ -212,9 +212,9 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
   describe('Form Integration Tests', () => {
     it('should work alongside form inputs', async () => {
-      let submittedData: any = null;
-      const handleSubmit = () => {
-        submittedData = component.formValue();
+      let buttontedData: any = null;
+      const handleButton = () => {
+        buttontedData = component.formValue();
       };
 
       const config: FormConfig = {
@@ -234,11 +234,11 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
             label: 'First Name',
           },
           {
-            key: 'submit',
-            type: 'submit',
-            label: 'Submit Form',
+            key: 'button',
+            type: 'button',
+            label: 'Button Form',
             props: {
-              onClick: handleSubmit,
+              onClick: handleButton,
             },
           },
         ],
@@ -251,23 +251,23 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       await waitForDFInit(component, fixture);
 
-      const submitButton = debugElement.query(By.css('button'));
+      const buttonButton = debugElement.query(By.css('button'));
 
-      // Click submit button
-      submitButton.nativeElement.click();
+      // Click button button
+      buttonButton.nativeElement.click();
       fixture.detectChanges();
 
-      expect(submittedData).toEqual({
+      expect(buttontedData).toEqual({
         email: 'test@example.com',
         firstName: 'John',
-        submit: '',
+        button: '',
       });
     });
 
     it('should handle form validation state', async () => {
-      let submitAttempts = 0;
-      const handleSubmit = () => {
-        submitAttempts++;
+      let buttonAttempts = 0;
+      const handleButton = () => {
+        buttonAttempts++;
       };
 
       const config: FormConfig = {
@@ -282,11 +282,11 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
             },
           },
           {
-            key: 'submit',
-            type: 'submit',
-            label: 'Submit',
+            key: 'button',
+            type: 'button',
+            label: 'Button',
             props: {
-              onClick: handleSubmit,
+              onClick: handleButton,
             },
           },
         ],
@@ -296,14 +296,14 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
 
       await waitForDFInit(component, fixture);
 
-      const submitButton = debugElement.query(By.css('button'));
+      const buttonButton = debugElement.query(By.css('button'));
 
-      // Submit with empty required field
-      submitButton.nativeElement.click();
+      // Button with empty required field
+      buttonButton.nativeElement.click();
       fixture.detectChanges();
 
-      // Submit handler should still be called (validation is form-level responsibility)
-      expect(submitAttempts).toBe(1);
+      // Button handler should still be called (validation is form-level responsibility)
+      expect(buttonAttempts).toBe(1);
     });
 
     it('should maintain button state during form updates', async () => {
@@ -315,8 +315,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
             label: 'First Name',
           },
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: 'Save Changes',
             props: {
               color: 'accent',
@@ -348,12 +348,12 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
   });
 
   describe('Edge Cases and Robustness Tests', () => {
-    it('should handle submit button without click handler', async () => {
+    it('should handle button button without click handler', async () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: 'No Handler',
           },
         ],
@@ -378,8 +378,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: longLabel,
           },
         ],
@@ -399,8 +399,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: specialLabel,
           },
         ],
@@ -414,15 +414,15 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       expect(buttonElement.nativeElement.textContent.trim()).toBe(specialLabel);
     });
 
-    it('should handle multiple submit buttons', async () => {
+    it('should handle multiple button buttons', async () => {
       let primaryClicks = 0;
       let secondaryClicks = 0;
 
       const config: FormConfig = {
         fields: [
           {
-            key: 'primarySubmit',
-            type: 'submit',
+            key: 'primaryButton',
+            type: 'button',
             label: 'Save',
             props: {
               color: 'primary',
@@ -430,8 +430,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
             },
           },
           {
-            key: 'secondarySubmit',
-            type: 'submit',
+            key: 'secondaryButton',
+            type: 'button',
             label: 'Cancel',
             props: {
               color: 'warn',
@@ -468,8 +468,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: 'Custom Button',
             props: {
               className: 'custom-class another-class',
@@ -496,8 +496,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: 'Rapid Click Test',
             props: {
               onClick: handleClick,
@@ -527,9 +527,9 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
-            label: 'Submit',
+            key: 'button',
+            type: 'button',
+            label: 'Button',
           },
         ],
       };
@@ -543,7 +543,7 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const buttonElement = debugElement.query(By.css('button'));
 
       expect(button).toBeTruthy();
-      expect(buttonElement.nativeElement.textContent.trim()).toBe('Submit');
+      expect(buttonElement.nativeElement.textContent.trim()).toBe('Button');
       expect(buttonElement.nativeElement.getAttribute('type')).toBe('button');
       expect(buttonElement.nativeElement.disabled).toBe(false);
       expect(buttonElement.nativeElement.className).toContain('mat-primary');
@@ -553,8 +553,8 @@ describe('MatSubmitFieldComponent - Dynamic Form Integration', () => {
       const config: FormConfig = {
         fields: [
           {
-            key: 'submit',
-            type: 'submit',
+            key: 'button',
+            type: 'button',
             label: 'Simple Button',
           },
         ],

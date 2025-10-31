@@ -16,4 +16,5 @@ export default class TestCheckboxHarness implements FormCheckboxControl {
 
   // Field-specific properties
   readonly label = input<string>('');
+  readonly props = input<Record<string, any>>({});
 }

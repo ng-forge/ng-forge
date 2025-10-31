@@ -1,29 +1,29 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { MatSubmitComponent, MatSubmitProps } from './mat-submit.type';
-import { EventBus, SubmitEvent } from '@ng-forge/dynamic-form';
+import { MatButtonComponent, MatButtonProps } from './mat-button.type';
+import { EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
 
 /**
- * Material Design submit button component
+ * Material Design button button component
  */
 @Component({
-  selector: 'df-mat-submit',
+  selector: 'df-mat-button',
   imports: [MatButton],
   template: `
     <button
       mat-raised-button
       type="button"
-      [color]="color() || 'primary'"
+      [color]="props()?.color || 'primary'"
       [class]="className() || ''"
       [disabled]="disabled() || false"
-      (click)="submit()"
+      (click)="triggerEvent()"
     >
       {{ label() }}
     </button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatSubmitFieldComponent implements MatSubmitComponent {
+export default class MatButtonFieldComponent<TEvent extends FormEvent> implements MatButtonComponent<TEvent> {
   private readonly eventBus = inject(EventBus);
 
   readonly label = input.required<string>();
@@ -32,10 +32,10 @@ export class MatSubmitFieldComponent implements MatSubmitComponent {
   readonly tabIndex = input<number>();
   readonly className = input<string>('');
 
-  // Material specific props
-  readonly color = input<MatSubmitProps['color']>('primary' as const);
+  readonly event = input.required<FormEventConstructor<TEvent>>();
+  readonly props = input<MatButtonProps>();
 
-  submit(): void {
-    this.eventBus.dispatch(new SubmitEvent());
+  triggerEvent(): void {
+    this.eventBus.dispatch(this.event());
   }
 }

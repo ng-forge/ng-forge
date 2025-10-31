@@ -13,7 +13,11 @@ import { MatInputComponent, MatInputProps } from './mat-input.type';
   selector: 'df-mat-input',
   imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent],
   template: `
-    <mat-form-field [appearance]="props()?.appearance ?? 'outline'" [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'" [class]="className() || ''">
+    <mat-form-field
+      [appearance]="props()?.appearance ?? 'outline'"
+      [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'"
+      [class]="className() || ''"
+    >
       @if (label()) {
       <mat-label>{{ label() }}</mat-label>
       }
@@ -37,7 +41,7 @@ import { MatInputComponent, MatInputProps } from './mat-input.type';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatInputFieldComponent implements FormValueControl<string>, MatInputComponent {
+export default class MatInputFieldComponent implements FormValueControl<string>, MatInputComponent {
   readonly value = model.required<string>();
 
   readonly required = input<boolean>(false);

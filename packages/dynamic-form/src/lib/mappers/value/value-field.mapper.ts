@@ -8,7 +8,7 @@ export interface ValueFieldMapperOptions<TModel = any> {
   fieldSignals: Map<string, WritableSignal<unknown>>;
 }
 
-export function valueFieldMapper<T>(fieldDef: BaseValueField<any, any>, options?: ValueFieldMapperOptions): Binding[] {
+export function valueFieldMapper(fieldDef: BaseValueField<any, any>, options?: ValueFieldMapperOptions): Binding[] {
   const bindings = baseFieldMapper(fieldDef);
 
   if (fieldDef.required) {

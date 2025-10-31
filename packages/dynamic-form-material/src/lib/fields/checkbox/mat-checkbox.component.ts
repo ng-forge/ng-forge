@@ -39,7 +39,7 @@ import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatCheckboxFieldComponent implements FormCheckboxControl, MatCheckboxComponent {
+export default class MatCheckboxFieldComponent implements FormCheckboxControl, MatCheckboxComponent {
   readonly checked = model.required<boolean>();
 
   readonly required = input<boolean>(false);

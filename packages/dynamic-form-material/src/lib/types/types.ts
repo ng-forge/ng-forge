@@ -6,7 +6,7 @@ export const MatField = {
   Input: 'input',
   Select: 'select',
   Checkbox: 'checkbox',
-  Submit: 'submit',
+  Button: 'button',
   Textarea: 'textarea',
   Radio: 'radio',
   MultiCheckbox: 'multi-checkbox',

@@ -1,36 +1,43 @@
 import { FieldDef } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
+import { entries, omit } from 'lodash-es';
 
-export function baseFieldMapper<T>(fieldDef: FieldDef<any>): Binding[] {
+export function baseFieldMapper({ disabled, readonly, hidden, label, className, tabIndex, props, ...fieldDef }: FieldDef<any>): Binding[] {
   const bindings: Binding[] = [];
 
-  if (fieldDef.disabled) {
-    bindings.push(inputBinding('disabled', () => fieldDef.disabled));
+  if (disabled) {
+    bindings.push(inputBinding('disabled', () => disabled));
   }
 
-  if (fieldDef.readonly) {
-    bindings.push(inputBinding('readonly', () => fieldDef.readonly));
+  if (readonly) {
+    bindings.push(inputBinding('readonly', () => readonly));
   }
 
-  if (fieldDef.hidden) {
-    bindings.push(inputBinding('hidden', () => fieldDef.hidden));
+  if (hidden) {
+    bindings.push(inputBinding('hidden', () => hidden));
   }
 
-  if (fieldDef.label) {
-    bindings.push(inputBinding('label', () => fieldDef.label));
+  if (label) {
+    bindings.push(inputBinding('label', () => label));
   }
 
-  if (fieldDef.className) {
-    bindings.push(inputBinding('className', () => fieldDef.className));
+  if (className) {
+    bindings.push(inputBinding('className', () => className));
   }
 
-  if (fieldDef.tabIndex) {
-    bindings.push(inputBinding('tabIndex', () => fieldDef.tabIndex));
+  if (tabIndex) {
+    bindings.push(inputBinding('tabIndex', () => tabIndex));
   }
 
-  if (fieldDef.props) {
-    bindings.push(inputBinding('props', () => fieldDef.props));
+  if (props) {
+    bindings.push(inputBinding('props', () => props));
   }
+
+  const remainingProperties = omit(fieldDef, ['key', 'type', 'conditionals', 'validation']);
+
+  entries(remainingProperties).forEach(([key, value]) => {
+    bindings.push(inputBinding(key, () => value));
+  });
 
   return bindings;
 }

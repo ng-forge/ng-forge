@@ -35,7 +35,9 @@ export function injectFieldRegistry() {
       // Handle async loading
       if (fieldType.loadComponent) {
         try {
-          return await fieldType.loadComponent();
+          const result = await fieldType.loadComponent();
+          // Handle ES module imports - extract default export if needed
+          return (result as any)?.default || result;
         } catch (error) {
           throw new Error(`Failed to load component for field type "${name}": ${error}`);
         }

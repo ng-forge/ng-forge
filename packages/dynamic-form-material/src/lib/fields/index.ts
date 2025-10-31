@@ -7,6 +7,6 @@ export * from './multi-checkbox';
 export * from './radio';
 export * from './select';
 export * from './slider';
-export * from './submit';
+export * from './button';
 export * from './textarea';
 export * from './toggle';

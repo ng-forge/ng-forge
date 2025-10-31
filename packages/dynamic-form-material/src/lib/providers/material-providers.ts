@@ -1,6 +1,7 @@
 import type { FieldTypeDefinition } from '@ng-forge/dynamic-form';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
 import {
+  MatButtonField,
   MatCheckboxField,
   MatDatepickerField,
   MatInputField,
@@ -11,7 +12,6 @@ import {
   MatTextareaField,
   MatToggleField
 } from '../fields';
-import { MatSubmitField } from '../fields/submit/mat-submit.type';
 
 /**
  * Configure dynamic forms with Material Design field types
@@ -30,7 +30,7 @@ declare module '@ng-forge/dynamic-form' {
     input: MatInputField;
     select: MatSelectField<any>;
     checkbox: MatCheckboxField;
-    submit: MatSubmitField;
+    submit: MatButtonField<any>;
     textarea: MatTextareaField;
     radio: MatRadioField<any>;
     'multi-checkbox': MatMultiCheckboxField<any>;

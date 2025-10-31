@@ -83,9 +83,9 @@ export class MaterialValidationComponent {
           hint: 'Required validation with custom error message',
           required: true,
         },
-        validators: {
-          required: true,
-        },
+        // validators: {
+        //   required: true,
+        // },
       },
 
       // === EMAIL VALIDATION ===
@@ -100,10 +100,10 @@ export class MaterialValidationComponent {
           hint: 'Must be a valid email format',
           required: true,
         },
-        validators: {
-          required: true,
-          email: true,
-        },
+        // validators: {
+        //   required: true,
+        //   email: true,
+        // },
       },
 
       // === PASSWORD VALIDATION ===
@@ -118,11 +118,11 @@ export class MaterialValidationComponent {
           hint: 'Minimum 8 characters, maximum 50',
           required: true,
         },
-        validators: {
-          required: true,
-          minLength: 8,
-          maxLength: 50,
-        },
+        // validators: {
+        //   required: true,
+        //   minLength: 8,
+        //   maxLength: 50,
+        // },
       },
 
       // === PATTERN VALIDATION ===
@@ -136,9 +136,9 @@ export class MaterialValidationComponent {
           appearance: 'outline',
           hint: 'Format: (XXX) XXX-XXXX',
         },
-        validators: {
-          pattern: '/^(d{3}) d{3}-d{4}$/',
-        },
+        // validators: {
+        //   pattern: '/^(d{3}) d{3}-d{4}$/',
+        // },
       },
 
       // === NUMERIC VALIDATION ===
@@ -153,11 +153,11 @@ export class MaterialValidationComponent {
           hint: 'Must be between 18 and 120',
           required: true,
         },
-        validators: {
-          required: true,
-          min: 18,
-          max: 120,
-        },
+        // validators: {
+        //   required: true,
+        //   min: 18,
+        //   max: 120,
+        // },
       },
 
       // === URL VALIDATION ===
@@ -171,9 +171,9 @@ export class MaterialValidationComponent {
           appearance: 'outline',
           hint: 'Must be a valid URL starting with http:// or https://',
         },
-        validators: {
-          pattern: '/^https?://.+/',
-        },
+        // validators: {
+        //   pattern: '/^https?://.+/',
+        // },
       },
 
       // === SELECT VALIDATION ===
@@ -192,9 +192,9 @@ export class MaterialValidationComponent {
             { value: 'option3', label: 'Third Option' },
           ],
         },
-        validators: {
-          required: true,
-        },
+        // validators: {
+        //   required: true,
+        // },
       },
 
       // === CHECKBOX VALIDATION ===
@@ -207,9 +207,9 @@ export class MaterialValidationComponent {
           color: 'primary',
           required: true,
         },
-        validators: {
-          required: true,
-        },
+        // validators: {
+        //   required: true,
+        // },
       },
 
       // === TERMS CHECKBOX ===
@@ -222,16 +222,19 @@ export class MaterialValidationComponent {
           color: 'primary',
           required: true,
         },
-        validators: {
-          required: true,
-        },
+        // validators: {
+        //   required: true,
+        // },
       },
 
       // === SUBMIT BUTTON ===
       submitButton({
+        key: 'submit',
         label: 'Submit Form',
-        color: 'primary',
-        className: 'submit-btn',
+        className: 'button-btn',
+        props: {
+          color: 'primary',
+        },
       }),
     ],
   };

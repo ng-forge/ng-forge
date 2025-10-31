@@ -56,7 +56,7 @@ import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.typ
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatDatepickerFieldComponent implements FormValueControl<Date | null>, MatDatepickerComponent {
+export default class MatDatepickerFieldComponent implements FormValueControl<Date | null>, MatDatepickerComponent {
   readonly value = model<Date | null>(null);
 
   readonly required = input<boolean>(false);

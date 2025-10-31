@@ -44,7 +44,7 @@ import { RadioOption } from '@ng-forge/dynamic-form';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatRadioFieldComponent<T> implements FormValueControl<T>, MatRadioComponent<T> {
+export default class MatRadioFieldComponent<T> implements FormValueControl<T>, MatRadioComponent<T> {
   readonly value = model.required<T>();
   readonly required = input<boolean>(false);
   readonly disabled = input<boolean>(false);
