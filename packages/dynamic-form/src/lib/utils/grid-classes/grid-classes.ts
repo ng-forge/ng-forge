@@ -16,38 +16,38 @@ export interface ColumnConfig {
  */
 export function generateGridClasses(fieldDef: FieldDef<Record<string, unknown>>): string[] {
   const classes: string[] = ['df-field'];
-  
+
   // Handle basic col property (legacy support)
   if (typeof fieldDef.col === 'number' && fieldDef.col > 0) {
     classes.push(`df-col-${Math.min(fieldDef.col, 12)}`);
     return classes;
   }
-  
+
   // Handle extended col configuration
   const colConfig = fieldDef.col as ColumnConfig | undefined;
   if (!colConfig) {
     // Default behavior - auto-size in row, full width outside row
     return classes;
   }
-  
+
   // Generate span classes
   if (colConfig.span && colConfig.span > 0) {
     const span = Math.min(colConfig.span, 12);
     classes.push(`df-col-${span}`);
   }
-  
+
   // Generate start classes
   if (colConfig.start && colConfig.start > 0) {
     const start = Math.min(colConfig.start, 12);
     classes.push(`df-col-start-${start}`);
   }
-  
+
   // Generate end classes
   if (colConfig.end && colConfig.end > 0) {
     const end = Math.min(colConfig.end, 13); // End can be 13 for full span
     classes.push(`df-col-end-${end}`);
   }
-  
+
   return classes;
 }
 
@@ -58,11 +58,11 @@ export function generateGridClasses(fieldDef: FieldDef<Record<string, unknown>>)
  */
 export function generateResponsiveGridClasses(fieldDef: FieldDef<Record<string, unknown>>): string[] {
   const classes: string[] = [];
-  
+
   // Check for responsive column configuration in props
   const props = fieldDef.props as any;
   if (!props) return classes;
-  
+
   // Small screens (tablet)
   if (props.colSm) {
     if (typeof props.colSm === 'number') {
@@ -71,7 +71,7 @@ export function generateResponsiveGridClasses(fieldDef: FieldDef<Record<string, 
       classes.push(`df-col-sm-${Math.min(props.colSm.span, 6)}`);
     }
   }
-  
+
   // Medium screens (small desktop)
   if (props.colMd) {
     if (typeof props.colMd === 'number') {
@@ -80,7 +80,7 @@ export function generateResponsiveGridClasses(fieldDef: FieldDef<Record<string, 
       classes.push(`df-col-md-${Math.min(props.colMd.span, 12)}`);
     }
   }
-  
+
   // Large screens (large desktop)
   if (props.colLg) {
     if (typeof props.colLg === 'number') {
@@ -89,7 +89,7 @@ export function generateResponsiveGridClasses(fieldDef: FieldDef<Record<string, 
       classes.push(`df-col-lg-${Math.min(props.colLg.span, 12)}`);
     }
   }
-  
+
   return classes;
 }
 
@@ -99,10 +99,7 @@ export function generateResponsiveGridClasses(fieldDef: FieldDef<Record<string, 
  * @returns Complete array of CSS classes for grid layout
  */
 export function getAllGridClasses(fieldDef: FieldDef<Record<string, unknown>>): string[] {
-  return [
-    ...generateGridClasses(fieldDef),
-    ...generateResponsiveGridClasses(fieldDef),
-  ];
+  return [...generateGridClasses(fieldDef), ...generateResponsiveGridClasses(fieldDef)];
 }
 
 /**
@@ -111,14 +108,10 @@ export function getAllGridClasses(fieldDef: FieldDef<Record<string, unknown>>): 
  * @param renderer Angular Renderer2 instance
  * @param elementRef Element reference to the field component
  */
-export function applyGridClasses(
-  fieldDef: FieldDef<Record<string, unknown>>,
-  renderer: any,
-  elementRef: any
-): void {
+export function applyGridClasses(fieldDef: FieldDef<Record<string, unknown>>, renderer: any, elementRef: any): void {
   const classes = getAllGridClasses(fieldDef);
-  
-  classes.forEach(className => {
+
+  classes.forEach((className) => {
     renderer.addClass(elementRef.nativeElement, className);
   });
 }

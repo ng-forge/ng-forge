@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
@@ -57,8 +57,4 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
   readonly props = input<MatSelectProps<T>>();
 
   defaultCompare = Object.is;
-
-  constructor() {
-  }
-
 }
