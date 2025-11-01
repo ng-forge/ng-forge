@@ -37,7 +37,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(5); // field + label + className + tabIndex + props
@@ -66,7 +66,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(2); // field + label
@@ -97,7 +97,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       // Should create bindings for: field + label + customProp + anotherProp
@@ -128,7 +128,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       // Should create bindings for: field + label + customProp
@@ -158,7 +158,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(2); // field binding + label binding
@@ -184,7 +184,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(1); // only label binding
@@ -208,7 +208,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(1); // only label binding, no field binding
@@ -234,7 +234,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(2); // field + label binding
@@ -266,8 +266,8 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act - test both fields
-      const bindings1 = baseFieldMapper(fieldDef1, options);
-      const bindings2 = baseFieldMapper(fieldDef2, options);
+      const bindings1 = baseFieldMapper(fieldDef1);
+      const bindings2 = baseFieldMapper(fieldDef2);
 
       // Assert
       expect(bindings1).toHaveLength(2); // field binding + label binding for field1
@@ -295,7 +295,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(1); // field binding is created for existing fields
@@ -322,7 +322,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(1); // field binding is created for existing fields
@@ -361,7 +361,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(complexFieldDef, options);
+      const bindings = baseFieldMapper(complexFieldDef);
 
       // Assert
       // Expected bindings: field + label + className + tabIndex + props + customAttribute + anotherCustomProp
@@ -389,7 +389,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(2); // field binding + label binding
@@ -417,7 +417,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(2); // label + className (no field binding for missing field)
@@ -455,7 +455,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(3); // field binding + label + className
@@ -489,7 +489,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(1); // only label binding, no field binding
@@ -520,7 +520,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef, options);
+      const bindings = baseFieldMapper(fieldDef);
 
       // Assert
       expect(bindings).toHaveLength(2); // label binding + field binding (form creates field proxy for existing fields)
@@ -568,7 +568,7 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(complexFieldDef, options);
+      const bindings = baseFieldMapper(complexFieldDef);
 
       // Assert
       // Expected: field + label + className + tabIndex + props + customAttribute

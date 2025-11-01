@@ -21,5 +21,5 @@ export function mapFieldToBindings<TModel = any>(
   }
 
   // Fallback to base mapper
-  return baseFieldMapper(fieldDef, { fieldSignalContext: options.fieldSignalContext });
+  return baseFieldMapper(fieldDef);
 }

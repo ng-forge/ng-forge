@@ -3,10 +3,11 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
+import { MatError } from '@angular/material/input';
 
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, MatErrorsComponent, Field],
+  imports: [MatCheckbox, MatErrorsComponent, Field, MatError],
   template: `
     @let f = field();
 
@@ -25,7 +26,7 @@ import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint }}</div>
     }
-    <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `

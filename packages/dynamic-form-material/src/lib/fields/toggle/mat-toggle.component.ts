@@ -3,10 +3,11 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
+import { MatError } from '@angular/material/input';
 
 @Component({
   selector: 'df-mat-toggle',
-  imports: [MatSlideToggle, MatErrorsComponent, Field],
+  imports: [MatSlideToggle, MatErrorsComponent, Field, MatError],
   template: `
     @let f = field();
 
@@ -25,7 +26,7 @@ import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint }}</div>
     }
-    <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `

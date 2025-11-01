@@ -16,7 +16,7 @@ import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs';
-import { keyBy, mapValues } from 'lodash-es';
+import { isEqual, keyBy, mapValues } from 'lodash-es';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FormConfig, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
@@ -28,6 +28,7 @@ import { flattenFields } from './utils';
 import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -105,6 +106,14 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
   });
 
   readonly formValue = computed(() => this.entity());
+
+  private readonly syncEntityToValue = explicitEffect([this.entity], ([currentEntity]) => {
+    const currentValue = this.value();
+
+    if (!isEqual(currentEntity, currentValue)) {
+      this.value.set(currentEntity);
+    }
+  });
 
   readonly valid = computed(() => this.form()().valid());
   readonly invalid = computed(() => this.form()().invalid());

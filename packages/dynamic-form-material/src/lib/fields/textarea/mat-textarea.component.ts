@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 
 @Component({
   selector: 'df-mat-textarea',
-  imports: [MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent, Field],
+  imports: [MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent, Field, MatError],
   template: `
     @let f = field();
 
@@ -35,7 +35,7 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
       <mat-hint>{{ hint }}</mat-hint>
       }
 
-      <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
     </mat-form-field>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

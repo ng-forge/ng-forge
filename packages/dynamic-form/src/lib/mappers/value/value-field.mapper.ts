@@ -1,5 +1,5 @@
 import { BaseValueField } from '../../definitions';
-import { Binding } from '@angular/core';
+import { Binding, inputBinding } from '@angular/core';
 import { baseFieldMapper } from '../base/base-field-mapper';
 import { FieldMapperOptions } from '../types';
 import { omit } from 'lodash-es';
@@ -9,5 +9,15 @@ export type ValueFieldMapperOptions<TModel = any> = Omit<FieldMapperOptions<TMod
 export function valueFieldMapper(fieldDef: BaseValueField<any, any>, options: ValueFieldMapperOptions): Binding[] {
   const omittedFields = omit(fieldDef, ['value', 'defaultValue']);
 
-  return baseFieldMapper(omittedFields, options);
+  const bindings: Binding[] = baseFieldMapper(omittedFields);
+
+  const formRoot = options.fieldSignalContext.form();
+  const childrenMap = (formRoot as any).structure?.childrenMap?.();
+
+  const formField = childrenMap?.get(fieldDef.key);
+  if (formField?.fieldProxy) {
+    bindings.push(inputBinding('field', () => formField.fieldProxy));
+  }
+
+  return bindings;
 }

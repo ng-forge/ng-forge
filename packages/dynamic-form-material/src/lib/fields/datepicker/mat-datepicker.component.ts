@@ -1,14 +1,26 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.type';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'df-mat-datepicker',
-  imports: [MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent, MatDatepicker, MatDatepickerInput, MatDatepickerToggle, Field],
+  imports: [
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatHint,
+    MatErrorsComponent,
+    MatDatepicker,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    Field,
+    MatError,
+  ],
   template: `
     @let f = field();
 
@@ -38,9 +50,10 @@ import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.typ
       <mat-hint>{{ hint }}</mat-hint>
       }
 
-      <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
     </mat-form-field>
   `,
+  providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatDatepickerFieldComponent implements MatDatepickerComponent {

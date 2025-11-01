@@ -1,19 +1,10 @@
 import { FieldDef } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
 import { entries } from 'lodash-es';
-import { FieldMapperOptions } from '../types';
 
-export function baseFieldMapper(fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
-  const { key, label, className, tabIndex, props } = fieldDef;
+export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
+  const { label, className, tabIndex, props } = fieldDef;
   const bindings: Binding[] = [];
-
-  const formRoot = options.fieldSignalContext.form();
-  const childrenMap = (formRoot as any).structure?.childrenMap?.();
-
-  const formField = childrenMap?.get(key);
-  if (formField?.fieldProxy) {
-    bindings.push(inputBinding('field', () => formField.fieldProxy));
-  }
 
   if (label !== undefined) {
     bindings.push(inputBinding('label', () => label));
@@ -31,6 +22,8 @@ export function baseFieldMapper(fieldDef: FieldDef<any>, options: Omit<FieldMapp
     bindings.push(inputBinding('props', () => props));
   }
 
+  const validationKeys = new Set(['required', 'email', 'min', 'max', 'minLength', 'maxLength', 'patternRule', 'validation']);
+
   const excludedKeys = new Set([
     'key',
     'type',
@@ -47,7 +40,7 @@ export function baseFieldMapper(fieldDef: FieldDef<any>, options: Omit<FieldMapp
   ]);
 
   for (const [key, value] of entries(fieldDef)) {
-    if (!excludedKeys.has(key) && value !== undefined) {
+    if (!excludedKeys.has(key) && !validationKeys.has(key) && value !== undefined) {
       bindings.push(inputBinding(key, () => value));
     }
   }

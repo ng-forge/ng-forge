@@ -7,10 +7,11 @@ import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxComponent, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
+import { MatError } from '@angular/material/input';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [MatCheckbox, MatErrorsComponent, ValueInArrayPipe],
+  imports: [MatCheckbox, MatErrorsComponent, ValueInArrayPipe, MatError],
   template: `
     @let f = field(); @if (label(); as label) {
     <div class="checkbox-group-label">{{ label }}</div>
@@ -34,7 +35,7 @@ import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
     <div class="mat-hint">{{ hint }}</div>
     }
 
-    <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `

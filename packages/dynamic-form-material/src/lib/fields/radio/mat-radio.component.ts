@@ -4,10 +4,11 @@ import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatRadioComponent, MatRadioProps } from './mat-radio.type';
 import { RadioOption } from '@ng-forge/dynamic-form';
+import { MatError } from '@angular/material/input';
 
 @Component({
   selector: 'df-mat-radio',
-  imports: [MatRadioGroup, MatRadioButton, MatErrorsComponent, Field],
+  imports: [MatRadioGroup, MatRadioButton, MatErrorsComponent, Field, MatError],
   template: `
     @let f = field(); @if (label()) {
     <div class="radio-label">{{ label() }}</div>
@@ -29,7 +30,7 @@ import { RadioOption } from '@ng-forge/dynamic-form';
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint }}</div>
     }
-    <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `

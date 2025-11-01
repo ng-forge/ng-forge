@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { ValidationError, WithOptionalField } from '@angular/forms/signals';
-import { MatError } from '@angular/material/input';
 
 /**
  * Generic error display component for Material Design forms
@@ -8,15 +7,10 @@ import { MatError } from '@angular/material/input';
  */
 @Component({
   selector: 'df-mat-errors',
-  imports: [MatError],
   template: `
-    @if (shouldShowErrors()) {
-    <mat-error>
-      @for (error of errors(); track error) {
-      <span>{{ error.message }}</span>
-      }
-    </mat-error>
-    }
+    @if (shouldShowErrors()) { @for (error of errors(); track error) {
+    <span>{{ error.message }}</span>
+    } }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

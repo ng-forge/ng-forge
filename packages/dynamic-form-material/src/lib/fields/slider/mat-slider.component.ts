@@ -3,10 +3,11 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
+import { MatError } from '@angular/material/input';
 
 @Component({
   selector: 'df-mat-slider',
-  imports: [MatSlider, MatSliderThumb, MatErrorsComponent, Field],
+  imports: [MatSlider, MatSliderThumb, MatErrorsComponent, Field, MatError],
   template: `
     @let f = field(); @if (label(); as label) {
     <div class="slider-label">{{ label }}</div>
@@ -16,7 +17,6 @@ import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
       [min]="minValue()"
       [max]="maxValue()"
       [step]="step()"
-      [disabled]="f().disabled()"
       [discrete]="props()?.thumbLabel || props()?.showThumbLabel"
       [showTickMarks]="props()?.tickInterval !== undefined"
       [color]="props()?.color || 'primary'"
@@ -28,7 +28,7 @@ import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint }}</div>
     }
-    <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `
