@@ -17,21 +17,24 @@ import { FieldRendererDirective } from '../../directives/dynamic-form.directive'
 import { FormUiControl } from '@angular/forms/signals';
 import { FieldSignalContext } from '../../mappers/types';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'row-field',
-  template: `
-    <form [class.disabled]="disabled()" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-      <!-- Fields will be automatically rendered by the fieldRenderer directive -->
-    </form>
-  `,
+  template: '',
   styleUrl: './row-field.component.scss',
   host: {
-    class: 'lib-row-field field__container lib-row-field__responsive',
+    class: 'df-field df-row',
+    '[class.disabled]': 'disabled()',
   },
+  hostDirectives: [
+    {
+      directive: FieldRendererDirective,
+      inputs: ['fieldRenderer'],
+      outputs: ['fieldsInitialized'],
+    },
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FieldRendererDirective],
 })
 export default class RowFieldComponent {
   private readonly fieldRegistry = injectFieldRegistry();
@@ -45,6 +48,9 @@ export default class RowFieldComponent {
   fieldSignalContext = input.required<FieldSignalContext<any>>();
 
   readonly disabled = computed(() => this.field().disabled || false);
+
+  // Connect to the host directive
+  fieldRenderer = model<ComponentRef<FormUiControl>[] | null>(null);
 
   private readonly fieldsInitializedSubject = new Subject<void>();
   readonly initialized$ = this.fieldsInitializedSubject.asObservable();
@@ -70,6 +76,11 @@ export default class RowFieldComponent {
     ),
     { initialValue: [] }
   );
+
+  // Connect fields to fieldRenderer for host directive
+  private readonly connectFieldsEffect = explicitEffect([this.fields], ([fields]) => {
+    this.fieldRenderer.set(fields);
+  });
 
   private mapFields(fields: readonly any[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields

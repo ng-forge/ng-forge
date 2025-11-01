@@ -7,7 +7,6 @@ import {
   Injector,
   input,
   linkedSignal,
-  model,
   runInInjectionContext,
   untracked,
   ViewContainerRef,
@@ -28,27 +27,15 @@ import { EventBus, SubmitEvent } from '../../events';
 import { flattenFields } from '../../utils';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'group-field',
   template: `
-    <fieldset>
-      <legend class="lib-group-field__legend">
-        {{ field().label }}
-      </legend>
-
-      <form
-        class="lib-group-field__content"
-        [class.disabled]="disabled()"
-        [fieldRenderer]="fields()"
-        (fieldsInitialized)="onFieldsInitialized()"
-      >
-        <!-- Fields will be automatically rendered by the fieldRenderer directive -->
-      </form>
-    </fieldset>
+    <form [class.disabled]="disabled()" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+      <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+    </form>
   `,
   styleUrl: './group-field.component.scss',
   host: {
-    class: 'lib-group-field',
+    class: 'df-field df-group',
   },
   providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,9 +53,6 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
   // Parent form context inputs
   parentForm = input.required<ReturnType<typeof form<TModel>>>();
   parentFieldSignalContext = input.required<FieldSignalContext<TModel>>();
-
-  // Form value model for two-way binding (represents the nested group value)
-  value = model<Record<string, unknown> | undefined>(undefined);
 
   private readonly formSetup = computed(() => {
     const groupField = this.field();

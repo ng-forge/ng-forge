@@ -31,16 +31,18 @@ import { FieldSignalContext } from './mappers';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'dynamic-form',
   imports: [FieldRendererDirective],
   template: `
-    <form [class.disabled]="formOptions().disabled" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+    <form class="df-form" [class.disabled]="formOptions().disabled" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
       <!-- Fields will be automatically rendered by the fieldRenderer directive -->
     </form>
   `,
   styleUrl: './dynamic-form.component.scss',
   providers: [EventBus],
+  host: {
+    '[class.disabled]': 'disabled()',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TModel = InferGlobalFormValue> {
@@ -142,7 +144,8 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
         return combineLatest(this.mapFields(fields));
       }),
       map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
-    )
+    ),
+    { initialValue: [] }
   );
 
   private mapFields(fields: readonly FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {

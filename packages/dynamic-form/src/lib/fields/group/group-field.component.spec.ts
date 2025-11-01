@@ -80,21 +80,6 @@ describe('GroupFieldComponent', () => {
     expect(component.field()).toEqual(field);
   });
 
-  it('should render group label as legend', () => {
-    const field: GroupField<any> = {
-      key: 'testGroup',
-      type: 'group',
-      label: 'Test Group Label',
-      fields: [],
-    };
-
-    const { fixture } = setupGroupTest(field);
-
-    const legend = fixture.nativeElement.querySelector('.lib-group-field__legend');
-    expect(legend).toBeTruthy();
-    expect(legend.textContent.trim()).toBe('Test Group Label');
-  });
-
   it('should have form state properties', () => {
     const field: GroupField<any> = {
       key: 'testGroup',
@@ -121,8 +106,9 @@ describe('GroupFieldComponent', () => {
 
     const { fixture } = setupGroupTest(field, { field1: 'value1', field2: 'value2' });
 
-    const content = fixture.nativeElement.querySelector('.lib-group-field__content');
-    expect(content).toBeTruthy();
+    // The form element should be present in the template
+    const formElement = fixture.nativeElement.querySelector('form');
+    expect(formElement).toBeTruthy();
   });
 
   it('should have host classes', () => {
@@ -136,6 +122,7 @@ describe('GroupFieldComponent', () => {
     const { fixture } = setupGroupTest(field);
 
     const element = fixture.nativeElement;
-    expect(element.classList.contains('lib-group-field')).toBe(true);
+    expect(element.classList.contains('df-field')).toBe(true);
+    expect(element.classList.contains('df-group')).toBe(true);
   });
 });

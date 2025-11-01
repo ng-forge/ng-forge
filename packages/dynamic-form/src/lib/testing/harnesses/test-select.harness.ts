@@ -7,7 +7,8 @@ import { Field, FieldTree } from '@angular/forms/signals';
 @Component({
   selector: 'df-test-select',
   template: `
-    <select [field]="field()" [disabled]="field()?.disabled" (change)="field()?.value.set($any($event.target).value)">
+    @let f = field();
+    <select [field]="f">
       <option value="">Select...</option>
       @for (option of options(); track option.value) {
       <option [value]="option.value">{{ option.label }}</option>

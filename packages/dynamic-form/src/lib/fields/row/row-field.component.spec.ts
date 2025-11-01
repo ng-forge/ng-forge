@@ -1,7 +1,7 @@
 import { RowFieldComponent } from './row-field.component';
 import { RowField } from '../../definitions/default/row-field';
 import { createSimpleTestField, setupSimpleTest } from '../../testing';
-import { FieldDef } from '@ng-forge/dynamic-form';
+import { FieldDef } from '../../definitions';
 
 describe('RowFieldComponent', () => {
   it('should create', () => {
@@ -42,13 +42,14 @@ describe('RowFieldComponent', () => {
       fields: [createSimpleTestField('field1', 'Field 1'), createSimpleTestField('field2', 'Field 2')],
     };
 
-    const { fixture } = setupSimpleTest(RowFieldComponent, {
+    const { component } = setupSimpleTest(RowFieldComponent, {
       field,
       value: { field1: 'value1', field2: 'value2' },
     });
 
-    const form = fixture.nativeElement.querySelector('form');
-    expect(form).toBeTruthy();
+    // The component should render directly as the host element (no nested form)
+    expect(component.field()).toEqual(field);
+    expect(component.fields()).toBeDefined();
   });
 
   it('should have host classes', () => {
@@ -64,8 +65,7 @@ describe('RowFieldComponent', () => {
     });
 
     const element = fixture.nativeElement;
-    expect(element.classList.contains('lib-row-field')).toBe(true);
-    expect(element.classList.contains('field__container')).toBe(true);
-    expect(element.classList.contains('lib-row-field__responsive')).toBe(true);
+    expect(element.classList.contains('df-field')).toBe(true);
+    expect(element.classList.contains('df-row')).toBe(true);
   });
 });

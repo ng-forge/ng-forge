@@ -15,4 +15,5 @@ export default class TestInputHarness {
   readonly placeholder = input<string>('');
   readonly type = input<string>('text');
   readonly props = input<Record<string, any>>({});
+  readonly className = input<string>('');
 }
