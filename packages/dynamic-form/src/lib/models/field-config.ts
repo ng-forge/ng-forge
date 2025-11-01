@@ -1,76 +1,11 @@
-/**
- * Validation rules
- */
-export interface ValidationRules<TValue = unknown> {
-  /** Field is required */
-  required?: boolean;
-
-  /** Email validation */
-  email?: boolean;
-
-  /** Minimum value for numbers */
-  min?: number;
-
-  /** Maximum value for numbers */
-  max?: number;
-
-  /** Minimum length for strings */
-  minLength?: number;
-
-  /** Maximum length for strings */
-  maxLength?: number;
-
-  /** Pattern validation */
-  pattern?: string | RegExp;
-
-  /** Custom validation functions */
-  custom?: CustomValidator<TValue>[];
-}
-
-/**
- * Custom error messages
- */
-export interface ValidationMessages {
-  required?: string;
-  email?: string;
-  min?: string;
-  max?: string;
-  minLength?: string;
-  maxLength?: string;
-  pattern?: string;
-  [key: string]: string | undefined;
-}
-
-/**
- * Custom validator function following signal forms pattern
- */
-export type CustomValidator<TValue = unknown> = (value: TValue, formValue: unknown) => ValidationError | null;
-
-/**
- * Validation error structure
- */
-export interface ValidationError {
-  readonly type: string;
-  readonly message: string;
-  readonly params?: Record<string, unknown>;
-}
-
-/**
- * Conditional field behavior rules
- */
-export interface ConditionalRules {
-  /** Show field when condition is true */
-  show?: (formValue: unknown) => boolean;
-
-  /** Hide field when condition is true */
-  hide?: (formValue: unknown) => boolean;
-
-  /** Enable field when condition is true */
-  enable?: (formValue: unknown) => boolean;
-
-  /** Disable field when condition is true */
-  disable?: (formValue: unknown) => boolean;
-}
+// Re-export validation types from the dedicated validation-types module
+export type {
+  ValidationRules,
+  ValidationMessages,
+  ValidationError,
+  CustomValidator,
+  ConditionalRules,
+} from './validation-types';
 
 /**
  * Utility function to build validation rules from field properties

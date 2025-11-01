@@ -142,15 +142,15 @@ export class ControlFieldTypesDemoComponent {
         key: 'selectValue',
         type: 'select',
         label: 'Select Field (ValueControlFieldType)',
+        options: [
+          { value: 'typescript', label: 'TypeScript' },
+          { value: 'angular', label: 'Angular' },
+          { value: 'material', label: 'Material Design' },
+        ],
         props: {
           placeholder: 'Implements FormValueControl<T> + MatSelectField<T>',
           appearance: 'outline',
           hint: 'Uses ValueControlFieldType<MatSelectProps, T>',
-          options: [
-            { value: 'typescript', label: 'TypeScript' },
-            { value: 'angular', label: 'Angular' },
-            { value: 'material', label: 'Material Design' },
-          ],
         },
       },
 
@@ -184,13 +184,13 @@ export class ControlFieldTypesDemoComponent {
         key: 'radioValue',
         type: 'radio',
         label: 'Radio Group (ValueControlFieldType)',
+        options: [
+          { value: 'beginner', label: 'Beginner Level' },
+          { value: 'intermediate', label: 'Intermediate Level' },
+          { value: 'advanced', label: 'Advanced Level' },
+        ],
         props: {
           hint: 'Uses ValueControlFieldType<MatRadioProps<T>, T>',
-          options: [
-            { value: 'beginner', label: 'Beginner Level' },
-            { value: 'intermediate', label: 'Intermediate Level' },
-            { value: 'advanced', label: 'Advanced Level' },
-          ],
         },
       },
 
@@ -239,15 +239,15 @@ export class ControlFieldTypesDemoComponent {
         key: 'multiCheckbox',
         type: 'multi-checkbox',
         label: 'Multi-Checkbox (ValueControlFieldType)',
+        options: [
+          { value: 'signals', label: 'Angular Signals' },
+          { value: 'forms', label: 'Signal Forms' },
+          { value: 'control', label: 'Form Controls' },
+          { value: 'types', label: 'Type Utilities' },
+        ],
         props: {
           hint: 'Uses ValueControlFieldType<MatMultiCheckboxProps<T>, T[]>',
           color: 'primary',
-          options: [
-            { value: 'signals', label: 'Angular Signals' },
-            { value: 'forms', label: 'Signal Forms' },
-            { value: 'control', label: 'Form Controls' },
-            { value: 'types', label: 'Type Utilities' },
-          ],
         },
       },
     ],

@@ -23,14 +23,6 @@ export interface DynamicFormFieldRegistry {
 }
 
 /**
- * Default field types when registry is empty or not fully populated
- */
-type DefaultFieldTypes =
-  | FieldDef<Record<string, unknown>>
-  | BaseValueField<Record<string, unknown>, any>
-  | BaseCheckedField<Record<string, unknown>>;
-
-/**
  * Union type of all registered field definitions
  */
 export type RegisteredFieldTypes = DynamicFormFieldRegistry[keyof DynamicFormFieldRegistry];

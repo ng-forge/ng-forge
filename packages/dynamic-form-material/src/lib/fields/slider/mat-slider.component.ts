@@ -9,7 +9,9 @@ import { MatError } from '@angular/material/input';
   selector: 'df-mat-slider',
   imports: [MatSlider, MatSliderThumb, MatErrorsComponent, Field, MatError],
   template: `
-    @let f = field(); @if (label(); as label) {
+    @let f = field();
+
+    @if (label(); as label) {
     <div class="slider-label">{{ label }}</div>
     }
 
@@ -38,7 +40,7 @@ import { MatError } from '@angular/material/input';
     `,
   ],
   host: {
-    class: 'className()',
+    '[class]': 'className()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

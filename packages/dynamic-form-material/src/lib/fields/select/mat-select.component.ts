@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatHint } from '@angular/material/input';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatSelectComponent, MatSelectProps } from './mat-select.type';
-import { SelectOption } from '@ng-forge/dynamic-form';
+import { FieldOption } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'df-mat-select',
@@ -53,8 +53,12 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<SelectOption<T>[]>([]);
+  readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatSelectProps<T>>();
 
   defaultCompare = Object.is;
+
+  constructor() {
+  }
+
 }

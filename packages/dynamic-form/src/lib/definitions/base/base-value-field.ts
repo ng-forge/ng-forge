@@ -1,6 +1,6 @@
 import { FieldDef } from './field-def';
 import { FieldWithValidation } from './field-with-validation';
-import { WithInputSignals } from '../../models/component-type';
+import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
 
 export const ValueType = ['string', 'number', 'boolean', 'object', 'array', 'date'] as const;

@@ -1,6 +1,6 @@
 import { FieldDef } from './field-def';
 import { FieldWithValidation } from './field-with-validation';
-import { WithInputSignals } from '../../models/component-type';
+import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
 
 export interface BaseCheckedField<TProps extends Record<string, unknown>> extends FieldDef<TProps>, FieldWithValidation {

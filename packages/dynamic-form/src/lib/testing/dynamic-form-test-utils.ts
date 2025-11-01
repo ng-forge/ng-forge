@@ -6,8 +6,8 @@ import { FormConfig } from '../models';
 import { FieldDef } from '../definitions';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { delay } from './delay';
-import { valueFieldMapper } from '../mappers/value/value-field.mapper';
-import { checkboxFieldMapper } from '../mappers/checkbox/checkbox-field-mapper';
+import { valueFieldMapper } from '../mappers';
+import { checkboxFieldMapper } from '../mappers';
 import { FieldMapperOptions } from '../mappers/types';
 
 /**
@@ -49,7 +49,13 @@ export class FormConfigBuilder {
   }
 
   requiredInputField(key: string, props?: Record<string, unknown>): FormConfigBuilder {
-    return this.inputField(key, { required: true, ...props });
+    return this.field({
+      key,
+      type: 'input',
+      label: key.charAt(0).toUpperCase() + key.slice(1),
+      required: true,
+      props: { placeholder: `Enter ${key}`, ...props },
+    });
   }
 
   selectField(key: string, options: Array<{ value: string; label: string }>, props?: Record<string, unknown>): FormConfigBuilder {
@@ -57,7 +63,8 @@ export class FormConfigBuilder {
       key,
       type: 'select',
       label: key.charAt(0).toUpperCase() + key.slice(1),
-      props: { options, ...props },
+      options,
+      props: props || {},
     });
   }
 
@@ -84,6 +91,15 @@ export class FormConfigBuilder {
       type: 'group',
       fields,
     } as FieldDef<Record<string, unknown>>);
+  }
+
+  buttonField(key: string, props?: Record<string, unknown>): FormConfigBuilder {
+    return this.field({
+      key,
+      type: 'button',
+      label: key.charAt(0).toUpperCase() + key.slice(1),
+      props: props || {},
+    });
   }
 
   build(): FormConfig {
@@ -136,7 +152,7 @@ export class DynamicFormTestUtils {
    */
   static registerTestFields(fieldRegistry: ReturnType<typeof injectFieldRegistry>): void {
     // Input field mapper that extends value field mapper
-    const inputMapper = (fieldDef: FieldDef<Record<string, unknown>>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
+    const inputMapper = (fieldDef: FieldDef<Record<string, unknown>>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
       const bindings = valueFieldMapper(fieldDef, options);
 
       // Add input-specific bindings
@@ -149,19 +165,23 @@ export class DynamicFormTestUtils {
     };
 
     // Select field mapper that extends value field mapper
-    const selectMapper = (fieldDef: FieldDef<Record<string, unknown>>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
+    const selectMapper = (fieldDef: FieldDef<Record<string, unknown>>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
       const bindings = valueFieldMapper(fieldDef, options);
 
-      // Add select-specific bindings
-      bindings.push(inputBinding('options', () => fieldDef.props?.['options'] || []));
+      // Add select-specific bindings - options should be at root level
+      bindings.push(inputBinding('options', () => (fieldDef as any).options || []));
 
       return bindings;
     };
 
     // Checkbox field mapper - uses checked instead of value
-    const checkboxMapper = (fieldDef: FieldDef<Record<string, unknown>>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
-      const bindings = checkboxFieldMapper(fieldDef, options);
-      return bindings;
+    const checkboxMapper = (fieldDef: FieldDef<Record<string, unknown>>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
+      return checkboxFieldMapper(fieldDef, options);
+    };
+
+    // Button field mapper that extends value field mapper
+    const buttonMapper = (fieldDef: FieldDef<Record<string, unknown>>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
+      return valueFieldMapper(fieldDef, options);
     };
 
     fieldRegistry.registerTypes([
@@ -179,6 +199,11 @@ export class DynamicFormTestUtils {
         name: 'checkbox',
         loadComponent: () => import('./harnesses/test-checkbox.harness'),
         mapper: checkboxMapper,
+      },
+      {
+        name: 'button',
+        loadComponent: () => import('./harnesses/test-button.harness'),
+        mapper: buttonMapper,
       },
     ]);
   }
@@ -246,7 +271,22 @@ export class DynamicFormTestUtils {
     }
 
     checkbox.checked = checked;
+    checkbox.dispatchEvent(new Event('input', { bubbles: true }));
     checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    await delay(0);
+  }
+
+  /**
+   * Simulates button click
+   */
+  static async simulateButtonClick(fixture: ComponentFixture<DynamicForm>, selector: string): Promise<void> {
+    const button = fixture.nativeElement.querySelector(selector) as HTMLButtonElement;
+    if (!button) {
+      throw new Error(`Button element not found with selector: ${selector}`);
+    }
+
+    button.click();
     fixture.detectChanges();
     await delay(0);
   }

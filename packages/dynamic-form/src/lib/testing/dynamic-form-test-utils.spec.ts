@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { DynamicFormTestUtils } from './dynamic-form-test-utils';
-import { provideDynamicForm } from '../providers/dynamic-form-providers';
+import { provideDynamicForm } from '../providers';
 
 describe('DynamicFormTestUtils', () => {
   beforeEach(async () => {
@@ -39,18 +39,18 @@ describe('DynamicFormTestUtils', () => {
         key: 'email',
         type: 'input',
         label: 'Email',
-        props: { required: true, type: 'email', placeholder: 'Enter email' },
+        required: true,
+        props: { type: 'email', placeholder: 'Enter email' },
       });
       expect(config.fields[1]).toEqual({
         key: 'country',
         type: 'select',
         label: 'Country',
-        props: {
-          options: [
-            { value: 'us', label: 'United States' },
-            { value: 'ca', label: 'Canada' },
-          ],
-        },
+        options: [
+          { value: 'us', label: 'United States' },
+          { value: 'ca', label: 'Canada' },
+        ],
+        props: {},
       });
       expect(config.fields[2]).toEqual({
         key: 'newsletter',

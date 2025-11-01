@@ -1,5 +1,4 @@
-import { ConditionalRules } from '../../models/field-config';
-import { WithInputSignals } from '../../models/component-type';
+import { ConditionalRules, WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
 
 export interface FieldDef<TProps extends Record<string, unknown>> {

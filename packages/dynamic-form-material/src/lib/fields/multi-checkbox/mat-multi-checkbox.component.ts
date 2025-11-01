@@ -6,7 +6,7 @@ import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxComponent, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
-import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
+import { FieldOption, ValueType } from '@ng-forge/dynamic-form';
 import { MatError } from '@angular/material/input';
 
 @Component({
@@ -59,10 +59,10 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<MultiCheckboxOption<T>[]>([]);
+  readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatMultiCheckboxProps>();
 
-  valueViewModel = linkedSignal<MultiCheckboxOption<T>[]>(
+  valueViewModel = linkedSignal<FieldOption<T>[]>(
     () => {
       const currentValues = this.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
@@ -90,7 +90,7 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
     });
   }
 
-  onCheckboxChange(option: MultiCheckboxOption<T>, checked: boolean): void {
+  onCheckboxChange(option: FieldOption<T>, checked: boolean): void {
     this.valueViewModel.update((currentOptions) => {
       if (checked) {
         return currentOptions.some((opt) => opt.value === option.value) ? currentOptions : [...currentOptions, option];

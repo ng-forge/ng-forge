@@ -3,7 +3,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatRadioComponent, MatRadioProps } from './mat-radio.type';
-import { RadioOption } from '@ng-forge/dynamic-form';
+import { FieldOption } from '@ng-forge/dynamic-form';
 import { MatError } from '@angular/material/input';
 
 @Component({
@@ -53,6 +53,6 @@ export default class MatRadioFieldComponent<T> implements MatRadioComponent<T> {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<RadioOption<T>[]>([]);
+  readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatRadioProps>();
 }

@@ -46,29 +46,29 @@ export class RadioDemoComponent {
         key: 'plan',
         type: 'radio',
         label: 'Select Plan',
+        options: [
+          { value: 'free', label: 'Free - $0/month' },
+          { value: 'pro', label: 'Pro - $10/month' },
+          { value: 'enterprise', label: 'Enterprise - $50/month' },
+        ],
         props: {
           color: 'primary',
           hint: 'Choose your subscription plan',
-          options: [
-            { value: 'free', label: 'Free - $0/month' },
-            { value: 'pro', label: 'Pro - $10/month' },
-            { value: 'enterprise', label: 'Enterprise - $50/month' },
-          ],
         },
       },
       {
         key: 'priority',
         type: 'radio',
         label: 'Priority Level',
+        options: [
+          { value: 'low', label: 'Low Priority' },
+          { value: 'medium', label: 'Medium Priority' },
+          { value: 'high', label: 'High Priority' },
+          { value: 'urgent', label: 'Urgent' },
+        ],
         props: {
           color: 'accent',
           hint: 'Select task priority',
-          options: [
-            { value: 'low', label: 'Low Priority' },
-            { value: 'medium', label: 'Medium Priority' },
-            { value: 'high', label: 'High Priority' },
-            { value: 'urgent', label: 'Urgent' },
-          ],
         },
       },
     ],

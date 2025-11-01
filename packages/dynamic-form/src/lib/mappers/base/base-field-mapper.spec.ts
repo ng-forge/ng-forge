@@ -25,22 +25,11 @@ describe('baseFieldMapper', () => {
         props: { hint: 'Test hint' },
       };
 
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ testField: '' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(5); // field + label + className + tabIndex + props
+      expect(bindings).toHaveLength(4); // label + className + tabIndex + props
       expect(Array.isArray(bindings)).toBe(true);
       expect(bindings.every((binding) => typeof binding === 'object')).toBe(true);
     });
@@ -54,22 +43,11 @@ describe('baseFieldMapper', () => {
         // className, tabIndex, props are undefined
       };
 
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ testField: '' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(2); // field + label
+      expect(bindings).toHaveLength(1); //  label
     });
 
     it('should create bindings for custom properties via entries iteration', () => {
@@ -85,23 +63,12 @@ describe('baseFieldMapper', () => {
         conditionals: {},
       } as any;
 
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ testField: '' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      // Should create bindings for: field + label + customProp + anotherProp
-      expect(bindings).toHaveLength(4);
+      // Should create bindings for: label + customProp + anotherProp
+      expect(bindings).toHaveLength(3);
     });
 
     it('should handle destructured properties correctly', () => {
@@ -116,24 +83,13 @@ describe('baseFieldMapper', () => {
         customProp: 'should be included',
       } as any;
 
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ testField: '' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      // Should create bindings for: field + label + customProp
+      // Should create bindings for: label + customProp
       // disabled, readonly, hidden are excluded from bindings
-      expect(bindings).toHaveLength(3);
+      expect(bindings).toHaveLength(2);
     });
   });
 
@@ -146,22 +102,11 @@ describe('baseFieldMapper', () => {
         label: 'Test Field',
       };
 
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ testField: 'initial value' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(2); // field binding + label binding
+      expect(bindings).toHaveLength(1); // label binding
     });
 
     it('should not create field binding when form field proxy does not exist', () => {
@@ -171,17 +116,6 @@ describe('baseFieldMapper', () => {
         type: 'input',
         label: 'Test Field',
       };
-
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ differentField: 'value' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
       const bindings = baseFieldMapper(fieldDef);
@@ -198,15 +132,6 @@ describe('baseFieldMapper', () => {
         label: 'Test Label',
       };
 
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value: signal({ testField: '' }),
-        defaultValues: () => ({ testField: '' }),
-        form: () => ({ structure: undefined } as any),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
@@ -222,22 +147,11 @@ describe('baseFieldMapper', () => {
         label: 'Test Label',
       };
 
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ testField: '' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(2); // field + label binding
+      expect(bindings).toHaveLength(1); // label binding
     });
 
     it('should work with multiple field proxies in form', () => {
@@ -254,24 +168,13 @@ describe('baseFieldMapper', () => {
         label: 'Field 2',
       };
 
-      const value = signal({ field1: 'value1', field2: 'value2' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ field1: 'value1', field2: 'value2' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act - test both fields
       const bindings1 = baseFieldMapper(fieldDef1);
       const bindings2 = baseFieldMapper(fieldDef2);
 
       // Assert
-      expect(bindings1).toHaveLength(2); // field binding + label binding for field1
-      expect(bindings2).toHaveLength(2); // field binding + label binding for field2
+      expect(bindings1).toHaveLength(1); // label binding for field1
+      expect(bindings2).toHaveLength(1); // label binding for field2
     });
   });
 
@@ -283,22 +186,11 @@ describe('baseFieldMapper', () => {
         type: 'input',
       };
 
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ testField: '' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // field binding is created for existing fields
+      expect(bindings).toHaveLength(0);
     });
 
     it('should handle field definition with only excluded properties', () => {
@@ -310,22 +202,11 @@ describe('baseFieldMapper', () => {
         validation: { required: true },
       } as any;
 
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ testField: '' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // field binding is created for existing fields
+      expect(bindings).toHaveLength(0);
     });
   });
 
@@ -349,24 +230,13 @@ describe('baseFieldMapper', () => {
         conditionals: { show: true },
       } as any;
 
-      const value = signal({ complexField: 'complex value' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ complexField: 'complex value' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(complexFieldDef);
 
       // Assert
-      // Expected bindings: field + label + className + tabIndex + props + customAttribute + anotherCustomProp
+      // Expected bindings: label + className + tabIndex + props + customAttribute + anotherCustomProp
       // disabled, readonly, hidden are excluded
-      expect(bindings).toHaveLength(7);
+      expect(bindings).toHaveLength(6);
     });
 
     it('should verify field proxy access pattern', () => {
@@ -377,22 +247,11 @@ describe('baseFieldMapper', () => {
         label: 'Test Field',
       };
 
-      const value = signal({ testField: '' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ testField: 'test value' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(2); // field binding + label binding
+      expect(bindings).toHaveLength(1); // label binding
       // Verify that form access works correctly by checking bindings length
     });
 
@@ -404,17 +263,6 @@ describe('baseFieldMapper', () => {
         label: 'Missing Field',
         className: 'missing-class',
       };
-
-      const value = signal({ existingField: 'value' });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value,
-        defaultValues: () => ({ existingField: 'value' }),
-        form: runInInjectionContext(injector, () => form(value)),
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
       const bindings = baseFieldMapper(fieldDef);
@@ -445,20 +293,11 @@ describe('baseFieldMapper', () => {
         return form(initialValue, formSchema);
       });
 
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value: initialValue,
-        defaultValues: () => ({ username: '' }),
-        form: realForm,
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(3); // field binding + label + className
+      expect(bindings).toHaveLength(2); // label + className
     });
 
     it('should create only property bindings when form has no matching field', () => {
@@ -523,7 +362,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(2); // label binding + field binding (form creates field proxy for existing fields)
+      expect(bindings).toHaveLength(1); // label binding
     });
 
     it('should handle complex field definitions with real forms', () => {
@@ -545,35 +384,13 @@ describe('baseFieldMapper', () => {
         validation: { required: true },
       } as any;
 
-      const initialValue = signal({
-        profile: 'John Doe',
-        email: 'john@example.com',
-      });
-
-      const realForm = runInInjectionContext(injector, () => {
-        const formSchema = schema<{ profile: string; email: string }>((path) => {
-          void path.profile;
-          void path.email;
-        });
-        return form(initialValue, formSchema);
-      });
-
-      const mockFieldSignalContext: FieldSignalContext = {
-        injector,
-        value: initialValue,
-        defaultValues: () => ({ profile: '', email: '' }),
-        form: realForm,
-      };
-
-      const options = { fieldSignalContext: mockFieldSignalContext };
-
       // Act
       const bindings = baseFieldMapper(complexFieldDef);
 
       // Assert
-      // Expected: field + label + className + tabIndex + props + customAttribute
+      // Expected: label + className + tabIndex + props + customAttribute
       // disabled, readonly are excluded
-      expect(bindings).toHaveLength(6);
+      expect(bindings).toHaveLength(5);
     });
   });
 });

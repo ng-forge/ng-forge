@@ -3,3 +3,5 @@ export * from './field-config';
 export * from './form-config';
 export * from './field-type';
 export * from './global-types';
+export * from './field-option';
+export * from './validation-types';

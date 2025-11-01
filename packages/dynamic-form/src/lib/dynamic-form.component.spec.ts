@@ -1,11 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { DynamicForm } from './dynamic-form.component';
 import { delay, SimpleTestUtils, TestCheckboxHarnessComponent, TestInputHarnessComponent } from './testing';
 import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
 import { checkboxFieldMapper, valueFieldMapper } from './mappers';
 import { BUILT_IN_FIELDS } from './providers/built-in-fields';
 import { BaseCheckedField, BaseValueField } from './definitions';
-import { RegisteredFieldTypes } from './models';
 import { DebugElement } from '@angular/core';
 
 // Test specific form config type
@@ -35,18 +34,6 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
 describe('DynamicFormComponent', () => {
   const createComponent = (config: TestFormConfig = { fields: [] }, initialValue?: any) => {
     return SimpleTestUtils.createComponent(config, initialValue);
-  };
-
-  const waitForInit = async (fixture: ComponentFixture<any>) => {
-    return SimpleTestUtils.waitForInit(fixture);
-  };
-
-  const simulateInput = async (fixture: ComponentFixture<any>, selector: string, value: string) => {
-    return SimpleTestUtils.simulateInput(fixture, selector, value);
-  };
-
-  const assertFormValue = <T extends RegisteredFieldTypes[]>(component: DynamicForm<T>, expectedValue: T) => {
-    return SimpleTestUtils.assertFormValue(component, expectedValue);
   };
 
   beforeEach(async () => {

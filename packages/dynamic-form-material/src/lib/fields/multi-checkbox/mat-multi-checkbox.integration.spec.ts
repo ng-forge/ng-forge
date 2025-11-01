@@ -297,8 +297,6 @@ describe('MatMultiCheckboxFieldComponent - Dynamic Form Integration', () => {
 
       await delay();
       fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
 
       const checkboxes = debugElement.queryAll(By.directive(MatCheckbox));
 

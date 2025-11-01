@@ -1,18 +1,19 @@
 import { GroupFieldComponent } from './group-field.component';
-import { GroupField } from '../../definitions/default/group-field';
+import { GroupField } from '../../definitions';
 import { createSimpleTestField } from '../../testing';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import { FieldSignalContext } from '../../mappers';
-import { provideDynamicForm } from '../../providers/dynamic-form-providers';
-import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
+import { baseFieldMapper, FieldSignalContext } from '../../mappers';
+import { provideDynamicForm } from '../../providers';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models';
 
 describe('GroupFieldComponent', () => {
   function setupGroupTest(field: GroupField<any>, value?: Record<string, unknown>) {
     const mockFieldType: FieldTypeDefinition = {
       name: 'test',
-      loadComponent: async () => (await import('../../testing/simple-test-utils')).TestFieldComponent,
+      loadComponent: () => import('../../testing/simple-test-utils'),
+      mapper: baseFieldMapper,
     };
 
     TestBed.configureTestingModule({

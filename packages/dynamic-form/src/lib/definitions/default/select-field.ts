@@ -1,10 +1,5 @@
 import { BaseValueField } from '../base';
-
-export interface SelectOption<T> {
-  label: string;
-  value: T;
-  disabled?: boolean;
-}
+import { FieldOption } from '../../models/field-option';
 
 /**
  * Interface for select field fields
@@ -12,5 +7,5 @@ export interface SelectOption<T> {
 export interface SelectField<T, TProps extends Record<string, unknown>> extends BaseValueField<TProps, T> {
   type: 'select';
 
-  options: SelectOption<T>[];
+  options: FieldOption<T>[];
 }

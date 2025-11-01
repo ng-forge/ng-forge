@@ -3,26 +3,6 @@ import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 
-interface CompleteFormModel {
-  personalInfo: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-  };
-  preferences: {
-    country: string;
-    language: string;
-    plan: string;
-    notifications: string[];
-  };
-  agreements: {
-    newsletter: boolean;
-    terms: boolean;
-    privacy: boolean;
-  };
-}
-
 @Component({
   selector: 'app-complete-material-form',
   imports: [DynamicForm, JsonPipe],
@@ -73,24 +53,18 @@ interface CompleteFormModel {
   ],
 })
 export class CompleteMaterialFormComponent {
-  model = signal<CompleteFormModel>({
-    personalInfo: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-    },
-    preferences: {
-      country: '',
-      language: '',
-      plan: '',
-      notifications: [],
-    },
-    agreements: {
-      newsletter: false,
-      terms: false,
-      privacy: false,
-    },
+  model = signal({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    country: '',
+    language: '',
+    plan: '',
+    notifications: [],
+    newsletter: false,
+    terms: false,
+    privacy: false,
   });
 
   submitted(value: any): void {
@@ -101,7 +75,7 @@ export class CompleteMaterialFormComponent {
     fields: [
       // Personal Information Section
       {
-        key: 'personalInfo.firstName',
+        key: 'firstName',
         type: 'input',
         label: 'First Name',
         props: {
@@ -115,7 +89,7 @@ export class CompleteMaterialFormComponent {
         },
       },
       {
-        key: 'personalInfo.lastName',
+        key: 'lastName',
         type: 'input',
         props: {
           label: 'Last Name',
@@ -129,7 +103,7 @@ export class CompleteMaterialFormComponent {
         },
       },
       {
-        key: 'personalInfo.email',
+        key: 'email',
         type: 'input',
         label: 'Email Address',
         props: {
@@ -145,7 +119,7 @@ export class CompleteMaterialFormComponent {
         },
       },
       {
-        key: 'personalInfo.phone',
+        key: 'phone',
         type: 'input',
         label: 'Phone Number',
         props: {
@@ -158,64 +132,65 @@ export class CompleteMaterialFormComponent {
 
       // Preferences Section
       {
-        key: 'preferences.country',
+        key: 'country',
         type: 'select',
         label: 'Country',
         props: {
           placeholder: 'Select your country',
           appearance: 'outline',
-          required: true,
-          options: [
-            { value: 'us', label: 'United States' },
-            { value: 'uk', label: 'United Kingdom' },
-            { value: 'ca', label: 'Canada' },
-            { value: 'au', label: 'Australia' },
-            { value: 'de', label: 'Germany' },
-            { value: 'fr', label: 'France' },
-            { value: 'jp', label: 'Japan' },
-          ],
         },
         validation: {
           required: true,
         },
+        required: true,
+        options: [
+          { value: 'us', label: 'United States' },
+          { value: 'uk', label: 'United Kingdom' },
+          { value: 'ca', label: 'Canada' },
+          { value: 'au', label: 'Australia' },
+          { value: 'de', label: 'Germany' },
+          { value: 'fr', label: 'France' },
+          { value: 'jp', label: 'Japan' },
+        ],
       },
       {
-        key: 'preferences.language',
+        key: 'language',
         type: 'select',
         label: 'Language',
         props: {
           placeholder: 'Select your language',
           appearance: 'outline',
-          options: [
-            { value: 'en', label: 'English' },
-            { value: 'es', label: 'Spanish' },
-            { value: 'fr', label: 'French' },
-            { value: 'de', label: 'German' },
-            { value: 'ja', label: 'Japanese' },
-          ],
         },
+        options: [
+          { value: 'en', label: 'English' },
+          { value: 'es', label: 'Spanish' },
+          { value: 'fr', label: 'French' },
+          { value: 'de', label: 'German' },
+          { value: 'ja', label: 'Japanese' },
+        ],
       },
       {
-        key: 'preferences.plan',
+        key: 'plan',
         type: 'select',
         label: 'Subscription Plan',
+        required: true,
         props: {
           placeholder: 'Choose your plan',
           appearance: 'outline',
-          required: true,
           hint: 'You can upgrade or downgrade anytime',
-          options: [
-            { value: 'free', label: 'Free - $0/month', description: 'Basic features' },
-            { value: 'pro', label: 'Pro - $10/month', description: 'Advanced features' },
-            { value: 'enterprise', label: 'Enterprise - $50/month', description: 'Full features + support' },
-          ],
+
         },
         validation: {
           required: true,
         },
+        options: [
+          { value: 'free', label: 'Free - $0/month' },
+          { value: 'pro', label: 'Pro - $10/month' },
+          { value: 'enterprise', label: 'Enterprise - $50/month' },
+        ],
       },
       {
-        key: 'preferences.notifications',
+        key: 'notifications',
         type: 'select',
         label: 'Notification Types',
         props: {
@@ -223,18 +198,18 @@ export class CompleteMaterialFormComponent {
           appearance: 'outline',
           multiple: true,
           hint: 'Select all that apply',
-          options: [
-            { value: 'email', label: 'Email notifications' },
-            { value: 'sms', label: 'SMS notifications' },
-            { value: 'push', label: 'Push notifications' },
-            { value: 'newsletter', label: 'Newsletter' },
-          ],
         },
+        options: [
+          { value: 'email', label: 'Email notifications' },
+          { value: 'sms', label: 'SMS notifications' },
+          { value: 'push', label: 'Push notifications' },
+          { value: 'newsletter', label: 'Newsletter' },
+        ],
       },
 
       // Agreements Section
       {
-        key: 'agreements.newsletter',
+        key: 'newsletter',
         type: 'checkbox',
         label: 'Subscribe to newsletter',
         props: {
@@ -243,25 +218,25 @@ export class CompleteMaterialFormComponent {
         },
       },
       {
-        key: 'agreements.terms',
+        key: 'terms',
         type: 'checkbox',
         label: 'I agree to the Terms and Conditions',
         props: {
           color: 'primary',
-          required: true,
         },
+        required: true,
         validation: {
           required: true,
         },
       },
       {
-        key: 'agreements.privacy',
+        key: 'privacy',
         type: 'checkbox',
         label: 'I agree to the Privacy Policy',
         props: {
           color: 'primary',
-          required: true,
         },
+        required: true,
         validation: {
           required: true,
         },

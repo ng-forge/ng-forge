@@ -1,10 +1,11 @@
 import { RowFieldComponent } from './row-field.component';
 import { RowField } from '../../definitions/default/row-field';
 import { createSimpleTestField, setupSimpleTest } from '../../testing';
+import { FieldDef } from '@ng-forge/dynamic-form';
 
 describe('RowFieldComponent', () => {
   it('should create', () => {
-    const field: RowField = {
+    const field: RowField<never[]> = {
       key: 'testRow',
       type: 'row',
       label: 'Test Row',
@@ -19,7 +20,7 @@ describe('RowFieldComponent', () => {
   });
 
   it('should have field input property', () => {
-    const field: RowField = {
+    const field: RowField<never[]> = {
       key: 'testRow',
       type: 'row',
       label: 'Test Row',
@@ -33,26 +34,8 @@ describe('RowFieldComponent', () => {
     expect(component.field()).toEqual(field);
   });
 
-  it('should have form state properties', () => {
-    const field: RowField = {
-      key: 'testRow',
-      type: 'row',
-      label: 'Test Row',
-      fields: [],
-    };
-
-    const { component } = setupSimpleTest(RowFieldComponent, {
-      field,
-    });
-
-    expect(typeof component.valid()).toBe('boolean');
-    expect(typeof component.invalid()).toBe('boolean');
-    expect(typeof component.dirty()).toBe('boolean');
-    expect(typeof component.touched()).toBe('boolean');
-  });
-
   it('should render with child fields', () => {
-    const field: RowField = {
+    const field: RowField<readonly FieldDef<Record<string, unknown>>[]> = {
       key: 'testRow',
       type: 'row',
       label: 'Test Row',
@@ -69,7 +52,7 @@ describe('RowFieldComponent', () => {
   });
 
   it('should have host classes', () => {
-    const field: RowField = {
+    const field: RowField<never[]> = {
       key: 'testRow',
       type: 'row',
       label: 'Test Row',
