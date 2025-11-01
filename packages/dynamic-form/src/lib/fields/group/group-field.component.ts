@@ -11,7 +11,6 @@ import {
   runInInjectionContext,
   untracked,
   ViewContainerRef,
-  WritableSignal,
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs';
@@ -21,7 +20,8 @@ import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-fi
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions';
-import { FieldSignalContext, getFieldDefaultValue } from '../../mappers';
+import { FieldSignalContext } from '../../mappers';
+import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { createSchemaFromFields } from '../../core';
 import { EventBus, SubmitEvent } from '../../events';
@@ -54,7 +54,7 @@ import { flattenFields } from '../../utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
-export default class GroupFieldComponent<T extends readonly FieldDef<Record<string, unknown>>[]> {
+export default class GroupFieldComponent<T extends readonly FieldDef<Record<string, unknown>>[], TModel = Record<string, unknown>> {
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
@@ -63,13 +63,15 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
   /** Field configuration input */
   field = input.required<GroupField<T>>();
 
-  // Form value model for two-way binding
-  value = model<any>(undefined);
+  // Parent form context inputs
+  parentForm = input.required<ReturnType<typeof form<TModel>>>();
+  parentFieldSignalContext = input.required<FieldSignalContext<TModel>>();
+
+  // Form value model for two-way binding (represents the nested group value)
+  value = model<Record<string, unknown> | undefined>(undefined);
 
   private readonly formSetup = computed(() => {
     const groupField = this.field();
-
-    this.fieldSignals.clear();
 
     if (groupField.fields && groupField.fields.length > 0) {
       const flattenedFields = flattenFields(groupField.fields);
@@ -92,19 +94,18 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
 
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
 
-  // Create reactive group value signal that extracts group-specific values from form
+  // Create reactive group value signal that extracts group-specific values from parent form
   private readonly entity = linkedSignal(() => {
-    const inputValue = this.value();
+    const parentValue = this.parentFieldSignalContext().value();
     const groupKey = this.field().key;
     const defaults = this.defaultValues();
 
-    // For group fields, we need to nest values under the group key
-    const groupValue = get(inputValue, groupKey) || {};
+    // Extract the group's nested values from parent form
+    const groupValue = get(parentValue, groupKey) || {};
     return { ...defaults, ...groupValue };
   });
 
-  private readonly fieldSignals = new Map<string, WritableSignal<unknown>>();
-
+  // Create nested form for this group
   private readonly form = computed(() => {
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
@@ -141,7 +142,7 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
   // Create field fields following the dynamic form pattern
   fields = toSignal(
     this.fields$.pipe(
-      switchMap((fields) => {
+      switchMap((fields: FieldDef<Record<string, unknown>>[]) => {
         if (!fields || fields.length === 0) {
           return of([]);
         }
@@ -149,10 +150,11 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
         return combineLatest(this.mapFields(fields));
       }),
       map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
-    )
+    ),
+    { initialValue: [] }
   );
 
-  private mapFields(fields: readonly any[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: readonly FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map(async (fieldDef) => {
         let componentType;
@@ -164,16 +166,16 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
         }
 
         // Create nested field signal context for group children
-        // Group values are nested under the group's key
-        const fieldSignalContext: FieldSignalContext<any> = {
+        // This creates a new form context scoped to this group
+        const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
           injector: this.injector,
-          value: this.value,
+          value: this.parentFieldSignalContext().value, // Pass through the parent's value signal
           defaultValues: this.defaultValues,
+          form: this.form() as ReturnType<typeof form<Record<string, unknown>>>, // Use this group's nested form
         };
 
         const bindings = mapFieldToBindings(fieldDef, {
-          fieldSignalContext,
-          fieldSignals: this.fieldSignals,
+          fieldSignalContext: groupFieldSignalContext,
           fieldRegistry: this.fieldRegistry.raw,
         });
 

@@ -1,43 +1,56 @@
 import { FieldDef } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
-import { entries, omit } from 'lodash-es';
+import { entries } from 'lodash-es';
+import { FieldMapperOptions } from '../types';
 
-export function baseFieldMapper({ disabled, readonly, hidden, label, className, tabIndex, props, ...fieldDef }: FieldDef<any>): Binding[] {
+export function baseFieldMapper(fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
+  const { key, label, className, tabIndex, props } = fieldDef;
   const bindings: Binding[] = [];
 
-  if (disabled) {
-    bindings.push(inputBinding('disabled', () => disabled));
+  const formRoot = options.fieldSignalContext.form();
+  const childrenMap = (formRoot as any).structure?.childrenMap?.();
+
+  const formField = childrenMap?.get(key);
+  if (formField?.fieldProxy) {
+    bindings.push(inputBinding('field', () => formField.fieldProxy));
   }
 
-  if (readonly) {
-    bindings.push(inputBinding('readonly', () => readonly));
-  }
-
-  if (hidden) {
-    bindings.push(inputBinding('hidden', () => hidden));
-  }
-
-  if (label) {
+  if (label !== undefined) {
     bindings.push(inputBinding('label', () => label));
   }
 
-  if (className) {
+  if (className !== undefined) {
     bindings.push(inputBinding('className', () => className));
   }
 
-  if (tabIndex) {
+  if (tabIndex !== undefined) {
     bindings.push(inputBinding('tabIndex', () => tabIndex));
   }
 
-  if (props) {
+  if (props !== undefined) {
     bindings.push(inputBinding('props', () => props));
   }
 
-  const remainingProperties = omit(fieldDef, ['key', 'type', 'conditionals', 'validation']);
+  const excludedKeys = new Set([
+    'key',
+    'type',
+    'conditionals',
+    'validation',
+    'label',
+    'className',
+    'tabIndex',
+    'props',
+    'disabled',
+    'readonly',
+    'hidden',
+    'required',
+  ]);
 
-  entries(remainingProperties).forEach(([key, value]) => {
-    bindings.push(inputBinding(key, () => value));
-  });
+  for (const [key, value] of entries(fieldDef)) {
+    if (!excludedKeys.has(key) && value !== undefined) {
+      bindings.push(inputBinding(key, () => value));
+    }
+  }
 
   return bindings;
 }

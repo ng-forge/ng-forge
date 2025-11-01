@@ -6,6 +6,7 @@ import { checkboxFieldMapper, valueFieldMapper } from './mappers';
 import { BUILT_IN_FIELDS } from './providers/built-in-fields';
 import { BaseCheckedField, BaseValueField } from './definitions';
 import { RegisteredFieldTypes } from './models';
+import { DebugElement } from '@angular/core';
 
 // Test specific form config type
 type TestFormConfig = {
@@ -21,18 +22,12 @@ type TestFormConfig = {
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: 'input',
-    loadComponent: async () => {
-      const module = await import('./testing/harnesses/test-input.harness');
-      return module.default;
-    },
+    loadComponent: () => import('./testing/harnesses/test-input.harness'),
     mapper: valueFieldMapper,
   },
   {
     name: 'checkbox',
-    loadComponent: async () => {
-      const module = await import('./testing/harnesses/test-checkbox.harness');
-      return module.default;
-    },
+    loadComponent: () => import('./testing/harnesses/test-checkbox.harness'),
     mapper: checkboxFieldMapper,
   },
 ];
@@ -320,9 +315,9 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      // When no default value is specified, undefined is used initially
+      // When no default value is specified, type-appropriate defaults are used
       expect(component.formValue()).toEqual({
-        firstName: undefined,
+        firstName: '',
         isActive: false,
       });
     });
@@ -659,7 +654,7 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
       // Find the test input component and simulate user input
-      const testInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestInputHarnessComponent);
+      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
       expect(testInput).toBeTruthy();
 
       // Simulate user typing new value
@@ -700,13 +695,14 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({ isActive: false });
 
       // Find the test checkbox component and simulate user interaction
-      const testCheckbox = fixture.debugElement.query((by) => by.componentInstance instanceof TestCheckboxHarnessComponent);
+      const testCheckbox = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestCheckboxHarnessComponent);
       expect(testCheckbox).toBeTruthy();
 
       // Simulate user checking the checkbox
       const checkboxElement = testCheckbox.nativeElement.querySelector('input[type="checkbox"]');
       checkboxElement.checked = true;
-      checkboxElement.dispatchEvent(new Event('change'));
+      checkboxElement.dispatchEvent(new Event('change', { bubbles: true }));
+      checkboxElement.dispatchEvent(new Event('input', { bubbles: true }));
       fixture.detectChanges();
 
       // Wait for changes to propagate
@@ -753,7 +749,9 @@ describe('DynamicFormComponent', () => {
       });
 
       // Update first name
-      const firstNameInput = fixture.debugElement.queryAll((by) => by.componentInstance instanceof TestInputHarnessComponent)[0];
+      const firstNameInput = fixture.debugElement.queryAll(
+        (by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent
+      )[0];
       const firstNameElement = firstNameInput.nativeElement.querySelector('input');
       firstNameElement.value = 'Jane';
       firstNameElement.dispatchEvent(new Event('input'));
@@ -769,10 +767,11 @@ describe('DynamicFormComponent', () => {
       });
 
       // Update checkbox
-      const checkboxInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestCheckboxHarnessComponent);
+      const checkboxInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestCheckboxHarnessComponent);
       const checkboxElement = checkboxInput.nativeElement.querySelector('input[type="checkbox"]');
       checkboxElement.checked = true;
-      checkboxElement.dispatchEvent(new Event('change'));
+      checkboxElement.dispatchEvent(new Event('change', { bubbles: true }));
+      checkboxElement.dispatchEvent(new Event('input', { bubbles: true }));
       fixture.detectChanges();
 
       await delay();
@@ -818,7 +817,7 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
       // Simulate user input
-      const testInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestInputHarnessComponent);
+      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
       const inputElement = testInput.nativeElement.querySelector('input');
       inputElement.value = 'Jane';
       inputElement.dispatchEvent(new Event('input'));
@@ -1071,7 +1070,7 @@ describe('DynamicFormComponent', () => {
       expect(initialValue).toEqual({ firstName: 'John' });
 
       // Simulate user input to test state tracking
-      const testInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestInputHarnessComponent);
+      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
       if (testInput) {
         const inputElement = testInput.nativeElement.querySelector('input');
         if (inputElement) {
@@ -1097,13 +1096,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: null as any,
+            defaultValue: null,
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: undefined as any,
+            defaultValue: undefined,
           },
         ],
       };
@@ -1180,7 +1179,7 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      const testInput = fixture.debugElement.query((by) => by.componentInstance instanceof TestInputHarnessComponent);
+      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
       const inputElement = testInput.nativeElement.querySelector('input');
 
       // Rapid changes

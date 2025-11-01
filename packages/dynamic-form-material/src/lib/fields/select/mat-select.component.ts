@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatHint } from '@angular/material/input';
@@ -10,8 +9,10 @@ import { SelectOption } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'df-mat-select',
-  imports: [FormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatErrorsComponent],
+  imports: [MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatErrorsComponent, Field],
   template: `
+    @let f = field();
+
     <mat-form-field
       [appearance]="props()?.appearance || 'fill'"
       [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'"
@@ -22,12 +23,10 @@ import { SelectOption } from '@ng-forge/dynamic-form';
       }
 
       <mat-select
-        [(ngModel)]="value"
+        [field]="f"
         [placeholder]="placeholder() || ''"
         [multiple]="props()?.multiple || false"
-        [disabled]="disabled()"
         [compareWith]="props()?.compareWith || defaultCompare"
-        (blur)="touched.set(true)"
       >
         @for (option of options(); track option.value) {
         <mat-option [value]="option.value" [disabled]="option.disabled || false">
@@ -40,22 +39,13 @@ import { SelectOption } from '@ng-forge/dynamic-form';
       <mat-hint>{{ hint }}</mat-hint>
       }
 
-      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
+      <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </mat-form-field>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatSelectFieldComponent<T> implements FormValueControl<T>, MatSelectComponent<T> {
-  readonly value = model<T>(undefined as T);
-
-  readonly required = input<boolean>(false);
-  readonly disabled = input<boolean>(false);
-  readonly readonly = input<boolean>(false);
-  readonly hidden = input<boolean>(false);
-  readonly touched = model<boolean>(false);
-  readonly invalid = model<boolean>(false);
-
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+export default class MatSelectFieldComponent<T> implements MatSelectComponent<T> {
+  readonly field = input.required<FieldTree<T>>();
 
   readonly label = input<string>('');
   readonly placeholder = input<string>('');

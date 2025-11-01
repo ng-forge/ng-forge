@@ -186,10 +186,7 @@ export interface SimpleComponentTestResult<T = any> {
 /**
  * Creates a simple test setup for individual field components
  */
-export function setupSimpleTest<T>(
-  componentType: Type<T>,
-  config: SimpleComponentTestConfig
-): SimpleComponentTestResult<T> {
+export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleComponentTestConfig): SimpleComponentTestResult<T> {
   const mockFieldType: FieldTypeDefinition = {
     name: 'test',
     loadComponent: async () => TestFieldComponent,

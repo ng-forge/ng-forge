@@ -1,18 +1,14 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import { FormCheckboxControl } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 
 @Component({
   selector: 'df-test-checkbox',
-  template: `<input type="checkbox" [checked]="checked()" (change)="checked.set($any($event.target).checked)" />`,
+  template: ` <input type="checkbox" [field]="field()" /> `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Field],
 })
-export default class TestCheckboxHarness implements FormCheckboxControl {
-  readonly checked = model<boolean>(false);
-  readonly disabled = input<boolean>(false);
-  readonly required = input<boolean>(false);
-  readonly errors = input<readonly any[]>([]);
-  readonly touched = model<boolean>(false);
-  readonly invalid = model<boolean>(false);
+export default class TestCheckboxHarness {
+  readonly field = input.required<FieldTree<boolean>>();
 
   // Field-specific properties
   readonly label = input<string>('');

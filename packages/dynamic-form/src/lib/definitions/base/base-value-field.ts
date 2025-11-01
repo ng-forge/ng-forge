@@ -29,6 +29,17 @@ export function isValueField<TProps extends Record<string, unknown>, TValue exte
   );
 }
 
-type ExcludedKeys = 'type' | 'key' | 'conditionals' | 'value' | 'valueType' | 'defaultValue' | 'col' | keyof FieldWithValidation;
+type ExcludedKeys =
+  | 'type'
+  | 'key'
+  | 'conditionals'
+  | 'value'
+  | 'valueType'
+  | 'defaultValue'
+  | 'disabled'
+  | 'readonly'
+  | 'hidden'
+  | 'col'
+  | keyof FieldWithValidation;
 
 export type ValueFieldComponent<T extends BaseValueField<any, any>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
@@ -8,8 +7,10 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 
 @Component({
   selector: 'df-mat-textarea',
-  imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent],
+  imports: [MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent, Field],
   template: `
+    @let f = field();
+
     <mat-form-field
       [appearance]="props()?.appearance || 'fill'"
       [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'"
@@ -21,37 +22,26 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 
       <textarea
         matInput
-        [(ngModel)]="value"
+        [field]="f"
         [placeholder]="placeholder() || ''"
-        [disabled]="disabled()"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
-        [maxlength]="maxLength() || null"
+        [maxLength]="maxLength() || null"
         [attr.tabindex]="tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
-        (blur)="touched.set(true)"
       ></textarea>
 
       @if (props()?.hint; as hint) {
       <mat-hint>{{ hint }}</mat-hint>
       }
 
-      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
+      <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </mat-form-field>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatTextareaFieldComponent implements FormValueControl<string>, MatTextareaComponent {
-  readonly value = model<string>('');
-
-  readonly required = input<boolean>(false);
-  readonly disabled = input<boolean>(false);
-  readonly readonly = input<boolean>(false);
-  readonly hidden = input<boolean>(false);
-  readonly touched = model<boolean>(false);
-  readonly invalid = model<boolean>(false);
-
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+export default class MatTextareaFieldComponent implements MatTextareaComponent {
+  readonly field = input.required<FieldTree<string>>();
 
   readonly label = input<string>('');
   readonly placeholder = input<string>('');

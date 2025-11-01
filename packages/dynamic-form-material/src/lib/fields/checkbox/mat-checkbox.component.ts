@@ -1,23 +1,23 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FormCheckboxControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, FormsModule, MatErrorsComponent],
+  imports: [MatCheckbox, MatErrorsComponent, Field],
   template: `
+    @let f = field();
+
     <mat-checkbox
-      [(ngModel)]="checked"
+      [field]="f"
       [labelPosition]="props()?.labelPosition || 'after'"
       [indeterminate]="props()?.indeterminate || false"
       [color]="props()?.color || 'primary'"
-      [disabled]="disabled()"
+      [disabled]="f().disabled()"
       [disableRipple]="props()?.disableRipple || false"
       [attr.tabindex]="tabIndex()"
-      (blur)="touched.set(true)"
     >
       {{ label() }}
     </mat-checkbox>
@@ -25,7 +25,7 @@ import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint }}</div>
     }
-    <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
+    <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
   `,
   styles: [
     `
@@ -35,27 +35,17 @@ import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
     `,
   ],
   host: {
-    class: 'className()',
+    '[class]': 'className()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatCheckboxFieldComponent implements FormCheckboxControl, MatCheckboxComponent {
-  readonly checked = model.required<boolean>();
+export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
+  readonly field = input.required<FieldTree<boolean>>();
 
-  readonly required = input<boolean>(false);
-  readonly disabled = input<boolean>(false);
-  readonly readonly = input<boolean>(false);
-  readonly hidden = input<boolean>(false);
-  readonly touched = model<boolean>(false);
-  readonly invalid = model<boolean>(false);
-
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
-
+  // Properties
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
-
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
-
   readonly props = input<MatCheckboxProps>();
 }

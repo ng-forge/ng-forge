@@ -11,23 +11,23 @@ import {
   runInInjectionContext,
   untracked,
   ViewContainerRef,
-  WritableSignal,
 } from '@angular/core';
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs';
 import { keyBy, mapValues } from 'lodash-es';
-import { FieldSignalContext, getFieldDefaultValue } from './mappers/utils/field-signal-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FormConfig, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
-import { createSchemaFromFields } from './core/schema-factory';
+import { createSchemaFromFields } from './core/schema-factory/schema-factory';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { InferGlobalFormValue } from './models/global-types';
 import { flattenFields } from './utils';
 import { FieldDef } from './definitions';
+import { getFieldDefaultValue } from './utils/default-value/default-value';
+import { FieldSignalContext } from './mappers';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -56,15 +56,12 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
   private readonly formSetup = computed(() => {
     const config = this.config();
 
-    this.fieldSignals.clear();
-
     if (config.fields && config.fields.length > 0) {
       const flattenedFields = flattenFields(config.fields);
       const fieldsById = keyBy(flattenedFields, 'key');
       const defaultValues = mapValues(fieldsById, (field) => getFieldDefaultValue(field)) as TModel;
 
       return {
-        approach: 'fields' as const,
         fields: flattenedFields,
         originalFields: config.fields,
         defaultValues,
@@ -74,7 +71,6 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
     // Fallback: empty form
     return {
-      approach: 'fields' as const,
       fields: [],
       defaultValues: {} as TModel,
       schema: undefined,
@@ -89,8 +85,6 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
     return { ...defaults, ...inputValue } as TModel;
   });
-
-  private readonly fieldSignals = new Map<string, WritableSignal<unknown>>();
 
   readonly formOptions = computed(() => {
     const config = this.config();
@@ -157,11 +151,11 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
           injector: this.injector,
           value: this.value,
           defaultValues: this.defaultValues,
+          form: this.form(),
         };
 
         const bindings = mapFieldToBindings(fieldDef, {
           fieldSignalContext,
-          fieldSignals: this.fieldSignals,
           fieldRegistry: this.fieldRegistry.raw,
         });
 

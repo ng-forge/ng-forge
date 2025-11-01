@@ -17,6 +17,16 @@ export function isCheckedField<TProps extends Record<string, unknown>>(field: Fi
   return 'checked' in field && typeof (field as { checked: unknown }).checked === 'boolean';
 }
 
-type ExcludedKeys = 'type' | 'key' | 'conditionals' | 'defaultValue' | 'checked' | 'col' | keyof FieldWithValidation;
+type ExcludedKeys =
+  | 'type'
+  | 'key'
+  | 'conditionals'
+  | 'defaultValue'
+  | 'checked'
+  | 'disabled'
+  | 'readonly'
+  | 'hidden'
+  | 'col'
+  | keyof FieldWithValidation;
 
 export type CheckedFieldComponent<T extends BaseCheckedField<any>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

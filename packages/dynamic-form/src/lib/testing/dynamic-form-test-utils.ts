@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { inputBinding, twoWayBinding } from '@angular/core';
+import { inputBinding } from '@angular/core';
 import { ValidationError } from '@angular/forms/signals';
 import { DynamicForm } from '../dynamic-form.component';
 import { FormConfig } from '../models';
@@ -7,7 +7,7 @@ import { FieldDef } from '../definitions';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { delay } from './delay';
 import { valueFieldMapper } from '../mappers/value/value-field.mapper';
-import { getFieldSignal } from '../mappers/utils/field-signal-utils';
+import { checkboxFieldMapper } from '../mappers/checkbox/checkbox-field-mapper';
 import { FieldMapperOptions } from '../mappers/types';
 
 /**
@@ -124,10 +124,10 @@ export class DynamicFormTestUtils {
     fixture.detectChanges();
     await DynamicFormTestUtils.waitForInit(fixture as ComponentFixture<DynamicForm>);
 
-    return { 
-      component: component as DynamicForm, 
-      fixture: fixture as ComponentFixture<DynamicForm>, 
-      fieldRegistry 
+    return {
+      component: component as DynamicForm,
+      fixture: fixture as ComponentFixture<DynamicForm>,
+      fieldRegistry,
     };
   }
 
@@ -160,15 +160,7 @@ export class DynamicFormTestUtils {
 
     // Checkbox field mapper - uses checked instead of value
     const checkboxMapper = (fieldDef: FieldDef<Record<string, unknown>>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
-      const bindings = [inputBinding('required', () => fieldDef.props?.['required'] || false)];
-
-      // Add two-way binding for checked if options are provided
-      if (options && 'fieldSignalContext' in options && 'fieldSignals' in options) {
-        const defaultValue = 'defaultValue' in fieldDef ? fieldDef.defaultValue : false;
-        const fieldSignal = getFieldSignal(fieldDef.key, defaultValue ?? false, options.fieldSignalContext, options.fieldSignals);
-        bindings.push(twoWayBinding('checked', fieldSignal));
-      }
-
+      const bindings = checkboxFieldMapper(fieldDef, options);
       return bindings;
     };
 

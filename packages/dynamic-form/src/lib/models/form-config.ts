@@ -4,7 +4,10 @@ import { InferFormValue, RegisteredFieldTypes } from './global-types';
 /**
  * Form configuration interface that uses registered field types for type safety
  */
-export interface FormConfig<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TValue = InferFormValue<TFields>> {
+export interface FormConfig<
+  TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[],
+  TValue = InferFormValue<TFields>
+> {
   readonly fields: TFields;
   readonly schema?: Schema<TValue>;
   readonly options?: FormOptions;

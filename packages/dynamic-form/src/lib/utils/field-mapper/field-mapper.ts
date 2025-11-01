@@ -8,14 +8,9 @@ import { baseFieldMapper, FieldMapperOptions } from '../../mappers';
  */
 export function mapFieldToBindings<TModel = any>(
   fieldDef: FieldDef<Record<string, unknown>>,
-  options?: FieldMapperOptions<TModel>
+  options: FieldMapperOptions<TModel>
 ): Binding[] {
-  const fieldRegistry = options?.fieldRegistry;
-
-  if (!fieldRegistry) {
-    // Fallback to base mapper if no registry provided
-    return baseFieldMapper(fieldDef);
-  }
+  const fieldRegistry = options.fieldRegistry;
 
   // Get the field type definition from registry
   const fieldType = fieldRegistry.get(fieldDef.type);
@@ -26,5 +21,5 @@ export function mapFieldToBindings<TModel = any>(
   }
 
   // Fallback to base mapper
-  return baseFieldMapper(fieldDef);
+  return baseFieldMapper(fieldDef, { fieldSignalContext: options.fieldSignalContext });
 }

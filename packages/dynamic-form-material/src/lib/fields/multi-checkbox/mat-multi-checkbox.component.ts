@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, input, linkedSignal, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
@@ -11,17 +10,17 @@ import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [FormsModule, MatCheckbox, MatErrorsComponent, ValueInArrayPipe],
+  imports: [MatCheckbox, MatErrorsComponent, ValueInArrayPipe],
   template: `
-    @if (label(); as label) {
+    @let f = field(); @if (label(); as label) {
     <div class="checkbox-group-label">{{ label }}</div>
     }
 
     <div class="checkbox-group">
-      @for (option of options(); track option.value; let $idx = $index) {
+      @for (option of options(); track option.value) {
       <mat-checkbox
         [checked]="option | inArray : valueViewModel()"
-        [disabled]="disabled() || option.disabled"
+        [disabled]="f().disabled() || option.disabled"
         [color]="props()?.color || 'primary'"
         [labelPosition]="props()?.labelPosition || 'after'"
         (change)="onCheckboxChange(option, $event.checked)"
@@ -35,7 +34,7 @@ import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
     <div class="mat-hint">{{ hint }}</div>
     }
 
-    <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
+    <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
   `,
   styles: [
     `
@@ -50,17 +49,8 @@ import { MultiCheckboxOption, ValueType } from '@ng-forge/dynamic-form';
   providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatMultiCheckboxFieldComponent<T extends ValueType> implements FormValueControl<T[]>, MatMultiCheckboxComponent<T> {
-  readonly value = model.required<T[]>();
-
-  readonly required = input<boolean>(false);
-  readonly disabled = input<boolean>(false);
-  readonly readonly = input<boolean>(false);
-  readonly hidden = input<boolean>(false);
-  readonly touched = model<boolean>(false);
-  readonly invalid = model<boolean>(false);
-
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+export default class MatMultiCheckboxFieldComponent<T extends ValueType> implements MatMultiCheckboxComponent<T> {
+  readonly field = input.required<FieldTree<T[]>>();
 
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
@@ -73,7 +63,7 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
 
   valueViewModel = linkedSignal<MultiCheckboxOption<T>[]>(
     () => {
-      const currentValues = this.value();
+      const currentValues = this.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual }
@@ -83,8 +73,8 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);
 
-      if (!isEqual(selectedValues, this.value())) {
-        this.value.set(selectedValues);
+      if (!isEqual(selectedValues, this.field()().value())) {
+        this.field()().value.set(selectedValues);
       }
     });
 

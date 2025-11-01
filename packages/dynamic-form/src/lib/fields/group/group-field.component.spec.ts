@@ -1,8 +1,58 @@
 import { GroupFieldComponent } from './group-field.component';
 import { GroupField } from '../../definitions/default/group-field';
-import { createSimpleTestField, setupSimpleTest } from '../../testing';
+import { createSimpleTestField } from '../../testing';
+import { TestBed } from '@angular/core/testing';
+import { Injector, runInInjectionContext, signal } from '@angular/core';
+import { form } from '@angular/forms/signals';
+import { FieldSignalContext } from '../../mappers';
+import { provideDynamicForm } from '../../providers/dynamic-form-providers';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
 
 describe('GroupFieldComponent', () => {
+  function setupGroupTest(field: GroupField<any>, value?: Record<string, unknown>) {
+    const mockFieldType: FieldTypeDefinition = {
+      name: 'test',
+      loadComponent: async () => (await import('../../testing/simple-test-utils')).TestFieldComponent,
+    };
+
+    TestBed.configureTestingModule({
+      imports: [GroupFieldComponent],
+      providers: [
+        provideDynamicForm(),
+        {
+          provide: FIELD_REGISTRY,
+          useValue: new Map([['test', mockFieldType]]),
+        },
+      ],
+    });
+
+    const fixture = TestBed.createComponent(GroupFieldComponent);
+    const component = fixture.componentInstance;
+    const injector = TestBed.inject(Injector);
+
+    const valueSignal = signal(value || {});
+    const defaultValues = () => ({});
+    const testForm = runInInjectionContext(injector, () => form(valueSignal));
+
+    const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
+      injector,
+      value: valueSignal,
+      defaultValues,
+      form: testForm,
+    };
+
+    fixture.componentRef.setInput('field', field);
+    fixture.componentRef.setInput('parentForm', testForm);
+    fixture.componentRef.setInput('parentFieldSignalContext', mockFieldSignalContext);
+    if (value !== undefined) {
+      fixture.componentRef.setInput('value', value);
+    }
+
+    fixture.detectChanges();
+
+    return { component, fixture };
+  }
+
   it('should create', () => {
     const field: GroupField<any> = {
       key: 'testGroup',
@@ -11,9 +61,7 @@ describe('GroupFieldComponent', () => {
       fields: [],
     };
 
-    const { component } = setupSimpleTest(GroupFieldComponent, {
-      field,
-    });
+    const { component } = setupGroupTest(field);
 
     expect(component).toBeTruthy();
   });
@@ -26,9 +74,7 @@ describe('GroupFieldComponent', () => {
       fields: [],
     };
 
-    const { component } = setupSimpleTest(GroupFieldComponent, {
-      field,
-    });
+    const { component } = setupGroupTest(field);
 
     expect(component.field()).toEqual(field);
   });
@@ -41,9 +87,7 @@ describe('GroupFieldComponent', () => {
       fields: [],
     };
 
-    const { fixture } = setupSimpleTest(GroupFieldComponent, {
-      field,
-    });
+    const { fixture } = setupGroupTest(field);
 
     const legend = fixture.nativeElement.querySelector('.lib-group-field__legend');
     expect(legend).toBeTruthy();
@@ -58,9 +102,7 @@ describe('GroupFieldComponent', () => {
       fields: [],
     };
 
-    const { component } = setupSimpleTest(GroupFieldComponent, {
-      field,
-    });
+    const { component } = setupGroupTest(field);
 
     expect(typeof component.valid()).toBe('boolean');
     expect(typeof component.invalid()).toBe('boolean');
@@ -76,10 +118,7 @@ describe('GroupFieldComponent', () => {
       fields: [createSimpleTestField('field1', 'Field 1'), createSimpleTestField('field2', 'Field 2')],
     };
 
-    const { fixture } = setupSimpleTest(GroupFieldComponent, {
-      field,
-      value: { field1: 'value1', field2: 'value2' },
-    });
+    const { fixture } = setupGroupTest(field, { field1: 'value1', field2: 'value2' });
 
     const content = fixture.nativeElement.querySelector('.lib-group-field__content');
     expect(content).toBeTruthy();
@@ -93,9 +132,7 @@ describe('GroupFieldComponent', () => {
       fields: [],
     };
 
-    const { fixture } = setupSimpleTest(GroupFieldComponent, {
-      field,
-    });
+    const { fixture } = setupGroupTest(field);
 
     const element = fixture.nativeElement;
     expect(element.classList.contains('lib-group-field')).toBe(true);

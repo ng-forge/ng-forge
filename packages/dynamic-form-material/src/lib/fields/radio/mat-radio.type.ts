@@ -10,4 +10,4 @@ export interface MatRadioProps extends Record<string, unknown> {
 
 export type MatRadioField<T> = RadioField<T, MatRadioProps>;
 
-export type MatRadioComponent<T> = ValueFieldComponent<MatRadioField<T>>
+export type MatRadioComponent<T> = ValueFieldComponent<MatRadioField<T>>;

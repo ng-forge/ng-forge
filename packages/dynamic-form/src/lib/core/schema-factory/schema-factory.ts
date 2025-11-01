@@ -1,6 +1,6 @@
 import { max, maxLength, min, minLength, required, schema, Schema } from '@angular/forms/signals';
-import { ValidationRules } from '../models/field-config';
-import { FieldDef } from '../definitions';
+import { ValidationRules } from '../../models/field-config';
+import { FieldDef } from '../../definitions';
 
 /**
  * Creates an Angular signal forms schema from field definitions

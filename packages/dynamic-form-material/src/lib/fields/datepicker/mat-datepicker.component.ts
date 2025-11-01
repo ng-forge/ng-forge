@@ -1,28 +1,17 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.type';
 
 @Component({
   selector: 'df-mat-datepicker',
-  imports: [
-    FormsModule,
-    MatFormField,
-    MatLabel,
-    MatInput,
-    MatHint,
-    MatErrorsComponent,
-    MatDatepicker,
-    MatDatepickerInput,
-    MatDatepickerToggle,
-    MatNativeDateModule,
-  ],
+  imports: [MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent, MatDatepicker, MatDatepickerInput, MatDatepickerToggle, Field],
   template: `
+    @let f = field();
+
     <mat-form-field
       [appearance]="props()?.appearance || 'fill'"
       [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'"
@@ -35,13 +24,11 @@ import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.typ
       <input
         matInput
         [matDatepicker]="picker"
-        [(ngModel)]="value"
+        [field]="f"
         [placeholder]="placeholder() || ''"
-        [disabled]="disabled()"
         [min]="minDate()"
         [max]="maxDate()"
         [attr.tabindex]="tabIndex()"
-        (blur)="touched.set(true)"
       />
 
       <mat-datepicker-toggle matIconSuffix [for]="$any(picker)" />
@@ -51,22 +38,13 @@ import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.typ
       <mat-hint>{{ hint }}</mat-hint>
       }
 
-      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
+      <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </mat-form-field>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatDatepickerFieldComponent implements FormValueControl<Date | null>, MatDatepickerComponent {
-  readonly value = model<Date | null>(null);
-
-  readonly required = input<boolean>(false);
-  readonly disabled = input<boolean>(false);
-  readonly readonly = input<boolean>(false);
-  readonly hidden = input<boolean>(false);
-  readonly touched = model<boolean>(false);
-  readonly invalid = model<boolean>(false);
-
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+export default class MatDatepickerFieldComponent implements MatDatepickerComponent {
+  readonly field = input.required<FieldTree<Date | null>>();
 
   readonly label = input<string>('');
   readonly placeholder = input<string>('');

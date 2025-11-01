@@ -72,7 +72,6 @@ export interface ConditionalRules {
   disable?: (formValue: unknown) => boolean;
 }
 
-
 /**
  * Utility function to build validation rules from field properties
  */

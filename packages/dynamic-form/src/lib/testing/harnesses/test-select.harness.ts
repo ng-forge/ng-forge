@@ -1,26 +1,24 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import { FormValueControl } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 
 /**
  * Test harness component for select fields
  */
 @Component({
   selector: 'df-test-select',
-  template: `<select [value]="value()" [disabled]="disabled()" (change)="value.set($any($event.target).value)" (blur)="touched.set(true)">
-    <option value="">Select...</option>
-    @for (option of options(); track option.value) {
-    <option [value]="option.value">{{ option.label }}</option>
-    }
-  </select>`,
+  template: `
+    <select [field]="field()" [disabled]="field()?.disabled" (change)="field()?.value.set($any($event.target).value)">
+      <option value="">Select...</option>
+      @for (option of options(); track option.value) {
+      <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Field],
 })
-export default class TestSelectHarness implements FormValueControl<string> {
-  readonly value = model<string>('');
-  readonly disabled = input<boolean>(false);
-  readonly required = input<boolean>(false);
-  readonly errors = input<readonly any[]>([]);
-  readonly touched = model<boolean>(false);
-  readonly invalid = model<boolean>(false);
+export default class TestSelectHarness {
+  readonly field = input.required<FieldTree<any>>();
 
   // Field-specific properties
   readonly label = input<string>('');

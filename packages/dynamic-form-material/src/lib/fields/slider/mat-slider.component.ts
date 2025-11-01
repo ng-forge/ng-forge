@@ -1,15 +1,14 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
 
 @Component({
   selector: 'df-mat-slider',
-  imports: [FormsModule, MatSlider, MatSliderThumb, MatErrorsComponent],
+  imports: [MatSlider, MatSliderThumb, MatErrorsComponent, Field],
   template: `
-    @if (label(); as label) {
+    @let f = field(); @if (label(); as label) {
     <div class="slider-label">{{ label }}</div>
     }
 
@@ -17,19 +16,19 @@ import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
       [min]="minValue()"
       [max]="maxValue()"
       [step]="step()"
-      [disabled]="disabled()"
+      [disabled]="f().disabled()"
       [discrete]="props()?.thumbLabel || props()?.showThumbLabel"
       [showTickMarks]="props()?.tickInterval !== undefined"
       [color]="props()?.color || 'primary'"
       class="slider-container"
     >
-      <input matSliderThumb [(ngModel)]="value" [attr.tabindex]="tabIndex()" (blur)="touched.set(true)" />
+      <input matSliderThumb [field]="f" [attr.tabindex]="tabIndex()" />
     </mat-slider>
 
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint }}</div>
     }
-    <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
+    <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
   `,
   styles: [
     `
@@ -43,17 +42,8 @@ import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatSliderFieldComponent implements FormValueControl<number>, MatSliderComponent {
-  readonly value = model.required<number>();
-
-  readonly required = input<boolean>(false);
-  readonly disabled = input<boolean>(false);
-  readonly readonly = input<boolean>(false);
-  readonly hidden = input<boolean>(false);
-  readonly touched = model<boolean>(false);
-  readonly invalid = model<boolean>(false);
-
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+export default class MatSliderFieldComponent implements MatSliderComponent {
+  readonly field = input.required<FieldTree<number>>();
 
   readonly label = input<string>('');
   readonly placeholder = input<string>('');

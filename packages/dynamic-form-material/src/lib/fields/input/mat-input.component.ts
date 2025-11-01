@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { FormValueControl, ValidationError, WithOptionalField } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
@@ -11,8 +10,10 @@ import { MatInputComponent, MatInputProps } from './mat-input.type';
  */
 @Component({
   selector: 'df-mat-input',
-  imports: [FormsModule, MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent],
+  imports: [MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent, Field],
   template: `
+    @let f = field();
+
     <mat-form-field
       [appearance]="props()?.appearance ?? 'outline'"
       [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'"
@@ -24,40 +25,28 @@ import { MatInputComponent, MatInputProps } from './mat-input.type';
 
       <input
         matInput
-        [(ngModel)]="value"
+        [field]="f"
         [type]="props()?.type || 'text'"
         [placeholder]="placeholder() || ''"
-        [disabled]="disabled()"
+        [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
-        (blur)="touched.set(true)"
       />
 
       @if (props()?.hint; as hint) {
       <mat-hint>{{ hint }}</mat-hint>
       }
 
-      <df-mat-errors [errors]="errors()" [invalid]="invalid()" [touched]="touched()" />
+      <df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </mat-form-field>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class MatInputFieldComponent implements FormValueControl<string>, MatInputComponent {
-  readonly value = model.required<string>();
-
-  readonly required = input<boolean>(false);
-  readonly disabled = input<boolean>(false);
-  readonly readonly = input<boolean>(false);
-  readonly hidden = input<boolean>(false);
-  readonly touched = model<boolean>(false);
-  readonly invalid = model<boolean>(false);
-
-  readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+export default class MatInputFieldComponent implements MatInputComponent {
+  readonly field = input.required<FieldTree<string>>();
 
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
-
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
-
   readonly props = input<MatInputProps>();
 }

@@ -14,5 +14,3 @@ export interface MatDatepickerProps extends Record<string, unknown> {
 export type MatDatepickerField = DatepickerField<MatDatepickerProps>;
 
 export type MatDatepickerComponent = ValueFieldComponent<MatDatepickerField>;
-
-
