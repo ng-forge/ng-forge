@@ -3,14 +3,15 @@
     "nx-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "nx",
-        "mcp"
-      ]
+      "args": ["nx", "mcp"]
     },
     "angular-cli": {
       "command": "npx",
       "args": ["-y", "@angular/cli", "mcp"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
     }
   }
 }

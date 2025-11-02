@@ -19132,7 +19132,7 @@ packages:
       immutable: 5.1.4
       source-map-js: 1.2.1
     optionalDependencies:
-      '@parcel/watcher': 2.4.1
+      '@parcel/watcher': 2.5.1
     dev: false
 
   /sass@1.93.2:
