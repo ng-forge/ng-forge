@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { FieldContext, LogicFn } from '@angular/forms/signals';
+import { FieldContext } from '@angular/forms/signals';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConditionalExpression } from '../../models';
-import { FunctionRegistryService } from '../registry';
+import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { createLogicFunction } from './logic-function-factory';
 
 describe('logic-function-factory', () => {
@@ -12,7 +12,11 @@ describe('logic-function-factory', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [FunctionRegistryService],
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        RootFormRegistryService,
+      ],
     });
 
     functionRegistry = TestBed.inject(FunctionRegistryService);
@@ -20,9 +24,18 @@ describe('logic-function-factory', () => {
   });
 
   describe('createLogicFunction', () => {
-    function createMockFieldContext<T>(value: T): FieldContext<T> {
+    function createMockFieldContext<T>(
+      value: T,
+      mockField?: any,
+      mockValueOf?: (path: any) => any
+    ): FieldContext<T> {
+      const defaultValueOf = () => ({ username: 'test', email: 'test@example.com' });
+      
       return {
         value: signal(value),
+        field: mockField || { parent: null },
+        valueOf: mockValueOf || defaultValueOf,
+        stateOf: vi.fn(),
         valid: signal(true),
         disabled: signal(false),
         pending: signal(false),
@@ -31,70 +44,76 @@ describe('logic-function-factory', () => {
         dirty: signal(false),
         pristine: signal(true),
         untouched: signal(true),
-      };
+      } as any;
+    }
+
+    function runLogicFunctionTest<T>(
+      expression: ConditionalExpression,
+      fieldValue: T,
+      mockValueOf?: (path: any) => any
+    ): boolean {
+      return runInInjectionContext(injector, () => {
+        // Set up the root form registry with mock data
+        const rootFormRegistry = TestBed.inject(RootFormRegistryService);
+        const mockRootField = {} as any;
+        rootFormRegistry.registerRootForm(mockRootField);
+        
+        const logicFn = createLogicFunction(expression);
+        const fieldContext = createMockFieldContext(fieldValue, undefined, mockValueOf);
+        return logicFn(fieldContext);
+      });
     }
 
     describe('fieldValue expressions', () => {
       it('should create logic function that evaluates field value conditions', () => {
-        // Since the current implementation doesn't access form values properly,
-        // fieldValue expressions will always evaluate against an empty formValue {}
-        // So fieldPath lookups will return undefined
+        // The fieldValue expression looks up a field in the form, not the current field value
         const expression: ConditionalExpression = {
           type: 'fieldValue',
-          fieldPath: 'testField',
+          fieldPath: 'username',
           operator: 'equals',
-          value: undefined, // Expected because formValue is {} and lookup returns undefined
+          value: 'test', // Expected value from mock form data
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('expectedValue');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'someValue');
         expect(result).toBe(true);
       });
 
       it('should handle different field value comparisons', () => {
-        // All these tests will be comparing undefined (from empty formValue lookup) with expected values
+        // Now that formValue is properly accessed, we can test against actual form field values
         const testCases = [
-          { value: 'test', operator: 'equals', expected: undefined, result: true },
-          { value: 'test', operator: 'notEquals', expected: 'other', result: true },
-          { value: 25, operator: 'equals', expected: undefined, result: true },
-          { value: 15, operator: 'equals', expected: undefined, result: true },
-          { value: 'hello world', operator: 'equals', expected: undefined, result: true },
-          { value: 'test@example.com', operator: 'equals', expected: undefined, result: true },
+          { fieldPath: 'username', operator: 'equals', expected: 'test', result: true },
+          { fieldPath: 'username', operator: 'notEquals', expected: 'other', result: true },
+          { fieldPath: 'email', operator: 'equals', expected: 'test@example.com', result: true },
+          { fieldPath: 'nonExistentField', operator: 'equals', expected: undefined, result: true },
         ];
 
-        testCases.forEach(({ value, operator, expected, result }) => {
+        testCases.forEach(({ fieldPath, operator, expected, result }) => {
           const expression: ConditionalExpression = {
             type: 'fieldValue',
-            fieldPath: 'testField',
+            fieldPath,
             operator: operator as any,
             value: expected,
           };
 
-          const logicFn = createLogicFunction(expression);
-          const fieldContext = createMockFieldContext(value);
-
-          expect(runInInjectionContext(injector, () => logicFn(fieldContext))).toBe(result);
+          const testResult = runLogicFunctionTest(expression, 'someValue');
+          expect(testResult).toBe(result);
         });
       });
     });
 
     describe('formValue expressions', () => {
       it('should create logic function that evaluates form value conditions', () => {
+        const mockFormValue = { username: 'test', email: 'test@example.com' };
         const expression: ConditionalExpression = {
           type: 'formValue',
           operator: 'equals',
-          value: {}, // Empty object for comparison
+          value: mockFormValue,
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('value');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
-        // Since formValue is currently {} (TODO: access root form value properly),
-        // and we're comparing with {}, but compareValues uses === which returns false for different object instances
-        expect(result).toBe(false);
+        const mockValueOf = vi.fn().mockReturnValue(mockFormValue);
+        const result = runLogicFunctionTest(expression, 'value', mockValueOf);
+        // compareValues uses === which returns true when comparing the same object instance
+        expect(result).toBe(true);
       });
     });
 
@@ -105,10 +124,7 @@ describe('logic-function-factory', () => {
           expression: 'fieldValue === "test"',
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(true);
       });
 
@@ -118,10 +134,7 @@ describe('logic-function-factory', () => {
           expression: 'typeof fieldValue === "string" && fieldValue.length > 2',
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(true);
       });
 
@@ -133,10 +146,7 @@ describe('logic-function-factory', () => {
           expression: 'nonexistentVariable.property',
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
         expect(consoleSpy).toHaveBeenCalled();
 
@@ -154,15 +164,12 @@ describe('logic-function-factory', () => {
           expression: 'validateField',
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(true);
         expect(mockCustomFn).toHaveBeenCalledWith(
           expect.objectContaining({
             fieldValue: 'test',
-            formValue: {},
+            formValue: { username: 'test', email: 'test@example.com' },
             fieldPath: '',
             customFunctions: expect.objectContaining({
               validateField: mockCustomFn,
@@ -179,10 +186,7 @@ describe('logic-function-factory', () => {
           expression: 'nonExistentFunction',
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
         expect(consoleSpy).toHaveBeenCalledWith('Custom function not found:', 'nonExistentFunction');
 
@@ -201,10 +205,7 @@ describe('logic-function-factory', () => {
           expression: 'throwingFn',
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
         expect(consoleSpy).toHaveBeenCalledWith('Error executing custom function:', 'throwingFn', expect.any(Error));
 
@@ -221,10 +222,7 @@ describe('logic-function-factory', () => {
           value: undefined, // Because formValue is {} and lookup returns undefined
         };
 
-        const logicFn: LogicFn<string, boolean> = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test');
         expect(typeof result).toBe('boolean');
         expect(result).toBe(true);
       });
@@ -233,7 +231,7 @@ describe('logic-function-factory', () => {
     describe('context building', () => {
       it('should build evaluation context correctly', () => {
         const mockCustomFn = vi.fn((context) => {
-          // Verify the context structure
+          // Verify the context structure and that form values are properly accessible
           expect(context).toHaveProperty('fieldValue');
           expect(context).toHaveProperty('formValue');
           expect(context).toHaveProperty('fieldPath');
@@ -242,6 +240,8 @@ describe('logic-function-factory', () => {
           expect(typeof context.formValue).toBe('object');
           expect(typeof context.fieldPath).toBe('string');
           expect(typeof context.customFunctions).toBe('object');
+          // Verify that formValue contains the expected mock data
+          expect(context.formValue).toEqual({ username: 'test', email: 'test@example.com' });
           return true;
         });
 
@@ -252,10 +252,7 @@ describe('logic-function-factory', () => {
           expression: 'contextChecker',
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test value');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test value');
         expect(result).toBe(true);
         expect(mockCustomFn).toHaveBeenCalled();
       });
@@ -277,10 +274,7 @@ describe('logic-function-factory', () => {
             expression: `typeof fieldValue === "${type}"`,
           };
 
-          const logicFn = createLogicFunction(expression);
-          const fieldContext = createMockFieldContext(value);
-
-          const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+          const result = runLogicFunctionTest(expression, value);
           expect(result).toBe(true);
         });
       });
@@ -292,10 +286,7 @@ describe('logic-function-factory', () => {
           type: 'invalidType' as any,
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
       });
 
@@ -304,10 +295,7 @@ describe('logic-function-factory', () => {
           type: 'fieldValue',
         };
 
-        const logicFn = createLogicFunction(expression);
-        const fieldContext = createMockFieldContext('test');
-
-        const result = runInInjectionContext(injector, () => logicFn(fieldContext));
+        const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
       });
     });
