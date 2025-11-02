@@ -61,12 +61,9 @@ export class InputDemoComponent {
           placeholder: 'user@example.com',
           appearance: 'outline',
           hint: 'Email validation included',
-          required: true,
         },
-        validation: {
-          required: true,
-          email: true,
-        },
+        required: true,
+        email: true,
       },
       {
         key: 'passwordInput',

@@ -129,12 +129,9 @@ export class ControlFieldTypesDemoComponent {
           placeholder: 'user@example.com',
           appearance: 'outline',
           hint: 'Type-safe email input with automatic validation',
-          required: true,
         },
-        validation: {
-          required: true,
-          email: true,
-        },
+        required: true,
+        email: true,
       },
 
       // === ValueControlFieldType<MatSelectProps, T> ===

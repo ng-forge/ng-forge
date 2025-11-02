@@ -4,7 +4,8 @@ import { BUILT_IN_FIELDS } from './built-in-fields';
 import { FieldDef } from '../definitions/base';
 
 // Re-export global types for module augmentation
-export type { DynamicFormFieldRegistry, RegisteredFieldTypes, InferGlobalFormValue, AvailableFieldTypes } from '../models/global-types';
+export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
+export type { RegisteredFieldTypes, InferGlobalFormValue } from '../models/types';
 
 /**
  * Extract FieldDef type from FieldTypeDefinition

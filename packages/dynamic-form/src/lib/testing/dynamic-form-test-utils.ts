@@ -6,8 +6,7 @@ import { FormConfig } from '../models';
 import { FieldDef } from '../definitions';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { delay } from './delay';
-import { valueFieldMapper } from '../mappers';
-import { checkboxFieldMapper } from '../mappers';
+import { checkboxFieldMapper, valueFieldMapper } from '../mappers';
 import { FieldMapperOptions } from '../mappers/types';
 
 /**
@@ -53,8 +52,7 @@ export class FormConfigBuilder {
       key,
       type: 'input',
       label: key.charAt(0).toUpperCase() + key.slice(1),
-      required: true,
-      props: { placeholder: `Enter ${key}`, ...props },
+      props: { placeholder: `Enter ${key}`, required: true, ...props },
     });
   }
 
@@ -63,8 +61,7 @@ export class FormConfigBuilder {
       key,
       type: 'select',
       label: key.charAt(0).toUpperCase() + key.slice(1),
-      options,
-      props: props || {},
+      props: { options, ...props },
     });
   }
 

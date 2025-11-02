@@ -83,7 +83,10 @@ describe('DynamicFormTestUtils', () => {
         config,
       });
 
-      // Simulate user input
+      // Wait for full initialization
+      await DynamicFormTestUtils.waitForInit(fixture);
+
+      // Use more specific selectors based on the actual structure
       await DynamicFormTestUtils.simulateInput(fixture, 'input[type="email"]', 'user@example.com');
       await DynamicFormTestUtils.simulateCheckbox(fixture, 'input[type="checkbox"]', true);
 

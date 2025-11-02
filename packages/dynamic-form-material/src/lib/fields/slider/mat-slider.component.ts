@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
@@ -7,11 +7,9 @@ import { MatError } from '@angular/material/input';
 
 @Component({
   selector: 'df-mat-slider',
-  imports: [MatSlider, MatSliderThumb, MatErrorsComponent, Field, MatError],
+  imports: [MatSlider, MatSliderThumb, MatErrorsComponent, MatError],
   template: `
-    @let f = field();
-
-    @if (label(); as label) {
+    @let f = field(); @if (label(); as label) {
     <div class="slider-label">{{ label }}</div>
     }
 
@@ -24,7 +22,7 @@ import { MatError } from '@angular/material/input';
       [color]="props()?.color || 'primary'"
       class="slider-container"
     >
-      <input matSliderThumb [field]="f" [attr.tabindex]="tabIndex()" />
+      <input matSliderThumb [(value)]="f().value" [attr.tabindex]="tabIndex()" />
     </mat-slider>
 
     @if (props()?.hint; as hint) {

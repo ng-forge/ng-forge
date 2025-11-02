@@ -81,12 +81,9 @@ export class CompleteMaterialFormComponent {
         props: {
           placeholder: 'Enter your first name',
           appearance: 'outline',
-          required: true,
         },
-        validation: {
-          required: true,
-          minLength: 2,
-        },
+        required: true,
+        minLength: 2,
       },
       {
         key: 'lastName',
@@ -95,12 +92,9 @@ export class CompleteMaterialFormComponent {
           label: 'Last Name',
           placeholder: 'Enter your last name',
           appearance: 'outline',
-          required: true,
         },
-        validation: {
-          required: true,
-          minLength: 2,
-        },
+        required: true,
+        minLength: 2,
       },
       {
         key: 'email',
@@ -110,13 +104,10 @@ export class CompleteMaterialFormComponent {
           type: 'email',
           placeholder: 'user@example.com',
           appearance: 'outline',
-          required: true,
           hint: 'We will never share your email',
         },
-        validation: {
-          required: true,
-          email: true,
-        },
+        required: true,
+        email: true,
       },
       {
         key: 'phone',
@@ -138,9 +129,6 @@ export class CompleteMaterialFormComponent {
         props: {
           placeholder: 'Select your country',
           appearance: 'outline',
-        },
-        validation: {
-          required: true,
         },
         required: true,
         options: [
@@ -178,10 +166,6 @@ export class CompleteMaterialFormComponent {
           placeholder: 'Choose your plan',
           appearance: 'outline',
           hint: 'You can upgrade or downgrade anytime',
-
-        },
-        validation: {
-          required: true,
         },
         options: [
           { value: 'free', label: 'Free - $0/month' },
@@ -225,9 +209,6 @@ export class CompleteMaterialFormComponent {
           color: 'primary',
         },
         required: true,
-        validation: {
-          required: true,
-        },
       },
       {
         key: 'privacy',
@@ -237,9 +218,6 @@ export class CompleteMaterialFormComponent {
           color: 'primary',
         },
         required: true,
-        validation: {
-          required: true,
-        },
       },
 
       // Submit Button

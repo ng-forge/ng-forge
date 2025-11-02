@@ -190,6 +190,7 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
   const mockFieldType: FieldTypeDefinition = {
     name: 'test',
     loadComponent: async () => TestFieldComponent,
+    mapper: () => [], // Simple mapper that returns empty bindings for testing
   };
 
   TestBed.configureTestingModule({

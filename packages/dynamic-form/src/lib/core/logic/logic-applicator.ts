@@ -1,0 +1,39 @@
+import { FieldPath, hidden, readonly, required } from '@angular/forms/signals';
+import { LogicConfig } from '../../models/logic';
+import { ConditionalExpression } from '../../models';
+import { createLogicFunction } from '../expressions';
+
+/**
+ * Apply logic configuration to field path
+ */
+export function applyLogic<TValue>(config: LogicConfig, fieldPath: FieldPath<TValue>): void {
+  const logicFn =
+    typeof config.condition === 'boolean'
+      ? () => config.condition as boolean
+      : createLogicFunction(config.condition as ConditionalExpression);
+
+  switch (config.type) {
+    case 'hidden':
+      hidden(fieldPath, logicFn);
+      break;
+
+    case 'readonly':
+      readonly(fieldPath, logicFn);
+      break;
+
+    case 'disabled':
+      console.warn('Disabled logic must be handled at component level');
+      break;
+
+    case 'required':
+      required(fieldPath, { when: logicFn });
+      break;
+  }
+}
+
+/**
+ * Apply multiple logic configurations to a field path
+ */
+export function applyMultipleLogic<TValue>(configs: LogicConfig[], fieldPath: FieldPath<TValue>): void {
+  configs.forEach((config) => applyLogic(config, fieldPath));
+}

@@ -1,4 +1,4 @@
-import { ConditionalRules, WithInputSignals } from '../../models';
+import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
 
 export interface FieldDef<TProps extends Record<string, unknown>> {
@@ -13,9 +13,6 @@ export interface FieldDef<TProps extends Record<string, unknown>> {
 
   /** Field-specific properties (placeholder, options, etc.) */
   readonly props?: TProps;
-
-  /** Conditional field behavior */
-  readonly conditionals?: ConditionalRules;
 
   /** Additional CSS classes */
   readonly className?: string;

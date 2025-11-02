@@ -60,11 +60,8 @@ export class DatepickerDemoComponent {
           placeholder: 'Select start date',
           appearance: 'fill',
           hint: 'When does the project begin?',
-          required: true,
         },
-        validation: {
-          required: true,
-        },
+        required: true,
       },
       {
         key: 'dueDate',

@@ -1,11 +1,5 @@
 // Re-export validation types from the dedicated validation-types module
-export type {
-  ValidationRules,
-  ValidationMessages,
-  ValidationError,
-  CustomValidator,
-  ConditionalRules,
-} from './validation-types';
+export type { ValidationMessages, ValidationError, CustomValidator } from './validation-types';
 
 /**
  * Utility function to build validation rules from field properties

@@ -8,6 +8,9 @@ export * from './definitions';
 // Provider system for dependency injection
 export * from './providers';
 
+// Services
+export * from './core/registry';
+
 // Field injection utility
 export { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 

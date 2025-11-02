@@ -20,15 +20,16 @@ import { isEqual, keyBy, mapValues } from 'lodash-es';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FormConfig, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
-import { createSchemaFromFields } from './core/schema-factory/schema-factory';
+import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
-import { InferGlobalFormValue } from './models/global-types';
+import { InferGlobalFormValue } from './models/types';
 import { flattenFields } from './utils';
 import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { FunctionRegistryService, SchemaRegistryService } from './core/registry';
 
 @Component({
   selector: 'dynamic-form',
@@ -39,7 +40,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
     </form>
   `,
   styleUrl: './dynamic-form.component.scss',
-  providers: [EventBus],
+  providers: [EventBus, SchemaRegistryService, FunctionRegistryService],
   host: {
     '[class.disabled]': 'disabled()',
   },

@@ -45,9 +45,6 @@ describe('GroupFieldComponent', () => {
     fixture.componentRef.setInput('field', field);
     fixture.componentRef.setInput('parentForm', testForm);
     fixture.componentRef.setInput('parentFieldSignalContext', mockFieldSignalContext);
-    if (value !== undefined) {
-      fixture.componentRef.setInput('value', value);
-    }
 
     fixture.detectChanges();
 
