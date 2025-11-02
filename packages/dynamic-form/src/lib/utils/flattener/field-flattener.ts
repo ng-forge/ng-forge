@@ -4,10 +4,10 @@ import { isGroupField } from '../../definitions/default/group-field';
 
 /**
  * Represents a field definition that has been processed through the flattening algorithm.
- * 
+ *
  * Guarantees that the field has a valid key property, either from the original
  * field definition or auto-generated during the flattening process.
- * 
+ *
  * @public
  * @since 1.0.0
  */
@@ -18,17 +18,17 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
 
 /**
  * Flattens a hierarchical field structure into a linear array for form processing.
- * 
+ *
  * Handles different field types with specific flattening strategies:
  * - **Row fields**: Children are flattened and merged into the result (no wrapper)
  * - **Group fields**: Maintains group structure with flattened children nested under the group key
  * - **Other fields**: Pass through unchanged with guaranteed key generation
- * 
+ *
  * Auto-generates keys for fields missing the key property to ensure form binding works correctly.
- * 
+ *
  * @param fields - Array of field definitions that may contain nested structures
  * @returns Flattened array of field definitions with guaranteed keys
- * 
+ *
  * @example
  * ```typescript
  * const hierarchicalFields = [
@@ -48,7 +48,7 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
  *     ]
  *   }
  * ];
- * 
+ *
  * const flattened = flattenFields(hierarchicalFields);
  * // Result: [
  * //   { type: 'input', key: 'firstName' },
@@ -56,7 +56,7 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
  * //   { type: 'group', key: 'address', fields: [...] }
  * // ]
  * ```
- * 
+ *
  * @example
  * ```typescript
  * // Auto-key generation for fields without keys
@@ -64,14 +64,14 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
  *   { type: 'input', label: 'Name' },
  *   { type: 'button', label: 'Submit' }
  * ];
- * 
+ *
  * const flattened = flattenFields(fieldsWithoutKeys);
  * // Result: [
  * //   { type: 'input', label: 'Name', key: 'auto_field_0' },
  * //   { type: 'button', label: 'Submit', key: 'auto_field_1' }
  * // ]
  * ```
- * 
+ *
  * @public
  * @since 1.0.0
  */

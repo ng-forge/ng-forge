@@ -3,19 +3,19 @@ import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
 
 /**
  * Injection function for accessing the dynamic form field registry.
- * 
+ *
  * Provides a convenient API for interacting with registered field types,
  * including type checking, component loading, and registration management.
  * Must be called within an injection context.
- * 
+ *
  * @returns Object with methods for field registry interaction
- * 
+ *
  * @example
  * ```typescript
  * @Component({...})
  * export class MyComponent {
  *   private fieldRegistry = injectFieldRegistry();
- * 
+ *
  *   async loadCustomField() {
  *     if (this.fieldRegistry.hasType('custom-input')) {
  *       const component = await this.fieldRegistry.loadTypeComponent('custom-input');
@@ -24,20 +24,20 @@ import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
  *   }
  * }
  * ```
- * 
+ *
  * @example
  * ```typescript
  * // In a service
  * @Injectable()
  * export class FormBuilderService {
  *   private fieldRegistry = injectFieldRegistry();
- * 
+ *
  *   getAvailableFieldTypes(): string[] {
  *     return this.fieldRegistry.getTypes().map(type => type.name);
  *   }
  * }
  * ```
- * 
+ *
  * @public
  * @since 1.0.0
  */
@@ -47,10 +47,10 @@ export function injectFieldRegistry() {
   return {
     /**
      * Retrieves a field type definition by its registered name.
-     * 
+     *
      * @param name - The registered name of the field type
      * @returns The field type definition if found, undefined otherwise
-     * 
+     *
      * @example
      * ```typescript
      * const inputType = fieldRegistry.getType('input');
@@ -65,10 +65,10 @@ export function injectFieldRegistry() {
 
     /**
      * Checks if a field type is registered in the registry.
-     * 
+     *
      * @param name - The name of the field type to check
      * @returns True if the field type exists, false otherwise
-     * 
+     *
      * @example
      * ```typescript
      * if (fieldRegistry.hasType('custom-input')) {
@@ -83,14 +83,14 @@ export function injectFieldRegistry() {
 
     /**
      * Loads a field type component with support for lazy loading.
-     * 
+     *
      * Handles both synchronous component references and asynchronous
      * dynamic imports. Automatically extracts default exports from ES modules.
-     * 
+     *
      * @param name - The name of the field type to load
      * @returns Promise resolving to the component constructor
      * @throws {Error} When field type is not registered or loading fails
-     * 
+     *
      * @example
      * ```typescript
      * try {
@@ -124,9 +124,9 @@ export function injectFieldRegistry() {
 
     /**
      * Gets all registered field type definitions.
-     * 
+     *
      * @returns Array of all field type definitions in the registry
-     * 
+     *
      * @example
      * ```typescript
      * const allTypes = fieldRegistry.getTypes();
@@ -140,12 +140,12 @@ export function injectFieldRegistry() {
 
     /**
      * Registers multiple field types at once.
-     * 
+     *
      * Useful for bulk registration of custom field types. Overwrites
      * existing registrations with the same name.
-     * 
+     *
      * @param types - Array of field type definitions to register
-     * 
+     *
      * @example
      * ```typescript
      * fieldRegistry.registerTypes([
@@ -163,12 +163,12 @@ export function injectFieldRegistry() {
 
     /**
      * Provides direct access to the underlying registry Map.
-     * 
+     *
      * Use with caution - direct modification can affect form behavior.
      * Primarily intended for advanced use cases and debugging.
-     * 
+     *
      * @returns The raw Map containing field type registrations
-     * 
+     *
      * @example
      * ```typescript
      * const rawRegistry = fieldRegistry.raw;

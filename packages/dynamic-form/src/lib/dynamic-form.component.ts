@@ -11,7 +11,7 @@ import {
   OnDestroy,
   runInInjectionContext,
   untracked,
-  ViewContainerRef,
+  ViewContainerRef
 } from '@angular/core';
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
@@ -30,25 +30,30 @@ import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { FunctionRegistryService, SchemaRegistryService, RootFormRegistryService, FieldContextRegistryService } from './core/registry';
+import {
+  FieldContextRegistryService,
+  FunctionRegistryService,
+  RootFormRegistryService,
+  SchemaRegistryService
+} from './core/registry';
 
 /**
  * Dynamic form component that renders a complete form based on configuration.
- * 
+ *
  * This is the main entry point component for the dynamic form system. It handles
  * form state management, validation, field rendering, and event coordination using
  * Angular's signal-based reactive forms.
- * 
+ *
  * @example
  * ```html
- * <dynamic-form 
+ * <dynamic-form
  *   [config]="formConfig"
  *   [(value)]="formData"
  *   (submitted)="handleSubmit($event)"
  *   (validityChange)="handleValidityChange($event)">
  * </dynamic-form>
  * ```
- * 
+ *
  * @example
  * ```typescript
  * // Component usage with typed form configuration
@@ -59,18 +64,18 @@ import { FunctionRegistryService, SchemaRegistryService, RootFormRegistryService
  *       { type: 'input', key: 'password', label: 'Password', validation: ['required'] }
  *     ]
  *   };
- * 
+ *
  *   formData = signal<Partial<UserProfile>>({});
- * 
+ *
  *   handleSubmit(values: Partial<UserProfile>) {
  *     console.log('Form submitted:', values);
  *   }
  * }
  * ```
- * 
+ *
  * @typeParam TFields - Array of registered field types available for this form
  * @typeParam TModel - The strongly-typed interface for form values
- * 
+ *
  * @public
  * @since 1.0.0
  */
@@ -100,10 +105,10 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
   /**
    * Form configuration defining the structure, validation, and behavior.
-   * 
+   *
    * Changes to this input will rebuild the form structure and reset form state.
    * For incremental updates, use the form's update methods instead.
-   * 
+   *
    * @example
    * ```typescript
    * const config: FormConfig = {
@@ -122,19 +127,19 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
   /**
    * Form values for two-way data binding.
-   * 
+   *
    * Supports both partial and complete form values. When used with two-way binding,
    * automatically syncs with form state changes and user input.
-   * 
+   *
    * @example
    * ```typescript
    * // Two-way binding
    * formData = signal<Partial<UserProfile>>({ email: 'user@example.com' });
-   * 
+   *
    * // In template
    * <dynamic-form [config]="config" [(value)]="formData" />
    * ```
-   * 
+   *
    * @defaultValue undefined
    */
   value = model<Partial<TModel> | undefined>(undefined);
@@ -207,53 +212,53 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
     }
   });
 
-  /** 
+  /**
    * Signal indicating whether the form is valid.
-   * 
+   *
    * @returns `true` if all form fields pass validation, `false` otherwise
    */
   readonly valid = computed(() => this.form()().valid());
-  
-  /** 
+
+  /**
    * Signal indicating whether the form is invalid.
-   * 
+   *
    * @returns `true` if any form field fails validation, `false` otherwise
    */
   readonly invalid = computed(() => this.form()().invalid());
-  
-  /** 
+
+  /**
    * Signal indicating whether the form has been modified.
-   * 
+   *
    * @returns `true` if any field value differs from its initial value
    */
   readonly dirty = computed(() => this.form()().dirty());
-  
-  /** 
+
+  /**
    * Signal indicating whether any form field has been touched.
-   * 
+   *
    * @returns `true` if user has interacted with any field
    */
   readonly touched = computed(() => this.form()().touched());
-  
-  /** 
+
+  /**
    * Signal containing all form validation errors.
-   * 
+   *
    * @returns Object with field keys and their validation error messages
    */
   readonly errors = computed(() => this.form()().errors());
-  
-  /** 
+
+  /**
    * Signal indicating whether the form is disabled.
-   * 
+   *
    * @returns `true` if form is disabled through configuration or programmatically
    */
   readonly disabled = computed(() => this.form()().disabled());
 
   /**
    * Emitted when form validity state changes.
-   * 
+   *
    * Subscribe to this output to react to validation state changes in real-time.
-   * 
+   *
    * @example
    * ```typescript
    * onValidityChange(isValid: boolean) {
@@ -262,12 +267,12 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
    * ```
    */
   readonly validityChange = outputFromObservable(toObservable(this.valid));
-  
+
   /**
    * Emitted when form dirty state changes.
-   * 
+   *
    * Useful for implementing unsaved changes warnings or auto-save functionality.
-   * 
+   *
    * @example
    * ```typescript
    * onDirtyChange(isDirty: boolean) {
@@ -278,13 +283,13 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
    * ```
    */
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
-  
+
   /**
    * Emitted when the form is submitted and passes validation.
-   * 
+   *
    * The event contains the complete form values object with proper typing
    * based on the form configuration.
-   * 
+   *
    * @example
    * ```typescript
    * handleSubmit(values: Partial<UserProfile>) {
