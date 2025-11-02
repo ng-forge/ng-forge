@@ -163,7 +163,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         priority: 0,
         categories: [],
       });
-      
+
       await delay();
       fixture.detectChanges();
 
@@ -681,7 +681,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       // Update via programmatic value change
       fixture.componentRef.setInput('value', { country: 'opt2' });
-      
+
       await delay();
       fixture.detectChanges();
 
