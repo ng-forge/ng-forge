@@ -1,5 +1,6 @@
+import { inject } from '@angular/core';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { createEvaluationContext } from './field-context-utils';
+import { FieldContextRegistryService } from '../registry';
 
 /**
  * Create a dynamic value function from an expression string
@@ -7,7 +8,8 @@ import { createEvaluationContext } from './field-context-utils';
 export function createDynamicValueFunction<TValue, TReturn>(expression: string): LogicFn<TValue, TReturn> {
   return (ctx: FieldContext<TValue>) => {
     // Create evaluation context using the registry-based approach
-    const evaluationContext = createEvaluationContext(ctx);
+    const fieldContextRegistry = inject(FieldContextRegistryService);
+    const evaluationContext = fieldContextRegistry.createEvaluationContext(ctx);
 
     try {
       const func = new Function('context', `with(context) { return ${expression}; }`);
@@ -18,4 +20,3 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
     }
   };
 }
-
