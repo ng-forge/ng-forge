@@ -6,11 +6,13 @@ You can find a comprehensive documentation in the [README.md](../ng-forge_/READM
 The package manager that we use is pnpm.
 
 # Bash commands
+
 - nx run lint
 - nx run build
 - nx run test
 
 # Workflow
+
 - Be sure to typecheck when you’re done making a series of code changes
 - Prefer running single tests, and not the whole test suite, for performance
 

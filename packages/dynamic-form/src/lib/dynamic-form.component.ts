@@ -30,12 +30,7 @@ import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { 
-  FunctionRegistryService, 
-  SchemaRegistryService, 
-  RootFormRegistryService, 
-  FieldContextRegistryService 
-} from './core/registry';
+import { FunctionRegistryService, SchemaRegistryService, RootFormRegistryService, FieldContextRegistryService } from './core/registry';
 
 @Component({
   selector: 'dynamic-form',
@@ -46,19 +41,15 @@ import {
     </form>
   `,
   styleUrl: './dynamic-form.component.scss',
-  providers: [
-    EventBus, 
-    SchemaRegistryService, 
-    FunctionRegistryService,
-    RootFormRegistryService,
-    FieldContextRegistryService
-  ],
+  providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
   host: {
     '[class.disabled]': 'disabled()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TModel = InferGlobalFormValue> implements OnDestroy {
+export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TModel = InferGlobalFormValue>
+  implements OnDestroy
+{
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
@@ -113,7 +104,7 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
       const setup = this.formSetup();
 
       let formInstance: ReturnType<typeof form<TModel>>;
-      
+
       if (setup.fields.length > 0) {
         const schema = createSchemaFromFields(setup.fields);
         formInstance = untracked(() => form(this.entity, schema));
