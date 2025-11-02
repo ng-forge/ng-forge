@@ -13,7 +13,7 @@ export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
 
   // Combine user className with generated grid classes
   const gridClassString = getGridClassString(fieldDef);
-  const allClasses = [];
+  const allClasses: string[] = [];
 
   if (gridClassString) {
     allClasses.push(gridClassString);

@@ -12,11 +12,7 @@ describe('logic-function-factory', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        FunctionRegistryService,
-        FieldContextRegistryService,
-        RootFormRegistryService,
-      ],
+      providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService],
     });
 
     functionRegistry = TestBed.inject(FunctionRegistryService);
@@ -24,13 +20,9 @@ describe('logic-function-factory', () => {
   });
 
   describe('createLogicFunction', () => {
-    function createMockFieldContext<T>(
-      value: T,
-      mockField?: any,
-      mockValueOf?: (path: any) => any
-    ): FieldContext<T> {
+    function createMockFieldContext<T>(value: T, mockField?: any, mockValueOf?: (path: any) => any): FieldContext<T> {
       const defaultValueOf = () => ({ username: 'test', email: 'test@example.com' });
-      
+
       return {
         value: signal(value),
         field: mockField || { parent: null },
@@ -47,17 +39,13 @@ describe('logic-function-factory', () => {
       } as any;
     }
 
-    function runLogicFunctionTest<T>(
-      expression: ConditionalExpression,
-      fieldValue: T,
-      mockValueOf?: (path: any) => any
-    ): boolean {
+    function runLogicFunctionTest<T>(expression: ConditionalExpression, fieldValue: T, mockValueOf?: (path: any) => any): boolean {
       return runInInjectionContext(injector, () => {
         // Set up the root form registry with mock data
         const rootFormRegistry = TestBed.inject(RootFormRegistryService);
         const mockRootField = {} as any;
         rootFormRegistry.registerRootForm(mockRootField);
-        
+
         const logicFn = createLogicFunction(expression);
         const fieldContext = createMockFieldContext(fieldValue, undefined, mockValueOf);
         return logicFn(fieldContext);

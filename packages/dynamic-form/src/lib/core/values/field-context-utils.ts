@@ -18,7 +18,7 @@ export function getRootField(field: FieldTree<any>): FieldTree<any> | null {
 export function buildFieldPath(field: FieldTree<any>): string {
   const pathSegments: string[] = [];
   let current = field;
-  
+
   // Traverse up the tree collecting path segments
   while (current && (current as any).parent) {
     const key = (current as any).key;
@@ -27,6 +27,6 @@ export function buildFieldPath(field: FieldTree<any>): string {
     }
     current = (current as any).parent;
   }
-  
+
   return pathSegments.join('.');
 }

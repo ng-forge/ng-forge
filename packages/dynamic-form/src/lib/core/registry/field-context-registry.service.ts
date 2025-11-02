@@ -6,7 +6,7 @@ import { RootFormRegistryService } from './root-form-registry.service';
 /**
  * Service that provides field evaluation context by combining
  * field context with root form registry information.
- * 
+ *
  * This service should be provided at the component level to ensure proper
  * isolation between different form instances.
  */
@@ -24,14 +24,14 @@ export class FieldContextRegistryService {
   createEvaluationContext<TValue>(
     fieldContext: FieldContext<TValue>,
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
-    formId: string = 'default'
+    formId = 'default'
   ): EvaluationContext {
     const fieldValue = fieldContext.value();
-    
+
     // Get root form value from registry
     const rootForm = this.rootFormRegistry.getRootForm(formId);
     let formValue: Record<string, unknown> = {};
-    
+
     if (rootForm) {
       try {
         const rootValue = fieldContext.valueOf(rootForm as any);
@@ -59,17 +59,13 @@ export class FieldContextRegistryService {
    * Registers a field path mapping for a specific form.
    * This can be called when fields are created to maintain path information.
    */
-  registerFieldPath(
-    fieldKey: string | number,
-    parentPath: string,
-    formId: string = 'default'
-  ): void {
+  registerFieldPath(fieldKey: string | number, parentPath: string, formId = 'default'): void {
     const context = this.rootFormRegistry.getFormContext(formId);
     const fullPath = parentPath ? `${parentPath}.${fieldKey}` : String(fieldKey);
-    
+
     context.fieldPaths = context.fieldPaths || {};
     (context.fieldPaths as Record<string, string>)[String(fieldKey)] = fullPath;
-    
+
     this.rootFormRegistry.registerFormContext(context, formId);
   }
 
@@ -78,17 +74,14 @@ export class FieldContextRegistryService {
    * This is a simplified implementation that could be enhanced
    * based on the specific needs of the form library.
    */
-  private extractFieldPath(
-    fieldContext: FieldContext<unknown>,
-    formContext: Record<string, unknown>
-  ): string {
+  private extractFieldPath(fieldContext: FieldContext<unknown>, formContext: Record<string, unknown>): string {
     // Check if the field context has a key property (for child fields)
     const extendedContext = fieldContext as any;
-    
+
     if (extendedContext.key && typeof extendedContext.key === 'function') {
       try {
         const key = extendedContext.key();
-        const fieldPaths = formContext.fieldPaths as Record<string, string> || {};
+        const fieldPaths = (formContext.fieldPaths as Record<string, string>) || {};
         return fieldPaths[String(key)] || String(key);
       } catch (error) {
         console.warn('Unable to extract field key:', error);
@@ -108,7 +101,7 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>
   ): EvaluationContext {
     const fieldValue = fieldContext.value();
-    
+
     // Try to use current field value as form value if it's an object
     let formValue: Record<string, unknown> = {};
     if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {

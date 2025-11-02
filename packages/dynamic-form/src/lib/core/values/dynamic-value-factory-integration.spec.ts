@@ -11,10 +11,7 @@ describe('dynamic-value-factory (integration)', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        RootFormRegistryService,
-        FieldContextRegistryService,
-      ],
+      providers: [RootFormRegistryService, FieldContextRegistryService],
     });
 
     injector = TestBed.inject(Injector);
@@ -26,12 +23,12 @@ describe('dynamic-value-factory (integration)', () => {
     mockFormValue: Record<string, unknown> = { username: 'test', email: 'test@example.com' }
   ): FieldContext<T> {
     const mockRootField = {} as FieldTree<unknown>;
-    
+
     return {
       value: signal(value),
       field: mockRootField,
       valueOf: () => mockFormValue,
-      stateOf: () => ({}) as any,
+      stateOf: () => ({} as any),
     } as any;
   }
 
@@ -64,9 +61,7 @@ describe('dynamic-value-factory (integration)', () => {
       const mockRootField = {} as FieldTree<unknown>;
       rootFormRegistry.registerRootForm(mockRootField);
 
-      const dynamicFn = createDynamicValueFunction<string, number>(
-        'fieldValue.length + formValue.username.length'
-      );
+      const dynamicFn = createDynamicValueFunction<string, number>('fieldValue.length + formValue.username.length');
       const fieldContext = createMockFieldContext('hello');
       return dynamicFn(fieldContext);
     });

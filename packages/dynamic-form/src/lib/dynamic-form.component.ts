@@ -8,6 +8,7 @@ import {
   input,
   linkedSignal,
   model,
+  OnDestroy,
   runInInjectionContext,
   untracked,
   ViewContainerRef,
@@ -29,7 +30,12 @@ import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { FunctionRegistryService, SchemaRegistryService } from './core/registry';
+import { 
+  FunctionRegistryService, 
+  SchemaRegistryService, 
+  RootFormRegistryService, 
+  FieldContextRegistryService 
+} from './core/registry';
 
 @Component({
   selector: 'dynamic-form',
@@ -40,17 +46,24 @@ import { FunctionRegistryService, SchemaRegistryService } from './core/registry'
     </form>
   `,
   styleUrl: './dynamic-form.component.scss',
-  providers: [EventBus, SchemaRegistryService, FunctionRegistryService],
+  providers: [
+    EventBus, 
+    SchemaRegistryService, 
+    FunctionRegistryService,
+    RootFormRegistryService,
+    FieldContextRegistryService
+  ],
   host: {
     '[class.disabled]': 'disabled()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TModel = InferGlobalFormValue> {
+export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TModel = InferGlobalFormValue> implements OnDestroy {
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
+  private readonly rootFormRegistry = inject(RootFormRegistryService);
 
   config = input.required<FormConfig<TFields>>();
 
@@ -99,12 +112,19 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
 
+      let formInstance: ReturnType<typeof form<TModel>>;
+      
       if (setup.fields.length > 0) {
         const schema = createSchemaFromFields(setup.fields);
-        return untracked(() => form(this.entity, schema));
+        formInstance = untracked(() => form(this.entity, schema));
+      } else {
+        formInstance = untracked(() => form(this.entity));
       }
 
-      return untracked(() => form(this.entity));
+      // Register the root form field in the registry for context access
+      this.rootFormRegistry.registerRootForm(formInstance);
+
+      return formInstance;
     });
   });
 
@@ -179,5 +199,10 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
   onFieldsInitialized(): void {
     this.fieldsInitializedSubject.next();
+  }
+
+  ngOnDestroy(): void {
+    // Clean up the root form registry to prevent memory leaks
+    this.rootFormRegistry.unregisterForm();
   }
 }
