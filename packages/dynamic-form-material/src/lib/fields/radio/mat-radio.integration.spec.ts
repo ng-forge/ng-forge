@@ -514,26 +514,22 @@ describe('MatRadioFieldComponent - Dynamic Form Integration', () => {
         priority: '',
       });
 
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
+      await waitForDFInit(component, fixture);
 
       const radioGroup = debugElement.query(By.directive(MatRadioGroup));
-      const radioGroupComponent = radioGroup.componentInstance;
-
-      expect(radioGroupComponent.disabled()).toBe(true);
-
-      // Try to click disabled radio - should not change value since it's disabled
       const radioButtons = debugElement.queryAll(By.directive(MatRadioButton));
       const firstRadioInput = radioButtons[0].nativeElement.querySelector('input[type="radio"]');
+
+      expect(firstRadioInput.disabled).toBe(true);
+
+      // Try to click disabled radio - should not change value since it's disabled
 
       firstRadioInput.click();
       fixture.detectChanges();
 
       // Verify the radio group remains disabled and doesn't change
-      expect(radioGroupComponent.disabled()).toBe(true);
-      expect(radioGroupComponent.value()).toBeFalsy();
+      expect(firstRadioInput.disabled).toBe(true);
+      expect(component.formValue().gender).toBeFalsy();
     });
 
     it('should apply default Material Design configuration', async () => {

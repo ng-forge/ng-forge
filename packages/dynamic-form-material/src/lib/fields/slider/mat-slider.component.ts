@@ -22,7 +22,8 @@ import { MatError } from '@angular/material/input';
       [color]="props()?.color || 'primary'"
       class="slider-container"
     >
-      <input matSliderThumb [(value)]="f().value" [attr.tabindex]="tabIndex()" />
+      <!-- TODO: integrate input with the field -->
+      <input matSliderThumb [(value)]="f().value" [disabled]="f().disabled()" [attr.tabindex]="tabIndex()" />
     </mat-slider>
 
     @if (props()?.hint; as hint) {

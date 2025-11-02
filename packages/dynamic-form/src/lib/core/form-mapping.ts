@@ -1,4 +1,4 @@
-import { email, FieldPath, max, maxLength, min, minLength, pattern, required } from '@angular/forms/signals';
+import { disabled, email, FieldPath, max, maxLength, min, minLength, pattern, required } from '@angular/forms/signals';
 import { FieldDef, FieldWithValidation } from '../definitions';
 import { createValidator } from './validation';
 import { applyLogic } from './logic';
@@ -81,6 +81,11 @@ function applySimpleValidationRules<TValue>(
  * Handle field-specific configuration that doesn't fit into validators/logic/schemas
  */
 function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<Record<string, unknown>>, fieldPath: FieldPath<TValue>): void {
+  // Handle disabled state
+  if (fieldDef.disabled) {
+    disabled(fieldPath);
+  }
+
   // Handle any additional configuration specific to the field type
   // This can be extended as needed for specific field requirements
 

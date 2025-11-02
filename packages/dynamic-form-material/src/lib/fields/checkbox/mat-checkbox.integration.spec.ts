@@ -219,8 +219,8 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
 
       expect(checkbox).toBeTruthy();
       expect(checkbox.nativeElement.textContent.trim()).toBe('Subscribe to Newsletter');
-      expect(checkboxComponent.color).toBe('primary');
-      expect(checkboxComponent.labelPosition).toBe('after');
+      expect(checkboxComponent.props.color).toBe('primary');
+      expect(checkboxComponent.props.labelPosition).toBe('after');
     });
 
     it('should not display hint when not provided', async () => {
@@ -438,10 +438,7 @@ describe('MatCheckboxFieldComponent - Dynamic Form Integration', () => {
         enableNotifications: false,
       });
 
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
+      await waitForDFInit(component, fixture);
 
       const checkbox = debugElement.query(By.directive(MatCheckbox));
       const checkboxInput = debugElement.query(By.css('input[type="checkbox"]'));

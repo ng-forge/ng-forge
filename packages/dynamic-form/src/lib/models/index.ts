@@ -1,6 +1,4 @@
-// Legacy exports for backwards compatibility
 export * from './component-type';
-export * from './field-config';
 export * from './form-config';
 export * from './field-type';
 export * from './field-option';

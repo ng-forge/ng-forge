@@ -381,10 +381,7 @@ describe('MatSliderFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { volume: 50 });
 
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
+      await waitForDFInit(component, fixture);
 
       const slider = debugElement.query(By.directive(MatSlider));
       const sliderInput = debugElement.query(By.css('input[matSliderThumb]'));

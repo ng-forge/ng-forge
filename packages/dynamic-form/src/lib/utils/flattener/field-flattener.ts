@@ -14,6 +14,7 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
  */
 export function flattenFields(fields: readonly FieldDef<Record<string, unknown>>[]): FlattenedField[] {
   const result: FlattenedField[] = [];
+  let autoKeyCounter = 0;
 
   for (const field of fields) {
     if (isRowField(field)) {
@@ -30,7 +31,12 @@ export function flattenFields(fields: readonly FieldDef<Record<string, unknown>>
 
       result.push(...flattenedChildren);
     } else {
-      result.push(field as FlattenedField);
+      // Ensure the field has a key, auto-generate if missing
+      const key = field.key || `auto_field_${autoKeyCounter++}`;
+      result.push({
+        ...field,
+        key,
+      } as FlattenedField);
     }
   }
 

@@ -441,10 +441,7 @@ describe('MatToggleFieldComponent - Dynamic Form Integration', () => {
         enableFeature: false,
       });
 
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
+      await waitForDFInit(component, fixture);
 
       const toggle = debugElement.query(By.directive(MatSlideToggle));
       const toggleButton = debugElement.query(By.css('button'));

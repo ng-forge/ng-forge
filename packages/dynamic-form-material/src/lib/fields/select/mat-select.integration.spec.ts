@@ -163,8 +163,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         priority: 0,
         categories: [],
       });
-      fixture.detectChanges();
-
+      
       await delay();
       fixture.detectChanges();
 
@@ -576,10 +575,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
         categories: [],
       });
 
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
+      await waitForDFInit(component, fixture);
 
       const select = debugElement.query(By.directive(MatSelect));
       const selectComponent = select.componentInstance;
@@ -685,8 +681,7 @@ describe('MatSelectFieldComponent - Dynamic Form Integration', () => {
 
       // Update via programmatic value change
       fixture.componentRef.setInput('value', { country: 'opt2' });
-      fixture.detectChanges();
-
+      
       await delay();
       fixture.detectChanges();
 

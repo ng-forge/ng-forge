@@ -389,10 +389,7 @@ describe('MatInputFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { firstName: '' });
 
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
+      await waitForDFInit(component, fixture);
 
       const input = debugElement.query(By.css('input'));
       expect(input.nativeElement.disabled).toBe(true);

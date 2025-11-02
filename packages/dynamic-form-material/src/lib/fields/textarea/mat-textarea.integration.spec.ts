@@ -316,10 +316,7 @@ describe('MatTextareaFieldComponent - Dynamic Form Integration', () => {
 
       createComponent(config, { comments: '' });
 
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
+      await waitForDFInit(component, fixture);
 
       const textarea = debugElement.query(By.css('textarea'));
       expect(textarea.nativeElement.disabled).toBe(true);
