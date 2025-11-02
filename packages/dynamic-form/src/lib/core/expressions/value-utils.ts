@@ -22,7 +22,11 @@ export function compareValues(actual: unknown, expected: unknown, operator: stri
     case 'endsWith':
       return String(actual).endsWith(String(expected));
     case 'matches':
-      return new RegExp(String(expected)).test(String(actual));
+      try {
+        return new RegExp(String(expected)).test(String(actual));
+      } catch {
+        return false;
+      }
     default:
       return false;
   }

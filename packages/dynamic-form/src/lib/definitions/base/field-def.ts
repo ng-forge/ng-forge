@@ -3,33 +3,33 @@ import { Prettify } from '../../models/prettify';
 
 export interface FieldDef<TProps extends Record<string, unknown>> {
   /** Unique field identifier - required for form binding */
-  readonly key: string;
+  key: string;
 
   /** Field type for component selection (input, select, checkbox, etc.) */
-  readonly type: string;
+  type: string;
 
   /** Human-readable field label */
-  readonly label?: string;
+  label?: string;
 
   /** Field-specific properties (placeholder, options, etc.) */
-  readonly props?: TProps;
+  props?: TProps;
 
   /** Additional CSS classes */
-  readonly className?: string;
+  className?: string;
 
   /** Whether the field is disabled */
-  readonly disabled?: boolean;
+  disabled?: boolean;
 
   /** Whether the field is read-only */
-  readonly readonly?: boolean;
+  readonly?: boolean;
 
   /** Whether the field is hidden */
-  readonly hidden?: boolean;
+  hidden?: boolean;
 
-  readonly tabIndex?: number | undefined;
+  tabIndex?: number | undefined;
 
   /** Column sizing configuration for responsive behavior */
-  readonly col?: number;
+  col?: number;
 }
 
 type IncludedKeys = 'label' | 'className' | 'hidden' | 'tabIndex';

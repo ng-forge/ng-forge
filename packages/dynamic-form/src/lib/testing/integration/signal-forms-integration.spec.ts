@@ -1,0 +1,532 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, signal } from '@angular/core';
+import { form } from '@angular/forms/signals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  ConditionalExpression,
+  evaluateCondition,
+  FunctionRegistryService,
+  SchemaDefinition,
+  SchemaRegistryService,
+  ValidatorConfig,
+} from '../../core';
+import { FormConfig } from '../../models';
+import { FieldDef, FieldWithValidation } from '../../definitions';
+
+// Mock component to test integration
+@Component({
+  template: `
+    <div>
+      <input
+        [value]="fieldValue()"
+        (input)="updateValue($event)"
+        [disabled]="isDisabled()"
+        [hidden]="isHidden()"
+        data-testid="test-input"
+      />
+    </div>
+  `,
+})
+class TestFormComponent {
+  private formValue = signal({
+    email: 'test@example.com',
+    age: 25,
+    contactMethod: 'email',
+    isActive: true,
+  });
+
+  fieldValue = signal('test@example.com');
+
+  form = form(this.formValue);
+
+  isDisabled = signal(false);
+  isHidden = signal(false);
+
+  updateValue(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.fieldValue.set(target.value);
+  }
+
+  // Methods to simulate field state changes for testing
+  setDisabled(disabled: boolean) {
+    this.isDisabled.set(disabled);
+  }
+
+  setHidden(hidden: boolean) {
+    this.isHidden.set(hidden);
+  }
+
+  updateFormValue(updates: Partial<any>) {
+    this.formValue.update((current) => ({ ...current, ...updates }));
+  }
+
+  getFormValue() {
+    return this.formValue();
+  }
+}
+
+describe('Signal Forms Integration Tests', () => {
+  let fixture: ComponentFixture<TestFormComponent>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [TestFormComponent],
+      providers: [SchemaRegistryService, FunctionRegistryService],
+    });
+
+    fixture = TestBed.createComponent(TestFormComponent);
+    fixture.detectChanges();
+  });
+
+  describe('API Configuration Processing', () => {
+    it('should process a complete API form configuration', () => {
+      const apiConfig: FormConfig = {
+        schemas: [
+          {
+            name: 'emailValidation',
+            description: 'Email validation schema',
+            validators: [{ type: 'required' }, { type: 'email' }],
+          },
+          {
+            name: 'conditionalRequired',
+            validators: [
+              {
+                type: 'required',
+                when: {
+                  type: 'fieldValue',
+                  fieldPath: 'isActive',
+                  operator: 'equals',
+                  value: true,
+                },
+              },
+            ],
+          },
+        ],
+        fields: [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email Address',
+            schemas: [{ type: 'apply', schema: 'emailValidation' }],
+            logic: [
+              {
+                type: 'hidden',
+                condition: {
+                  type: 'fieldValue',
+                  fieldPath: 'contactMethod',
+                  operator: 'notEquals',
+                  value: 'email',
+                },
+              },
+            ],
+          } as any,
+        ],
+      };
+
+      // Register schemas
+      const schemaRegistry = TestBed.inject(SchemaRegistryService);
+      apiConfig.schemas?.forEach((schema) => {
+        schemaRegistry.registerSchema(schema);
+      });
+
+      // Verify schemas are registered
+      const emailSchema = schemaRegistry.getSchema('emailValidation');
+      expect(emailSchema).toBeDefined();
+      expect(emailSchema?.validators).toHaveLength(2);
+
+      const conditionalSchema = schemaRegistry.getSchema('conditionalRequired');
+      expect(conditionalSchema).toBeDefined();
+      expect(conditionalSchema?.validators?.[0].when).toBeDefined();
+    });
+
+    it('should handle field configuration with multiple validator types', () => {
+      const fieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        key: 'age',
+        type: 'input',
+        label: 'Age',
+        validators: [
+          { type: 'required' },
+          { type: 'min', value: 18 },
+          { type: 'max', value: 100 },
+          {
+            type: 'pattern',
+            value: '^[0-9]+$',
+            errorMessage: 'Please enter a valid number',
+          },
+        ],
+      };
+
+      // Simulate applying validators (in real implementation, this would be done by the form system)
+      fieldConfig.validators?.forEach((validatorConfig) => {
+        expect(() => {
+          // This would normally call service.createValidator with actual field path
+          // For test, we just verify the config is valid
+          expect(validatorConfig.type).toMatch(/^(required|min|max|pattern|email|minLength|maxLength|custom)$/);
+        }).not.toThrow();
+      });
+    });
+
+    it('should handle complex conditional logic', () => {
+      const complexCondition: ConditionalExpression = {
+        type: 'javascript',
+        expression: 'formValue.age >= 18 && formValue.hasLicense === true',
+      };
+
+      const context = {
+        fieldValue: 'test',
+        formValue: { age: 25, hasLicense: true },
+        fieldPath: 'driverStatus',
+      };
+
+      const result = evaluateCondition(complexCondition, context);
+      expect(result).toBe(true);
+    });
+
+    it('should handle nested field path conditions', () => {
+      const nestedCondition: ConditionalExpression = {
+        type: 'fieldValue',
+        fieldPath: 'user.profile.role',
+        operator: 'equals',
+        value: 'admin',
+      };
+
+      const context = {
+        fieldValue: 'test',
+        formValue: {
+          user: {
+            profile: {
+              role: 'admin',
+            },
+          },
+        },
+        fieldPath: 'adminPanel',
+      };
+
+      const result = evaluateCondition(nestedCondition, context);
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('Real-world Scenarios', () => {
+    beforeEach(() => {
+      // Register common schemas
+      const emailSchema: SchemaDefinition = {
+        name: 'email',
+        validators: [{ type: 'required' }, { type: 'email' }],
+      };
+
+      const phoneSchema: SchemaDefinition = {
+        name: 'phone',
+        validators: [{ type: 'required' }, { type: 'pattern', value: '^\\+?[1-9]\\d{1,14}$' }],
+      };
+
+      const schemaRegistry = TestBed.inject(SchemaRegistryService);
+      schemaRegistry.registerSchema(emailSchema);
+      schemaRegistry.registerSchema(phoneSchema);
+    });
+
+    it('should handle conditional field visibility based on form state', () => {
+      const fieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        key: 'email',
+        type: 'input',
+        label: 'Email',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'contactMethod',
+              operator: 'notEquals',
+              value: 'email',
+            },
+          },
+        ],
+      };
+
+      // Test when email should be visible
+      let context = {
+        fieldValue: '',
+        formValue: { contactMethod: 'email' },
+        fieldPath: 'email',
+      };
+
+      let shouldHide = evaluateCondition(fieldConfig.logic![0].condition as ConditionalExpression, context);
+      expect(shouldHide).toBe(false); // Should not hide when contactMethod is email
+
+      // Test when email should be hidden
+      context = {
+        fieldValue: '',
+        formValue: { contactMethod: 'phone' },
+        fieldPath: 'email',
+      };
+
+      shouldHide = evaluateCondition(fieldConfig.logic![0].condition as ConditionalExpression, context);
+      expect(shouldHide).toBe(true); // Should hide when contactMethod is not email
+    });
+
+    it('should handle dynamic validation based on other field values', () => {
+      const ageFieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        key: 'age',
+        type: 'input',
+        label: 'Age',
+        validators: [
+          {
+            type: 'required',
+            when: {
+              type: 'fieldValue',
+              fieldPath: 'requiresAge',
+              operator: 'equals',
+              value: true,
+            },
+          },
+          {
+            type: 'min',
+            value: 18,
+            when: {
+              type: 'fieldValue',
+              fieldPath: 'category',
+              operator: 'equals',
+              value: 'adult',
+            },
+          },
+        ],
+      };
+
+      // Test required validation condition
+      const requiredCondition = ageFieldConfig.validators![0].when!;
+      const context = {
+        fieldValue: 25,
+        formValue: { requiresAge: true, category: 'adult' },
+        fieldPath: 'age',
+      };
+
+      let isRequired = evaluateCondition(requiredCondition, context);
+      expect(isRequired).toBe(true);
+
+      // Test min validation condition
+      const minCondition = ageFieldConfig.validators![1].when!;
+      let isAdult = evaluateCondition(minCondition, context);
+      expect(isAdult).toBe(true);
+
+      // Test when conditions are not met
+      context.formValue = { requiresAge: false, category: 'child' };
+      isRequired = evaluateCondition(requiredCondition, context);
+      isAdult = evaluateCondition(minCondition, context);
+
+      expect(isRequired).toBe(false);
+      expect(isAdult).toBe(false);
+    });
+
+    it('should handle array field validation with applyEach', () => {
+      const arrayFieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        key: 'contacts',
+        type: 'array',
+        label: 'Contact Information',
+        schemas: [
+          {
+            type: 'applyEach',
+            schema: {
+              name: 'contactItem',
+              validators: [{ type: 'required' }],
+              logic: [
+                {
+                  type: 'hidden',
+                  condition: {
+                    type: 'fieldValue',
+                    fieldPath: 'type',
+                    operator: 'equals',
+                    value: 'disabled',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      expect(arrayFieldConfig.schemas?.[0].type).toBe('applyEach');
+      expect(arrayFieldConfig.schemas?.[0].schema).toBeDefined();
+    });
+
+    it('should handle custom business logic validation', () => {
+      // Register custom function
+      const functionRegistry = TestBed.inject(FunctionRegistryService);
+      functionRegistry.registerCustomFunction('isBusinessDay', (context) => {
+        const date = new Date(context.fieldValue as string);
+        const dayOfWeek = date.getDay();
+        return dayOfWeek >= 1 && dayOfWeek <= 5; // Monday to Friday
+      });
+
+      // Test the custom function
+      const businessDayCondition: ConditionalExpression = {
+        type: 'custom',
+        expression: 'isBusinessDay',
+      };
+
+      // Test with Monday (business day)
+      const context = {
+        fieldValue: '2024-01-08', // Monday
+        formValue: {},
+        fieldPath: 'appointmentDate',
+        customFunctions: functionRegistry.getCustomFunctions(),
+      };
+
+      let isBusinessDay = evaluateCondition(businessDayCondition, context);
+      expect(isBusinessDay).toBe(true);
+
+      // Test with Sunday (weekend)
+      context.fieldValue = '2024-01-07'; // Sunday
+      isBusinessDay = evaluateCondition(businessDayCondition, context);
+      expect(isBusinessDay).toBe(false);
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle invalid expressions gracefully', () => {
+      const invalidExpression: ConditionalExpression = {
+        type: 'javascript',
+        expression: 'this.will.throw.error',
+      };
+
+      const context = {
+        fieldValue: 'test',
+        formValue: {},
+        fieldPath: 'test',
+      };
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
+      const result = evaluateCondition(invalidExpression, context);
+
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalled();
+    });
+
+    it('should handle missing custom functions', () => {
+      const missingFunctionExpression: ConditionalExpression = {
+        type: 'custom',
+        expression: 'nonExistentFunction',
+      };
+
+      const context = {
+        fieldValue: 'test',
+        formValue: {},
+        fieldPath: 'test',
+      };
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
+      const result = evaluateCondition(missingFunctionExpression, context);
+
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith('Custom function not found:', 'nonExistentFunction');
+    });
+
+    it('should handle missing field paths gracefully', () => {
+      const missingFieldExpression: ConditionalExpression = {
+        type: 'fieldValue',
+        fieldPath: 'nonexistent.deeply.nested.field',
+        operator: 'equals',
+        value: 'test',
+      };
+
+      const context = {
+        fieldValue: 'test',
+        formValue: { existing: 'value' },
+        fieldPath: 'test',
+      };
+
+      const result = evaluateCondition(missingFieldExpression, context);
+      expect(result).toBe(false); // undefined !== 'test'
+    });
+  });
+
+  describe('Performance and Edge Cases', () => {
+    it('should handle large numbers of validators efficiently', () => {
+      const manyValidators: ValidatorConfig[] = [];
+
+      // Create 100 validators
+      for (let i = 0; i < 100; i++) {
+        manyValidators.push({
+          type: 'minLength',
+          value: i,
+          when: {
+            type: 'fieldValue',
+            fieldPath: `field${i}`,
+            operator: 'equals',
+            value: true,
+          },
+        });
+      }
+
+      const fieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        key: 'testField',
+        type: 'input',
+        label: 'Test Field',
+        validators: manyValidators,
+      };
+
+      expect(fieldConfig.validators).toHaveLength(100);
+
+      // Verify each validator is valid
+      fieldConfig.validators?.forEach((validator, index) => {
+        expect(validator.type).toBe('minLength');
+        expect(validator.value).toBe(index);
+        expect(validator.when?.fieldPath).toBe(`field${index}`);
+      });
+    });
+
+    it('should handle deeply nested form values', () => {
+      const deeplyNestedForm = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                level5: {
+                  deepValue: 'found',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const deepExpression: ConditionalExpression = {
+        type: 'fieldValue',
+        fieldPath: 'level1.level2.level3.level4.level5.deepValue',
+        operator: 'equals',
+        value: 'found',
+      };
+
+      const context = {
+        fieldValue: 'test',
+        formValue: deeplyNestedForm,
+        fieldPath: 'test',
+      };
+
+      const result = evaluateCondition(deepExpression, context);
+      expect(result).toBe(true);
+    });
+
+    it('should handle circular references safely', () => {
+      const circularRef: any = { name: 'test' };
+      circularRef.self = circularRef;
+
+      const context = {
+        fieldValue: 'test',
+        formValue: circularRef,
+        fieldPath: 'test',
+      };
+
+      const expression: ConditionalExpression = {
+        type: 'fieldValue',
+        fieldPath: 'name',
+        operator: 'equals',
+        value: 'test',
+      };
+
+      // Should handle circular references without infinite loops
+      expect(() => {
+        evaluateCondition(expression, context);
+      }).not.toThrow();
+    });
+  });
+});

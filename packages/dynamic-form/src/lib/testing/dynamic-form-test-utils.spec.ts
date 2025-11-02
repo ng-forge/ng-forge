@@ -118,10 +118,13 @@ describe('DynamicFormTestUtils', () => {
     it('should check form validity', async () => {
       const config = DynamicFormTestUtils.builder().requiredInputField('name').build();
 
-      const { component } = await DynamicFormTestUtils.createTest({
+      const { component, fixture } = await DynamicFormTestUtils.createTest({
         config,
         initialValue: { name: '' },
       });
+
+      // Trigger validation by simulating user interaction
+      await DynamicFormTestUtils.simulateBlur(fixture, 'input[type="text"]');
 
       expect(DynamicFormTestUtils.isFormValid(component)).toBe(false);
     });

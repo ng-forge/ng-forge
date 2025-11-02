@@ -52,7 +52,8 @@ export class FormConfigBuilder {
       key,
       type: 'input',
       label: key.charAt(0).toUpperCase() + key.slice(1),
-      props: { placeholder: `Enter ${key}`, required: true, ...props },
+      required: true,
+      props: { placeholder: `Enter ${key}`, ...props },
     });
   }
 
@@ -61,7 +62,8 @@ export class FormConfigBuilder {
       key,
       type: 'select',
       label: key.charAt(0).toUpperCase() + key.slice(1),
-      props: { options, ...props },
+      options,
+      props: props || {},
     });
   }
 
