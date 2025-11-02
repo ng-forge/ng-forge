@@ -1257,12 +1257,13 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      // Group definitions currently flatten their children to root level
+      // Group definitions should create nested object structure
       expect(component.formValue()).toEqual({
-        street: '123 Main St',
-        city: 'New York',
-        zipCode: '10001',
-        address: undefined,
+        address: {
+          street: '123 Main St',
+          city: 'New York',
+          zipCode: '10001',
+        },
       });
     });
 
@@ -1308,12 +1309,13 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      // Should create flattened structure with group field undefined
+      // Should create nested structure with group containing row-flattened fields
       expect(component.formValue()).toEqual({
-        first: 'John',
-        last: 'Doe',
-        email: 'john.doe@example.com',
-        contact: undefined,
+        contact: {
+          first: 'John',
+          last: 'Doe',
+          email: 'john.doe@example.com',
+        },
       });
     });
 
@@ -1377,15 +1379,16 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      // Should handle mixed field types correctly with group fields flattened
+      // Should handle mixed field types correctly with group fields nested
       expect(component.formValue()).toEqual({
         username: 'johndoe',
         firstName: 'John',
         lastName: 'Doe',
-        street: '123 Main St',
-        city: 'New York',
         isActive: true,
-        address: undefined,
+        address: {
+          street: '123 Main St',
+          city: 'New York',
+        },
       });
     });
 
@@ -1420,12 +1423,13 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      // Form should be invalid due to empty required email field
+      // Form should be invalid due to empty required email field in nested group
       expect(component.valid()).toBe(false);
       expect(component.formValue()).toEqual({
-        email: '',
-        name: 'John',
-        userDetails: undefined,
+        userDetails: {
+          email: '',
+          name: 'John',
+        },
       });
     });
 

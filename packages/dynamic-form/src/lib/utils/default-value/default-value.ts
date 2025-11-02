@@ -1,9 +1,26 @@
 import { FieldDef } from '../../definitions/base/field-def';
 
 export function getFieldDefaultValue(field: FieldDef<any>): unknown {
-  // Group and row fields are container fields and should not have default values
-  if (field.type === 'group' || field.type === 'row') {
+  // Row fields are layout containers and should not have default values
+  if (field.type === 'row') {
     return undefined;
+  }
+
+  // Group fields should return an object with their child field defaults
+  if (field.type === 'group' && 'fields' in field) {
+    const fields = field.fields as readonly FieldDef<any>[];
+    // If group has no fields, return undefined (exclude from form)
+    if (!fields || fields.length === 0) {
+      return undefined;
+    }
+
+    const groupDefaults: Record<string, unknown> = {};
+    for (const childField of fields) {
+      if ('key' in childField && childField.key) {
+        groupDefaults[childField.key] = getFieldDefaultValue(childField);
+      }
+    }
+    return groupDefaults;
   }
 
   if ('defaultValue' in field && field.defaultValue !== undefined) {

@@ -24,12 +24,12 @@ export function flattenFields(fields: readonly FieldDef<Record<string, unknown>>
       const childFieldsArray = Object.values(field.fields);
       const flattenedChildren = flattenFields(childFieldsArray);
 
+      // Add only the group field with its flattened children, not the children separately
       result.push({
         ...field,
         fields: flattenedChildren,
+        key: field.key || `auto_group_${autoKeyCounter++}`,
       } as FlattenedField);
-
-      result.push(...flattenedChildren);
     } else {
       // Ensure the field has a key, auto-generate if missing
       const key = field.key || `auto_field_${autoKeyCounter++}`;

@@ -3,6 +3,7 @@ import { FieldDef, FieldWithValidation } from '../definitions';
 import { createValidator } from './validation';
 import { applyLogic } from './logic';
 import { applySchema } from './schema-application';
+import { isGroupField } from '../definitions/default/group-field';
 
 /**
  * Single entry point to map field data into form
@@ -11,6 +12,12 @@ import { applySchema } from './schema-application';
 export function mapFieldToForm<TValue>(fieldDef: FieldDef<Record<string, unknown>>, fieldPath: FieldPath<TValue>): void {
   // Cast to FieldWithValidation to access validation properties
   const validationField = fieldDef as FieldDef<Record<string, unknown>> & FieldWithValidation;
+
+  // Special handling for group fields - apply child field validations to the parent form schema
+  if (isGroupField(fieldDef)) {
+    mapGroupFieldToForm(fieldDef, fieldPath);
+    return;
+  }
 
   // Apply simple validation rules from field properties (backward compatibility)
   applySimpleValidationRules(validationField, fieldPath);
@@ -93,5 +100,29 @@ function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<Record<string,
   if ('customFormConfig' in fieldDef && fieldDef.customFormConfig) {
     console.log('Custom form configuration detected for field:', fieldDef.key);
     // Handle custom configuration here
+  }
+}
+
+/**
+ * Maps group field children to the parent form schema
+ * This ensures that validation from child fields is applied to the parent form
+ */
+function mapGroupFieldToForm<TValue>(groupField: FieldDef<Record<string, unknown>>, fieldPath: FieldPath<TValue>): void {
+  if (!isGroupField(groupField) || !groupField.fields) {
+    return;
+  }
+
+  // Apply validation for each child field to the appropriate nested path in the parent form
+  for (const childField of groupField.fields) {
+    if (!childField.key) {
+      continue;
+    }
+
+    // Get the nested path for this child field within the group
+    const nestedPath = (fieldPath as any)[childField.key];
+    if (nestedPath) {
+      // Recursively apply field mapping to the child field
+      mapFieldToForm(childField, nestedPath);
+    }
   }
 }
