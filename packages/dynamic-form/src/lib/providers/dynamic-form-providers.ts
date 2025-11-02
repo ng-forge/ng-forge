@@ -33,8 +33,50 @@ type ProvideDynamicFormResult<T extends readonly FieldTypeDefinition[]> = Enviro
 };
 
 /**
- * Provide dynamic form functionality with field type definitions
- * Simple provider setup that accepts field types directly and infers types
+ * Provider function to configure the dynamic form system with field types and options.
+ * 
+ * This function should be called in your application's bootstrap providers array
+ * to register built-in field types and configure global form behavior. It provides
+ * type-safe field registration with automatic type inference.
+ * 
+ * @param fieldTypes - Custom field type definitions to register alongside built-in types
+ * @returns Array of Angular providers for dependency injection with type inference
+ * 
+ * @example
+ * ```typescript
+ * // Basic setup with built-in fields only
+ * bootstrapApplication(AppComponent, {
+ *   providers: [
+ *     provideDynamicForm()
+ *   ]
+ * });
+ * ```
+ * 
+ * @example
+ * ```typescript
+ * // Custom field types with type inference
+ * import { CustomFieldType, AnotherFieldType } from './custom-fields';
+ * 
+ * bootstrapApplication(AppComponent, {
+ *   providers: [
+ *     provideDynamicForm(CustomFieldType, AnotherFieldType),
+ *     // Other providers...
+ *   ]
+ * });
+ * 
+ * // Form configuration now has access to custom types
+ * const config: FormConfig = {
+ *   fields: [
+ *     { type: 'custom-input', key: 'customField' }, // Type-safe!
+ *     { type: 'another-field', key: 'anotherField' }
+ *   ]
+ * };
+ * ```
+ * 
+ * @typeParam T - Array of field type definitions for type inference
+ * 
+ * @public
+ * @since 1.0.0
  */
 export function provideDynamicForm<const T extends readonly FieldTypeDefinition[]>(...fieldTypes: T): ProvideDynamicFormResult<T> {
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
