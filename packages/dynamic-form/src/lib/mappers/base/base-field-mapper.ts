@@ -1,7 +1,7 @@
 import { FieldDef } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
 import { entries } from 'lodash-es';
-import { getAllGridClasses } from '../../utils/grid-classes/grid-classes';
+import { getGridClassString } from '../../utils/grid-classes/grid-classes';
 
 export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
   const { label, className, tabIndex, props } = fieldDef;
@@ -12,8 +12,12 @@ export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
   }
 
   // Combine user className with generated grid classes
-  const gridClasses = getAllGridClasses(fieldDef);
-  const allClasses = [...gridClasses];
+  const gridClassString = getGridClassString(fieldDef);
+  const allClasses = [];
+
+  if (gridClassString) {
+    allClasses.push(gridClassString);
+  }
 
   if (className) {
     allClasses.push(className);
