@@ -129,7 +129,7 @@ devDependencies:
     specifier: 21.6.5
     version: 21.6.5(@swc-node/register@1.9.2)(@swc/core@1.13.5)
   '@playwright/test':
-    specifier: ^1.36.0
+    specifier: ^1.56.1
     version: 1.56.1
   '@schematics/angular':
     specifier: ~20.3.0
@@ -197,6 +197,9 @@ devDependencies:
   patch-package:
     specifier: ^8.0.1
     version: 8.0.1
+  playwright:
+    specifier: ^1.56.1
+    version: 1.56.1
   postcss:
     specifier: ^8.4.5
     version: 8.5.6

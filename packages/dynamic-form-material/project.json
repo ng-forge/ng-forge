@@ -43,6 +43,13 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright"],
+      "options": {
+        "config": "packages/dynamic-form-material/playwright.config.ts"
+      }
     }
   }
 }
