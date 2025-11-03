@@ -47,12 +47,14 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className() || ""',
+    id: 'key()',
   },
   providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatMultiCheckboxFieldComponent<T extends ValueType> implements MatMultiCheckboxComponent<T> {
   readonly field = input.required<FieldTree<T[]>>();
+  readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();

@@ -29,7 +29,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(4); // label + className + tabIndex + props
+      expect(bindings).toHaveLength(5); // key + label + className + tabIndex + props
       expect(Array.isArray(bindings)).toBe(true);
       expect(bindings.every((binding) => typeof binding === 'object')).toBe(true);
     });
@@ -47,7 +47,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // only label
+      expect(bindings).toHaveLength(2); // key + label
     });
 
     it('should create bindings for custom properties via entries iteration', () => {
@@ -67,8 +67,8 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      // Should create bindings for: label + customProp + anotherProp
-      expect(bindings).toHaveLength(3);
+      // Should create bindings for: key + label + customProp + anotherProp
+      expect(bindings).toHaveLength(4);
     });
 
     it('should handle destructured properties correctly', () => {
@@ -87,9 +87,9 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      // Should create bindings for: label + customProp
+      // Should create bindings for: key + label + customProp
       // disabled, readonly, hidden are excluded from bindings
-      expect(bindings).toHaveLength(2);
+      expect(bindings).toHaveLength(3);
     });
   });
 
@@ -106,7 +106,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // label binding
+      expect(bindings).toHaveLength(2); // key + label binding
     });
 
     it('should not create field binding when form field proxy does not exist', () => {
@@ -121,7 +121,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // only label binding
+      expect(bindings).toHaveLength(2); // key + label binding
     });
 
     it('should handle form context without structure', () => {
@@ -136,7 +136,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // only label binding, no field binding
+      expect(bindings).toHaveLength(2); // key + label binding, no field binding
     });
 
     it('should handle form context with null childrenMap', () => {
@@ -151,7 +151,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // label binding
+      expect(bindings).toHaveLength(2); // key + label binding
     });
 
     it('should work with multiple field proxies in form', () => {
@@ -173,8 +173,8 @@ describe('baseFieldMapper', () => {
       const bindings2 = baseFieldMapper(fieldDef2);
 
       // Assert
-      expect(bindings1).toHaveLength(1); // label binding for field1
-      expect(bindings2).toHaveLength(1); // label binding for field2
+      expect(bindings1).toHaveLength(2); // key + label binding for field1
+      expect(bindings2).toHaveLength(2); // key + label binding for field2
     });
   });
 
@@ -190,7 +190,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(0);
+      expect(bindings).toHaveLength(1); // key binding
     });
 
     it('should handle field definition with only excluded properties', () => {
@@ -206,7 +206,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(0);
+      expect(bindings).toHaveLength(1); // key binding
     });
   });
 
@@ -234,9 +234,9 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(complexFieldDef);
 
       // Assert
-      // Expected bindings: label + className + tabIndex + props + customAttribute + anotherCustomProp
+      // Expected bindings: key + label + className + tabIndex + props + customAttribute + anotherCustomProp
       // disabled, readonly, hidden are excluded
-      expect(bindings).toHaveLength(6);
+      expect(bindings).toHaveLength(7);
     });
 
     it('should verify field proxy access pattern', () => {
@@ -251,7 +251,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // label binding
+      expect(bindings).toHaveLength(2); // key + label binding
       // Verify that form access works correctly by checking bindings length
     });
 
@@ -268,7 +268,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(2); // label + className (no field binding for missing field)
+      expect(bindings).toHaveLength(3); // key + label + className (no field binding for missing field)
     });
   });
 
@@ -286,7 +286,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(2); // label + className
+      expect(bindings).toHaveLength(3); // key + label + className
     });
 
     it('should create only property bindings when form has no matching field', () => {
@@ -320,7 +320,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // only label binding, no field binding
+      expect(bindings).toHaveLength(2); // key + label binding, no field binding
     });
 
     it('should work with form without schema', () => {
@@ -351,7 +351,7 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(fieldDef);
 
       // Assert
-      expect(bindings).toHaveLength(1); // label binding
+      expect(bindings).toHaveLength(2); // key + label binding
     });
 
     it('should handle complex field definitions with real forms', () => {
@@ -377,9 +377,9 @@ describe('baseFieldMapper', () => {
       const bindings = baseFieldMapper(complexFieldDef);
 
       // Assert
-      // Expected: label + className + tabIndex + props + customAttribute
+      // Expected: key + label + className + tabIndex + props + customAttribute
       // disabled, readonly are excluded
-      expect(bindings).toHaveLength(5);
+      expect(bindings).toHaveLength(6);
     });
   });
 });

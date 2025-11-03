@@ -40,11 +40,13 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className()',
+    id: 'key()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatToggleFieldComponent implements MatToggleComponent {
   readonly field = input.required<FieldTree<boolean>>();
+  readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();

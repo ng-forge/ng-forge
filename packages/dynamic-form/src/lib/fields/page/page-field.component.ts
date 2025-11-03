@@ -11,7 +11,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { EMPTY, forkJoin, map, of, Subject, switchMap } from 'rxjs';
+import { forkJoin, map, of, switchMap } from 'rxjs';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
@@ -20,6 +20,7 @@ import { FieldSignalContext } from '../../mappers/types';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
+import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 
 @Component({
   selector: 'page-field',
@@ -42,6 +43,7 @@ import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/
     '[class.df-page-visible]': 'isVisible()',
     '[class.df-page-hidden]': '!isVisible()',
     '[attr.data-page-index]': 'pageIndex()',
+    id: 'key()',
   },
   imports: [FieldRendererDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,10 +53,11 @@ export default class PageFieldComponent {
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
-  private readonly eventBus = inject(EventBus, { optional: true });
+  private readonly eventBus = inject(EventBus);
 
   // Page field definition and parent form context
   field = input.required<PageField<any>>();
+  key = input.required<string>();
 
   form = input.required<FieldTree<any>>();
 
@@ -82,14 +85,12 @@ export default class PageFieldComponent {
    */
   readonly isVisible = computed(() => this._isVisible());
 
-  private readonly fieldsInitializedSubject = new Subject<void>();
+  // EventBus outputs for page navigation
+  readonly nextPage = outputFromObservable(this.eventBus.subscribe<NextPageEvent>('next-page'));
 
-  // EventBus outputs for page navigation (only if EventBus is provided)
-  readonly nextPage = outputFromObservable(this.eventBus?.subscribe<NextPageEvent>('next-page') ?? EMPTY);
+  readonly previousPage = outputFromObservable(this.eventBus.subscribe<PreviousPageEvent>('previous-page'));
 
-  readonly previousPage = outputFromObservable(this.eventBus?.subscribe<PreviousPageEvent>('previous-page') ?? EMPTY);
-
-  readonly pageChange = outputFromObservable(this.eventBus?.subscribe<PageChangeEvent>('page-change') ?? EMPTY);
+  readonly pageChange = outputFromObservable(this.eventBus.subscribe<PageChangeEvent>('page-change'));
 
   // Validate that this page doesn't contain nested pages
   readonly isValid = computed(() => {
@@ -164,7 +165,7 @@ export default class PageFieldComponent {
   }
 
   onFieldsInitialized(): void {
-    this.fieldsInitializedSubject.next();
+    this.eventBus.dispatch(ComponentInitializedEvent, 'page', this.field().key);
   }
 
   /**

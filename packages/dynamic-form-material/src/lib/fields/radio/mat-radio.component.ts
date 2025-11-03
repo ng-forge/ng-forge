@@ -42,11 +42,13 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className() || ""',
+    id: 'key()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatRadioFieldComponent<T> implements MatRadioComponent<T> {
   readonly field = input.required<FieldTree<T>>();
+  readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();

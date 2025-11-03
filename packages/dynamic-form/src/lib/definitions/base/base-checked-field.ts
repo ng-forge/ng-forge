@@ -7,8 +7,6 @@ import { DynamicText } from '../../pipes';
 export interface BaseCheckedField<TProps extends Record<string, unknown>> extends FieldDef<TProps>, FieldWithValidation {
   checked?: boolean;
 
-  defaultValue?: boolean;
-
   /**
    * Placeholder text displayed when the field is empty.
    * Supports static strings, Observables, and Signals for dynamic content.
@@ -24,7 +22,6 @@ export function isCheckedField<TProps extends Record<string, unknown>>(field: Fi
 
 type ExcludedKeys =
   | 'type'
-  | 'key'
   | 'conditionals'
   | 'defaultValue'
   | 'checked'

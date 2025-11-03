@@ -44,9 +44,13 @@ import { AsyncPipe } from '@angular/common';
     </mat-form-field>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    id: 'key()',
+  },
 })
 export default class MatSelectFieldComponent<T> implements MatSelectComponent<T> {
   readonly field = input.required<FieldTree<T>>();
+  readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();

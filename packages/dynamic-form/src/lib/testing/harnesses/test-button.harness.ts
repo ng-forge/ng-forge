@@ -9,6 +9,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
 })
 export default class TestButtonHarness {
   readonly field = input.required<FieldTree<string>>();
+  readonly key = input.required<string>();
 
   // Field-specific properties
   readonly label = input<string>('');

@@ -11,7 +11,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, Subject, switchMap } from 'rxjs';
+import { forkJoin, map, of, switchMap } from 'rxjs';
 import { RowField } from '../../definitions/default/row-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
@@ -19,6 +19,8 @@ import { FormUiControl } from '@angular/forms/signals';
 import { FieldSignalContext } from '../../mappers/types';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { EventBus } from '../../events/event.bus';
+import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 
 @Component({
   selector: 'row-field',
@@ -27,6 +29,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   host: {
     class: 'df-field df-row',
     '[class.disabled]': 'disabled()',
+    id: 'key()',
   },
   hostDirectives: [
     {
@@ -42,9 +45,11 @@ export default class RowFieldComponent {
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
+  private readonly eventBus = inject(EventBus);
 
   // Row field definition and parent form context
   field = input.required<RowField<any>>();
+  key = input.required<string>();
   value = model<any>(undefined);
   form = input.required<any>(); // Parent form instance
   fieldSignalContext = input.required<FieldSignalContext<any>>();
@@ -53,9 +58,6 @@ export default class RowFieldComponent {
 
   // Connect to the host directive
   fieldRenderer = model<ComponentRef<FormUiControl>[] | null>(null);
-
-  private readonly fieldsInitializedSubject = new Subject<void>();
-  readonly initialized$ = this.fieldsInitializedSubject.asObservable();
 
   // Row fields are just layout containers - they pass through child fields directly
   fields$ = toObservable(
@@ -122,7 +124,7 @@ export default class RowFieldComponent {
   }
 
   onFieldsInitialized(): void {
-    this.fieldsInitializedSubject.next();
+    this.eventBus.dispatch(ComponentInitializedEvent, 'row', this.field().key);
   }
 }
 

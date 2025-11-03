@@ -13,7 +13,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, Subject, switchMap } from 'rxjs';
+import { forkJoin, map, of, switchMap } from 'rxjs';
 import { get, keyBy, mapValues, memoize } from 'lodash-es';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
@@ -25,6 +25,7 @@ import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { createSchemaFromFields } from '../../core';
 import { EventBus, SubmitEvent } from '../../events';
+import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 import { flattenFields } from '../../utils';
 
 @Component({
@@ -37,6 +38,7 @@ import { flattenFields } from '../../utils';
   styleUrl: './group-field.component.scss',
   host: {
     class: 'df-field df-group',
+    id: 'key()',
   },
   providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,6 +70,7 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
 
   /** Field configuration input */
   field = input.required<GroupField<T>>();
+  key = input.required<string>();
 
   // Parent form context inputs
   parentForm = input.required<ReturnType<typeof form<TModel>>>();
@@ -136,10 +139,6 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
   readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit'));
 
-  private readonly fieldsInitializedSubject = new Subject<void>();
-
-  readonly initialized$ = this.fieldsInitializedSubject.asObservable();
-
   // Convert field setup to observable for field mapping
   fields$ = toObservable(computed(() => this.formSetup().fields));
 
@@ -199,7 +198,7 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
   }
 
   onFieldsInitialized(): void {
-    this.fieldsInitializedSubject.next();
+    this.eventBus.dispatch(ComponentInitializedEvent, 'group', this.field().key);
   }
 }
 

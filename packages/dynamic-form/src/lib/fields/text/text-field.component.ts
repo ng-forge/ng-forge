@@ -44,8 +44,12 @@ import { DynamicText } from '../../models';
   styleUrl: './text-field.component.scss',
   imports: [AsyncPipe, DynamicTextPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    id: 'key()',
+  },
 })
 export default class TextFieldComponent {
+  readonly key = input.required<string>();
   readonly label = input.required<DynamicText>();
   readonly className = input<string>();
   readonly tabIndex = input<number>();

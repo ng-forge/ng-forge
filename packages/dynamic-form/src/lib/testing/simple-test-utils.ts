@@ -5,6 +5,7 @@ import { FieldDef } from '../definitions';
 import { provideDynamicForm } from '../providers/dynamic-form-providers';
 import { Component, signal, Type } from '@angular/core';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
+import { EventBus } from '../events/event.bus';
 
 /**
  * Simple form configuration interface for testing
@@ -197,6 +198,7 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
     imports: [componentType],
     providers: [
       provideDynamicForm(),
+      EventBus,
       {
         provide: FIELD_REGISTRY,
         useValue: new Map([['test', mockFieldType]]),
@@ -208,6 +210,7 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
   const component = fixture.componentInstance;
 
   fixture.componentRef.setInput('field', config.field);
+  fixture.componentRef.setInput('key', config.field.key);
   if (config.value !== undefined) {
     fixture.componentRef.setInput('value', config.value);
   }

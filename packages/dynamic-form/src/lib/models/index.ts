@@ -11,4 +11,6 @@ export * from './logic';
 export * from './expressions';
 export * from './schemas';
 export * from './registry';
+
+// Performance optimizations - parked for later
 export * from './types';

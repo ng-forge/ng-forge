@@ -10,6 +10,9 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'df-mat-button',
   imports: [MatButton, DynamicTextPipe, AsyncPipe],
+  host: {
+    id: 'key()',
+  },
   template: `
     <button
       mat-raised-button
@@ -27,6 +30,7 @@ import { AsyncPipe } from '@angular/common';
 export default class MatButtonFieldComponent<TEvent extends FormEvent> implements MatButtonComponent<TEvent> {
   private readonly eventBus = inject(EventBus);
 
+  readonly key = input.required<string>();
   readonly label = input.required<DynamicText>();
   readonly disabled = input<boolean>(false);
   readonly hidden = input<boolean>(false);

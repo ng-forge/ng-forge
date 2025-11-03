@@ -25,6 +25,9 @@ import { AsyncPipe } from '@angular/common';
     DynamicTextPipe,
     AsyncPipe,
   ],
+  host: {
+    id: 'key()',
+  },
   template: `
     @let f = field();
 
@@ -62,6 +65,7 @@ import { AsyncPipe } from '@angular/common';
 })
 export default class MatDatepickerFieldComponent implements MatDatepickerComponent {
   readonly field = input.required<FieldTree<Date | null>>();
+  readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();

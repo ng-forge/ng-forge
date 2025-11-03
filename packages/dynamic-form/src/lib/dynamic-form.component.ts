@@ -17,7 +17,7 @@ import {
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, Subject, switchMap } from 'rxjs';
+import { filter, forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { isEqual, keyBy, mapValues, memoize } from 'lodash-es';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FormConfig, RegisteredFieldTypes } from './models';
@@ -25,6 +25,8 @@ import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-
 import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
+import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
+import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
 import { InferGlobalFormValue } from './models/types';
 import { flattenFields } from './utils';
 import { FieldDef } from './definitions';
@@ -385,9 +387,13 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
    */
   readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit').pipe(map(() => this.value())));
 
-  private readonly fieldsInitializedSubject = new Subject<void>();
+  private readonly componentId = 'dynamic-form';
 
-  readonly initialized$ = this.fieldsInitializedSubject.asObservable();
+  /**
+   * Observable that emits when all components (pages + rows + groups + dynamic-form) are initialized.
+   * Uses the external utility function to track initialization count.
+   */
+  readonly initialized$ = this.createInitializedObservable();
 
   fields$ = toObservable(computed(() => this.formSetup().fields));
 
@@ -437,7 +443,37 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
   }
 
   onFieldsInitialized(): void {
-    this.fieldsInitializedSubject.next();
+    this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+  }
+
+  /**
+   * Creates an observable that tracks when all form components are initialized.
+   * The count includes: 1 dynamic-form + pages + rows + groups
+   */
+  private createInitializedObservable(): Observable<boolean> {
+    const totalComponentsCount = computed(() => {
+      const fields = this.formSetup().fields;
+      if (!fields) return 1; // Just the dynamic-form component
+
+      const flatFields = flattenFields(fields);
+      const componentCount = flatFields.filter((field) => field.type === 'page' || field.type === 'row' || field.type === 'group').length;
+
+      return componentCount + 1; // +1 for dynamic-form component
+    });
+
+    return toObservable(totalComponentsCount).pipe(
+      switchMap((count) => {
+        if (count === 1) {
+          // Only dynamic-form component, emit immediately when it initializes
+          return this.eventBus.subscribe<ComponentInitializedEvent>('component-initialized').pipe(
+            filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
+            map(() => true)
+          );
+        }
+
+        return createInitializationTracker(this.eventBus, count);
+      })
+    );
   }
 
   /**

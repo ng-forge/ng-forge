@@ -27,7 +27,6 @@ export function isValueField<TProps extends Record<string, unknown>>(field: Fiel
 
 type ExcludedKeys =
   | 'type'
-  | 'key'
   | 'conditionals'
   | 'value'
   | 'valueType'

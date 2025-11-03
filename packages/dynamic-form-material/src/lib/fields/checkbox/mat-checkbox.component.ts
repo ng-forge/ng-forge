@@ -39,11 +39,13 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className()',
+    id: 'key()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly field = input.required<FieldTree<boolean>>();
+  readonly key = input.required<string>();
 
   // Properties
   readonly label = input<DynamicText>();
