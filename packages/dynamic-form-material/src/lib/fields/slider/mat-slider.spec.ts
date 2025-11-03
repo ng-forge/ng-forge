@@ -58,11 +58,14 @@ describe('MatSliderFieldComponent', () => {
 
     it.skip('should handle user input and update form value', async () => {
       const config = MaterialFormTestUtils.builder()
-        .matSliderField({ key: 'volume', props: {
-          min: 0,
-          max: 100,
-          step: 1,
-        } })
+        .matSliderField({
+          key: 'volume',
+          props: {
+            min: 0,
+            max: 100,
+            step: 1,
+          },
+        })
         .build();
 
       const { component, fixture } = await MaterialFormTestUtils.createTest({
@@ -91,10 +94,13 @@ describe('MatSliderFieldComponent', () => {
 
     it('should reflect external value changes in slider field', async () => {
       const config = MaterialFormTestUtils.builder()
-        .matSliderField({ key: 'volume', props: {
-          min: 0,
-          max: 100,
-        } })
+        .matSliderField({
+          key: 'volume',
+          props: {
+            min: 0,
+            max: 100,
+          },
+        })
         .build();
 
       const { component, fixture } = await MaterialFormTestUtils.createTest({
@@ -217,9 +223,7 @@ describe('MatSliderFieldComponent', () => {
 
   describe('Minimal Configuration Tests', () => {
     it.skip('should render with default Material configuration', async () => {
-      const config = MaterialFormTestUtils.builder()
-        .matSliderField({ key: 'volume' })
-        .build();
+      const config = MaterialFormTestUtils.builder().matSliderField({ key: 'volume' }).build();
 
       const { fixture } = await MaterialFormTestUtils.createTest({
         config,
@@ -236,9 +240,7 @@ describe('MatSliderFieldComponent', () => {
     });
 
     it('should not display hint when not provided', async () => {
-      const config = MaterialFormTestUtils.builder()
-        .matSliderField({ key: 'volume' })
-        .build();
+      const config = MaterialFormTestUtils.builder().matSliderField({ key: 'volume' }).build();
 
       const { fixture } = await MaterialFormTestUtils.createTest({
         config,
@@ -333,11 +335,14 @@ describe('MatSliderFieldComponent', () => {
   describe('Slider-Specific Features Tests', () => {
     it('should display tick marks when tickInterval is provided', async () => {
       const config = MaterialFormTestUtils.builder()
-        .matSliderField({ key: 'volume', props: {
-          min: 0,
-          max: 100,
-          tickInterval: 20,
-        } })
+        .matSliderField({
+          key: 'volume',
+          props: {
+            min: 0,
+            max: 100,
+            tickInterval: 20,
+          },
+        })
         .build();
 
       const { fixture } = await MaterialFormTestUtils.createTest({
@@ -366,9 +371,7 @@ describe('MatSliderFieldComponent', () => {
     });
 
     it('should handle touched state on blur', async () => {
-      const config = MaterialFormTestUtils.builder()
-        .matSliderField({ key: 'volume' })
-        .build();
+      const config = MaterialFormTestUtils.builder().matSliderField({ key: 'volume' }).build();
 
       const { fixture } = await MaterialFormTestUtils.createTest({
         config,
@@ -390,9 +393,7 @@ describe('MatSliderFieldComponent', () => {
 
   describe('Edge Cases and Robustness Tests', () => {
     it('should handle undefined form values gracefully', async () => {
-      const config = MaterialFormTestUtils.builder()
-        .matSliderField({ key: 'volume' })
-        .build();
+      const config = MaterialFormTestUtils.builder().matSliderField({ key: 'volume' }).build();
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
@@ -401,9 +402,7 @@ describe('MatSliderFieldComponent', () => {
     });
 
     it('should handle null form values gracefully', async () => {
-      const config = MaterialFormTestUtils.builder()
-        .matSliderField({ key: 'volume' })
-        .build();
+      const config = MaterialFormTestUtils.builder().matSliderField({ key: 'volume' }).build();
 
       const { fixture } = await MaterialFormTestUtils.createTest({
         config,

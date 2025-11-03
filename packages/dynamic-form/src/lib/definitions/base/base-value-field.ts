@@ -16,9 +16,7 @@ export interface BaseValueField<TProps extends Record<string, unknown>, TValue> 
   required?: boolean;
 }
 
-export function isValueField<TProps extends Record<string, unknown>>(
-  field: FieldDef<TProps>
-): field is BaseValueField<TProps, ValueType> {
+export function isValueField<TProps extends Record<string, unknown>>(field: FieldDef<TProps>): field is BaseValueField<TProps, ValueType> {
   return 'value' in field;
 }
 
