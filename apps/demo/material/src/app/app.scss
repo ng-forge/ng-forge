@@ -1,0 +1,30 @@
+.demo-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-header {
+  background: #1976d2;
+  color: white;
+  padding: 1rem 2rem;
+  text-align: center;
+
+  h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
+  }
+}
+
+.demo-main {
+  flex: 1;
+  padding: 2rem;
+  background: #fafafa;
+}

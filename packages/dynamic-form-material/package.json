@@ -10,7 +10,6 @@
     "@angular/platform-browser": "~21.0.0-next.9",
     "@ng-forge/dynamic-form": "^0.0.1",
     "@nx/vite": "21.6.5",
-    "@playwright/test": "^1.56.1",
     "lodash-es": "^4.17.21",
     "ngxtension": "^6.0.0",
     "rxjs": "~7.8.0",
