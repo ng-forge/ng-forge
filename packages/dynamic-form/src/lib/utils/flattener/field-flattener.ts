@@ -1,6 +1,7 @@
 import { FieldDef } from '../../definitions';
 import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
+import { isPageField } from '../../definitions/default/page-field';
 
 /**
  * Represents a field definition that has been processed through the flattening algorithm.
@@ -19,6 +20,7 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
  * Flattens a hierarchical field structure into a linear array for form processing.
  *
  * Handles different field types with specific flattening strategies:
+ * - **Page fields**: Children are flattened and merged into the result (no wrapper)
  * - **Row fields**: Children are flattened and merged into the result (no wrapper)
  * - **Group fields**: Maintains group structure with flattened children nested under the group key
  * - **Other fields**: Pass through unchanged with guaranteed key generation
@@ -78,7 +80,13 @@ export function flattenFields(fields: readonly FieldDef<Record<string, unknown>>
   let autoKeyCounter = 0;
 
   for (const field of fields) {
-    if (isRowField(field)) {
+    if (isPageField(field)) {
+      // Page fields are layout containers - flatten their children to root level
+      if (field.fields) {
+        const flattenedChildren = flattenFields(field.fields);
+        result.push(...flattenedChildren);
+      }
+    } else if (isRowField(field)) {
       const flattenedChildren = flattenFields(field.fields);
       result.push(...flattenedChildren);
     } else if (isGroupField(field)) {

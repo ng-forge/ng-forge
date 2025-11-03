@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models';
 import { RootFormRegistryService } from './root-form-registry.service';
@@ -12,7 +12,7 @@ import { RootFormRegistryService } from './root-form-registry.service';
  */
 @Injectable()
 export class FieldContextRegistryService {
-  constructor(private rootFormRegistry: RootFormRegistryService) {}
+  private rootFormRegistry = inject(RootFormRegistryService);
 
   /**
    * Creates an evaluation context for a field by combining:

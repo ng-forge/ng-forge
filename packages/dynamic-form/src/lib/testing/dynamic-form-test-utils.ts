@@ -8,6 +8,7 @@ import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field
 import { delay } from './delay';
 import { checkboxFieldMapper, valueFieldMapper } from '../mappers';
 import { FieldMapperOptions } from '../mappers/types';
+import { BUILT_IN_FIELDS } from '../providers/built-in-fields';
 
 /**
  * Configuration for creating a dynamic form test
@@ -101,6 +102,15 @@ export class FormConfigBuilder {
     });
   }
 
+  pageField(key: string, fields: FieldDef<Record<string, unknown>>[], title?: string): FormConfigBuilder {
+    return this.field({
+      key,
+      type: 'page',
+      title,
+      fields,
+    } as FieldDef<Record<string, unknown>>);
+  }
+
   build(): FormConfig {
     return { fields: this.fields } as unknown as FormConfig;
   }
@@ -147,7 +157,7 @@ export class DynamicFormTestUtils {
   }
 
   /**
-   * Registers common test field types
+   * Registers common test field types including built-in types like page, row, group
    */
   static registerTestFields(fieldRegistry: ReturnType<typeof injectFieldRegistry>): void {
     // Input field mapper that extends value field mapper
@@ -183,6 +193,10 @@ export class DynamicFormTestUtils {
       return valueFieldMapper(fieldDef, options);
     };
 
+    // Register built-in fields first (page, row, group)
+    fieldRegistry.registerTypes(BUILT_IN_FIELDS);
+
+    // Then register test field types
     fieldRegistry.registerTypes([
       {
         name: 'input',

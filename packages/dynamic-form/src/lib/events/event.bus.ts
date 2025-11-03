@@ -58,8 +58,8 @@ export class EventBus {
    * eventBus.dispatch(CustomFormEvent);
    * ```
    */
-  dispatch<T extends FormEventConstructor>(eventConstructor: T): void {
-    this.pipeline$.next(new eventConstructor());
+  dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: any[]): void {
+    this.pipeline$.next(new eventConstructor(...args));
   }
 
   /**

@@ -31,6 +31,9 @@ import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './core/registry';
+import { detectFormMode, FormModeDetectionResult } from './models/types/form-mode';
+import { FormModeValidator } from './utils/form-validation/form-mode-validator';
+import { PageOrchestratorComponent } from './core/page-orchestrator';
 
 /**
  * Dynamic form component that renders a complete form based on configuration.
@@ -75,16 +78,40 @@ import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryS
  */
 @Component({
   selector: 'dynamic-form',
-  imports: [FieldRendererDirective],
+  imports: [FieldRendererDirective, PageOrchestratorComponent],
   template: `
-    <form class="df-form" [class.disabled]="formOptions().disabled" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-      <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+    <form
+      class="df-form"
+      [class.disabled]="formOptions().disabled"
+      [class.df-form-paged]="formModeDetection().mode === 'paged'"
+      [class.df-form-non-paged]="formModeDetection().mode === 'non-paged'"
+    >
+      @if (formModeDetection().mode === 'paged') {
+      <!-- Paged form: Use page orchestrator with page fields -->
+      <page-orchestrator
+        [pageComponents]="fields()"
+        [config]="{ initialPageIndex: 0 }"
+        (pageChanged)="onPageChanged($event)"
+        (navigationStateChanged)="onNavigationStateChanged($event)"
+      >
+        <!-- Page fields will be rendered here -->
+        <div [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+          <!-- Page field components will be automatically rendered by the fieldRenderer directive -->
+        </div>
+      </page-orchestrator>
+      } @else {
+      <!-- Non-paged form: Render fields directly -->
+      <div [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+        <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+      </div>
+      }
     </form>
   `,
   styleUrl: './dynamic-form.component.scss',
   providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
   host: {
     '[class.disabled]': 'disabled()',
+    '[attr.data-form-mode]': 'formModeDetection().mode',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -138,27 +165,59 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
    */
   value = model<Partial<TModel> | undefined>(undefined);
 
+  /**
+   * Form mode detection and validation
+   */
+  readonly formModeDetection = computed<FormModeDetectionResult>(() => {
+    const config = this.config();
+    const fields = config.fields || [];
+
+    const detection = detectFormMode(fields);
+
+    // Validate form configuration and log errors/warnings
+    const validation = FormModeValidator.validateFormConfiguration(fields);
+
+    if (!validation.isValid) {
+      console.error('Invalid form configuration:', validation.errors);
+    }
+
+    if (validation.warnings.length > 0) {
+      console.warn('Form configuration warnings:', validation.warnings);
+    }
+
+    return detection;
+  });
+
   private readonly formSetup = computed(() => {
     const config = this.config();
+    const modeDetection = this.formModeDetection();
 
     if (config.fields && config.fields.length > 0) {
+      // Always flatten fields for form schema - this extracts child fields from page/row containers
       const flattenedFields = flattenFields(config.fields);
       const fieldsById = keyBy(flattenedFields, 'key');
       const defaultValues = mapValues(fieldsById, (field) => getFieldDefaultValue(field)) as TModel;
 
+      // For rendering, paged forms keep original structure, non-paged use flattened
+      const fieldsToRender = modeDetection.mode === 'paged' ? config.fields : flattenedFields;
+
       return {
-        fields: flattenedFields,
+        fields: fieldsToRender,
+        schemaFields: flattenedFields, // Fields for form schema (always flattened)
         originalFields: config.fields,
         defaultValues,
         schema: undefined,
+        mode: modeDetection.mode,
       };
     }
 
     // Fallback: empty form
     return {
       fields: [],
+      schemaFields: [],
       defaultValues: {} as TModel,
       schema: undefined,
+      mode: 'non-paged' as const,
     };
   });
 
@@ -182,8 +241,8 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
       let formInstance: ReturnType<typeof form<TModel>>;
 
-      if (setup.fields.length > 0) {
-        const schema = createSchemaFromFields(setup.fields);
+      if (setup.schemaFields && setup.schemaFields.length > 0) {
+        const schema = createSchemaFromFields(setup.schemaFields);
         formInstance = untracked(() => form(this.entity, schema));
       } else {
         formInstance = untracked(() => form(this.entity));
@@ -344,6 +403,24 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
   onFieldsInitialized(): void {
     this.fieldsInitializedSubject.next();
+  }
+
+  /**
+   * Handle page change events from the page orchestrator
+   * @param event The page change event
+   */
+  onPageChanged(event: any): void {
+    // Re-emit the page change event for external consumers
+    // This allows users to listen to page changes at the form level
+  }
+
+  /**
+   * Handle navigation state changes from the page orchestrator
+   * @param state The new navigation state
+   */
+  onNavigationStateChanged(state: any): void {
+    // Could be used for additional state management or logging
+    // Currently just provides a hook for future functionality
   }
 
   ngOnDestroy(): void {

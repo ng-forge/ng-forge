@@ -4,6 +4,7 @@ import { createValidator } from './validation';
 import { applyLogic } from './logic';
 import { applySchema } from './schema-application';
 import { isGroupField } from '../definitions/default/group-field';
+import { isPageField } from '../definitions/default/page-field';
 
 /**
  * Single entry point to map field data into form
@@ -12,6 +13,12 @@ import { isGroupField } from '../definitions/default/group-field';
 export function mapFieldToForm<TValue>(fieldDef: FieldDef<Record<string, unknown>>, fieldPath: FieldPath<TValue>): void {
   // Cast to FieldWithValidation to access validation properties
   const validationField = fieldDef as FieldDef<Record<string, unknown>> & FieldWithValidation;
+
+  // Special handling for page fields - flatten child fields to root level
+  if (isPageField(fieldDef)) {
+    mapPageFieldToForm(fieldDef, fieldPath);
+    return;
+  }
 
   // Special handling for group fields - apply child field validations to the parent form schema
   if (isGroupField(fieldDef)) {
@@ -100,6 +107,32 @@ function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<Record<string,
   if ('customFormConfig' in fieldDef && fieldDef.customFormConfig) {
     console.log('Custom form configuration detected for field:', fieldDef.key);
     // Handle custom configuration here
+  }
+}
+
+/**
+ * Maps page field children to the root form schema
+ * Page fields are layout containers that don't create their own form controls
+ * Their children are flattened to the root level of the form
+ */
+function mapPageFieldToForm<TValue>(pageField: FieldDef<Record<string, unknown>>, rootPath: FieldPath<TValue>): void {
+  if (!isPageField(pageField) || !pageField.fields) {
+    return;
+  }
+
+  // Page fields don't create their own form controls
+  // Instead, their child fields are mapped directly to the root form
+  for (const childField of pageField.fields) {
+    if (!childField.key) {
+      continue;
+    }
+
+    // Get the field path for this child at the root level (not nested under the page)
+    const childPath = (rootPath as any)[childField.key];
+    if (childPath) {
+      // Recursively apply field mapping to the child field at root level
+      mapFieldToForm(childField, childPath);
+    }
   }
 }
 

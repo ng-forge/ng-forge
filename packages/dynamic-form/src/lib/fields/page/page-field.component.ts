@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, ComponentRef, computed, inject, Injector, input, ViewContainerRef } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ComponentRef,
+  computed,
+  inject,
+  Injector,
+  input,
+  signal,
+  ViewContainerRef,
+} from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, EMPTY, map, of, Subject, switchMap } from 'rxjs';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
@@ -13,14 +23,24 @@ import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/
 @Component({
   selector: 'page-field',
   template: `
-    <div class="df-page" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+    <div
+      class="df-page"
+      [class.df-page-visible]="isVisible()"
+      [class.df-page-hidden]="!isVisible()"
+      [attr.aria-hidden]="!isVisible()"
+      [fieldRenderer]="fields()"
+      (fieldsInitialized)="onFieldsInitialized()"
+    >
       <!-- Fields will be automatically rendered by the fieldRenderer directive -->
     </div>
   `,
   styleUrl: './page-field.component.scss',
   host: {
-    class: 'df-field',
+    class: 'df-field df-page-field',
     '[class.disabled]': 'disabled()',
+    '[class.df-page-visible]': 'isVisible()',
+    '[class.df-page-hidden]': '!isVisible()',
+    '[attr.data-page-index]': 'pageIndex()',
   },
   imports: [FieldRendererDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,6 +59,26 @@ export default class PageFieldComponent {
   fieldSignalContext = input.required<FieldSignalContext<any>>();
 
   readonly disabled = computed(() => this.field().disabled || false);
+
+  /**
+   * Page index signal managed by orchestrator
+   */
+  private readonly _pageIndex = signal(0);
+
+  /**
+   * Page index for orchestrator coordination
+   */
+  readonly pageIndex = computed(() => this._pageIndex());
+
+  /**
+   * Page visibility signal managed by orchestrator
+   */
+  private readonly _isVisible = signal(true);
+
+  /**
+   * Page visibility state controlled by the orchestrator
+   */
+  readonly isVisible = computed(() => this._isVisible());
 
   private readonly fieldsInitializedSubject = new Subject<void>();
 
@@ -114,5 +154,19 @@ export default class PageFieldComponent {
 
   onFieldsInitialized(): void {
     this.fieldsInitializedSubject.next();
+  }
+
+  /**
+   * Method called by orchestrator to set page index
+   */
+  setPageIndex(index: number): void {
+    this._pageIndex.set(index);
+  }
+
+  /**
+   * Method called by orchestrator to set visibility
+   */
+  setVisibility(visible: boolean): void {
+    this._isVisible.set(visible);
   }
 }

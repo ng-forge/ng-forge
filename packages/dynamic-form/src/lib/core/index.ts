@@ -4,6 +4,7 @@ export * from './logic';
 export * from './expressions';
 export * from './values';
 export * from './registry';
+export * from './page-orchestrator';
 
 // Schema application (keeping original file location for now)
 export { applySchema, createSchemaFunction } from './schema-application';

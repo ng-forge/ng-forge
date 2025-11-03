@@ -11,4 +11,57 @@
   &.df-page-spacing-custom {
     --df-grid-row-gap: var(--page-custom-spacing, 1.5rem);
   }
+
+  // Page visibility states
+  &.df-page-visible {
+    display: block;
+    opacity: 1;
+  }
+
+  &.df-page-hidden {
+    display: none;
+    opacity: 0;
+  }
+}
+
+.df-page {
+  width: 100%;
+  transition: opacity 0.2s ease-in-out;
+
+  &.df-page-visible {
+    opacity: 1;
+  }
+
+  &.df-page-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+// Accessibility improvements
+.df-page[aria-hidden='true'] {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+// Animation support (optional - can be overridden by consumers)
+@media (prefers-reduced-motion: no-preference) {
+  .df-page {
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  }
+
+  .df-page.df-page-visible {
+    transform: translateX(0);
+  }
+
+  .df-page.df-page-hidden {
+    transform: translateX(-10px);
+  }
+}
+
+// Ensure animations are disabled for users who prefer reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .df-page {
+    transition: none;
+  }
 }
