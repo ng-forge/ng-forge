@@ -3,6 +3,7 @@ import {
   Component,
   ComponentRef,
   computed,
+  DestroyRef,
   inject,
   Injector,
   input,
@@ -16,8 +17,8 @@ import {
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, map, of, Subject, switchMap } from 'rxjs';
-import { isEqual, keyBy, mapValues } from 'lodash-es';
+import { forkJoin, map, of, Subject, switchMap } from 'rxjs';
+import { isEqual, keyBy, mapValues, memoize } from 'lodash-es';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FormConfig, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
@@ -118,11 +119,42 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
 export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TModel = InferGlobalFormValue>
   implements OnDestroy
 {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
+
+  // Type-safe memoized functions for performance optimization
+  private readonly memoizedFlattenFields = memoize(
+    (fields: readonly FieldDef<Record<string, unknown>>[]) => flattenFields(fields),
+    (fields) => JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type })))
+  );
+
+  private readonly memoizedKeyBy = memoize(
+    <T extends { key: string }>(fields: readonly T[]) => keyBy(fields, 'key'),
+    (fields) => fields.map((f) => f.key).join(',')
+  );
+
+  private readonly memoizedDefaultValues = memoize(
+    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>) =>
+      mapValues(fieldsById, (field) => getFieldDefaultValue(field)) as TModel,
+    (fieldsById) => Object.keys(fieldsById).sort().join(',')
+  );
+
+  // Memoized field signal context to avoid recreation for every field
+  private readonly fieldSignalContext = computed(
+    (): FieldSignalContext<TModel> => ({
+      injector: this.injector,
+      value: this.value,
+      defaultValues: this.defaultValues,
+      form: this.form(),
+    })
+  );
+
+  // Memoized field registry raw access
+  private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   /**
    * Form configuration defining the structure, validation, and behavior.
@@ -193,10 +225,10 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
     const modeDetection = this.formModeDetection();
 
     if (config.fields && config.fields.length > 0) {
-      // Always flatten fields for form schema - this extracts child fields from page/row containers
-      const flattenedFields = flattenFields(config.fields);
-      const fieldsById = keyBy(flattenedFields, 'key');
-      const defaultValues = mapValues(fieldsById, (field) => getFieldDefaultValue(field)) as TModel;
+      // Use memoized functions for expensive operations
+      const flattenedFields = this.memoizedFlattenFields(config.fields);
+      const fieldsById = this.memoizedKeyBy(flattenedFields);
+      const defaultValues = this.memoizedDefaultValues(fieldsById);
 
       // For rendering, paged forms keep original structure, non-paged use flattened
       const fieldsToRender = modeDetection.mode === 'paged' ? config.fields : flattenedFields;
@@ -366,39 +398,42 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
           return of([]);
         }
 
-        return combineLatest(this.mapFields(fields));
+        return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
+      map((components) => components.filter(Boolean))
     ),
     { initialValue: [] }
   );
 
   private mapFields(fields: readonly FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
-      .map(async (fieldDef) => {
-        let componentType;
-        try {
-          componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type);
-        } catch (error) {
-          console.error(error);
+      .map((fieldDef) => this.mapSingleField(fieldDef))
+      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+  }
+
+  private async mapSingleField(fieldDef: FieldDef<Record<string, unknown>>): Promise<ComponentRef<FormUiControl> | undefined> {
+    return this.fieldRegistry
+      .loadTypeComponent(fieldDef.type)
+      .then((componentType) => {
+        // Check if component is destroyed before creating new components
+        if (this.destroyRef.destroyed) {
           return undefined;
         }
 
-        const fieldSignalContext: FieldSignalContext<TModel> = {
-          injector: this.injector,
-          value: this.value,
-          defaultValues: this.defaultValues,
-          form: this.form(),
-        };
-
         const bindings = mapFieldToBindings(fieldDef, {
-          fieldSignalContext,
-          fieldRegistry: this.fieldRegistry.raw,
+          fieldSignalContext: this.fieldSignalContext(),
+          fieldRegistry: this.rawFieldRegistry(),
         });
 
-        return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
+        return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
       })
-      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+      .catch((error) => {
+        // Only log errors if component hasn't been destroyed
+        if (!this.destroyRef.destroyed) {
+          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+        }
+        return undefined;
+      });
   }
 
   onFieldsInitialized(): void {

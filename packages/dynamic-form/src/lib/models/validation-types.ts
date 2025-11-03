@@ -1,5 +1,5 @@
 import { ValidationError as AngularValidationError } from '@angular/forms/signals';
-import { DynamicText } from '../pipes/types';
+import { DynamicText } from '../pipes';
 
 /**
  * Re-export Angular's ValidationError for consistency

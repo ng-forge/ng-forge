@@ -1,4 +1,4 @@
-import { FieldDef, GroupField, PageField, RowField } from '../../definitions';
+import { FieldDef, GroupField, PageField, RowField, TextField } from '../../definitions';
 
 /**
  * Global interface for dynamic form field definitions
@@ -18,6 +18,7 @@ export interface DynamicFormFieldRegistry {
   row: RowField<readonly FieldDef<Record<string, unknown>>[]>;
   group: GroupField<readonly FieldDef<Record<string, unknown>>[]>;
   page: PageField<readonly FieldDef<Record<string, unknown>>[]>;
+  text: TextField;
 }
 
 /**

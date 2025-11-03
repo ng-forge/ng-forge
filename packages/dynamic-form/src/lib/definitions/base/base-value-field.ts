@@ -2,7 +2,7 @@ import { FieldDef } from './field-def';
 import { FieldWithValidation } from './field-with-validation';
 import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
-import { DynamicText } from '../../pipes/types';
+import { DynamicText } from '../../pipes';
 
 export const ValueType = ['string', 'number', 'boolean', 'object', 'array', 'date'] as const;
 export type ValueType = (typeof ValueType)[number];

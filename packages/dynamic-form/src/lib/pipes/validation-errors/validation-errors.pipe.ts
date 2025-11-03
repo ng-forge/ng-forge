@@ -2,7 +2,7 @@ import { DestroyRef, inject, Pipe, PipeTransform, signal } from '@angular/core';
 import { isObservable, Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { ValidationError } from '../../models/validation-types';
-import { DynamicText } from '../types';
+import { DynamicText } from '../index';
 
 /**
  * Injectable translation service interface for validation error translation
@@ -157,7 +157,7 @@ export class ValidationErrorsPipe implements PipeTransform {
     }
 
     if (isObservable(customMessage)) {
-      return customMessage.pipe(map((message) => this.interpolateParams(message, error)));
+      return customMessage.pipe(map((message) => this.interpolateParams(message as string, error)));
     }
 
     // Handle signals by reading their value

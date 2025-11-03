@@ -1,6 +1,6 @@
 import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
-import { DynamicText } from '../../pipes/types';
+import { DynamicText } from '../../pipes';
 
 /**
  * Base interface for all dynamic form field definitions.
