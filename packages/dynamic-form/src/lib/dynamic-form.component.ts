@@ -11,7 +11,7 @@ import {
   OnDestroy,
   runInInjectionContext,
   untracked,
-  ViewContainerRef
+  ViewContainerRef,
 } from '@angular/core';
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
@@ -30,12 +30,7 @@ import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import {
-  FieldContextRegistryService,
-  FunctionRegistryService,
-  RootFormRegistryService,
-  SchemaRegistryService
-} from './core/registry';
+import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './core/registry';
 
 /**
  * Dynamic form component that renders a complete form based on configuration.
@@ -77,7 +72,6 @@ import {
  * @typeParam TModel - The strongly-typed interface for form values
  *
  * @public
- * @since 1.0.0
  */
 @Component({
   selector: 'dynamic-form',

@@ -32,7 +32,6 @@ import { EvaluationContext } from './expressions';
  * @typeParam TValue - The strongly-typed interface for form values
  *
  * @public
- * @since 1.0.0
  */
 export interface FormConfig<
   TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[],
@@ -129,7 +128,6 @@ export interface FormConfig<
  * ```
  *
  * @public
- * @since 1.0.0
  */
 export interface SignalFormsConfig {
   /**
@@ -187,7 +185,6 @@ export interface SignalFormsConfig {
  * ```
  *
  * @public
- * @since 1.0.0
  */
 export interface FormOptions {
   /**

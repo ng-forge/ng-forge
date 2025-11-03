@@ -42,7 +42,6 @@ import { Prettify } from '../../models/prettify';
  * @typeParam TProps - Field-specific properties interface
  *
  * @public
- * @since 1.0.0
  */
 export interface FieldDef<TProps extends Record<string, unknown>> {
   /**
@@ -222,6 +221,5 @@ type IncludedKeys = 'label' | 'className' | 'hidden' | 'tabIndex';
  * @typeParam T - Field definition type to extract properties from
  *
  * @public
- * @since 1.0.0
  */
 export type FieldComponent<T extends FieldDef<any>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;

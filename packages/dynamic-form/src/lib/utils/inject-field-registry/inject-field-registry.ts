@@ -39,7 +39,6 @@ import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
  * ```
  *
  * @public
- * @since 1.0.0
  */
 export function injectFieldRegistry() {
   const registry = inject(FIELD_REGISTRY);

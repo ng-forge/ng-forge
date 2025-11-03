@@ -41,7 +41,6 @@ import { FieldDef } from '../../definitions';
  * ```
  *
  * @public
- * @since 1.0.0
  */
 export function getGridClassString(fieldDef: FieldDef<Record<string, unknown>>): string {
   const classes: string[] = [];

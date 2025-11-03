@@ -76,7 +76,6 @@ type ProvideDynamicFormResult<T extends readonly FieldTypeDefinition[]> = Enviro
  * @typeParam T - Array of field type definitions for type inference
  *
  * @public
- * @since 1.0.0
  */
 export function provideDynamicForm<const T extends readonly FieldTypeDefinition[]>(...fieldTypes: T): ProvideDynamicFormResult<T> {
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];

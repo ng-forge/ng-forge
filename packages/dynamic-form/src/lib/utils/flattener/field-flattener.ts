@@ -9,7 +9,6 @@ import { isGroupField } from '../../definitions/default/group-field';
  * field definition or auto-generated during the flattening process.
  *
  * @public
- * @since 1.0.0
  */
 export interface FlattenedField extends FieldDef<Record<string, unknown>> {
   /** Guaranteed non-empty key for form binding and field identification */
@@ -73,7 +72,6 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
  * ```
  *
  * @public
- * @since 1.0.0
  */
 export function flattenFields(fields: readonly FieldDef<Record<string, unknown>>[]): FlattenedField[] {
   const result: FlattenedField[] = [];
