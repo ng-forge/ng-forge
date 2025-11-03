@@ -1,6 +1,6 @@
 import { isSignal, Pipe, PipeTransform } from '@angular/core';
 import { isObservable, Observable, of } from 'rxjs';
-import { DynamicText } from '@ng-forge/dynamic-form';
+import { DynamicText } from '../../models/types/dynamic-text';
 
 /**
  * Pipe that handles dynamic text resolution with support for static strings,

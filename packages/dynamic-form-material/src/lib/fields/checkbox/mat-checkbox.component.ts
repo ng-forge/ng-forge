@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText } from '@ng-forge/dynamic-form';
-import { DynamicTextPipe } from '../../pipes/dynamic-text.pipe';
+import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';

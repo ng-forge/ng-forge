@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText, FieldOption, ValueType } from '@ng-forge/dynamic-form';
-import { DynamicTextPipe } from '../../pipes/dynamic-text.pipe';
+import { DynamicText, DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-form';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';

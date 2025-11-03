@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { DynamicText } from '@ng-forge/dynamic-form';
-import { DynamicTextPipe } from '../../pipes/dynamic-text.pipe';
+import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
 import { MatError } from '@angular/material/input';

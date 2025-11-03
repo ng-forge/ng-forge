@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { DynamicText, EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
-import { DynamicTextPipe } from '../../pipes/dynamic-text.pipe';
+import { DynamicText, DynamicTextPipe, EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
 import { MatButtonComponent, MatButtonProps } from './mat-button.type';
 import { AsyncPipe } from '@angular/common';
 

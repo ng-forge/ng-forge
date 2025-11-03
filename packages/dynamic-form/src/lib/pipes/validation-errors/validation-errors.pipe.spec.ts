@@ -2,8 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { computed, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ValidationErrorsPipe, ValidationTranslationService } from './validation-errors.pipe';
-import { ValidationError } from '../models/validation-types';
-import { FakeTranslationService } from '../testing/fake-translation.service';
+import { ValidationError } from '../../models/validation-types';
+import { FakeTranslationService } from '../../testing/fake-translation.service';
 
 describe('ValidationErrorsPipe', () => {
   let pipe: ValidationErrorsPipe;

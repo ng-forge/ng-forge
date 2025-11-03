@@ -11,3 +11,4 @@ export type { ToggleField } from './toggle-field';
 export type { RowField } from './row-field';
 export type { GroupField } from './group-field';
 export type { PageField } from './page-field';
+export type { TextField } from './text-field';

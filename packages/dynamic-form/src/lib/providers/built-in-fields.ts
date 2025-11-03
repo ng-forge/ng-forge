@@ -1,5 +1,5 @@
 import { FieldTypeDefinition } from '../models/field-type';
-import { groupFieldMapper, rowFieldMapper } from '../mappers';
+import { baseFieldMapper, groupFieldMapper, rowFieldMapper } from '../mappers';
 import { pageFieldMapper } from '../mappers/page/page-field-mapper';
 
 /**
@@ -42,5 +42,10 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
     name: 'page',
     loadComponent: () => import('../fields/page/page-field.component'),
     mapper: pageFieldMapper,
+  },
+  {
+    name: 'text',
+    loadComponent: () => import('../fields/text/text-field.component'),
+    mapper: baseFieldMapper,
   },
 ];

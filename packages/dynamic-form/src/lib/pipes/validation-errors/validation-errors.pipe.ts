@@ -1,8 +1,8 @@
 import { DestroyRef, inject, Pipe, PipeTransform, signal } from '@angular/core';
 import { isObservable, Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { ValidationError } from '../models/validation-types';
-import { DynamicText } from './types';
+import { ValidationError } from '../../models/validation-types';
+import { DynamicText } from '../types';
 
 /**
  * Injectable translation service interface for validation error translation
