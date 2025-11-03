@@ -3,6 +3,7 @@ import {
   Component,
   ComponentRef,
   computed,
+  DestroyRef,
   inject,
   Injector,
   input,
@@ -12,8 +13,8 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, map, of, Subject, switchMap } from 'rxjs';
-import { get, keyBy, mapValues } from 'lodash-es';
+import { forkJoin, map, of, Subject, switchMap } from 'rxjs';
+import { get, keyBy, mapValues, memoize } from 'lodash-es';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
@@ -42,10 +43,28 @@ import { flattenFields } from '../../utils';
   imports: [FieldRendererDirective],
 })
 export default class GroupFieldComponent<T extends readonly FieldDef<Record<string, unknown>>[], TModel = Record<string, unknown>> {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
+
+  // Type-safe memoized functions for performance optimization
+  private readonly memoizedFlattenFields = memoize(
+    (fields: readonly FieldDef<Record<string, unknown>>[]) => flattenFields(fields),
+    (fields) => JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type })))
+  );
+
+  private readonly memoizedKeyBy = memoize(
+    <T extends { key: string }>(fields: readonly T[]) => keyBy(fields, 'key'),
+    (fields) => fields.map((f) => f.key).join(',')
+  );
+
+  private readonly memoizedDefaultValues = memoize(
+    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>) =>
+      mapValues(fieldsById, (field) => getFieldDefaultValue(field)),
+    (fieldsById) => Object.keys(fieldsById).sort().join(',')
+  );
 
   /** Field configuration input */
   field = input.required<GroupField<T>>();
@@ -58,9 +77,10 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
     const groupField = this.field();
 
     if (groupField.fields && groupField.fields.length > 0) {
-      const flattenedFields = flattenFields(groupField.fields);
-      const fieldsById = keyBy(flattenedFields, 'key');
-      const defaultValues = mapValues(fieldsById, (field) => getFieldDefaultValue(field));
+      // Use memoized functions for expensive operations
+      const flattenedFields = this.memoizedFlattenFields(groupField.fields);
+      const fieldsById = this.memoizedKeyBy(flattenedFields);
+      const defaultValues = this.memoizedDefaultValues(fieldsById);
 
       return {
         fields: flattenedFields,
@@ -131,7 +151,7 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
           return of([]);
         }
 
-        return combineLatest(this.mapFields(fields));
+        return forkJoin(this.mapFields(fields));
       }),
       map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
     ),
@@ -140,12 +160,16 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
 
   private mapFields(fields: readonly FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
-      .map(async (fieldDef) => {
-        let componentType;
-        try {
-          componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type);
-        } catch (error) {
-          console.error(error);
+      .map((fieldDef) => this.mapSingleField(fieldDef))
+      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+  }
+
+  private async mapSingleField(fieldDef: FieldDef<Record<string, unknown>>): Promise<ComponentRef<FormUiControl> | undefined> {
+    return this.fieldRegistry
+      .loadTypeComponent(fieldDef.type)
+      .then((componentType) => {
+        // Check if component is destroyed before creating new components
+        if (this.destroyRef.destroyed) {
           return undefined;
         }
 
@@ -163,9 +187,15 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
           fieldRegistry: this.fieldRegistry.raw,
         });
 
-        return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
+        return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
       })
-      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+      .catch((error) => {
+        // Only log errors if component hasn't been destroyed
+        if (!this.destroyRef.destroyed) {
+          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+        }
+        return undefined;
+      });
   }
 
   onFieldsInitialized(): void {

@@ -3,6 +3,7 @@ import {
   Component,
   ComponentRef,
   computed,
+  DestroyRef,
   inject,
   Injector,
   input,
@@ -10,7 +11,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, EMPTY, map, of, Subject, switchMap } from 'rxjs';
+import { EMPTY, forkJoin, map, of, Subject, switchMap } from 'rxjs';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
@@ -46,6 +47,7 @@ import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PageFieldComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
@@ -122,7 +124,7 @@ export default class PageFieldComponent {
           return of([]);
         }
 
-        return combineLatest(this.mapFields(fields));
+        return forkJoin(this.mapFields(fields));
       }),
       map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
     ),
@@ -131,13 +133,16 @@ export default class PageFieldComponent {
 
   private mapFields(fields: readonly any[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
-      .map(async (fieldDef) => {
-        let componentType;
+      .map((fieldDef) => this.mapSingleField(fieldDef))
+      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+  }
 
-        try {
-          componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type);
-        } catch (error) {
-          console.error(error);
+  private async mapSingleField(fieldDef: any): Promise<ComponentRef<FormUiControl> | undefined> {
+    return this.fieldRegistry
+      .loadTypeComponent(fieldDef.type)
+      .then((componentType) => {
+        // Check if component is destroyed before creating new components
+        if (this.destroyRef.destroyed) {
           return undefined;
         }
 
@@ -147,9 +152,15 @@ export default class PageFieldComponent {
           fieldRegistry: this.fieldRegistry.raw,
         });
 
-        return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
+        return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
       })
-      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+      .catch((error) => {
+        // Only log errors if component hasn't been destroyed
+        if (!this.destroyRef.destroyed) {
+          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+        }
+        return undefined;
+      });
   }
 
   onFieldsInitialized(): void {

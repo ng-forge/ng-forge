@@ -3,6 +3,7 @@ import {
   Component,
   ComponentRef,
   computed,
+  DestroyRef,
   inject,
   Injector,
   input,
@@ -10,7 +11,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, map, of, Subject, switchMap } from 'rxjs';
+import { forkJoin, map, of, Subject, switchMap } from 'rxjs';
 import { RowField } from '../../definitions/default/row-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
@@ -37,6 +38,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class RowFieldComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
@@ -70,7 +72,7 @@ export default class RowFieldComponent {
           return of([]);
         }
 
-        return combineLatest(this.mapFields(fields));
+        return forkJoin(this.mapFields(fields));
       }),
       map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
     ),
@@ -84,25 +86,39 @@ export default class RowFieldComponent {
 
   private mapFields(fields: readonly any[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
-      .map(async (fieldDef) => {
-        let componentType;
+      .map((fieldDef) => this.mapSingleField(fieldDef))
+      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+  }
 
-        try {
-          componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type);
-        } catch (error) {
-          console.error(error);
+  private async mapSingleField(fieldDef: any): Promise<ComponentRef<FormUiControl> | undefined> {
+    return this.fieldRegistry
+      .loadTypeComponent(fieldDef.type)
+      .then((componentType) => {
+        // Check if component is destroyed before creating new components
+        if (this.destroyRef.destroyed) {
           return undefined;
         }
 
         // Pass through the parent form context - row doesn't change form shape
+        const fieldSignalContext = this.fieldSignalContext();
+        if (!fieldSignalContext) {
+          return undefined;
+        }
+
         const bindings = mapFieldToBindings(fieldDef, {
-          fieldSignalContext: this.fieldSignalContext(),
+          fieldSignalContext,
           fieldRegistry: this.fieldRegistry.raw,
         });
 
-        return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
+        return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
       })
-      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+      .catch((error) => {
+        // Only log errors if component hasn't been destroyed
+        if (!this.destroyRef.destroyed) {
+          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+        }
+        return undefined;
+      });
   }
 
   onFieldsInitialized(): void {
