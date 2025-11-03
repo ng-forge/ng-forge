@@ -10,11 +10,14 @@ export const appRoutes: Route[] = [
     path: 'scenarios',
     loadComponent: () => import('./scenarios/scenario-list.component').then((m) => m.ScenarioListComponent),
   },
-  // TODO: Add scenario routes as components are created
-  // {
-  //   path: 'single-page',
-  //   loadComponent: () => import('./scenarios/single-page/single-page-form.component').then(m => m.SinglePageFormComponent),
-  // },
+  {
+    path: 'single-page',
+    loadComponent: () => import('./scenarios/single-page/single-page-demo.component'),
+  },
+  {
+    path: 'e2e-test',
+    loadComponent: () => import('./e2e-test/simple-e2e-test-page.component').then((m) => m.SimpleE2ETestPageComponent),
+  },
   // {
   //   path: 'multi-page',
   //   loadComponent: () => import('./scenarios/multi-page/multi-page-form.component').then(m => m.MultiPageFormComponent),

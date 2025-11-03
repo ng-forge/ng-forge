@@ -10,8 +10,8 @@ import { RouterModule } from '@angular/router';
       <p>Select a scenario to test dynamic form behavior with Material Design components:</p>
 
       <div class="scenario-grid">
-        <div class="scenario-card coming-soon" data-testid="single-page-scenario">
-          <h3>Single Page Form <span class="badge">Coming Soon</span></h3>
+        <a class="scenario-card" routerLink="/single-page" data-testid="single-page-scenario">
+          <h3>Single Page Form <span class="badge ready">Ready</span></h3>
           <p>Test comprehensive single-page forms with various field types and validations.</p>
           <ul>
             <li>All Material field types</li>
@@ -19,7 +19,7 @@ import { RouterModule } from '@angular/router';
             <li>Form submission</li>
             <li>Default styling</li>
           </ul>
-        </div>
+        </a>
 
         <div class="scenario-card coming-soon" data-testid="multi-page-scenario">
           <h3>Multi-Page Form <span class="badge">Coming Soon</span></h3>
@@ -146,13 +146,20 @@ import { RouterModule } from '@angular/router';
       }
 
       .badge {
-        background: #ff9800;
         color: white;
         padding: 0.2rem 0.5rem;
         border-radius: 12px;
         font-size: 0.75rem;
         font-weight: 500;
         margin-left: 0.5rem;
+
+        &.ready {
+          background: #4caf50;
+        }
+
+        &:not(.ready) {
+          background: #ff9800;
+        }
       }
     `,
   ],

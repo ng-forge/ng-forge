@@ -3,7 +3,7 @@ import { inputBinding } from '@angular/core';
 import { ValidationError } from '@angular/forms/signals';
 import { DynamicForm } from '../dynamic-form.component';
 import { FormConfig } from '../models';
-import { FieldDef } from '../definitions';
+import { FieldDef, InputField, SelectField } from '../definitions';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { delay } from './delay';
 import { checkboxFieldMapper, valueFieldMapper } from '../mappers';
@@ -32,9 +32,9 @@ export interface DynamicFormTestResult {
  * Fluent API for building form configurations
  */
 export class FormConfigBuilder {
-  private fields: FieldDef<Record<string, unknown>>[] = [];
+  private fields: FieldDef<any>[] = [];
 
-  field(field: FieldDef<Record<string, unknown>>): FormConfigBuilder {
+  field(field: FieldDef<any>): FormConfigBuilder {
     this.fields.push(field);
     return this;
   }
@@ -49,23 +49,25 @@ export class FormConfigBuilder {
   }
 
   requiredInputField(key: string, props?: Record<string, unknown>): FormConfigBuilder {
-    return this.field({
+    const inputField: InputField<Record<string, unknown>> = {
       key,
       type: 'input',
       label: key.charAt(0).toUpperCase() + key.slice(1),
       required: true,
       props: { placeholder: `Enter ${key}`, ...props },
-    });
+    };
+    return this.field(inputField);
   }
 
   selectField(key: string, options: Array<{ value: string; label: string }>, props?: Record<string, unknown>): FormConfigBuilder {
-    return this.field({
+    const selectField: SelectField<string, Record<string, unknown>> = {
       key,
       type: 'select',
       label: key.charAt(0).toUpperCase() + key.slice(1),
       options,
       props: props || {},
-    });
+    };
+    return this.field(selectField);
   }
 
   checkboxField(key: string, props?: Record<string, unknown>): FormConfigBuilder {
