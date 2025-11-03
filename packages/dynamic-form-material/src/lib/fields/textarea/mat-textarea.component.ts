@@ -2,12 +2,15 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
+import { DynamicText } from '@ng-forge/dynamic-form';
+import { DynamicTextPipe } from '../../pipes/dynamic-text.pipe';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-textarea',
-  imports: [MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent, Field, MatError],
+  imports: [MatFormField, MatLabel, MatInput, MatHint, MatErrorsComponent, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -17,13 +20,13 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
       [class]="className() || ''"
     >
       @if (label()) {
-      <mat-label>{{ label() }}</mat-label>
+      <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }
 
       <textarea
         matInput
         [field]="f"
-        [placeholder]="placeholder() || ''"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
         [attr.maxlength]="props()?.maxLength || null"
@@ -32,7 +35,7 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
       ></textarea>
 
       @if (props()?.hint; as hint) {
-      <mat-hint>{{ hint }}</mat-hint>
+      <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
       }
 
       <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
@@ -43,8 +46,8 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly field = input.required<FieldTree<string>>();
 
-  readonly label = input<string>('');
-  readonly placeholder = input<string>('');
+  readonly label = input<DynamicText>();
+  readonly placeholder = input<DynamicText>();
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<MatTextareaProps>();

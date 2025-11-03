@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { MatButton } from '@angular/material/button';
+import { DynamicText, EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
+import { DynamicTextPipe } from '../../pipes/dynamic-text.pipe';
 import { MatButtonComponent, MatButtonProps } from './mat-button.type';
-import { EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
+import { AsyncPipe } from '@angular/common';
 
 /**
  * Material Design button button component
  */
 @Component({
   selector: 'df-mat-button',
-  imports: [MatButton],
+  imports: [MatButton, DynamicTextPipe, AsyncPipe],
   template: `
     <button
       mat-raised-button
@@ -18,7 +20,7 @@ import { EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-for
       [disabled]="disabled() || false"
       (click)="triggerEvent()"
     >
-      {{ label() }}
+      {{ label() | dynamicText | async }}
     </button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,7 +28,7 @@ import { EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-for
 export default class MatButtonFieldComponent<TEvent extends FormEvent> implements MatButtonComponent<TEvent> {
   private readonly eventBus = inject(EventBus);
 
-  readonly label = input.required<string>();
+  readonly label = input.required<DynamicText>();
   readonly disabled = input<boolean>(false);
   readonly hidden = input<boolean>(false);
   readonly tabIndex = input<number>();

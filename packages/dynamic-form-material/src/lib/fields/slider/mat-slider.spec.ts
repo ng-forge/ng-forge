@@ -1,5 +1,6 @@
 import { By } from '@angular/platform-browser';
 import { MatSlider } from '@angular/material/slider';
+import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
 // TODO: un-skip tests when maximum callstack on disabled error is fixed
@@ -496,6 +497,54 @@ describe('MatSliderFieldComponent', () => {
 
       // Should have the final value
       expect(MaterialFormTestUtils.getFormValue(component).volume).toBe(90);
+    });
+  });
+
+  describe('Dynamic Text Support', () => {
+    describe('Translation Service Integration', () => {
+      it('should handle translation service with dynamic language updates for labels and hints', async () => {
+        const translationService = createTestTranslationService({
+          'form.volume.label': 'Volume Level',
+          'form.volume.hint': 'Adjust the volume to your preference',
+        });
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'volume',
+            type: 'slider',
+            label: translationService.translate('form.volume.label'),
+            props: {
+              min: 0,
+              max: 100,
+              step: 5,
+              hint: translationService.translate('form.volume.hint'),
+            },
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { volume: 50 },
+        });
+
+        const labelElement = fixture.debugElement.query(By.css('.slider-label'));
+        const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
+
+        // Initial translations
+        expect(labelElement.nativeElement.textContent.trim()).toBe('Volume Level');
+        expect(hintElement.nativeElement.textContent.trim()).toBe('Adjust the volume to your preference');
+
+        // Update to Spanish
+        translationService.addTranslations({
+          'form.volume.label': 'Nivel de Volumen',
+          'form.volume.hint': 'Ajusta el volumen según tu preferencia',
+        });
+        translationService.setLanguage('es');
+        fixture.detectChanges();
+
+        expect(labelElement.nativeElement.textContent.trim()).toBe('Nivel de Volumen');
+        expect(hintElement.nativeElement.textContent.trim()).toBe('Ajusta el volumen según tu preferencia');
+      });
     });
   });
 });

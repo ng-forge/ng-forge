@@ -1,5 +1,6 @@
 import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
+import { DynamicText } from '../../pipes/types';
 
 /**
  * Base interface for all dynamic form field definitions.
@@ -84,16 +85,25 @@ export interface FieldDef<TProps extends Record<string, unknown>> {
    * Human-readable field label displayed to users.
    *
    * Provides accessible labeling for form fields and is typically
-   * displayed above or beside the field input.
+   * displayed above or beside the field input. Supports static strings,
+   * translation keys, Observables, and Signals for dynamic content.
    *
    * @example
    * ```typescript
+   * // Static string
    * label: 'Email Address'
-   * label: 'First Name'
-   * label: 'Date of Birth'
+   *
+   * // Translation key (auto-detected)
+   * label: 'form.email.label'
+   *
+   * // Observable from translation service
+   * label: this.transloco.selectTranslate('form.email.label')
+   *
+   * // Signal-based
+   * label: computed(() => this.translations().email.label)
    * ```
    */
-  label?: string;
+  label?: DynamicText;
 
   /**
    * Field-specific properties and configuration options.

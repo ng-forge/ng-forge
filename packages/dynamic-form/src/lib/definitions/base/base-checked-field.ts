@@ -2,13 +2,18 @@ import { FieldDef } from './field-def';
 import { FieldWithValidation } from './field-with-validation';
 import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
+import { DynamicText } from '../../pipes/types';
 
 export interface BaseCheckedField<TProps extends Record<string, unknown>> extends FieldDef<TProps>, FieldWithValidation {
   checked?: boolean;
 
   defaultValue?: boolean;
 
-  placeholder?: string;
+  /**
+   * Placeholder text displayed when the field is empty.
+   * Supports static strings, Observables, and Signals for dynamic content.
+   */
+  placeholder?: DynamicText;
 
   required?: boolean;
 }

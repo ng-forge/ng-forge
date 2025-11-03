@@ -1,12 +1,7 @@
 import { By } from '@angular/platform-browser';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
+import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
-
-interface TestFormModel {
-  gender: string;
-  preference: string;
-  priority: string;
-}
 
 describe('MatRadioFieldComponent', () => {
   describe('Basic Material Radio Integration', () => {
@@ -526,6 +521,75 @@ describe('MatRadioFieldComponent', () => {
       expect(radioButtons[0].componentInstance.disabled).toBe(false);
       expect(radioButtons[1].componentInstance.disabled).toBe(true);
       expect(radioButtons[2].componentInstance.disabled).toBe(false);
+    });
+  });
+
+  describe('Dynamic Text Support', () => {
+    describe('Translation Service Integration', () => {
+      it('should handle translation service with dynamic language updates for labels and options', async () => {
+        const translationService = createTestTranslationService({
+          'form.gender.label': 'Select Gender',
+          'form.gender.hint': 'Choose your gender',
+          'gender.male': 'Male',
+          'gender.female': 'Female',
+          'gender.other': 'Other',
+        });
+
+        const dynamicOptions = [
+          { value: 'male', label: translationService.translate('gender.male') },
+          { value: 'female', label: translationService.translate('gender.female') },
+          { value: 'other', label: translationService.translate('gender.other') },
+        ];
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'gender',
+            type: 'radio',
+            label: translationService.translate('form.gender.label'),
+            options: dynamicOptions,
+            props: {
+              hint: translationService.translate('form.gender.hint'),
+            },
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { gender: '' },
+        });
+
+        const labelElement = fixture.debugElement.query(By.css('.radio-label'));
+        const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
+        const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+
+        // Initial translations
+        expect(labelElement.nativeElement.textContent.trim()).toBe('Select Gender');
+        expect(hintElement.nativeElement.textContent.trim()).toBe('Choose your gender');
+        expect(radioButtons[0].nativeElement.textContent.trim()).toBe('Male');
+        expect(radioButtons[1].nativeElement.textContent.trim()).toBe('Female');
+        expect(radioButtons[2].nativeElement.textContent.trim()).toBe('Other');
+
+        // Update to Spanish
+        translationService.addTranslations({
+          'form.gender.label': 'Seleccionar Género',
+          'form.gender.hint': 'Elige tu género',
+          'gender.male': 'Masculino',
+          'gender.female': 'Femenino',
+          'gender.other': 'Otro',
+        });
+        translationService.setLanguage('es');
+
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(labelElement.nativeElement.textContent.trim()).toBe('Seleccionar Género');
+        expect(hintElement.nativeElement.textContent.trim()).toBe('Elige tu género');
+
+        const updatedRadioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+        expect(updatedRadioButtons[0].nativeElement.textContent.trim()).toBe('Masculino');
+        expect(updatedRadioButtons[1].nativeElement.textContent.trim()).toBe('Femenino');
+        expect(updatedRadioButtons[2].nativeElement.textContent.trim()).toBe('Otro');
+      });
     });
   });
 });

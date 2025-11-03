@@ -1,5 +1,7 @@
 import { By } from '@angular/platform-browser';
 import { MatInput } from '@angular/material/input';
+import { BehaviorSubject, of } from 'rxjs';
+import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
 describe('MatInputFieldComponent', () => {
@@ -367,6 +369,250 @@ describe('MatInputFieldComponent', () => {
 
       // Use material-specific field value assertion
       MaterialFormTestUtils.assertMatFieldValue(fixture, 'input', 'Test Value');
+    });
+  });
+
+  describe('Dynamic Text Support', () => {
+    describe('Static Text (Backward Compatibility)', () => {
+      it('should render static label correctly', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'email',
+            type: 'input',
+            label: 'Static Email Label',
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '' },
+        });
+
+        const label = fixture.debugElement.query(By.css('mat-label'));
+        expect(label.nativeElement.textContent.trim()).toBe('Static Email Label');
+      });
+
+      it('should render static placeholder correctly', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'email',
+            type: 'input',
+            placeholder: 'Static placeholder text',
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '' },
+        });
+
+        const input = fixture.debugElement.query(By.css('input'));
+        // Note: placeholder might be null when using floating labels in Material
+        const placeholderValue = input.nativeElement.getAttribute('placeholder');
+        expect(placeholderValue === 'Static placeholder text' || placeholderValue === '').toBeTruthy();
+      });
+    });
+
+    describe('Observable-Based Dynamic Text', () => {
+      it('should render and update label from Observable', async () => {
+        const labelSubject = new BehaviorSubject('Initial Label');
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'email',
+            type: 'input',
+            label: labelSubject.asObservable(),
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '' },
+        });
+
+        // Initial label
+        let label = fixture.debugElement.query(By.css('mat-label'));
+        expect(label.nativeElement.textContent.trim()).toBe('Initial Label');
+
+        // Update Observable
+        labelSubject.next('Updated Label');
+        fixture.detectChanges();
+
+        label = fixture.debugElement.query(By.css('mat-label'));
+        expect(label.nativeElement.textContent.trim()).toBe('Updated Label');
+      });
+
+      it('should render and update placeholder from Observable', async () => {
+        const placeholderSubject = new BehaviorSubject('Initial placeholder');
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'email',
+            type: 'input',
+            placeholder: placeholderSubject.asObservable(),
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '' },
+        });
+
+        // Initial placeholder
+        let input = fixture.debugElement.query(By.css('input'));
+        expect(input.nativeElement.getAttribute('placeholder')).toBe('Initial placeholder');
+
+        // Update Observable
+        placeholderSubject.next('Updated placeholder');
+        fixture.detectChanges();
+
+        input = fixture.debugElement.query(By.css('input'));
+        expect(input.nativeElement.getAttribute('placeholder')).toBe('Updated placeholder');
+      });
+    });
+
+    describe('Translation Service Integration', () => {
+      it('should handle translation service with dynamic language updates', async () => {
+        const translationService = createTestTranslationService({
+          'form.email.label': 'Email Address',
+          'form.email.placeholder': 'Enter your email address',
+        });
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'email',
+            type: 'input',
+            label: translationService.translate('form.email.label'),
+            placeholder: translationService.translate('form.email.placeholder'),
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '' },
+        });
+
+        const label = fixture.debugElement.query(By.css('mat-label'));
+        const input = fixture.debugElement.query(By.css('input'));
+
+        // Initial translations
+        expect(label.nativeElement.textContent.trim()).toBe('Email Address');
+        expect(input.nativeElement.getAttribute('placeholder')).toBe('Enter your email address');
+
+        // Update to Spanish
+        translationService.addTranslations({
+          'form.email.label': 'Dirección de Correo Electrónico',
+          'form.email.placeholder': 'Ingrese su correo electrónico',
+        });
+        translationService.setLanguage('es');
+        fixture.detectChanges();
+
+        expect(label.nativeElement.textContent.trim()).toBe('Dirección de Correo Electrónico');
+        expect(input.nativeElement.getAttribute('placeholder')).toBe('Ingrese su correo electrónico');
+      });
+    });
+
+    describe('Mixed Dynamic Text Types', () => {
+      it('should handle different dynamic text types in same form', async () => {
+        const translationService = createTestTranslationService({
+          'form.email.label': 'Email',
+        });
+
+        const dynamicPlaceholder = new BehaviorSubject('Dynamic placeholder');
+        const staticLabel = 'Static Label';
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'email',
+            type: 'input',
+            label: translationService.translate('form.email.label'),
+          })
+          .field({
+            key: 'name',
+            type: 'input',
+            label: staticLabel,
+            placeholder: dynamicPlaceholder.asObservable(),
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '', name: '' },
+        });
+
+        const labels = fixture.debugElement.queryAll(By.css('mat-label'));
+        const inputs = fixture.debugElement.queryAll(By.css('input'));
+
+        expect(labels[0].nativeElement.textContent.trim()).toBe('Email');
+        expect(labels[1].nativeElement.textContent.trim()).toBe('Static Label');
+        expect(inputs[1].nativeElement.getAttribute('placeholder')).toBe('Dynamic placeholder');
+      });
+    });
+
+    describe('Edge Cases', () => {
+      it('should handle undefined dynamic text gracefully', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'email',
+            type: 'input',
+            label: undefined,
+            placeholder: undefined,
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '' },
+        });
+
+        const label = fixture.debugElement.query(By.css('mat-label'));
+        const input = fixture.debugElement.query(By.css('input'));
+
+        expect(label).toBeNull(); // No label rendered when undefined
+        expect(input.nativeElement.getAttribute('placeholder')).toBeNull(); // null for undefined placeholder
+      });
+
+      it('should handle empty string from Observable', async () => {
+        const emptyObservable = new BehaviorSubject('');
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'email',
+            type: 'input',
+            label: emptyObservable.asObservable(),
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '' },
+        });
+
+        const label = fixture.debugElement.query(By.css('mat-label'));
+        expect(label.nativeElement.textContent.trim()).toBe('');
+      });
+
+      it('should handle empty Observable values', async () => {
+        const emptyObservable = of('');
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'email',
+            type: 'input',
+            placeholder: emptyObservable,
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '' },
+        });
+
+        const input = fixture.debugElement.query(By.css('input'));
+
+        // Empty Observable results in null placeholder attribute in Material
+        expect(input.nativeElement.getAttribute('placeholder')).toBeNull();
+      });
     });
   });
 });

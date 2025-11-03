@@ -22,3 +22,6 @@ export * from './events';
 
 // Mappers
 export * from './mappers';
+
+// Pipes
+export * from './pipes';

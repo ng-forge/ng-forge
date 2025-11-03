@@ -1,4 +1,5 @@
 import { ValidationError as AngularValidationError } from '@angular/forms/signals';
+import { DynamicText } from '../pipes/types';
 
 /**
  * Re-export Angular's ValidationError for consistency
@@ -12,15 +13,16 @@ export type ValidationError = AngularValidationError;
 export type CustomValidator<TValue = unknown> = (value: TValue, formValue: unknown) => ValidationError | null;
 
 /**
- * Custom error messages for validation rules
+ * Custom error messages for validation rules.
+ * Supports static strings, Observables, and Signals for dynamic content.
  */
 export interface ValidationMessages {
-  required?: string;
-  email?: string;
-  min?: string;
-  max?: string;
-  minLength?: string;
-  maxLength?: string;
-  pattern?: string;
-  [key: string]: string | undefined;
+  required?: DynamicText;
+  email?: DynamicText;
+  min?: DynamicText;
+  max?: DynamicText;
+  minLength?: DynamicText;
+  maxLength?: DynamicText;
+  pattern?: DynamicText;
+  [key: string]: DynamicText | undefined;
 }

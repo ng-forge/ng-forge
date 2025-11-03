@@ -1,13 +1,16 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { DynamicText } from '@ng-forge/dynamic-form';
+import { DynamicTextPipe } from '../../pipes/dynamic-text.pipe';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, MatErrorsComponent, Field, MatError],
+  imports: [MatCheckbox, MatErrorsComponent, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -20,11 +23,11 @@ import { MatError } from '@angular/material/input';
       [disableRipple]="props()?.disableRipple || false"
       [attr.tabindex]="tabIndex()"
     >
-      {{ label() }}
+      {{ label() | dynamicText | async }}
     </mat-checkbox>
 
     @if (props()?.hint; as hint) {
-    <div class="mat-hint">{{ hint }}</div>
+    <div class="mat-hint">{{ hint | dynamicText | async }}</div>
     }
     <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
@@ -44,8 +47,8 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly field = input.required<FieldTree<boolean>>();
 
   // Properties
-  readonly label = input<string>('');
-  readonly placeholder = input<string>('');
+  readonly label = input<DynamicText>();
+  readonly placeholder = input<DynamicText>();
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<MatCheckboxProps>();

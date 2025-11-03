@@ -1,5 +1,6 @@
 import { By } from '@angular/platform-browser';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
 describe('MatMultiCheckboxFieldComponent', () => {
@@ -489,6 +490,75 @@ describe('MatMultiCheckboxFieldComponent', () => {
       const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
       expect(checkboxes[0].componentInstance.checked).toBe(true);
       expect(checkboxes[1].componentInstance.checked).toBe(false);
+    });
+  });
+
+  describe('Dynamic Text Support', () => {
+    describe('Translation Service Integration', () => {
+      it('should handle translation service with dynamic language updates for labels and options', async () => {
+        const translationService = createTestTranslationService({
+          'form.hobbies.label': 'Select Hobbies',
+          'form.hobbies.hint': 'Choose your hobbies',
+          'hobby.reading': 'Reading',
+          'hobby.gaming': 'Gaming',
+          'hobby.cooking': 'Cooking',
+        });
+
+        const dynamicOptions = [
+          { value: 'reading', label: translationService.translate('hobby.reading') },
+          { value: 'gaming', label: translationService.translate('hobby.gaming') },
+          { value: 'cooking', label: translationService.translate('hobby.cooking') },
+        ];
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'hobbies',
+            type: 'multi-checkbox',
+            label: translationService.translate('form.hobbies.label'),
+            options: dynamicOptions,
+            props: {
+              hint: translationService.translate('form.hobbies.hint'),
+            },
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { hobbies: [] },
+        });
+
+        const labelElement = fixture.debugElement.query(By.css('.checkbox-group-label'));
+        const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
+        const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+
+        // Initial translations
+        expect(labelElement.nativeElement.textContent.trim()).toBe('Select Hobbies');
+        expect(hintElement.nativeElement.textContent.trim()).toBe('Choose your hobbies');
+        expect(checkboxes[0].nativeElement.textContent.trim()).toBe('Reading');
+        expect(checkboxes[1].nativeElement.textContent.trim()).toBe('Gaming');
+        expect(checkboxes[2].nativeElement.textContent.trim()).toBe('Cooking');
+
+        // Update to Spanish
+        translationService.addTranslations({
+          'form.hobbies.label': 'Seleccionar Pasatiempos',
+          'form.hobbies.hint': 'Elige tus pasatiempos',
+          'hobby.reading': 'Lectura',
+          'hobby.gaming': 'Juegos',
+          'hobby.cooking': 'Cocina',
+        });
+        translationService.setLanguage('es');
+
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(labelElement.nativeElement.textContent.trim()).toBe('Seleccionar Pasatiempos');
+        expect(hintElement.nativeElement.textContent.trim()).toBe('Elige tus pasatiempos');
+
+        const updatedCheckboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+        expect(updatedCheckboxes[0].nativeElement.textContent.trim()).toBe('Lectura');
+        expect(updatedCheckboxes[1].nativeElement.textContent.trim()).toBe('Juegos');
+        expect(updatedCheckboxes[2].nativeElement.textContent.trim()).toBe('Cocina');
+      });
     });
   });
 });

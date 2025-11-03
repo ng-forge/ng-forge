@@ -1,5 +1,6 @@
 import { By } from '@angular/platform-browser';
 import { MatDatepickerInput } from '@angular/material/datepicker';
+import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
 describe('MatDatepickerFieldComponent', () => {
@@ -469,6 +470,57 @@ describe('MatDatepickerFieldComponent', () => {
       fixture.detectChanges();
 
       expect(MaterialFormTestUtils.getFormValue(component).birthDate).toBeDefined();
+    });
+  });
+
+  describe('Dynamic Text Support', () => {
+    describe('Translation Service Integration', () => {
+      it('should handle translation service with dynamic language updates for labels and placeholders', async () => {
+        const translationService = createTestTranslationService({
+          'form.birthDate.label': 'Birth Date',
+          'form.birthDate.placeholder': 'Select your birth date',
+          'form.birthDate.hint': 'Choose the date you were born',
+        });
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'birthDate',
+            type: 'datepicker',
+            label: translationService.translate('form.birthDate.label'),
+            placeholder: translationService.translate('form.birthDate.placeholder'),
+            props: {
+              hint: translationService.translate('form.birthDate.hint'),
+            },
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { birthDate: null },
+        });
+
+        const label = fixture.debugElement.query(By.css('mat-label'));
+        const input = fixture.debugElement.query(By.directive(MatDatepickerInput));
+        const hint = fixture.debugElement.query(By.css('mat-hint'));
+
+        // Initial translations
+        expect(label.nativeElement.textContent.trim()).toBe('Birth Date');
+        expect(input.nativeElement.getAttribute('placeholder')).toBe('Select your birth date');
+        expect(hint.nativeElement.textContent.trim()).toBe('Choose the date you were born');
+
+        // Update to Spanish
+        translationService.addTranslations({
+          'form.birthDate.label': 'Fecha de Nacimiento',
+          'form.birthDate.placeholder': 'Selecciona tu fecha de nacimiento',
+          'form.birthDate.hint': 'Elige la fecha en que naciste',
+        });
+        translationService.setLanguage('es');
+        fixture.detectChanges();
+
+        expect(label.nativeElement.textContent.trim()).toBe('Fecha de Nacimiento');
+        expect(input.nativeElement.getAttribute('placeholder')).toBe('Selecciona tu fecha de nacimiento');
+        expect(hint.nativeElement.textContent.trim()).toBe('Elige la fecha en que naciste');
+      });
     });
   });
 });

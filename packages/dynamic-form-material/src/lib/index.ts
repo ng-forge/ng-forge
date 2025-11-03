@@ -11,3 +11,6 @@ export { MatField, type MatFieldType } from './types/types';
 
 // Providers
 export { withMaterialFields } from './providers/material-providers';
+
+// Pipes
+export * from './pipes';

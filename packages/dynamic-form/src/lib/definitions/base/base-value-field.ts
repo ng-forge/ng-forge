@@ -2,6 +2,7 @@ import { FieldDef } from './field-def';
 import { FieldWithValidation } from './field-with-validation';
 import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
+import { DynamicText } from '../../pipes/types';
 
 export const ValueType = ['string', 'number', 'boolean', 'object', 'array', 'date'] as const;
 export type ValueType = (typeof ValueType)[number];
@@ -11,7 +12,11 @@ export interface BaseValueField<TProps extends Record<string, unknown>, TValue> 
 
   defaultValue?: TValue;
 
-  placeholder?: string;
+  /**
+   * Placeholder text displayed when the field is empty.
+   * Supports static strings, Observables, and Signals for dynamic content.
+   */
+  placeholder?: DynamicText;
 
   required?: boolean;
 }

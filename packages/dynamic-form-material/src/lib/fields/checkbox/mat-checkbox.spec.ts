@@ -1,5 +1,6 @@
 import { By } from '@angular/platform-browser';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
 describe('MatCheckboxFieldComponent', () => {
@@ -395,6 +396,51 @@ describe('MatCheckboxFieldComponent', () => {
 
       expect(checkboxComponent.checked).toBe(true);
       expect(MaterialFormTestUtils.getFormValue(component)['acceptTerms']).toBe(true);
+    });
+  });
+
+  describe('Dynamic Text Support', () => {
+    describe('Translation Service Integration', () => {
+      it('should handle translation service with dynamic language updates for checkbox', async () => {
+        const translationService = createTestTranslationService({
+          'form.terms.label': 'Accept Terms and Conditions',
+          'form.terms.hint': 'Please read and accept our terms',
+        });
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'acceptTerms',
+            type: 'checkbox',
+            label: translationService.translate('form.terms.label'),
+            props: {
+              hint: translationService.translate('form.terms.hint'),
+            },
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { acceptTerms: false },
+        });
+
+        const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+        const hint = fixture.debugElement.query(By.css('.mat-hint'));
+
+        // Initial translations
+        expect(checkbox.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
+        expect(hint.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
+
+        // Update to Spanish
+        translationService.addTranslations({
+          'form.terms.label': 'Aceptar Términos y Condiciones',
+          'form.terms.hint': 'Por favor lea y acepte nuestros términos',
+        });
+        translationService.setLanguage('es');
+        fixture.detectChanges();
+
+        expect(checkbox.nativeElement.textContent.trim()).toBe('Aceptar Términos y Condiciones');
+        expect(hint.nativeElement.textContent.trim()).toBe('Por favor lea y acepte nuestros términos');
+      });
     });
   });
 });

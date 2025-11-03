@@ -1,4 +1,5 @@
 import { By } from '@angular/platform-browser';
+import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
 describe('MatTextareaFieldComponent', () => {
@@ -343,6 +344,57 @@ describe('MatTextareaFieldComponent', () => {
       await MaterialFormTestUtils.simulateMatInput(fixture, 'textarea[matInput]', longText);
 
       expect(MaterialFormTestUtils.getFormValue(component).comments).toBe(longText);
+    });
+  });
+
+  describe('Dynamic Text Support', () => {
+    describe('Translation Service Integration', () => {
+      it('should handle translation service with dynamic language updates for textarea', async () => {
+        const translationService = createTestTranslationService({
+          'form.comments.label': 'Comments',
+          'form.comments.placeholder': 'Enter your comments',
+          'form.comments.hint': 'Please provide feedback',
+        });
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'comments',
+            type: 'textarea',
+            label: translationService.translate('form.comments.label'),
+            placeholder: translationService.translate('form.comments.placeholder'),
+            props: {
+              hint: translationService.translate('form.comments.hint'),
+            },
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { comments: '' },
+        });
+
+        const label = fixture.debugElement.query(By.css('mat-label'));
+        const textarea = fixture.debugElement.query(By.css('textarea[matInput]'));
+        const hint = fixture.debugElement.query(By.css('mat-hint'));
+
+        // Initial translations
+        expect(label.nativeElement.textContent.trim()).toBe('Comments');
+        expect(textarea.nativeElement.getAttribute('placeholder')).toBe('Enter your comments');
+        expect(hint.nativeElement.textContent.trim()).toBe('Please provide feedback');
+
+        // Update to Spanish
+        translationService.addTranslations({
+          'form.comments.label': 'Comentarios',
+          'form.comments.placeholder': 'Ingrese sus comentarios',
+          'form.comments.hint': 'Proporcione sus comentarios',
+        });
+        translationService.setLanguage('es');
+        fixture.detectChanges();
+
+        expect(label.nativeElement.textContent.trim()).toBe('Comentarios');
+        expect(textarea.nativeElement.getAttribute('placeholder')).toBe('Ingrese sus comentarios');
+        expect(hint.nativeElement.textContent.trim()).toBe('Proporcione sus comentarios');
+      });
     });
   });
 });

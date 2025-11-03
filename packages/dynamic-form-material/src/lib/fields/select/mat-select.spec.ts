@@ -1,5 +1,6 @@
 import { By } from '@angular/platform-browser';
 import { MatSelect } from '@angular/material/select';
+import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
 describe('MatSelectFieldComponent', () => {
@@ -592,6 +593,87 @@ describe('MatSelectFieldComponent', () => {
 
       const select = fixture.debugElement.query(By.directive(MatSelect));
       expect(select).toBeTruthy();
+    });
+  });
+
+  describe('Dynamic Text Support', () => {
+    describe('Translation Service Integration', () => {
+      it('should handle translation service with dynamic language updates for labels and options', async () => {
+        const translationService = createTestTranslationService({
+          'form.country.label': 'Country',
+          'form.country.placeholder': 'Select your country',
+          'form.country.hint': 'Choose the country you live in',
+          'country.us': 'United States',
+          'country.ca': 'Canada',
+          'country.uk': 'United Kingdom',
+        });
+
+        const dynamicOptions = [
+          { label: translationService.translate('country.us'), value: 'US' },
+          { label: translationService.translate('country.ca'), value: 'CA' },
+          { label: translationService.translate('country.uk'), value: 'UK' },
+        ];
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'country',
+            type: 'select',
+            label: translationService.translate('form.country.label'),
+            placeholder: translationService.translate('form.country.placeholder'),
+            options: dynamicOptions,
+            props: {
+              hint: translationService.translate('form.country.hint'),
+            },
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { country: '' },
+        });
+
+        const label = fixture.debugElement.query(By.css('mat-label'));
+        const select = fixture.debugElement.query(By.directive(MatSelect));
+        const hint = fixture.debugElement.query(By.css('mat-hint'));
+
+        // Initial translations
+        expect(label.nativeElement.textContent.trim()).toBe('Country');
+        expect(select.componentInstance.placeholder).toBe('Select your country');
+        expect(hint.nativeElement.textContent.trim()).toBe('Choose the country you live in');
+
+        // Open select to check options
+        select.nativeElement.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const options = fixture.debugElement.queryAll(By.css('mat-option'));
+        expect(options[0].nativeElement.textContent.trim()).toBe('United States');
+        expect(options[1].nativeElement.textContent.trim()).toBe('Canada');
+        expect(options[2].nativeElement.textContent.trim()).toBe('United Kingdom');
+
+        // Update to Spanish
+        translationService.addTranslations({
+          'form.country.label': 'País',
+          'form.country.placeholder': 'Selecciona tu país',
+          'form.country.hint': 'Elige el país donde vives',
+          'country.us': 'Estados Unidos',
+          'country.ca': 'Canadá',
+          'country.uk': 'Reino Unido',
+        });
+        translationService.setLanguage('es');
+
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(label.nativeElement.textContent.trim()).toBe('País');
+        expect(select.componentInstance.placeholder).toBe('Selecciona tu país');
+        expect(hint.nativeElement.textContent.trim()).toBe('Elige el país donde vives');
+
+        const updatedOptions = fixture.debugElement.queryAll(By.css('mat-option'));
+        expect(updatedOptions[0].nativeElement.textContent.trim()).toBe('Estados Unidos');
+        expect(updatedOptions[1].nativeElement.textContent.trim()).toBe('Canadá');
+        expect(updatedOptions[2].nativeElement.textContent.trim()).toBe('Reino Unido');
+      });
     });
   });
 });

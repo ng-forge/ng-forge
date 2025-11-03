@@ -1,5 +1,6 @@
 import { By } from '@angular/platform-browser';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
 describe('MatToggleFieldComponent', () => {
@@ -401,6 +402,51 @@ describe('MatToggleFieldComponent', () => {
 
       expect(toggleComponent.checked).toBe(true);
       expect(MaterialFormTestUtils.getFormValue(component)['darkMode']).toBe(true);
+    });
+  });
+
+  describe('Dynamic Text Support', () => {
+    describe('Translation Service Integration', () => {
+      it('should handle translation service with dynamic language updates for toggle', async () => {
+        const translationService = createTestTranslationService({
+          'form.darkMode.label': 'Enable Dark Mode',
+          'form.darkMode.hint': 'Toggle between light and dark themes',
+        });
+
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'darkMode',
+            type: 'toggle',
+            label: translationService.translate('form.darkMode.label'),
+            props: {
+              hint: translationService.translate('form.darkMode.hint'),
+            },
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { darkMode: false },
+        });
+
+        const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+        const hint = fixture.debugElement.query(By.css('.mat-hint'));
+
+        // Initial translations
+        expect(toggle.nativeElement.textContent.trim()).toBe('Enable Dark Mode');
+        expect(hint.nativeElement.textContent.trim()).toBe('Toggle between light and dark themes');
+
+        // Update to Spanish
+        translationService.addTranslations({
+          'form.darkMode.label': 'Habilitar Modo Oscuro',
+          'form.darkMode.hint': 'Alternar entre temas claro y oscuro',
+        });
+        translationService.setLanguage('es');
+        fixture.detectChanges();
+
+        expect(toggle.nativeElement.textContent.trim()).toBe('Habilitar Modo Oscuro');
+        expect(hint.nativeElement.textContent.trim()).toBe('Alternar entre temas claro y oscuro');
+      });
     });
   });
 });

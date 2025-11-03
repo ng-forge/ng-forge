@@ -1,20 +1,22 @@
 import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { DynamicText, FieldOption, ValueType } from '@ng-forge/dynamic-form';
+import { DynamicTextPipe } from '../../pipes/dynamic-text.pipe';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxComponent, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
-import { FieldOption, ValueType } from '@ng-forge/dynamic-form';
 import { MatError } from '@angular/material/input';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [MatCheckbox, MatErrorsComponent, ValueInArrayPipe, MatError],
+  imports: [MatCheckbox, MatErrorsComponent, ValueInArrayPipe, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field(); @if (label(); as label) {
-    <div class="checkbox-group-label">{{ label }}</div>
+    <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
     <div class="checkbox-group">
@@ -26,13 +28,13 @@ import { MatError } from '@angular/material/input';
         [labelPosition]="props()?.labelPosition || 'after'"
         (change)="onCheckboxChange(option, $event.checked)"
       >
-        {{ option.label }}
+        {{ option.label | dynamicText | async }}
       </mat-checkbox>
       }
     </div>
 
     @if (props()?.hint; as hint) {
-    <div class="mat-hint">{{ hint }}</div>
+    <div class="mat-hint">{{ hint | dynamicText | async }}</div>
     }
 
     <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
@@ -53,8 +55,8 @@ import { MatError } from '@angular/material/input';
 export default class MatMultiCheckboxFieldComponent<T extends ValueType> implements MatMultiCheckboxComponent<T> {
   readonly field = input.required<FieldTree<T[]>>();
 
-  readonly label = input<string>('');
-  readonly placeholder = input<string>('');
+  readonly label = input<DynamicText>();
+  readonly placeholder = input<DynamicText>();
 
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
