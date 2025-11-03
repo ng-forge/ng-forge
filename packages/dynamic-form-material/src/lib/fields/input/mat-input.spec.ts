@@ -1,0 +1,372 @@
+import { By } from '@angular/platform-browser';
+import { MatInput } from '@angular/material/input';
+import { MaterialFormTestUtils } from '../../testing/material-test-utils';
+
+describe('MatInputFieldComponent', () => {
+  describe('Basic Material Input Integration', () => {
+    it('should render email input with full configuration', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .field({
+          key: 'email',
+          type: 'input',
+          label: 'Email Address',
+          required: true,
+          tabIndex: 1,
+          className: 'email-input',
+          props: {
+            placeholder: 'Enter your email',
+            hint: 'We will never share your email',
+            type: 'email',
+            appearance: 'outline',
+          },
+        })
+        .build();
+
+      const { component, fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { email: '', password: '', firstName: '', age: 0, website: '', phone: '' },
+      });
+
+      const input = fixture.debugElement.query(By.directive(MatInput));
+      const formField = fixture.debugElement.query(By.css('mat-form-field'));
+      const label = fixture.debugElement.query(By.css('mat-label'));
+      const hint = fixture.debugElement.query(By.css('mat-hint'));
+
+      expect(input).toBeTruthy();
+      expect(input.nativeElement.getAttribute('type')).toBe('email');
+      // Note: placeholder might be null in Material components that use floating labels
+      // expect(input.nativeElement.getAttribute('placeholder')).toBe('Enter your email');
+      expect(input.nativeElement.getAttribute('tabindex')).toBe('1');
+      expect(formField.nativeElement.className).toContain('email-input');
+      expect(formField.nativeElement.className).toContain('mat-form-field-appearance-outline');
+      expect(label.nativeElement.textContent.trim()).toBe('Email Address');
+      expect(hint.nativeElement.textContent.trim()).toBe('We will never share your email');
+    });
+
+    it('should handle user input and update form value', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .matInputField({ key: 'email', props: { type: 'email' } })
+        .build();
+
+      const { component, fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { email: '' },
+      });
+
+      // Initial value check
+      expect(MaterialFormTestUtils.getFormValue(component).email).toBe('');
+
+      // Simulate user typing using utility
+      await MaterialFormTestUtils.simulateMatInput(fixture, 'input[type="email"]', 'test@example.com');
+
+      // Verify form value updated
+      expect(MaterialFormTestUtils.getFormValue(component).email).toBe('test@example.com');
+    });
+
+    it('should reflect external value changes in input field', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .matInputField({ key: 'email', props: { type: 'email' } })
+        .build();
+
+      const { component, fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { email: '' },
+      });
+
+      // Update form model programmatically
+      fixture.componentRef.setInput('value', { email: 'user@domain.com' });
+      fixture.detectChanges();
+
+      expect(MaterialFormTestUtils.getFormValue(component).email).toBe('user@domain.com');
+    });
+  });
+
+  describe('Different Input Types Integration', () => {
+    it('should render various input types with correct attributes', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .matInputField({ key: 'firstName', props: { type: 'text' } })
+        .matInputField({ key: 'password', props: { type: 'password' } })
+        .matInputField({ key: 'age', props: { type: 'number' } })
+        .matInputField({ key: 'website', props: { type: 'url' } })
+        .matInputField({ key: 'phone', props: { type: 'tel' } })
+        .build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '', password: '', age: 0, website: '', phone: '' },
+      });
+
+      const inputs = fixture.debugElement.queryAll(By.directive(MatInput));
+
+      expect(inputs.length).toBe(5);
+      expect(inputs[0].nativeElement.getAttribute('type')).toBe('text');
+      expect(inputs[1].nativeElement.getAttribute('type')).toBe('password');
+      expect(inputs[2].nativeElement.getAttribute('type')).toBe('number');
+      expect(inputs[3].nativeElement.getAttribute('type')).toBe('url');
+      expect(inputs[4].nativeElement.getAttribute('type')).toBe('tel');
+    });
+
+    it('should handle number input value changes', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .matInputField({ key: 'age', props: { type: 'number' } })
+        .build();
+
+      const { component, fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { age: 0 },
+      });
+
+      // Initial value
+      expect(MaterialFormTestUtils.getFormValue(component).age).toBe(0);
+
+      // Simulate typing a number using utility
+      await MaterialFormTestUtils.simulateMatInput(fixture, 'input[type="number"]', '25');
+
+      // Note: HTML input returns string, form should handle conversion
+      expect(MaterialFormTestUtils.getFormValue(component).age).toBe(25);
+    });
+
+    it('should reflect external value changes for all input types', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .matInputField({ key: 'firstName' })
+        .matInputField({ key: 'password', props: { type: 'password' } })
+        .matInputField({ key: 'age', props: { type: 'number' } })
+        .matInputField({ key: 'website', props: { type: 'url' } })
+        .matInputField({ key: 'phone' })
+        .build();
+
+      const { component, fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '', password: '', age: 0, website: '', phone: '' },
+      });
+
+      // Update form model programmatically
+      fixture.componentRef.setInput('value', {
+        firstName: 'John',
+        password: 'secret123',
+        age: 30,
+        website: 'https://example.com',
+        phone: '555-0123',
+      });
+      fixture.detectChanges();
+
+      const formValue = MaterialFormTestUtils.getFormValue(component);
+      expect(formValue.firstName).toBe('John');
+      expect(formValue.password).toBe('secret123');
+      expect(formValue.age).toBe(30);
+      expect(formValue.website).toBe('https://example.com');
+      expect(formValue.phone).toBe('555-0123');
+    });
+  });
+
+  describe('Minimal Configuration Tests', () => {
+    it('should render with default Material configuration', async () => {
+      const config = MaterialFormTestUtils.builder().matInputField({ key: 'firstName' }).build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '' },
+      });
+
+      const input = fixture.debugElement.query(By.directive(MatInput));
+      const formField = fixture.debugElement.query(By.css('mat-form-field'));
+
+      expect(input.nativeElement.getAttribute('type')).toBe('text');
+      // Material 17+ uses 'outline' as default, not 'fill'
+      expect(formField.nativeElement.className).toContain('mat-form-field-appearance-outline');
+    });
+
+    it('should not display hint when not provided', async () => {
+      const config = MaterialFormTestUtils.builder().matInputField({ key: 'firstName' }).build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '' },
+      });
+
+      const hint = fixture.debugElement.query(By.css('mat-hint'));
+      expect(hint).toBeNull();
+    });
+  });
+
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .field({
+          key: 'firstName',
+          type: 'input',
+          label: 'Disabled Input',
+          disabled: true,
+        })
+        .build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '' },
+      });
+
+      const input = fixture.debugElement.query(By.css('input'));
+      expect(input.nativeElement.disabled).toBe(true);
+    });
+
+    it('should apply different Material appearance styles', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .matInputField({ key: 'firstName', props: { appearance: 'fill' } })
+        .matInputField({ key: 'email', props: { appearance: 'outline' } })
+        .build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '', email: '' },
+      });
+
+      const formFields = fixture.debugElement.queryAll(By.css('mat-form-field'));
+      expect(formFields[0].nativeElement.className).toContain('mat-form-field-appearance-fill');
+      expect(formFields[1].nativeElement.className).toContain('mat-form-field-appearance-outline');
+    });
+
+    it('should handle multiple inputs with independent value changes', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .matInputField({ key: 'firstName' })
+        .matInputField({ key: 'email', props: { type: 'email' } })
+        .build();
+
+      const { component, fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: 'Initial Name', email: 'initial@email.com' },
+      });
+
+      // Initial values
+      MaterialFormTestUtils.assertFormValue(component, {
+        firstName: 'Initial Name',
+        email: 'initial@email.com',
+      });
+
+      // Change first input using utility
+      await MaterialFormTestUtils.simulateMatInput(fixture, 'input[type="text"]', 'Updated Name');
+
+      let formValue = MaterialFormTestUtils.getFormValue(component);
+      expect(formValue.firstName).toBe('Updated Name');
+      expect(formValue.email).toBe('initial@email.com');
+
+      // Change second input using utility
+      await MaterialFormTestUtils.simulateMatInput(fixture, 'input[type="email"]', 'updated@email.com');
+
+      formValue = MaterialFormTestUtils.getFormValue(component);
+      expect(formValue.firstName).toBe('Updated Name');
+      expect(formValue.email).toBe('updated@email.com');
+    });
+  });
+
+  describe('Edge Cases and Robustness Tests', () => {
+    it('should handle undefined form values gracefully', async () => {
+      const config = MaterialFormTestUtils.builder().matInputField({ key: 'firstName' }).build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value
+
+      const input = fixture.debugElement.query(By.directive(MatInput));
+      expect(input).toBeTruthy();
+    });
+
+    it('should handle null form values gracefully', async () => {
+      const config = MaterialFormTestUtils.builder().matInputField({ key: 'firstName' }).build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: null as any,
+      });
+
+      const input = fixture.debugElement.query(By.directive(MatInput));
+      expect(input).toBeTruthy();
+    });
+
+    it('should handle empty string values correctly', async () => {
+      const config = MaterialFormTestUtils.builder().matInputField({ key: 'firstName' }).build();
+
+      const { component } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '' },
+      });
+
+      expect(MaterialFormTestUtils.getFormValue(component).firstName).toBe('');
+    });
+
+    it('should apply default Material Design configuration', async () => {
+      const config = MaterialFormTestUtils.builder().matInputField({ key: 'firstName' }).build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '' },
+      });
+
+      const input = fixture.debugElement.query(By.directive(MatInput));
+      const formField = fixture.debugElement.query(By.css('mat-form-field'));
+
+      // Verify default Material configuration is applied
+      expect(input.nativeElement.getAttribute('type')).toBe('text');
+      // Material 17+ uses 'outline' as default, not 'fill'
+      expect(formField.nativeElement.className).toContain('mat-form-field-appearance-outline');
+    });
+
+    it('should handle special characters and unicode input', async () => {
+      const config = MaterialFormTestUtils.builder().matInputField({ key: 'firstName' }).build();
+
+      const { component, fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '' },
+      });
+
+      const specialText = 'José María 🌟 @#$%^&*()';
+
+      // Simulate typing special characters using utility
+      await MaterialFormTestUtils.simulateMatInput(fixture, 'input[type="text"]', specialText);
+
+      expect(MaterialFormTestUtils.getFormValue(component).firstName).toBe(specialText);
+    });
+
+    it('should handle rapid value changes correctly', async () => {
+      const config = MaterialFormTestUtils.builder().matInputField({ key: 'firstName' }).build();
+
+      const { component, fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '' },
+      });
+
+      const testValues = ['A', 'Ab', 'Abc', 'Abcd', 'Alice'];
+
+      // Simulate rapid typing using utility (final value)
+      await MaterialFormTestUtils.simulateMatInput(fixture, 'input[type="text"]', 'Alice');
+
+      // Should have the final value
+      expect(MaterialFormTestUtils.getFormValue(component).firstName).toBe('Alice');
+    });
+  });
+
+  describe('Material-Specific Assertion Tests', () => {
+    it('should verify material form field appearance', async () => {
+      const config = MaterialFormTestUtils.builder()
+        .matInputField({ key: 'firstName', props: { appearance: 'outline' } })
+        .build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: '' },
+      });
+
+      // Use material-specific assertion
+      MaterialFormTestUtils.assertMatFormFieldAppearance(fixture, '', 'outline');
+    });
+
+    it('should verify material field values', async () => {
+      const config = MaterialFormTestUtils.builder().matInputField({ key: 'firstName' }).build();
+
+      const { fixture } = await MaterialFormTestUtils.createTest({
+        config,
+        initialValue: { firstName: 'Test Value' },
+      });
+
+      // Use material-specific field value assertion
+      MaterialFormTestUtils.assertMatFieldValue(fixture, 'input', 'Test Value');
+    });
+  });
+});

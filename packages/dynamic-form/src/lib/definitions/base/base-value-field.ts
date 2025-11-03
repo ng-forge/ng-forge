@@ -11,22 +11,15 @@ export interface BaseValueField<TProps extends Record<string, unknown>, TValue> 
 
   defaultValue?: TValue;
 
-  valueType?: ValueType;
-
   placeholder?: string;
 
   required?: boolean;
 }
 
-export function isValueField<TProps extends Record<string, unknown>, TValue extends ValueType>(
+export function isValueField<TProps extends Record<string, unknown>>(
   field: FieldDef<TProps>
 ): field is BaseValueField<TProps, ValueType> {
-  return (
-    'value' in field &&
-    'valueType' in field &&
-    ValueType.includes(typeof (field as { valueType: unknown }).valueType as ValueType) &&
-    typeof (field as { value: unknown; valueType: TValue }).value === field.valueType
-  );
+  return 'value' in field;
 }
 
 type ExcludedKeys =

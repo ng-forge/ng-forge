@@ -17,6 +17,7 @@ import { MatError } from '@angular/material/input';
       [labelPosition]="props()?.labelPosition || 'after'"
       [hideIcon]="props()?.hideIcon || false"
       [disableRipple]="props()?.disableRipple || false"
+      [disabled]="f().disabled()"
       [attr.tabindex]="tabIndex()"
       class="toggle-container"
     >
@@ -36,7 +37,7 @@ import { MatError } from '@angular/material/input';
     `,
   ],
   host: {
-    class: 'className()',
+    '[class]': 'className()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

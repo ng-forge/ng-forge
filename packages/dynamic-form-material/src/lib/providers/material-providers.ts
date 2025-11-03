@@ -30,7 +30,7 @@ declare module '@ng-forge/dynamic-form' {
     input: MatInputField;
     select: MatSelectField<any>;
     checkbox: MatCheckboxField;
-    submit: MatButtonField<any>;
+    button: MatButtonField<any>;
     textarea: MatTextareaField;
     radio: MatRadioField<any>;
     'multi-checkbox': MatMultiCheckboxField<any>;

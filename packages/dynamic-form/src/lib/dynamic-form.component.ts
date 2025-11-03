@@ -202,7 +202,7 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
     });
   });
 
-  readonly formValue = computed(() => this.entity());
+  readonly formValue = computed(() => this.form()().value());
 
   private readonly syncEntityToValue = explicitEffect([this.entity], ([currentEntity]) => {
     const currentValue = this.value();

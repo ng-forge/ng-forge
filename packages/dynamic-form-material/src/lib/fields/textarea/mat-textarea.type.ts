@@ -3,8 +3,12 @@ import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-
 
 export interface MatTextareaProps extends Record<string, unknown> {
   hint?: string;
-  appearance: MatFormFieldAppearance;
+  appearance?: MatFormFieldAppearance;
   subscriptSizing?: SubscriptSizing;
+  rows?: number;
+  cols?: number;
+  resize?: 'none' | 'both' | 'horizontal' | 'vertical';
+  maxLength?: number;
 }
 
 export type MatTextareaField = TextareaField<MatTextareaProps>;

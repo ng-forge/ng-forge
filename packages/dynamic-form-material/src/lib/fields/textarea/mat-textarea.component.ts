@@ -16,8 +16,8 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
       [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'"
       [class]="className() || ''"
     >
-      @if (label(); as label) {
-      <mat-label>{{ label }}</mat-label>
+      @if (label()) {
+      <mat-label>{{ label() }}</mat-label>
       }
 
       <textarea
@@ -26,7 +26,7 @@ import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
         [placeholder]="placeholder() || ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
-        [maxLength]="maxLength() || null"
+        [attr.maxlength]="props()?.maxLength || null"
         [attr.tabindex]="tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
@@ -45,10 +45,7 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
 
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
-
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
-  readonly maxLength = input<number>();
-
   readonly props = input<MatTextareaProps>();
 }
