@@ -7,7 +7,10 @@ import { FieldMapperOptions } from '@ng-forge/dynamic-form';
 /**
  * Mapper for submit button - preconfigures SubmitEvent and disables when form is invalid
  */
-export function submitButtonFieldMapper(fieldDef: FieldDef<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
+export function submitButtonFieldMapper(
+  fieldDef: FieldDef<Record<string, unknown>>,
+  options?: Omit<FieldMapperOptions, 'fieldRegistry'>
+): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Preconfigure the SubmitEvent
@@ -44,7 +47,7 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<any>, options?: Omit<
  * Mapper for next page button - preconfigures NextPageEvent
  * Note: Does not auto-disable based on validation. Users can explicitly disable if needed.
  */
-export function nextButtonFieldMapper(fieldDef: FieldDef<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
+export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Preconfigure the NextPageEvent
@@ -67,7 +70,7 @@ export function nextButtonFieldMapper(fieldDef: FieldDef<any>, options?: Omit<Fi
  * Mapper for previous page button - preconfigures PreviousPageEvent
  * Note: Does not auto-disable based on validation. Users can explicitly disable if needed.
  */
-export function previousButtonFieldMapper(fieldDef: FieldDef<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
+export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Preconfigure the PreviousPageEvent
