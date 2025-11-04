@@ -15,9 +15,12 @@ export interface RowField<TFields extends readonly unknown[] = readonly unknown[
   readonly fields: TFields;
 }
 
-/** Type guard for RowField */
-export function isRowField<TFields extends readonly any[]>(field: FieldDef<Record<string, unknown>>): field is RowField<readonly any[]> {
-  return field.type === 'row' && 'fields' in field && isArray((field as { fields: TFields }).fields);
+/**
+ * Type guard for RowField with proper type narrowing
+ * After this guard, TypeScript knows the field is a RowField and can access its properties safely
+ */
+export function isRowField(field: FieldDef<Record<string, unknown>>): field is RowField {
+  return field.type === 'row' && 'fields' in field && isArray((field as RowField).fields);
 }
 
 export type RowComponent = FieldComponent<RowField<readonly any[]>>;

@@ -7,6 +7,7 @@ import {
   inject,
   Injector,
   input,
+  InputSignal,
   linkedSignal,
   model,
   OnDestroy,
@@ -189,7 +190,7 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
    * };
    * ```
    */
-  config = input.required<FormConfig<TFields>>();
+  config: InputSignal<FormConfig<TFields>> = input.required<FormConfig<TFields>>();
 
   /**
    * Form values for two-way data binding.

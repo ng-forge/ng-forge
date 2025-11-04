@@ -24,9 +24,12 @@ export interface PageField<TFields extends readonly any[] = readonly any[]> exte
   description?: string;
 }
 
-/** Type guard for PageField */
-export function isPageField<TFields extends readonly any[]>(field: FieldDef<Record<string, unknown>>): field is PageField<readonly any[]> {
-  return field.type === 'page' && 'fields' in field && isArray((field as { fields: TFields }).fields);
+/**
+ * Type guard for PageField with proper type narrowing
+ * After this guard, TypeScript knows the field is a PageField and can access its properties safely
+ */
+export function isPageField(field: FieldDef<Record<string, unknown>>): field is PageField {
+  return field.type === 'page' && 'fields' in field && isArray((field as PageField).fields);
 }
 
 export type PageComponent = FieldComponent<PageField<readonly any[]>>;

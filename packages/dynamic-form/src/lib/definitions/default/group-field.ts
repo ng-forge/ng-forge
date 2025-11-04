@@ -14,7 +14,11 @@ export interface GroupField<TFields extends readonly any[] = readonly any[]> ext
   readonly fields: TFields;
 }
 
-export function isGroupField<TFields extends readonly any[]>(field: FieldDef<Record<string, unknown>>): field is GroupField<TFields> {
+/**
+ * Type guard for GroupField with proper type narrowing
+ * After this guard, TypeScript knows the field is a GroupField and can access its properties safely
+ */
+export function isGroupField(field: FieldDef<Record<string, unknown>>): field is GroupField {
   return field.type === 'group' && 'fields' in field;
 }
 
