@@ -53,8 +53,9 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: readonly FieldDef<Record<string, unknown>>[]) => flattenFields(fields),
-    (fields) => JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type })))
+    (fields: readonly FieldDef<Record<string, unknown>>[], registry: Map<string, any>) => flattenFields(fields, registry),
+    (fields, registry) =>
+      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
   );
 
   private readonly memoizedKeyBy = memoize(
@@ -63,9 +64,9 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
   );
 
   private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>) =>
-      mapValues(fieldsById, (field) => getFieldDefaultValue(field)),
-    (fieldsById) => Object.keys(fieldsById).sort().join(',')
+    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>, registry: Map<string, any>) =>
+      mapValues(fieldsById, (field) => getFieldDefaultValue(field, registry)),
+    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(',')
   );
 
   /** Field configuration input */
@@ -78,17 +79,19 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
 
   private readonly formSetup = computed(() => {
     const groupField = this.field();
+    const registry = this.fieldRegistry.raw;
 
     if (groupField.fields && groupField.fields.length > 0) {
-      // Use memoized functions for expensive operations
-      const flattenedFields = this.memoizedFlattenFields(groupField.fields);
+      // Use memoized functions for expensive operations with registry
+      const flattenedFields = this.memoizedFlattenFields(groupField.fields, registry);
       const fieldsById = this.memoizedKeyBy(flattenedFields);
-      const defaultValues = this.memoizedDefaultValues(fieldsById);
+      const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
 
       return {
         fields: flattenedFields,
         originalFields: groupField.fields,
         defaultValues,
+        registry, // Include registry for schema creation
       };
     }
 
@@ -96,6 +99,7 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
       fields: [],
       originalFields: [],
       defaultValues: {},
+      registry, // Include registry even for empty forms
     };
   });
 
@@ -118,7 +122,7 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
       const setup = this.formSetup();
 
       if (setup.fields.length > 0) {
-        const schema = createSchemaFromFields(setup.fields);
+        const schema = createSchemaFromFields(setup.fields, setup.registry);
         return untracked(() => form(this.entity, schema));
       }
 

@@ -160,11 +160,11 @@ describe('MatButtonFieldComponent', () => {
       // Click submit button - should not throw
       await expect(MaterialFormTestUtils.simulateMatButtonClick(fixture, 'button')).resolves.not.toThrow();
 
-      // Verify form data is accessible
+      // Verify form data is accessible - button should be excluded from form values
       expect(MaterialFormTestUtils.getFormValue(component)).toEqual({
         email: 'test@example.com',
         firstName: 'John',
-        submitButton: '',
+        // Note: submitButton is intentionally excluded as buttons don't contribute to form values
       });
     });
 

@@ -18,7 +18,7 @@ import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map, Observable, of, switchMap } from 'rxjs';
-import { isEqual, keyBy, mapValues, memoize } from 'lodash-es';
+import { isEqual, keyBy, memoize } from 'lodash-es';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FormConfig, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
@@ -130,8 +130,9 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: readonly FieldDef<Record<string, unknown>>[]) => flattenFields(fields),
-    (fields) => JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type })))
+    (fields: readonly FieldDef<Record<string, unknown>>[], registry: Map<string, any>) => flattenFields(fields, registry),
+    (fields, registry) =>
+      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
   );
 
   private readonly memoizedKeyBy = memoize(
@@ -140,9 +141,19 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
   );
 
   private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>) =>
-      mapValues(fieldsById, (field) => getFieldDefaultValue(field)) as TModel,
-    (fieldsById) => Object.keys(fieldsById).sort().join(',')
+    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>, registry: Map<string, any>) => {
+      const result: Record<string, unknown> = {};
+      for (const [key, field] of Object.entries(fieldsById)) {
+        const defaultValue = getFieldDefaultValue(field, registry);
+        // Only include fields that have non-undefined default values
+        // This excludes fields with valueHandling: 'exclude'
+        if (defaultValue !== undefined) {
+          result[key] = defaultValue;
+        }
+      }
+      return result as TModel;
+    },
+    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(',')
   );
 
   // Memoized field signal context to avoid recreation for every field
@@ -225,12 +236,13 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
   private readonly formSetup = computed(() => {
     const config = this.config();
     const modeDetection = this.formModeDetection();
+    const registry = this.rawFieldRegistry();
 
     if (config.fields && config.fields.length > 0) {
-      // Use memoized functions for expensive operations
-      const flattenedFields = this.memoizedFlattenFields(config.fields);
+      // Use memoized functions for expensive operations with registry
+      const flattenedFields = this.memoizedFlattenFields(config.fields, registry);
       const fieldsById = this.memoizedKeyBy(flattenedFields);
-      const defaultValues = this.memoizedDefaultValues(fieldsById);
+      const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
 
       // For rendering, paged forms keep original structure, non-paged use flattened
       const fieldsToRender = modeDetection.mode === 'paged' ? config.fields : flattenedFields;
@@ -242,6 +254,7 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
         defaultValues,
         schema: undefined,
         mode: modeDetection.mode,
+        registry, // Include registry for schema creation
       };
     }
 
@@ -252,6 +265,7 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
       defaultValues: {} as TModel,
       schema: undefined,
       mode: 'non-paged' as const,
+      registry, // Include registry even for empty forms
     };
   });
 
@@ -276,7 +290,7 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
       let formInstance: ReturnType<typeof form<TModel>>;
 
       if (setup.schemaFields && setup.schemaFields.length > 0) {
-        const schema = createSchemaFromFields(setup.schemaFields);
+        const schema = createSchemaFromFields(setup.schemaFields, setup.registry);
         formInstance = untracked(() => form(this.entity, schema));
       } else {
         formInstance = untracked(() => form(this.entity));
@@ -471,7 +485,8 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
       const fields = this.formSetup().fields;
       if (!fields) return 1; // Just the dynamic-form component
 
-      const flatFields = flattenFields(fields);
+      const registry = this.rawFieldRegistry();
+      const flatFields = flattenFields(fields, registry);
       const componentCount = flatFields.filter((field) => field.type === 'page' || field.type === 'row' || field.type === 'group').length;
 
       return componentCount + 1; // +1 for dynamic-form component

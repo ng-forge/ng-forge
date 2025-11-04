@@ -1,7 +1,6 @@
 import { FieldDef } from '../../definitions';
-import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
-import { isPageField } from '../../definitions/default/page-field';
+import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
 
 /**
  * Represents a field definition that has been processed through the flattening algorithm.
@@ -75,23 +74,28 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
  *
  * @public
  */
-export function flattenFields(fields: readonly FieldDef<Record<string, unknown>>[]): FlattenedField[] {
+export function flattenFields(
+  fields: readonly FieldDef<Record<string, unknown>>[],
+  registry: Map<string, FieldTypeDefinition>
+): FlattenedField[] {
   const result: FlattenedField[] = [];
   let autoKeyCounter = 0;
 
   for (const field of fields) {
-    if (isPageField(field)) {
-      // Page fields are layout containers - flatten their children to root level
+    const valueHandling = getFieldValueHandling(field.type, registry);
+
+    if (valueHandling === 'flatten' && 'fields' in field) {
+      // Flatten children to current level
       if (field.fields) {
-        const flattenedChildren = flattenFields(field.fields);
+        // Handle both array (page/row fields) and object (group fields)
+        const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
+        const flattenedChildren = flattenFields(fieldsArray, registry);
         result.push(...flattenedChildren);
       }
-    } else if (isRowField(field)) {
-      const flattenedChildren = flattenFields(field.fields);
-      result.push(...flattenedChildren);
     } else if (isGroupField(field)) {
+      // Groups always maintain their structure (even if they have 'include' handling)
       const childFieldsArray = Object.values(field.fields);
-      const flattenedChildren = flattenFields(childFieldsArray);
+      const flattenedChildren = flattenFields(childFieldsArray, registry);
 
       // Add only the group field with its flattened children, not the children separately
       result.push({
@@ -100,7 +104,8 @@ export function flattenFields(fields: readonly FieldDef<Record<string, unknown>>
         key: field.key || `auto_group_${autoKeyCounter++}`,
       } as FlattenedField);
     } else {
-      // Ensure the field has a key, auto-generate if missing
+      // All other fields (include/exclude) maintain their structure
+      // The value handling will be processed later in schema creation
       const key = field.key || `auto_field_${autoKeyCounter++}`;
       result.push({
         ...field,

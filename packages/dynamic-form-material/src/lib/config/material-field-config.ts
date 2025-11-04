@@ -1,4 +1,4 @@
-import { baseFieldMapper, checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-form';
+import { checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-form';
 import { MatField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/mat-button.mapper';
 
@@ -26,6 +26,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     name: MatField.Button,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: buttonFieldMapper,
+    valueHandling: 'exclude',
   },
   {
     name: MatField.Textarea,

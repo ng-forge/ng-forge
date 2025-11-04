@@ -1,21 +1,34 @@
 import { FieldPath, Schema, schema } from '@angular/forms/signals';
 import { FieldDef } from '../definitions';
 import { mapFieldToForm } from './form-mapping';
-import { isPageField } from '../definitions/default/page-field';
+import { FieldTypeDefinition, getFieldValueHandling } from '../models/field-type';
+import { getFieldDefaultValue } from '../utils/default-value/default-value';
 
 /**
  * Creates an Angular signal forms schema from field definitions
  * This is the single entry point at dynamic form level that replaces createSchemaFromFields
  * Uses the new modular signal forms adapter structure
  */
-export function createSchemaFromFields<TModel = unknown>(fields: readonly FieldDef<Record<string, unknown>>[]): Schema<TModel> {
+export function createSchemaFromFields<TModel = unknown>(
+  fields: readonly FieldDef<Record<string, unknown>>[],
+  registry: Map<string, FieldTypeDefinition>
+): Schema<TModel> {
   return schema<TModel>((path) => {
     for (const fieldDef of fields) {
-      // Special handling for page fields - they don't create form controls themselves
-      // Instead, their children are processed directly
-      if (isPageField(fieldDef)) {
+      const valueHandling = getFieldValueHandling(fieldDef.type, registry);
+
+      // Handle different value handling modes
+      if (valueHandling === 'exclude') {
+        // Skip fields that don't contribute to form values
+        continue;
+      }
+
+      if (valueHandling === 'flatten' && 'fields' in fieldDef) {
+        // Flatten children to current level
         if (fieldDef.fields) {
-          for (const childField of fieldDef.fields) {
+          // Handle both array (page/row fields) and object (group fields)
+          const fieldsArray = Array.isArray(fieldDef.fields) ? fieldDef.fields : Object.values(fieldDef.fields);
+          for (const childField of fieldsArray) {
             if (!childField.key) continue;
 
             const childPath = path[childField.key as keyof typeof path] as FieldPath<unknown>;
@@ -27,7 +40,7 @@ export function createSchemaFromFields<TModel = unknown>(fields: readonly FieldD
         continue;
       }
 
-      // Regular field processing
+      // Regular field processing for 'include' fields
       const fieldPath = path[fieldDef.key as keyof typeof path] as FieldPath<unknown>;
 
       if (!fieldPath) {
@@ -44,25 +57,18 @@ export function createSchemaFromFields<TModel = unknown>(fields: readonly FieldD
 /**
  * Utility to convert field definitions to default values object
  */
-export function fieldsToDefaultValues<TModel = unknown>(fields: readonly FieldDef<Record<string, unknown>>[]): TModel {
+export function fieldsToDefaultValues<TModel = unknown>(
+  fields: readonly FieldDef<Record<string, unknown>>[],
+  registry: Map<string, FieldTypeDefinition>
+): TModel {
   const defaultValues: Record<string, unknown> = {};
 
   for (const field of fields) {
-    // Special handling for page fields - flatten their children
-    if (isPageField(field)) {
-      if (field.fields) {
-        for (const childField of field.fields) {
-          if ('defaultValue' in childField && childField.defaultValue !== undefined) {
-            defaultValues[childField.key] = childField.defaultValue;
-          }
-        }
-      }
-      continue;
-    }
+    if (!field.key) continue;
 
-    // Check if field has a defaultValue property
-    if ('defaultValue' in field && field.defaultValue !== undefined) {
-      defaultValues[field.key] = field.defaultValue;
+    const defaultValue = getFieldDefaultValue(field, registry);
+    if (defaultValue !== undefined) {
+      defaultValues[field.key] = defaultValue;
     }
   }
 

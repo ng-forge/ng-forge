@@ -3,6 +3,15 @@ import { FieldDef } from '../definitions';
 import { MapperFn } from '../mappers';
 
 /**
+ * Defines how a field type handles form values and data collection.
+ *
+ * - 'include': Field contributes to form values (default for input fields)
+ * - 'exclude': Field is excluded from form values (for display/layout fields)
+ * - 'flatten': Field's children are flattened to parent level (for container fields)
+ */
+export type ValueHandlingMode = 'include' | 'exclude' | 'flatten';
+
+/**
  * Configuration interface for registering custom field types.
  *
  * Defines how a field type should be handled by the dynamic form system,
@@ -32,6 +41,8 @@ export interface FieldTypeDefinition<T extends FieldDef<Record<string, unknown>>
   loadComponent?: () => Promise<any>;
   /** Mapper function that converts field definition to component bindings */
   mapper: MapperFn<T>;
+  /** How this field type handles form values and data collection (defaults to 'include') */
+  valueHandling?: ValueHandlingMode;
 }
 
 /**
@@ -52,3 +63,15 @@ export const FIELD_REGISTRY = new InjectionToken<Map<string, FieldTypeDefinition
   providedIn: 'root',
   factory: () => new Map(),
 });
+
+/**
+ * Gets the value handling mode for a specific field type from the registry.
+ *
+ * @param fieldType - The field type identifier
+ * @param registry - The field type registry
+ * @returns The value handling mode ('include' is the default if not specified)
+ */
+export function getFieldValueHandling(fieldType: string, registry: Map<string, FieldTypeDefinition>): ValueHandlingMode {
+  const definition = registry.get(fieldType);
+  return definition?.valueHandling ?? 'include';
+}

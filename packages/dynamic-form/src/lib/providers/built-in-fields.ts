@@ -32,20 +32,24 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
     name: 'row',
     loadComponent: () => import('../fields/row/row-field.component'),
     mapper: rowFieldMapper,
+    valueHandling: 'flatten',
   },
   {
     name: 'group',
     loadComponent: () => import('../fields/group/group-field.component'),
     mapper: groupFieldMapper,
+    valueHandling: 'include',
   },
   {
     name: 'page',
     loadComponent: () => import('../fields/page/page-field.component'),
     mapper: pageFieldMapper,
+    valueHandling: 'flatten',
   },
   {
     name: 'text',
     loadComponent: () => import('../fields/text/text-field.component'),
     mapper: baseFieldMapper,
+    valueHandling: 'exclude',
   },
 ];

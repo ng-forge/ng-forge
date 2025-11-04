@@ -1,29 +1,23 @@
 import { FieldDef } from '../../definitions/base/field-def';
+import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
 
 /**
  * Generates appropriate default values for different field types in dynamic forms.
  *
- * Handles special cases for layout fields (row/group) and applies type-specific
- * default value logic. Group fields recursively generate default values for their
- * child fields, while layout fields like rows are excluded from form values.
+ * Uses registry configuration to determine how each field type should handle values.
+ * Supports exclude/flatten/include modes based on field type registration.
  *
  * @param field - Field definition to generate default value for
+ * @param registry - Field type registry for value handling configuration
  * @returns Appropriate default value based on field type and configuration
  *
  * @example
  * ```typescript
  * // Basic input field defaults to empty string
- * getFieldDefaultValue({ type: 'input', key: 'email' }); // ''
+ * getFieldDefaultValue({ type: 'input', key: 'email' }, registry); // ''
  *
- * // Checkbox field defaults to false
- * getFieldDefaultValue({ type: 'checkbox', key: 'terms' }); // false
- *
- * // Field with explicit default value
- * getFieldDefaultValue({
- *   type: 'input',
- *   key: 'country',
- *   defaultValue: 'US'
- * }); // 'US'
+ * // Excluded fields (like text/row) return undefined
+ * getFieldDefaultValue({ type: 'text', key: 'label' }, registry); // undefined
  *
  * // Group field returns object with child defaults
  * getFieldDefaultValue({
@@ -33,17 +27,23 @@ import { FieldDef } from '../../definitions/base/field-def';
  *     { type: 'input', key: 'street' },
  *     { type: 'input', key: 'city', defaultValue: 'New York' }
  *   ]
- * }); // { street: '', city: 'New York' }
- *
- * // Row fields are layout containers (no default value)
- * getFieldDefaultValue({ type: 'row', fields: [...] }); // undefined
+ * }, registry); // { street: '', city: 'New York' }
  * ```
  */
-export function getFieldDefaultValue(field: FieldDef<any>): unknown {
-  if (field.type === 'row') {
+export function getFieldDefaultValue(field: FieldDef<any>, registry: Map<string, FieldTypeDefinition>): unknown {
+  const valueHandling = getFieldValueHandling(field.type, registry);
+
+  // Fields with 'exclude' or 'flatten' handling don't contribute direct values
+  if (valueHandling === 'exclude') {
     return undefined;
   }
 
+  if (valueHandling === 'flatten' && 'fields' in field) {
+    // Flatten fields don't contribute values themselves - their children are processed separately
+    return undefined;
+  }
+
+  // Group fields with 'include' handling create nested objects
   if (field.type === 'group' && 'fields' in field) {
     const fields = field.fields as readonly FieldDef<any>[];
     if (!fields || fields.length === 0) {
@@ -53,7 +53,10 @@ export function getFieldDefaultValue(field: FieldDef<any>): unknown {
     const groupDefaults: Record<string, unknown> = {};
     for (const childField of fields) {
       if ('key' in childField && childField.key) {
-        groupDefaults[childField.key] = getFieldDefaultValue(childField);
+        const childValue = getFieldDefaultValue(childField, registry);
+        if (childValue !== undefined) {
+          groupDefaults[childField.key] = childValue;
+        }
       }
     }
     return groupDefaults;
