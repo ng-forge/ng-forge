@@ -1,0 +1,220 @@
+# Field Types
+
+Field types define form control behavior and rendering. All fields use the `FieldConfig` interface:
+
+```typescript
+interface FieldConfig {
+  key: string; // Form model property (supports nested paths: 'user.profile.name')
+  type: string; // Field type identifier
+  label?: string; // Field label
+  required?: boolean; // Required validation
+  props?: Record<string, any>; // Type-specific properties
+  validators?: ValidatorConfig; // Validation rules
+  options?: SelectOption[]; // Options for select/radio fields
+}
+```
+
+## Core Field Types
+
+### input
+
+Text-based input with HTML5 type support.
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  required: true,
+  email: true,
+  props: {
+    type: 'email',              // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
+    placeholder: 'user@example.com',
+    hint: 'Enter a valid email address',
+  }
+}
+```
+
+**Props:**
+
+- `type`: HTML input type
+- `placeholder`: Input placeholder
+- `hint`: Help text
+- `readonly`: Read-only state
+- `disabled`: Disabled state
+
+### select
+
+Single or multi-select dropdown.
+
+```typescript
+{
+  key: 'country',
+  type: 'select',
+  label: 'Country',
+  required: true,
+  options: [
+    { value: 'us', label: 'United States' },
+    { value: 'uk', label: 'United Kingdom' },
+  ],
+  props: {
+    placeholder: 'Select country',
+    multiple: false,
+    clearable: true,
+  }
+}
+```
+
+**Option structure:**
+
+```typescript
+interface SelectOption {
+  value: any;
+  label: string;
+  description?: string;
+  disabled?: boolean;
+}
+```
+
+### checkbox
+
+Boolean toggle control.
+
+```typescript
+{
+  key: 'newsletter',
+  type: 'checkbox',
+  label: 'Subscribe to newsletter',
+  props: {
+    hint: 'Get weekly updates',
+  }
+}
+```
+
+Supports nested paths:
+
+```typescript
+{ key: 'preferences.notifications', type: 'checkbox', label: 'Enable notifications' }
+```
+
+### radio
+
+Single selection from multiple options.
+
+```typescript
+{
+  key: 'plan',
+  type: 'radio',
+  label: 'Subscription Plan',
+  required: true,
+  options: [
+    { value: 'free', label: 'Free' },
+    { value: 'pro', label: 'Pro - $10/month' },
+    { value: 'enterprise', label: 'Enterprise - $50/month' },
+  ]
+}
+```
+
+### textarea
+
+Multi-line text input.
+
+```typescript
+{
+  key: 'bio',
+  type: 'textarea',
+  label: 'Biography',
+  props: {
+    placeholder: 'Tell us about yourself',
+    rows: 4,
+    maxLength: 500,
+  }
+}
+```
+
+### datepicker
+
+Date selection control (requires UI integration).
+
+```typescript
+{
+  key: 'birthDate',
+  type: 'datepicker',
+  label: 'Birth Date',
+  required: true,
+  props: {
+    minDate: new Date(1900, 0, 1),
+    maxDate: new Date(),
+  }
+}
+```
+
+### slider
+
+Numeric range selection (requires UI integration).
+
+```typescript
+{
+  key: 'volume',
+  type: 'slider',
+  label: 'Volume',
+  props: {
+    min: 0,
+    max: 100,
+    step: 5,
+  }
+}
+```
+
+## Custom Field Types
+
+Register custom field types using `provideField`:
+
+```typescript
+import { provideField } from '@ng-forge/dynamic-form';
+import { CustomDatePickerComponent } from './custom-date-picker';
+
+export const provideCustomDatePicker = () => provideField('custom-datepicker', CustomDatePickerComponent);
+```
+
+Use in app config:
+
+```typescript
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(), provideCustomDatePicker()],
+};
+```
+
+## Overriding Field Types
+
+Override built-in field types with custom implementations:
+
+```typescript
+// Replace the default input field
+export const provideCustomInput = () => provideField('input', CustomInputComponent);
+```
+
+## Validation
+
+Fields integrate with Angular's reactive forms validation. See [Validation](../validation) for details.
+
+```typescript
+{
+  key: 'username',
+  type: 'input',
+  label: 'Username',
+  required: true,
+  minLength: 3,
+  maxLength: 20,
+  pattern: '^[a-zA-Z0-9_]+$',
+}
+```
+
+## UI Integrations
+
+UI framework integrations extend field types with framework-specific styling and features while maintaining the same configuration API.
+
+- [Material Design](../../custom-integrations/reference/material) - Material Design components
+- [Bootstrap](../../custom-integrations/reference/bootstrap) - Bootstrap styling
+- [PrimeNG](../../custom-integrations/reference/primeng) - PrimeNG components
+- [Ionic](../../custom-integrations/reference/ionic) - Ionic mobile components

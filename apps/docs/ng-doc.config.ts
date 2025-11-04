@@ -1,7 +1,7 @@
 import { NgDocConfiguration } from '@ng-doc/builder';
 
 const config: NgDocConfiguration = {
-  docsPath: 'apps/docs/content',
+  docsPath: 'apps/docs/src/docs',
   outDir: 'dist',
   cache: true,
   repoConfig: {
