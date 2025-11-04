@@ -424,4 +424,196 @@ describe('MatButtonFieldComponent', () => {
       });
     });
   });
+
+  describe('Specific Button Types with Preconfigured Events', () => {
+    describe('Submit Button', () => {
+      it('should render submit button with preconfigured SubmitEvent', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'submitBtn',
+            type: 'submit-button',
+            label: 'Submit',
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({ config });
+
+        const button = fixture.debugElement.query(By.directive(MatButton));
+        const buttonElement = fixture.debugElement.query(By.css('button'));
+
+        expect(button).toBeTruthy();
+        expect(buttonElement.nativeElement.textContent.trim()).toBe('Submit');
+      });
+
+      it('should disable submit button when form is invalid', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .matInputField({ key: 'email', required: true })
+          .field({
+            key: 'submitBtn',
+            type: 'submit-button',
+            label: 'Submit',
+          })
+          .build();
+
+        const { fixture, component } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: '' },
+        });
+
+        const buttonElement = fixture.debugElement.query(By.css('button'));
+
+        // Button should be disabled when form is invalid
+        expect(buttonElement.nativeElement.disabled).toBe(true);
+        expect(component.valid()).toBe(false);
+
+        // Update form to be valid
+        await MaterialFormTestUtils.simulateMatInput(fixture, 'input', 'test@example.com');
+
+        // Button should now be enabled
+        expect(buttonElement.nativeElement.disabled).toBe(false);
+        expect(component.valid()).toBe(true);
+      });
+
+      it('should allow explicit disabled state to override form validation', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .matInputField({ key: 'email', required: true })
+          .field({
+            key: 'submitBtn',
+            type: 'submit-button',
+            label: 'Submit',
+            disabled: true,
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { email: 'valid@example.com' },
+        });
+
+        const buttonElement = fixture.debugElement.query(By.css('button'));
+
+        // Button should be disabled even though form is valid
+        expect(buttonElement.nativeElement.disabled).toBe(true);
+      });
+    });
+
+    describe('Next Button', () => {
+      it('should render next button with preconfigured NextPageEvent', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'nextBtn',
+            type: 'next-button',
+            label: 'Next',
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({ config });
+
+        const button = fixture.debugElement.query(By.directive(MatButton));
+        const buttonElement = fixture.debugElement.query(By.css('button'));
+
+        expect(button).toBeTruthy();
+        expect(buttonElement.nativeElement.textContent.trim()).toBe('Next');
+        expect(buttonElement.nativeElement.disabled).toBe(false);
+      });
+
+      it('should respect explicit disabled state', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'nextBtn',
+            type: 'next-button',
+            label: 'Next',
+            disabled: true,
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({ config });
+
+        const buttonElement = fixture.debugElement.query(By.css('button'));
+        expect(buttonElement.nativeElement.disabled).toBe(true);
+      });
+    });
+
+    describe('Previous Button', () => {
+      it('should render previous button with preconfigured PreviousPageEvent', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'prevBtn',
+            type: 'previous-button',
+            label: 'Previous',
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({ config });
+
+        const button = fixture.debugElement.query(By.directive(MatButton));
+        const buttonElement = fixture.debugElement.query(By.css('button'));
+
+        expect(button).toBeTruthy();
+        expect(buttonElement.nativeElement.textContent.trim()).toBe('Previous');
+        expect(buttonElement.nativeElement.disabled).toBe(false);
+      });
+
+      it('should respect explicit disabled state', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .field({
+            key: 'prevBtn',
+            type: 'previous-button',
+            label: 'Previous',
+            disabled: true,
+          })
+          .build();
+
+        const { fixture } = await MaterialFormTestUtils.createTest({ config });
+
+        const buttonElement = fixture.debugElement.query(By.css('button'));
+        expect(buttonElement.nativeElement.disabled).toBe(true);
+      });
+    });
+
+    describe('All Specific Button Types Together', () => {
+      it('should work correctly when all specific button types are used together', async () => {
+        const config = MaterialFormTestUtils.builder()
+          .matInputField({ key: 'name', required: true })
+          .field({
+            key: 'prevBtn',
+            type: 'previous-button',
+            label: 'Back',
+          })
+          .field({
+            key: 'nextBtn',
+            type: 'next-button',
+            label: 'Next',
+          })
+          .field({
+            key: 'submitBtn',
+            type: 'submit-button',
+            label: 'Submit',
+          })
+          .build();
+
+        const { fixture, component } = await MaterialFormTestUtils.createTest({
+          config,
+          initialValue: { name: '' },
+        });
+
+        const buttons = fixture.debugElement.queryAll(By.css('button'));
+        expect(buttons.length).toBe(3); // 3 action buttons
+
+        // Previous and Next should be enabled, Submit should be disabled
+        expect(buttons[0].nativeElement.disabled).toBe(false); // Previous
+        expect(buttons[1].nativeElement.disabled).toBe(false); // Next
+        expect(buttons[2].nativeElement.disabled).toBe(true); // Submit (form invalid)
+
+        // Make form valid
+        await MaterialFormTestUtils.simulateMatInput(fixture, 'input', 'John');
+
+        // Now all should be enabled
+        expect(buttons[0].nativeElement.disabled).toBe(false);
+        expect(buttons[1].nativeElement.disabled).toBe(false);
+        expect(buttons[2].nativeElement.disabled).toBe(false);
+        expect(component.valid()).toBe(true);
+      });
+    });
+  });
 });
