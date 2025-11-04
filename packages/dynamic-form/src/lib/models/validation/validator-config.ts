@@ -5,7 +5,7 @@ import { ConditionalExpression } from '../expressions/conditional-expression';
  */
 export interface ValidatorConfig {
   /** Validator type identifier */
-  type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
+  type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern';
 
   /** Static value for the validator (e.g., min value, pattern) */
   value?: number | string | RegExp;

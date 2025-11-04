@@ -34,7 +34,7 @@ export class FieldContextRegistryService {
 
     if (rootForm) {
       try {
-        const rootValue = fieldContext.valueOf(rootForm as any);
+        const rootValue = rootForm().value();
         if (rootValue && typeof rootValue === 'object' && !Array.isArray(rootValue)) {
           formValue = rootValue as Record<string, unknown>;
         }
