@@ -7,7 +7,7 @@ import { isArray } from 'lodash-es';
  * The row itself doesn't have a value - it's a layout container
  * This is a programmatic field type only - users cannot customize this field type
  */
-export interface RowField<TFields extends readonly FieldDef<Record<string, unknown>>[]> extends FieldDef<never> {
+export interface RowField<TFields extends readonly unknown[] = readonly unknown[]> extends FieldDef<never> {
   /** Field type identifier */
   readonly type: 'row';
 
@@ -16,13 +16,11 @@ export interface RowField<TFields extends readonly FieldDef<Record<string, unkno
 }
 
 /** Type guard for RowField */
-export function isRowField<TFields extends readonly FieldDef<Record<string, unknown>>[]>(
-  field: FieldDef<Record<string, unknown>>
-): field is RowField<readonly FieldDef<Record<string, unknown>>[]> {
+export function isRowField<TFields extends readonly any[]>(field: FieldDef<Record<string, unknown>>): field is RowField<readonly any[]> {
   return field.type === 'row' && 'fields' in field && isArray((field as { fields: TFields }).fields);
 }
 
-export type RowComponent = FieldComponent<RowField<readonly FieldDef<Record<string, unknown>>[]>>;
+export type RowComponent = FieldComponent<RowField<readonly any[]>>;
 
 /**
  * Row child field with column layout properties

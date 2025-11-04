@@ -7,8 +7,10 @@ import { isArray } from 'lodash-es';
  * The page itself doesn't have a value - it's a layout container like row
  * Pages can only be used at the top level and cannot be nested
  * This is a programmatic field type only - users cannot customize this field type
+ *
+ * The generic parameter preserves the exact field types for proper inference
  */
-export interface PageField<TFields extends readonly FieldDef<Record<string, unknown>>[]> extends FieldDef<never> {
+export interface PageField<TFields extends readonly any[] = readonly any[]> extends FieldDef<never> {
   /** Field type identifier */
   readonly type: 'page';
 
@@ -23,13 +25,11 @@ export interface PageField<TFields extends readonly FieldDef<Record<string, unkn
 }
 
 /** Type guard for PageField */
-export function isPageField<TFields extends readonly FieldDef<Record<string, unknown>>[]>(
-  field: FieldDef<Record<string, unknown>>
-): field is PageField<readonly FieldDef<Record<string, unknown>>[]> {
+export function isPageField<TFields extends readonly any[]>(field: FieldDef<Record<string, unknown>>): field is PageField<readonly any[]> {
   return field.type === 'page' && 'fields' in field && isArray((field as { fields: TFields }).fields);
 }
 
-export type PageComponent = FieldComponent<PageField<readonly FieldDef<Record<string, unknown>>[]>>;
+export type PageComponent = FieldComponent<PageField<readonly any[]>>;
 
 /**
  * Validates that a page field doesn't contain nested page fields
