@@ -30,26 +30,27 @@ test.describe('Material Demo App - Scenario List', () => {
     }
   });
 
-  test('should show "Coming Soon" badges on all scenarios', async ({ page }) => {
+  test('should show correct status badges on scenarios', async ({ page }) => {
+    // All scenarios should be "Ready" now
     const badges = page.locator('.badge');
-    await expect(badges).toHaveCount(5);
+    const badgeCount = await badges.count();
+    expect(badgeCount).toBeGreaterThan(0);
 
-    for (let i = 0; i < 5; i++) {
-      await expect(badges.nth(i)).toContainText('Coming Soon');
-    }
+    // Check specific scenarios are ready
+    const multiPageBadge = page.locator('[data-testid="multi-page-scenario"] .badge');
+    await expect(multiPageBadge).toContainText('Ready');
   });
 
   test('should have proper styling for scenario cards', async ({ page }) => {
-    const firstCard = page.locator('[data-testid="single-page-scenario"]');
+    const multiPageCard = page.locator('[data-testid="multi-page-scenario"]');
 
     // Check card is visible and has expected styling
-    await expect(firstCard).toBeVisible();
-    await expect(firstCard).toHaveClass(/scenario-card/);
-    await expect(firstCard).toHaveClass(/coming-soon/);
+    await expect(multiPageCard).toBeVisible();
+    await expect(multiPageCard).toHaveClass(/scenario-card/);
 
-    // Check card has reduced opacity for coming soon state
-    const opacity = await firstCard.evaluate((el) => window.getComputedStyle(el).opacity);
-    expect(parseFloat(opacity)).toBeLessThan(1);
+    // Multi-page card should be clickable and ready
+    const multiPageLink = multiPageCard.locator('a');
+    await expect(multiPageLink).toHaveAttribute('href', '/multi-page');
   });
 
   test('should display scenario descriptions', async ({ page }) => {
@@ -58,6 +59,18 @@ test.describe('Material Demo App - Scenario List', () => {
     await expect(singlePageCard.locator('h3')).toContainText('Single Page Form');
     await expect(singlePageCard.locator('p')).toContainText('Test comprehensive single-page forms');
     await expect(singlePageCard.locator('li').first()).toContainText('All Material field types');
+  });
+
+  test('should navigate to multi-page scenario successfully', async ({ page }) => {
+    // Click on multi-page scenario
+    await page.locator('[data-testid="multi-page-scenario"] a').click();
+
+    // Should navigate to multi-page route
+    await expect(page).toHaveURL('/multi-page');
+
+    // Should display multi-page demo content
+    await expect(page.locator('h1')).toContainText('Multi-Page Form Demo');
+    await expect(page.locator('dynamic-form')).toBeVisible();
   });
 
   test('should have accessible content structure', async ({ page }) => {

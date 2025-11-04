@@ -35,7 +35,7 @@ export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
     bindings.push(inputBinding('props', () => props));
   }
 
-  const validationKeys = new Set(['required', 'email', 'min', 'max', 'minLength', 'maxLength', 'patternRule', 'validators']);
+  const validationKeys = new Set(['required', 'email', 'min', 'max', 'minLength', 'maxLength', 'pattern', 'validators', 'logic']);
 
   const excludedKeys = new Set([
     'col',

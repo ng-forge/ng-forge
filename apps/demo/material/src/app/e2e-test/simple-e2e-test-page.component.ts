@@ -18,7 +18,7 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
       <div class="e2e-test-container" [attr.data-testid]="currentTestId()">
         @if (currentTitle()) {
         <div class="form-header">
-          <h2 [attr.data-testid]="currentTitle() + '-title'">{{ currentTitle() }}</h2>
+          <h2 [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
           @if (currentDescription()) {
           <p class="description">{{ currentDescription() }}</p>
           }
@@ -29,6 +29,7 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
           [config]="currentConfig()!"
           [(value)]="formValue"
           (submitted)="onSubmitted($event)"
+          (initialized)="onFormInitialized()"
           [attr.data-testid]="'dynamic-form-' + currentTestId()"
         >
         </dynamic-form>
@@ -182,6 +183,7 @@ export class SimpleE2ETestPageComponent {
 
   formValue = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);
+  formInitialized = signal<boolean>(false);
 
   constructor() {
     this.setupScenarioLoader();
@@ -209,6 +211,22 @@ export class SimpleE2ETestPageComponent {
     );
   }
 
+  onFormInitialized(): void {
+    this.formInitialized.set(true);
+
+    console.log('Form initialization complete');
+
+    // Emit custom event for e2e test detection
+    window.dispatchEvent(
+      new CustomEvent('formInitialized', {
+        detail: {
+          testId: this.currentTestId(),
+          timestamp: new Date().toISOString(),
+        },
+      })
+    );
+  }
+
   loadBasicScenario(): void {
     const basicConfig: FormConfig = {
       fields: [
@@ -218,6 +236,7 @@ export class SimpleE2ETestPageComponent {
           label: 'First Name',
           props: {
             placeholder: 'Enter your first name',
+            'data-testid': 'firstName',
           },
           required: true,
           col: 6,
@@ -228,6 +247,7 @@ export class SimpleE2ETestPageComponent {
           label: 'Last Name',
           props: {
             placeholder: 'Enter your last name',
+            'data-testid': 'lastName',
           },
           required: true,
           col: 6,
@@ -239,9 +259,25 @@ export class SimpleE2ETestPageComponent {
           props: {
             type: 'email',
             placeholder: 'Enter your email',
+            'data-testid': 'email',
           },
           required: true,
           email: true,
+        },
+        {
+          key: 'priority',
+          type: 'radio',
+          label: 'Priority Level',
+          options: [
+            { value: 'low', label: 'Low Priority' },
+            { value: 'medium', label: 'Medium Priority' },
+            { value: 'high', label: 'High Priority' },
+          ],
+          props: {
+            'data-testid': 'priority',
+            hint: 'Select task priority',
+          },
+          required: true,
         },
         {
           key: 'submit',
@@ -249,6 +285,7 @@ export class SimpleE2ETestPageComponent {
           label: 'Submit',
           props: {
             type: 'submit',
+            'data-testid': 'submit',
           },
         },
       ],
@@ -258,6 +295,7 @@ export class SimpleE2ETestPageComponent {
     this.currentTestId.set('basic-test');
     this.currentTitle.set('Basic Test Scenario');
     this.currentDescription.set('Simple form for e2e testing');
+    this.formInitialized.set(false);
   }
 
   private setupScenarioLoader(): void {
@@ -274,6 +312,7 @@ export class SimpleE2ETestPageComponent {
       this.currentTestId.set(options?.testId || 'default');
       this.currentTitle.set(options?.title || '');
       this.currentDescription.set(options?.description || '');
+      this.formInitialized.set(false);
     };
 
     // Helper function to clear current scenario
@@ -284,6 +323,7 @@ export class SimpleE2ETestPageComponent {
       this.currentDescription.set('');
       this.formValue.set({});
       this.submissionLog.set([]);
+      this.formInitialized.set(false);
     };
   }
 }

@@ -1,6 +1,6 @@
 # Test Configuration Patterns Reference
 
-This document catalogs configuration patterns discovered from unit tests for use in e2e test configuration factories.
+This document catalogs configuration patterns for e2e testing of the dynamic form system. Use this as a reference when creating new test scenarios.
 
 ## Field Type Configurations
 
@@ -500,32 +500,45 @@ const formConfig: FormConfig = {
 }
 ```
 
-## Testing Utilities Available
+## E2E Testing Utilities Available
 
-### FormConfigBuilder Methods
+### Test Scenario Access
 
-- `inputField(key, props?)` - Basic input field
-- `requiredInputField(key, props?)` - Required input field
-- `selectField(key, options, props?)` - Select dropdown
-- `checkboxField(key, props?)` - Checkbox field
-- `rowField(key, fields)` - Row layout container
-- `groupField(key, fields)` - Group layout container
-- `buttonField(key, props?)` - Button field
-- `pageField(key, fields, title?)` - Page container
+Get scenarios from the `scenarios` folder:
 
-### Test Interaction Methods
+```typescript
+import { getScenario, getScenariosByCategory, getAllScenarioNames, userProfileConfig, contactFormConfig } from './scenarios';
 
-- `simulateInput(fixture, selector, value)` - Simulate text input
-- `simulateCheckbox(fixture, selector, checked)` - Toggle checkbox
-- `simulateSelect(fixture, selector, value)` - Select option
-- `simulateButtonClick(fixture, selector)` - Click button
-- `simulateBlur(fixture, selector)` - Trigger blur event
+// Get a specific scenario using helper function
+const userProfile = getScenario('userProfile');
 
-### Assertion Methods
+// Or import and use directly (better type safety)
+import { userProfileConfig } from './scenarios/user-profile';
+console.log(userProfileConfig); // Typed as FormConfig
 
-- `assertFormValue(component, expectedValue)` - Check form value
-- `assertFieldValue(fixture, selector, expectedValue)` - Check field value
-- `isFormValid(component)` - Check form validity
+// Get all scenarios in a category
+const basicForms = getScenariosByCategory('BASIC_FORMS');
+
+// Get all available scenario names
+const allScenarios = getAllScenarioNames();
+```
+
+### E2E Form Helper Methods
+
+From `e2e-form-helpers.ts`:
+
+- `fillInput(key, value)` - Fill input field
+- `selectOption(key, value)` - Select dropdown option
+- `toggleCheckbox(key, checked)` - Toggle checkbox
+- `clickButton(key)` - Click button
+- `getFieldErrors(key)` - Get field validation errors
+- `isFormValid()` - Check form validity
+- `getFormValue()` - Get current form value
+
+### Cross-Field Validation Methods
+
+- `validatePasswordMatch(passwordField, confirmField)` - Test password confirmation
+- `validateConditionalField(dependentField, triggerField, triggerValue)` - Test conditional visibility
 
 ## Key Patterns for E2E Configuration
 

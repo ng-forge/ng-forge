@@ -5,7 +5,8 @@
  * Based on existing unit test patterns from DynamicFormTestUtils and demo components.
  */
 
-export { E2EFormConfigFactory, type E2EFormConfig } from './e2e-form-config-factory';
+// Export scenario configurations
+export * from './scenarios';
 
 export { E2EFormHelpers, E2EPaginationHelpers, E2ECrossFieldValidationHelpers, E2ETranslationHelpers } from './e2e-form-helpers';
 

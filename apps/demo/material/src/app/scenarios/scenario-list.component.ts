@@ -21,8 +21,8 @@ import { RouterModule } from '@angular/router';
           </ul>
         </a>
 
-        <div class="scenario-card coming-soon" data-testid="multi-page-scenario">
-          <h3>Multi-Page Form <span class="badge">Coming Soon</span></h3>
+        <a class="scenario-card" routerLink="/multi-page" data-testid="multi-page-scenario">
+          <h3>Multi-Page Form <span class="badge ready">Ready</span></h3>
           <p>Test paginated forms with navigation and state persistence.</p>
           <ul>
             <li>Page navigation</li>
@@ -30,10 +30,10 @@ import { RouterModule } from '@angular/router';
             <li>Cross-page validation</li>
             <li>Progress indicators</li>
           </ul>
-        </div>
+        </a>
 
-        <div class="scenario-card coming-soon" data-testid="cross-field-validation-scenario">
-          <h3>Cross-Field Validation <span class="badge">Coming Soon</span></h3>
+        <a class="scenario-card" routerLink="/cross-field-validation" data-testid="cross-field-validation-scenario">
+          <h3>Cross-Field Validation <span class="badge ready">Ready</span></h3>
           <p>Test complex validation scenarios with field dependencies.</p>
           <ul>
             <li>Conditional field display</li>
@@ -41,10 +41,10 @@ import { RouterModule } from '@angular/router';
             <li>Dynamic field updates</li>
             <li>Error state management</li>
           </ul>
-        </div>
+        </a>
 
-        <div class="scenario-card coming-soon" data-testid="user-registration-scenario">
-          <h3>User Registration Flow <span class="badge">Coming Soon</span></h3>
+        <a class="scenario-card" routerLink="/user-registration" data-testid="user-registration-scenario">
+          <h3>User Registration Flow <span class="badge ready">Ready</span></h3>
           <p>Test complete user registration with realistic data requirements.</p>
           <ul>
             <li>Personal information</li>
@@ -52,10 +52,10 @@ import { RouterModule } from '@angular/router';
             <li>Terms & conditions</li>
             <li>Confirmation flow</li>
           </ul>
-        </div>
+        </a>
 
-        <div class="scenario-card coming-soon" data-testid="profile-management-scenario">
-          <h3>Profile Management <span class="badge">Coming Soon</span></h3>
+        <a class="scenario-card" routerLink="/profile-management" data-testid="profile-management-scenario">
+          <h3>Profile Management <span class="badge ready">Ready</span></h3>
           <p>Test profile editing with pre-populated data and updates.</p>
           <ul>
             <li>Pre-filled forms</li>
@@ -63,7 +63,7 @@ import { RouterModule } from '@angular/router';
             <li>Data persistence</li>
             <li>Change notifications</li>
           </ul>
-        </div>
+        </a>
       </div>
     </div>
   `,

@@ -18,20 +18,23 @@ export const appRoutes: Route[] = [
     path: 'e2e-test',
     loadComponent: () => import('./e2e-test/simple-e2e-test-page.component').then((m) => m.SimpleE2ETestPageComponent),
   },
-  // {
-  //   path: 'multi-page',
-  //   loadComponent: () => import('./scenarios/multi-page/multi-page-form.component').then(m => m.MultiPageFormComponent),
-  // },
-  // {
-  //   path: 'cross-field-validation',
-  //   loadComponent: () => import('./scenarios/cross-field-validation/cross-field-validation.component').then(m => m.CrossFieldValidationComponent),
-  // },
-  // {
-  //   path: 'user-registration',
-  //   loadComponent: () => import('./scenarios/user-registration/user-registration.component').then(m => m.UserRegistrationComponent),
-  // },
-  // {
-  //   path: 'profile-management',
-  //   loadComponent: () => import('./scenarios/profile-management/profile-management.component').then(m => m.ProfileManagementComponent),
-  // },
+  {
+    path: 'multi-page',
+    loadComponent: () => import('./scenarios/multi-page/multi-page-demo.component').then((m) => m.MultiPageDemoComponent),
+  },
+  {
+    path: 'cross-field-validation',
+    loadComponent: () =>
+      import('./scenarios/cross-field-validation/cross-field-validation-demo.component').then((m) => m.CrossFieldValidationDemoComponent),
+  },
+  {
+    path: 'user-registration',
+    loadComponent: () =>
+      import('./scenarios/user-registration/user-registration-demo.component').then((m) => m.UserRegistrationDemoComponent),
+  },
+  {
+    path: 'profile-management',
+    loadComponent: () =>
+      import('./scenarios/profile-management/profile-management-demo.component').then((m) => m.ProfileManagementDemoComponent),
+  },
 ];

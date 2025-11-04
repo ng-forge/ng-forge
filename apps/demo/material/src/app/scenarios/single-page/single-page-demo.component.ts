@@ -168,14 +168,12 @@ export default class SinglePageDemoComponent {
         key: 'gender',
         type: 'radio',
         label: this.translationService.translate('form.labels.gender'),
-        props: {
-          options: [
-            { value: 'male', label: 'Male' },
-            { value: 'female', label: 'Female' },
-            { value: 'other', label: 'Other' },
-            { value: 'prefer-not-to-say', label: 'Prefer not to say' },
-          ],
-        },
+        options: [
+          { value: 'male', label: 'Male' },
+          { value: 'female', label: 'Female' },
+          { value: 'other', label: 'Other' },
+          { value: 'prefer-not-to-say', label: 'Prefer not to say' },
+        ],
       },
 
       // Account Details Section
@@ -239,16 +237,16 @@ export default class SinglePageDemoComponent {
         label: this.translationService.translate('form.labels.country'),
         props: {
           placeholder: this.translationService.translate('form.placeholders.selectCountry'),
-          options: [
-            { value: 'us', label: 'United States' },
-            { value: 'ca', label: 'Canada' },
-            { value: 'uk', label: 'United Kingdom' },
-            { value: 'de', label: 'Germany' },
-            { value: 'fr', label: 'France' },
-            { value: 'au', label: 'Australia' },
-            { value: 'jp', label: 'Japan' },
-          ],
         },
+        options: [
+          { value: 'us', label: 'United States' },
+          { value: 'ca', label: 'Canada' },
+          { value: 'uk', label: 'United Kingdom' },
+          { value: 'de', label: 'Germany' },
+          { value: 'fr', label: 'France' },
+          { value: 'au', label: 'Australia' },
+          { value: 'jp', label: 'Japan' },
+        ],
       },
 
       // City and postal code row
@@ -312,16 +310,14 @@ export default class SinglePageDemoComponent {
         key: 'interests',
         type: 'multi-checkbox',
         label: 'Areas of Interest',
-        props: {
-          options: [
-            { value: 'technology', label: 'Technology' },
-            { value: 'sports', label: 'Sports' },
-            { value: 'music', label: 'Music' },
-            { value: 'travel', label: 'Travel' },
-            { value: 'food', label: 'Food & Cooking' },
-            { value: 'books', label: 'Books & Literature' },
-          ],
-        },
+        options: [
+          { value: 'technology', label: 'Technology' },
+          { value: 'sports', label: 'Sports' },
+          { value: 'music', label: 'Music' },
+          { value: 'travel', label: 'Travel' },
+          { value: 'food', label: 'Food & Cooking' },
+          { value: 'books', label: 'Books & Literature' },
+        ],
       },
 
       // Communication frequency slider
@@ -334,7 +330,6 @@ export default class SinglePageDemoComponent {
           max: 10,
           step: 1,
           tickInterval: 1,
-          displayWith: (value: number) => (value === 0 ? 'Never' : value === 10 ? 'Daily' : `${value}x`),
         },
         defaultValue: 2,
       },

@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { E2ETestHostComponent } from '../../../e2e/src/utils/e2e-test-host.component';
 import { FormConfig } from '@ng-forge/dynamic-form';
+import * as testScenarios from '../../../e2e/src/utils/scenarios';
 
 /**
  * E2E Test Page Component
@@ -157,15 +158,13 @@ export class E2ETestPageComponent {
 
   private setupWindowTestUtils(): void {
     // Import test utilities and expose them globally
-    import('../../../e2e/src/utils/test-scenarios').then((testScenarios) => {
-      (window as any).testUtils = {
-        getScenario: testScenarios.getScenario,
-        getScenariosByCategory: testScenarios.getScenariosByCategory,
-        getAllScenarioNames: testScenarios.getAllScenarioNames,
-        QUICK_SCENARIOS: testScenarios.QUICK_SCENARIOS,
-        TEST_CATEGORIES: testScenarios.TEST_CATEGORIES,
-      };
-    });
+    (window as any).testUtils = {
+      getScenario: testScenarios.getScenario,
+      getScenariosByCategory: testScenarios.getScenariosByCategory,
+      getAllScenarioNames: testScenarios.getAllScenarioNames,
+      QUICK_SCENARIOS: testScenarios.QUICK_SCENARIOS,
+      TEST_CATEGORIES: testScenarios.TEST_CATEGORIES,
+    };
   }
 
   private setupScenarioLoader(): void {
@@ -197,18 +196,16 @@ export class E2ETestPageComponent {
 
     // Helper function to load scenario by name
     (window as any).loadScenarioByName = (scenarioName: string) => {
-      import('../../../e2e/src/utils/test-scenarios').then((testScenarios) => {
-        try {
-          const config = testScenarios.getScenario(scenarioName as any);
-          (window as any).loadTestScenario(config, {
-            testId: scenarioName,
-            title: `Test Scenario: ${scenarioName}`,
-            description: `Automated test scenario for ${scenarioName}`,
-          });
-        } catch (error) {
-          console.error(`Failed to load scenario: ${scenarioName}`, error);
-        }
-      });
+      try {
+        const config = testScenarios.getScenario(scenarioName as any);
+        (window as any).loadTestScenario(config, {
+          testId: scenarioName,
+          title: `Test Scenario: ${scenarioName}`,
+          description: `Automated test scenario for ${scenarioName}`,
+        });
+      } catch (error) {
+        console.error(`Failed to load scenario: ${scenarioName}`, error);
+      }
     };
   }
 }
