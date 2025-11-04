@@ -26,7 +26,7 @@ import { AsyncPipe } from '@angular/common';
     AsyncPipe,
   ],
   host: {
-    id: 'key()',
+    '[id]': '`${key()}`',
   },
   template: `
     @let f = field();

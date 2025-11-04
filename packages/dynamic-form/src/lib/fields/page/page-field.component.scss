@@ -1,12 +1,6 @@
 @use '../../styles/grid-system.scss';
 
-// Page-specific styling
-// The core grid system is handled by df-page class in grid-system.scss
-
 :host {
-  // Page-specific customizations can be added here
-  // The df-page class handles the basic layout
-
   // Allow custom spacing for pages
   &.df-page-spacing-custom {
     --df-grid-row-gap: var(--page-custom-spacing, 1.5rem);

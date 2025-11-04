@@ -10,8 +10,8 @@
 .df-form {
   /* Grid Configuration */
   --df-grid-columns: 12;
-  --df-grid-gap: 1rem;
-  --df-grid-row-gap: 1.5rem;
+  --df-grid-gap: 0.5rem;
+  --df-grid-row-gap: 0.5rem;
 
   /* Responsive Breakpoints */
   --df-breakpoint-sm: 576px;
@@ -20,16 +20,16 @@
   --df-breakpoint-xl: 1200px;
 
   /* Responsive Gap Adjustments */
-  --df-grid-gap-sm: 0.75rem;
-  --df-grid-gap-md: 1rem;
-  --df-grid-gap-lg: 1.25rem;
-  --df-grid-gap-xl: 1.5rem;
+  --df-grid-gap-sm: 0.5rem;
+  --df-grid-gap-md: 0.5rem;
+  --df-grid-gap-lg: 0.5rem;
+  --df-grid-gap-xl: 0.5rem;
 
   /* Responsive Row Gap Adjustments */
-  --df-grid-row-gap-sm: 1rem;
-  --df-grid-row-gap-md: 1.25rem;
-  --df-grid-row-gap-lg: 1.5rem;
-  --df-grid-row-gap-xl: 1.75rem;
+  --df-grid-row-gap-sm: 0.5rem;
+  --df-grid-row-gap-md: 0.5rem;
+  --df-grid-row-gap-lg: 0.5rem;
+  --df-grid-row-gap-xl: 0.5rem;
 }
 
 /* Base Form Grid Container */

@@ -11,7 +11,7 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-mat-button',
   imports: [MatButton, DynamicTextPipe, AsyncPipe],
   host: {
-    id: 'key()',
+    '[id]': '`${key()}`',
   },
   template: `
     <button

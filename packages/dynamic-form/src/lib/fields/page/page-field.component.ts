@@ -43,7 +43,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
     '[class.df-page-visible]': 'isVisible()',
     '[class.df-page-hidden]': '!isVisible()',
     '[attr.data-page-index]': 'pageIndex()',
-    id: 'key()',
+    '[id]': '`${key()}`',
   },
   imports: [FieldRendererDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,

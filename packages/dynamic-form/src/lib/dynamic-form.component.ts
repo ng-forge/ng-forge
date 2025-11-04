@@ -103,8 +103,8 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
         </div>
       </page-orchestrator>
       } @else {
-      <!-- Non-paged form: Render fields directly -->
-      <div [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+      <!-- Non-paged form: Render fields directly with grid system -->
+      <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
         <!-- Fields will be automatically rendered by the fieldRenderer directive -->
       </div>
       }
@@ -394,6 +394,22 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
    * Uses the external utility function to track initialization count.
    */
   readonly initialized$ = this.createInitializedObservable();
+
+  /**
+   * Emitted when all form components are initialized and ready for interaction.
+   *
+   * This includes the dynamic form itself, all pages, rows, groups, and field components.
+   * Useful for e2e testing to ensure the form is fully rendered before interaction.
+   *
+   * @example
+   * ```typescript
+   * handleFormInitialized() {
+   *   console.log('Form is fully initialized and ready for interaction');
+   *   // Safe to programmatically interact with form elements
+   * }
+   * ```
+   */
+  readonly initialized = outputFromObservable(this.initialized$);
 
   fields$ = toObservable(computed(() => this.formSetup().fields));
 

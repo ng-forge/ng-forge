@@ -29,7 +29,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
   host: {
     class: 'df-field df-row',
     '[class.disabled]': 'disabled()',
-    id: 'key()',
+    '[id]': '`${key()}`',
   },
   hostDirectives: [
     {

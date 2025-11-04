@@ -25,14 +25,4 @@
       --df-grid-columns: 2;
     }
   }
-
-  // Legacy class support for backward compatibility
-  &.lib-row-field {
-    // Apply the same styles as df-row
-    display: grid;
-    grid-template-columns: repeat(var(--df-grid-columns, 12), 1fr);
-    gap: var(--df-grid-gap, 1rem);
-    align-items: start;
-    width: 100%;
-  }
 }

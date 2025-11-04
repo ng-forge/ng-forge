@@ -38,7 +38,7 @@ import { flattenFields } from '../../utils';
   styleUrl: './group-field.component.scss',
   host: {
     class: 'df-field df-group',
-    id: 'key()',
+    '[id]': '`${key()}`',
   },
   providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,

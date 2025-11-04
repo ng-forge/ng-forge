@@ -43,7 +43,7 @@ import { AsyncPipe } from '@angular/common';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    id: 'key()',
+    '[id]': '`${key()}`',
   },
 })
 export default class MatInputFieldComponent implements MatInputComponent {

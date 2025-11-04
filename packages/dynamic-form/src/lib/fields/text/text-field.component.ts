@@ -45,7 +45,7 @@ import { DynamicText } from '../../models';
   imports: [AsyncPipe, DynamicTextPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    id: 'key()',
+    '[id]': '`${key()}`',
   },
 })
 export default class TextFieldComponent {
