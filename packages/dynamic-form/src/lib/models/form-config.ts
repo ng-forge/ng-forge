@@ -53,7 +53,7 @@ export interface FormConfig<
    * ]
    * ```
    */
-  readonly fields: TFields;
+  fields: TFields;
 
   /**
    * Optional form-level validation schema.

@@ -42,6 +42,7 @@ describe('GroupFieldComponent', () => {
       form: testForm,
     };
 
+    fixture.componentRef.setInput('key', 'key');
     fixture.componentRef.setInput('field', field);
     fixture.componentRef.setInput('parentForm', testForm);
     fixture.componentRef.setInput('parentFieldSignalContext', mockFieldSignalContext);

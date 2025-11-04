@@ -12,16 +12,16 @@ import { isArray } from 'lodash-es';
  */
 export interface PageField<TFields extends readonly any[] = readonly any[]> extends FieldDef<never> {
   /** Field type identifier */
-  readonly type: 'page';
+  type: 'page';
 
   /** Child field definitions to render within this page */
-  readonly fields: TFields;
+  fields: TFields;
 
   /** Page title (optional) */
-  readonly title?: string;
+  title?: string;
 
   /** Page description (optional) */
-  readonly description?: string;
+  description?: string;
 }
 
 /** Type guard for PageField */

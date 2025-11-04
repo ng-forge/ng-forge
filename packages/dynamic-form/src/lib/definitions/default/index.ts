@@ -8,7 +8,7 @@ export type { MultiCheckboxField } from './multi-checkbox-field';
 export type { DatepickerField } from './datepicker-field';
 export type { SliderField } from './slider-field';
 export type { ToggleField } from './toggle-field';
-export type { RowField } from './row-field';
+export { type RowField, isRowField } from './row-field';
 export type { GroupField } from './group-field';
 export type { PageField } from './page-field';
 export type { TextField, TextElementType, TextProps, TextFieldStyle } from './text-field';

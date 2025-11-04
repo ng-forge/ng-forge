@@ -5,10 +5,11 @@ import { TextProps } from '../../definitions/default/text-field';
 import { DynamicTextPipe } from '../../pipes';
 
 @Component({
-  template: ` <df-text [label]="content()" [className]="className()" [tabIndex]="tabIndex()" [props]="props()" /> `,
+  template: ` <df-text [key]="key()" [label]="content()" [className]="className()" [tabIndex]="tabIndex()" [props]="props()" /> `,
   imports: [TextFieldComponent],
 })
 class TestHostComponent {
+  key = signal('test');
   content = signal('Test content');
   className = signal('test-class');
   tabIndex = signal(1);

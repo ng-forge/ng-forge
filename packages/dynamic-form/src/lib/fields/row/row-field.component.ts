@@ -18,26 +18,23 @@ import { FieldRendererDirective } from '../../directives/dynamic-form.directive'
 import { FormUiControl } from '@angular/forms/signals';
 import { FieldSignalContext } from '../../mappers/types';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
-import { explicitEffect } from 'ngxtension/explicit-effect';
 import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 
 @Component({
   selector: 'row-field',
-  template: '',
+  template: `
+    <div class="df-row" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+      <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+    </div>
+  `,
   styleUrl: './row-field.component.scss',
   host: {
     class: 'df-field df-row',
     '[class.disabled]': 'disabled()',
     '[id]': '`${key()}`',
   },
-  hostDirectives: [
-    {
-      directive: FieldRendererDirective,
-      inputs: ['fieldRenderer'],
-      outputs: ['fieldsInitialized'],
-    },
-  ],
+  imports: [FieldRendererDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class RowFieldComponent {
@@ -55,9 +52,6 @@ export default class RowFieldComponent {
   fieldSignalContext = input.required<FieldSignalContext<any>>();
 
   readonly disabled = computed(() => this.field().disabled || false);
-
-  // Connect to the host directive
-  fieldRenderer = model<ComponentRef<FormUiControl>[] | null>(null);
 
   // Row fields are just layout containers - they pass through child fields directly
   fields$ = toObservable(
@@ -80,11 +74,6 @@ export default class RowFieldComponent {
     ),
     { initialValue: [] }
   );
-
-  // Connect fields to fieldRenderer for host directive
-  private readonly connectFieldsEffect = explicitEffect([this.fields], ([fields]) => {
-    this.fieldRenderer.set(fields);
-  });
 
   private mapFields(fields: readonly any[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields

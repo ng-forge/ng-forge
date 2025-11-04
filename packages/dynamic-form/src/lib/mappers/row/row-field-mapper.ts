@@ -9,6 +9,8 @@ import { FieldMapperOptions } from '../types';
 export function rowFieldMapper(fieldDef: RowField<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
   const bindings: Binding[] = [];
 
+  bindings.push(inputBinding('key', () => fieldDef.key));
+
   // Row fields need the field definition
   bindings.push(inputBinding('field', () => fieldDef));
 

@@ -19,8 +19,11 @@
 }
 
 .df-page {
+  display: grid;
+  grid-template-columns: 1fr;
   width: 100%;
   transition: opacity 0.2s ease-in-out;
+  gap: var(--df-grid-row-gap);
 
   &.df-page-visible {
     opacity: 1;

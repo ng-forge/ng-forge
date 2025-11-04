@@ -13,9 +13,7 @@ import { FieldMapperOptions } from '../types';
 export function pageFieldMapper(fieldDef: PageField<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
   const bindings: Binding[] = [];
 
-  if (fieldDef.key !== undefined) {
-    bindings.push(inputBinding('key', () => fieldDef.key));
-  }
+  bindings.push(inputBinding('key', () => fieldDef.key));
 
   // Bind the field definition
   bindings.push(inputBinding('field', () => fieldDef));
