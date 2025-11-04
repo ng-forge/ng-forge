@@ -15,7 +15,7 @@ interface UserFormModel {
 }
 
 @Component({
-  selector: 'docs-quick-start-demo',
+  selector: 'app-quick-start-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="demo-container">

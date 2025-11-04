@@ -5,7 +5,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
  * Wraps Ionic-based examples to prevent style pollution.
  */
 @Component({
-  selector: 'docs-ionic-container',
+  selector: 'app-ionic-container',
   template: `<div class="ionic-integration"><ng-content /></div>`,
   styles: [
     `

@@ -5,7 +5,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
  * Wraps Bootstrap-based examples to prevent style pollution.
  */
 @Component({
-  selector: 'docs-bootstrap-container',
+  selector: 'app-bootstrap-container',
   template: `<div class="bootstrap-integration"><ng-content /></div>`,
   styles: [
     `

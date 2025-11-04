@@ -5,7 +5,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
  * Wraps PrimeNG-based examples to prevent style pollution.
  */
 @Component({
-  selector: 'docs-primeng-container',
+  selector: 'app-primeng-container',
   template: `<div class="primeng-integration"><ng-content /></div>`,
   styles: [
     `

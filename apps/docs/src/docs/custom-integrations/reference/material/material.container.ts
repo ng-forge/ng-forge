@@ -5,7 +5,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
  * Wraps Material-based examples to prevent style pollution.
  */
 @Component({
-  selector: 'docs-material-container',
+  selector: 'app-material-container',
   template: `<div class="material-integration"><ng-content /></div>`,
   styles: [
     `

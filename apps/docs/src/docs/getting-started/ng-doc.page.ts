@@ -8,7 +8,7 @@ const GettingStartedPage: NgDocPage = {
   playgrounds: {
     DemoFormPlayground: {
       target: QuickStartDemoComponent,
-      template: `<docs-quick-start-demo />`,
+      template: `<app-quick-start-demo />`,
     },
   },
 };
