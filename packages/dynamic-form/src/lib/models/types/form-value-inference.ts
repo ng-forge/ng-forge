@@ -3,6 +3,10 @@ import { RegisteredFieldTypes } from '../registry/field-registry';
 /**
  * Helper type to convert union to intersection
  * Used to merge multiple field value objects into a single object type
+ *
+ * Note: The `any` in `U extends any` is intentional and necessary for distributive conditional types.
+ * This is a TypeScript pattern where `any` is required to distribute the conditional type over union members.
+ * @see https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
  */
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 

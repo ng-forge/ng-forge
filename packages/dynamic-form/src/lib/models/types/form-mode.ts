@@ -6,6 +6,24 @@ import { RegisteredFieldTypes } from '../registry';
 export { isPageField };
 
 /**
+ * Helper interface for container fields with fields property
+ */
+interface ContainerFieldWithFields extends FieldDef<Record<string, unknown>> {
+  fields: readonly FieldDef<Record<string, unknown>>[];
+}
+
+/**
+ * Type guard to check if a field is a container with fields
+ */
+function isContainerWithFields(field: FieldDef<Record<string, unknown>>): field is ContainerFieldWithFields {
+  return (
+    (field.type === 'row' || field.type === 'group' || field.type === 'page') &&
+    'fields' in field &&
+    Array.isArray((field as ContainerFieldWithFields).fields)
+  );
+}
+
+/**
  * Form mode enumeration distinguishing between paged and non-paged forms
  */
 export type FormMode = 'paged' | 'non-paged';
@@ -112,12 +130,9 @@ function hasAnyPageFields(fields: readonly FieldDef<Record<string, unknown>>[]):
     }
 
     // Check nested fields in container types
-    if (field.type === 'row' || field.type === 'group') {
-      const containerField = field as any;
-      if (containerField.fields && Array.isArray(containerField.fields)) {
-        if (hasAnyPageFields(containerField.fields)) {
-          return true;
-        }
+    if (isContainerWithFields(field) && (field.type === 'row' || field.type === 'group')) {
+      if (hasAnyPageFields(field.fields)) {
+        return true;
       }
     }
   }
@@ -133,22 +148,16 @@ function hasAnyPageFields(fields: readonly FieldDef<Record<string, unknown>>[]):
 function hasNestedPageFields(fields: readonly FieldDef<Record<string, unknown>>[]): boolean {
   for (const field of fields) {
     // If this is a page field, check if its children contain pages
-    if (isPageField(field)) {
-      const pageField = field as any;
-      if (pageField.fields && Array.isArray(pageField.fields)) {
-        if (hasAnyPageFields(pageField.fields)) {
-          return true;
-        }
+    if (isPageField(field) && isContainerWithFields(field)) {
+      if (hasAnyPageFields(field.fields)) {
+        return true;
       }
     }
 
     // Check other container types for nested pages
-    if (field.type === 'row' || field.type === 'group') {
-      const containerField = field as any;
-      if (containerField.fields && Array.isArray(containerField.fields)) {
-        if (hasNestedPageFields(containerField.fields)) {
-          return true;
-        }
+    if (isContainerWithFields(field) && (field.type === 'row' || field.type === 'group')) {
+      if (hasNestedPageFields(field.fields)) {
+        return true;
       }
     }
   }

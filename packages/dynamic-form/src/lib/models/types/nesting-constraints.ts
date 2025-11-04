@@ -26,17 +26,17 @@ export type GroupAllowedChildren = Exclude<RegisteredFieldTypes, { type: 'page' 
 /**
  * Validates that a fields array contains only allowed child types for a Page
  */
-export type ValidatePageChildren<TFields extends readonly any[]> = TFields extends readonly PageAllowedChildren[] ? TFields : never;
+export type ValidatePageChildren<TFields extends readonly unknown[]> = TFields extends readonly PageAllowedChildren[] ? TFields : never;
 
 /**
  * Validates that a fields array contains only allowed child types for a Row
  */
-export type ValidateRowChildren<TFields extends readonly any[]> = TFields extends readonly RowAllowedChildren[] ? TFields : never;
+export type ValidateRowChildren<TFields extends readonly unknown[]> = TFields extends readonly RowAllowedChildren[] ? TFields : never;
 
 /**
  * Validates that a fields array contains only allowed child types for a Group
  */
-export type ValidateGroupChildren<TFields extends readonly any[]> = TFields extends readonly GroupAllowedChildren[] ? TFields : never;
+export type ValidateGroupChildren<TFields extends readonly unknown[]> = TFields extends readonly GroupAllowedChildren[] ? TFields : never;
 
 /**
  * Type guard to check if a field is a container field at type level
@@ -50,10 +50,12 @@ export type IsLeafField<T> = T extends { type: 'page' | 'row' | 'group' } ? fals
 
 /**
  * Extract all fields that have a value property (value-bearing fields)
+ * Note: Using `unknown` in the Extract condition to match any value type
  */
-export type ValueBearingFields = Extract<RegisteredFieldTypes, { value: any }>;
+export type ValueBearingFields = Extract<RegisteredFieldTypes, { value: unknown }>;
 
 /**
  * Extract all fields that don't have a value property (layout/display fields)
+ * Note: Using `unknown` in the Exclude condition to match any value type
  */
-export type NonValueBearingFields = Exclude<RegisteredFieldTypes, { value: any }>;
+export type NonValueBearingFields = Exclude<RegisteredFieldTypes, { value: unknown }>;

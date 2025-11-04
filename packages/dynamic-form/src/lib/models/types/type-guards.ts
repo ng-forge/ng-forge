@@ -23,8 +23,9 @@ export function isLeafField(field: RegisteredFieldTypes): field is LeafFieldType
 /**
  * Type guard to check if a field has a value property (value-bearing field)
  * These fields contribute to the form value output
+ * Note: Using `unknown` in the Extract condition to match any value type
  */
-export function isValueBearingField(field: RegisteredFieldTypes): field is Extract<RegisteredFieldTypes, { value: any }> {
+export function isValueBearingField(field: RegisteredFieldTypes): field is Extract<RegisteredFieldTypes, { value: unknown }> {
   return 'value' in field;
 }
 

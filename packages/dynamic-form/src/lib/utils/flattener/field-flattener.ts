@@ -88,13 +88,15 @@ export function flattenFields(
       // Flatten children to current level
       if (field.fields) {
         // Handle both array (page/row fields) and object (group fields)
+        // Type assertion: fields can be unknown[] from container field generics, but we know they're FieldDef[]
         const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-        const flattenedChildren = flattenFields(fieldsArray, registry);
+        const flattenedChildren = flattenFields(fieldsArray as readonly FieldDef<Record<string, unknown>>[], registry);
         result.push(...flattenedChildren);
       }
     } else if (isGroupField(field)) {
       // Groups always maintain their structure (even if they have 'include' handling)
-      const childFieldsArray = Object.values(field.fields);
+      // Type assertion: After isGroupField guard, we know fields contains FieldDef instances
+      const childFieldsArray = Object.values(field.fields) as FieldDef<Record<string, unknown>>[];
       const flattenedChildren = flattenFields(childFieldsArray, registry);
 
       // Add only the group field with its flattened children, not the children separately

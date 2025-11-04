@@ -23,7 +23,7 @@ export function isRowField(field: FieldDef<Record<string, unknown>>): field is R
   return field.type === 'row' && 'fields' in field && isArray((field as RowField).fields);
 }
 
-export type RowComponent = FieldComponent<RowField<readonly any[]>>;
+export type RowComponent = FieldComponent<RowField<readonly unknown[]>>;
 
 /**
  * Row child field with column layout properties

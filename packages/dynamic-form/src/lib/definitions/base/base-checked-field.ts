@@ -31,4 +31,4 @@ type ExcludedKeys =
   | 'col'
   | keyof FieldWithValidation;
 
-export type CheckedFieldComponent<T extends BaseCheckedField<any>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;
+export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown>>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

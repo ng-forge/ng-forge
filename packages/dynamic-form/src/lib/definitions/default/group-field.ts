@@ -7,7 +7,7 @@ import { FieldComponent, FieldDef } from '../base';
  *
  * The generic parameter preserves the exact field types for proper inference
  */
-export interface GroupField<TFields extends readonly any[] = readonly any[]> extends FieldDef<never> {
+export interface GroupField<TFields extends readonly unknown[] = readonly unknown[]> extends FieldDef<never> {
   /** Field type identifier */
   readonly type: 'group';
 
@@ -22,4 +22,4 @@ export function isGroupField(field: FieldDef<Record<string, unknown>>): field is
   return field.type === 'group' && 'fields' in field;
 }
 
-export type GroupComponent<T extends readonly any[]> = FieldComponent<GroupField<T>>;
+export type GroupComponent<T extends readonly unknown[]> = FieldComponent<GroupField<T>>;
