@@ -722,3 +722,69 @@ These are NOT tested by expression evaluation (too low-level) or E2E tests (too 
 **Assessment Confidence:** VERY HIGH
 **Recommendation:** Implement Phase 1 & 2 first (validator-factory + logic-applicator)
 **Impact:** Critical - fills the missing middle layer of transformation logic testing
+
+---
+
+## Implementation Progress
+
+### ✅ Phase 1: validator-factory.spec.ts - COMPLETED
+**File:** `packages/dynamic-form/src/lib/core/validation/validator-factory.spec.ts`
+**Commit:** `1e07a02`
+**Tests Created:** 23 tests (484 lines)
+
+**Coverage:**
+- ✅ Type checking edge cases (8 tests): Missing values, wrong types, null/undefined
+- ✅ Expression vs static branching (4 tests): Both present, neither present, preference order
+- ✅ Pattern conversion (3 tests): String→RegExp, invalid regex, empty pattern
+- ✅ Conditional required (3 tests): with/without when, invalid expressions
+- ✅ Unknown validator types (2 tests): Silent handling, no API calls
+- ✅ applyValidators (3 tests): Multiple validators, empty array, error handling
+
+**Lines of Previously Untested Code Covered:** 88 lines
+
+---
+
+### ✅ Phase 2: logic-applicator.spec.ts - COMPLETED
+**File:** `packages/dynamic-form/src/lib/core/logic/logic-applicator.spec.ts`
+**Commit:** `73360c9`
+**Tests Created:** 19 tests (420 lines)
+
+**Coverage:**
+- ✅ Condition type checking (5 tests): boolean, ConditionalExpression, undefined, null, non-boolean
+- ✅ Logic type routing (3 tests): hidden, readonly, required
+- ✅ Disabled logic warning (2 tests): console.warn, no API calls
+- ✅ Unknown logic types (2 tests): Silent handling, no API calls
+- ✅ Invalid expressions (2 tests): Invalid type, malformed expression
+- ✅ applyMultipleLogic (4 tests): Empty array, invalid configs, disabled in sequence, error handling
+
+**Lines of Previously Untested Code Covered:** 40 lines
+
+---
+
+### ⏳ Phase 3: form-mapping.spec.ts - PENDING
+**File:** `packages/dynamic-form/src/lib/core/form-mapping.spec.ts`
+**Estimated:** 15-18 tests (~250 lines)
+**Lines to Cover:** 165 lines
+
+---
+
+### ⏳ Phase 4: schema-transformation.spec.ts - PENDING
+**File:** `packages/dynamic-form/src/lib/core/schema-transformation.spec.ts`
+**Estimated:** 15-18 tests (~250 lines)
+**Lines to Cover:** 145 lines (schema-builder.ts + schema-application.ts)
+
+---
+
+## Summary Statistics
+
+| Metric | Value |
+|--------|-------|
+| **Total Tests Created** | 42 tests |
+| **Total Lines of Test Code** | 904 lines |
+| **Transformation Logic Covered** | 128 / 293 lines (43.7%) |
+| **Phases Complete** | 2 / 4 (50%) |
+| **Estimated Remaining Work** | ~30-36 tests (~500 lines) |
+
+---
+
+**Next Steps:** Continue with Phase 3 (form-mapping) and Phase 4 (schema-transformation) to achieve complete transformation logic test coverage.
