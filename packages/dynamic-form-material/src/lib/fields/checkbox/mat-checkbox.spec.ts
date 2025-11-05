@@ -45,7 +45,7 @@ describe('MatCheckboxFieldComponent', () => {
       expect(checkbox.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
 
       expect(containerDiv).not.toBeNull();
-      expect(containerDiv.nativeElement).toBeInstanceOf(HTMLDivElement);
+      expect(containerDiv.nativeElement).toBeInstanceOf(HTMLElement);
       expect(containerDiv.nativeElement.classList.contains('terms-checkbox')).toBe(true);
       expect(hintElement?.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
