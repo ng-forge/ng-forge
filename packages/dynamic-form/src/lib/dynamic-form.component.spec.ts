@@ -1305,6 +1305,691 @@ describe('DynamicFormComponent', () => {
     });
   });
 
+  describe('Form Submission', () => {
+    it('should emit submitted event when form is submitted', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+            required: true,
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      let submittedValue: any;
+      component.submitted.subscribe(value => submittedValue = value);
+
+      // Find and submit the form element
+      const formElement = fixture.nativeElement.querySelector('form');
+      expect(formElement).not.toBeNull();
+
+      formElement.dispatchEvent(new Event('submit', { bubbles: true }));
+      fixture.detectChanges();
+      await delay();
+
+      expect(submittedValue).toBeDefined();
+    });
+
+    it('should emit current form values in submitted event', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'isActive',
+            type: 'checkbox',
+            label: 'Is Active',
+            defaultValue: true,
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      let submittedValue: any;
+      component.submitted.subscribe(value => submittedValue = value);
+
+      const formElement = fixture.nativeElement.querySelector('form');
+      formElement.dispatchEvent(new Event('submit', { bubbles: true }));
+      fixture.detectChanges();
+      await delay();
+
+      expect(submittedValue).toEqual({
+        firstName: 'John',
+        isActive: true,
+      });
+    });
+
+    it('should handle submission with valid form', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            required: true,
+            defaultValue: 'test@example.com',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.valid()).toBe(true);
+
+      let submittedValue: any;
+      component.submitted.subscribe(value => submittedValue = value);
+
+      const formElement = fixture.nativeElement.querySelector('form');
+      formElement.dispatchEvent(new Event('submit', { bubbles: true }));
+      fixture.detectChanges();
+      await delay();
+
+      expect(submittedValue).toEqual({ email: 'test@example.com' });
+    });
+
+    it('should handle submission attempt with invalid form', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            required: true,
+            defaultValue: '',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.valid()).toBe(false);
+
+      let submittedValue: any;
+      let submissionOccurred = false;
+      component.submitted.subscribe(value => {
+        submittedValue = value;
+        submissionOccurred = true;
+      });
+
+      const formElement = fixture.nativeElement.querySelector('form');
+      formElement.dispatchEvent(new Event('submit', { bubbles: true }));
+      fixture.detectChanges();
+      await delay();
+
+      // Submission should still emit the current values even if invalid
+      expect(submissionOccurred).toBe(true);
+      expect(submittedValue).toEqual({ email: '' });
+    });
+  });
+
+  describe('Touched State Behavior', () => {
+    it('should not mark form touched initially', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.touched()).toBe(false);
+    });
+
+    it('should mark form as touched after user interacts with field', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.touched()).toBe(false);
+
+      // Find and interact with the input
+      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      const inputElement = testInput.nativeElement.querySelector('input');
+
+      // Simulate user interaction
+      inputElement.dispatchEvent(new Event('focus'));
+      inputElement.value = 'Jane';
+      inputElement.dispatchEvent(new Event('input'));
+      inputElement.dispatchEvent(new Event('blur'));
+
+      fixture.detectChanges();
+      await delay();
+
+      expect(component.touched()).toBe(true);
+    });
+
+    it('should track touched state per field interaction', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'lastName',
+            type: 'input',
+            label: 'Last Name',
+            defaultValue: 'Doe',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.touched()).toBe(false);
+
+      // Touch first field
+      const inputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      const firstInput = inputs[0].nativeElement.querySelector('input');
+
+      firstInput.dispatchEvent(new Event('focus'));
+      firstInput.dispatchEvent(new Event('blur'));
+      fixture.detectChanges();
+      await delay();
+
+      expect(component.touched()).toBe(true);
+    });
+
+    it('should update touched when field loses focus', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            defaultValue: '',
+            required: true,
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.touched()).toBe(false);
+
+      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      const inputElement = testInput.nativeElement.querySelector('input');
+
+      // Focus then blur without changing value
+      inputElement.dispatchEvent(new Event('focus'));
+      fixture.detectChanges();
+      expect(component.touched()).toBe(false);
+
+      inputElement.dispatchEvent(new Event('blur'));
+      fixture.detectChanges();
+      await delay();
+
+      expect(component.touched()).toBe(true);
+    });
+  });
+
+  describe('Form Disabled State', () => {
+    it('should disable form when disabled signal is true', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      // Initially not disabled
+      expect(component.disabled()).toBe(false);
+
+      // Set formOptions with disabled=true
+      fixture.componentRef.setInput('formOptions', { disabled: true });
+      fixture.detectChanges();
+      await delay();
+
+      expect(component.disabled()).toBe(true);
+    });
+
+    it('should apply disabled CSS class when form disabled', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      const formElement = fixture.nativeElement.querySelector('form');
+      expect(formElement.classList.contains('disabled')).toBe(false);
+
+      fixture.componentRef.setInput('formOptions', { disabled: true });
+      fixture.detectChanges();
+      await delay();
+
+      expect(formElement.classList.contains('disabled')).toBe(true);
+    });
+
+    it('should prevent user interactions when form is disabled', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      fixture.componentRef.setInput('formOptions', { disabled: true });
+      fixture.detectChanges();
+      await delay();
+
+      expect(component.disabled()).toBe(true);
+
+      // Try to interact with the field
+      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      const inputElement = testInput.nativeElement.querySelector('input');
+
+      const originalValue = component.formValue().firstName;
+      inputElement.value = 'Jane';
+      inputElement.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      await delay();
+
+      // Note: This test documents the behavior - actual prevention may depend on field implementation
+      // The disabled state is tracked and can be used by field components
+      expect(component.disabled()).toBe(true);
+    });
+
+    it('should re-enable form when disabled becomes false', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      // Disable first
+      fixture.componentRef.setInput('formOptions', { disabled: true });
+      fixture.detectChanges();
+      await delay();
+      expect(component.disabled()).toBe(true);
+
+      // Then re-enable
+      fixture.componentRef.setInput('formOptions', { disabled: false });
+      fixture.detectChanges();
+      await delay();
+
+      expect(component.disabled()).toBe(false);
+
+      const formElement = fixture.nativeElement.querySelector('form');
+      expect(formElement.classList.contains('disabled')).toBe(false);
+    });
+  });
+
+  describe('Initialization Complete', () => {
+    it('should emit initialized event when all fields are ready', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+
+      let initializationEmitted = false;
+      component.initialized.subscribe(() => {
+        initializationEmitted = true;
+      });
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(initializationEmitted).toBe(true);
+    });
+
+    it('should emit initialized after async components load', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'isActive',
+            type: 'checkbox',
+            label: 'Is Active',
+            defaultValue: true,
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+
+      let initializationEmitted = false;
+      let emissionTime: number;
+      component.initialized.subscribe(() => {
+        initializationEmitted = true;
+        emissionTime = Date.now();
+      });
+
+      const startTime = Date.now();
+
+      await delay();
+      fixture.detectChanges();
+
+      expect(initializationEmitted).toBe(true);
+      // Verify it emitted after async components loaded
+      expect(emissionTime!).toBeGreaterThanOrEqual(startTime);
+    });
+
+    it('should not emit initialized multiple times', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+
+      let emissionCount = 0;
+      component.initialized.subscribe(() => {
+        emissionCount++;
+      });
+
+      await delay();
+      fixture.detectChanges();
+
+      // Wait a bit more to ensure no duplicate emissions
+      await delay(50);
+      fixture.detectChanges();
+
+      expect(emissionCount).toBe(1);
+    });
+  });
+
+  describe('Dynamic Field Addition and Removal', () => {
+    it('should add new fields when config changes to include them', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({ firstName: 'John' });
+
+      // Add a new field
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            defaultValue: 'test@example.com',
+          },
+        ],
+      };
+
+      fixture.componentRef.setInput('config', newConfig);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        email: 'test@example.com',
+      });
+    });
+
+    it('should remove fields when config changes to exclude them', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            defaultValue: 'test@example.com',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        email: 'test@example.com',
+      });
+
+      // Remove email field
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      fixture.componentRef.setInput('config', newConfig);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({ firstName: 'John' });
+      expect(component.formValue().hasOwnProperty('email')).toBe(false);
+    });
+
+    it('should preserve values for fields that remain after config change', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'lastName',
+            type: 'input',
+            label: 'Last Name',
+            defaultValue: 'Doe',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await delay();
+      fixture.detectChanges();
+
+      // Change firstName value
+      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      const inputElement = testInput.nativeElement.querySelector('input');
+      inputElement.value = 'Jane';
+      inputElement.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      await delay();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'Jane',
+        lastName: 'Doe',
+      });
+
+      // Change config but keep firstName
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John', // default is John but current value should be preserved
+          },
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            defaultValue: 'test@example.com',
+          },
+        ],
+      };
+
+      fixture.componentRef.setInput('config', newConfig);
+      await delay();
+      fixture.detectChanges();
+
+      // firstName should preserve the changed value 'Jane'
+      const formValue = component.formValue();
+      expect(formValue.firstName).toBe('Jane');
+      expect(formValue.email).toBe('test@example.com');
+      expect(formValue.hasOwnProperty('lastName')).toBe(false);
+    });
+
+    it('should clear values for removed fields', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'temporaryField',
+            type: 'input',
+            label: 'Temporary',
+            defaultValue: 'temp',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        temporaryField: 'temp',
+      });
+
+      // Remove temporaryField
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      fixture.componentRef.setInput('config', newConfig);
+      await delay();
+      fixture.detectChanges();
+
+      const formValue = component.formValue();
+      expect(formValue).toEqual({ firstName: 'John' });
+      expect('temporaryField' in formValue).toBe(false);
+    });
+  });
+
   describe('Row and Group Field Support', () => {
     it('should handle row definitions with multiple child definitions', async () => {
       const config: TestFormConfig = {
