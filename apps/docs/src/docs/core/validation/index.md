@@ -1,5 +1,3 @@
-# Validation
-
 ng-forge integrates with Angular's signal forms validation system. Configure validators directly in field config.
 
 ## Built-in Validators

@@ -1,5 +1,3 @@
-# Form Rows
-
 Organize fields into horizontal rows for compact layouts. Rows display fields side-by-side.
 
 ## Basic Row

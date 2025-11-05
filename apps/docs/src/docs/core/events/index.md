@@ -1,5 +1,3 @@
-# Event Bus
-
 The event bus enables communication between the `<dynamic-form>` component and custom field components within it. Each form instance has its own isolated event bus.
 
 ## Overview

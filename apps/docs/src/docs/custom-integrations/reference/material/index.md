@@ -106,11 +106,18 @@ Multi-line text input.
 
 {{ NgDocActions.demo("TextareaDemoComponent") }}
 
+**Field properties:**
+
+- `maxLength`: Maximum character limit
+
 **Props:**
 
-- `rows`: Number of visible rows
+- `rows`: Number of visible rows (default: 4)
+- `cols`: Number of visible columns
+- `resize`: `'none' | 'both' | 'horizontal' | 'vertical'` (default: 'vertical')
 - `appearance`: `'fill' | 'outline'`
-- `autosize`: Auto-grow to fit content
+- `subscriptSizing`: `'fixed' | 'dynamic'`
+- `hint`: Help text
 
 ### Datepicker
 
@@ -118,11 +125,20 @@ Date selection with calendar popup.
 
 {{ NgDocActions.demo("DatepickerDemoComponent") }}
 
+**Field properties:**
+
+- `minDate`: Minimum selectable date (Date | string | null)
+- `maxDate`: Maximum selectable date (Date | string | null)
+- `startAt`: Initial calendar date (Date | null)
+
 **Props:**
 
-- `minDate`: Minimum selectable date
-- `maxDate`: Maximum selectable date
 - `appearance`: `'fill' | 'outline'`
+- `color`: `'primary' | 'accent' | 'warn'`
+- `startView`: `'month' | 'year' | 'multi-year'` (default: 'month')
+- `touchUi`: Enable touch-optimized UI (boolean)
+- `subscriptSizing`: `'fixed' | 'dynamic'`
+- `hint`: Help text
 
 ### Slider
 
@@ -130,24 +146,29 @@ Numeric slider control.
 
 {{ NgDocActions.demo("SliderDemoComponent") }}
 
+**Field properties:**
+
+- `minValue`: Minimum value (default: 0)
+- `maxValue`: Maximum value (default: 100)
+- `step`: Increment step (default: 1)
+
 **Props:**
 
-- `min`: Minimum value
-- `max`: Maximum value
-- `step`: Increment step
-- `thumbLabel`: Show value tooltip
-- `color`: `'primary' | 'accent' | 'warn'`
+- `thumbLabel` or `showThumbLabel`: Show value tooltip (boolean)
+- `tickInterval`: Show tick marks (number | undefined)
+- `color`: `'primary' | 'accent' | 'warn'` (default: 'primary')
+- `hint`: Help text
 
 ### Submit Button
 
-Form submission button.
+Form submission button (automatically disabled when form is invalid).
 
 {{ NgDocActions.demo("SubmitDemoComponent") }}
 
 **Props:**
 
 - `color`: `'primary' | 'accent' | 'warn'`
-- `variant`: `'basic' | 'raised' | 'stroked' | 'flat'`
+- `type`: `'button' | 'submit' | 'reset'` (default: 'button')
 
 ## Comprehensive Examples
 
@@ -203,12 +224,11 @@ Benefits:
 - `'before'`
 - `'after'` (default)
 
-**variant**: Button style
+**type**: Button type
 
-- `'basic'`
-- `'raised'` (default)
-- `'stroked'`
-- `'flat'`
+- `'button'` (default)
+- `'submit'`
+- `'reset'`
 
 ## Accessibility
 

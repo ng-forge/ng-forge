@@ -1,5 +1,3 @@
-# Building Custom Integrations
-
 Create custom UI integrations for ng-forge using any component library or design system.
 
 ## Integration Overview
@@ -48,11 +46,11 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="custom-field" [class.custom-outline]="props()?.appearance === 'outline'">
       @if (label()) {
-      <label [for]="key()">{% raw %}{{ label() | dynamicText | async }}{% endraw %}</label>
+      <label [for]="key() + '-input'">{% raw %}{{ label() | dynamicText | async }}{% endraw %}</label>
       }
 
       <input
-        [id]="key()"
+        [id]="key() + '-input'"
         [field]="f"
         [type]="props()?.type || 'text'"
         [placeholder]="{% raw %}(placeholder() | dynamicText | async) ?? ''{% endraw %}"

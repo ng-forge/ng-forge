@@ -1,5 +1,3 @@
-# Field Types
-
 Field types define form control behavior and rendering. All fields use the `FieldConfig` interface:
 
 ```typescript

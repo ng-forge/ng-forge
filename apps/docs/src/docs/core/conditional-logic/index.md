@@ -1,5 +1,3 @@
-# Conditional Logic
-
 Control field visibility, validation, and behavior based on form state.
 
 ## Conditional Visibility
