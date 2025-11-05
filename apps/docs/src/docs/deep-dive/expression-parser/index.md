@@ -242,18 +242,18 @@ const customFunctions = {
 
 For dynamic forms, the parser prevents:
 
-✅ **Code Injection**: Can't execute `Function()`, `eval()`, or create new code
-✅ **Prototype Pollution**: Can't access `constructor` or `__proto__`
-✅ **Unsafe Operations**: Can't call methods that modify state or access globals
+- ✅ **Code Injection**: Can't execute `Function()`, `eval()`, or create new code
+- ✅ **Prototype Pollution**: Can't access `constructor` or `__proto__`
+- ✅ **Unsafe Operations**: Can't call methods that modify state or access globals
 
 ## What You Must Handle
 
 The parser only prevents code injection. If you're using form data elsewhere:
 
-❌ **SQL Queries**: Use parameterized queries
-❌ **HTML Rendering**: Sanitize before showing to users
-❌ **File Operations**: Validate paths
-❌ **API Calls**: Validate/sanitize data
+- ❌ **SQL Queries**: Use parameterized queries
+- ❌ **HTML Rendering**: Sanitize before showing to users
+- ❌ **File Operations**: Validate paths
+- ❌ **API Calls**: Validate/sanitize data
 
 ```typescript
 // ❌ WRONG: Direct SQL injection risk
