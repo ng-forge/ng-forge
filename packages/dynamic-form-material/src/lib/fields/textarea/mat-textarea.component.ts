@@ -43,6 +43,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
 })
 export default class MatTextareaFieldComponent implements MatTextareaComponent {

@@ -39,6 +39,7 @@ import { flattenFields } from '../../utils';
   host: {
     class: 'df-field df-group',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,

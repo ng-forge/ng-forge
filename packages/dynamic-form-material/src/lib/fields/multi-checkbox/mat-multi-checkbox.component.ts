@@ -48,6 +48,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[class]': 'className() || ""',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,

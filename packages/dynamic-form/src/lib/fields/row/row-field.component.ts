@@ -33,6 +33,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
     class: 'df-field df-row',
     '[class.disabled]': 'disabled()',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   imports: [FieldRendererDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
