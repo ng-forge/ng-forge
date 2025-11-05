@@ -139,7 +139,10 @@ describe('MatSelectFieldComponent', () => {
       });
 
       const select = fixture.debugElement.query(By.directive(MatSelect));
-      expect(select).toBeTruthy();
+      // ITERATION 4 FIX: Verify select is MatSelect instance
+      // Previous: expect(select).toBeTruthy()
+      expect(select).not.toBeNull();
+      expect(select.componentInstance).toBeInstanceOf(MatSelect);
       // Disabled options are tested when the select panel is opened
     });
   });

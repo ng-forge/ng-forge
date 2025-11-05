@@ -422,8 +422,11 @@ describe('MatMultiCheckboxFieldComponent', () => {
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
       const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
-      expect(checkboxes).toBeTruthy();
+      // ITERATION 4 FIX: queryAll returns array - verify array and content, not truthiness
+      // Previous: expect(checkboxes).toBeTruthy() - always true for arrays
+      expect(Array.isArray(checkboxes)).toBe(true);
       expect(checkboxes.length).toBe(1);
+      expect(checkboxes[0].componentInstance).toBeInstanceOf(MatCheckbox);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -437,8 +440,11 @@ describe('MatMultiCheckboxFieldComponent', () => {
       });
 
       const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
-      expect(checkboxes).toBeTruthy();
+      // ITERATION 4 FIX: queryAll returns array - verify array and content, not truthiness
+      // Previous: expect(checkboxes).toBeTruthy() - always true for arrays
+      expect(Array.isArray(checkboxes)).toBe(true);
       expect(checkboxes.length).toBe(1);
+      expect(checkboxes[0].componentInstance).toBeInstanceOf(MatCheckbox);
     });
 
     it('should handle empty options array', async () => {

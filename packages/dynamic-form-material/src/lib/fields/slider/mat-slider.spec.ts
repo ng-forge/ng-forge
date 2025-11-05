@@ -45,14 +45,22 @@ describe('MatSliderFieldComponent', () => {
       const hint = fixture.debugElement.query(By.css('.mat-hint'));
       const container = fixture.debugElement.query(By.css('.volume-slider'));
 
-      expect(slider).toBeTruthy();
+      // ITERATION 4 FIX: Verify slider is MatSlider instance
+      // Previous: expect(slider).toBeTruthy()
+      expect(slider).not.toBeNull();
+      expect(slider.componentInstance).toBeInstanceOf(MatSlider);
       expect(slider.componentInstance.min).toBe(0);
       expect(slider.componentInstance.max).toBe(100);
       expect(slider.componentInstance.discrete).toBe(true);
       expect(slider.componentInstance.showTickMarks).toBe(true);
       expect(slider.componentInstance.color).toBe('primary');
       expect(sliderInput.nativeElement.getAttribute('tabindex')).toBe('1');
-      expect(container).toBeTruthy();
+
+      // ITERATION 4 FIX: Verify container element structure
+      // Previous: expect(container).toBeTruthy()
+      expect(container).not.toBeNull();
+      expect(container.nativeElement).toBeInstanceOf(HTMLElement);
+      expect(container.nativeElement.classList.contains('volume-slider')).toBe(true);
       expect(label.nativeElement.textContent.trim()).toBe('Volume Level');
       expect(hint.nativeElement.textContent.trim()).toBe('Adjust the volume level');
     });

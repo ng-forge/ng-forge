@@ -38,9 +38,17 @@ describe('MatToggleFieldComponent', () => {
       const containerDiv = fixture.debugElement.query(By.css('.dark-mode-toggle'));
       const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
 
-      expect(toggle).toBeTruthy();
+      // ITERATION 4 FIX: Verify toggle is MatSlideToggle instance
+      // Previous: expect(toggle).toBeTruthy()
+      expect(toggle).not.toBeNull();
+      expect(toggle.componentInstance).toBeInstanceOf(MatSlideToggle);
       expect(toggle.nativeElement.textContent.trim()).toBe('Enable Dark Mode');
-      expect(containerDiv).toBeTruthy();
+
+      // ITERATION 4 FIX: Verify container element structure
+      // Previous: expect(containerDiv).toBeTruthy()
+      expect(containerDiv).not.toBeNull();
+      expect(containerDiv.nativeElement).toBeInstanceOf(HTMLElement);
+      expect(containerDiv.nativeElement.classList.contains('dark-mode-toggle')).toBe(true);
       expect(hintElement?.nativeElement.textContent.trim()).toBe('Toggle between light and dark themes');
 
       // Verify form control integration and dynamic field component properties
