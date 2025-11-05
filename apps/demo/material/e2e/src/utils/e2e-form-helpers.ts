@@ -22,7 +22,7 @@ export class E2EFormHelpers {
 
   async isFormValid(): Promise<boolean> {
     // Check if submit button is enabled (assuming it's disabled for invalid forms)
-    const submitButton = this.page.locator('[data-testid*="submit"]');
+    const submitButton = this.page.locator('[data-testid="submit-button"]');
     return await submitButton.isEnabled();
   }
 
@@ -162,23 +162,23 @@ export class E2EPaginationHelpers {
   }
 
   async isNextButtonEnabled(): Promise<boolean> {
-    const nextButton = this.page.locator('[data-testid*="next"], .next-button, button:has-text("Next")');
+    const nextButton = this.page.locator('[data-testid="next-button"]');
     return await nextButton.isEnabled();
   }
 
   async isPreviousButtonEnabled(): Promise<boolean> {
-    const prevButton = this.page.locator('[data-testid*="previous"], .previous-button, button:has-text("Previous")');
+    const prevButton = this.page.locator('[data-testid="previous-button"]');
     return await prevButton.isEnabled();
   }
 
   async clickNext(): Promise<void> {
-    const nextButton = this.page.locator('[data-testid*="next"], .next-button, button:has-text("Next")');
+    const nextButton = this.page.locator('[data-testid="next-button"]');
     await nextButton.click();
     await this.page.waitForTimeout(500); // Allow page transition
   }
 
   async clickPrevious(): Promise<void> {
-    const prevButton = this.page.locator('[data-testid*="previous"], .previous-button, button:has-text("Previous")');
+    const prevButton = this.page.locator('[data-testid="previous-button"]');
     await prevButton.click();
     await this.page.waitForTimeout(500); // Allow page transition
   }
@@ -287,7 +287,7 @@ export class E2ECrossFieldValidationHelpers {
     await expect(conditionalField).toBeVisible();
 
     // If it's required, attempting to submit should show validation error
-    const submitButton = this.page.locator('[data-testid*="submit"]');
+    const submitButton = this.page.locator('[data-testid="submit-button"]');
     if (await submitButton.isVisible()) {
       await submitButton.click();
 

@@ -97,7 +97,7 @@ test.describe('Demo Scenarios Functionality', () => {
       await page.getByLabel('Email').fill('john.doe@example.com');
 
       // Click Next
-      await page.getByRole('button', { name: 'Next' }).click();
+      await page.locator('[data-testid="next-button"]').click();
 
       // Step 2: Account Setup should be active
       await expect(page.getByText('Account Setup').locator('..')).toHaveClass(/mat-mdc-tab-label-active/);
@@ -108,7 +108,7 @@ test.describe('Demo Scenarios Functionality', () => {
       await page.getByLabel('Confirm Password').fill('SecurePass123!');
 
       // Click Next
-      await page.getByRole('button', { name: 'Next' }).click();
+      await page.locator('[data-testid="next-button"]').click();
 
       // Step 3: Confirmation should be active
       await expect(page.getByText('Confirmation').locator('..')).toHaveClass(/mat-mdc-tab-label-active/);
@@ -118,7 +118,7 @@ test.describe('Demo Scenarios Functionality', () => {
       await page.getByLabel('I agree to the Privacy Policy').check();
 
       // Submit button should be enabled
-      await expect(page.getByRole('button', { name: 'Complete Registration' })).toBeEnabled();
+      await expect(page.locator('[data-testid="submit-button"]')).toBeEnabled();
     });
   });
 

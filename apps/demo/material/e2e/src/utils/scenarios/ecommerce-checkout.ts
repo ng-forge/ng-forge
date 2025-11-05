@@ -63,7 +63,7 @@ export const ecommerceCheckoutConfig = {
           key: 'applyPromo',
           type: 'button',
           label: 'Apply',
-          props: { type: 'button', color: 'accent' },
+          color: 'accent',
           col: 4,
         },
         {
@@ -261,9 +261,9 @@ export const ecommerceCheckoutConfig = {
         },
         {
           key: 'placeOrder',
-          type: 'button',
+          type: 'submit',
           label: 'Place Order',
-          props: { type: 'submit', color: 'primary' },
+          color: 'primary',
         },
       ],
     },

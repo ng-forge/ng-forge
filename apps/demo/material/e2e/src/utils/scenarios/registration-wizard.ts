@@ -197,9 +197,9 @@ export const registrationWizardConfig = {
         },
         {
           key: 'submit',
-          type: 'button',
+          type: 'submit',
           label: 'Complete Registration',
-          props: { type: 'submit', color: 'primary' },
+          color: 'primary',
         },
       ],
     },

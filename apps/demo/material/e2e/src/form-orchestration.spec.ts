@@ -131,11 +131,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
               },
               {
                 key: 'submitPersistence',
-                type: 'button',
+                type: 'submit',
                 label: 'Save Profile',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
@@ -182,7 +179,7 @@ test.describe('Form Orchestration and State Management Tests', () => {
       expect(formValue).toContain('John');
 
       // Navigate to page 2
-      const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+      const nextButton = page.locator('[data-testid="next-button"]');
       if (await nextButton.isVisible()) {
         await nextButton.click();
         await page.waitForTimeout(1000);
@@ -217,7 +214,7 @@ test.describe('Form Orchestration and State Management Tests', () => {
               await page.click('#workPreference mat-radio-button:has-text("Remote")');
 
               // Test backward navigation and data persistence
-              const backButton = page.locator('button:has-text("Previous")').or(page.locator('button:has-text("Back")'));
+              const backButton = page.locator('[data-testid="previous-button"]');
               if (await backButton.isVisible()) {
                 await backButton.click();
                 await page.waitForTimeout(1000);
@@ -325,11 +322,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
               },
               {
                 key: 'submitValidation',
-                type: 'button',
+                type: 'submit',
                 label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
@@ -355,7 +349,7 @@ test.describe('Form Orchestration and State Management Tests', () => {
     }
 
     // Try to navigate without filling required fields
-    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(1000);
@@ -438,11 +432,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
               },
               {
                 key: 'submitDirty',
-                type: 'button',
+                type: 'submit',
                 label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
@@ -487,7 +478,7 @@ test.describe('Form Orchestration and State Management Tests', () => {
     console.log('After change form state:', formState);
 
     // Navigate to page 2 and check if dirty state persists
-    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(1000);
@@ -578,11 +569,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
               },
               {
                 key: 'submitOrchestration',
-                type: 'button',
+                type: 'submit',
                 label: 'Complete Setup',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
@@ -610,7 +598,7 @@ test.describe('Form Orchestration and State Management Tests', () => {
     // Test premium user flow
     await page.click('#userType mat-radio-button:has-text("Premium User")');
 
-    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(1000);
@@ -668,11 +656,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
               },
               {
                 key: 'submitQuick',
-                type: 'button',
+                type: 'submit',
                 label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
