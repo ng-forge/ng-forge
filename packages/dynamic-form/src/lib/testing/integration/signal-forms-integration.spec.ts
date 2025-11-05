@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { vi } from 'vitest';
 import {
   ConditionalExpression,
   evaluateCondition,
@@ -383,9 +383,10 @@ describe('Signal Forms Integration Tests', () => {
 
   describe('Error Handling', () => {
     it('should handle invalid expressions gracefully', () => {
+      // Test with an expression that causes a parsing error
       const invalidExpression: ConditionalExpression = {
         type: 'javascript',
-        expression: 'this.will.throw.error',
+        expression: 'invalid @@ syntax',
       };
 
       const context = {

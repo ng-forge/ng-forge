@@ -1,11 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
-import { submitButton } from '@ng-forge/dynamic-form-material';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { submitButton, withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 @Component({
   selector: 'app-complete-material-form',
   imports: [DynamicForm, JsonPipe],
+  providers: [provideDynamicForm(...withMaterialFields())],
   template: `
     <h4>Complete Material Design Form</h4>
     <p>Comprehensive form showcasing all Material components with theming and validation.</p>

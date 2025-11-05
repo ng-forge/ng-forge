@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { vi } from 'vitest';
 import { ConditionalExpression, EvaluationContext } from '../../models';
 import { evaluateCondition } from './condition-evaluator';
 
@@ -207,7 +207,7 @@ describe('condition-evaluator', () => {
           { expression: 'null', expected: false },
           { expression: 'undefined', expected: false },
           { expression: '[]', expected: true },
-          { expression: '{}', expected: true },
+          // Note: Object literals ({}) are not supported by the secure parser for security reasons
         ];
 
         testCases.forEach(({ expression, expected }) => {
@@ -233,19 +233,16 @@ describe('condition-evaluator', () => {
       it('should handle JavaScript errors gracefully', () => {
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
 
+        // Test with an expression that causes a parsing error
         const expression: ConditionalExpression = {
           type: 'javascript',
-          expression: 'nonexistentVariable.property',
+          expression: 'invalid @@ syntax',
         };
 
         const result = evaluateCondition(expression, mockContext);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Error evaluating JavaScript expression:',
-          'nonexistentVariable.property',
-          expect.any(Error)
-        );
+        expect(consoleSpy).toHaveBeenCalledWith('Error evaluating JavaScript expression:', 'invalid @@ syntax', expect.any(Error));
 
         consoleSpy.mockRestore();
       });
@@ -277,9 +274,11 @@ describe('condition-evaluator', () => {
       });
 
       it('should handle mathematical expressions', () => {
+        // Note: Math.sqrt and other Math functions are not supported for security reasons
+        // Test basic arithmetic operators instead
         const expression: ConditionalExpression = {
           type: 'javascript',
-          expression: 'formValue.age * 2 > 40 && Math.sqrt(formValue.age) > 4',
+          expression: 'formValue.age * 2 > 40 && formValue.age / 5 > 4',
         };
 
         const result = evaluateCondition(expression, mockContext);

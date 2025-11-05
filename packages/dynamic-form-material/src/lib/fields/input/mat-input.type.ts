@@ -5,7 +5,7 @@ export interface MatInputProps extends Record<string, unknown> {
   appearance?: MatFormFieldAppearance;
   disableRipple?: boolean;
   subscriptSizing?: SubscriptSizing;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
   hint?: DynamicText;
 }
 

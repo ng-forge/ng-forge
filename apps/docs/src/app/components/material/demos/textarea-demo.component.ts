@@ -1,10 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 @Component({
   selector: 'app-textarea-demo',
   imports: [DynamicForm, JsonPipe],
+  providers: [provideDynamicForm(...withMaterialFields())],
   template: `
     <div class="demo-container">
       <dynamic-form [config]="fields" [(value)]="formOutput"></dynamic-form>

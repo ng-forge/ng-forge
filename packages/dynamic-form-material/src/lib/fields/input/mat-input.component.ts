@@ -16,7 +16,7 @@ import { AsyncPipe } from '@angular/common';
   template: `
     @let f = field();
 
-    <mat-form-field [appearance]="props()?.appearance ?? 'outline'" [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'">
+    <mat-form-field [appearance]="props()?.appearance ?? 'outline'" [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'">
       @if (label()) {
       <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { vi } from 'vitest';
 import { ConditionalExpression } from '../../models';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { createLogicFunction } from './logic-function-factory';
@@ -129,9 +129,10 @@ describe('logic-function-factory', () => {
       it('should handle JavaScript expression errors gracefully', () => {
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
 
+        // Test with an expression that causes a parsing error
         const expression: ConditionalExpression = {
           type: 'javascript',
-          expression: 'nonexistentVariable.property',
+          expression: 'invalid @@ syntax',
         };
 
         const result = runLogicFunctionTest(expression, 'test');

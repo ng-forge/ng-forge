@@ -1,3 +1,5 @@
+import { FormConfig } from '@ng-forge/dynamic-form';
+
 /**
  * Contact Form - Simple validation
  */
@@ -77,7 +79,9 @@ export const contactFormConfig = {
       key: 'submit',
       type: 'submit',
       label: 'Send Message',
-      color: 'primary',
+      props: {
+        color: 'primary',
+      },
     },
   ],
-} as const;
+} as const satisfies FormConfig;

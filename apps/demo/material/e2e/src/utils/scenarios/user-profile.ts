@@ -1,3 +1,5 @@
+import { FormConfig } from '@ng-forge/dynamic-form';
+
 /**
  * User Profile Form - Basic cross-field validation
  */
@@ -66,4 +68,4 @@ export const userProfileConfig = {
       defaultValue: false,
     },
   ],
-} as const;
+} as const satisfies FormConfig;

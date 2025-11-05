@@ -1,3 +1,5 @@
+import { FormConfig } from '@ng-forge/dynamic-form';
+
 /**
  * E-commerce Checkout - Multi-page checkout flow
  */
@@ -7,10 +9,6 @@ export const ecommerceCheckoutConfig = {
     {
       key: 'cartPage',
       type: 'page',
-      props: {
-        title: 'Review Cart',
-        description: 'Review your items before checkout',
-      },
       fields: [
         {
           key: 'cartSummary',
@@ -63,7 +61,9 @@ export const ecommerceCheckoutConfig = {
           key: 'applyPromo',
           type: 'button',
           label: 'Apply',
-          color: 'accent',
+          props: {
+            color: 'accent',
+          },
           col: 4,
         },
         {
@@ -79,10 +79,6 @@ export const ecommerceCheckoutConfig = {
     {
       key: 'shippingPage',
       type: 'page',
-      props: {
-        title: 'Shipping Information',
-        description: 'Where should we deliver your order?',
-      },
       fields: [
         {
           key: 'shippingAddress',
@@ -186,10 +182,6 @@ export const ecommerceCheckoutConfig = {
     {
       key: 'paymentPage',
       type: 'page',
-      props: {
-        title: 'Payment Information',
-        description: 'Complete your purchase',
-      },
       fields: [
         {
           key: 'paymentMethod',
@@ -263,9 +255,11 @@ export const ecommerceCheckoutConfig = {
           key: 'placeOrder',
           type: 'submit',
           label: 'Place Order',
-          color: 'primary',
+          props: {
+            color: 'primary',
+          },
         },
       ],
     },
   ],
-} as const;
+} as const satisfies FormConfig;
