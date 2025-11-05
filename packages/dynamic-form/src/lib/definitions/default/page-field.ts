@@ -26,12 +26,6 @@ export interface PageField<TFields extends PageAllowedChildren[] = PageAllowedCh
 
   /** Child field definitions to render within this page */
   fields: TFields;
-
-  /** Page title (optional) */
-  title?: string;
-
-  /** Page description (optional) */
-  description?: string;
 }
 
 /**
@@ -42,14 +36,14 @@ export function isPageField(field: FieldDef<Record<string, unknown>>): field is 
   return field.type === 'page' && 'fields' in field && isArray((field as PageField).fields);
 }
 
-export type PageComponent = FieldComponent<PageField<PageAllowedChildren[]>>;
+export type PageComponent = FieldComponent<PageField>;
 
 /**
  * Validates that a page field doesn't contain nested page fields
  * @param pageField The page field to validate
  * @returns true if valid (no nested pages), false otherwise
  */
-export function validatePageNesting(pageField: PageField<PageAllowedChildren[]>): boolean {
+export function validatePageNesting(pageField: PageField): boolean {
   return !hasNestedPages(pageField.fields as FieldDef<Record<string, unknown>>[]);
 }
 

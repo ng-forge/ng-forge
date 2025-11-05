@@ -62,7 +62,7 @@ export default class PageFieldComponent {
 
   form = input.required<FieldTree<any>>();
 
-  fieldSignalContext = input.required<FieldSignalContext<any>>();
+  fieldSignalContext = input.required<FieldSignalContext>();
 
   readonly disabled = computed(() => this.field().disabled || false);
 
