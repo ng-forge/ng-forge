@@ -1,27 +1,31 @@
-import { RegisteredFieldTypes, ContainerFieldTypes, LeafFieldTypes } from '../registry/field-registry';
+import { LeafFieldTypes } from '../registry/field-registry';
+import type { RowField } from '../../definitions/default/row-field';
+import type { GroupField } from '../../definitions/default/group-field';
 
 /**
  * Type constraints for field nesting rules
  * These ensure that container fields can only contain valid child field types
+ *
+ * Note: We explicitly list types instead of using Exclude to avoid circular dependencies
  */
 
 /**
  * Fields that are allowed as children of Page fields
  * Pages can contain: rows, groups, and leaf fields (but NOT other pages)
  */
-export type PageAllowedChildren = Exclude<RegisteredFieldTypes, { type: 'page' }>;
+export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField;
 
 /**
  * Fields that are allowed as children of Row fields
  * Rows can contain: groups and leaf fields (but NOT pages or other rows)
  */
-export type RowAllowedChildren = Exclude<RegisteredFieldTypes, { type: 'page' | 'row' }>;
+export type RowAllowedChildren = LeafFieldTypes | GroupField;
 
 /**
  * Fields that are allowed as children of Group fields
  * Groups can contain: rows and leaf fields (but NOT pages or other groups)
  */
-export type GroupAllowedChildren = Exclude<RegisteredFieldTypes, { type: 'page' | 'group' }>;
+export type GroupAllowedChildren = LeafFieldTypes | RowField;
 
 /**
  * Validates that a fields array contains only allowed child types for a Page
@@ -52,10 +56,11 @@ export type IsLeafField<T> = T extends { type: 'page' | 'row' | 'group' } ? fals
  * Extract all fields that have a value property (value-bearing fields)
  * Note: Using `unknown` in the Extract condition to match any value type
  */
-export type ValueBearingFields = Extract<RegisteredFieldTypes, { value: unknown }>;
+export type ValueBearingFields = Extract<LeafFieldTypes, { value: unknown }>;
 
 /**
  * Extract all fields that don't have a value property (layout/display fields)
  * Note: Using `unknown` in the Exclude condition to match any value type
+ * This includes container fields (page, row, group) and non-value leaf fields
  */
-export type NonValueBearingFields = Exclude<RegisteredFieldTypes, { value: unknown }>;
+export type NonValueBearingFields = Exclude<LeafFieldTypes, { value: unknown }> | RowField | GroupField;

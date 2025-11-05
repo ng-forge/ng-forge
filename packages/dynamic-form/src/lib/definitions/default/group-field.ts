@@ -1,14 +1,14 @@
 import { FieldComponent, FieldDef } from '../base';
+import { GroupAllowedChildren } from '../../models/types/nesting-constraints';
 
 /**
  * Group field interface for creating logical field groupings that map to object values
  * Groups create nested form structures where child field values are collected into an object
  * This is a programmatic grouping only - users cannot customize this field type
  *
- * The generic parameter preserves the exact field types for proper inference
- *
- * Note: We use `any[]` here instead of `RegisteredFieldTypes[]` to avoid circular dependency.
- * Type safety is enforced at the FormConfig level using `satisfies`.
+ * TypeScript cannot enforce field nesting rules due to circular dependency limitations.
+ * For documentation: Groups should contain rows and leaf fields, but NOT pages or other groups.
+ * Runtime validation enforces these rules.
  */
 export interface GroupField<TFields extends any[] = any[]> extends FieldDef<never> {
   /** Field type identifier */
@@ -25,4 +25,4 @@ export function isGroupField(field: FieldDef<Record<string, unknown>>): field is
   return field.type === 'group' && 'fields' in field;
 }
 
-export type GroupComponent<T extends any[]> = FieldComponent<GroupField<T>>;
+export type GroupComponent<T extends GroupAllowedChildren[]> = FieldComponent<GroupField<T>>;

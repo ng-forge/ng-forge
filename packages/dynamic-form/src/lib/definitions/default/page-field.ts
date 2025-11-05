@@ -1,4 +1,5 @@
 import { FieldComponent, FieldDef } from '../base';
+import { PageAllowedChildren } from '../../models/types/nesting-constraints';
 import { isArray } from 'lodash-es';
 
 /**
@@ -15,9 +16,9 @@ interface ContainerFieldWithFields extends FieldDef<Record<string, unknown>> {
  * Pages can only be used at the top level and cannot be nested
  * This is a programmatic field type only - users cannot customize this field type
  *
- * The generic parameter preserves the exact field types for proper inference
- * Note: We use `any[]` here instead of `RegisteredFieldTypes[]` to avoid circular dependency.
- * Type safety is enforced at the FormConfig level using `satisfies`.
+ * TypeScript cannot enforce field nesting rules due to circular dependency limitations.
+ * For documentation: Pages should contain rows, groups, and leaf fields, but NOT other pages.
+ * Runtime validation enforces these rules.
  */
 export interface PageField<TFields extends any[] = any[]> extends FieldDef<never> {
   /** Field type identifier */
@@ -41,14 +42,14 @@ export function isPageField(field: FieldDef<Record<string, unknown>>): field is 
   return field.type === 'page' && 'fields' in field && isArray((field as PageField).fields);
 }
 
-export type PageComponent = FieldComponent<PageField<any[]>>;
+export type PageComponent = FieldComponent<PageField<PageAllowedChildren[]>>;
 
 /**
  * Validates that a page field doesn't contain nested page fields
  * @param pageField The page field to validate
  * @returns true if valid (no nested pages), false otherwise
  */
-export function validatePageNesting(pageField: PageField<any[]>): boolean {
+export function validatePageNesting(pageField: PageField<PageAllowedChildren[]>): boolean {
   return !hasNestedPages(pageField.fields as FieldDef<Record<string, unknown>>[]);
 }
 
