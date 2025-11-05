@@ -1,63 +1,42 @@
 # Form Rows
 
-Organize fields into horizontal rows for compact layouts.
+Organize fields into horizontal rows for compact layouts. Rows display fields side-by-side.
 
 ## Basic Row
 
-Display multiple fields side-by-side:
+```typescript
+{
+  type: 'row',
+  fields: [
+    { key: 'firstName', type: 'input', label: 'First Name', value: '' },
+    { key: 'lastName', type: 'input', label: 'Last Name', value: '' },
+  ],
+}
+```
+
+Rows flatten their children - they don't add nesting to form values.
+
+## Column Sizing
+
+Control field widths within rows using the `col` property:
 
 ```typescript
 {
   type: 'row',
   fields: [
-    { key: 'firstName', type: 'input', label: 'First Name' },
-    { key: 'lastName', type: 'input', label: 'Last Name' },
+    { key: 'city', type: 'input', label: 'City', value: '', col: 6 },
+    { key: 'state', type: 'select', label: 'State', value: '', col: 3 },
+    { key: 'zip', type: 'input', label: 'ZIP', value: '', col: 3 },
   ],
 }
 ```
 
-## Responsive Rows
+The `col` property uses a 12-column grid system (like Bootstrap). In this example:
 
-Rows automatically stack on small screens.
+- `city` takes 6/12 (50%) width
+- `state` takes 3/12 (25%) width
+- `zip` takes 3/12 (25%) width
 
-## Custom Widths
+## Responsive Behavior
 
-Control field widths within rows:
-
-```typescript
-{
-  type: 'row',
-  fields: [
-    { key: 'city', type: 'input', label: 'City', width: '60%' },
-    { key: 'state', type: 'select', label: 'State', width: '20%' },
-    { key: 'zip', type: 'input', label: 'ZIP', width: '20%' },
-  ],
-}
-```
-
-## Nested Rows
-
-Combine rows with other field types:
-
-```typescript
-{
-  fields: [
-    {
-      type: 'row',
-      fields: [
-        { key: 'street', type: 'input', label: 'Street Address' },
-      ],
-    },
-    {
-      type: 'row',
-      fields: [
-        { key: 'city', type: 'input', label: 'City' },
-        { key: 'state', type: 'select', label: 'State' },
-        { key: 'zip', type: 'input', label: 'ZIP' },
-      ],
-    },
-  ],
-}
-```
-
-_More examples coming soon_
+Rows automatically stack on small screens, making forms mobile-friendly without additional configuration.

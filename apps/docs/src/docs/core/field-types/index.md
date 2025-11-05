@@ -164,31 +164,26 @@ Numeric range selection (requires UI integration).
 
 ## Custom Field Types
 
-Register custom field types using `provideField`:
+Register custom field types using `FieldTypeDefinition` with `provideDynamicForm`:
 
 ```typescript
-import { provideField } from '@ng-forge/dynamic-form';
+import { FieldTypeDefinition, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 import { CustomDatePickerComponent } from './custom-date-picker';
+import type { CustomDatePickerField } from './custom-date-picker';
 
-export const provideCustomDatePicker = () => provideField('custom-datepicker', CustomDatePickerComponent);
-```
+export const CustomDatePickerType: FieldTypeDefinition<CustomDatePickerField> = {
+  name: 'custom-datepicker',
+  component: CustomDatePickerComponent,
+};
 
-Use in app config:
-
-```typescript
+// In app.config.ts
 export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(), provideCustomDatePicker()],
+  providers: [provideDynamicForm(...withMaterialFields(), CustomDatePickerType)],
 };
 ```
 
-## Overriding Field Types
-
-Override built-in field types with custom implementations:
-
-```typescript
-// Replace the default input field
-export const provideCustomInput = () => provideField('input', CustomInputComponent);
-```
+See [Type Safety & Inference](../type-safety) for the complete custom field type workflow including type definitions and module augmentation.
 
 ## Validation
 

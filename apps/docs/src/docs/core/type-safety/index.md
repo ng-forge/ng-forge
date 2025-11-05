@@ -486,7 +486,7 @@ const config = {
 // Type inferred: { email: string } (required, so no undefined)
 ```
 
-For comprehensive validation with custom validators and error messages, use the `validators` property:
+For custom error messages, use `validationMessages`:
 
 ```typescript
 const config = {
@@ -496,10 +496,40 @@ const config = {
       type: 'input',
       value: '',
       required: true,
-      validators: {
-        minLength: { value: 8, message: 'Password must be at least 8 characters' },
-        pattern: { value: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)', message: 'Must include uppercase, lowercase, and number' },
+      minLength: 8,
+      pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)',
+      validationMessages: {
+        required: 'Password is required',
+        minLength: 'Password must be at least 8 characters',
+        pattern: 'Must include uppercase, lowercase, and number',
       },
+    },
+  ],
+} as const satisfies FormConfig;
+```
+
+For advanced validation scenarios (conditional validators, dynamic values), use the `validators` array:
+
+```typescript
+const config = {
+  fields: [
+    {
+      key: 'discount',
+      type: 'input',
+      value: 0,
+      validators: [
+        {
+          type: 'min',
+          value: 0,
+          errorMessage: 'Discount cannot be negative',
+        },
+        {
+          type: 'max',
+          value: 100,
+          when: { expression: 'formValue.discountType === "percentage"' },
+          errorMessage: 'Percentage discount cannot exceed 100',
+        },
+      ],
     },
   ],
 } as const satisfies FormConfig;
@@ -593,29 +623,41 @@ function processForm(value: InferFormValue<(typeof USER_FORM)['fields']>) {
 
 ## Troubleshooting
 
-**Type resolves to `never` or `unknown`:**
+**Type inference not working:**
 
-- Verify `as const` is used
-- Check all field types are registered in `FieldRegistryLeaves`
-- Ensure `value` property is present on value-bearing fields
-- Verify nesting rules are followed (pages/rows/groups)
-- Check TypeScript version is 5.0+
+Type inference requires `as const` - without it, TypeScript treats your config as mutable and can't infer precise types:
 
-**IntelliSense not working:**
+```typescript
+// ✗ No inference - types are too wide
+const config = {
+  fields: [{ key: 'name', type: 'input', value: '' }],
+};
+// Type: { fields: { key: string; type: string; value: string }[] }
 
-- Restart TypeScript server (VS Code: Cmd+Shift+P → "Restart TS Server")
-- Check `fields` array is readonly (`as const`)
-- Verify no circular type references
-- Ensure field configuration uses proper generics
+// ✓ With as const - precise inference
+const config = {
+  fields: [{ key: 'name', type: 'input', value: '' }],
+} as const satisfies FormConfig;
+// Type inferred: { name?: string }
+```
 
-**Nesting depth exceeded:**
+**Dynamic form configs:**
 
-- Type inference is limited to 5 levels of nesting
-- Flatten deeply nested structures using rows
-- Consider splitting complex forms into multiple pages
+If your form configuration is built dynamically (e.g., from API data, conditional logic, or runtime calculations), type inference won't work:
 
-**Field type not recognized:**
+```typescript
+// ✗ Dynamic - no inference possible
+const fields = getFieldsFromAPI(); // Returns field array at runtime
+const config = { fields } as const satisfies FormConfig;
+// Can't infer - TypeScript doesn't know what getFieldsFromAPI() returns
 
-- Ensure UI integration is imported (`@ng-forge/dynamic-form-material`)
-- Check module augmentation is loaded (import the field definitions)
-- Verify custom field types are properly registered in `FieldRegistryLeaves`
+// For dynamic forms, manually type your form values:
+interface MyFormValue {
+  name: string;
+  email: string;
+}
+
+const formValue = signal<MyFormValue>({ name: '', email: '' });
+```
+
+Type inference only works for **static**, **compile-time constant** configurations.

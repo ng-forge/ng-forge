@@ -1,34 +1,33 @@
 # Form Groups
 
-Group related fields with visual containers and labels.
+Groups nest form fields under a single key in the form value. This creates logical grouping for form data, not visual grouping.
 
 ## Basic Group
 
 ```typescript
 {
   type: 'group',
-  label: 'Personal Information',
+  key: 'address',
   fields: [
-    { key: 'firstName', type: 'input', label: 'First Name' },
-    { key: 'lastName', type: 'input', label: 'Last Name' },
-    { key: 'email', type: 'input', label: 'Email' },
+    { key: 'street', type: 'input', label: 'Street', value: '' },
+    { key: 'city', type: 'input', label: 'City', value: '' },
+    { key: 'zip', type: 'input', label: 'ZIP', value: '' },
   ],
 }
 ```
 
-## Collapsible Groups
+This creates a nested structure in the form value:
 
 ```typescript
 {
-  type: 'group',
-  label: 'Optional Information',
-  collapsible: true,
-  collapsed: true,
-  fields: [
-    { key: 'phone', type: 'input', label: 'Phone' },
-    { key: 'address', type: 'textarea', label: 'Address' },
-  ],
+  address: {
+    street: '',
+    city: '',
+    zip: ''
+  }
 }
 ```
 
-_Documentation in progress_
+Groups are for organizing form **data**, not UI. The visual presentation depends on your UI integration (Material, Bootstrap, etc.).
+
+See [Type Safety & Inference](../core/type-safety) for details on how groups affect type inference.

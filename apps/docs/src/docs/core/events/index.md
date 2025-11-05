@@ -1,48 +1,36 @@
 # Event Bus
 
-The event bus provides decoupled communication between form components using type-safe events.
+The event bus enables communication between the `<dynamic-form>` component and custom field components within it. Each form instance has its own isolated event bus.
 
 ## Overview
 
-The `EventBus` service enables:
+The event bus provides:
 
-- Form-wide event broadcasting
+- Communication between field components within a single form
 - Type-safe event subscriptions
 - Reactive event handling with RxJS
-- Multi-wizard page coordination
-- Custom form workflows
+- Wizard page navigation coordination
+- Custom field component workflows
 
-## Basic Usage
+**Note**: The event bus is scoped to each `<dynamic-form>` instance - events don't cross form boundaries.
 
-### Subscribe to Events
+## Usage in Custom Field Components
+
+When building custom field types, inject the event bus to communicate with the parent form or other fields:
 
 ```typescript
 import { Component, inject } from '@angular/core';
 import { EventBus } from '@ng-forge/dynamic-form';
 
-@Component({...})
-export class MyFormComponent {
+@Component({
+  selector: 'app-custom-submit-button',
+  template: `<button (click)="submit()">Submit Form</button>`,
+})
+export class CustomSubmitButton {
   eventBus = inject(EventBus);
 
-  ngOnInit() {
-    // Subscribe to submit events
-    this.eventBus.subscribe('submit').subscribe(() => {
-      console.log('Form submitted');
-    });
-  }
-}
-```
-
-### Dispatch Events
-
-```typescript
-import { SubmitEvent } from '@ng-forge/dynamic-form';
-
-@Component({...})
-export class MyFormComponent {
-  eventBus = inject(EventBus);
-
-  onSubmit() {
+  submit() {
+    // Dispatch submit event to the parent dynamic-form
     this.eventBus.dispatch(SubmitEvent);
   }
 }
