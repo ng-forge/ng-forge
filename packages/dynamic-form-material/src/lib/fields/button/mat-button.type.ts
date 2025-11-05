@@ -13,7 +13,7 @@ export type MatButtonComponent<TEvent extends FormEvent> = FieldComponent<MatBut
 
 /** Submit button field - automatically disabled when form is invalid */
 export interface MatSubmitButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
-  type: 'submit-button';
+  type: 'submit';
   key: string;
   label: string;
   disabled?: boolean;
@@ -23,7 +23,7 @@ export interface MatSubmitButtonField extends Omit<FieldDef<MatButtonProps>, 'ev
 
 /** Next page button field - with preconfigured NextPageEvent */
 export interface MatNextButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
-  type: 'next-button';
+  type: 'next';
   key: string;
   label: string;
   disabled?: boolean;
@@ -33,7 +33,7 @@ export interface MatNextButtonField extends Omit<FieldDef<MatButtonProps>, 'even
 
 /** Previous page button field - with preconfigured PreviousPageEvent */
 export interface MatPreviousButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
-  type: 'previous-button';
+  type: 'previous';
   key: string;
   label: string;
   disabled?: boolean;

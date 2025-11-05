@@ -30,19 +30,19 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     valueHandling: 'exclude',
   },
   {
-    name: MatField.SubmitButton,
+    name: MatField.Submit,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: submitButtonFieldMapper,
     valueHandling: 'exclude',
   },
   {
-    name: MatField.NextButton,
+    name: MatField.Next,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: nextButtonFieldMapper,
     valueHandling: 'exclude',
   },
   {
-    name: MatField.PreviousButton,
+    name: MatField.Previous,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: previousButtonFieldMapper,
     valueHandling: 'exclude',

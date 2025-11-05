@@ -24,7 +24,7 @@ export function actionButton<T extends FormEvent>(options: Omit<MatButtonField<T
  */
 export function submitButton(options: Omit<MatSubmitButtonField, 'type' | 'event'>): MatSubmitButtonField {
   return {
-    type: 'submit-button',
+    type: 'submit',
     key: options.key,
     label: options.label,
     disabled: options.disabled,
@@ -39,7 +39,7 @@ export function submitButton(options: Omit<MatSubmitButtonField, 'type' | 'event
  */
 export function nextPageButton(options: Omit<MatNextButtonField, 'type' | 'event'>): MatNextButtonField {
   return {
-    type: 'next-button',
+    type: 'next',
     key: options.key,
     label: options.label,
     disabled: options.disabled,
@@ -54,7 +54,7 @@ export function nextPageButton(options: Omit<MatNextButtonField, 'type' | 'event
  */
 export function previousPageButton(options: Omit<MatPreviousButtonField, 'type' | 'event'>): MatPreviousButtonField {
   return {
-    type: 'previous-button',
+    type: 'previous',
     key: options.key,
     label: options.label,
     disabled: options.disabled,

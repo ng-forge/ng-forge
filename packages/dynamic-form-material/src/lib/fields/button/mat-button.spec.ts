@@ -431,7 +431,7 @@ describe('MatButtonFieldComponent', () => {
         const config = MaterialFormTestUtils.builder()
           .field({
             key: 'submitBtn',
-            type: 'submit-button',
+            type: 'submit',
             label: 'Submit',
           })
           .build();
@@ -450,7 +450,7 @@ describe('MatButtonFieldComponent', () => {
           .matInputField({ key: 'email', required: true })
           .field({
             key: 'submitBtn',
-            type: 'submit-button',
+            type: 'submit',
             label: 'Submit',
           })
           .build();
@@ -479,7 +479,7 @@ describe('MatButtonFieldComponent', () => {
           .matInputField({ key: 'email', required: true })
           .field({
             key: 'submitBtn',
-            type: 'submit-button',
+            type: 'submit',
             label: 'Submit',
             disabled: true,
           })
@@ -502,7 +502,7 @@ describe('MatButtonFieldComponent', () => {
         const config = MaterialFormTestUtils.builder()
           .field({
             key: 'nextBtn',
-            type: 'next-button',
+            type: 'next',
             label: 'Next',
           })
           .build();
@@ -521,7 +521,7 @@ describe('MatButtonFieldComponent', () => {
         const config = MaterialFormTestUtils.builder()
           .field({
             key: 'nextBtn',
-            type: 'next-button',
+            type: 'next',
             label: 'Next',
             disabled: true,
           })
@@ -539,7 +539,7 @@ describe('MatButtonFieldComponent', () => {
         const config = MaterialFormTestUtils.builder()
           .field({
             key: 'prevBtn',
-            type: 'previous-button',
+            type: 'previous',
             label: 'Previous',
           })
           .build();
@@ -558,7 +558,7 @@ describe('MatButtonFieldComponent', () => {
         const config = MaterialFormTestUtils.builder()
           .field({
             key: 'prevBtn',
-            type: 'previous-button',
+            type: 'previous',
             label: 'Previous',
             disabled: true,
           })
@@ -577,17 +577,17 @@ describe('MatButtonFieldComponent', () => {
           .matInputField({ key: 'name', required: true })
           .field({
             key: 'prevBtn',
-            type: 'previous-button',
+            type: 'previous',
             label: 'Back',
           })
           .field({
             key: 'nextBtn',
-            type: 'next-button',
+            type: 'next',
             label: 'Next',
           })
           .field({
             key: 'submitBtn',
-            type: 'submit-button',
+            type: 'submit',
             label: 'Submit',
           })
           .build();
