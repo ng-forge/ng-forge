@@ -26,17 +26,17 @@ export type GroupAllowedChildren = Exclude<RegisteredFieldTypes, { type: 'page' 
 /**
  * Validates that a fields array contains only allowed child types for a Page
  */
-export type ValidatePageChildren<TFields extends readonly unknown[]> = TFields extends readonly PageAllowedChildren[] ? TFields : never;
+export type ValidatePageChildren<TFields extends unknown[]> = TFields extends PageAllowedChildren[] ? TFields : never;
 
 /**
  * Validates that a fields array contains only allowed child types for a Row
  */
-export type ValidateRowChildren<TFields extends readonly unknown[]> = TFields extends readonly RowAllowedChildren[] ? TFields : never;
+export type ValidateRowChildren<TFields extends unknown[]> = TFields extends RowAllowedChildren[] ? TFields : never;
 
 /**
  * Validates that a fields array contains only allowed child types for a Group
  */
-export type ValidateGroupChildren<TFields extends readonly unknown[]> = TFields extends readonly GroupAllowedChildren[] ? TFields : never;
+export type ValidateGroupChildren<TFields extends unknown[]> = TFields extends GroupAllowedChildren[] ? TFields : never;
 
 /**
  * Type guard to check if a field is a container field at type level

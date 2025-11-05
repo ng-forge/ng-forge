@@ -74,10 +74,7 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
  *
  * @public
  */
-export function flattenFields(
-  fields: readonly FieldDef<Record<string, unknown>>[],
-  registry: Map<string, FieldTypeDefinition>
-): FlattenedField[] {
+export function flattenFields(fields: FieldDef<Record<string, unknown>>[], registry: Map<string, FieldTypeDefinition>): FlattenedField[] {
   const result: FlattenedField[] = [];
   let autoKeyCounter = 0;
 
@@ -90,7 +87,7 @@ export function flattenFields(
         // Handle both array (page/row fields) and object (group fields)
         // Type assertion: fields can be unknown[] from container field generics, but we know they're FieldDef[]
         const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-        const flattenedChildren = flattenFields(fieldsArray as readonly FieldDef<Record<string, unknown>>[], registry);
+        const flattenedChildren = flattenFields(fieldsArray as FieldDef<Record<string, unknown>>[], registry);
         result.push(...flattenedChildren);
       }
     } else if (isGroupField(field)) {

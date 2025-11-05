@@ -5,7 +5,7 @@ import { isArray } from 'lodash-es';
  * Helper interface for container fields (row/group) within nested checking
  */
 interface ContainerFieldWithFields extends FieldDef<Record<string, unknown>> {
-  fields: readonly FieldDef<Record<string, unknown>>[];
+  fields: FieldDef<Record<string, unknown>>[];
 }
 
 /**
@@ -17,7 +17,7 @@ interface ContainerFieldWithFields extends FieldDef<Record<string, unknown>> {
  *
  * The generic parameter preserves the exact field types for proper inference
  */
-export interface PageField<TFields extends readonly unknown[] = readonly unknown[]> extends FieldDef<never> {
+export interface PageField<TFields extends unknown[] = unknown[]> extends FieldDef<never> {
   /** Field type identifier */
   type: 'page';
 
@@ -39,15 +39,15 @@ export function isPageField(field: FieldDef<Record<string, unknown>>): field is 
   return field.type === 'page' && 'fields' in field && isArray((field as PageField).fields);
 }
 
-export type PageComponent = FieldComponent<PageField<readonly unknown[]>>;
+export type PageComponent = FieldComponent<PageField<unknown[]>>;
 
 /**
  * Validates that a page field doesn't contain nested page fields
  * @param pageField The page field to validate
  * @returns true if valid (no nested pages), false otherwise
  */
-export function validatePageNesting(pageField: PageField<readonly unknown[]>): boolean {
-  return !hasNestedPages(pageField.fields as readonly FieldDef<Record<string, unknown>>[]);
+export function validatePageNesting(pageField: PageField<unknown[]>): boolean {
+  return !hasNestedPages(pageField.fields as FieldDef<Record<string, unknown>>[]);
 }
 
 /**
@@ -62,7 +62,7 @@ function isContainerWithFields(field: FieldDef<Record<string, unknown>>): field 
  * @param fields Array of field definitions to check
  * @returns true if nested pages found, false otherwise
  */
-function hasNestedPages(fields: readonly FieldDef<Record<string, unknown>>[]): boolean {
+function hasNestedPages(fields: FieldDef<Record<string, unknown>>[]): boolean {
   for (const field of fields) {
     if (isPageField(field)) {
       return true;

@@ -2,11 +2,7 @@ import { RegisteredFieldTypes } from '../registry/field-registry';
 
 /**
  * Helper type to convert union to intersection
- * Used to merge multiple field value objects into a single object type
- *
- * Note: The `any` in `U extends any` is intentional and necessary for distributive conditional types.
- * This is a TypeScript pattern where `any` is required to distribute the conditional type over union members.
- * @see https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+ * Note: `any` is necessary for distributive conditional types
  */
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 
@@ -39,18 +35,18 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
   ? Record<string, unknown> // Max depth reached, return generic
   : // Page fields: flatten children (don't create a key for the page itself)
   T extends { type: 'page'; fields: infer TFields }
-  ? TFields extends readonly RegisteredFieldTypes[]
+  ? TFields extends RegisteredFieldTypes[]
     ? InferFormValueWithDepth<TFields, Depth[D]>
     : never
   : // Row fields: flatten children (don't create a key for the row itself)
   T extends { type: 'row'; fields: infer TFields }
-  ? TFields extends readonly RegisteredFieldTypes[]
+  ? TFields extends RegisteredFieldTypes[]
     ? InferFormValueWithDepth<TFields, Depth[D]>
     : never
   : // Group fields: nest children under the group's key
   T extends { type: 'group'; key: infer K; fields: infer TFields }
   ? K extends string
-    ? TFields extends readonly RegisteredFieldTypes[]
+    ? TFields extends RegisteredFieldTypes[]
       ? { [P in K]: InferFormValueWithDepth<TFields, Depth[D]> }
       : { [P in K]: Record<string, unknown> }
     : never
@@ -73,9 +69,7 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
 /**
  * Internal helper with depth tracking
  */
-type InferFormValueWithDepth<T extends readonly RegisteredFieldTypes[], D extends number = 5> = UnionToIntersection<
-  ProcessField<T[number], D>
->;
+type InferFormValueWithDepth<T extends RegisteredFieldTypes[], D extends number = 5> = UnionToIntersection<ProcessField<T[number], D>>;
 
 /**
  * Infer form value type from an array of field definitions
@@ -96,7 +90,7 @@ type InferFormValueWithDepth<T extends readonly RegisteredFieldTypes[], D extend
  * // Result: { email: string; address: { street?: string; city?: string } }
  * ```
  */
-export type InferFormValue<T extends readonly RegisteredFieldTypes[]> = InferFormValueWithDepth<T, 5>;
+export type InferFormValue<T extends RegisteredFieldTypes[]> = InferFormValueWithDepth<T, 5>;
 
 /**
  * Infer form value type from the global field registry

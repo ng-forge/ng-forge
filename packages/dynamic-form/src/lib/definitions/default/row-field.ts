@@ -7,12 +7,12 @@ import { isArray } from 'lodash-es';
  * The row itself doesn't have a value - it's a layout container
  * This is a programmatic field type only - users cannot customize this field type
  */
-export interface RowField<TFields extends readonly unknown[] = readonly unknown[]> extends FieldDef<never> {
+export interface RowField<TFields extends unknown[] = unknown[]> extends FieldDef<never> {
   /** Field type identifier */
-  readonly type: 'row';
+  type: 'row';
 
   /** Child definitions to render within this row */
-  readonly fields: TFields;
+  fields: TFields;
 }
 
 /**
@@ -23,7 +23,7 @@ export function isRowField(field: FieldDef<Record<string, unknown>>): field is R
   return field.type === 'row' && 'fields' in field && isArray((field as RowField).fields);
 }
 
-export type RowComponent = FieldComponent<RowField<readonly unknown[]>>;
+export type RowComponent = FieldComponent<RowField<unknown[]>>;
 
 /**
  * Row child field with column layout properties

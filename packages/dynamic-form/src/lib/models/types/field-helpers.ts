@@ -23,10 +23,7 @@ import { PageAllowedChildren, RowAllowedChildren, GroupAllowedChildren } from '.
  * };
  * ```
  */
-export type TypeSafePageField<TFields extends readonly PageAllowedChildren[] = readonly PageAllowedChildren[]> = Omit<
-  PageField<TFields>,
-  'fields'
-> & {
+export type TypeSafePageField<TFields extends PageAllowedChildren[] = PageAllowedChildren[]> = Omit<PageField<TFields>, 'fields'> & {
   fields: TFields;
 };
 
@@ -46,10 +43,7 @@ export type TypeSafePageField<TFields extends readonly PageAllowedChildren[] = r
  * };
  * ```
  */
-export type TypeSafeRowField<TFields extends readonly RowAllowedChildren[] = readonly RowAllowedChildren[]> = Omit<
-  RowField<TFields>,
-  'fields'
-> & {
+export type TypeSafeRowField<TFields extends RowAllowedChildren[] = RowAllowedChildren[]> = Omit<RowField<TFields>, 'fields'> & {
   fields: TFields;
 };
 
@@ -69,10 +63,7 @@ export type TypeSafeRowField<TFields extends readonly RowAllowedChildren[] = rea
  * };
  * ```
  */
-export type TypeSafeGroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> = Omit<
-  GroupField<TFields>,
-  'fields'
-> & {
+export type TypeSafeGroupField<TFields extends GroupAllowedChildren[] = GroupAllowedChildren[]> = Omit<GroupField<TFields>, 'fields'> & {
   fields: TFields;
 };
 
@@ -81,14 +72,14 @@ export type TypeSafeGroupField<TFields extends readonly GroupAllowedChildren[] =
  * For non-paged forms: no page fields allowed
  * For paged forms: only page fields allowed at root
  */
-export type ValidateRootFields<TFields extends readonly RegisteredFieldTypes[]> =
+export type ValidateRootFields<TFields extends RegisteredFieldTypes[]> =
   // Check if any fields are pages
   TFields[number] extends { type: 'page' }
     ? // If so, all must be pages
-      TFields extends readonly PageField[]
+      TFields extends PageField[]
       ? TFields
       : never // Mixed page and non-page fields not allowed
     : // If no pages, no pages should be present
-    TFields extends readonly Exclude<RegisteredFieldTypes, { type: 'page' }>[]
+    TFields extends Exclude<RegisteredFieldTypes, { type: 'page' }>[]
     ? TFields
     : never;

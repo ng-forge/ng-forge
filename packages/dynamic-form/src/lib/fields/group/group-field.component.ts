@@ -44,7 +44,7 @@ import { flattenFields } from '../../utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
-export default class GroupFieldComponent<T extends readonly FieldDef<Record<string, unknown>>[], TModel = Record<string, unknown>> {
+export default class GroupFieldComponent<T extends FieldDef<Record<string, unknown>>[], TModel = Record<string, unknown>> {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
@@ -53,13 +53,13 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: readonly FieldDef<Record<string, unknown>>[], registry: Map<string, any>) => flattenFields(fields, registry),
+    (fields: FieldDef<Record<string, unknown>>[], registry: Map<string, any>) => flattenFields(fields, registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
   );
 
   private readonly memoizedKeyBy = memoize(
-    <T extends { key: string }>(fields: readonly T[]) => keyBy(fields, 'key'),
+    <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
     (fields) => fields.map((f) => f.key).join(',')
   );
 
@@ -161,7 +161,7 @@ export default class GroupFieldComponent<T extends readonly FieldDef<Record<stri
     { initialValue: [] }
   );
 
-  private mapFields(fields: readonly FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map((fieldDef) => this.mapSingleField(fieldDef))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
