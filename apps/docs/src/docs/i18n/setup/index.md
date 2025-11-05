@@ -1,210 +1,200 @@
 # i18n Setup
 
-Configure internationalization for form labels, hints, validation messages, and field options.
+ng-forge supports internationalization through Angular's reactive primitives: **Observables** and **Signals**. It's framework-agnostic - use any translation library that provides these types.
 
-## Angular i18n Integration
+## How i18n Works
 
-ng-forge integrates with Angular's i18n system.
-
-### 1. Configure Angular i18n
+ng-forge uses the `DynamicText` type for all text properties:
 
 ```typescript
-// app.config.ts
-import { provideHttpClient } from '@angular/common/http';
-import { provideTransloco } from '@jsverse/transloco';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient(),
-    provideTransloco({
-      config: {
-        availableLangs: ['en', 'es', 'fr', 'de'],
-        defaultLang: 'en',
-        reRenderOnLangChange: true,
-      },
-      loader: TranslocoHttpLoader,
-    }),
-    provideDynamicForm(),
-  ],
-};
+type DynamicText = string | Observable<string> | Signal<string>;
 ```
 
-### 2. Translation Files
+Any property that accepts text (`label`, `placeholder`, `hint`, `validationMessages`, etc.) accepts:
 
-Create translation files for each language:
+- Static strings
+- Observables (from translation libraries like Transloco, ngx-translate, etc.)
+- Signals
 
-```json
-// assets/i18n/en.json
-{
-  "form": {
-    "labels": {
-      "firstName": "First Name",
-      "lastName": "Last Name",
-      "email": "Email Address"
-    },
-    "placeholders": {
-      "email": "Enter your email"
-    },
-    "hints": {
-      "email": "We'll never share your email"
-    }
-  },
-  "validation": {
-    "required": "This field is required",
-    "email": "Invalid email address",
-    "minLength": "Minimum {length} characters"
-  }
-}
-```
+## Basic Example
 
-```json
-// assets/i18n/es.json
-{
-  "form": {
-    "labels": {
-      "firstName": "Nombre",
-      "lastName": "Apellido",
-      "email": "Correo Electrónico"
-    },
-    "placeholders": {
-      "email": "Ingrese su correo"
-    },
-    "hints": {
-      "email": "Nunca compartiremos su correo"
-    }
-  },
-  "validation": {
-    "required": "Este campo es obligatorio",
-    "email": "Dirección de correo inválida",
-    "minLength": "Mínimo {length} caracteres"
-  }
-}
-```
-
-## Form Configuration with i18n
-
-Use translation keys in field configuration:
+With any translation service that returns Observables:
 
 ```typescript
-import { TranslocoService } from '@jsverse/transloco';
+import { Component, inject } from '@angular/core';
 
 @Component({...})
 export class MyFormComponent {
-  transloco = inject(TranslocoService);
+  translationService = inject(YourTranslationService);
 
   config = {
     fields: [
       {
         key: 'firstName',
         type: 'input',
-        label: this.transloco.selectTranslate('form.labels.firstName'),
-        props: {
-          placeholder: this.transloco.selectTranslate('form.placeholders.firstName'),
-        },
+        label: this.translationService.translate('form.firstName'), // Observable<string>
+        value: '',
       },
       {
         key: 'email',
         type: 'input',
-        label: this.transloco.selectTranslate('form.labels.email'),
+        label: this.translationService.translate('form.email'),
         email: true,
-        props: {
-          hint: this.transloco.selectTranslate('form.hints.email'),
+        validationMessages: {
+          required: this.translationService.translate('validation.required'),
+          email: this.translationService.translate('validation.email'),
         },
+        value: '',
       },
     ],
   };
 }
 ```
 
-## Translated Validation Messages
+The form automatically updates when translations change.
 
-Configure validation messages:
+## Example with Transloco
+
+Here's a complete example using [@jsverse/transloco](https://jsverse.github.io/transloco/):
 
 ```typescript
-import { provideValidationMessages } from '@ng-forge/dynamic-form';
-import { TranslocoService } from '@jsverse/transloco';
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideTransloco } from '@jsverse/transloco';
+import { provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
-export function provideTranslatedValidation() {
-  return provideValidationMessages((errors, transloco: TranslocoService) => {
-    const key = Object.keys(errors)[0];
-    return transloco.translate(`validation.${key}`, errors[key]);
-  });
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient(),
+    provideTransloco({
+      config: {
+        availableLangs: ['en', 'es'],
+        defaultLang: 'en',
+        reRenderOnLangChange: true,
+      },
+      loader: TranslocoHttpLoader,
+    }),
+    provideDynamicForm(...withMaterialFields()),
+  ],
+};
+```
+
+```typescript
+// my-form.component.ts
+import { Component, inject } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
+import { DynamicForm } from '@ng-forge/dynamic-form';
+
+@Component({
+  selector: 'app-my-form',
+  imports: [DynamicForm],
+  template: ` <dynamic-form [config]="formConfig" /> `,
+})
+export class MyFormComponent {
+  transloco = inject(TranslocoService);
+
+  formConfig = {
+    fields: [
+      {
+        key: 'username',
+        type: 'input',
+        label: this.transloco.selectTranslate('form.username'),
+        value: '',
+        required: true,
+        validationMessages: {
+          required: this.transloco.selectTranslate('validation.required'),
+        },
+      },
+    ],
+  };
+
+  // Optional: Switch languages
+  changeLanguage(lang: string) {
+    this.transloco.setActiveLang(lang);
+    // Form automatically updates due to reRenderOnLangChange: true
+  }
+}
+```
+
+## Example with Signals
+
+Use Angular signals for translations:
+
+```typescript
+import { Component, signal, computed } from '@angular/core';
+
+@Component({...})
+export class MyFormComponent {
+  currentLang = signal<'en' | 'es'>('en');
+
+  translations = computed(() => ({
+    en: {
+      username: 'Username',
+      required: 'This field is required',
+    },
+    es: {
+      username: 'Nombre de usuario',
+      required: 'Este campo es obligatorio',
+    },
+  }[this.currentLang()]));
+
+  formConfig = computed(() => ({
+    fields: [
+      {
+        key: 'username',
+        type: 'input',
+        label: this.translations().username,  // Signal<string>
+        value: '',
+        required: true,
+        validationMessages: {
+          required: this.translations().required,
+        },
+      },
+    ],
+  }));
+
+  switchLanguage(lang: 'en' | 'es') {
+    this.currentLang.set(lang);
+    // Form automatically updates
+  }
 }
 ```
 
 ## Translated Select Options
 
-Translate dropdown options:
+Options also support `DynamicText`:
 
 ```typescript
 {
   key: 'country',
   type: 'select',
-  label: this.transloco.selectTranslate('form.labels.country'),
-  options: this.transloco.selectTranslateObject('countries').pipe(
-    map(translations => [
-      { value: 'us', label: translations.us },
-      { value: 'es', label: translations.es },
-      { value: 'fr', label: translations.fr },
+  label: translationService.translate('form.country'),
+  value: '',
+  options: translationService.translate('countries').pipe(
+    map(countries => [
+      { value: 'us', label: countries.us },
+      { value: 'es', label: countries.es },
     ])
   ),
 }
 ```
 
-## Language Switching
+## Other Translation Libraries
 
-Switch languages at runtime:
+ng-forge works with any library that provides Observables or Signals:
 
-```typescript
-@Component({
-  template: `
-    <select (change)="changeLanguage($event)">
-      <option value="en">English</option>
-      <option value="es">Español</option>
-      <option value="fr">Français</option>
-    </select>
-
-    <dynamic-form [config]="formConfig" />
-  `,
-})
-export class MyFormComponent {
-  transloco = inject(TranslocoService);
-
-  changeLanguage(event: Event) {
-    const lang = (event.target as HTMLSelectElement).value;
-    this.transloco.setActiveLang(lang);
-  }
-}
-```
-
-Forms automatically update when language changes due to `reRenderOnLangChange: true`.
-
-## Best Practices
-
-**Namespace translations:**
-
-```json
-{
-  "forms": {
-    "user": { "firstName": "First Name" },
-    "company": { "name": "Company Name" }
-  }
-}
-```
-
-**Use template strings for dynamic values:**
-
-```json
-{
-  "validation": {
-    "minLength": "Minimum {{min}} characters",
-    "between": "Value must be between {{min}} and {{max}}"
-  }
-}
-```
-
-**Provide fallbacks:**
+**ngx-translate:**
 
 ```typescript
-label: this.transloco.selectTranslate('form.label', {}, 'en');
+label: this.translate.get('form.username'); // Observable<string>
 ```
+
+**Custom service:**
+
+```typescript
+label: this.myTranslationService.translate('key'); // Observable<string> or Signal<string>
+```
+
+The key is that your translation method returns `Observable<string>` or `Signal<string>`.
