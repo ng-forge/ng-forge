@@ -651,9 +651,9 @@ All UI packages include: input, textarea, select, checkbox, radio, date picker, 
 ## Join the Community
 
 - 📖 **[Documentation](../)** - Comprehensive guides and examples
-- 💬 **[GitHub Discussions](https://github.com/ng-forge/dynamic-forms/discussions)** - Ask questions, share tips
-- 🐛 **[Issue Tracker](https://github.com/ng-forge/dynamic-forms/issues)** - Report bugs, request features
-- ⭐ **[Star on GitHub](https://github.com/ng-forge/dynamic-forms)** - Support the project
+- 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions, share tips
+- 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs, request features
+- ⭐ **[Star on GitHub](https://github.com/ng-forge/ng-forge)** - Support the project
 
 ---
 

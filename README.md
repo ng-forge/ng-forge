@@ -5,43 +5,64 @@
 [![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-form.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-ng-forge is a modern dynamic forms library for Angular 21+ that eliminates boilerplate while providing full type safety, validation, and conditional logic - all powered by Angular's signal forms.
+ng-forge dynamic forms is a modern forms library for Angular 21+ that eliminates boilerplate while providing full type safety, validation, and conditional logic - all powered by Angular's signal forms.
 
-## ✨ Why ng-forge?
+## ✨ How It Works
 
-**From this:**
+ng-forge dynamic forms uses a declarative, type-safe configuration to build complete forms with validation, conditional logic, and beautiful UI:
 
 ```typescript
-// Traditional approach: Verbose, repetitive, hard to maintain
-export class TraditionalFormComponent {
-  form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    // ... more boilerplate
-  });
+import { Component } from '@angular/core';
+import { DynamicFormComponent, FormConfig } from '@ng-forge/dynamic-form';
 
-  // Manual error handling
-  // Custom validator logic
-  // Conditional field display
-  // Subscription management
-  // ngOnDestroy cleanup...
+@Component({
+  selector: 'app-login',
+  imports: [DynamicFormComponent],
+  template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
+})
+export class LoginComponent {
+  config = {
+    fields: [
+      {
+        key: 'email',
+        type: 'input',
+        value: '',
+        label: 'Email',
+        required: true,
+        email: true,
+      },
+      {
+        key: 'password',
+        type: 'input',
+        value: '',
+        label: 'Password',
+        required: true,
+        minLength: 8,
+        props: { type: 'password' },
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Sign In',
+        props: { color: 'primary' },
+      },
+    ],
+  } as const satisfies FormConfig;
+
+  onSubmit(value: unknown) {
+    // TypeScript knows: { email: string, password: string }
+    console.log('Login:', value);
+  }
 }
 ```
 
-**To this:**
+**That's it!** You get:
 
-```typescript
-// ng-forge: Clean, declarative, type-safe
-const config = {
-  fields: [
-    { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
-    { key: 'password', type: 'input', value: '', label: 'Password', required: true, minLength: 8, props: { type: 'password' } },
-    { type: 'submit', key: 'submit', label: 'Sign In' },
-  ],
-} as const satisfies FormConfig;
-```
-
-**That's it.** Validation, error messages, state management, UI - all handled automatically.
+- ✅ Real-time validation with custom error messages
+- ✅ Full TypeScript type inference
+- ✅ Beautiful Material Design UI
+- ✅ Accessibility built-in
+- ✅ No subscriptions or cleanup needed
 
 ## 🚀 Features
 
@@ -259,7 +280,7 @@ provideDynamicForm(
 
 ## 🎨 UI Framework Support
 
-ng-forge works with any UI library:
+ng-forge dynamic forms works with any UI library:
 
 ### Material Design (Official)
 
@@ -371,4 +392,4 @@ MIT © ng-forge
 
 **Built with ❤️ for the Angular community**
 
-If you find ng-forge useful, please consider giving it a ⭐ on [GitHub](https://github.com/ng-forge/ng-forge)!
+If you find ng-forge dynamic forms useful, please consider giving it a ⭐ on [GitHub](https://github.com/ng-forge/ng-forge)!
