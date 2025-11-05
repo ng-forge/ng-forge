@@ -1,0 +1,61 @@
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
+import { IonToggle } from '@ionic/angular/standalone';
+import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
+import { IonicErrorsComponent } from '../../shared/ionic-errors.component';
+import { IonicToggleComponent, IonicToggleProps } from './ionic-toggle.type';
+import { AsyncPipe } from '@angular/common';
+
+/**
+ * Ionic toggle field component
+ */
+@Component({
+  selector: 'df-ionic-toggle',
+  imports: [IonToggle, IonicErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  template: `
+    @let f = field();
+
+    <ion-toggle
+      [field]="f"
+      [labelPlacement]="props()?.labelPlacement ?? 'end'"
+      [justify]="props()?.justify"
+      [color]="props()?.color ?? 'primary'"
+      [enableOnOffLabels]="props()?.enableOnOffLabels ?? false"
+      [disabled]="f().disabled()"
+      [attr.tabindex]="tabIndex()"
+    >
+      {{ label() | dynamicText | async }}
+    </ion-toggle>
+
+    <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+  `,
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
+  host: {
+    '[class]': 'className()',
+    '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export default class IonicToggleFieldComponent implements IonicToggleComponent {
+  readonly field = input.required<FieldTree<boolean>>();
+  readonly key = input.required<string>();
+
+  // Properties
+  readonly label = input<DynamicText>();
+  readonly placeholder = input<DynamicText>();
+  readonly className = input<string>('');
+  readonly tabIndex = input<number>();
+  readonly props = input<IonicToggleProps>();
+}

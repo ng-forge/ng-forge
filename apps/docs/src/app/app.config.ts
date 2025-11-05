@@ -1,6 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 import {
   NG_DOC_DEFAULT_PAGE_PROCESSORS,
   NG_DOC_DEFAULT_PAGE_SKELETON,
@@ -30,6 +31,9 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(),
     provideAnimationsAsync(),
+    provideIonicAngular({
+      mode: 'md', // 'ios' or 'md' (Material Design)
+    }),
     provideNgDocContext(),
     provideNgDocApp({
       shiki: {

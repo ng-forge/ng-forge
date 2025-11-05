@@ -4,5 +4,43 @@
 // ============================================
 // MATERIAL THEME
 // ============================================
-// Material Design theme (required for Material integration examples)
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+// ============================================
+// PRIMENG THEME
+// ============================================
+@import 'primeng/resources/themes/lara-light-blue/theme.css';
+@import 'primeng/resources/primeng.css';
+@import 'primeicons/primeicons.css';
+
+// ============================================
+// IONIC THEME
+// ============================================
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/display.css';
+
+/* Optional Ionic CSS utilities */
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/float-elements.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/text-transformation.css';
+@import '@ionic/angular/css/flex-utils.css';
+
+// ============================================
+// THEME ISOLATION
+// ============================================
+.theme-material {
+  // Material-specific overrides if needed
+}
+
+.theme-primeng {
+  // PrimeNG-specific overrides if needed
+}
+
+.theme-ionic {
+  // Ionic-specific overrides if needed
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Roboto", sans-serif;
+}
