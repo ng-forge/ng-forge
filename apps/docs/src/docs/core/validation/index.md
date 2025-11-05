@@ -15,6 +15,91 @@ Every validator you configure in your field definition is applied using these An
 - Integration with Angular's form state management
 - Built-in accessibility features
 
+## Which Validation Approach Should I Use?
+
+ng-forge dynamic forms provides three ways to configure validation. Here's when to use each:
+
+| Approach                 | Use When                                                                         | Example                                                  |
+| ------------------------ | -------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Shorthand Validators** | Validation is **always active** and uses **simple, static values**               | `required: true`<br/>`minLength: 8`<br/>`email: true`    |
+| **Validators Array**     | Validation depends on **other field values** or uses **dynamic/computed values** | `validators: [{ type: 'max', value: 100, when: {...} }]` |
+| **Conditional Logic**    | Field should become **required/readonly/hidden** based on conditions             | `logic: [{ type: 'required', condition: {...} }]`        |
+
+### Decision Tree
+
+```
+Do you need to validate this field?
+├─ Yes
+│  ├─ Is validation always active?
+│  │  ├─ Yes → Use Shorthand Validators (required: true, email: true, etc.)
+│  │  └─ No, it depends on other fields → Use Validators Array with 'when' condition
+│  │
+│  └─ Does the field need to change behavior (hidden/readonly/required)?
+│     └─ Yes → Use Conditional Logic (logic: [{ type: 'required', condition: {...} }])
+│
+└─ No → No validators needed
+```
+
+### Examples Compared
+
+**Scenario: Username must be between 3-20 characters**
+
+```typescript
+// ✅ Use Shorthand (simple, always active)
+{
+  key: 'username',
+  type: 'input',
+  value: '',
+  minLength: 3,
+  maxLength: 20,
+}
+```
+
+**Scenario: Discount must be ≤ 100 when discount type is "percentage"**
+
+```typescript
+// ✅ Use Validators Array (conditional validation)
+{
+  key: 'discount',
+  type: 'input',
+  value: 0,
+  validators: [{
+    type: 'max',
+    value: 100,
+    when: {
+      type: 'fieldValue',
+      fieldPath: 'discountType',
+      operator: 'equals',
+      value: 'percentage',
+    },
+  }],
+}
+```
+
+**Scenario: Tax ID required only for business accounts**
+
+```typescript
+// ✅ Use Conditional Logic (field behavior changes)
+{
+  key: 'taxId',
+  type: 'input',
+  value: '',
+  logic: [{
+    type: 'required',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'accountType',
+      operator: 'equals',
+      value: 'business',
+    },
+  }],
+}
+```
+
+> **💡 Tip**: When in doubt, start with Shorthand Validators. Upgrade to Validators Array or Conditional Logic only when you need dynamic behavior.
+
+---
+
 ## Shorthand Validators
 
 Configure common validators using simple field properties. These provide the most concise syntax for standard validation scenarios.

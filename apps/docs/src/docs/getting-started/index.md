@@ -535,12 +535,12 @@ provideDynamicForm(
 | Framework           | Package                            | Status              |
 | ------------------- | ---------------------------------- | ------------------- |
 | **Material Design** | `@ng-forge/dynamic-form-material`  | ✅ Production Ready |
-| **Bootstrap**       | `@ng-forge/dynamic-form-bootstrap` | ✅ Production Ready |
-| **PrimeNG**         | `@ng-forge/dynamic-form-primeng`   | ✅ Production Ready |
-| **Ionic**           | `@ng-forge/dynamic-form-ionic`     | ✅ Production Ready |
+| **Bootstrap**       | `@ng-forge/dynamic-form-bootstrap` | 🚧 Coming Soon      |
+| **PrimeNG**         | `@ng-forge/dynamic-form-primeng`   | 🚧 Coming Soon      |
+| **Ionic**           | `@ng-forge/dynamic-form-ionic`     | 🚧 Coming Soon      |
 | **Custom**          | Build your own                     | ✅ Full Support     |
 
-All UI packages include: input, textarea, select, checkbox, radio, date picker, and buttons.
+**Material Design** integration is production-ready with complete documentation. Other UI framework integrations are in development - see individual pages for details and alternatives.
 
 ## Performance Features
 
