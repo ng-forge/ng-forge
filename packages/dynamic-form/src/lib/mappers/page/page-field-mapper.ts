@@ -10,7 +10,7 @@ import { FieldMapperOptions } from '../types';
  * @param options Field mapper options containing form context
  * @returns Array of input bindings for the page component
  */
-export function pageFieldMapper(fieldDef: PageField<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
+export function pageFieldMapper(fieldDef: PageField, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
   const bindings: Binding[] = [];
 
   bindings.push(inputBinding('key', () => fieldDef.key));

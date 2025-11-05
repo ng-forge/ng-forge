@@ -12,7 +12,7 @@ import { isArray } from 'lodash-es';
  * For documentation: Rows should contain groups and leaf fields, but NOT pages or other rows.
  * Runtime validation enforces these rules.
  */
-export interface RowField<TFields extends any[] = any[]> extends FieldDef<never> {
+export interface RowField<TFields extends RowAllowedChildren[] = RowAllowedChildren[]> extends FieldDef<never> {
   /** Field type identifier */
   type: 'row';
 

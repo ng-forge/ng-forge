@@ -10,7 +10,7 @@ import { GroupAllowedChildren } from '../../models/types/nesting-constraints';
  * For documentation: Groups should contain rows and leaf fields, but NOT pages or other groups.
  * Runtime validation enforces these rules.
  */
-export interface GroupField<TFields extends any[] = any[]> extends FieldDef<never> {
+export interface GroupField<TFields extends GroupAllowedChildren[] = GroupAllowedChildren[]> extends FieldDef<never> {
   /** Field type identifier */
   type: 'group';
 
