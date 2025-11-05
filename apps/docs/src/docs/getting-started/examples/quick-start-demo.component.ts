@@ -18,83 +18,16 @@ interface UserFormModel {
   selector: 'app-quick-start-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <div class="demo-container">
-      <h1>ng-forge Dynamic Forms Demo</h1>
-      <p class="description">Showcase of ng-forge dynamic forms library built with Angular 21 signal forms architecture.</p>
+    <div>
+      <h2>User Registration Form</h2>
+      <p>Raw ng-forge form without custom styling - showing Material Design integration</p>
 
-      <div class="form-section">
-        <h2>User Registration Form</h2>
-        <dynamic-form [config]="userFormFields" [(value)]="userModel" />
-      </div>
+      <dynamic-form [config]="userFormFields" [(value)]="userModel" />
 
-      <div class="output-section">
-        <h3>Form Data (Live)</h3>
-        <pre><code>{{ userModel() | json }}</code></pre>
-      </div>
+      <h3>Form Output (Live)</h3>
+      <pre>{{ userModel() | json }}</pre>
     </div>
   `,
-  styles: [
-    `
-      .demo-container {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 2rem;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      }
-
-      h1 {
-        color: #1976d2;
-        text-align: center;
-        margin-bottom: 1rem;
-      }
-
-      .description {
-        text-align: center;
-        color: #666;
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-      }
-
-      .form-section {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
-        margin-bottom: 2rem;
-      }
-
-      .form-section h2 {
-        margin-top: 0;
-        margin-bottom: 1.5rem;
-        color: #333;
-      }
-
-      .output-section {
-        background: #f5f5f5;
-        border-radius: 8px;
-        padding: 1.5rem;
-      }
-
-      .output-section h3 {
-        margin-top: 0;
-        margin-bottom: 1rem;
-        color: #333;
-      }
-
-      pre {
-        background: #2d2d2d;
-        color: #f8f8f2;
-        padding: 1rem;
-        border-radius: 4px;
-        overflow-x: auto;
-        font-size: 0.9rem;
-      }
-
-      code {
-        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-      }
-    `,
-  ],
 })
 export class QuickStartDemoComponent {
   userModel = signal<UserFormModel>({

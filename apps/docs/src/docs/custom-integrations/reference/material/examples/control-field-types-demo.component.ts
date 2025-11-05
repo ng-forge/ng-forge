@@ -6,89 +6,10 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
   selector: 'app-control-field-types-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <div class="example-container">
-      <h4>Control Field Types Implementation</h4>
-      <p class="description">
-        This example demonstrates how Material components implement both FormControl interfaces and field interfaces using the new control
-        field type utilities. Each field showcases type-safe implementation with automatic property exclusion and signal compatibility.
-      </p>
-      <dynamic-form [config]="fields" [(value)]="model"></dynamic-form>
-      <div class="implementation-notes">
-        <h5>Implementation Details:</h5>
-        <ul>
-          <li><strong>ValueControlFieldType:</strong> Used by input, select, textarea, datepicker, radio, slider, and toggle fields</li>
-          <li><strong>CheckboxControlFieldType:</strong> Used by checkbox and multi-checkbox fields</li>
-          <li>
-            <strong>Automatic Exclusion:</strong> Properties like 'value', 'disabled', 'touched' are provided by FormControl interfaces
-          </li>
-          <li><strong>Signal Compatibility:</strong> All field properties are properly typed as InputSignals</li>
-          <li><strong>Type Safety:</strong> TypeScript ensures correct implementation of both interfaces</li>
-        </ul>
-      </div>
-      <div class="output">
-        <strong>Form Data:</strong>
-        <pre>{{ model() | json }}</pre>
-      </div>
-    </div>
+    <dynamic-form [config]="fields" [(value)]="model" />
+    <h4>Form Data:</h4>
+    <pre>{{ model() | json }}</pre>
   `,
-  styles: [
-    `
-      .example-container {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 2rem;
-        margin: 1rem 0;
-        max-width: 900px;
-      }
-      .description {
-        color: #666;
-        margin-bottom: 1.5rem;
-        font-style: italic;
-        line-height: 1.5;
-      }
-      .implementation-notes {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        padding: 1rem;
-        margin: 1.5rem 0;
-      }
-      .implementation-notes h5 {
-        margin-top: 0;
-        margin-bottom: 0.5rem;
-        color: #495057;
-      }
-      .implementation-notes ul {
-        margin: 0;
-        padding-left: 1.5rem;
-      }
-      .implementation-notes li {
-        margin-bottom: 0.5rem;
-        color: #6c757d;
-      }
-      .implementation-notes strong {
-        color: #495057;
-      }
-      .output {
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e0e0e0;
-      }
-      pre {
-        background: #f5f5f5;
-        padding: 1rem;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        margin: 0.5rem 0;
-        max-height: 300px;
-        overflow-y: auto;
-      }
-      h4 {
-        margin-top: 0;
-        color: #1976d2;
-      }
-    `,
-  ],
 })
 export class ControlFieldTypesDemoComponent {
   model = signal({

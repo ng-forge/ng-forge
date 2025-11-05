@@ -6,36 +6,10 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
   selector: 'app-select-demo',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <div class="demo-container">
-      <dynamic-form [config]="fields" [(value)]="formOutput"></dynamic-form>
-      <div class="output">
-        <strong>Form Data:</strong>
-        <pre>{{ formOutput() | json }}</pre>
-      </div>
-    </div>
+    <dynamic-form [config]="fields" [(value)]="formOutput" />
+    <h4>Form Data:</h4>
+    <pre>{{ formOutput() | json }}</pre>
   `,
-  styles: [
-    `
-      .demo-container {
-        padding: 1rem;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        margin: 1rem 0;
-      }
-      .output {
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e0e0e0;
-      }
-      pre {
-        background: #f5f5f5;
-        padding: 0.5rem;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        margin: 0.5rem 0;
-      }
-    `,
-  ],
 })
 export class SelectDemoComponent {
   formOutput = signal({});

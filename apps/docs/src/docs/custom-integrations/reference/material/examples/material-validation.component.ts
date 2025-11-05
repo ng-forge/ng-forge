@@ -7,54 +7,11 @@ import { submitButton } from '@ng-forge/dynamic-form-material';
   selector: 'app-material-validation',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <div class="example-container">
-      <h4>Material Validation & Error Handling</h4>
-      <p class="description">
-        Examples of form validation with Material Design error styling and messaging. Try interacting with fields to see validation in
-        action.
-      </p>
-      <dynamic-form [config]="fields" [(value)]="model"></dynamic-form>
-      <div class="output">
-        <strong>Form Data:</strong>
-        <pre>{{ model() | json }}</pre>
-      </div>
-    </div>
+    <h4>Validation Examples</h4>
+    <dynamic-form [config]="fields" [(value)]="model" />
+    <h4>Form Data:</h4>
+    <pre>{{ model() | json }}</pre>
   `,
-  styles: [
-    `
-      .example-container {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 2rem;
-        margin: 1rem 0;
-        max-width: 700px;
-      }
-      .description {
-        color: #666;
-        margin-bottom: 1.5rem;
-        font-style: italic;
-        line-height: 1.5;
-      }
-      .output {
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e0e0e0;
-      }
-      pre {
-        background: #f5f5f5;
-        padding: 1rem;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        margin: 0.5rem 0;
-        max-height: 300px;
-        overflow-y: auto;
-      }
-      h4 {
-        margin-top: 0;
-        color: #1976d2;
-      }
-    `,
-  ],
 })
 export class MaterialValidationComponent {
   model = signal({

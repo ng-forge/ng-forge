@@ -6,52 +6,11 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
   selector: 'app-material-field-types',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <div class="example-container">
-      <h4>Material Field Types</h4>
-      <p class="description">
-        Comprehensive examples of all available Material Design field components with their type-safe configurations.
-      </p>
-      <dynamic-form [config]="fields" [(value)]="model"></dynamic-form>
-      <div class="output">
-        <strong>Form Data:</strong>
-        <pre>{{ model() | json }}</pre>
-      </div>
-    </div>
+    <h4>All Material Field Types</h4>
+    <dynamic-form [config]="fields" [(value)]="model" />
+    <h4>Form Data:</h4>
+    <pre>{{ model() | json }}</pre>
   `,
-  styles: [
-    `
-      .example-container {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 2rem;
-        margin: 1rem 0;
-        max-width: 900px;
-      }
-      .description {
-        color: #666;
-        margin-bottom: 1.5rem;
-        font-style: italic;
-      }
-      .output {
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e0e0e0;
-      }
-      pre {
-        background: #f5f5f5;
-        padding: 1rem;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        margin: 0.5rem 0;
-        max-height: 400px;
-        overflow-y: auto;
-      }
-      h4 {
-        margin-top: 0;
-        color: #1976d2;
-      }
-    `,
-  ],
 })
 export class MaterialFieldTypesComponent {
   model = signal({
