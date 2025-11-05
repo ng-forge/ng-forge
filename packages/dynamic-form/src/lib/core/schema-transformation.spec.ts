@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { form } from '@angular/forms/signals';
+import { form, schema } from '@angular/forms/signals';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
 import { FieldDef } from '../definitions';
 import { FieldTypeDefinition } from '../models/field-type';

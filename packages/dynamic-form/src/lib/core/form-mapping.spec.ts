@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { form } from '@angular/forms/signals';
+import { form, schema } from '@angular/forms/signals';
 import { FieldDef, FieldWithValidation } from '../definitions';
-import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from './registry';
+import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, SchemaRegistryService } from './registry';
 import { mapFieldToForm } from './form-mapping';
 
 describe('form-mapping', () => {
@@ -12,7 +12,7 @@ describe('form-mapping', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService],
+      providers: [RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, SchemaRegistryService],
     });
 
     injector = TestBed.inject(Injector);
@@ -24,9 +24,6 @@ describe('form-mapping', () => {
       it('should handle page fields without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field1: '', field2: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const pageField: FieldDef = {
             type: 'page',
             fields: [
@@ -35,18 +32,21 @@ describe('form-mapping', () => {
             ],
           };
 
-          expect(() => {
-            mapFieldToForm(pageField, formInstance().controls as any);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(pageField, path as any);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle group fields without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: { street: '', city: '' } });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const groupField: FieldDef = {
             key: 'address',
             type: 'group',
@@ -56,27 +56,36 @@ describe('form-mapping', () => {
             ],
           };
 
-          expect(() => {
-            mapFieldToForm(groupField, formInstance().controls.address);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(groupField, path.address);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle regular fields without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'email',
             type: 'input',
             required: true,
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -85,161 +94,188 @@ describe('form-mapping', () => {
       it('should handle required property without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'email',
             type: 'input',
             required: true,
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle email property without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'email',
             type: 'input',
             email: true,
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle min property without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 0 });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'age',
             type: 'input',
             min: 18,
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.age);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.age);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle max property without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 0 });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'age',
             type: 'input',
             max: 120,
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.age);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.age);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle minLength property without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'username',
             type: 'input',
             minLength: 3,
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.username);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.username);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle maxLength property without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'username',
             type: 'input',
             maxLength: 20,
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.username);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.username);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle pattern string without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'username',
             type: 'input',
             pattern: '^[a-z]+$',
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.username);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.username);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle pattern RegExp without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'username',
             type: 'input',
             pattern: /^[a-z]+$/,
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.username);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.username);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle fields with no validation properties', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'field',
             type: 'input',
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.field);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.field);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -248,27 +284,27 @@ describe('form-mapping', () => {
       it('should handle advanced validators without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'email',
             type: 'input',
             validators: [{ type: 'required' }, { type: 'email' }],
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle logic configurations without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'email',
             type: 'input',
@@ -278,36 +314,42 @@ describe('form-mapping', () => {
             ],
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle schema configurations without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'email',
             type: 'input',
             schemas: [{ type: 'apply', schema: 'emailSchema' }],
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle combined validators, logic, and schemas', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef & FieldWithValidation = {
             key: 'email',
             type: 'input',
@@ -317,9 +359,15 @@ describe('form-mapping', () => {
             schemas: [{ type: 'apply', schema: 'test' }],
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -328,35 +376,42 @@ describe('form-mapping', () => {
       it('should handle disabled state without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef = {
             key: 'email',
             type: 'input',
             disabled: true,
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should log custom form configuration', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const fieldDef: any = {
             key: 'email',
             type: 'input',
             customFormConfig: { custom: true },
           };
 
-          mapFieldToForm(fieldDef, formInstance().controls.email);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.email);
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
 
           expect(consoleLogSpy).toHaveBeenCalledWith('Custom form configuration detected for field:', 'email');
           consoleLogSpy.mockRestore();
@@ -366,17 +421,20 @@ describe('form-mapping', () => {
       it('should handle fields without custom config', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const fieldDef: FieldDef = {
             key: 'email',
             type: 'input',
           };
 
-          expect(() => {
-            mapFieldToForm(fieldDef, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -385,9 +443,6 @@ describe('form-mapping', () => {
       it('should handle page fields with children without keys', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field1: '', field2: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const pageField: FieldDef = {
             type: 'page',
             fields: [
@@ -396,18 +451,21 @@ describe('form-mapping', () => {
             ],
           };
 
-          expect(() => {
-            mapFieldToForm(pageField, formInstance().controls as any);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(pageField, path as any);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle page fields with missing paths', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field1: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const pageField: FieldDef = {
             type: 'page',
             fields: [
@@ -416,51 +474,60 @@ describe('form-mapping', () => {
             ],
           };
 
-          expect(() => {
-            mapFieldToForm(pageField, formInstance().controls as any);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(pageField, path as any);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle empty page fields array', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({});
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const pageField: FieldDef = {
             type: 'page',
             fields: [],
           };
 
-          expect(() => {
-            mapFieldToForm(pageField, formInstance().controls as any);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(pageField, path as any);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle page field without fields property', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({});
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const pageField: FieldDef = {
             type: 'page',
           };
 
-          expect(() => {
-            mapFieldToForm(pageField, formInstance().controls as any);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(pageField, path as any);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle nested page fields', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field1: '', field2: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const pageField: FieldDef = {
             type: 'page',
             fields: [
@@ -472,9 +539,15 @@ describe('form-mapping', () => {
             ],
           };
 
-          expect(() => {
-            mapFieldToForm(pageField, formInstance().controls as any);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(pageField, path as any);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -483,9 +556,6 @@ describe('form-mapping', () => {
       it('should handle group fields with children without keys', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: { street: '', city: '' } });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const groupField: FieldDef = {
             key: 'address',
             type: 'group',
@@ -495,18 +565,21 @@ describe('form-mapping', () => {
             ],
           };
 
-          expect(() => {
-            mapFieldToForm(groupField, formInstance().controls.address);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(groupField, path.address);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle group fields with missing nested paths', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: { street: '' } });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const groupField: FieldDef = {
             key: 'address',
             type: 'group',
@@ -516,53 +589,62 @@ describe('form-mapping', () => {
             ],
           };
 
-          expect(() => {
-            mapFieldToForm(groupField, formInstance().controls.address);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(groupField, path.address);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle empty group fields array', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: {} });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const groupField: FieldDef = {
             key: 'address',
             type: 'group',
             fields: [],
           };
 
-          expect(() => {
-            mapFieldToForm(groupField, formInstance().controls.address);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(groupField, path.address);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle group field without fields property', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: {} });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const groupField: FieldDef = {
             key: 'address',
             type: 'group',
           };
 
-          expect(() => {
-            mapFieldToForm(groupField, formInstance().controls.address);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(groupField, path.address);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle nested group fields', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: { location: { street: '', city: '' } } });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const groupField: FieldDef = {
             key: 'address',
             type: 'group',
@@ -578,9 +660,15 @@ describe('form-mapping', () => {
             ],
           };
 
-          expect(() => {
-            mapFieldToForm(groupField, formInstance().controls.address);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                mapFieldToForm(groupField, path.address);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
