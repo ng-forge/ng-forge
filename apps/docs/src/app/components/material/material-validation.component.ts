@@ -1,11 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
-import { submitButton } from '@ng-forge/dynamic-form-material';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { submitButton, withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 @Component({
   selector: 'app-material-validation',
   imports: [DynamicForm, JsonPipe],
+  providers: [provideDynamicForm(...withMaterialFields())],
   template: `
     <div class="example-container">
       <h4>Material Validation & Error Handling</h4>

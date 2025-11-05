@@ -15,7 +15,6 @@ import {
 import { provideNgDocContext } from '@ng-doc/generated';
 import { appRoutes } from './app.routes';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -30,7 +29,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(),
     provideAnimations(),
-    provideDynamicForm(...withMaterialFields()),
+    provideDynamicForm(), // Core dynamic form with built-in fields only
     provideNgDocContext(),
     provideNgDocApp({
       shiki: {
