@@ -168,8 +168,6 @@ Material provides multiple prebuilt button types for common form actions.
 Form submission button - automatically disabled when the form is invalid.
 
 ```typescript
-import { submitButton } from '@ng-forge/dynamic-form-material';
-
 const config = {
   fields: [
     { key: 'name', type: 'input', value: '', label: 'Name', required: true },
@@ -181,21 +179,28 @@ const config = {
       label: 'I accept the terms and conditions',
       required: true,
     },
-    submitButton({
+    {
+      type: 'submit',
       key: 'submit',
       label: 'Create Account',
       props: { color: 'primary' },
-    }),
+    },
   ],
 } as const satisfies FormConfig;
 
 // The submit button will be disabled until all required fields are valid
 ```
 
-Alternative syntax without helper function:
+Alternative using helper function:
 
 ```typescript
-{ type: 'submit', key: 'submit', label: 'Create Account', props: { color: 'primary' } }
+import { submitButton } from '@ng-forge/dynamic-form-material';
+
+submitButton({
+  key: 'submit',
+  label: 'Create Account',
+  props: { color: 'primary' },
+});
 ```
 
 #### Next/Previous Buttons
@@ -203,8 +208,6 @@ Alternative syntax without helper function:
 Navigation buttons for multi-step (paged) forms.
 
 ```typescript
-import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dynamic-form-material';
-
 const config = {
   fields: [
     {
@@ -220,11 +223,12 @@ const config = {
           key: 'navigation',
           type: 'row',
           fields: [
-            nextPageButton({
+            {
+              type: 'next',
               key: 'nextToContact',
               label: 'Continue to Contact Info',
               props: { color: 'primary' },
-            }),
+            },
           ],
         },
       ],
@@ -247,15 +251,13 @@ const config = {
           key: 'navigation',
           type: 'row',
           fields: [
-            previousPageButton({
-              key: 'backToPersonal',
-              label: 'Back',
-            }),
-            submitButton({
+            { type: 'previous', key: 'backToPersonal', label: 'Back' },
+            {
+              type: 'submit',
               key: 'submit',
               label: 'Complete Registration',
               props: { color: 'primary' },
-            }),
+            },
           ],
         },
       ],
@@ -264,12 +266,14 @@ const config = {
 } as const satisfies FormConfig;
 ```
 
-Alternative syntax without helper functions:
+Alternative using helper functions:
 
 ```typescript
-{ type: 'next', key: 'next', label: 'Continue' }
-{ type: 'previous', key: 'back', label: 'Back' }
-{ type: 'submit', key: 'submit', label: 'Complete' }
+import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dynamic-form-material';
+
+nextPageButton({ key: 'next', label: 'Continue', props: { color: 'primary' } });
+previousPageButton({ key: 'back', label: 'Back' });
+submitButton({ key: 'submit', label: 'Complete' });
 ```
 
 #### Custom Action Button
@@ -277,8 +281,7 @@ Alternative syntax without helper functions:
 Generic button for custom events. Use this for application-specific actions.
 
 ```typescript
-import { actionButton } from '@ng-forge/dynamic-form-material';
-import { FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
+import { FormEvent } from '@ng-forge/dynamic-form';
 
 // Define your custom event
 class SaveDraftEvent extends FormEvent {
@@ -293,17 +296,19 @@ const config = {
       key: 'actions',
       type: 'row',
       fields: [
-        actionButton({
+        {
+          type: 'button',
           key: 'saveDraft',
           label: 'Save as Draft',
           event: SaveDraftEvent,
           props: { color: 'accent' },
-        }),
-        submitButton({
+        },
+        {
+          type: 'submit',
           key: 'publish',
           label: 'Publish',
           props: { color: 'primary' },
-        }),
+        },
       ],
     },
   ],
@@ -325,6 +330,19 @@ class MyComponent {
     });
   }
 }
+```
+
+Alternative using helper function:
+
+```typescript
+import { actionButton } from '@ng-forge/dynamic-form-material';
+
+actionButton({
+  key: 'saveDraft',
+  label: 'Save as Draft',
+  event: SaveDraftEvent,
+  props: { color: 'accent' },
+});
 ```
 
 **Button Props:**
