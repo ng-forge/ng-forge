@@ -1,3 +1,6 @@
+import { FormConfig } from '@ng-forge/dynamic-form';
+import '@ng-forge/dynamic-form-material';
+
 /**
  * Registration Wizard - Multi-page registration form
  */
@@ -7,10 +10,6 @@ export const registrationWizardConfig = {
     {
       key: 'personalPage',
       type: 'page',
-      props: {
-        title: 'Personal Information',
-        description: 'Tell us about yourself',
-      },
       fields: [
         {
           key: 'firstName',
@@ -69,10 +68,6 @@ export const registrationWizardConfig = {
     {
       key: 'contactPage',
       type: 'page',
-      props: {
-        title: 'Contact Information',
-        description: 'How can we reach you?',
-      },
       fields: [
         {
           key: 'phone',
@@ -142,10 +137,6 @@ export const registrationWizardConfig = {
     {
       key: 'preferencesPage',
       type: 'page',
-      props: {
-        title: 'Preferences',
-        description: 'Customize your experience',
-      },
       fields: [
         {
           key: 'interests',
@@ -197,11 +188,14 @@ export const registrationWizardConfig = {
         },
         {
           key: 'submit',
-          type: 'submit',
+          type: 'button',
           label: 'Complete Registration',
-          color: 'primary',
+          props: {
+            type: 'submit',
+            color: 'primary',
+          },
         },
       ],
     },
   ],
-} as const;
+};

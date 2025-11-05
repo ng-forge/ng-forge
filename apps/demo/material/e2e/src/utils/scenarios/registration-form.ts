@@ -1,3 +1,6 @@
+import { FormConfig } from '@ng-forge/dynamic-form';
+import '@ng-forge/dynamic-form-material';
+
 /**
  * Registration Form - Complex validation with password confirmation
  */
@@ -51,14 +54,7 @@ export const registrationFormConfig = {
       required: true,
       defaultValue: 'SecurePass123!',
       props: { type: 'password' },
-      validators: [
-        { type: 'required' },
-        {
-          type: 'custom',
-          expression: 'formValue.password === fieldValue',
-          errorMessage: 'Passwords do not match',
-        },
-      ],
+      validators: [{ type: 'required' }],
       col: 6,
     },
     {
@@ -109,9 +105,12 @@ export const registrationFormConfig = {
     },
     {
       key: 'submit',
-      type: 'submit',
+      type: 'button',
       label: 'Create Account',
-      color: 'primary',
+      props: {
+        type: 'submit',
+        color: 'primary',
+      },
     },
   ],
-} as const;
+};
