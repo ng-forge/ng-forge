@@ -28,8 +28,9 @@ import { AsyncPipe } from '@angular/common';
               [field]="f"
               class="btn-check"
               [id]="key() + '_' + i"
+              [name]="key()"
               [value]="option.value"
-              [disabled]="option.disabled || false"
+              [disabled]="f().disabled() || option.disabled || false"
               autocomplete="off"
             />
             <label
@@ -54,8 +55,9 @@ import { AsyncPipe } from '@angular/common';
               [field]="f"
               class="form-check-input"
               [id]="key() + '_' + i"
+              [name]="key()"
               [value]="option.value"
-              [disabled]="option.disabled || false"
+              [disabled]="f().disabled() || option.disabled || false"
             />
             <label class="form-check-label" [for]="key() + '_' + i">
               {{ option.label | dynamicText | async }}

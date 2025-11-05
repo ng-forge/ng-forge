@@ -57,6 +57,7 @@ export default class BsButtonFieldComponent<TEvent extends FormEvent> implements
       p?.size === 'lg' && 'btn-lg',
       p?.block && 'w-100',
       p?.active && 'active',
+      this.className(),
     ]
       .filter(Boolean)
       .join(' ');
