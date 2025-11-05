@@ -2,7 +2,7 @@ import { NgDocCategory } from '@ng-doc/core';
 
 const DeepDiveCategory: NgDocCategory = {
   title: 'Deep Dive',
-  order: 10,
+  order: 5,
   expandable: true,
 };
 
