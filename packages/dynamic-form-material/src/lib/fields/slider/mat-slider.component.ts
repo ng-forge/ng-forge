@@ -25,6 +25,7 @@ import { AsyncPipe } from '@angular/common';
       class="slider-container"
     >
       <!-- TODO: integrate input with the field -->
+      <input matSliderThumb [(value)]="f().value" [disabled]="f().disabled()" [attr.tabindex]="tabIndex()" />
     </mat-slider>
 
     @if (props()?.hint; as hint) {
