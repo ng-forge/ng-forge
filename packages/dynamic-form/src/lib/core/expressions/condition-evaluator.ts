@@ -1,8 +1,10 @@
 import { ConditionalExpression, EvaluationContext } from '../../models';
 import { compareValues, getNestedValue } from './value-utils';
+import { ExpressionParser } from './parser';
 
 /**
  * Evaluate conditional expression
+ * Uses secure AST-based parsing for JavaScript expressions
  */
 export function evaluateCondition(expression: ConditionalExpression, context: EvaluationContext): boolean {
   switch (expression.type) {
@@ -39,8 +41,9 @@ function evaluateJavaScriptExpression(expression: ConditionalExpression, context
   if (!expression.expression) return false;
 
   try {
-    const func = new Function('context', `with(context) { return !!(${expression.expression}); }`);
-    return func(context);
+    // Use secure AST-based expression parser instead of new Function()
+    const result = ExpressionParser.evaluate(expression.expression, context);
+    return !!result;
   } catch (error) {
     console.error('Error evaluating JavaScript expression:', expression.expression, error);
     return false;
