@@ -1,5 +1,9 @@
 ## Build Forms 10x Faster with Full Type Safety
 
+> **Difficulty**: 🟢 Beginner
+> **Prerequisites**: None
+> **Estimated time**: 15 minutes
+
 ng-forge dynamic forms gives you declarative, type-safe forms powered by Angular 21's signal forms. Define your structure once, get validation, conditional logic, and beautiful UI automatically.
 
 ### Quick Example
@@ -550,26 +554,24 @@ provideDynamicForm(
 - **🎯 OnPush Change Detection** - Optimized throughout
 - **💪 SSR Compatible** - Works with Angular Universal
 
-## Next Steps
+## Related Topics
 
-### 📚 Learn the Essentials
+### Core Concepts
 
-- **[Validation Guide](../core/validation)** - Shorthand validators, conditional validation, custom error messages
-- **[Conditional Logic](../core/conditional-logic)** - Dynamic required fields, show/hide logic, reactive forms
-- **[Field Types](../core/field-types)** - Groups, rows, pages, and complex layouts
-- **[Type Safety](../core/type-safety)** - Deep dive into TypeScript inference
+- **[Field Types](../core/field-types)** 🟢 - All available field types and their properties
+- **[Validation](../core/validation)** 🟡 - Validation strategies with decision matrix
+- **[Conditional Logic](../core/conditional-logic)** 🟡 - Show/hide fields dynamically
+- **[Type Safety](../core/type-safety)** 🔴 - Advanced TypeScript inference patterns
 
-### 🎨 Choose Your UI
+### UI Implementations
 
-- **[Material Design](../custom-integrations/reference/material)** - Complete Material implementation
-- **[Bootstrap](../custom-integrations/reference/bootstrap)** - Bootstrap 5 integration
-- **[PrimeNG](../custom-integrations/reference/primeng)** - PrimeNG components
-- **[Ionic](../custom-integrations/reference/ionic)** - Mobile-first Ionic
-- **[Custom Fields](../custom-integrations/guide)** - Build your own
+- **[Material Design](../custom-integrations/reference/material)** 🟢 - Production-ready Material integration
+- **[Custom Integration Guide](../custom-integrations/guide)** 🔴 - Build your own UI integration
 
-### 🌍 Going Global
+### Advanced Topics
 
-- **[i18n Setup](../i18n/setup)** - Internationalization with Observables and Signals
+- **[i18n Setup](../i18n/setup)** 🟡 - Multi-language support
+- **[Events](../core/events)** 🟡 - Form event bus and custom events
 
 ---
 

@@ -1,4 +1,9 @@
-Create custom UI integrations for ng-forge using any component library or design system.
+# Custom Integration Guide
+
+> **Difficulty**: 🔴 Advanced
+> **Prerequisites**: [Getting Started](../../getting-started), [Field Types](../../core/field-types), [Type Safety](../../core/type-safety) > **Estimated time**: 4-6 hours
+
+Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
 
 ## Integration Overview
 
@@ -333,3 +338,10 @@ See complete integrations:
 - [Ionic](../reference/ionic)
 
 The Material integration source code is the most comprehensive example of implementing custom field types.
+
+## Related Topics
+
+- **[Material Integration](../reference/material)** 🟢 - Complete reference implementation
+- **[Field Types](../../core/field-types)** 🟢 - Understanding all available field types
+- **[Type Safety](../../core/type-safety)** 🔴 - Module augmentation for custom types
+- **[Validation](../../core/validation)** 🟡 - Displaying validation errors in custom fields

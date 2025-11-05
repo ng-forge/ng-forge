@@ -1,4 +1,9 @@
-ng-forge provides compile-time type inference for form configurations, eliminating manual type definitions and catching errors before runtime.
+# Type Safety
+
+> **Difficulty**: 🔴 Advanced
+> **Prerequisites**: [Getting Started](../../getting-started), [Field Types](../field-types) > **Estimated time**: 45 minutes
+
+ng-forge dynamic forms provides compile-time type inference for form configurations, eliminating manual type definitions and catching errors before runtime.
 
 ## Basic Type Inference
 
@@ -659,3 +664,10 @@ const formValue = signal<MyFormValue>({ name: '', email: '' });
 ```
 
 Type inference only works for **static**, **compile-time constant** configurations.
+
+## Related Topics
+
+- **[Validation](../validation)** 🟡 - How validators affect inferred types
+- **[Field Types](../field-types)** 🟢 - Understanding field types for better inference
+- **[Custom Integration Guide](../../custom-integrations/guide)** 🔴 - Creating type-safe custom fields
+- **[Conditional Logic](../conditional-logic)** 🟡 - Type-safe conditional expressions

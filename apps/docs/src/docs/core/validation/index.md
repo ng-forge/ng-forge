@@ -1,4 +1,9 @@
-ng-forge provides comprehensive validation through direct integration with Angular's signal forms validation system. All validators map directly to Angular's built-in validators, ensuring type-safe, reactive validation with minimal configuration.
+# Validation
+
+> **Difficulty**: 🟡 Intermediate
+> **Prerequisites**: [Getting Started](../../getting-started), [Field Types](../field-types) > **Estimated time**: 30 minutes
+
+ng-forge dynamic forms provides comprehensive validation through direct integration with Angular's signal forms validation system. All validators map directly to Angular's built-in validators, ensuring type-safe, reactive validation with minimal configuration.
 
 ## Signal Forms Integration
 
@@ -1054,3 +1059,10 @@ const config = {
   }
 }
 ```
+
+## Related Topics
+
+- **[Conditional Logic](../conditional-logic)** 🟡 - Dynamic field behavior beyond validation
+- **[Field Types](../field-types)** 🟢 - Understanding which fields can be validated
+- **[Type Safety](../type-safety)** 🔴 - How validation affects TypeScript types
+- **[Material Integration](../../custom-integrations/reference/material)** 🟢 - How validation errors are displayed
