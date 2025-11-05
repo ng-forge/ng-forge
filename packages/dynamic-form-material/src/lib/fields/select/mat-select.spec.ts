@@ -42,7 +42,10 @@ describe('MatSelectFieldComponent', () => {
       const label = fixture.debugElement.query(By.css('mat-label'));
       const hint = fixture.debugElement.query(By.css('mat-hint'));
 
-      expect(select).toBeTruthy();
+      // ITERATION 3 FIX: Verify select is MatSelect instance
+      // Previous: expect(select).toBeTruthy()
+      expect(select).not.toBeNull();
+      expect(select.componentInstance).toBeInstanceOf(MatSelect);
       // Check that placeholder property is properly set via the mat-select's placeholder attribute
       expect(select.componentInstance.placeholder).toBe('Select your country');
       expect(formField.nativeElement.className).toContain('country-select');

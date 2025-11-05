@@ -42,9 +42,17 @@ describe('MatRadioFieldComponent', () => {
       const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
       const labelElement = fixture.debugElement.query(By.css('.radio-label'));
 
-      expect(radioGroup).toBeTruthy();
+      // ITERATION 3 FIX: Verify radio group and container structure
+      // Previous: expect(radioGroup).toBeTruthy()
+      expect(radioGroup).not.toBeNull();
+      expect(radioGroup.componentInstance).toBeInstanceOf(MatRadioGroup);
       expect(radioButtons.length).toBe(3);
-      expect(containerDiv).toBeTruthy();
+
+      // ITERATION 3 FIX: Verify container element structure
+      // Previous: expect(containerDiv).toBeTruthy()
+      expect(containerDiv).not.toBeNull();
+      expect(containerDiv.nativeElement).toBeInstanceOf(HTMLElement);
+      expect(containerDiv.nativeElement.classList.contains('gender-radio')).toBe(true);
       expect(hintElement?.nativeElement.textContent.trim()).toBe('Choose your gender');
       expect(labelElement?.nativeElement.textContent.trim()).toBe('Select Gender');
 
