@@ -402,6 +402,8 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    */
   readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit').pipe(map(() => this.value())));
 
+  readonly events = outputFromObservable(this.eventBus.events$);
+
   private readonly componentId = 'dynamic-form';
 
   /**

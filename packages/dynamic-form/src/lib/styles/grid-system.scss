@@ -30,6 +30,10 @@
   --df-grid-row-gap-md: 0.5rem;
   --df-grid-row-gap-lg: 0.5rem;
   --df-grid-row-gap-xl: 0.5rem;
+
+  /* Group Field Styling Variables */
+  --df-group-gap: var(--df-grid-gap);
+  --df-group-padding: var(--df-grid-gap);
 }
 
 /* Base Form Grid Container */
@@ -400,10 +404,7 @@
 /* Group Field Styling */
 .df-group {
   display: block;
-  padding: var(--df-grid-gap);
-  border: 1px solid var(--df-border-color, #e0e0e0);
-  border-radius: var(--df-border-radius, 0.375rem);
-  background: var(--df-group-bg, transparent);
+  width: 100%;
 }
 
 /* Page Field Styling */

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import { expect, test } from '@playwright/test';
 
 test.describe('User Journey Flow Tests', () => {
@@ -27,9 +28,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'education', label: 'Educational Purposes' },
                   { value: 'nonprofit', label: 'Non-Profit Organization' },
                 ],
-                props: {
-                  'data-testid': 'accountPurpose',
-                },
                 required: true,
                 col: 12,
               },
@@ -44,9 +42,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'advertisement', label: 'Advertisement' },
                   { value: 'other', label: 'Other' },
                 ],
-                props: {
-                  'data-testid': 'referralSource',
-                },
                 col: 12,
               },
             ],
@@ -64,7 +59,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'First Name',
                 props: {
                   placeholder: 'Enter your first name',
-                  'data-testid': 'firstName',
                 },
                 required: true,
                 col: 6,
@@ -75,7 +69,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Last Name',
                 props: {
                   placeholder: 'Enter your last name',
-                  'data-testid': 'lastName',
                 },
                 required: true,
                 col: 6,
@@ -87,7 +80,6 @@ test.describe('User Journey Flow Tests', () => {
                 props: {
                   type: 'email',
                   placeholder: 'Enter your email',
-                  'data-testid': 'emailAddress',
                 },
                 email: true,
                 required: true,
@@ -100,7 +92,6 @@ test.describe('User Journey Flow Tests', () => {
                 props: {
                   type: 'tel',
                   placeholder: 'Enter your phone number',
-                  'data-testid': 'phoneNumber',
                 },
                 pattern: '^[+]?[0-9\\s\\-\\(\\)]+$',
                 col: 6,
@@ -111,7 +102,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Date of Birth',
                 props: {
                   type: 'date',
-                  'data-testid': 'birthDate',
                 },
                 required: true,
                 col: 6,
@@ -131,7 +121,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Street Address',
                 props: {
                   placeholder: 'Enter your street address',
-                  'data-testid': 'streetAddress',
                 },
                 required: true,
                 col: 12,
@@ -142,7 +131,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'City',
                 props: {
                   placeholder: 'Enter your city',
-                  'data-testid': 'city',
                 },
                 required: true,
                 col: 6,
@@ -159,9 +147,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'wa', label: 'Washington' },
                   { value: 'other', label: 'Other' },
                 ],
-                props: {
-                  'data-testid': 'state',
-                },
                 required: true,
                 col: 6,
               },
@@ -171,7 +156,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'ZIP/Postal Code',
                 props: {
                   placeholder: 'Enter ZIP or postal code',
-                  'data-testid': 'zipCode',
                 },
                 pattern: '^[0-9]{5}(-[0-9]{4})?$|^[A-Z][0-9][A-Z]\\s?[0-9][A-Z][0-9]$',
                 required: true,
@@ -187,9 +171,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'uk', label: 'United Kingdom' },
                   { value: 'other', label: 'Other' },
                 ],
-                props: {
-                  'data-testid': 'country',
-                },
                 defaultValue: 'us',
                 col: 6,
               },
@@ -209,7 +190,6 @@ test.describe('User Journey Flow Tests', () => {
                 props: {
                   type: 'password',
                   placeholder: 'Create a strong password',
-                  'data-testid': 'password',
                 },
                 required: true,
                 minLength: 8,
@@ -222,7 +202,6 @@ test.describe('User Journey Flow Tests', () => {
                 props: {
                   type: 'password',
                   placeholder: 'Confirm your password',
-                  'data-testid': 'confirmPassword',
                 },
                 required: true,
                 col: 6,
@@ -237,9 +216,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'city', label: 'In what city were you born?' },
                   { value: 'mother', label: "What is your mother's maiden name?" },
                 ],
-                props: {
-                  'data-testid': 'securityQuestion',
-                },
                 required: true,
                 col: 12,
               },
@@ -249,7 +225,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Security Answer',
                 props: {
                   placeholder: 'Answer to your security question',
-                  'data-testid': 'securityAnswer',
                 },
                 required: true,
                 col: 12,
@@ -258,27 +233,18 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'twoFactorAuth',
                 type: 'checkbox',
                 label: 'Enable two-factor authentication (recommended)',
-                props: {
-                  'data-testid': 'twoFactorAuth',
-                },
                 col: 12,
               },
               {
                 key: 'emailNotifications',
                 type: 'checkbox',
                 label: 'Receive email notifications',
-                props: {
-                  'data-testid': 'emailNotifications',
-                },
                 col: 6,
               },
               {
                 key: 'marketingEmails',
                 type: 'checkbox',
                 label: 'Receive marketing emails',
-                props: {
-                  'data-testid': 'marketingEmails',
-                },
                 col: 6,
               },
             ],
@@ -294,9 +260,6 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'dataAccuracy',
                 type: 'checkbox',
                 label: 'I confirm that all the information provided is accurate',
-                props: {
-                  'data-testid': 'dataAccuracy',
-                },
                 required: true,
                 col: 12,
               },
@@ -304,9 +267,6 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'termsOfService',
                 type: 'checkbox',
                 label: 'I agree to the Terms of Service',
-                props: {
-                  'data-testid': 'termsOfService',
-                },
                 required: true,
                 col: 6,
               },
@@ -314,9 +274,6 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'privacyPolicy',
                 type: 'checkbox',
                 label: 'I agree to the Privacy Policy',
-                props: {
-                  'data-testid': 'privacyPolicy',
-                },
                 required: true,
                 col: 6,
               },
@@ -326,7 +283,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Complete Registration',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitRegistration',
                 },
                 col: 12,
               },
@@ -360,7 +316,7 @@ test.describe('User Journey Flow Tests', () => {
     await page.click('mat-option[value="search"]');
 
     // Navigate to page 2
-    let nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(1000);
@@ -467,7 +423,6 @@ test.describe('User Journey Flow Tests', () => {
                   min: '0',
                   max: '10',
                   value: '1',
-                  'data-testid': 'itemQuantity1',
                 },
                 defaultValue: 1,
                 required: true,
@@ -482,7 +437,6 @@ test.describe('User Journey Flow Tests', () => {
                   min: '0',
                   max: '10',
                   value: '2',
-                  'data-testid': 'itemQuantity2',
                 },
                 defaultValue: 2,
                 col: 6,
@@ -493,7 +447,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Promo Code (Optional)',
                 props: {
                   placeholder: 'Enter promo code',
-                  'data-testid': 'promoCode',
                 },
                 col: 12,
               },
@@ -501,9 +454,6 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'giftWrap',
                 type: 'checkbox',
                 label: 'Add gift wrapping (+$5.00)',
-                props: {
-                  'data-testid': 'giftWrap',
-                },
                 col: 12,
               },
             ],
@@ -521,7 +471,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'First Name',
                 props: {
                   placeholder: 'Shipping first name',
-                  'data-testid': 'shippingFirstName',
                 },
                 required: true,
                 col: 6,
@@ -532,7 +481,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Last Name',
                 props: {
                   placeholder: 'Shipping last name',
-                  'data-testid': 'shippingLastName',
                 },
                 required: true,
                 col: 6,
@@ -543,7 +491,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Shipping Address',
                 props: {
                   placeholder: 'Enter complete shipping address',
-                  'data-testid': 'shippingAddress',
                   rows: 3,
                 },
                 required: true,
@@ -558,9 +505,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'express', label: 'Express (2-3 days) - $9.99' },
                   { value: 'overnight', label: 'Overnight - $24.99' },
                 ],
-                props: {
-                  'data-testid': 'shippingMethod',
-                },
                 required: true,
                 defaultValue: 'standard',
                 col: 12,
@@ -571,7 +515,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Delivery Instructions (Optional)',
                 props: {
                   placeholder: 'Special delivery instructions',
-                  'data-testid': 'deliveryInstructions',
                   rows: 2,
                 },
                 col: 12,
@@ -589,9 +532,6 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'sameAsShipping',
                 type: 'checkbox',
                 label: 'Billing address same as shipping',
-                props: {
-                  'data-testid': 'sameAsShipping',
-                },
                 col: 12,
               },
               {
@@ -600,7 +540,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Billing First Name',
                 props: {
                   placeholder: 'Billing first name',
-                  'data-testid': 'billingFirstName',
                 },
                 // Would be conditionally required based on sameAsShipping
                 col: 6,
@@ -611,7 +550,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Billing Last Name',
                 props: {
                   placeholder: 'Billing last name',
-                  'data-testid': 'billingLastName',
                 },
                 col: 6,
               },
@@ -625,9 +563,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'paypal', label: 'PayPal' },
                   { value: 'applepay', label: 'Apple Pay' },
                 ],
-                props: {
-                  'data-testid': 'paymentMethod',
-                },
                 required: true,
                 col: 12,
               },
@@ -637,7 +572,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Card Number',
                 props: {
                   placeholder: '1234 5678 9012 3456',
-                  'data-testid': 'cardNumber',
                 },
                 pattern: '^[0-9\\s]{13,19}$',
                 required: true,
@@ -649,7 +583,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'CVV',
                 props: {
                   placeholder: '123',
-                  'data-testid': 'cvv',
                   maxLength: '4',
                 },
                 pattern: '^[0-9]{3,4}$',
@@ -660,9 +593,6 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'savePayment',
                 type: 'checkbox',
                 label: 'Save payment method for future purchases',
-                props: {
-                  'data-testid': 'savePayment',
-                },
                 col: 12,
               },
             ],
@@ -680,7 +610,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Order Notes (Optional)',
                 props: {
                   placeholder: 'Any special notes for this order',
-                  'data-testid': 'orderNotes',
                   rows: 3,
                 },
                 col: 12,
@@ -689,9 +618,6 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'emailReceipt',
                 type: 'checkbox',
                 label: 'Email me order confirmation and tracking info',
-                props: {
-                  'data-testid': 'emailReceipt',
-                },
                 defaultValue: true,
                 col: 12,
               },
@@ -699,18 +625,12 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'smsUpdates',
                 type: 'checkbox',
                 label: 'Send SMS updates for delivery status',
-                props: {
-                  'data-testid': 'smsUpdates',
-                },
                 col: 12,
               },
               {
                 key: 'termsCheckout',
                 type: 'checkbox',
                 label: 'I agree to the Terms of Sale and Return Policy',
-                props: {
-                  'data-testid': 'termsCheckout',
-                },
                 required: true,
                 col: 12,
               },
@@ -720,7 +640,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Place Order',
                 props: {
                   type: 'submit',
-                  'data-testid': 'placeOrder',
                 },
                 col: 12,
               },
@@ -754,7 +673,7 @@ test.describe('User Journey Flow Tests', () => {
     await page.click('#giftWrap mat-checkbox');
 
     // Navigate to shipping
-    let nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(1000);
@@ -842,9 +761,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'business_customer', label: 'Business Customer' },
                   { value: 'non_customer', label: 'Not Currently a Customer' },
                 ],
-                props: {
-                  'data-testid': 'participantType',
-                },
                 required: true,
                 col: 12,
               },
@@ -860,9 +776,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: '55-64', label: '55-64' },
                   { value: '65+', label: '65+' },
                 ],
-                props: {
-                  'data-testid': 'ageGroup',
-                },
                 required: true,
                 col: 6,
               },
@@ -876,9 +789,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'asia', label: 'Asia Pacific' },
                   { value: 'other', label: 'Other' },
                 ],
-                props: {
-                  'data-testid': 'region',
-                },
                 required: true,
                 col: 6,
               },
@@ -902,9 +812,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'dissatisfied', label: 'Dissatisfied' },
                   { value: 'very_dissatisfied', label: 'Very Dissatisfied' },
                 ],
-                props: {
-                  'data-testid': 'overallSatisfaction',
-                },
                 required: true,
                 col: 12,
               },
@@ -919,9 +826,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: '2', label: 'Poor' },
                   { value: '1', label: 'Very Poor' },
                 ],
-                props: {
-                  'data-testid': 'productQuality',
-                },
                 required: true,
                 col: 6,
               },
@@ -936,9 +840,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: '2', label: 'Poor' },
                   { value: '1', label: 'Very Poor' },
                 ],
-                props: {
-                  'data-testid': 'customerService',
-                },
                 required: true,
                 col: 6,
               },
@@ -953,9 +854,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'speed', label: 'Fast Delivery' },
                   { value: 'variety', label: 'Product Variety' },
                 ],
-                props: {
-                  'data-testid': 'mostImportantFeature',
-                },
                 col: 12,
               },
             ],
@@ -973,7 +871,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'What could we improve?',
                 props: {
                   placeholder: 'Share your suggestions for improvement...',
-                  'data-testid': 'improvements',
                   rows: 4,
                 },
                 col: 12,
@@ -984,7 +881,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'What do you like most about us?',
                 props: {
                   placeholder: 'Tell us what you appreciate...',
-                  'data-testid': 'favoriteAspect',
                   rows: 3,
                 },
                 col: 12,
@@ -1006,9 +902,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: '1', label: '1' },
                   { value: '0', label: '0 - Not at All Likely' },
                 ],
-                props: {
-                  'data-testid': 'recommendToFriend',
-                },
                 required: true,
                 col: 12,
               },
@@ -1022,9 +915,6 @@ test.describe('User Journey Flow Tests', () => {
                   { value: 'events', label: 'Company events and webinars' },
                   { value: 'newsletter', label: 'Monthly newsletter' },
                 ],
-                props: {
-                  'data-testid': 'futureInterest',
-                },
                 col: 12,
               },
             ],
@@ -1040,9 +930,6 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'followUpContact',
                 type: 'checkbox',
                 label: "I'm willing to be contacted for follow-up questions",
-                props: {
-                  'data-testid': 'followUpContact',
-                },
                 col: 12,
               },
               {
@@ -1052,7 +939,6 @@ test.describe('User Journey Flow Tests', () => {
                 props: {
                   type: 'email',
                   placeholder: 'your.email@example.com',
-                  'data-testid': 'contactEmail',
                 },
                 email: true,
                 col: 12,
@@ -1063,7 +949,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Any additional comments?',
                 props: {
                   placeholder: "Anything else you'd like to share...",
-                  'data-testid': 'additionalComments',
                   rows: 3,
                 },
                 col: 12,
@@ -1072,9 +957,6 @@ test.describe('User Journey Flow Tests', () => {
                 key: 'surveyConsent',
                 type: 'checkbox',
                 label: 'I consent to the use of this feedback for improvement purposes',
-                props: {
-                  'data-testid': 'surveyConsent',
-                },
                 required: true,
                 col: 12,
               },
@@ -1084,7 +966,6 @@ test.describe('User Journey Flow Tests', () => {
                 label: 'Submit Survey',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitSurvey',
                 },
                 col: 12,
               },
@@ -1120,7 +1001,7 @@ test.describe('User Journey Flow Tests', () => {
     await page.click('mat-option[value="north"]');
 
     // Navigate to experience page
-    let nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(1000);

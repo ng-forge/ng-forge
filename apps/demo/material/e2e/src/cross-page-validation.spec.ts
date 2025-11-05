@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import { expect, test } from '@playwright/test';
 
 test.describe('Cross-Page Validation Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/e2e-test');
+    await page.goto('http://localhost:4200/e2e-test');
   });
 
   test('should test email verification across multiple pages', async ({ page }) => {
@@ -14,9 +15,22 @@ test.describe('Cross-Page Validation Tests', () => {
           {
             key: 'emailPage',
             type: 'page',
-            title: 'Email Registration',
-            description: 'Please provide your email address',
             fields: [
+              {
+                key: 'emailPageTitle',
+                type: 'text',
+                label: 'Email Registration',
+                props: {
+                  elementType: 'h2',
+                },
+                col: 12,
+              },
+              {
+                key: 'emailPageDescription',
+                type: 'text',
+                label: 'Please provide your email address',
+                col: 12,
+              },
               {
                 key: 'primaryEmail',
                 type: 'input',
@@ -24,7 +38,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 props: {
                   type: 'email',
                   placeholder: 'Enter your primary email',
-                  'data-testid': 'primaryEmail',
                 },
                 email: true,
                 required: true,
@@ -39,9 +52,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'business', label: 'Business Email' },
                   { value: 'other', label: 'Other' },
                 ],
-                props: {
-                  'data-testid': 'emailType',
-                },
                 required: true,
                 col: 12,
               },
@@ -51,16 +61,28 @@ test.describe('Cross-Page Validation Tests', () => {
           {
             key: 'personalPage',
             type: 'page',
-            title: 'Personal Information',
-            description: 'Tell us more about yourself',
             fields: [
+              {
+                key: 'personalPageTitle',
+                type: 'text',
+                label: 'Personal Information',
+                props: {
+                  elementType: 'h2',
+                },
+                col: 12,
+              },
+              {
+                key: 'personalPageDescription',
+                type: 'text',
+                label: 'Tell us more about yourself',
+                col: 12,
+              },
               {
                 key: 'fullName',
                 type: 'input',
                 label: 'Full Name',
                 props: {
                   placeholder: 'Enter your full name',
-                  'data-testid': 'fullName',
                 },
                 required: true,
                 col: 12,
@@ -71,7 +93,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Company Name',
                 props: {
                   placeholder: 'Enter company name (for business emails)',
-                  'data-testid': 'companyName',
                 },
                 // Would typically be required only if emailType is 'business'
                 col: 12,
@@ -83,7 +104,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 props: {
                   type: 'tel',
                   placeholder: 'Enter phone number',
-                  'data-testid': 'phoneNumber',
                 },
                 pattern: '^[+]?[0-9\\s\\-\\(\\)]+$',
                 required: true,
@@ -95,9 +115,22 @@ test.describe('Cross-Page Validation Tests', () => {
           {
             key: 'confirmationPage',
             type: 'page',
-            title: 'Confirmation',
-            description: 'Please confirm your information',
             fields: [
+              {
+                key: 'confirmationPageTitle',
+                type: 'text',
+                label: 'Confirmation',
+                props: {
+                  elementType: 'h2',
+                },
+                col: 12,
+              },
+              {
+                key: 'confirmationPageDescription',
+                type: 'text',
+                label: 'Please confirm your information',
+                col: 12,
+              },
               {
                 key: 'confirmEmail',
                 type: 'input',
@@ -105,7 +138,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 props: {
                   type: 'email',
                   placeholder: 'Re-enter your email to confirm',
-                  'data-testid': 'confirmEmail',
                 },
                 email: true,
                 required: true,
@@ -115,9 +147,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 key: 'termsAgreement',
                 type: 'checkbox',
                 label: 'I agree to the Terms of Service and Privacy Policy',
-                props: {
-                  'data-testid': 'termsAgreement',
-                },
                 required: true,
                 col: 12,
               },
@@ -125,9 +154,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 key: 'emailNotifications',
                 type: 'checkbox',
                 label: 'Send me email notifications',
-                props: {
-                  'data-testid': 'emailNotifications',
-                },
                 col: 12,
               },
               {
@@ -136,7 +162,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Complete Registration',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitEmailVerification',
                 },
                 col: 12,
               },
@@ -242,9 +267,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'business', label: 'Business Account' },
                   { value: 'nonprofit', label: 'Non-Profit Organization' },
                 ],
-                props: {
-                  'data-testid': 'accountType',
-                },
                 required: true,
                 col: 12,
               },
@@ -258,9 +280,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'education', label: 'Educational Use' },
                   { value: 'charity', label: 'Charitable Work' },
                 ],
-                props: {
-                  'data-testid': 'primaryUse',
-                },
                 required: true,
                 col: 12,
               },
@@ -279,7 +298,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'First Name',
                 props: {
                   placeholder: 'Enter first name',
-                  'data-testid': 'firstName',
                 },
                 required: true,
                 col: 6,
@@ -290,7 +308,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Last Name',
                 props: {
                   placeholder: 'Enter last name',
-                  'data-testid': 'lastName',
                 },
                 required: true,
                 col: 6,
@@ -301,7 +318,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Date of Birth',
                 props: {
                   type: 'date',
-                  'data-testid': 'birthDate',
                 },
                 required: true,
                 col: 12,
@@ -321,7 +337,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Business Name',
                 props: {
                   placeholder: 'Enter business name',
-                  'data-testid': 'businessName',
                 },
                 required: true,
                 col: 12,
@@ -332,7 +347,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Tax ID / EIN',
                 props: {
                   placeholder: 'Enter tax identification number',
-                  'data-testid': 'taxId',
                 },
                 pattern: '^[0-9]{2}-[0-9]{7}$',
                 required: true,
@@ -348,9 +362,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'partnership', label: 'Partnership' },
                   { value: 'sole_proprietorship', label: 'Sole Proprietorship' },
                 ],
-                props: {
-                  'data-testid': 'businessType',
-                },
                 required: true,
                 col: 6,
               },
@@ -369,7 +380,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Confirmation Code',
                 props: {
                   placeholder: 'Enter confirmation code (sent via email)',
-                  'data-testid': 'confirmationCode',
                 },
                 pattern: '^[A-Z0-9]{6}$',
                 required: true,
@@ -379,9 +389,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 key: 'finalTerms',
                 type: 'checkbox',
                 label: 'I confirm all information is accurate',
-                props: {
-                  'data-testid': 'finalTerms',
-                },
                 required: true,
                 col: 12,
               },
@@ -391,7 +398,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Create Account',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitConditional',
                 },
                 col: 12,
               },
@@ -487,9 +493,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'business', label: 'Business Account' },
                   { value: 'nonprofit', label: 'Non-Profit Organization' },
                 ],
-                props: {
-                  'data-testid': 'accountType',
-                },
                 required: true,
                 col: 12,
               },
@@ -506,7 +509,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Business Name',
                 props: {
                   placeholder: 'Enter business name',
-                  'data-testid': 'businessName',
                 },
                 required: true,
                 col: 12,
@@ -517,7 +519,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Tax ID / EIN',
                 props: {
                   placeholder: 'Format: XX-XXXXXXX',
-                  'data-testid': 'taxId',
                 },
                 pattern: '^[0-9]{2}-[0-9]{7}$',
                 required: true,
@@ -536,7 +537,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Create Business Account',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitBusiness',
                 },
                 col: 12,
               },
@@ -640,9 +640,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'uk', label: 'United Kingdom' },
                   { value: 'de', label: 'Germany' },
                 ],
-                props: {
-                  'data-testid': 'country',
-                },
                 required: true,
                 col: 6,
               },
@@ -656,9 +653,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'de', label: 'German' },
                   { value: 'es', label: 'Spanish' },
                 ],
-                props: {
-                  'data-testid': 'language',
-                },
                 required: true,
                 col: 6,
               },
@@ -672,9 +666,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'gbp', label: 'British Pound (£)' },
                   { value: 'eur', label: 'Euro (€)' },
                 ],
-                props: {
-                  'data-testid': 'currency',
-                },
                 required: true,
                 col: 12,
               },
@@ -693,7 +684,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Street Address',
                 props: {
                   placeholder: 'Enter street address',
-                  'data-testid': 'streetAddress',
                 },
                 required: true,
                 col: 12,
@@ -704,7 +694,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'City',
                 props: {
                   placeholder: 'Enter city',
-                  'data-testid': 'city',
                 },
                 required: true,
                 col: 6,
@@ -715,7 +704,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Postal/ZIP Code',
                 props: {
                   placeholder: 'Enter postal/ZIP code',
-                  'data-testid': 'postalCode',
                 },
                 required: true,
                 col: 6,
@@ -732,9 +720,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'on', label: 'Ontario' },
                   { value: 'bc', label: 'British Columbia' },
                 ],
-                props: {
-                  'data-testid': 'stateProvince',
-                },
                 required: true,
                 col: 12,
               },
@@ -757,9 +742,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'paypal', label: 'PayPal' },
                   { value: 'crypto', label: 'Cryptocurrency' },
                 ],
-                props: {
-                  'data-testid': 'paymentMethod',
-                },
                 required: true,
                 col: 12,
               },
@@ -773,9 +755,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'uk', label: 'United Kingdom' },
                   { value: 'de', label: 'Germany' },
                 ],
-                props: {
-                  'data-testid': 'bankCountry',
-                },
                 // Should default to country from page 1
                 col: 12,
               },
@@ -785,7 +764,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Complete Setup',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitCascade',
                 },
                 col: 12,
               },
@@ -892,7 +870,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Username',
                 props: {
                   placeholder: 'Minimum 3 characters',
-                  'data-testid': 'username',
                 },
                 required: true,
                 minLength: 3,
@@ -913,7 +890,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 props: {
                   type: 'password',
                   placeholder: 'Minimum 8 characters',
-                  'data-testid': 'password',
                 },
                 required: true,
                 minLength: 8,
@@ -928,9 +904,6 @@ test.describe('Cross-Page Validation Tests', () => {
                   { value: 'school', label: 'What was your first school?' },
                   { value: 'city', label: 'In what city were you born?' },
                 ],
-                props: {
-                  'data-testid': 'securityQuestion',
-                },
                 required: true,
                 col: 12,
               },
@@ -940,7 +913,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Security Answer',
                 props: {
                   placeholder: 'Answer to security question',
-                  'data-testid': 'securityAnswer',
                 },
                 required: true,
                 minLength: 2,
@@ -960,7 +932,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Confirm Username',
                 props: {
                   placeholder: 'Re-enter your username',
-                  'data-testid': 'confirmUsername',
                 },
                 required: true,
                 col: 12,
@@ -971,7 +942,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Verification Code',
                 props: {
                   placeholder: 'Enter 6-digit code',
-                  'data-testid': 'verificationCode',
                 },
                 pattern: '^[0-9]{6}$',
                 required: true,
@@ -983,7 +953,6 @@ test.describe('Cross-Page Validation Tests', () => {
                 label: 'Complete Verification',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitProgressive',
                 },
                 col: 12,
               },

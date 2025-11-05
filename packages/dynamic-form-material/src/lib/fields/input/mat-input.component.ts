@@ -16,11 +16,7 @@ import { AsyncPipe } from '@angular/common';
   template: `
     @let f = field();
 
-    <mat-form-field
-      [appearance]="props()?.appearance ?? 'outline'"
-      [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'"
-      [class]="className() || ''"
-    >
+    <mat-form-field [appearance]="props()?.appearance ?? 'outline'" [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'">
       @if (label()) {
       <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }
@@ -44,6 +40,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
+    '[class]': 'className()',
   },
 })
 export default class MatInputFieldComponent implements MatInputComponent {
