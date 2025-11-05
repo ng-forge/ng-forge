@@ -164,11 +164,8 @@ test.describe('Comprehensive Material Field Tests', () => {
           // Submit Button
           {
             key: 'submit',
-            type: 'button',
+            type: 'submit',
             label: 'Submit All Fields',
-            props: {
-              type: 'submit',
-            },
             col: 12,
           },
         ],
@@ -330,11 +327,8 @@ test.describe('Comprehensive Material Field Tests', () => {
           // Submit Button
           {
             key: 'submitValidation',
-            type: 'button',
+            type: 'submit',
             label: 'Submit with Validation',
-            props: {
-              type: 'submit',
-            },
             col: 12,
           },
         ],
@@ -500,11 +494,8 @@ test.describe('Comprehensive Material Field Tests', () => {
           },
           {
             key: 'submitGrid',
-            type: 'button',
+            type: 'submit',
             label: 'Submit Grid Test',
-            props: {
-              type: 'submit',
-            },
             col: 12,
           },
         ],
@@ -603,11 +594,8 @@ test.describe('Comprehensive Material Field Tests', () => {
           },
           {
             key: 'submitState',
-            type: 'button',
+            type: 'submit',
             label: 'Submit State Test',
-            props: {
-              type: 'submit',
-            },
             col: 12,
           },
         ],

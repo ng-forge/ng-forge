@@ -59,12 +59,8 @@ test.describe('Cross-Field Validation Tests', () => {
           },
           {
             key: 'submitPassword',
-            type: 'button',
+            type: 'submit',
             label: 'Create Account',
-            event: SubmitEvent,
-            props: {
-              type: 'submit',
-            },
             col: 12,
           },
         ],
@@ -167,11 +163,8 @@ test.describe('Cross-Field Validation Tests', () => {
           },
           {
             key: 'submitConditional',
-            type: 'button',
+            type: 'submit',
             label: 'Submit Address',
-            props: {
-              type: 'submit',
-            },
             col: 12,
           },
         ],
@@ -302,11 +295,8 @@ test.describe('Cross-Field Validation Tests', () => {
           },
           {
             key: 'submitDependent',
-            type: 'button',
+            type: 'submit',
             label: 'Add Product',
-            props: {
-              type: 'submit',
-            },
             col: 12,
           },
         ],
@@ -434,11 +424,8 @@ test.describe('Cross-Field Validation Tests', () => {
           },
           {
             key: 'submitEnableDisable',
-            type: 'button',
+            type: 'submit',
             label: 'Complete Order',
-            props: {
-              type: 'submit',
-            },
             col: 12,
           },
         ],

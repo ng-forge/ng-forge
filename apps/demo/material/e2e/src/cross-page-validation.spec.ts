@@ -158,11 +158,8 @@ test.describe('Cross-Page Validation Tests', () => {
               },
               {
                 key: 'submitEmailVerification',
-                type: 'button',
-                label: 'Complete Registration',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Complete Registration',
                 col: 12,
               },
             ],
@@ -394,11 +391,8 @@ test.describe('Cross-Page Validation Tests', () => {
               },
               {
                 key: 'submitConditional',
-                type: 'button',
-                label: 'Create Account',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Create Account',
                 col: 12,
               },
             ],
@@ -533,11 +527,8 @@ test.describe('Cross-Page Validation Tests', () => {
             fields: [
               {
                 key: 'submitBusiness',
-                type: 'button',
-                label: 'Create Business Account',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Create Business Account',
                 col: 12,
               },
             ],
@@ -760,11 +751,8 @@ test.describe('Cross-Page Validation Tests', () => {
               },
               {
                 key: 'submitCascade',
-                type: 'button',
-                label: 'Complete Setup',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Complete Setup',
                 col: 12,
               },
             ],
@@ -949,11 +937,8 @@ test.describe('Cross-Page Validation Tests', () => {
               },
               {
                 key: 'submitProgressive',
-                type: 'button',
-                label: 'Complete Verification',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Complete Verification',
                 col: 12,
               },
             ],

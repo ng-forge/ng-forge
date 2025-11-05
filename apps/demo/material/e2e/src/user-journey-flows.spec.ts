@@ -279,11 +279,8 @@ test.describe('User Journey Flow Tests', () => {
               },
               {
                 key: 'submitRegistration',
-                type: 'button',
-                label: 'Complete Registration',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Complete Registration',
                 col: 12,
               },
             ],
@@ -636,11 +633,8 @@ test.describe('User Journey Flow Tests', () => {
               },
               {
                 key: 'placeOrder',
-                type: 'button',
-                label: 'Place Order',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Place Order',
                 col: 12,
               },
             ],
@@ -962,11 +956,8 @@ test.describe('User Journey Flow Tests', () => {
               },
               {
                 key: 'submitSurvey',
-                type: 'button',
-                label: 'Submit Survey',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Submit Survey',
                 col: 12,
               },
             ],

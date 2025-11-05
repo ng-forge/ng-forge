@@ -66,11 +66,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               },
               {
                 key: 'submitBrowserNav',
-                type: 'button',
-                label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Submit',
                 col: 12,
               },
             ],
@@ -194,11 +191,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               },
               {
                 key: 'submitRefresh',
-                type: 'button',
-                label: 'Submit After Refresh',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Submit After Refresh',
                 col: 12,
               },
             ],
@@ -310,11 +304,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               },
               {
                 key: 'submitRapid',
-                type: 'button',
-                label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Submit',
                 col: 12,
               },
             ],
@@ -417,11 +408,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               },
               {
                 key: 'submitNetwork',
-                type: 'button',
-                label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Submit',
                 col: 12,
               },
             ],
@@ -518,11 +506,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               },
               {
                 key: 'submitInvalid',
-                type: 'button',
-                label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Submit',
                 col: 12,
               },
             ],
@@ -611,11 +596,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               },
               {
                 key: 'submitDestruct',
-                type: 'button',
-                label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Submit',
                 col: 12,
               },
             ],
@@ -673,11 +655,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               },
               {
                 key: 'submitReconstruct',
-                type: 'button',
-                label: 'Submit Reconstructed',
-                props: {
-                  type: 'submit',
-                },
+                type: 'submit',
+            label: 'Submit Reconstructed',
                 col: 12,
               },
             ],
