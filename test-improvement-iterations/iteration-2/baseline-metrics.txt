@@ -1,0 +1,7 @@
+=== ITERATION 1 - AFTER FIXES ===
+
+Weak toBeDefined assertions:
+35
+
+Weak boolean assertions:
+67

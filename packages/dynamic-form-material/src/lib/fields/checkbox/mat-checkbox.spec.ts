@@ -38,9 +38,15 @@ describe('MatCheckboxFieldComponent', () => {
       const containerDiv = fixture.debugElement.query(By.css('.terms-checkbox'));
       const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
 
-      expect(checkbox).toBeTruthy();
+      // ITERATION 2 FIX: Verify elements exist AND have correct structure/type
+      // Previous: expect(checkbox).toBeTruthy() - only checks truthy
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.componentInstance).toBeInstanceOf(MatCheckbox);
       expect(checkbox.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
-      expect(containerDiv).toBeTruthy();
+
+      expect(containerDiv).not.toBeNull();
+      expect(containerDiv.nativeElement).toBeInstanceOf(HTMLDivElement);
+      expect(containerDiv.nativeElement.classList.contains('terms-checkbox')).toBe(true);
       expect(hintElement?.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
       // Verify form control integration and dynamic field component properties
