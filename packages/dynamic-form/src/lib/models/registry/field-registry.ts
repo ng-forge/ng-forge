@@ -1,42 +1,58 @@
 import { GroupField, PageField, RowField, TextField } from '../../definitions';
 
 /**
- * Global interface for dynamic form field definitions with categorization
- * Users can augment this interface to add their custom field types
- *
- * Container fields: Layout fields that contain other fields (page, row, group)
- * Leaf fields: Fields that can hold values or display content (input, text, etc.)
+ * Container fields registry - augment this interface to add custom container fields
  *
  * @example
  * ```typescript
  * declare module '@ng-forge/dynamic-form' {
- *   interface DynamicFormFieldRegistry {
- *     containers: {
- *       'my-container': MyContainerFieldDef;
- *     };
- *     leaves: {
- *       'my-input': MyInputFieldDef;
- *     };
+ *   interface FieldRegistryContainers {
+ *     'my-container': MyContainerFieldDef;
  *   }
  * }
  * ```
+ */
+export interface FieldRegistryContainers {
+  page: PageField;
+  row: RowField;
+  group: GroupField;
+}
+
+/**
+ * Leaf fields registry - augment this interface to add custom leaf fields
+ *
+ * @example
+ * ```typescript
+ * declare module '@ng-forge/dynamic-form' {
+ *   interface FieldRegistryLeaves {
+ *     'my-input': MyInputFieldDef;
+ *   }
+ * }
+ * ```
+ */
+export interface FieldRegistryLeaves {
+  text: TextField;
+}
+
+/**
+ * Global interface for dynamic form field definitions with categorization
+ * This interface combines containers and leaves from their respective registries
+ *
+ * Container fields: Layout fields that contain other fields (page, row, group)
+ * Leaf fields: Fields that can hold values or display content (input, text, etc.)
+ *
+ * To add custom fields, augment FieldRegistryContainers or FieldRegistryLeaves
  */
 export interface DynamicFormFieldRegistry {
   /**
    * Container fields that hold other fields (no value, have children)
    */
-  containers: {
-    page: PageField;
-    row: RowField;
-    group: GroupField;
-  };
+  containers: FieldRegistryContainers;
 
   /**
    * Leaf fields that have values or display content
    */
-  leaves: {
-    text: TextField;
-  };
+  leaves: FieldRegistryLeaves;
 }
 
 /**
