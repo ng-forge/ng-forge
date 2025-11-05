@@ -2,7 +2,7 @@
 
 **The problem:** Angular forms require endless boilerplate - validators, error messages, subscriptions, template bindings, cleanup logic. And you lose type safety the moment you use `FormBuilder`.
 
-**The solution:** ng-forge gives you declarative, type-safe forms powered by Angular 21's signal forms. Define your structure once, get everything else automatically.
+**The solution:** ng-forge dynamic forms gives you declarative, type-safe forms powered by Angular 21's signal forms. Define your structure once, get everything else automatically.
 
 ### From 150+ Lines of Boilerplate...
 
@@ -59,7 +59,7 @@ export class TraditionalFormComponent implements OnDestroy {
 ### ...To 30 Lines with Full Type Safety
 
 ```typescript
-// ng-forge: Clean, typed, automatic
+// ng-forge dynamic forms: Clean, typed, automatic
 import { Component } from '@angular/core';
 import { DynamicFormComponent, FormConfig } from '@ng-forge/dynamic-form';
 
@@ -257,7 +257,7 @@ Even your conditional expressions are type-checked:
 
 ### ⚡ Native Signal Forms Integration
 
-Not a wrapper or polyfill - true integration with Angular 21's signal forms API. ng-forge maps your config directly to `required()`, `email()`, `min()`, `hidden()`, and other signal form validators.
+Not a wrapper or polyfill - true integration with Angular 21's signal forms API. ng-forge dynamic forms maps your config directly to `required()`, `email()`, `min()`, `hidden()`, and other signal form validators.
 
 ```typescript
 // Your config
@@ -350,11 +350,11 @@ provideDynamicForm(withFieldTypes([{ name: 'my-input', loadComponent: () => MyCu
 
 ### 🚀 Zero `ControlValueAccessor` Implementation
 
-Traditional Angular requires implementing `ControlValueAccessor` for every custom form control. ng-forge handles all of that automatically with signals:
+Traditional Angular requires implementing `ControlValueAccessor` for every custom form control. ng-forge dynamic forms handles all of that automatically with signals:
 
 ```typescript
 // Traditional: ~50 lines of ControlValueAccessor boilerplate
-// ng-forge: Just use input() and model()
+// ng-forge dynamic forms: Just use input() and model()
 @Component({...})
 export class MyField {
   value = model<string>(''); // That's it!
@@ -560,6 +560,8 @@ export class CheckoutComponent {
 
 Need a custom control? Create one in minutes with no `ControlValueAccessor` boilerplate:
 
+{% raw %}
+
 ```typescript
 // 1. Create your field component
 @Component({
@@ -598,6 +600,8 @@ provideDynamicForm(
   label: 'How was your experience?',
 }
 ```
+
+{% endraw %}
 
 **No** `writeValue()`, **no** `registerOnChange()`, **no** `registerOnTouched()`. Just signals.
 
@@ -647,9 +651,9 @@ All UI packages include: input, textarea, select, checkbox, radio, date picker, 
 ## Join the Community
 
 - 📖 **[Documentation](../)** - Comprehensive guides and examples
-- 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions, share tips
-- 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs, request features
-- ⭐ **[Star on GitHub](https://github.com/ng-forge/ng-forge)** - Support the project
+- 💬 **[GitHub Discussions](https://github.com/ng-forge/dynamic-forms/discussions)** - Ask questions, share tips
+- 🐛 **[Issue Tracker](https://github.com/ng-forge/dynamic-forms/issues)** - Report bugs, request features
+- ⭐ **[Star on GitHub](https://github.com/ng-forge/dynamic-forms)** - Support the project
 
 ---
 
