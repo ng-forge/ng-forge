@@ -1,0 +1,26 @@
+=== BASELINE METRICS - Iteration 1 ===
+Date: 2025-11-05
+Test Suite: dynamic-form + dynamic-form-material
+
+ISSUES FOUND:
+- Weak toBeDefined() assertions: 31
+- Weak boolean assertions (toBeTruthy/toBeFalsy): 67
+- Total weak assertions: 98
+
+SEVERITY:
+- Critical: These assertions can pass even when functionality is broken
+- Impact: False confidence in test suite
+
+TOP FILES WITH ISSUES:
+1. packages/dynamic-form-material/src/lib/fields/datepicker/mat-datepicker.spec.ts (multiple)
+2. [To be identified in detailed analysis]
+
+NEXT STEPS:
+- Run detailed analysis to identify top 5 critical issues
+- Fix those issues in this iteration
+- Re-measure to track improvement
+
+TARGETS:
+- Weak assertions: 98 → 0
+- Quality score: ??? → 90+
+- Test pass rate: ??? → 100%
