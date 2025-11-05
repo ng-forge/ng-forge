@@ -89,68 +89,19 @@ expression: 'formValue.__proto__'; // Error: Property "__proto__" is not accessi
 
 **Why?** Dynamic forms need to access any field name you define. The parser blocks only the dangerous properties that could break security.
 
-## What Data is Exposed
+## Available Context Variables
 
-When the parser evaluates expressions, it has access to the scope you provide. For dynamic forms, this typically includes:
+When expressions are evaluated, they have access to:
 
 ```typescript
 {
   fieldValue: 'current field value',
   formValue: { /* entire form state */ },
-  fieldPath: 'fieldName',
-  customFunctions: { /* your custom validators */ }
+  fieldPath: 'fieldName'
 }
 ```
 
-**Important**: Anything you put in `formValue` or `customFunctions` is accessible in expressions.
-
-## Form Configuration Best Practices
-
-### ✅ Safe Form Configuration
-
-```typescript
-// GOOD - Normal form fields
-const config = {
-  fields: [
-    { key: 'username', type: 'input', value: '' },
-    { key: 'age', type: 'input', value: 0 },
-    { key: 'country', type: 'select', value: '' },
-  ],
-};
-
-// GOOD - Custom validation functions
-const customFunctions = {
-  isValidEmail: (ctx) => ctx.fieldValue.includes('@'),
-  isAdult: (ctx) => ctx.formValue.age >= 18,
-};
-```
-
-### ❌ Unsafe Form Configuration
-
-```typescript
-// BAD - Exposing sensitive data in formValue
-const formValue = {
-  username: 'john',
-  sessionToken: 'secret123', // Don't put this in form state!
-  _apiKey: 'key', // Also accessible in expressions
-};
-
-// BAD - Functions with side effects
-const customFunctions = {
-  saveToDb: (ctx) => {
-    api.save(ctx.fieldValue); // Side effect!
-    return true;
-  },
-};
-
-// BAD - User-controlled RegExp
-const customFunctions = {
-  matchPattern: (ctx) => {
-    const pattern = new RegExp(ctx.formValue.userPattern); // ReDoS risk!
-    return pattern.test(ctx.fieldValue);
-  },
-};
-```
+**Note**: Don't store sensitive data (tokens, API keys) in form state since it's accessible in expressions.
 
 ## Common Form Use Cases
 
@@ -246,27 +197,6 @@ For dynamic forms, the parser prevents:
 - ✅ **Prototype Pollution**: Can't access `constructor` or `__proto__`
 - ✅ **Unsafe Operations**: Can't call methods that modify state or access globals
 
-## What You Must Handle
-
-The parser only protects expressions from code injection. When you submit the form, you still need to validate and sanitize the data:
-
-```typescript
-// When the form is submitted
-onSubmit(formValue: any) {
-  // ✅ Validate the data
-  if (!this.isValidEmail(formValue.email)) {
-    throw new Error('Invalid email');
-  }
-
-  // ✅ Send to your API
-  this.api.createUser(formValue).subscribe(...);
-
-  // Your backend should also validate and use parameterized queries
-}
-```
-
-**Remember**: The expression parser prevents malicious code in expressions like `formValue.age >= 18`. It doesn't validate that the age value itself is reasonable or that the email is properly formatted.
-
 ## Custom Functions
 
 When providing custom functions for use in expressions, register them with the FunctionRegistryService:
@@ -317,14 +247,6 @@ functionRegistry.registerFunction('logValue', (ctx) => {
 });
 ```
 
-## Quick Checklist for Form Security
-
-- [ ] Form fields contain only user data (no tokens, keys, or sensitive info)
-- [ ] Custom functions are pure (no side effects)
-- [ ] RegExp patterns are hardcoded (not from form values)
-- [ ] Form data is validated before database operations
-- [ ] Form data is sanitized before HTML rendering
-
 ## Supported Expression Features
 
 In JavaScript expressions (`type: 'javascript'`), you can use:
@@ -345,11 +267,9 @@ expression: 'formValue.age >= 18 && formValue.email.includes("@example.com")';
 
 ## Summary
 
-The expression parser lets you write flexible conditional logic and dynamic values while preventing code injection attacks. For dynamic forms:
+The expression parser lets you write flexible conditional logic while preventing code injection attacks:
 
 1. **Form state is accessible** - Any field in `formValue` can be read
-2. **Custom functions can execute** - Only provide pure functions
-3. **Methods are restricted** - Only safe, non-mutating methods allowed
-4. **Prototype is protected** - Can't access dangerous properties
-
-**Key Principle**: The parser prevents code injection. You're responsible for validating/sanitizing data when you use it outside the form (databases, APIs, HTML).
+2. **Methods are restricted** - Only safe, non-mutating methods allowed
+3. **Prototype is protected** - Can't access dangerous properties
+4. **Custom functions supported** - Register pure functions for reusable logic
