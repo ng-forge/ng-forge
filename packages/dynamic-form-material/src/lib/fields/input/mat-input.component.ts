@@ -40,6 +40,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
     '[class]': 'className()',
   },
 })

@@ -46,6 +46,7 @@ import { DynamicText } from '../../models';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
 })
 export default class TextFieldComponent {

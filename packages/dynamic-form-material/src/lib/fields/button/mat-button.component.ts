@@ -12,6 +12,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatButton, DynamicTextPipe, AsyncPipe],
   host: {
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   template: `
     <button
