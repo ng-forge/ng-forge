@@ -1,27 +1,35 @@
-Dynamic forms use expressions for conditional logic and dynamic values. The expression parser evaluates these expressions safely, preventing code injection attacks while maintaining the flexibility you need.
+Dynamic forms use expressions for conditional logic and dynamic values. When you use JavaScript expressions with `type: 'javascript'`, the expression parser evaluates them safely, preventing code injection attacks while maintaining the flexibility you need.
 
-## How Expressions Work in Forms
+## How JavaScript Expressions Work
 
-When you configure conditional logic or dynamic values in your form:
+When you configure JavaScript expressions in your form:
 
 ```typescript
 {
-  key: 'age',
+  key: 'driverLicense',
   type: 'input',
   value: '',
-  label: 'Age',
-  hidden: hidden((form) => form.value.country !== 'US'),
-  required: required((form) => form.value.age >= 18)
+  label: 'Driver License',
+  logic: [
+    {
+      type: 'required',
+      condition: {
+        type: 'javascript',
+        expression: 'formValue.age >= 18 && formValue.needsTransport === true'
+      },
+      errorMessage: 'Driver license required for adults needing transport'
+    }
+  ]
 }
 ```
 
-The expressions like `form.value.country !== 'US'` are evaluated by the parser, which has access to:
+The expression `'formValue.age >= 18 && formValue.needsTransport === true'` is evaluated by the parser, which has access to:
 
 ```typescript
 {
   fieldValue: currentFieldValue,
-  formValue: { country: 'US', age: 25, ... },
-  fieldPath: 'age'
+  formValue: { age: 25, needsTransport: true, ... },
+  fieldPath: 'driverLicense'
 }
 ```
 
@@ -35,13 +43,31 @@ Only safe methods can be called in expressions:
 
 ```typescript
 // ✅ Works - safe string methods
-hidden: hidden((form) => form.value.email.includes('@company.com'));
+{
+  type: 'hidden',
+  condition: {
+    type: 'javascript',
+    expression: 'formValue.email.includes("@company.com")'
+  }
+}
 
 // ✅ Works - safe array methods
-hidden: hidden((form) => form.value.roles.some((role) => role === 'admin'));
+{
+  type: 'hidden',
+  condition: {
+    type: 'javascript',
+    expression: 'formValue.roles.some((role) => role === "admin")'
+  }
+}
 
 // ❌ Blocked - not whitelisted
-hidden: hidden((form) => form.value.text.link('url'));
+{
+  type: 'hidden',
+  condition: {
+    type: 'javascript',
+    expression: 'formValue.text.link("url")' // Error: Method "link" is not allowed
+  }
+}
 ```
 
 Common safe methods: `toUpperCase`, `toLowerCase`, `includes`, `startsWith`, `slice`, `map`, `filter`, `some`, `every`, `toFixed`
@@ -52,13 +78,13 @@ All properties in the form data are accessible, except prototype properties:
 
 ```typescript
 // ✅ Works - access any form field
-form.value.firstName;
-form.value._internalFlag;
-form.value.nested.deeply.property;
+expression: 'formValue.firstName';
+expression: 'formValue._internalFlag';
+expression: 'formValue.nested.deeply.property';
 
 // ❌ Blocked - prototype pollution risks
-form.value.constructor;
-form.value.__proto__;
+expression: 'formValue.constructor'; // Error: Property "constructor" is not accessible
+expression: 'formValue.__proto__'; // Error: Property "__proto__" is not accessible
 ```
 
 **Why?** Dynamic forms need to access any field name you define. The parser blocks only the dangerous properties that could break security.
@@ -137,7 +163,15 @@ const customFunctions = {
   value: '',
   label: 'Company Name',
   // Show only if user selects "Employed"
-  hidden: hidden((form) => form.value.employmentStatus !== 'employed')
+  logic: [
+    {
+      type: 'hidden',
+      condition: {
+        type: 'javascript',
+        expression: 'formValue.employmentStatus !== "employed"'
+      }
+    }
+  ]
 }
 ```
 
@@ -150,39 +184,57 @@ const customFunctions = {
   value: '',
   label: 'Tax ID',
   // Required only for business accounts
-  required: required((form) => form.value.accountType === 'business')
+  logic: [
+    {
+      type: 'required',
+      condition: {
+        type: 'javascript',
+        expression: 'formValue.accountType === "business"'
+      },
+      errorMessage: 'Tax ID is required for business accounts'
+    }
+  ]
 }
 ```
 
-### Dynamic Values with Transformations
+### Complex Conditions
 
 ```typescript
 {
-  key: 'fullName',
-  type: 'input',
-  value: dynamicValue((ctx) => {
-    const first = ctx.formValue.firstName || '';
-    const last = ctx.formValue.lastName || '';
-    return `${first} ${last}`.trim().toUpperCase();
-  }),
-  label: 'Full Name'
+  key: 'personalConcierge',
+  type: 'checkbox',
+  value: false,
+  label: 'Request Personal Concierge Service',
+  logic: [
+    {
+      type: 'hidden',
+      condition: {
+        type: 'javascript',
+        expression: 'formValue.membershipLevel !== "vip" || formValue.annualIncome < 100000'
+      }
+    }
+  ]
 }
 ```
 
-### Array Filtering
+### String Methods in Expressions
 
 ```typescript
 {
-  key: 'adminEmails',
+  key: 'discountCode',
   type: 'input',
-  value: dynamicValue((ctx) => {
-    const users = ctx.formValue.users || [];
-    return users
-      .filter(u => u.role === 'admin')
-      .map(u => u.email)
-      .join(', ');
-  }),
-  label: 'Admin Emails'
+  value: '',
+  label: 'Discount Code',
+  logic: [
+    {
+      type: 'required',
+      condition: {
+        type: 'javascript',
+        expression: 'formValue.email.endsWith("@company.com")'
+      },
+      errorMessage: 'Discount code required for company emails'
+    }
+  ]
 }
 ```
 
@@ -214,34 +266,52 @@ db.query('SELECT * FROM users WHERE name = ?', [form.value.username]);
 
 ## Custom Functions
 
-When providing custom functions to forms, only include pure functions:
+When providing custom functions for use in expressions, register them with the FunctionRegistryService:
 
 ```typescript
 // ✅ GOOD - Pure functions
-const customFunctions = {
-  isValidEmail: (ctx) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ctx.fieldValue),
-  isAdult: (ctx) => ctx.formValue.age >= 18,
-  calculateTotal: (ctx) => ctx.formValue.items.reduce((sum, item) => sum + item.price, 0),
-};
+import { FunctionRegistryService } from '@ng-forge/dynamic-form';
 
-// ❌ BAD - Side effects
-const customFunctions = {
-  logValue: (ctx) => {
-    console.log(ctx.fieldValue); // Side effect!
-    trackAnalytics(ctx); // Side effect!
-    return true;
-  },
-};
+const functionRegistry = inject(FunctionRegistryService);
+
+functionRegistry.registerFunction('isValidEmail', (ctx) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ctx.fieldValue);
+});
+
+functionRegistry.registerFunction('isAdult', (ctx) => {
+  return ctx.formValue.age >= 18;
+});
 ```
 
-**Why?** Custom functions can be executed via array methods:
+Then use them with `type: 'custom'`:
 
 ```typescript
-// If you have this in customFunctions:
-saveToApi: (item) => api.post('/items', item);
+{
+  key: 'adultContent',
+  type: 'checkbox',
+  value: false,
+  label: 'Access Adult Content',
+  logic: [
+    {
+      type: 'hidden',
+      condition: {
+        type: 'custom',
+        expression: 'isAdult'
+      }
+    }
+  ]
+}
+```
 
-// User could trigger it with:
-dynamicValue((ctx) => ctx.formValue.items.map(ctx.customFunctions.saveToApi));
+**Important**: Only provide pure functions without side effects:
+
+```typescript
+// ❌ BAD - Side effects
+functionRegistry.registerFunction('logValue', (ctx) => {
+  console.log(ctx.fieldValue); // Side effect!
+  trackAnalytics(ctx); // Side effect!
+  return true;
+});
 ```
 
 ## Quick Checklist for Form Security
@@ -254,15 +324,21 @@ dynamicValue((ctx) => ctx.formValue.items.map(ctx.customFunctions.saveToApi));
 
 ## Supported Expression Features
 
-In conditional logic and dynamic values, you can use:
+In JavaScript expressions (`type: 'javascript'`), you can use:
 
-**Basic Operations**: Property access (`form.value.name`), comparisons (`===`, `!==`, `>`, `<`), logical operators (`&&`, `||`, `!`)
+**Basic Operations**: Property access (`formValue.name`), comparisons (`===`, `!==`, `>`, `<`), logical operators (`&&`, `||`, `!`)
 
 **String Methods**: `toUpperCase`, `toLowerCase`, `includes`, `startsWith`, `endsWith`, `slice`, `trim`
 
 **Array Methods**: `map`, `filter`, `some`, `every`, `find`, `includes`, `join`
 
-**Not Supported**: Object literals `{}`, arrow functions `() => {}`, ternary `a ? b : c`, assignment `x = 5`
+**Example**:
+
+```typescript
+expression: 'formValue.age >= 18 && formValue.email.includes("@example.com")';
+```
+
+**Not Supported**: Object literals `{}`, ternary `a ? b : c`, assignment `x = 5`
 
 ## Summary
 
