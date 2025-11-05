@@ -39,11 +39,9 @@ export const registrationWizardConfig = {
         },
         {
           key: 'dateOfBirth',
-          type: 'input',
+          type: 'datepicker',
           label: 'Date of Birth',
           required: true,
-          defaultValue: '1990-05-15',
-          props: { type: 'date' },
           validators: [{ type: 'required' }],
           col: 6,
         },
