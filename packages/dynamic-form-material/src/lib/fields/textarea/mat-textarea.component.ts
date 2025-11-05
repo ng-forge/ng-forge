@@ -15,7 +15,7 @@ import { AsyncPipe } from '@angular/common';
 
     <mat-form-field
       [appearance]="props()?.appearance || 'fill'"
-      [subscriptSizing]="props()?.subscriptSizing ?? 'fixed'"
+      [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'"
       [class]="className() || ''"
     >
       @if (label()) {
