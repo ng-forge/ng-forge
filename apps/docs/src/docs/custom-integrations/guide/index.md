@@ -1,7 +1,4 @@
-# Custom Integration Guide
-
-> **Difficulty**: 🔴 Advanced
-> **Prerequisites**: [Getting Started](../../getting-started), [Field Types](../../core/field-types), [Type Safety](../../core/type-safety) > **Estimated time**: 4-6 hours
+> **Prerequisites**: [Getting Started](../../getting-started), [Field Types](../../core/field-types), [Type Safety](../../core/type-safety)
 
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
 
@@ -341,7 +338,7 @@ The Material integration source code is the most comprehensive example of implem
 
 ## Related Topics
 
-- **[Material Integration](../reference/material)** 🟢 - Complete reference implementation
-- **[Field Types](../../core/field-types)** 🟢 - Understanding all available field types
-- **[Type Safety](../../core/type-safety)** 🔴 - Module augmentation for custom types
-- **[Validation](../../core/validation)** 🟡 - Displaying validation errors in custom fields
+- **[Material Integration](../reference/material)** - Complete reference implementation
+- **[Field Types](../../core/field-types)** - Understanding all available field types
+- **[Type Safety](../../core/type-safety)** - Module augmentation for custom types
+- **[Validation](../../core/validation)** - Displaying validation errors in custom fields

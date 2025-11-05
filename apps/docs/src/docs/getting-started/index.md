@@ -1,9 +1,3 @@
-## Build Forms 10x Faster with Full Type Safety
-
-> **Difficulty**: 🟢 Beginner
-> **Prerequisites**: None
-> **Estimated time**: 15 minutes
-
 ng-forge dynamic forms gives you declarative, type-safe forms powered by Angular 21's signal forms. Define your structure once, get validation, conditional logic, and beautiful UI automatically.
 
 ### Quick Example
@@ -558,20 +552,20 @@ provideDynamicForm(
 
 ### Core Concepts
 
-- **[Field Types](../core/field-types)** 🟢 - All available field types and their properties
-- **[Validation](../core/validation)** 🟡 - Validation strategies with decision matrix
-- **[Conditional Logic](../core/conditional-logic)** 🟡 - Show/hide fields dynamically
-- **[Type Safety](../core/type-safety)** 🔴 - Advanced TypeScript inference patterns
+- **[Field Types](../core/field-types)** - All available field types and their properties
+- **[Validation](../core/validation)** - Validation strategies with decision matrix
+- **[Conditional Logic](../core/conditional-logic)** - Show/hide fields dynamically
+- **[Type Safety](../core/type-safety)** - Advanced TypeScript inference patterns
 
 ### UI Implementations
 
-- **[Material Design](../custom-integrations/reference/material)** 🟢 - Production-ready Material integration
-- **[Custom Integration Guide](../custom-integrations/guide)** 🔴 - Build your own UI integration
+- **[Material Design](../custom-integrations/reference/material)** - Production-ready Material integration
+- **[Custom Integration Guide](../custom-integrations/guide)** - Build your own UI integration
 
 ### Advanced Topics
 
-- **[i18n Setup](../i18n/setup)** 🟡 - Multi-language support
-- **[Events](../core/events)** 🟡 - Form event bus and custom events
+- **[i18n Setup](../i18n/setup)** - Multi-language support
+- **[Events](../core/events)** - Form event bus and custom events
 
 ---
 
