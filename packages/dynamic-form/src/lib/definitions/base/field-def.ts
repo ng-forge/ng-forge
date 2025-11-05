@@ -1,6 +1,5 @@
 import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
-import { FieldKey } from '../../models/field-key';
 import { DynamicText } from '../../pipes';
 
 /**
@@ -50,37 +49,21 @@ export interface FieldDef<TProps extends Record<string, unknown>> {
    * Unique field identifier used for form binding and value tracking.
    *
    * This key is used to associate the field with form values and must be
-   * unique within the form. Keys must follow standard naming conventions:
-   * camelCase, kebab-case, snake_case, or PascalCase.
+   * unique within the form. It follows object property naming conventions.
    *
    * @example
    * ```typescript
-   * // Valid camelCase keys
+   * // Simple field key
    * key: 'email'
-   * key: 'firstName'
-   * key: 'userAddress'
    *
-   * // Valid kebab-case keys
-   * key: 'user-email'
-   * key: 'first-name'
-   * key: 'user-address'
+   * // Nested object notation
+   * key: 'address.street'
    *
-   * // Valid snake_case keys
-   * key: 'user_email'
-   * key: 'first_name'
-   * key: 'user_address'
-   *
-   * // Valid PascalCase keys
-   * key: 'UserEmail'
-   * key: 'FirstName'
-   * key: 'UserAddress'
-   *
-   * // Invalid keys (will cause TypeScript errors)
-   * key: 'user name'    // spaces not allowed
-   * key: '1stName'      // starting with number not allowed
+   * // Array notation
+   * key: 'hobbies[0]'
    * ```
    */
-  key: FieldKey;
+  key: string;
 
   /**
    * Field type identifier for component selection.
