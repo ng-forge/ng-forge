@@ -61,11 +61,11 @@ export class TraditionalFormComponent implements OnDestroy {
 ```typescript
 // ng-forge dynamic forms: Clean, typed, automatic
 import { Component } from '@angular/core';
-import { DynamicFormComponent, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-user-form',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
 export class UserFormComponent {
@@ -146,7 +146,7 @@ export class UserFormComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(formValue: unknown) {
+  onSubmit(formValue: ExtractFormValue<typeof this.config>) {
     // TypeScript infers: { username: string, email: string, accountType: 'personal' | 'business', companyName: string, age: number }
     console.log(formValue.age.toFixed(2)); // ✓ Type-safe!
   }
@@ -392,11 +392,11 @@ export const appConfig: ApplicationConfig = {
 
 ```typescript name="login.component.ts"
 import { Component } from '@angular/core';
-import { DynamicFormComponent, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-login',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
 export class LoginComponent {
@@ -428,7 +428,7 @@ export class LoginComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: unknown) {
+  onSubmit(value: ExtractFormValue<typeof this.config>) {
     // TypeScript knows: { email: string, password: string }
     console.log('Login:', value);
   }
@@ -454,7 +454,7 @@ Here's a production-ready, multi-step checkout flow - **fully typed, validated, 
 ```typescript
 @Component({
   selector: 'app-checkout',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `<dynamic-form [config]="config" (submit)="processOrder($event)" />`,
 })
 export class CheckoutComponent {

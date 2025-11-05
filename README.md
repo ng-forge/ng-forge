@@ -13,11 +13,11 @@ ng-forge dynamic forms uses a declarative, type-safe configuration to build comp
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicFormComponent, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-login',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
 export class LoginComponent {
@@ -49,7 +49,7 @@ export class LoginComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: unknown) {
+  onSubmit(value: ExtractFormValue<typeof this.config>) {
     // TypeScript knows: { email: string, password: string }
     console.log('Login:', value);
   }
@@ -110,11 +110,11 @@ export const appConfig: ApplicationConfig = {
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicFormComponent, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-registration',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
 export class RegistrationComponent {
@@ -156,7 +156,8 @@ export class RegistrationComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: unknown) {
+  onSubmit(value: ExtractFormValue<typeof this.config>) {
+    // TypeScript infers: { username: string, email: string, password: string }
     console.log('Form submitted:', value);
   }
 }
