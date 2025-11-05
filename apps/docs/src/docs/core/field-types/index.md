@@ -4,7 +4,7 @@ Field types define form control behavior and rendering. All fields use the `Fiel
 
 ```typescript
 interface FieldConfig {
-  key: string; // Form model property (supports nested paths: 'user.profile.name')
+  key: string; // Form model property
   type: string; // Field type identifier
   label?: string; // Field label
   required?: boolean; // Required validation
@@ -13,6 +13,8 @@ interface FieldConfig {
   options?: SelectOption[]; // Options for select/radio fields
 }
 ```
+
+**Note**: For nested form structures, use [group fields](../field-types#group) instead of dot notation in keys.
 
 ## Core Field Types
 
@@ -89,12 +91,6 @@ Boolean toggle control.
     hint: 'Get weekly updates',
   }
 }
-```
-
-Supports nested paths:
-
-```typescript
-{ key: 'preferences.notifications', type: 'checkbox', label: 'Enable notifications' }
 ```
 
 ### radio
@@ -196,7 +192,7 @@ export const provideCustomInput = () => provideField('input', CustomInputCompone
 
 ## Validation
 
-Fields integrate with Angular's reactive forms validation. See [Validation](../validation) for details.
+Fields integrate with Angular's signal forms validation system. ng-forge provides shorthand syntax for common validators (e.g., `required: true`) with comprehensive customizability via the `validators` property. See [Validation](../validation) for details.
 
 ```typescript
 {

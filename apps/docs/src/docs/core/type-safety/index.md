@@ -24,22 +24,36 @@ const formConfig = {
 
 ## Field Registry System
 
-Field types are registered through the `FieldRegistryLeaves` interface. UI integrations (Material, Bootstrap, etc.) augment this interface to add their field types:
+UI integrations register their field types via `provideDynamicForm`. For example, with Material Design:
 
 ```typescript
-// Material fields are registered via module augmentation
+// app.config.ts
+import { provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(...withMaterialFields()),
+    // other providers
+  ],
+};
+```
+
+Material fields augment the `FieldRegistryLeaves` interface for type safety:
+
+```typescript
+// From @ng-forge/dynamic-form-material (already included)
 declare module '@ng-forge/dynamic-form' {
   interface FieldRegistryLeaves {
     input: MatInputField;
     select: MatSelectField<unknown>;
     checkbox: MatCheckboxField;
-    textarea: MatTextareaField;
     // ... other Material fields
   }
 }
 ```
 
-The field registry determines what types are available and how they're inferred.
+This determines what field types are available and how they're inferred.
 
 ## Required vs Optional Fields
 
@@ -332,7 +346,7 @@ export interface FileUploadField extends FieldDef {
   };
 }
 
-// Augment the registry
+// Augment the registry for type safety
 declare module '@ng-forge/dynamic-form' {
   interface FieldRegistryLeaves {
     'color-picker': ColorPickerField;
@@ -341,7 +355,36 @@ declare module '@ng-forge/dynamic-form' {
 }
 ```
 
-Usage:
+Register your custom field components:
+
+```typescript
+// custom-fields.provider.ts
+import { FieldTypeDefinition } from '@ng-forge/dynamic-form';
+import { ColorPickerComponent } from './color-picker.component';
+import { FileUploadComponent } from './file-upload.component';
+import type { ColorPickerField, FileUploadField } from './custom-fields';
+
+export const ColorPickerFieldType: FieldTypeDefinition<ColorPickerField> = {
+  name: 'color-picker',
+  component: ColorPickerComponent,
+};
+
+export const FileUploadFieldType: FieldTypeDefinition<FileUploadField> = {
+  name: 'file-upload',
+  component: FileUploadComponent,
+};
+
+// app.config.ts
+import { provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { ColorPickerFieldType, FileUploadFieldType } from './custom-fields.provider';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(...withMaterialFields(), ColorPickerFieldType, FileUploadFieldType)],
+};
+```
+
+Use in form config:
 
 ```typescript
 const config = {
@@ -397,41 +440,34 @@ const config = {
 // Type: { skills?: string[]; interests?: string[] }
 ```
 
-## Custom Type Guards
+## Runtime Validation
 
-Create type guards for runtime validation of form values:
+Form values are typed via `InferFormValue` at compile-time, but come as `unknown` at runtime. You can cast to the inferred type if you trust the form structure, or re-validate if you need runtime guarantees:
 
 ```typescript
-interface UserFormValue {
-  username: string;
-  age: number;
-  email: string;
-}
+import { InferFormValue } from '@ng-forge/dynamic-form';
 
-function isValidUserForm(value: unknown): value is UserFormValue {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'username' in value &&
-    typeof value.username === 'string' &&
-    'age' in value &&
-    typeof value.age === 'number' &&
-    'email' in value &&
-    typeof value.email === 'string'
-  );
-}
+const USER_FORM = {
+  fields: [
+    { key: 'username', type: 'input', value: '', required: true },
+    { key: 'email', type: 'input', value: '', required: true },
+  ],
+} as const satisfies FormConfig;
+
+type UserFormValue = InferFormValue<typeof USER_FORM['fields']>;
 
 onSubmit(value: unknown) {
-  if (isValidUserForm(value)) {
-    // value is now fully typed as UserFormValue
-    console.log(value.username, value.age, value.email);
-  }
+  // Option 1: Cast if you trust the form structure
+  const data = value as UserFormValue;
+
+  // Option 2: Re-validate with a library like Zod for runtime guarantees
+  // const result = userSchema.safeParse(value);
 }
 ```
 
 ## Type-Safe Validation
 
-Validators integrate with the type system:
+ng-forge integrates validation with the type system. Use shorthand syntax for common validators:
 
 ```typescript
 const config = {
@@ -440,9 +476,9 @@ const config = {
       key: 'email',
       type: 'input',
       value: '',
-      required: true,
-      email: true,
-      minLength: 5,
+      required: true, // Shorthand: removes undefined from inferred type
+      email: true, // Shorthand: email validation
+      minLength: 5, // Shorthand: min length validation
     },
   ],
 } as const satisfies FormConfig;
@@ -450,9 +486,26 @@ const config = {
 // Type inferred: { email: string } (required, so no undefined)
 ```
 
-The `required: true` flag removes `undefined` from the type, making the field mandatory in the inferred type.
+For comprehensive validation with custom validators and error messages, use the `validators` property:
 
-See [Validation](../validation) for validator details.
+```typescript
+const config = {
+  fields: [
+    {
+      key: 'password',
+      type: 'input',
+      value: '',
+      required: true,
+      validators: {
+        minLength: { value: 8, message: 'Password must be at least 8 characters' },
+        pattern: { value: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)', message: 'Must include uppercase, lowercase, and number' },
+      },
+    },
+  ],
+} as const satisfies FormConfig;
+```
+
+See [Validation](../validation) for full validator details.
 
 ## Best Practices
 
