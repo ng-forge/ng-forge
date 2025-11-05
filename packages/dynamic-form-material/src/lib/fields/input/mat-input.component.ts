@@ -23,7 +23,7 @@ import { AsyncPipe } from '@angular/common';
 
       <input
         matInput
-        [attr.data-testid]="props()?.['data-testid']"
+        [attr.data-testid]="key()"
         [field]="f"
         [type]="props()?.type || 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"

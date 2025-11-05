@@ -14,7 +14,7 @@ import { AsyncPipe } from '@angular/common';
     @let f = field();
 
     <mat-checkbox
-      [attr.data-testid]="props()?.['data-testid']"
+      [attr.data-testid]="key()"
       [field]="f"
       [labelPosition]="props()?.labelPosition || 'after'"
       [indeterminate]="props()?.indeterminate || false"

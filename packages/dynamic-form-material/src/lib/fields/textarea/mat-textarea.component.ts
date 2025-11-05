@@ -24,7 +24,7 @@ import { AsyncPipe } from '@angular/common';
 
       <textarea
         matInput
-        [attr.data-testid]="props()?.['data-testid']"
+        [attr.data-testid]="key()"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"

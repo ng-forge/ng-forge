@@ -15,7 +15,7 @@ import { AsyncPipe } from '@angular/common';
     <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
-    <mat-radio-group [attr.data-testid]="props()?.['data-testid']" [field]="f">
+    <mat-radio-group [attr.data-testid]="key()" [field]="f">
       @for (option of options(); track option.value) {
       <mat-radio-button
         [value]="option.value"

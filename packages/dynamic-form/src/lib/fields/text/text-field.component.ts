@@ -8,35 +8,35 @@ import { DynamicText } from '../../models';
   selector: 'df-text',
   template: `
     @switch (elementType()) { @case ('p') {
-    <p class="df-text df-text-p" [class]="className() || ''" [attr.data-testid]="$any(props())?.['data-testid']">
+    <p class="df-text df-text-p" [class]="className() || ''" [attr.data-testid]="key()">
       {{ label() | dynamicText | async }}
     </p>
     } @case ('h1') {
-    <h1 class="df-text df-text-h1" [class]="className() || ''" [attr.data-testid]="$any(props())?.['data-testid']">
+    <h1 class="df-text df-text-h1" [class]="className() || ''" [attr.data-testid]="key()">
       {{ label() | dynamicText | async }}
     </h1>
     } @case ('h2') {
-    <h2 class="df-text df-text-h2" [class]="className() || ''" [attr.data-testid]="$any(props())?.['data-testid']">
+    <h2 class="df-text df-text-h2" [class]="className() || ''" [attr.data-testid]="key()">
       {{ label() | dynamicText | async }}
     </h2>
     } @case ('h3') {
-    <h3 class="df-text df-text-h3" [class]="className() || ''" [attr.data-testid]="$any(props())?.['data-testid']">
+    <h3 class="df-text df-text-h3" [class]="className() || ''" [attr.data-testid]="key()">
       {{ label() | dynamicText | async }}
     </h3>
     } @case ('h4') {
-    <h4 class="df-text df-text-h4" [class]="className() || ''" [attr.data-testid]="$any(props())?.['data-testid']">
+    <h4 class="df-text df-text-h4" [class]="className() || ''" [attr.data-testid]="key()">
       {{ label() | dynamicText | async }}
     </h4>
     } @case ('h5') {
-    <h5 class="df-text df-text-h5" [class]="className() || ''" [attr.data-testid]="$any(props())?.['data-testid']">
+    <h5 class="df-text df-text-h5" [class]="className() || ''" [attr.data-testid]="key()">
       {{ label() | dynamicText | async }}
     </h5>
     } @case ('h6') {
-    <h6 class="df-text df-text-h6" [class]="className() || ''" [attr.data-testid]="$any(props())?.['data-testid']">
+    <h6 class="df-text df-text-h6" [class]="className() || ''" [attr.data-testid]="key()">
       {{ label() | dynamicText | async }}
     </h6>
     } @case ('span') {
-    <span class="df-text df-text-span" [class]="className() || ''" [attr.data-testid]="$any(props())?.['data-testid']">
+    <span class="df-text df-text-span" [class]="className() || ''" [attr.data-testid]="key()">
       {{ label() | dynamicText | async }}
     </span>
     } }
