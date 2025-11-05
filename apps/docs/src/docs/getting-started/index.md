@@ -1,88 +1,21 @@
 ## Build Forms 10x Faster with Full Type Safety
 
-**The problem:** Angular forms require endless boilerplate - validators, error messages, subscriptions, template bindings, cleanup logic. And you lose type safety the moment you use `FormBuilder`.
+ng-forge dynamic forms gives you declarative, type-safe forms powered by Angular 21's signal forms. Define your structure once, get validation, conditional logic, and beautiful UI automatically.
 
-**The solution:** ng-forge dynamic forms gives you declarative, type-safe forms powered by Angular 21's signal forms. Define your structure once, get everything else automatically.
-
-### From 150+ Lines of Boilerplate...
+### Quick Example
 
 ```typescript
-// Traditional FormBuilder: Types are lost, boilerplate everywhere
-export class TraditionalFormComponent implements OnDestroy {
-  private destroy$ = new Subject<void>();
-
-  form = this.fb.group({
-    username: ['', [Validators.required, Validators.minLength(3)]],
-    email: ['', [Validators.required, Validators.email]],
-    accountType: ['personal'],
-    companyName: [''], // Should be required when accountType === 'business'
-    age: [0, [Validators.required, Validators.min(18)]],
-  });
-
-  constructor(private fb: FormBuilder) {
-    // Manual conditional validation
-    this.form
-      .get('accountType')
-      ?.valueChanges.pipe(takeUntil(this.destroy$))
-      .subscribe((accountType) => {
-        const companyName = this.form.get('companyName');
-        if (accountType === 'business') {
-          companyName?.setValidators([Validators.required]);
-        } else {
-          companyName?.clearValidators();
-        }
-        companyName?.updateValueAndValidity();
-      });
-  }
-
-  getErrorMessage(fieldName: string): string {
-    const control = this.form.get(fieldName);
-    if (control?.hasError('required')) return 'This field is required';
-    if (control?.hasError('email')) return 'Invalid email';
-    if (control?.hasError('minlength')) return 'Too short';
-    // ... more boilerplate
-    return '';
-  }
-
-  onSubmit() {
-    const value = this.form.value; // Type: any or Partial<FormValue> 😢
-    console.log(value.age.toFixed(2)); // No type safety, runtime error if undefined
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-}
-```
-
-### ...To 30 Lines with Full Type Safety
-
-```typescript
-// ng-forge dynamic forms: Clean, typed, automatic
 import { Component } from '@angular/core';
 import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
 
 @Component({
-  selector: 'app-user-form',
+  selector: 'app-registration',
   imports: [DynamicForm],
   template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
-export class UserFormComponent {
+export class RegistrationComponent {
   config = {
     fields: [
-      {
-        key: 'username',
-        type: 'input',
-        value: '',
-        label: 'Username',
-        required: true,
-        minLength: 3,
-        validationMessages: {
-          required: 'Username is required',
-          minLength: 'Must be at least 3 characters',
-        },
-      },
       {
         key: 'email',
         type: 'input',
@@ -90,10 +23,15 @@ export class UserFormComponent {
         label: 'Email',
         required: true,
         email: true,
-        validationMessages: {
-          required: 'Email is required',
-          email: 'Please enter a valid email',
-        },
+      },
+      {
+        key: 'password',
+        type: 'input',
+        value: '',
+        label: 'Password',
+        required: true,
+        minLength: 8,
+        props: { type: 'password' },
       },
       {
         key: 'accountType',
@@ -121,21 +59,8 @@ export class UserFormComponent {
               operator: 'equals',
               value: 'business',
             },
-            errorMessage: 'Company name required for business accounts',
           },
         ],
-      },
-      {
-        key: 'age',
-        type: 'input',
-        value: 0,
-        label: 'Age',
-        required: true,
-        min: 18,
-        validationMessages: {
-          required: 'Age is required',
-          min: 'Must be at least 18 years old',
-        },
       },
       {
         type: 'submit',
@@ -146,21 +71,21 @@ export class UserFormComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(formValue: ExtractFormValue<typeof this.config>) {
-    // TypeScript infers: { username: string, email: string, accountType: 'personal' | 'business', companyName: string, age: number }
-    console.log(formValue.age.toFixed(2)); // ✓ Type-safe!
+  onSubmit(value: ExtractFormValue<typeof this.config>) {
+    // TypeScript knows: { email: string, password: string, accountType: 'personal' | 'business', companyName: string }
+    console.log('Account created:', value);
   }
 }
 ```
 
-**What you get automatically:**
+**What you get:**
 
-- ✅ Validation with custom error messages
-- ✅ Conditional required fields (companyName)
-- ✅ Full type inference from config
-- ✅ No subscriptions or cleanup
-- ✅ Beautiful Material UI
-- ✅ Accessibility built-in
+- ✅ Real-time validation with custom error messages
+- ✅ Conditional required fields (companyName only required for business)
+- ✅ Full TypeScript type inference - no manual type definitions
+- ✅ Beautiful Material Design UI
+- ✅ Zero subscriptions or cleanup needed
+- ✅ Built-in accessibility
 
 ## Full Type Safety with Zero Type Annotations
 
@@ -197,7 +122,7 @@ type FormValue = {
 };
 
 // In your submit handler:
-onSubmit(value: unknown) {
+onSubmit(value: ExtractFormValue<typeof this.config>) {
   // TypeScript knows the exact structure!
   value.username.toUpperCase(); // ✓ Valid
   value.age.toFixed(2);         // ✓ Valid
@@ -224,7 +149,7 @@ config = {
   ],
 } as const satisfies FormConfig;
 
-onSubmit(value: unknown) {
+onSubmit(value: ExtractFormValue<typeof this.config>) {
   value. // ← TypeScript autocomplete shows: email, password
   value.email. // ← Shows: string methods (charAt, substring, toLowerCase, ...)
   value.password. // ← Shows: string methods

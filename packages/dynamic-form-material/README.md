@@ -43,11 +43,11 @@ export const appConfig: ApplicationConfig = {
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicFormComponent, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-contact-form',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
 export class ContactFormComponent {
@@ -100,7 +100,8 @@ export class ContactFormComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: unknown) {
+  onSubmit(value: ExtractFormValue<typeof this.config>) {
+    // TypeScript infers: { name: string, email: string, message: string }
     console.log('Form submitted:', value);
   }
 }
@@ -479,12 +480,12 @@ Here's a full registration form with Material Design:
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicFormComponent, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 
 @Component({
   selector: 'app-registration',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
 export class RegistrationComponent {
@@ -575,7 +576,8 @@ export class RegistrationComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: unknown) {
+  onSubmit(value: ExtractFormValue<typeof this.config>) {
+    // TypeScript infers the complete nested structure
     console.log('Registration submitted:', value);
   }
 }

@@ -51,11 +51,11 @@ export const appConfig: ApplicationConfig = {
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicFormComponent, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-user-form',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
 export class UserFormComponent {
@@ -86,7 +86,8 @@ export class UserFormComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: unknown) {
+  onSubmit(value: ExtractFormValue<typeof this.config>) {
+    // TypeScript infers: { email: string, password: string }
     console.log('Form submitted:', value);
   }
 }
