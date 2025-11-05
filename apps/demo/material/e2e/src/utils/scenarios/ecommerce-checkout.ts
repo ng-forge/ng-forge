@@ -1,5 +1,4 @@
 import { FormConfig } from '@ng-forge/dynamic-form';
-import '@ng-forge/dynamic-form-material';
 
 /**
  * E-commerce Checkout - Multi-page checkout flow
@@ -254,14 +253,13 @@ export const ecommerceCheckoutConfig = {
         },
         {
           key: 'placeOrder',
-          type: 'button',
+          type: 'submit',
           label: 'Place Order',
           props: {
-            type: 'submit',
             color: 'primary',
           },
         },
       ],
     },
   ],
-};
+} as const satisfies FormConfig;

@@ -16,6 +16,9 @@ import type {
   MatSliderField,
   MatTextareaField,
   MatToggleField,
+  MatSubmitButtonField,
+  MatNextButtonField,
+  MatPreviousButtonField,
 } from '../fields';
 
 declare module '@ng-forge/dynamic-form' {
@@ -24,6 +27,9 @@ declare module '@ng-forge/dynamic-form' {
     select: MatSelectField<unknown>;
     checkbox: MatCheckboxField;
     button: MatButtonField<FormEvent>;
+    submit: MatSubmitButtonField;
+    next: MatNextButtonField;
+    previous: MatPreviousButtonField;
     textarea: MatTextareaField;
     radio: MatRadioField<unknown>;
     'multi-checkbox': MatMultiCheckboxField<unknown>;

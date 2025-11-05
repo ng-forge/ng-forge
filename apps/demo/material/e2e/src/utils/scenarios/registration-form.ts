@@ -1,5 +1,4 @@
 import { FormConfig } from '@ng-forge/dynamic-form';
-import '@ng-forge/dynamic-form-material';
 
 /**
  * Registration Form - Complex validation with password confirmation
@@ -105,12 +104,11 @@ export const registrationFormConfig = {
     },
     {
       key: 'submit',
-      type: 'button',
+      type: 'submit',
       label: 'Create Account',
       props: {
-        type: 'submit',
         color: 'primary',
       },
     },
   ],
-};
+} as const satisfies FormConfig;

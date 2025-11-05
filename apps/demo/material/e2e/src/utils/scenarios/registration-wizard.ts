@@ -1,5 +1,4 @@
 import { FormConfig } from '@ng-forge/dynamic-form';
-import '@ng-forge/dynamic-form-material';
 
 /**
  * Registration Wizard - Multi-page registration form
@@ -188,14 +187,13 @@ export const registrationWizardConfig = {
         },
         {
           key: 'submit',
-          type: 'button',
+          type: 'submit',
           label: 'Complete Registration',
           props: {
-            type: 'submit',
             color: 'primary',
           },
         },
       ],
     },
   ],
-};
+} as const satisfies FormConfig;
