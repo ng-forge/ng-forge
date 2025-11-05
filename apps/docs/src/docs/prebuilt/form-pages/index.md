@@ -38,8 +38,6 @@ Each page field supports:
 - `key` (required) - Unique identifier for the page
 - `type: 'page'` (required) - Field type identifier
 - `fields` (required) - Array of child fields to render on this page
-- `title` (optional) - Page heading displayed to users
-- `description` (optional) - Additional context or instructions for the page
 
 ## Page with Description
 
@@ -47,8 +45,6 @@ Each page field supports:
 {
   key: 'preferences',
   type: 'page',
-  title: 'Communication Preferences',
-  description: 'Choose how you would like to receive updates from us.',
   fields: [
     { key: 'newsletter', type: 'checkbox', label: 'Subscribe to newsletter', value: false },
     { key: 'notifications', type: 'checkbox', label: 'Enable notifications', value: false },

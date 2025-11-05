@@ -24,7 +24,7 @@ import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(withMaterialFields())],
+  providers: [provideDynamicForm(...withMaterialFields())],
 };
 ```
 
@@ -37,10 +37,10 @@ import { DynamicFormComponent, FieldConfig } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'app-user-form',
   imports: [DynamicForm],
-  template: ` <dynamic-form [fields]="fields" [model]="model" (modelChange)="onModelChange($event)" (formSubmit)="onSubmit($event)" /> `,
+  template: ` <dynamic-form [fields]="fields" [(value)]="value" (submit)="onSubmit($event)" /> `,
 })
 export class UserFormComponent {
-  model = signal({
+  value = signal({
     firstName: '',
     email: '',
     newsletter: false,
