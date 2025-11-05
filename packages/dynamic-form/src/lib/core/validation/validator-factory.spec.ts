@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { form } from '@angular/forms/signals';
+import { form, schema } from '@angular/forms/signals';
 import { ValidatorConfig } from '../../models';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { applyValidator, applyValidators } from './validator-factory';
@@ -24,7 +24,13 @@ describe('validator-factory', () => {
       it('should handle min validator with undefined value without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 25 });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              // WIP: Attempting to create controls via schema - not working yet
+              void path.age;
+            })
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = { type: 'min' };
@@ -38,7 +44,10 @@ describe('validator-factory', () => {
       it('should handle min validator with wrong type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 25 });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = { type: 'min', value: 'ten' as any };
@@ -52,7 +61,10 @@ describe('validator-factory', () => {
       it('should handle pattern validator with undefined value without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = { type: 'pattern' };
@@ -66,7 +78,10 @@ describe('validator-factory', () => {
       it('should handle pattern validator with wrong type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = { type: 'pattern', value: 123 as any };
@@ -82,7 +97,10 @@ describe('validator-factory', () => {
       it('should handle min validator with both value and expression', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 25 });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = {
@@ -100,7 +118,10 @@ describe('validator-factory', () => {
       it('should handle min validator with only static value', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 25 });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = {
@@ -119,7 +140,10 @@ describe('validator-factory', () => {
       it('should convert string pattern to RegExp without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = {
@@ -136,7 +160,10 @@ describe('validator-factory', () => {
       it('should throw when pattern string is invalid regex', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = {
@@ -153,7 +180,10 @@ describe('validator-factory', () => {
       it('should handle empty string pattern', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = {
@@ -170,7 +200,10 @@ describe('validator-factory', () => {
       it('should handle RegExp pattern directly', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = {
@@ -189,7 +222,10 @@ describe('validator-factory', () => {
       it('should handle required with when condition', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '', contactMethod: 'email' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = {
@@ -211,7 +247,10 @@ describe('validator-factory', () => {
       it('should handle required without when condition', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = {
@@ -227,7 +266,10 @@ describe('validator-factory', () => {
       it('should handle invalid when expression without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = {
@@ -248,7 +290,10 @@ describe('validator-factory', () => {
       it('should handle unknown validator type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: 'value' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = { type: 'customValidator' as any };
@@ -264,7 +309,10 @@ describe('validator-factory', () => {
       it('should handle email validator without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>(() => void 0)
+          );
           rootFormRegistry.registerRootForm(formInstance);
 
           const config: ValidatorConfig = { type: 'email' };
@@ -281,7 +329,10 @@ describe('validator-factory', () => {
     it('should apply multiple validators without throwing', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>(() => void 0)
+        );
         rootFormRegistry.registerRootForm(formInstance);
 
         const configs: ValidatorConfig[] = [{ type: 'required' }, { type: 'email' }];
@@ -295,7 +346,10 @@ describe('validator-factory', () => {
     it('should handle empty validator array', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>(() => void 0)
+        );
         rootFormRegistry.registerRootForm(formInstance);
 
         const configs: ValidatorConfig[] = [];
@@ -309,7 +363,10 @@ describe('validator-factory', () => {
     it('should handle validators with unknown types', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>(() => void 0)
+        );
         rootFormRegistry.registerRootForm(formInstance);
 
         const configs: ValidatorConfig[] = [{ type: 'required' }, { type: 'unknownType' as any }, { type: 'email' }];
