@@ -31,7 +31,12 @@ import { flattenFields } from '../../utils';
 @Component({
   selector: 'group-field',
   template: `
-    <form [class.disabled]="disabled()" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+    <form
+      [attr.data-testid]="$any(field().props)?.['data-testid']"
+      [class.disabled]="disabled()"
+      [fieldRenderer]="fields()"
+      (fieldsInitialized)="onFieldsInitialized()"
+    >
       <!-- Fields will be automatically rendered by the fieldRenderer directive -->
     </form>
   `,

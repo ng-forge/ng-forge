@@ -24,7 +24,12 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
 @Component({
   selector: 'row-field',
   template: `
-    <div class="df-row" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+    <div
+      class="df-row"
+      [attr.data-testid]="$any(field().props)?.['data-testid']"
+      [fieldRenderer]="fields()"
+      (fieldsInitialized)="onFieldsInitialized()"
+    >
       <!-- Fields will be automatically rendered by the fieldRenderer directive -->
     </div>
   `,

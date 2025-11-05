@@ -27,6 +27,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
   template: `
     <div
       class="df-page"
+      [attr.data-testid]="$any(field().props)?.['data-testid']"
       [class.df-page-visible]="isVisible()"
       [class.df-page-hidden]="!isVisible()"
       [attr.aria-hidden]="!isVisible()"
