@@ -42,6 +42,7 @@ import { AsyncPipe } from '@angular/common';
 
       <input
         matInput
+        [attr.data-testid]="props()?.['data-testid']"
         [matDatepicker]="picker"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"

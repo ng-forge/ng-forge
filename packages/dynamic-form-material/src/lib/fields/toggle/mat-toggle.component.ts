@@ -14,6 +14,7 @@ import { AsyncPipe } from '@angular/common';
     @let f = field();
 
     <mat-slide-toggle
+      [attr.data-testid]="props()?.['data-testid']"
       [field]="f"
       [color]="props()?.color || 'primary'"
       [labelPosition]="props()?.labelPosition || 'after'"

@@ -24,6 +24,7 @@ import { AsyncPipe } from '@angular/common';
       }
 
       <mat-select
+        [attr.data-testid]="props()?.['data-testid']"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
