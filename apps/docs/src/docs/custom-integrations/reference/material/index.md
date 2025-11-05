@@ -172,24 +172,30 @@ import { submitButton } from '@ng-forge/dynamic-form-material';
 
 const config = {
   fields: [
+    { key: 'name', type: 'input', value: '', label: 'Name', required: true },
+    { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
+    {
+      key: 'terms',
+      type: 'checkbox',
+      value: false,
+      label: 'I accept the terms and conditions',
+      required: true,
+    },
     submitButton({
       key: 'submit',
-      label: 'Submit Form',
+      label: 'Create Account',
       props: { color: 'primary' },
     }),
   ],
 } as const satisfies FormConfig;
+
+// The submit button will be disabled until all required fields are valid
 ```
 
-Or use the field type directly:
+Alternative syntax without helper function:
 
 ```typescript
-{
-  type: 'submit',
-  key: 'submit',
-  label: 'Submit Form',
-  props: { color: 'primary' }
-}
+{ type: 'submit', key: 'submit', label: 'Create Account', props: { color: 'primary' } }
 ```
 
 #### Next/Previous Buttons
@@ -197,67 +203,128 @@ Or use the field type directly:
 Navigation buttons for multi-step (paged) forms.
 
 ```typescript
-import { nextPageButton, previousPageButton } from '@ng-forge/dynamic-form-material';
+import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dynamic-form-material';
 
 const config = {
   fields: [
     {
-      key: 'page1',
+      key: 'personalInfo',
       type: 'page',
-      title: 'Personal Info',
+      title: 'Personal Information',
+      description: 'Tell us about yourself',
       fields: [
-        { key: 'name', type: 'input', value: '', label: 'Name' },
-        nextPageButton({
-          key: 'next',
-          label: 'Next',
-          props: { color: 'primary' },
-        }),
+        { key: 'firstName', type: 'input', value: '', label: 'First Name', required: true },
+        { key: 'lastName', type: 'input', value: '', label: 'Last Name', required: true },
+        { key: 'birthdate', type: 'date', value: null, label: 'Date of Birth' },
+        {
+          key: 'navigation',
+          type: 'row',
+          fields: [
+            nextPageButton({
+              key: 'nextToContact',
+              label: 'Continue to Contact Info',
+              props: { color: 'primary' },
+            }),
+          ],
+        },
       ],
     },
     {
-      key: 'page2',
+      key: 'contactInfo',
       type: 'page',
-      title: 'Contact Info',
+      title: 'Contact Information',
+      description: 'How can we reach you?',
       fields: [
-        { key: 'email', type: 'input', value: '', label: 'Email' },
-        previousPageButton({
-          key: 'back',
-          label: 'Back',
-        }),
-        submitButton({
-          key: 'submit',
-          label: 'Submit',
-        }),
+        { key: 'email', type: 'input', value: '', label: 'Email Address', required: true, email: true },
+        { key: 'phone', type: 'input', value: '', label: 'Phone Number', props: { type: 'tel' } },
+        {
+          key: 'subscribe',
+          type: 'checkbox',
+          value: false,
+          label: 'Subscribe to newsletter',
+        },
+        {
+          key: 'navigation',
+          type: 'row',
+          fields: [
+            previousPageButton({
+              key: 'backToPersonal',
+              label: 'Back',
+            }),
+            submitButton({
+              key: 'submit',
+              label: 'Complete Registration',
+              props: { color: 'primary' },
+            }),
+          ],
+        },
       ],
     },
   ],
 } as const satisfies FormConfig;
 ```
 
-Or use field types directly:
+Alternative syntax without helper functions:
 
 ```typescript
-{ type: 'next', key: 'next', label: 'Next' }
+{ type: 'next', key: 'next', label: 'Continue' }
 { type: 'previous', key: 'back', label: 'Back' }
+{ type: 'submit', key: 'submit', label: 'Complete' }
 ```
 
 #### Custom Action Button
 
-Generic button for custom events.
+Generic button for custom events. Use this for application-specific actions.
 
 ```typescript
 import { actionButton } from '@ng-forge/dynamic-form-material';
+import { FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
+
+// Define your custom event
+class SaveDraftEvent extends FormEvent {
+  static override readonly eventName = 'SaveDraft';
+}
 
 const config = {
   fields: [
-    actionButton({
-      key: 'reset',
-      label: 'Reset Form',
-      event: ResetFormEvent,
-      props: { color: 'warn' },
-    }),
+    { key: 'title', type: 'input', value: '', label: 'Document Title', required: true },
+    { key: 'content', type: 'textarea', value: '', label: 'Content' },
+    {
+      key: 'actions',
+      type: 'row',
+      fields: [
+        actionButton({
+          key: 'saveDraft',
+          label: 'Save as Draft',
+          event: SaveDraftEvent,
+          props: { color: 'accent' },
+        }),
+        submitButton({
+          key: 'publish',
+          label: 'Publish',
+          props: { color: 'primary' },
+        }),
+      ],
+    },
   ],
 } as const satisfies FormConfig;
+```
+
+Then listen for the event in your component:
+
+```typescript
+import { EventBus } from '@ng-forge/dynamic-form';
+
+class MyComponent {
+  private eventBus = inject(EventBus);
+
+  ngOnInit() {
+    this.eventBus.on(SaveDraftEvent).subscribe(() => {
+      console.log('Save draft clicked', this.form.value);
+      // Handle draft saving logic
+    });
+  }
+}
 ```
 
 **Button Props:**
