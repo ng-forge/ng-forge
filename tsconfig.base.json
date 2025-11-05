@@ -17,6 +17,7 @@
     "paths": {
       "@ng-doc/generated": ["dist/ng-doc/docs"],
       "@ng-forge/dynamic-form": ["packages/dynamic-form/src/index.ts"],
+      "@ng-forge/dynamic-form-bootstrap": ["packages/dynamic-form-bootstrap/src/index.ts"],
       "@ng-forge/dynamic-form-material": ["packages/dynamic-form-material/src/index.ts"]
     }
   },

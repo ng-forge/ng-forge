@@ -1,5 +1,42 @@
 @use '@ng-doc/app/styles/global';
 @use '@ng-doc/app/styles/themes/dark.css';
 
-// Material Design theme (required for Material integration examples)
+// ============================================
+// MATERIAL THEME
+// ============================================
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+// ============================================
+// PRIMENG THEME
+// ============================================
+// Add PrimeNG theme imports here if needed
+
+// ============================================
+// IONIC THEME
+// ============================================
+// Add Ionic theme imports here if needed
+
+// ============================================
+// BOOTSTRAP THEME
+// ============================================
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+// ============================================
+// THEME ISOLATION
+// ============================================
+.theme-material {
+  // Material-specific overrides if needed
+}
+
+.theme-primeng {
+  // PrimeNG-specific overrides if needed
+}
+
+.theme-ionic {
+  // Ionic-specific overrides if needed
+}
+
+.theme-bootstrap {
+  // Bootstrap-specific overrides if needed
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
