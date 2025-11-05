@@ -269,7 +269,10 @@ describe('MatInputFieldComponent', () => {
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value
 
       const input = fixture.debugElement.query(By.directive(MatInput));
-      expect(input).toBeTruthy();
+      // ITERATION 5 FIX: Verify input component exists with undefined value
+      // Previous: expect(input).toBeTruthy()
+      expect(input).not.toBeNull();
+      expect(input.componentInstance).toBeInstanceOf(MatInput);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -281,7 +284,10 @@ describe('MatInputFieldComponent', () => {
       });
 
       const input = fixture.debugElement.query(By.directive(MatInput));
-      expect(input).toBeTruthy();
+      // ITERATION 5 FIX: Verify input component exists with null value
+      // Previous: expect(input).toBeTruthy()
+      expect(input).not.toBeNull();
+      expect(input.componentInstance).toBeInstanceOf(MatInput);
     });
 
     it('should handle empty string values correctly', async () => {

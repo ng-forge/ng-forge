@@ -1,0 +1,5 @@
+=== ITERATION 5 BASELINE (Post-Iteration 4) ===
+Weak assertions (toBeDefined): 43
+Weak assertions (boolean): 47
+Total weak assertions: 90
+Quality score: 82/100

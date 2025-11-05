@@ -245,7 +245,10 @@ describe('MatSliderFieldComponent', () => {
       expect(slider.componentInstance.color).toBe('primary');
       expect(slider.componentInstance.discrete).toBe(false);
       expect(slider.componentInstance.showTickMarks).toBe(false);
-      expect(sliderInput).toBeTruthy();
+      // ITERATION 5 FIX: Verify slider input element exists and is correct type
+      // Previous: expect(sliderInput).toBeTruthy()
+      expect(sliderInput).not.toBeNull();
+      expect(sliderInput.nativeElement).toBeInstanceOf(HTMLInputElement);
     });
 
     it('should not display hint when not provided', async () => {
@@ -396,7 +399,10 @@ describe('MatSliderFieldComponent', () => {
 
       // Note: The touched state is handled internally by the component
       // We can't directly access it from the form, but we can verify the event was handled
-      expect(sliderInput).toBeTruthy();
+      // ITERATION 5 FIX: Verify slider input element exists after blur event
+      // Previous: expect(sliderInput).toBeTruthy()
+      expect(sliderInput).not.toBeNull();
+      expect(sliderInput.nativeElement).toBeInstanceOf(HTMLInputElement);
     });
   });
 
@@ -407,7 +413,10 @@ describe('MatSliderFieldComponent', () => {
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
       const slider = fixture.debugElement.query(By.directive(MatSlider));
-      expect(slider).toBeTruthy();
+      // ITERATION 5 FIX: Verify slider component exists with undefined value
+      // Previous: expect(slider).toBeTruthy()
+      expect(slider).not.toBeNull();
+      expect(slider.componentInstance).toBeInstanceOf(MatSlider);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -419,7 +428,10 @@ describe('MatSliderFieldComponent', () => {
       });
 
       const slider = fixture.debugElement.query(By.directive(MatSlider));
-      expect(slider).toBeTruthy();
+      // ITERATION 5 FIX: Verify slider component exists with null value
+      // Previous: expect(slider).toBeTruthy()
+      expect(slider).not.toBeNull();
+      expect(slider.componentInstance).toBeInstanceOf(MatSlider);
     });
 
     it('should handle zero values correctly', async () => {

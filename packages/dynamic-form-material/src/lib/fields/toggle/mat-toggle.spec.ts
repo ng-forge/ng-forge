@@ -167,7 +167,10 @@ describe('MatToggleFieldComponent', () => {
       const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
       const toggleComponent = toggle.componentInstance;
 
-      expect(toggle).toBeTruthy();
+      // ITERATION 5 FIX: Verify toggle component exists with minimal config
+      // Previous: expect(toggle).toBeTruthy()
+      expect(toggle).not.toBeNull();
+      expect(toggle.componentInstance).toBeInstanceOf(MatSlideToggle);
       expect(toggle.nativeElement.textContent.trim()).toBe('Enable Notifications');
       expect(toggleComponent.color).toBe('primary');
       expect(toggleComponent.labelPosition).toBe('after');
@@ -375,7 +378,10 @@ describe('MatToggleFieldComponent', () => {
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
       const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
-      expect(toggle).toBeTruthy();
+      // ITERATION 5 FIX: Verify toggle component exists with undefined value
+      // Previous: expect(toggle).toBeTruthy()
+      expect(toggle).not.toBeNull();
+      expect(toggle.componentInstance).toBeInstanceOf(MatSlideToggle);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -387,7 +393,10 @@ describe('MatToggleFieldComponent', () => {
       });
 
       const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
-      expect(toggle).toBeTruthy();
+      // ITERATION 5 FIX: Verify toggle component exists with null value
+      // Previous: expect(toggle).toBeTruthy()
+      expect(toggle).not.toBeNull();
+      expect(toggle.componentInstance).toBeInstanceOf(MatSlideToggle);
     });
 
     it('should handle programmatic value updates correctly', async () => {

@@ -158,7 +158,10 @@ describe('MatCheckboxFieldComponent', () => {
       const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
       const checkboxComponent = checkbox.componentInstance;
 
-      expect(checkbox).toBeTruthy();
+      // ITERATION 5 FIX: Verify checkbox component exists with minimal config
+      // Previous: expect(checkbox).toBeTruthy()
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.componentInstance).toBeInstanceOf(MatCheckbox);
       expect(checkbox.nativeElement.textContent.trim()).toBe('Subscribe to Newsletter');
       expect(checkboxComponent.color).toBe('primary');
       expect(checkboxComponent.labelPosition).toBe('after');
@@ -367,7 +370,10 @@ describe('MatCheckboxFieldComponent', () => {
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
       const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
-      expect(checkbox).toBeTruthy();
+      // ITERATION 5 FIX: Verify checkbox component exists with undefined value
+      // Previous: expect(checkbox).toBeTruthy()
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.componentInstance).toBeInstanceOf(MatCheckbox);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -379,7 +385,10 @@ describe('MatCheckboxFieldComponent', () => {
       });
 
       const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
-      expect(checkbox).toBeTruthy();
+      // ITERATION 5 FIX: Verify checkbox component exists with null value
+      // Previous: expect(checkbox).toBeTruthy()
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.componentInstance).toBeInstanceOf(MatCheckbox);
     });
 
     it('should handle programmatic value updates correctly', async () => {
