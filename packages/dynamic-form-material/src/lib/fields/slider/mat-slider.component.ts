@@ -25,7 +25,6 @@ import { AsyncPipe } from '@angular/common';
       class="slider-container"
     >
       <!-- TODO: integrate input with the field -->
-      <input matSliderThumb [attr.data-testid]="key()" [(value)]="f().value" [disabled]="f().disabled()" [attr.tabindex]="tabIndex()" />
     </mat-slider>
 
     @if (props()?.hint; as hint) {
@@ -43,6 +42,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[class]': 'className()',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

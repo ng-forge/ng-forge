@@ -24,7 +24,6 @@ import { AsyncPipe } from '@angular/common';
 
       <textarea
         matInput
-        [attr.data-testid]="key()"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
@@ -44,6 +43,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
 })
 export default class MatTextareaFieldComponent implements MatTextareaComponent {

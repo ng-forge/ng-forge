@@ -31,7 +31,7 @@ import { flattenFields } from '../../utils';
 @Component({
   selector: 'group-field',
   template: `
-    <form [attr.data-testid]="key()" [class.disabled]="disabled()" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+    <form [class.disabled]="disabled()" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
       <!-- Fields will be automatically rendered by the fieldRenderer directive -->
     </form>
   `,
@@ -39,6 +39,7 @@ import { flattenFields } from '../../utils';
   host: {
     class: 'df-field df-group',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,

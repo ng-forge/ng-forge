@@ -24,7 +24,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
 @Component({
   selector: 'row-field',
   template: `
-    <div class="df-row" [attr.data-testid]="key()" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+    <div class="df-row" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
       <!-- Fields will be automatically rendered by the fieldRenderer directive -->
     </div>
   `,
@@ -33,6 +33,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
     class: 'df-field df-row',
     '[class.disabled]': 'disabled()',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   imports: [FieldRendererDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,

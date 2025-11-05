@@ -27,7 +27,6 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
   template: `
     <div
       class="df-page"
-      [attr.data-testid]="key()"
       [class.df-page-visible]="isVisible()"
       [class.df-page-hidden]="!isVisible()"
       [attr.aria-hidden]="!isVisible()"
@@ -45,6 +44,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
     '[class.df-page-hidden]': '!isVisible()',
     '[attr.data-page-index]': 'pageIndex()',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   imports: [FieldRendererDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,

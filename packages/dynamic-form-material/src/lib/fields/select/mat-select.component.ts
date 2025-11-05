@@ -24,7 +24,6 @@ import { AsyncPipe } from '@angular/common';
       }
 
       <mat-select
-        [attr.data-testid]="key()"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
@@ -47,6 +46,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
     '[class]': 'className()',
   },
 })

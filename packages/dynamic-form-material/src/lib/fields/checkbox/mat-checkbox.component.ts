@@ -14,7 +14,6 @@ import { AsyncPipe } from '@angular/common';
     @let f = field();
 
     <mat-checkbox
-      [attr.data-testid]="key()"
       [field]="f"
       [labelPosition]="props()?.labelPosition || 'after'"
       [indeterminate]="props()?.indeterminate || false"
@@ -48,6 +47,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[class]': 'className()',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,

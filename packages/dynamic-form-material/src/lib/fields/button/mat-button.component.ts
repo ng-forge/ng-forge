@@ -12,11 +12,11 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatButton, DynamicTextPipe, AsyncPipe],
   host: {
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   template: `
     <button
       mat-raised-button
-      [attr.data-testid]="key()"
       [type]="props()?.type || 'button'"
       [color]="props()?.color || 'primary'"
       [class]="className() || ''"

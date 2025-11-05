@@ -14,7 +14,6 @@ import { AsyncPipe } from '@angular/common';
     @let f = field();
 
     <mat-slide-toggle
-      [attr.data-testid]="key()"
       [field]="f"
       [color]="props()?.color || 'primary'"
       [labelPosition]="props()?.labelPosition || 'after'"
@@ -42,6 +41,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[class]': 'className()',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

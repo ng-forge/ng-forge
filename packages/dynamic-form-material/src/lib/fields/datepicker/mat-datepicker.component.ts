@@ -27,6 +27,7 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   template: `
     @let f = field();
@@ -42,7 +43,6 @@ import { AsyncPipe } from '@angular/common';
 
       <input
         matInput
-        [attr.data-testid]="key()"
         [matDatepicker]="picker"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"

@@ -15,7 +15,7 @@ import { AsyncPipe } from '@angular/common';
     <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
-    <mat-radio-group [attr.data-testid]="key()" [field]="f">
+    <mat-radio-group [field]="f">
       @for (option of options(); track option.value) {
       <mat-radio-button
         [value]="option.value"
@@ -43,6 +43,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[class]': 'className() || ""',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

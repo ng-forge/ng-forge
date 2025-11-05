@@ -18,7 +18,7 @@ import { AsyncPipe } from '@angular/common';
     <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
-    <div class="checkbox-group" [attr.data-testid]="key()">
+    <div class="checkbox-group">
       @for (option of options(); track option.value) {
       <mat-checkbox
         [checked]="option | inArray : valueViewModel()"
@@ -48,6 +48,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[class]': 'className() || ""',
     '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
   },
   providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
