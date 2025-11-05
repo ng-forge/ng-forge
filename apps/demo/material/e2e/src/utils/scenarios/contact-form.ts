@@ -75,9 +75,9 @@ export const contactFormConfig = {
     },
     {
       key: 'submit',
-      type: 'button',
+      type: 'submit',
       label: 'Send Message',
-      props: { type: 'submit', color: 'primary' },
+      color: 'primary',
     },
   ],
 } as const;

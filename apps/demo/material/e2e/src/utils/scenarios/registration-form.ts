@@ -109,9 +109,9 @@ export const registrationFormConfig = {
     },
     {
       key: 'submit',
-      type: 'button',
+      type: 'submit',
       label: 'Create Account',
-      props: { type: 'submit', color: 'primary' },
+      color: 'primary',
     },
   ],
 } as const;
