@@ -16,7 +16,7 @@ import { AsyncPipe } from '@angular/common';
   template: `
     <button
       mat-raised-button
-      type="button"
+      [type]="props()?.type || 'button'"
       [color]="props()?.color || 'primary'"
       [class]="className() || ''"
       [disabled]="disabled() || false"

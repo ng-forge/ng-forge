@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import { expect, test } from '@playwright/test';
 
 test.describe('Navigation Edge Cases and Error Handling Tests', () => {
@@ -26,7 +27,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Step 1 Data',
                 props: {
                   placeholder: 'Enter step 1 data',
-                  'data-testid': 'step1Data',
                 },
                 required: true,
                 col: 12,
@@ -44,7 +44,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Step 2 Data',
                 props: {
                   placeholder: 'Enter step 2 data',
-                  'data-testid': 'step2Data',
                 },
                 required: true,
                 col: 12,
@@ -62,7 +61,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Step 3 Data',
                 props: {
                   placeholder: 'Enter step 3 data',
-                  'data-testid': 'step3Data',
                 },
                 col: 12,
               },
@@ -72,7 +70,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitBrowserNav',
                 },
                 col: 12,
               },
@@ -175,7 +172,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Data Before Refresh',
                 props: {
                   placeholder: 'This data should survive refresh',
-                  'data-testid': 'refreshData1',
                 },
                 required: true,
                 col: 12,
@@ -193,7 +189,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Data After Refresh',
                 props: {
                   placeholder: 'Enter data after refresh',
-                  'data-testid': 'refreshData2',
                 },
                 col: 12,
               },
@@ -203,7 +198,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Submit After Refresh',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitRefresh',
                 },
                 col: 12,
               },
@@ -286,9 +280,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 key: 'rapidData1',
                 type: 'input',
                 label: 'Rapid Test Data 1',
-                props: {
-                  'data-testid': 'rapidData1',
-                },
                 col: 12,
               },
             ],
@@ -302,9 +293,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 key: 'rapidData2',
                 type: 'input',
                 label: 'Rapid Test Data 2',
-                props: {
-                  'data-testid': 'rapidData2',
-                },
                 col: 12,
               },
             ],
@@ -318,9 +306,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 key: 'rapidData3',
                 type: 'input',
                 label: 'Rapid Test Data 3',
-                props: {
-                  'data-testid': 'rapidData3',
-                },
                 col: 12,
               },
               {
@@ -329,7 +314,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitRapid',
                 },
                 col: 12,
               },
@@ -410,7 +394,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Large Data Field',
                 props: {
                   placeholder: 'Enter large amount of data',
-                  'data-testid': 'networkData1',
                   rows: 5,
                 },
                 col: 12,
@@ -428,7 +411,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'More Large Data',
                 props: {
                   placeholder: 'More data that might be affected by network',
-                  'data-testid': 'networkData2',
                   rows: 5,
                 },
                 col: 12,
@@ -439,7 +421,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitNetwork',
                 },
                 col: 12,
               },
@@ -519,9 +500,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 key: 'requiredField',
                 type: 'input',
                 label: 'Required Field',
-                props: {
-                  'data-testid': 'requiredField',
-                },
                 required: true,
                 col: 12,
               },
@@ -536,9 +514,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 key: 'optionalField',
                 type: 'input',
                 label: 'Optional Field',
-                props: {
-                  'data-testid': 'optionalField',
-                },
                 col: 12,
               },
               {
@@ -547,7 +522,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitInvalid',
                 },
                 col: 12,
               },
@@ -620,9 +594,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 key: 'destructData1',
                 type: 'input',
                 label: 'Data Before Destruction',
-                props: {
-                  'data-testid': 'destructData1',
-                },
                 col: 12,
               },
             ],
@@ -636,9 +607,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 key: 'destructData2',
                 type: 'input',
                 label: 'Data After Reconstruction',
-                props: {
-                  'data-testid': 'destructData2',
-                },
                 col: 12,
               },
               {
@@ -647,7 +615,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitDestruct',
                 },
                 col: 12,
               },
@@ -702,9 +669,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 key: 'reconstructData',
                 type: 'input',
                 label: 'Data After Reconstruction',
-                props: {
-                  'data-testid': 'reconstructData',
-                },
                 col: 12,
               },
               {
@@ -713,7 +677,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
                 label: 'Submit Reconstructed',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitReconstruct',
                 },
                 col: 12,
               },

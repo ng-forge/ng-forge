@@ -7,6 +7,7 @@ import {
   inject,
   Injector,
   input,
+  InputSignal,
   linkedSignal,
   model,
   OnDestroy,
@@ -118,7 +119,7 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[], TModel = InferGlobalFormValue>
+export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = InferGlobalFormValue>
   implements OnDestroy
 {
   private readonly destroyRef = inject(DestroyRef);
@@ -130,13 +131,13 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: readonly FieldDef<Record<string, unknown>>[], registry: Map<string, any>) => flattenFields(fields, registry),
+    (fields: FieldDef<Record<string, unknown>>[], registry: Map<string, any>) => flattenFields(fields, registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
   );
 
   private readonly memoizedKeyBy = memoize(
-    <T extends { key: string }>(fields: readonly T[]) => keyBy(fields, 'key'),
+    <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
     (fields) => fields.map((f) => f.key).join(',')
   );
 
@@ -189,7 +190,7 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
    * };
    * ```
    */
-  config = input.required<FormConfig<TFields>>();
+  config: InputSignal<FormConfig<TFields>> = input.required<FormConfig<TFields>>();
 
   /**
    * Form values for two-way data binding.
@@ -401,6 +402,8 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
    */
   readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit').pipe(map(() => this.value())));
 
+  readonly events = outputFromObservable(this.eventBus.events$);
+
   private readonly componentId = 'dynamic-form';
 
   /**
@@ -441,7 +444,7 @@ export class DynamicForm<TFields extends readonly RegisteredFieldTypes[] = reado
     { initialValue: [] }
   );
 
-  private mapFields(fields: readonly FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map((fieldDef) => this.mapSingleField(fieldDef))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);

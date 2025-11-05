@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import { expect, test } from '@playwright/test';
 
 test.describe('Form Orchestration and State Management Tests', () => {
@@ -27,7 +28,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'First Name',
                 props: {
                   placeholder: 'Enter first name',
-                  'data-testid': 'firstName',
                 },
                 required: true,
                 col: 6,
@@ -38,7 +38,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Last Name',
                 props: {
                   placeholder: 'Enter last name',
-                  'data-testid': 'lastName',
                 },
                 required: true,
                 col: 6,
@@ -50,7 +49,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 props: {
                   type: 'email',
                   placeholder: 'Enter email',
-                  'data-testid': 'email',
                 },
                 email: true,
                 required: true,
@@ -71,7 +69,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Job Title',
                 props: {
                   placeholder: 'Enter job title',
-                  'data-testid': 'jobTitle',
                 },
                 required: true,
                 col: 6,
@@ -82,7 +79,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Company',
                 props: {
                   placeholder: 'Enter company name',
-                  'data-testid': 'company',
                 },
                 required: true,
                 col: 6,
@@ -97,9 +93,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                   { value: '6-10', label: '6-10 years' },
                   { value: '10+', label: '10+ years' },
                 ],
-                props: {
-                  'data-testid': 'experience',
-                },
                 required: true,
                 col: 12,
               },
@@ -122,9 +115,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                   { value: 'java', label: 'Java' },
                   { value: 'csharp', label: 'C#' },
                 ],
-                props: {
-                  'data-testid': 'skills',
-                },
                 col: 12,
               },
               {
@@ -136,9 +126,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                   { value: 'office', label: 'Office' },
                   { value: 'hybrid', label: 'Hybrid' },
                 ],
-                props: {
-                  'data-testid': 'workPreference',
-                },
                 required: true,
                 col: 12,
               },
@@ -148,7 +135,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Save Profile',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitPersistence',
                 },
                 col: 12,
               },
@@ -299,7 +285,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Required Field 1',
                 props: {
                   placeholder: 'This field is required',
-                  'data-testid': 'requiredField1',
                 },
                 required: true,
                 col: 12,
@@ -311,7 +296,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 props: {
                   type: 'email',
                   placeholder: 'Enter valid email',
-                  'data-testid': 'emailField',
                 },
                 email: true,
                 required: true,
@@ -333,7 +317,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                   type: 'number',
                   min: '10',
                   max: '100',
-                  'data-testid': 'numberField',
                 },
                 min: 10,
                 max: 100,
@@ -346,7 +329,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitValidation',
                 },
                 col: 12,
               },
@@ -435,7 +417,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Field 1',
                 props: {
                   placeholder: 'Enter text',
-                  'data-testid': 'field1',
                 },
                 col: 12,
               },
@@ -452,7 +433,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Field 2',
                 props: {
                   placeholder: 'Enter text',
-                  'data-testid': 'field2',
                 },
                 col: 12,
               },
@@ -462,7 +442,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitDirty',
                 },
                 col: 12,
               },
@@ -553,9 +532,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                   { value: 'premium', label: 'Premium User' },
                   { value: 'enterprise', label: 'Enterprise User' },
                 ],
-                props: {
-                  'data-testid': 'userType',
-                },
                 required: true,
                 col: 12,
               },
@@ -571,27 +547,18 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 key: 'standardFeature',
                 type: 'checkbox',
                 label: 'Enable standard features',
-                props: {
-                  'data-testid': 'standardFeature',
-                },
                 col: 12,
               },
               {
                 key: 'premiumFeature',
                 type: 'checkbox',
                 label: 'Enable premium features (Premium+ only)',
-                props: {
-                  'data-testid': 'premiumFeature',
-                },
                 col: 12,
               },
               {
                 key: 'enterpriseFeature',
                 type: 'checkbox',
                 label: 'Enable enterprise features (Enterprise only)',
-                props: {
-                  'data-testid': 'enterpriseFeature',
-                },
                 col: 12,
               },
             ],
@@ -606,9 +573,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 key: 'confirmSettings',
                 type: 'checkbox',
                 label: 'I confirm these settings are correct',
-                props: {
-                  'data-testid': 'confirmSettings',
-                },
                 required: true,
                 col: 12,
               },
@@ -618,7 +582,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Complete Setup',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitOrchestration',
                 },
                 col: 12,
               },
@@ -699,7 +662,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Quick Data',
                 props: {
                   placeholder: 'Enter quick data',
-                  'data-testid': 'quickData',
                 },
                 required: true,
                 col: 12,
@@ -710,7 +672,6 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitQuick',
                 },
                 col: 12,
               },

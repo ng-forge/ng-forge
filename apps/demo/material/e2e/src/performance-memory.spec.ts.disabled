@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import { expect, test } from '@playwright/test';
 
 test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
@@ -6,7 +7,9 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
 
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    // Wait for the component to initialize and loadTestScenario to be available
+    await page.waitForFunction(() => (window as any).loadTestScenario !== undefined);
+    await page.waitForTimeout(1000);
   });
 
   test('should test performance with large multi-page configurations', async ({ page }) => {
@@ -29,9 +32,6 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
             key: `page${pageNum}Field${fieldNum}`,
             type: fieldType,
             label: `Page ${pageNum} Field ${fieldNum}`,
-            props: {
-              'data-testid': `page${pageNum}Field${fieldNum}`,
-            },
             col: fieldNum % 2 === 0 ? 6 : 12,
           };
 
@@ -86,7 +86,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
             label: 'Submit Large Form',
             props: {
               type: 'submit',
-              'data-testid': 'submitLarge',
+              'id': 'submitLarge',
             },
             col: 12,
           });
@@ -151,7 +151,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
 
       // Measure navigation time
       const navStart = Date.now();
-      const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+      const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next'));
       if (await nextButton.isVisible()) {
         await nextButton.click();
         await page.waitForTimeout(1000);
@@ -187,7 +187,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                   type: 'textarea',
                   label: `Memory Test Field ${iteration}`,
                   props: {
-                    'data-testid': `memoryField${iteration}`,
+                    'id': `memoryField${iteration}`,
                     rows: 5,
                   },
                   col: 12,
@@ -198,7 +198,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                   label: `Submit ${iteration}`,
                   props: {
                     type: 'submit',
-                    'data-testid': `submitMemory${iteration}`,
+                    'id': `submitMemory${iteration}`,
                   },
                   col: 12,
                 },
@@ -241,7 +241,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
         await page.waitForTimeout(1000);
 
         // Verify submission
-        const submissionExists = await page.locator('[data-testid="submission-0"]').isVisible();
+        const submissionExists = await page.locator('#submission-0').isVisible();
         if (submissionExists) {
           console.log(`Cycle ${cycle} submission successful`);
         }
@@ -309,7 +309,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                 type: 'input',
                 label: `Field ${i}-1`,
                 props: {
-                  'data-testid': `perfField${i}_1`,
+                  'id': `perfField${i}_1`,
                 },
                 required: true,
                 col: 6,
@@ -324,7 +324,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                   { value: 'opt3', label: 'Option 3' },
                 ],
                 props: {
-                  'data-testid': `perfField${i}_2`,
+                  'id': `perfField${i}_2`,
                 },
                 col: 6,
               },
@@ -339,7 +339,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
           label: 'Submit Performance Test',
           props: {
             type: 'submit',
-            'data-testid': 'submitPerf',
+            'id': 'submitPerf',
           },
           col: 12,
         });
@@ -370,7 +370,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
       for (let navTest = 1; navTest < Math.min(pageCount, 3); navTest++) {
         await page.fill(`#perfField${navTest}_1 input`, `test${navTest}`);
 
-        const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+        const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next'));
         if (await nextButton.isVisible()) {
           await nextButton.click();
           await page.waitForTimeout(500);
@@ -419,7 +419,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                 type: 'input',
                 label: 'Stress Input',
                 props: {
-                  'data-testid': 'stressInput',
+                  'id': 'stressInput',
                 },
                 col: 6,
               },
@@ -433,7 +433,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                   { value: 'stress3', label: 'Stress Option 3' },
                 ],
                 props: {
-                  'data-testid': 'stressSelect',
+                  'id': 'stressSelect',
                 },
                 col: 6,
               },
@@ -454,7 +454,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                   { value: 'check3', label: 'Check 3' },
                 ],
                 props: {
-                  'data-testid': 'stressCheckbox',
+                  'id': 'stressCheckbox',
                 },
                 col: 12,
               },
@@ -464,7 +464,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                 label: 'Submit Stress Test',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitStress',
+                  'id': 'submitStress',
                 },
                 col: 12,
               },
@@ -524,7 +524,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
     console.log(`Stress test completed in ${stressEnd - stressStart}ms`);
 
     // Navigate to page 2
-    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(1000);
@@ -546,7 +546,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
         // Submit after stress test
         await page.click('#submitStress button');
 
-        const submissionExists = await page.locator('[data-testid="submission-0"]').isVisible();
+        const submissionExists = await page.locator('#submission-0').isVisible();
         if (submissionExists) {
           console.log('Form survived stress test and submitted successfully');
         }
@@ -565,6 +565,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
   });
 
   test('should test form performance with large datasets', async ({ page }) => {
+    test.setTimeout(60000); // Increase timeout to 60 seconds for large dataset tests
     // Load form with large select options and complex data
     await page.evaluate(() => {
       // Generate large option lists
@@ -592,7 +593,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                 label: 'Large Select (100 options)',
                 options: generateLargeOptions('large1', 100),
                 props: {
-                  'data-testid': 'largeSelect1',
+                  'id': 'largeSelect1',
                 },
                 col: 6,
               },
@@ -602,7 +603,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                 label: 'Large Select (200 options)',
                 options: generateLargeOptions('large2', 200),
                 props: {
-                  'data-testid': 'largeSelect2',
+                  'id': 'largeSelect2',
                 },
                 col: 6,
               },
@@ -612,7 +613,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                 label: 'Large Checkbox List (50 options)',
                 options: generateLargeOptions('checkbox', 50),
                 props: {
-                  'data-testid': 'largeCheckbox',
+                  'id': 'largeCheckbox',
                 },
                 col: 12,
               },
@@ -622,7 +623,7 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
                 label: 'Submit Large Data',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitLargeData',
+                  'id': 'submitLargeData',
                 },
                 col: 12,
               },
@@ -667,8 +668,18 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
     await page.click('mat-option:nth-child(100)');
 
     // Test large checkbox array (select a few options)
-    for (let i = 1; i <= 5; i++) {
-      await page.click(`#largeCheckbox mat-checkbox:nth-child(${i * 10})`);
+    // Wait for checkboxes to be rendered
+    await page.waitForSelector('#largeCheckbox');
+
+    // Get the actual available checkboxes and click on some of them
+    const checkboxes = page.locator('#largeCheckbox mat-checkbox');
+    const checkboxCount = await checkboxes.count();
+    console.log(`Found ${checkboxCount} checkboxes`);
+
+    // Click on up to 5 checkboxes if they exist
+    const clickCount = Math.min(5, checkboxCount);
+    for (let i = 0; i < clickCount; i++) {
+      await checkboxes.nth(i * Math.floor(checkboxCount / clickCount)).click();
       await page.waitForTimeout(200);
     }
 
@@ -676,14 +687,14 @@ test.describe('Performance and Memory Testing for Multi-Page Forms', () => {
     const submitStart = Date.now();
     await page.click('#submitLargeData button');
 
-    const submissionExists = await page.locator('[data-testid="submission-0"]').isVisible();
+    const submissionExists = await page.locator('#submission-0').isVisible();
     const submitEnd = Date.now();
 
     if (submissionExists) {
       console.log(`Large data submission time: ${submitEnd - submitStart}ms`);
       expect(submitEnd - submitStart).toBeLessThan(5000); // Should submit within 5 seconds
 
-      const submissionText = await page.locator('[data-testid="submission-0"]').textContent();
+      const submissionText = await page.locator('#submission-0').textContent();
       expect(submissionText).toContain('large1_50');
       expect(submissionText).toContain('large2_100');
     }

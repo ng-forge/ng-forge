@@ -1,6 +1,6 @@
 import { disabled, email, FieldPath, max, maxLength, min, minLength, pattern, required } from '@angular/forms/signals';
 import { FieldDef, FieldWithValidation } from '../definitions';
-import { createValidator } from './validation';
+import { applyValidator } from './validation';
 import { applyLogic } from './logic';
 import { applySchema } from './schema-application';
 import { isGroupField } from '../definitions/default/group-field';
@@ -32,7 +32,7 @@ export function mapFieldToForm<TValue>(fieldDef: FieldDef<Record<string, unknown
   // Apply advanced validators if they exist
   if (validationField.validators) {
     validationField.validators.forEach((validatorConfig) => {
-      createValidator(validatorConfig, fieldPath);
+      applyValidator(validatorConfig, fieldPath);
     });
   }
 
@@ -122,7 +122,9 @@ function mapPageFieldToForm<TValue>(pageField: FieldDef<Record<string, unknown>>
 
   // Page fields don't create their own form controls
   // Instead, their child fields are mapped directly to the root form
-  for (const childField of pageField.fields) {
+  // Type assertion: After isPageField guard, we know fields contains FieldDef instances
+  const fields = pageField.fields as FieldDef<Record<string, unknown>>[];
+  for (const childField of fields) {
     if (!childField.key) {
       continue;
     }
@@ -146,7 +148,9 @@ function mapGroupFieldToForm<TValue>(groupField: FieldDef<Record<string, unknown
   }
 
   // Apply validation for each child field to the appropriate nested path in the parent form
-  for (const childField of groupField.fields) {
+  // Type assertion: After isGroupField guard, we know fields contains FieldDef instances
+  const fields = groupField.fields as FieldDef<Record<string, unknown>>[];
+  for (const childField of fields) {
     if (!childField.key) {
       continue;
     }

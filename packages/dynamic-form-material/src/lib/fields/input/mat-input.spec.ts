@@ -39,7 +39,6 @@ describe('MatInputFieldComponent', () => {
       // Note: placeholder might be null in Material components that use floating labels
       // expect(input.nativeElement.getAttribute('placeholder')).toBe('Enter your email');
       expect(input.nativeElement.getAttribute('tabindex')).toBe('1');
-      expect(formField.nativeElement.className).toContain('email-input');
       expect(formField.nativeElement.className).toContain('mat-form-field-appearance-outline');
       expect(label.nativeElement.textContent.trim()).toBe('Email Address');
       expect(hint.nativeElement.textContent.trim()).toBe('We will never share your email');

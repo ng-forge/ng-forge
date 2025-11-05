@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { ValidationError, WithOptionalField } from '@angular/forms/signals';
+import { ValidationErrorsPipe, ValidationMessages } from '@ng-forge/dynamic-form';
 
 /**
  * Generic error display component for Material Design forms
@@ -7,8 +8,9 @@ import { ValidationError, WithOptionalField } from '@angular/forms/signals';
  */
 @Component({
   selector: 'df-mat-errors',
+  imports: [ValidationErrorsPipe],
   template: `
-    @if (shouldShowErrors()) { @for (error of errors(); track error) {
+    @if (shouldShowErrors()) { @for (error of (errors() | validationErrors:validationMessages()); track error) {
     <span>{{ error.message }}</span>
     } }
   `,
@@ -16,6 +18,7 @@ import { ValidationError, WithOptionalField } from '@angular/forms/signals';
 })
 export class MatErrorsComponent {
   readonly errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+  readonly validationMessages = input<ValidationMessages>();
   readonly invalid = input<boolean>(false);
   readonly touched = input<boolean>(false);
 

@@ -21,25 +21,33 @@ import { AsyncPipe } from '@angular/common';
       [disabled]="f().disabled()"
       [disableRipple]="props()?.disableRipple || false"
       [attr.tabindex]="tabIndex()"
+      [attr.hidden]="f().hidden() || null"
     >
       {{ label() | dynamicText | async }}
     </mat-checkbox>
 
     @if (props()?.hint; as hint) {
-    <div class="mat-hint">{{ hint | dynamicText | async }}</div>
+    <div class="mat-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
     }
-    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
+    <mat-error [attr.hidden]="f().hidden() || null"
+      ><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()"
+    /></mat-error>
   `,
   styles: [
     `
       :host {
         display: block;
       }
+
+      :host([hidden]) {
+        display: none !important;
+      }
     `,
   ],
   host: {
     '[class]': 'className()',
     '[id]': '`${key()}`',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

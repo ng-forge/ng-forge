@@ -59,7 +59,8 @@ export const passwordMatchingConfig = {
     {
       key: 'passwordHint',
       type: 'text',
-      label: 'Password must contain at least 8 characters, including uppercase, lowercase, and a number.',
+      label:
+        'Password must contain at least 8 characters. Note: Password matching validation would typically be implemented using custom validators.',
       className: 'password-hint',
       col: 12,
     },
