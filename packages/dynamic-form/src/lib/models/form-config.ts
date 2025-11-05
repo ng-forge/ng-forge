@@ -33,10 +33,7 @@ import { EvaluationContext } from './expressions';
  *
  * @public
  */
-export interface FormConfig<
-  TFields extends readonly RegisteredFieldTypes[] = readonly RegisteredFieldTypes[],
-  TValue = InferFormValue<TFields>
-> {
+export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TValue = InferFormValue<TFields>> {
   /**
    * Array of field definitions that define the form structure.
    *
@@ -68,7 +65,7 @@ export interface FormConfig<
    * }
    * ```
    */
-  readonly schema?: Schema<TValue>;
+  schema?: Schema<TValue>;
 
   /**
    * Global form configuration options.
@@ -77,7 +74,7 @@ export interface FormConfig<
    *
    * @defaultValue {}
    */
-  readonly options?: FormOptions;
+  options?: FormOptions;
 
   /**
    * Global schemas available to all fields.
@@ -95,7 +92,7 @@ export interface FormConfig<
    * ]
    * ```
    */
-  readonly schemas?: SchemaDefinition[];
+  schemas?: SchemaDefinition[];
 
   /**
    * Signal forms adapter configuration.
@@ -103,7 +100,7 @@ export interface FormConfig<
    * Advanced configuration for signal forms behavior including
    * legacy migration and custom expression functions.
    */
-  readonly signalFormsConfig?: SignalFormsConfig;
+  signalFormsConfig?: SignalFormsConfig;
 }
 
 /**
@@ -195,7 +192,7 @@ export interface FormOptions {
    *
    * @defaultValue false
    */
-  readonly validateOnChange?: boolean;
+  validateOnChange?: boolean;
 
   /**
    * Enable validation on field blur.
@@ -205,7 +202,7 @@ export interface FormOptions {
    *
    * @defaultValue true
    */
-  readonly validateOnBlur?: boolean;
+  validateOnBlur?: boolean;
 
   /**
    * Disable the entire form.
@@ -215,5 +212,5 @@ export interface FormOptions {
    *
    * @defaultValue false
    */
-  readonly disabled?: boolean;
+  disabled?: boolean;
 }

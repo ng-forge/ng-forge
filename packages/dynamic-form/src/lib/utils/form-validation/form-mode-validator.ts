@@ -14,7 +14,7 @@ export class FormModeValidator {
    * @param fields The form field definitions to validate
    * @returns Validation result with mode detection and error details
    */
-  static validateFormConfiguration<TFields extends readonly RegisteredFieldTypes[]>(fields: TFields): FormConfigurationValidationResult {
+  static validateFormConfiguration<TFields extends RegisteredFieldTypes[]>(fields: TFields): FormConfigurationValidationResult {
     const modeDetection = detectFormMode(fields);
     const additionalErrors: string[] = [];
 
@@ -50,7 +50,7 @@ export class FormModeValidator {
    * @param fields The form field definitions to validate
    * @throws Error with detailed validation messages if form is invalid
    */
-  static validateFormConfigurationOrThrow<TFields extends readonly RegisteredFieldTypes[]>(fields: TFields): void {
+  static validateFormConfigurationOrThrow<TFields extends RegisteredFieldTypes[]>(fields: TFields): void {
     const result = this.validateFormConfiguration(fields);
 
     if (!result.isValid) {
@@ -68,7 +68,7 @@ export class FormModeValidator {
    * @param modeDetection The mode detection result
    * @returns Array of warning messages
    */
-  private static generateWarnings<TFields extends readonly RegisteredFieldTypes[]>(
+  private static generateWarnings<TFields extends RegisteredFieldTypes[]>(
     fields: TFields,
     modeDetection: FormModeDetectionResult
   ): string[] {
@@ -109,6 +109,6 @@ export interface FormConfigurationValidationResult extends FormModeDetectionResu
  * @param fields The form field definitions to validate
  * @returns True if form configuration is valid, false otherwise
  */
-export function isValidFormConfiguration<TFields extends readonly RegisteredFieldTypes[]>(fields: TFields): boolean {
+export function isValidFormConfiguration<TFields extends RegisteredFieldTypes[]>(fields: TFields): boolean {
   return FormModeValidator.validateFormConfiguration(fields).isValid;
 }

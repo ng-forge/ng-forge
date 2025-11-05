@@ -6,6 +6,24 @@ import { RegisteredFieldTypes } from '../registry';
 export { isPageField };
 
 /**
+ * Helper interface for container fields with fields property
+ */
+interface ContainerFieldWithFields extends FieldDef<Record<string, unknown>> {
+  fields: FieldDef<Record<string, unknown>>[];
+}
+
+/**
+ * Type guard to check if a field is a container with fields
+ */
+function isContainerWithFields(field: FieldDef<Record<string, unknown>>): field is ContainerFieldWithFields {
+  return (
+    (field.type === 'row' || field.type === 'group' || field.type === 'page') &&
+    'fields' in field &&
+    Array.isArray((field as ContainerFieldWithFields).fields)
+  );
+}
+
+/**
  * Form mode enumeration distinguishing between paged and non-paged forms
  */
 export type FormMode = 'paged' | 'non-paged';
@@ -26,7 +44,7 @@ export interface FormModeDetectionResult {
  * Type guard for paged form configurations
  * A paged form has ALL root-level fields of type 'page'
  */
-export function isPagedForm<TFields extends readonly RegisteredFieldTypes[]>(fields: TFields): boolean {
+export function isPagedForm<TFields extends RegisteredFieldTypes[]>(fields: TFields): boolean {
   if (!fields || fields.length === 0) {
     return false;
   }
@@ -38,7 +56,7 @@ export function isPagedForm<TFields extends readonly RegisteredFieldTypes[]>(fie
  * Type guard for non-paged form configurations
  * A non-paged form has NO page fields at any level
  */
-export function isNonPagedForm<TFields extends readonly RegisteredFieldTypes[]>(fields: TFields): boolean {
+export function isNonPagedForm<TFields extends RegisteredFieldTypes[]>(fields: TFields): boolean {
   if (!fields || fields.length === 0) {
     return true; // Empty form is considered non-paged
   }
@@ -51,7 +69,7 @@ export function isNonPagedForm<TFields extends readonly RegisteredFieldTypes[]>(
  * @param fields The form field definitions
  * @returns Detection result with mode and validation status
  */
-export function detectFormMode<TFields extends readonly RegisteredFieldTypes[]>(fields: TFields): FormModeDetectionResult {
+export function detectFormMode<TFields extends RegisteredFieldTypes[]>(fields: TFields): FormModeDetectionResult {
   if (!fields || fields.length === 0) {
     return {
       mode: 'non-paged',
@@ -105,19 +123,16 @@ export function detectFormMode<TFields extends readonly RegisteredFieldTypes[]>(
  * @param fields Array of field definitions to check
  * @returns true if any page field is found at any level
  */
-function hasAnyPageFields(fields: readonly FieldDef<Record<string, unknown>>[]): boolean {
+function hasAnyPageFields(fields: FieldDef<Record<string, unknown>>[]): boolean {
   for (const field of fields) {
     if (isPageField(field)) {
       return true;
     }
 
     // Check nested fields in container types
-    if (field.type === 'row' || field.type === 'group') {
-      const containerField = field as any;
-      if (containerField.fields && Array.isArray(containerField.fields)) {
-        if (hasAnyPageFields(containerField.fields)) {
-          return true;
-        }
+    if (isContainerWithFields(field) && (field.type === 'row' || field.type === 'group')) {
+      if (hasAnyPageFields(field.fields)) {
+        return true;
       }
     }
   }
@@ -130,25 +145,19 @@ function hasAnyPageFields(fields: readonly FieldDef<Record<string, unknown>>[]):
  * @param fields Array of field definitions to check
  * @returns true if nested page fields found
  */
-function hasNestedPageFields(fields: readonly FieldDef<Record<string, unknown>>[]): boolean {
+function hasNestedPageFields(fields: FieldDef<Record<string, unknown>>[]): boolean {
   for (const field of fields) {
     // If this is a page field, check if its children contain pages
-    if (isPageField(field)) {
-      const pageField = field as any;
-      if (pageField.fields && Array.isArray(pageField.fields)) {
-        if (hasAnyPageFields(pageField.fields)) {
-          return true;
-        }
+    if (isPageField(field) && isContainerWithFields(field)) {
+      if (hasAnyPageFields(field.fields)) {
+        return true;
       }
     }
 
     // Check other container types for nested pages
-    if (field.type === 'row' || field.type === 'group') {
-      const containerField = field as any;
-      if (containerField.fields && Array.isArray(containerField.fields)) {
-        if (hasNestedPageFields(containerField.fields)) {
-          return true;
-        }
+    if (isContainerWithFields(field) && (field.type === 'row' || field.type === 'group')) {
+      if (hasNestedPageFields(field.fields)) {
+        return true;
       }
     }
   }
@@ -158,7 +167,7 @@ function hasNestedPageFields(fields: readonly FieldDef<Record<string, unknown>>[
 /**
  * Type predicate for valid paged form configurations
  */
-export function isValidPagedForm<TFields extends readonly RegisteredFieldTypes[]>(fields: TFields): boolean {
+export function isValidPagedForm<TFields extends RegisteredFieldTypes[]>(fields: TFields): boolean {
   const result = detectFormMode(fields);
   return result.mode === 'paged' && result.isValid;
 }
@@ -166,7 +175,7 @@ export function isValidPagedForm<TFields extends readonly RegisteredFieldTypes[]
 /**
  * Type predicate for valid non-paged form configurations
  */
-export function isValidNonPagedForm<TFields extends readonly RegisteredFieldTypes[]>(fields: TFields): boolean {
+export function isValidNonPagedForm<TFields extends RegisteredFieldTypes[]>(fields: TFields): boolean {
   const result = detectFormMode(fields);
   return result.mode === 'non-paged' && result.isValid;
 }

@@ -132,7 +132,7 @@ export default class PageFieldComponent {
     { initialValue: [] }
   );
 
-  private mapFields(fields: readonly any[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: any[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map((fieldDef) => this.mapSingleField(fieldDef))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);

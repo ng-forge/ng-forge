@@ -1,4 +1,5 @@
 import { FieldComponent, FieldDef } from '../base';
+import { RowAllowedChildren } from '../../models/types/nesting-constraints';
 import { isArray } from 'lodash-es';
 
 /**
@@ -6,21 +7,28 @@ import { isArray } from 'lodash-es';
  * This is a special field type that contains other definitions arranged horizontally
  * The row itself doesn't have a value - it's a layout container
  * This is a programmatic field type only - users cannot customize this field type
+ *
+ * TypeScript cannot enforce field nesting rules due to circular dependency limitations.
+ * For documentation: Rows should contain groups and leaf fields, but NOT pages or other rows.
+ * Runtime validation enforces these rules.
  */
-export interface RowField<TFields extends readonly unknown[] = readonly unknown[]> extends FieldDef<never> {
+export interface RowField<TFields extends RowAllowedChildren[] = RowAllowedChildren[]> extends FieldDef<never> {
   /** Field type identifier */
-  readonly type: 'row';
+  type: 'row';
 
   /** Child definitions to render within this row */
-  readonly fields: TFields;
+  fields: TFields;
 }
 
-/** Type guard for RowField */
-export function isRowField<TFields extends readonly any[]>(field: FieldDef<Record<string, unknown>>): field is RowField<readonly any[]> {
-  return field.type === 'row' && 'fields' in field && isArray((field as { fields: TFields }).fields);
+/**
+ * Type guard for RowField with proper type narrowing
+ * After this guard, TypeScript knows the field is a RowField and can access its properties safely
+ */
+export function isRowField(field: FieldDef<Record<string, unknown>>): field is RowField {
+  return field.type === 'row' && 'fields' in field && isArray((field as RowField).fields);
 }
 
-export type RowComponent = FieldComponent<RowField<readonly any[]>>;
+export type RowComponent = FieldComponent<RowField<RowAllowedChildren[]>>;
 
 /**
  * Row child field with column layout properties

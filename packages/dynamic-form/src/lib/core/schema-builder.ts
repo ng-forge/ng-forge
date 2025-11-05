@@ -10,7 +10,7 @@ import { getFieldDefaultValue } from '../utils/default-value/default-value';
  * Uses the new modular signal forms adapter structure
  */
 export function createSchemaFromFields<TModel = unknown>(
-  fields: readonly FieldDef<Record<string, unknown>>[],
+  fields: FieldDef<Record<string, unknown>>[],
   registry: Map<string, FieldTypeDefinition>
 ): Schema<TModel> {
   return schema<TModel>((path) => {
@@ -58,7 +58,7 @@ export function createSchemaFromFields<TModel = unknown>(
  * Utility to convert field definitions to default values object
  */
 export function fieldsToDefaultValues<TModel = unknown>(
-  fields: readonly FieldDef<Record<string, unknown>>[],
+  fields: FieldDef<Record<string, unknown>>[],
   registry: Map<string, FieldTypeDefinition>
 ): TModel {
   const defaultValues: Record<string, unknown> = {};

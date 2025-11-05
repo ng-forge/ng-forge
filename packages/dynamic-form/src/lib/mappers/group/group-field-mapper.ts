@@ -6,7 +6,7 @@ import { FieldMapperOptions } from '../types';
  * Maps a group field definition to Angular bindings
  * Group components create nested form structures under the group's key
  */
-export function groupFieldMapper(fieldDef: GroupField<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
+export function groupFieldMapper(fieldDef: GroupField, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
   const bindings: Binding[] = [];
 
   bindings.push(inputBinding('key', () => fieldDef.key));

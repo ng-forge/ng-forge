@@ -15,7 +15,7 @@ type ExtractFieldDef<T> = T extends FieldTypeDefinition<infer F> ? F : never;
 /**
  * Union of all FieldDef types from provided field types
  */
-type FieldDefUnion<T extends readonly FieldTypeDefinition[]> = ExtractFieldDef<T[number]>;
+type FieldDefUnion<T extends FieldTypeDefinition[]> = ExtractFieldDef<T[number]>;
 
 /**
  * Infer form value type from field definitions
@@ -27,7 +27,7 @@ type InferFormValue<TFieldDefs extends FieldDef<Record<string, unknown>>[]> = {
 /**
  * Provider result with type inference
  */
-type ProvideDynamicFormResult<T extends readonly FieldTypeDefinition[]> = EnvironmentProviders & {
+type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProviders & {
   __fieldDefs?: FieldDefUnion<T>;
   __formValue?: InferFormValue<FieldDefUnion<T>[]>;
 };
@@ -77,7 +77,7 @@ type ProvideDynamicFormResult<T extends readonly FieldTypeDefinition[]> = Enviro
  *
  * @public
  */
-export function provideDynamicForm<const T extends readonly FieldTypeDefinition[]>(...fieldTypes: T): ProvideDynamicFormResult<T> {
+export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fieldTypes: T): ProvideDynamicFormResult<T> {
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
 
   const providers: Provider[] = [
