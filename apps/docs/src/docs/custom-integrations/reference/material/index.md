@@ -1,5 +1,3 @@
-# Material Design Integration
-
 The `@ng-forge/dynamic-form-material` package provides Material Design field components.
 
 ## Installation

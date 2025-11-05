@@ -1,5 +1,3 @@
-# i18n Setup
-
 ng-forge supports internationalization through Angular's reactive primitives: **Observables** and **Signals**. It's framework-agnostic - use any translation library that provides these types.
 
 ## How i18n Works

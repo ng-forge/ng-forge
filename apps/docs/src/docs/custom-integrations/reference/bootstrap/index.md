@@ -1,5 +1,3 @@
-# Bootstrap Integration
-
 Bootstrap integration for ng-forge is in development.
 
 ## Planned Features

@@ -1,5 +1,3 @@
-# Text Field
-
 Display static or dynamic text content in forms. Text fields are **display-only** - they don't collect user input or contribute to form values.
 
 ## Basic Text

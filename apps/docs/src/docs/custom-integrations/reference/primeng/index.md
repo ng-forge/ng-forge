@@ -1,5 +1,3 @@
-# PrimeNG Integration
-
 PrimeNG integration for ng-forge is in development.
 
 ## Planned Features

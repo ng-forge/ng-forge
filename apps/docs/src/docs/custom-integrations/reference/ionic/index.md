@@ -1,5 +1,3 @@
-# Ionic Integration
-
 Ionic integration for ng-forge is in development.
 
 ## Planned Features

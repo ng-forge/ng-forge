@@ -1,5 +1,3 @@
-# Type Safety & Inference
-
 ng-forge provides compile-time type inference for form configurations, eliminating manual type definitions and catching errors before runtime.
 
 ## Basic Type Inference
