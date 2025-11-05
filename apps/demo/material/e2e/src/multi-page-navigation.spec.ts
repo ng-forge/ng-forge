@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import { expect, test } from '@playwright/test';
 
 test.describe('Multi-Page Navigation Tests', () => {
@@ -23,7 +24,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Username',
                 props: {
                   placeholder: 'Enter username',
-                  'data-testid': 'username',
                 },
                 required: true,
                 minLength: 3,
@@ -36,7 +36,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 props: {
                   type: 'email',
                   placeholder: 'Enter email',
-                  'data-testid': 'email',
                 },
                 email: true,
                 required: true,
@@ -49,7 +48,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 props: {
                   type: 'password',
                   placeholder: 'Enter password',
-                  'data-testid': 'password',
                 },
                 required: true,
                 minLength: 8,
@@ -62,7 +60,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 props: {
                   type: 'password',
                   placeholder: 'Confirm password',
-                  'data-testid': 'confirmPassword',
                 },
                 required: true,
                 col: 6,
@@ -82,7 +79,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'First Name',
                 props: {
                   placeholder: 'Enter first name',
-                  'data-testid': 'firstName',
                 },
                 required: true,
                 col: 6,
@@ -93,7 +89,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Last Name',
                 props: {
                   placeholder: 'Enter last name',
-                  'data-testid': 'lastName',
                 },
                 required: true,
                 col: 6,
@@ -104,7 +99,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Date of Birth',
                 props: {
                   type: 'date',
-                  'data-testid': 'birthDate',
                 },
                 required: true,
                 col: 6,
@@ -116,7 +110,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 props: {
                   type: 'tel',
                   placeholder: 'Enter phone number',
-                  'data-testid': 'phoneNumber',
                 },
                 pattern: '^[+]?[0-9\\s\\-\\(\\)]+$',
                 col: 6,
@@ -134,9 +127,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 key: 'newsletter',
                 type: 'checkbox',
                 label: 'Subscribe to newsletter',
-                props: {
-                  'data-testid': 'newsletter',
-                },
                 col: 12,
               },
               {
@@ -149,9 +139,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                   { value: 'fr', label: 'French' },
                   { value: 'de', label: 'German' },
                 ],
-                props: {
-                  'data-testid': 'language',
-                },
                 defaultValue: 'en',
                 col: 6,
               },
@@ -165,18 +152,12 @@ test.describe('Multi-Page Navigation Tests', () => {
                   { value: 'PST', label: 'Pacific Time' },
                   { value: 'GMT', label: 'Greenwich Mean Time' },
                 ],
-                props: {
-                  'data-testid': 'timezone',
-                },
                 col: 6,
               },
               {
                 key: 'terms',
                 type: 'checkbox',
                 label: 'I agree to the Terms of Service',
-                props: {
-                  'data-testid': 'terms',
-                },
                 required: true,
                 col: 12,
               },
@@ -186,7 +167,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Complete Registration',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitRegistration',
                 },
                 col: 12,
               },
@@ -313,7 +293,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Required Field',
                 props: {
                   placeholder: 'This field is required',
-                  'data-testid': 'requiredField',
                 },
                 required: true,
                 col: 12,
@@ -325,7 +304,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 props: {
                   type: 'email',
                   placeholder: 'Enter valid email',
-                  'data-testid': 'emailField',
                 },
                 email: true,
                 required: true,
@@ -345,7 +323,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Optional Field',
                 props: {
                   placeholder: 'This field is optional',
-                  'data-testid': 'optionalField',
                 },
                 col: 12,
               },
@@ -355,7 +332,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Submit Form',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitValidation',
                 },
                 col: 12,
               },
@@ -440,7 +416,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Field 1',
                 props: {
                   placeholder: 'Enter data for step 1',
-                  'data-testid': 'field1',
                 },
                 col: 12,
               },
@@ -457,7 +432,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Field 2',
                 props: {
                   placeholder: 'Enter data for step 2',
-                  'data-testid': 'field2',
                 },
                 col: 12,
               },
@@ -474,7 +448,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Field 3',
                 props: {
                   placeholder: 'Enter data for step 3',
-                  'data-testid': 'field3',
                 },
                 col: 12,
               },
@@ -484,7 +457,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitBackward',
                 },
                 col: 12,
               },
@@ -515,7 +487,7 @@ test.describe('Multi-Page Navigation Tests', () => {
     await page.fill('#field1 input', 'Data from step 1');
 
     // Navigate to page 2
-    let nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(1000);
@@ -578,7 +550,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Introduction',
                 props: {
                   placeholder: 'Introduction text',
-                  'data-testid': 'introText',
                 },
                 col: 12,
               },
@@ -595,7 +566,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Details',
                 props: {
                   placeholder: 'Detail text',
-                  'data-testid': 'detailText',
                 },
                 col: 12,
               },
@@ -612,7 +582,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Summary',
                 props: {
                   placeholder: 'Summary text',
-                  'data-testid': 'summaryText',
                 },
                 col: 12,
               },
@@ -622,7 +591,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitDirect',
                 },
                 col: 12,
               },
@@ -691,7 +659,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Large Data Field',
                 props: {
                   placeholder: 'Enter large amount of data',
-                  'data-testid': 'data1',
                   rows: 5,
                 },
                 col: 12,
@@ -709,7 +676,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'More Data',
                 props: {
                   placeholder: 'Enter more data',
-                  'data-testid': 'data2',
                   rows: 5,
                 },
                 col: 12,
@@ -720,7 +686,6 @@ test.describe('Multi-Page Navigation Tests', () => {
                 label: 'Submit',
                 props: {
                   type: 'submit',
-                  'data-testid': 'submitTransition',
                 },
                 col: 12,
               },

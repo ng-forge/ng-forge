@@ -16,14 +16,18 @@ import { DynamicText } from '../index';
  * @example
  * ```html
  * <!-- Basic usage -->
- * <mat-error *ngFor="let error of (field.errors() | validationErrors)">
+ * @for (error of (field.errors() | validationErrors); track error) {
+ * <mat-error>
  *   {{ error.message }}
  * </mat-error>
+ * }
  *
  * <!-- With custom validation messages -->
- * <mat-error *ngFor="let error of (field.errors() | validationErrors:field.validationMessages())">
+ * @for (error of (field.errors() | validationErrors:field.validationMessages()); track error) {
+ * <mat-error>
  *   {{ error.message }}
  * </mat-error>
+ * }
  * ```
  *
  * Custom validation messages example:

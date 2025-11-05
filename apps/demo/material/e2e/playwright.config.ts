@@ -22,7 +22,11 @@ export default defineConfig({
     baseURL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    /* Save screenshots to material demo folder */
+    screenshot: 'only-on-failure',
   },
+  /* Configure output directories */
+  outputDir: '../screenshots',
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'pnpm exec nx run material:serve --port 4200',

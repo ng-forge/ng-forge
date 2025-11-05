@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Simple E2E Test Page Component
@@ -236,7 +236,6 @@ export class SimpleE2ETestPageComponent {
           label: 'First Name',
           props: {
             placeholder: 'Enter your first name',
-            'data-testid': 'firstName',
           },
           required: true,
           col: 6,
@@ -247,7 +246,6 @@ export class SimpleE2ETestPageComponent {
           label: 'Last Name',
           props: {
             placeholder: 'Enter your last name',
-            'data-testid': 'lastName',
           },
           required: true,
           col: 6,
@@ -259,7 +257,6 @@ export class SimpleE2ETestPageComponent {
           props: {
             type: 'email',
             placeholder: 'Enter your email',
-            'data-testid': 'email',
           },
           required: true,
           email: true,
@@ -274,7 +271,6 @@ export class SimpleE2ETestPageComponent {
             { value: 'high', label: 'High Priority' },
           ],
           props: {
-            'data-testid': 'priority',
             hint: 'Select task priority',
           },
           required: true,
@@ -283,9 +279,9 @@ export class SimpleE2ETestPageComponent {
           key: 'submit',
           type: 'button',
           label: 'Submit',
+          event: SubmitEvent,
           props: {
             type: 'submit',
-            'data-testid': 'submit',
           },
         },
       ],
@@ -299,6 +295,9 @@ export class SimpleE2ETestPageComponent {
   }
 
   private setupScenarioLoader(): void {
+    // Expose SubmitEvent globally for e2e tests
+    (window as any).SubmitEvent = SubmitEvent;
+
     // Create global function for loading test scenarios
     (window as any).loadTestScenario = (
       config: FormConfig,

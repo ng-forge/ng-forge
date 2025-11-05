@@ -95,7 +95,7 @@ export const E2E_UTILS = {
   /**
    * Wait for form to be ready and initialized
    */
-  async waitForFormReady(page: any, testId: string = 'default'): Promise<void> {
+  async waitForFormReady(page: any, testId = 'default'): Promise<void> {
     await page.waitForSelector(`[data-testid="dynamic-form-${testId}"]`);
     await page.waitForTimeout(500); // Allow form to fully initialize
   },
@@ -114,7 +114,7 @@ export const E2E_UTILS = {
   /**
    * Wait for form submission event
    */
-  async waitForSubmission(page: any, timeout: number = 5000): Promise<any> {
+  async waitForSubmission(page: any, timeout = 5000): Promise<any> {
     return page.waitForEvent('console', {
       predicate: (msg: any) => msg.text().includes('Form Submitted:'),
       timeout,

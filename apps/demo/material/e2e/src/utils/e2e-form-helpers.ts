@@ -74,7 +74,7 @@ export class E2EFormHelpers {
     await this.page.locator('body').click();
   }
 
-  async toggleCheckbox(testId: string, checked: boolean = true): Promise<void> {
+  async toggleCheckbox(testId: string, checked = true): Promise<void> {
     const checkbox = this.page.locator(`[data-testid="${testId}"]`);
     const isCurrentlyChecked = await checkbox.isChecked();
 

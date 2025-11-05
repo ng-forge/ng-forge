@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import { expect, test } from '@playwright/test';
 
 test.describe('Error Handling and Edge Cases', () => {
@@ -15,18 +16,12 @@ test.describe('Error Handling and Edge Cases', () => {
             key: 'missingType',
             label: 'Field without type',
             // type property is missing
-            props: {
-              'data-testid': 'missingType',
-            },
           },
           // Field with invalid type
           {
             key: 'invalidType',
             type: 'nonexistent-field-type',
             label: 'Invalid Field Type',
-            props: {
-              'data-testid': 'invalidType',
-            },
           },
           // Valid field for comparison
           {
@@ -35,7 +30,6 @@ test.describe('Error Handling and Edge Cases', () => {
             label: 'Valid Field',
             props: {
               placeholder: 'This should work',
-              'data-testid': 'validField',
             },
           },
           {
@@ -44,7 +38,6 @@ test.describe('Error Handling and Edge Cases', () => {
             label: 'Submit Invalid Config',
             props: {
               type: 'submit',
-              'data-testid': 'submitInvalid',
             },
           },
         ],

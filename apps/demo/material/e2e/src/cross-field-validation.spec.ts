@@ -1,13 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import { expect, test } from '@playwright/test';
 
 test.describe('Cross-Field Validation Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/e2e-test');
+    await page.goto('http://localhost:4200/e2e-test');
+    // Wait for the component to initialize and loadTestScenario to be available
+    await page.waitForFunction(() => window.loadTestScenario !== undefined);
   });
 
   test('should test password confirmation validation', async ({ page }) => {
     // Load password confirmation scenario
     await page.evaluate(() => {
+      const SubmitEvent = (window as any).SubmitEvent;
+
       const passwordConfig = {
         fields: [
           {
@@ -17,7 +22,6 @@ test.describe('Cross-Field Validation Tests', () => {
             props: {
               type: 'password',
               placeholder: 'Enter password',
-              'data-testid': 'password',
             },
             required: true,
             minLength: 8,
@@ -30,10 +34,16 @@ test.describe('Cross-Field Validation Tests', () => {
             props: {
               type: 'password',
               placeholder: 'Confirm password',
-              'data-testid': 'confirmPassword',
             },
             required: true,
             col: 6,
+            validators: [
+              {
+                type: 'custom',
+                name: 'passwordMatch',
+                message: 'Passwords must match',
+              },
+            ],
           },
           {
             key: 'email',
@@ -42,7 +52,6 @@ test.describe('Cross-Field Validation Tests', () => {
             props: {
               type: 'email',
               placeholder: 'Enter email',
-              'data-testid': 'email',
             },
             email: true,
             required: true,
@@ -52,9 +61,9 @@ test.describe('Cross-Field Validation Tests', () => {
             key: 'submitPassword',
             type: 'button',
             label: 'Create Account',
+            event: SubmitEvent,
             props: {
               type: 'submit',
-              'data-testid': 'submitPassword',
             },
             col: 12,
           },
@@ -89,8 +98,9 @@ test.describe('Cross-Field Validation Tests', () => {
 
     // Should not submit due to password mismatch (manual validation would be needed here)
     // For now, we'll test the form state
+    await page.waitForSelector('.form-state summary', { timeout: 10000 });
     await page.click('.form-state summary');
-    const formValue = await page.locator('[data-testid="form-value-password-validation"]').textContent();
+    const formValue = await page.locator('#form-value-password-validation').textContent();
     expect(formValue).toContain('password123');
     expect(formValue).toContain('differentpassword');
 
@@ -99,8 +109,8 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitPassword button');
 
     // Should submit successfully with matching passwords
-    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('test@example.com');
+    await expect(page.locator('#submission-0')).toBeVisible();
+    await expect(page.locator('#submission-0')).toContainText('test@example.com');
   });
 
   test('should test conditional required fields', async ({ page }) => {
@@ -112,9 +122,6 @@ test.describe('Cross-Field Validation Tests', () => {
             key: 'hasAddress',
             type: 'checkbox',
             label: 'I have a different billing address',
-            props: {
-              'data-testid': 'hasAddress',
-            },
             col: 12,
           },
           {
@@ -123,7 +130,6 @@ test.describe('Cross-Field Validation Tests', () => {
             label: 'Street Address',
             props: {
               placeholder: 'Enter street address',
-              'data-testid': 'streetAddress',
             },
             // This would typically be conditionally required based on hasAddress
             col: 12,
@@ -134,7 +140,6 @@ test.describe('Cross-Field Validation Tests', () => {
             label: 'City',
             props: {
               placeholder: 'Enter city',
-              'data-testid': 'city',
             },
             col: 6,
           },
@@ -144,7 +149,6 @@ test.describe('Cross-Field Validation Tests', () => {
             label: 'ZIP Code',
             props: {
               placeholder: 'Enter ZIP code',
-              'data-testid': 'zipCode',
             },
             pattern: '^[0-9]{5}(-[0-9]{4})?$',
             col: 6,
@@ -159,9 +163,6 @@ test.describe('Cross-Field Validation Tests', () => {
               { value: 'mx', label: 'Mexico' },
               { value: 'other', label: 'Other' },
             ],
-            props: {
-              'data-testid': 'country',
-            },
             col: 12,
           },
           {
@@ -170,7 +171,6 @@ test.describe('Cross-Field Validation Tests', () => {
             label: 'Submit Address',
             props: {
               type: 'submit',
-              'data-testid': 'submitConditional',
             },
             col: 12,
           },
@@ -199,7 +199,7 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitConditional button');
 
     // Check if submission occurred (basic form should submit)
-    const submissionExists = await page.locator('[data-testid="submission-0"]').isVisible();
+    const submissionExists = await page.locator('#submission-0').isVisible();
     console.log('Initial submission exists:', submissionExists);
 
     // Check the "has address" checkbox
@@ -218,11 +218,11 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitConditional button');
 
     // Verify submission contains address information
-    const submissionCount = await page.locator('[data-testid^="submission-"]').count();
+    const submissionCount = await page.locator('[data-testid^="submission-').count();
     expect(submissionCount).toBeGreaterThan(0);
 
     // Get the latest submission
-    const latestSubmission = page.locator(`[data-testid="submission-${submissionCount - 1}"]`);
+    const latestSubmission = page.locator(`#submission-${submissionCount - 1}`);
     await expect(latestSubmission).toContainText('123 Main Street');
     await expect(latestSubmission).toContainText('New York');
     await expect(latestSubmission).toContainText('10001');
@@ -243,9 +243,6 @@ test.describe('Cross-Field Validation Tests', () => {
               { value: 'clothing', label: 'Clothing' },
               { value: 'books', label: 'Books' },
             ],
-            props: {
-              'data-testid': 'category',
-            },
             required: true,
             col: 6,
           },
@@ -265,9 +262,6 @@ test.describe('Cross-Field Validation Tests', () => {
               { value: 'nonfiction', label: 'Non-Fiction' },
               { value: 'textbook', label: 'Textbook' },
             ],
-            props: {
-              'data-testid': 'subcategory',
-            },
             col: 6,
           },
           {
@@ -276,7 +270,6 @@ test.describe('Cross-Field Validation Tests', () => {
             label: 'Product Name',
             props: {
               placeholder: 'Enter product name',
-              'data-testid': 'productName',
             },
             required: true,
             col: 12,
@@ -288,7 +281,6 @@ test.describe('Cross-Field Validation Tests', () => {
             props: {
               type: 'number',
               placeholder: 'Enter price',
-              'data-testid': 'price',
               step: '0.01',
             },
             min: 0,
@@ -305,9 +297,6 @@ test.describe('Cross-Field Validation Tests', () => {
               { value: 'gbp', label: 'GBP' },
               { value: 'cad', label: 'CAD' },
             ],
-            props: {
-              'data-testid': 'currency',
-            },
             defaultValue: 'usd',
             col: 6,
           },
@@ -317,7 +306,6 @@ test.describe('Cross-Field Validation Tests', () => {
             label: 'Add Product',
             props: {
               type: 'submit',
-              'data-testid': 'submitDependent',
             },
             col: 12,
           },
@@ -362,12 +350,12 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitDependent button');
 
     // Verify submission contains dependent field values
-    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('electronics');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('laptop');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('MacBook Pro 16"');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('2499.99');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('eur');
+    await expect(page.locator('#submission-0')).toBeVisible();
+    await expect(page.locator('#submission-0')).toContainText('electronics');
+    await expect(page.locator('#submission-0')).toContainText('laptop');
+    await expect(page.locator('#submission-0')).toContainText('MacBook Pro 16"');
+    await expect(page.locator('#submission-0')).toContainText('2499.99');
+    await expect(page.locator('#submission-0')).toContainText('eur');
 
     // Test changing category and ensuring form state updates
     await page.click('#category mat-select');
@@ -385,11 +373,11 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitDependent button');
 
     // Verify second submission
-    await expect(page.locator('[data-testid="submission-1"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-1"]')).toContainText('clothing');
-    await expect(page.locator('[data-testid="submission-1"]')).toContainText('shirt');
-    await expect(page.locator('[data-testid="submission-1"]')).toContainText('Cotton T-Shirt');
-    await expect(page.locator('[data-testid="submission-1"]')).toContainText('29.99');
+    await expect(page.locator('#submission-1')).toBeVisible();
+    await expect(page.locator('#submission-1')).toContainText('clothing');
+    await expect(page.locator('#submission-1')).toContainText('shirt');
+    await expect(page.locator('#submission-1')).toContainText('Cotton T-Shirt');
+    await expect(page.locator('#submission-1')).toContainText('29.99');
   });
 
   test('should test field enable/disable based on other fields', async ({ page }) => {
@@ -407,9 +395,6 @@ test.describe('Cross-Field Validation Tests', () => {
               { value: 'overnight', label: 'Overnight' },
               { value: 'pickup', label: 'Store Pickup' },
             ],
-            props: {
-              'data-testid': 'shippingMethod',
-            },
             required: true,
             col: 12,
           },
@@ -419,7 +404,6 @@ test.describe('Cross-Field Validation Tests', () => {
             label: 'Shipping Address',
             props: {
               placeholder: 'Enter shipping address',
-              'data-testid': 'shippingAddress',
               rows: 3,
             },
             // Would typically be disabled when "pickup" is selected
@@ -431,7 +415,6 @@ test.describe('Cross-Field Validation Tests', () => {
             label: 'Special Delivery Instructions',
             props: {
               placeholder: 'Special instructions for express/overnight delivery',
-              'data-testid': 'expressInstructions',
               rows: 2,
             },
             // Would typically be enabled only for express/overnight
@@ -446,9 +429,6 @@ test.describe('Cross-Field Validation Tests', () => {
               { value: 'mall', label: 'Shopping Mall Store' },
               { value: 'airport', label: 'Airport Store' },
             ],
-            props: {
-              'data-testid': 'storeLocation',
-            },
             // Would typically be enabled only for pickup
             col: 12,
           },
@@ -458,7 +438,6 @@ test.describe('Cross-Field Validation Tests', () => {
             label: 'Complete Order',
             props: {
               type: 'submit',
-              'data-testid': 'submitEnableDisable',
             },
             col: 12,
           },
@@ -496,9 +475,9 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitEnableDisable button');
 
     // Verify submission
-    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('standard');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('123 Main St');
+    await expect(page.locator('#submission-0')).toBeVisible();
+    await expect(page.locator('#submission-0')).toContainText('standard');
+    await expect(page.locator('#submission-0')).toContainText('123 Main St');
 
     // Test express shipping scenario
     await page.click('#shippingMethod mat-radio-button:has-text("Express")');
@@ -510,9 +489,9 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitEnableDisable button');
 
     // Verify second submission
-    await expect(page.locator('[data-testid="submission-1"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-1"]')).toContainText('express');
-    await expect(page.locator('[data-testid="submission-1"]')).toContainText('Ring doorbell twice');
+    await expect(page.locator('#submission-1')).toBeVisible();
+    await expect(page.locator('#submission-1')).toContainText('express');
+    await expect(page.locator('#submission-1')).toContainText('Ring doorbell twice');
 
     // Test pickup scenario
     await page.click('#shippingMethod mat-radio-button:has-text("Store Pickup")');
@@ -528,8 +507,8 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitEnableDisable button');
 
     // Verify third submission
-    await expect(page.locator('[data-testid="submission-2"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-2"]')).toContainText('pickup');
-    await expect(page.locator('[data-testid="submission-2"]')).toContainText('downtown');
+    await expect(page.locator('#submission-2')).toBeVisible();
+    await expect(page.locator('#submission-2')).toContainText('pickup');
+    await expect(page.locator('#submission-2')).toContainText('downtown');
   });
 });
