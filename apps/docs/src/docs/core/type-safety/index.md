@@ -259,7 +259,7 @@ Fields are categorized by whether they contribute to form values:
 ```typescript
 const config = {
   fields: [
-    { type: 'text', content: 'Enter your details:' }, // Excluded from values
+    { type: 'text', label: 'Enter your details:' }, // Excluded from values
     { key: 'name', type: 'input', value: '' }, // Included in values
     {
       type: 'row', // Excluded (container)
