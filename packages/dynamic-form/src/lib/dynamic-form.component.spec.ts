@@ -68,14 +68,28 @@ describe('DynamicFormComponent', () => {
       expect(component).not.toBeNull();
       expect(component).toBeInstanceOf(DynamicForm);
 
-      // Verify essential properties exist
+      // ITERATION 6 FIX: Verify essential properties exist AND are signals (functions)
+      // Previous: Only checked .toBeDefined() - doesn't verify they're signals
       expect(component.config).toBeDefined();
+      expect(typeof component.config).toBe('function');
+
       expect(component.formValue).toBeDefined();
+      expect(typeof component.formValue).toBe('function');
+
       expect(component.valid).toBeDefined();
+      expect(typeof component.valid).toBe('function');
+
       expect(component.invalid).toBeDefined();
+      expect(typeof component.invalid).toBe('function');
+
       expect(component.dirty).toBeDefined();
+      expect(typeof component.dirty).toBe('function');
+
       expect(component.touched).toBeDefined();
+      expect(typeof component.touched).toBe('function');
+
       expect(component.errors).toBeDefined();
+      expect(typeof component.errors).toBe('function');
     });
 
     it('should initialize with empty form value when no definitions', () => {

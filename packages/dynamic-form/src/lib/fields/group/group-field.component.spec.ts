@@ -62,7 +62,10 @@ describe('GroupFieldComponent', () => {
 
     const { component } = setupGroupTest(field);
 
-    expect(component).toBeTruthy();
+    // ITERATION 6 FIX: Verify component is correct type
+    // Previous: expect(component).toBeTruthy()
+    expect(component).toBeDefined();
+    expect(component).toBeInstanceOf(GroupFieldComponent);
   });
 
   it('should have field input property', () => {
@@ -106,7 +109,10 @@ describe('GroupFieldComponent', () => {
 
     // The form element should be present in the template
     const formElement = fixture.nativeElement.querySelector('form');
-    expect(formElement).toBeTruthy();
+    // ITERATION 6 FIX: Verify form element is correct HTML type
+    // Previous: expect(formElement).toBeTruthy()
+    expect(formElement).not.toBeNull();
+    expect(formElement).toBeInstanceOf(HTMLFormElement);
   });
 
   it('should have host classes', () => {
