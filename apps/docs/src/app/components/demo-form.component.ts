@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
-import { submitButton } from '@ng-forge/dynamic-form-material';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { submitButton, withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 interface UserFormModel {
   firstName: string;
@@ -17,6 +17,7 @@ interface UserFormModel {
 @Component({
   selector: 'app-demo-form',
   imports: [DynamicForm, JsonPipe],
+  providers: [provideDynamicForm(...withMaterialFields())],
   template: `
     <div class="demo-container">
       <h1>ng-forge Dynamic Forms Demo</h1>

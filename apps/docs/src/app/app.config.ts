@@ -14,8 +14,6 @@ import {
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { provideNgDocContext } from '@ng-doc/generated';
 import { appRoutes } from './app.routes';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -30,7 +28,6 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(),
     provideAnimations(),
-    provideDynamicForm(...withMaterialFields()),
     provideNgDocContext(),
     provideNgDocApp({
       shiki: {
