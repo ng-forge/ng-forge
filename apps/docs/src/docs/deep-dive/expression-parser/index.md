@@ -1,15 +1,29 @@
-The expression parser evaluates dynamic expressions in conditional logic and dynamic values. It replaces JavaScript's unsafe `new Function()` and `eval()` with a secure evaluation engine that prevents code injection attacks.
+Dynamic forms use expressions for conditional logic and dynamic values. The expression parser evaluates these expressions safely, preventing code injection attacks while maintaining the flexibility you need.
 
-## What It Does
+## How Expressions Work in Forms
 
-The parser safely evaluates expressions against a provided scope:
+When you configure conditional logic or dynamic values in your form:
 
 ```typescript
-ExpressionParser.evaluate("user.name === 'John'", { user: { name: 'John' } });
-// Returns: true
+{
+  key: 'age',
+  type: 'input',
+  value: '',
+  label: 'Age',
+  hidden: hidden((form) => form.value.country !== 'US'),
+  required: required((form) => form.value.age >= 18)
+}
 ```
 
-**Key Feature**: Expressions cannot execute arbitrary code - the parser only performs safe data operations.
+The expressions like `form.value.country !== 'US'` are evaluated by the parser, which has access to:
+
+```typescript
+{
+  fieldValue: currentFieldValue,
+  formValue: { country: 'US', age: 25, ... },
+  fieldPath: 'age'
+}
+```
 
 ## Security Model
 
@@ -17,189 +31,246 @@ The parser uses different rules for methods and properties:
 
 ### Methods: Whitelist Only
 
-Only approved methods can be called:
+Only safe methods can be called in expressions:
 
 ```typescript
-// ✅ Allowed - safe methods
-user.name.toUpperCase();
-items.filter(fn);
-items.map(fn);
-date.toISOString();
+// ✅ Works - safe string methods
+hidden: hidden((form) => form.value.email.includes('@company.com'));
+
+// ✅ Works - safe array methods
+hidden: hidden((form) => form.value.roles.some((role) => role === 'admin'));
 
 // ❌ Blocked - not whitelisted
-str.link();
-obj.toString(); // Only for primitives
-arr.push(); // Mutating methods blocked
+hidden: hidden((form) => form.value.text.link('url'));
 ```
 
-Safe methods include common string operations (`toUpperCase`, `slice`, `split`), array transformations (`map`, `filter`, `reduce`), number formatting (`toFixed`), and date getters.
+Common safe methods: `toUpperCase`, `toLowerCase`, `includes`, `startsWith`, `slice`, `map`, `filter`, `some`, `every`, `toFixed`
 
-### Properties: Open Access (with Exceptions)
+### Properties: Open Access (Except Dangerous Ones)
 
-All properties in scope are accessible except dangerous ones:
+All properties in the form data are accessible, except prototype properties:
 
 ```typescript
-// ✅ Allowed
-user.name;
-user._internal;
-formData.value;
+// ✅ Works - access any form field
+form.value.firstName;
+form.value._internalFlag;
+form.value.nested.deeply.property;
 
 // ❌ Blocked - prototype pollution risks
-obj.constructor;
-obj.__proto__;
-obj.prototype;
+form.value.constructor;
+form.value.__proto__;
 ```
 
-## Scope is Your Security Boundary
+**Why?** Dynamic forms need to access any field name you define. The parser blocks only the dangerous properties that could break security.
 
-**Critical**: The scope you provide is fully accessible. Only include safe data.
+## What Data is Exposed
 
-### ✅ Safe Scope
+When the parser evaluates expressions, it has access to the scope you provide. For dynamic forms, this typically includes:
 
 ```typescript
-// GOOD - Only expose what's needed
-const scope = {
-  userName: user.name,
-  userAge: user.age,
-  isAdmin: user.roles.includes('admin'),
+{
+  fieldValue: 'current field value',
+  formValue: { /* entire form state */ },
+  fieldPath: 'fieldName',
+  customFunctions: { /* your custom validators */ }
+}
+```
+
+**Important**: Anything you put in `formValue` or `customFunctions` is accessible in expressions.
+
+## Form Configuration Best Practices
+
+### ✅ Safe Form Configuration
+
+```typescript
+// GOOD - Normal form fields
+const config = {
+  fields: [
+    { key: 'username', type: 'input', value: '' },
+    { key: 'age', type: 'input', value: 0 },
+    { key: 'country', type: 'select', value: '' },
+  ],
+};
+
+// GOOD - Custom validation functions
+const customFunctions = {
+  isValidEmail: (ctx) => ctx.fieldValue.includes('@'),
+  isAdult: (ctx) => ctx.formValue.age >= 18,
 };
 ```
 
-### ❌ Unsafe Scope
+### ❌ Unsafe Form Configuration
 
 ```typescript
-// BAD - Exposing sensitive data
-const scope = {
-  user: {
-    name: 'John',
-    sessionToken: 'secret123', // Accessible in expressions!
-    _privateKey: 'key', // Also accessible!
-  },
+// BAD - Exposing sensitive data in formValue
+const formValue = {
+  username: 'john',
+  sessionToken: 'secret123', // Don't put this in form state!
+  _apiKey: 'key', // Also accessible in expressions
 };
 
 // BAD - Functions with side effects
-const scope = {
-  items: [1, 2, 3],
-  saveToDb: (x) => db.save(x), // Can be called via items.map(saveToDb)!
+const customFunctions = {
+  saveToDb: (ctx) => {
+    api.save(ctx.fieldValue); // Side effect!
+    return true;
+  },
 };
 
 // BAD - User-controlled RegExp
-const scope = {
-  text: 'test',
-  pattern: new RegExp(userInput), // ReDoS vulnerability!
+const customFunctions = {
+  matchPattern: (ctx) => {
+    const pattern = new RegExp(ctx.formValue.userPattern); // ReDoS risk!
+    return pattern.test(ctx.fieldValue);
+  },
 };
+```
+
+## Common Form Use Cases
+
+### Dynamic Visibility
+
+```typescript
+{
+  key: 'companyName',
+  type: 'input',
+  value: '',
+  label: 'Company Name',
+  // Show only if user selects "Employed"
+  hidden: hidden((form) => form.value.employmentStatus !== 'employed')
+}
+```
+
+### Conditional Required
+
+```typescript
+{
+  key: 'taxId',
+  type: 'input',
+  value: '',
+  label: 'Tax ID',
+  // Required only for business accounts
+  required: required((form) => form.value.accountType === 'business')
+}
+```
+
+### Dynamic Values with Transformations
+
+```typescript
+{
+  key: 'fullName',
+  type: 'input',
+  value: dynamicValue((ctx) => {
+    const first = ctx.formValue.firstName || '';
+    const last = ctx.formValue.lastName || '';
+    return `${first} ${last}`.trim().toUpperCase();
+  }),
+  label: 'Full Name'
+}
+```
+
+### Array Filtering
+
+```typescript
+{
+  key: 'adminEmails',
+  type: 'input',
+  value: dynamicValue((ctx) => {
+    const users = ctx.formValue.users || [];
+    return users
+      .filter(u => u.role === 'admin')
+      .map(u => u.email)
+      .join(', ');
+  }),
+  label: 'Admin Emails'
+}
 ```
 
 ## What the Parser Prevents
 
-✅ **Code Injection**: Blocks `Function()`, `eval()`, `setTimeout()`
-✅ **Prototype Pollution**: Blocks `constructor`, `__proto__`, `prototype`
-✅ **Unsafe Methods**: Only whitelisted methods can be called
+For dynamic forms, the parser prevents:
+
+✅ **Code Injection**: Can't execute `Function()`, `eval()`, or create new code
+✅ **Prototype Pollution**: Can't access `constructor` or `__proto__`
+✅ **Unsafe Operations**: Can't call methods that modify state or access globals
 
 ## What You Must Handle
 
-The parser only prevents code injection. Your application must handle:
+The parser only prevents code injection. If you're using form data elsewhere:
 
-❌ **SQL Injection**: Use parameterized queries, not raw expression results
-❌ **XSS**: Sanitize HTML before rendering
-❌ **Path Traversal**: Validate file paths
-❌ **Command Injection**: Sanitize shell commands
+❌ **SQL Queries**: Use parameterized queries
+❌ **HTML Rendering**: Sanitize before showing to users
+❌ **File Operations**: Validate paths
+❌ **API Calls**: Validate/sanitize data
 
 ```typescript
-// ❌ WRONG: SQL injection vulnerability
-const name = ExpressionParser.evaluate('userName', scope);
-db.query(`SELECT * FROM users WHERE name = '${name}'`); // Unsafe!
+// ❌ WRONG: Direct SQL injection risk
+const username = form.value.username;
+db.query(`SELECT * FROM users WHERE name = '${username}'`);
 
-// ✅ CORRECT: Use parameterized queries
-const name = ExpressionParser.evaluate('userName', scope);
-db.query('SELECT * FROM users WHERE name = ?', [name]);
+// ✅ CORRECT: Parameterized query
+db.query('SELECT * FROM users WHERE name = ?', [form.value.username]);
 ```
 
-## Scope Guidelines
+## Custom Functions
 
-1. **Only expose necessary data** - Don't pass entire objects
-2. **No sensitive values** - No tokens, keys, or internal data
-3. **Pure functions only** - No side effects or global access
-4. **Hardcoded RegExp only** - Never from user input
-5. **Validate in development**:
+When providing custom functions to forms, only include pure functions:
 
 ```typescript
-function createScope(data: any) {
-  if (process.env.NODE_ENV === 'development') {
-    for (const [key, value] of Object.entries(data)) {
-      if (typeof value === 'function') {
-        console.warn(`Function in scope: "${key}" - can be executed via array methods`);
-      }
-      if (value instanceof RegExp) {
-        console.warn(`RegExp in scope: "${key}" - ensure it's safe from ReDoS`);
-      }
-      if (key.startsWith('_')) {
-        console.warn(`Private property in scope: "${key}" - consider renaming`);
-      }
-    }
-  }
-  return data;
-}
-```
+// ✅ GOOD - Pure functions
+const customFunctions = {
+  isValidEmail: (ctx) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ctx.fieldValue),
+  isAdult: (ctx) => ctx.formValue.age >= 18,
+  calculateTotal: (ctx) => ctx.formValue.items.reduce((sum, item) => sum + item.price, 0),
+};
 
-## Common Pitfalls
-
-### Pitfall 1: Assuming Complete Security
-
-The parser prevents **code injection only**. You still need to sanitize outputs and validate inputs.
-
-### Pitfall 2: Exposing Entire Objects
-
-```typescript
-// ❌ Wrong
-const scope = { user: getCurrentUser() };
-
-// ✅ Correct
-const scope = {
-  userName: user.name,
-  userRole: user.role,
+// ❌ BAD - Side effects
+const customFunctions = {
+  logValue: (ctx) => {
+    console.log(ctx.fieldValue); // Side effect!
+    trackAnalytics(ctx); // Side effect!
+    return true;
+  },
 };
 ```
 
-### Pitfall 3: Functions in Scope
-
-Array methods can execute functions from scope:
+**Why?** Custom functions can be executed via array methods:
 
 ```typescript
-const scope = {
-  items: [1, 2, 3],
-  process: (x) => {
-    sendAnalytics(x);
-    return x;
-  }, // Side effect!
-};
+// If you have this in customFunctions:
+saveToApi: (item) => api.post('/items', item);
 
-// This executes the function:
-ExpressionParser.evaluate('items.map(process)', scope);
+// User could trigger it with:
+dynamicValue((ctx) => ctx.formValue.items.map(ctx.customFunctions.saveToApi));
 ```
 
-Only include pure functions without side effects.
+## Quick Checklist for Form Security
 
-## Supported Features
+- [ ] Form fields contain only user data (no tokens, keys, or sensitive info)
+- [ ] Custom functions are pure (no side effects)
+- [ ] RegExp patterns are hardcoded (not from form values)
+- [ ] Form data is validated before database operations
+- [ ] Form data is sanitized before HTML rendering
 
-**Expressions**: Property access, method calls, arithmetic (`+`, `-`, `*`, `/`), comparison (`===`, `>`, `<`), logical (`&&`, `||`, `!`), `typeof`
+## Supported Expression Features
 
-**Not Supported**: Object literals `{}`, array indexing `arr[0]`, assignment `x = 5`, arrow functions `() => {}`, ternary `a ? b : c`, optional chaining `obj?.prop`
+In conditional logic and dynamic values, you can use:
 
-## Quick Checklist
+**Basic Operations**: Property access (`form.value.name`), comparisons (`===`, `!==`, `>`, `<`), logical operators (`&&`, `||`, `!`)
 
-Before deploying:
+**String Methods**: `toUpperCase`, `toLowerCase`, `includes`, `startsWith`, `endsWith`, `slice`, `trim`
 
-- [ ] Scope contains only data user should access
-- [ ] No sensitive data in scope (tokens, keys, internal IDs)
-- [ ] Functions in scope are pure (no side effects)
-- [ ] RegExp objects are hardcoded and safe
-- [ ] SQL uses parameterized statements
-- [ ] HTML output is sanitized
-- [ ] File paths are validated
+**Array Methods**: `map`, `filter`, `some`, `every`, `find`, `includes`, `join`
+
+**Not Supported**: Object literals `{}`, arrow functions `() => {}`, ternary `a ? b : c`, assignment `x = 5`
 
 ## Summary
 
-The expression parser provides **strong protection against code injection** but requires **careful scope management**. Think of scope as your security boundary - only include values that are safe to expose in expressions.
+The expression parser lets you write flexible conditional logic and dynamic values while preventing code injection attacks. For dynamic forms:
 
-**Remember**: The parser is one layer of defense. Use proper sanitization, validation, and access controls throughout your application.
+1. **Form state is accessible** - Any field in `formValue` can be read
+2. **Custom functions can execute** - Only provide pure functions
+3. **Methods are restricted** - Only safe, non-mutating methods allowed
+4. **Prototype is protected** - Can't access dangerous properties
+
+**Key Principle**: The parser prevents code injection. You're responsible for validating/sanitizing data when you use it outside the form (databases, APIs, HTML).
