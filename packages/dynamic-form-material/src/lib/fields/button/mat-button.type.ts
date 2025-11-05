@@ -2,6 +2,7 @@ import { ButtonField, FieldComponent, FieldDef, FormEvent } from '@ng-forge/dyna
 
 export interface MatButtonProps extends Record<string, unknown> {
   color?: 'primary' | 'accent' | 'warn';
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export type MatButtonField<TEvent extends FormEvent> = ButtonField<MatButtonProps, TEvent>;

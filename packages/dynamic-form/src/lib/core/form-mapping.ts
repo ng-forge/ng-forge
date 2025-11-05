@@ -1,6 +1,6 @@
 import { disabled, email, FieldPath, max, maxLength, min, minLength, pattern, required } from '@angular/forms/signals';
 import { FieldDef, FieldWithValidation } from '../definitions';
-import { createValidator } from './validation';
+import { applyValidator } from './validation';
 import { applyLogic } from './logic';
 import { applySchema } from './schema-application';
 import { isGroupField } from '../definitions/default/group-field';
@@ -32,7 +32,7 @@ export function mapFieldToForm<TValue>(fieldDef: FieldDef<Record<string, unknown
   // Apply advanced validators if they exist
   if (validationField.validators) {
     validationField.validators.forEach((validatorConfig) => {
-      createValidator(validatorConfig, fieldPath);
+      applyValidator(validatorConfig, fieldPath);
     });
   }
 

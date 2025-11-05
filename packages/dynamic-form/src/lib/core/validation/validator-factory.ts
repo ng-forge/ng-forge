@@ -4,9 +4,9 @@ import { createLogicFunction } from '../expressions';
 import { createDynamicValueFunction } from '../values';
 
 /**
- * Convert validator configuration to signal forms validator function calls
+ * Apply validator configuration to field path, following the logic pattern
  */
-export function createValidator<TValue>(config: ValidatorConfig, fieldPath: FieldPath<TValue>): void {
+export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: FieldPath<TValue>): void {
   switch (config.type) {
     case 'required':
       if (config.when) {
@@ -76,16 +76,12 @@ export function createValidator<TValue>(config: ValidatorConfig, fieldPath: Fiel
         }
       }
       break;
-
-    case 'custom':
-      console.warn('Custom validators require manual implementation with LogicFn');
-      break;
   }
 }
 
 /**
  * Apply multiple validators to a field path
  */
-export function createValidators<TValue>(configs: ValidatorConfig[], fieldPath: FieldPath<TValue>): void {
-  configs.forEach((config) => createValidator(config, fieldPath));
+export function applyValidators<TValue>(configs: ValidatorConfig[], fieldPath: FieldPath<TValue>): void {
+  configs.forEach((config) => applyValidator(config, fieldPath));
 }

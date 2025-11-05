@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@playwright/test';
 
 test.describe('Comprehensive Material Field Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/e2e-test');
+    // Wait for the component to initialize and loadTestScenario to be available
+    await page.waitForFunction(() => window.loadTestScenario !== undefined);
   });
 
   test('should test all basic field types', async ({ page }) => {
@@ -17,7 +20,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Text Input',
             props: {
               placeholder: 'Enter text',
-              'data-testid': 'textInput',
             },
             required: true,
             col: 6,
@@ -30,7 +32,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             props: {
               type: 'email',
               placeholder: 'Enter email',
-              'data-testid': 'emailInput',
             },
             email: true,
             required: true,
@@ -44,7 +45,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             props: {
               type: 'password',
               placeholder: 'Enter password',
-              'data-testid': 'passwordInput',
             },
             required: true,
             minLength: 8,
@@ -58,7 +58,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             props: {
               type: 'number',
               placeholder: 'Enter number',
-              'data-testid': 'numberInput',
             },
             min: 1,
             max: 100,
@@ -71,7 +70,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Textarea Field',
             props: {
               placeholder: 'Enter long text',
-              'data-testid': 'textareaField',
               rows: 4,
             },
             col: 12,
@@ -86,9 +84,6 @@ test.describe('Comprehensive Material Field Tests', () => {
               { value: 'option2', label: 'Option 2' },
               { value: 'option3', label: 'Option 3' },
             ],
-            props: {
-              'data-testid': 'selectField',
-            },
             col: 6,
           },
           // Multi-Select Field
@@ -103,7 +98,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             ],
             props: {
               multiple: true,
-              'data-testid': 'multiSelectField',
             },
             col: 6,
           },
@@ -117,9 +111,6 @@ test.describe('Comprehensive Material Field Tests', () => {
               { value: 'radio2', label: 'Radio Option 2' },
               { value: 'radio3', label: 'Radio Option 3' },
             ],
-            props: {
-              'data-testid': 'radioField',
-            },
             col: 12,
           },
           // Checkbox Field
@@ -127,9 +118,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             key: 'checkboxField',
             type: 'checkbox',
             label: 'Checkbox Field',
-            props: {
-              'data-testid': 'checkboxField',
-            },
             col: 6,
           },
           // Toggle Field
@@ -138,7 +126,7 @@ test.describe('Comprehensive Material Field Tests', () => {
             type: 'toggle',
             label: 'Toggle Field',
             props: {
-              'data-testid': 'toggleField',
+              id: 'toggleField',
             },
             col: 6,
           },
@@ -152,9 +140,6 @@ test.describe('Comprehensive Material Field Tests', () => {
               { value: 'check2', label: 'Checkbox 2' },
               { value: 'check3', label: 'Checkbox 3' },
             ],
-            props: {
-              'data-testid': 'multiCheckboxField',
-            },
             col: 12,
           },
           // Datepicker Field
@@ -162,9 +147,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             key: 'datepickerField',
             type: 'datepicker',
             label: 'Date Picker',
-            props: {
-              'data-testid': 'datepickerField',
-            },
             col: 6,
           },
           // Slider Field
@@ -176,7 +158,6 @@ test.describe('Comprehensive Material Field Tests', () => {
               min: 0,
               max: 100,
               step: 10,
-              'data-testid': 'sliderField',
             },
             col: 6,
           },
@@ -187,7 +168,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Submit All Fields',
             props: {
               type: 'submit',
-              'data-testid': 'submit',
             },
             col: 12,
           },
@@ -212,8 +192,14 @@ test.describe('Comprehensive Material Field Tests', () => {
       });
     });
 
-    // Test title and description
-    await expect(page.locator('[data-testid="comprehensive-fields-title"]')).toContainText('Comprehensive Field Testing');
+    // Wait a bit more for the DOM to be ready
+    await page.waitForTimeout(1000);
+
+    // Verify the form container is visible
+    await expect(page.locator('#comprehensive-fields')).toBeVisible();
+
+    // Test title and description (use the testId for the container)
+    await expect(page.locator('#comprehensive-fields-title')).toContainText('Comprehensive Field Testing');
 
     // Test Text Input
     await expect(page.locator('#textInput input')).toBeVisible();
@@ -238,6 +224,7 @@ test.describe('Comprehensive Material Field Tests', () => {
     // Test Select Field
     await expect(page.locator('#selectField mat-select')).toBeVisible();
     await page.click('#selectField mat-select');
+    await page.waitForSelector('mat-option[value="option2"]', { state: 'visible' });
     await page.click('mat-option[value="option2"]');
 
     // Test Radio Field
@@ -276,7 +263,7 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('#submit button');
 
     // Verify submission contains all field values
-    const submissionElement = page.locator('[data-testid="submission-0"]');
+    const submissionElement = page.locator('#submission-0');
     await expect(submissionElement).toBeVisible();
     await expect(submissionElement).toContainText('Test text value');
     await expect(submissionElement).toContainText('test@example.com');
@@ -296,7 +283,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Required Text (minimum 5 characters)',
             props: {
               placeholder: 'Enter at least 5 characters',
-              'data-testid': 'requiredText',
             },
             required: true,
             minLength: 5,
@@ -310,7 +296,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             props: {
               type: 'email',
               placeholder: 'Enter valid email',
-              'data-testid': 'emailValidation',
             },
             email: true,
             required: true,
@@ -324,7 +309,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             props: {
               type: 'number',
               placeholder: 'Enter number between 1 and 100',
-              'data-testid': 'numberRange',
             },
             min: 1,
             max: 100,
@@ -338,7 +322,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Pattern Validation (Only letters and spaces)',
             props: {
               placeholder: 'Only letters and spaces allowed',
-              'data-testid': 'patternValidation',
             },
             pattern: '^[a-zA-Z\\s]+$',
             required: true,
@@ -351,7 +334,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Submit with Validation',
             props: {
               type: 'submit',
-              'data-testid': 'submitValidation',
             },
             col: 12,
           },
@@ -380,7 +362,7 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('#submitValidation button');
 
     // Form should not submit (no submission in log)
-    const submissionExists = await page.locator('[data-testid="submission-0"]').isVisible();
+    const submissionExists = await page.locator('#submission-0').isVisible();
     expect(submissionExists).toBeFalsy();
 
     // Test invalid inputs
@@ -401,7 +383,7 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('#submitValidation button');
 
     // Should still not submit
-    const submissionStillExists = await page.locator('[data-testid="submission-0"]').isVisible();
+    const submissionStillExists = await page.locator('#submission-0').isVisible();
     expect(submissionStillExists).toBeFalsy();
 
     // Now fill with valid data
@@ -414,11 +396,11 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('#submitValidation button');
 
     // Should now submit successfully
-    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Valid text input');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('valid@example.com');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('50');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Valid Name');
+    await expect(page.locator('#submission-0')).toBeVisible();
+    await expect(page.locator('#submission-0')).toContainText('Valid text input');
+    await expect(page.locator('#submission-0')).toContainText('valid@example.com');
+    await expect(page.locator('#submission-0')).toContainText('50');
+    await expect(page.locator('#submission-0')).toContainText('Valid Name');
   });
 
   test('should test responsive grid layout', async ({ page }) => {
@@ -432,7 +414,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Full Width (col-12)',
             props: {
               placeholder: 'This takes full width',
-              'data-testid': 'fullWidth',
             },
             col: 12,
           },
@@ -442,7 +423,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Half Width 1 (col-6)',
             props: {
               placeholder: 'Half width field 1',
-              'data-testid': 'halfWidth1',
             },
             col: 6,
           },
@@ -452,7 +432,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Half Width 2 (col-6)',
             props: {
               placeholder: 'Half width field 2',
-              'data-testid': 'halfWidth2',
             },
             col: 6,
           },
@@ -462,7 +441,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Third Width 1 (col-4)',
             props: {
               placeholder: 'Third width field 1',
-              'data-testid': 'thirdWidth1',
             },
             col: 4,
           },
@@ -472,7 +450,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Third Width 2 (col-4)',
             props: {
               placeholder: 'Third width field 2',
-              'data-testid': 'thirdWidth2',
             },
             col: 4,
           },
@@ -482,7 +459,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Third Width 3 (col-4)',
             props: {
               placeholder: 'Third width field 3',
-              'data-testid': 'thirdWidth3',
             },
             col: 4,
           },
@@ -492,7 +468,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Quarter 1 (col-3)',
             props: {
               placeholder: 'Quarter 1',
-              'data-testid': 'quarterWidth1',
             },
             col: 3,
           },
@@ -502,7 +477,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Quarter 2 (col-3)',
             props: {
               placeholder: 'Quarter 2',
-              'data-testid': 'quarterWidth2',
             },
             col: 3,
           },
@@ -512,7 +486,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Quarter 3 (col-3)',
             props: {
               placeholder: 'Quarter 3',
-              'data-testid': 'quarterWidth3',
             },
             col: 3,
           },
@@ -522,7 +495,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Quarter 4 (col-3)',
             props: {
               placeholder: 'Quarter 4',
-              'data-testid': 'quarterWidth4',
             },
             col: 3,
           },
@@ -532,7 +504,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Submit Grid Test',
             props: {
               type: 'submit',
-              'data-testid': 'submitGrid',
             },
             col: 12,
           },
@@ -591,11 +562,11 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('#submitGrid button');
 
     // Verify submission contains all grid field values
-    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Full width content');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Half 1');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Half 2');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Third 1');
+    await expect(page.locator('#submission-0')).toBeVisible();
+    await expect(page.locator('#submission-0')).toContainText('Full width content');
+    await expect(page.locator('#submission-0')).toContainText('Half 1');
+    await expect(page.locator('#submission-0')).toContainText('Half 2');
+    await expect(page.locator('#submission-0')).toContainText('Third 1');
 
     // Reset viewport back to desktop
     await page.setViewportSize({ width: 1280, height: 720 });
@@ -612,7 +583,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'State Input 1',
             props: {
               placeholder: 'Enter value 1',
-              'data-testid': 'stateInput1',
             },
             col: 6,
           },
@@ -622,7 +592,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'State Input 2',
             props: {
               placeholder: 'Enter value 2',
-              'data-testid': 'stateInput2',
             },
             col: 6,
           },
@@ -630,9 +599,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             key: 'stateCheckbox',
             type: 'checkbox',
             label: 'State Checkbox',
-            props: {
-              'data-testid': 'stateCheckbox',
-            },
             col: 12,
           },
           {
@@ -641,7 +607,6 @@ test.describe('Comprehensive Material Field Tests', () => {
             label: 'Submit State Test',
             props: {
               type: 'submit',
-              'data-testid': 'submitState',
             },
             col: 12,
           },
@@ -668,14 +633,14 @@ test.describe('Comprehensive Material Field Tests', () => {
 
     // Initially form should be empty
     await page.click('.form-state summary');
-    const initialFormValue = await page.locator('[data-testid="form-value-state-management"]').textContent();
+    const initialFormValue = await page.locator('#form-value-state-management').textContent();
     expect(initialFormValue).toContain('{}');
 
     // Fill first input and check state update
     await page.fill('#stateInput1 input', 'First value');
 
     // Check that form state reflects the change
-    const updatedFormValue = await page.locator('[data-testid="form-value-state-management"]').textContent();
+    const updatedFormValue = await page.locator('#form-value-state-management').textContent();
     expect(updatedFormValue).toContain('First value');
 
     // Fill second input
@@ -685,7 +650,7 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('#stateCheckbox mat-checkbox');
 
     // Check final form state
-    const finalFormValue = await page.locator('[data-testid="form-value-state-management"]').textContent();
+    const finalFormValue = await page.locator('#form-value-state-management').textContent();
     expect(finalFormValue).toContain('First value');
     expect(finalFormValue).toContain('Second value');
     expect(finalFormValue).toContain('true'); // checkbox should be true
@@ -694,17 +659,17 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('#submitState button');
 
     // Check submission log
-    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('First value');
-    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Second value');
+    await expect(page.locator('#submission-0')).toBeVisible();
+    await expect(page.locator('#submission-0')).toContainText('First value');
+    await expect(page.locator('#submission-0')).toContainText('Second value');
 
     // Test multiple submissions
     await page.fill('#stateInput1 input', 'Modified first value');
     await page.click('#submitState button');
 
     // Should have two submissions now
-    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-1"]')).toBeVisible();
-    await expect(page.locator('[data-testid="submission-1"]')).toContainText('Modified first value');
+    await expect(page.locator('#submission-0')).toBeVisible();
+    await expect(page.locator('#submission-1')).toBeVisible();
+    await expect(page.locator('#submission-1')).toContainText('Modified first value');
   });
 });

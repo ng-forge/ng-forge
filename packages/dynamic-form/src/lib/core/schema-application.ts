@@ -4,7 +4,7 @@ import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
 import { SchemaRegistryService } from './registry';
 import { createLogicFunction } from './expressions';
 import { createTypePredicateFunction } from './values';
-import { createValidator } from './validation';
+import { applyValidator } from './validation';
 import { applyLogic } from './logic';
 
 /**
@@ -53,7 +53,7 @@ export function createSchemaFunction<T = unknown>(schema: SchemaDefinition): Sch
   return (path: FieldPath<T>) => {
     // Apply validators
     schema.validators?.forEach((validatorConfig) => {
-      createValidator(validatorConfig, path);
+      applyValidator(validatorConfig, path);
     });
 
     // Apply logic

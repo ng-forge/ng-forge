@@ -46,6 +46,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
+    '[class]': 'className()',
   },
 })
 export default class MatSelectFieldComponent<T> implements MatSelectComponent<T> {
