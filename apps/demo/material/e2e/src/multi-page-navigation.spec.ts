@@ -163,11 +163,8 @@ test.describe('Multi-Page Navigation Tests', () => {
               },
               {
                 key: 'submitRegistration',
-                type: 'button',
+                type: 'submit',
                 label: 'Complete Registration',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
@@ -204,10 +201,7 @@ test.describe('Multi-Page Navigation Tests', () => {
     await page.fill('#confirmPassword input', 'securepassword123');
 
     // Navigate to page 2 (look for navigation buttons)
-    const nextButton = page
-      .locator('button:has-text("Next")')
-      .or(page.locator('button[aria-label*="next"]'))
-      .or(page.locator('.page-navigation button').last());
+    const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
     } else {
@@ -232,10 +226,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       await page.fill('#phoneNumber input', '+1-555-123-4567');
 
       // Navigate to page 3
-      const nextButton2 = page
-        .locator('button:has-text("Next")')
-        .or(page.locator('button[aria-label*="next"]'))
-        .or(page.locator('.page-navigation button').last());
+      const nextButton2 = page.locator('[data-testid="next-button"]');
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
         await page.waitForTimeout(1000);
@@ -328,11 +319,8 @@ test.describe('Multi-Page Navigation Tests', () => {
               },
               {
                 key: 'submitValidation',
-                type: 'button',
+                type: 'submit',
                 label: 'Submit Form',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
@@ -362,7 +350,7 @@ test.describe('Multi-Page Navigation Tests', () => {
     await expect(page.locator('text=Required Information')).toBeVisible();
 
     // Try to navigate to page 2 without filling required fields
-    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(500);
@@ -453,11 +441,8 @@ test.describe('Multi-Page Navigation Tests', () => {
               },
               {
                 key: 'submitBackward',
-                type: 'button',
+                type: 'submit',
                 label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
@@ -487,7 +472,7 @@ test.describe('Multi-Page Navigation Tests', () => {
     await page.fill('#field1 input', 'Data from step 1');
 
     // Navigate to page 2
-    const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+    const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(1000);
@@ -509,7 +494,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       await page.fill('#field3 input', 'Data from step 3');
 
       // Now test backward navigation
-      const backButton = page.locator('button:has-text("Previous")').or(page.locator('button:has-text("Back")'));
+      const backButton = page.locator('[data-testid="previous-button"]');
       if (await backButton.isVisible()) {
         await backButton.click();
         await page.waitForTimeout(1000);
@@ -587,11 +572,8 @@ test.describe('Multi-Page Navigation Tests', () => {
               },
               {
                 key: 'submitDirect',
-                type: 'button',
+                type: 'submit',
                 label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
@@ -682,11 +664,8 @@ test.describe('Multi-Page Navigation Tests', () => {
               },
               {
                 key: 'submitTransition',
-                type: 'button',
+                type: 'submit',
                 label: 'Submit',
-                props: {
-                  type: 'submit',
-                },
                 col: 12,
               },
             ],
@@ -718,7 +697,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       await data1Field.fill('Large amount of data that might cause loading delays when transitioning between pages');
 
       // Navigate to next page and monitor for loading states
-      const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
+      const nextButton = page.locator('[data-testid="next-button"]');
       if (await nextButton.isVisible()) {
         await nextButton.click();
 

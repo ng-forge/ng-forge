@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { DynamicText, DynamicTextPipe, EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, EventBus, FormEvent, FormEventConstructor, NextPageEvent, PreviousPageEvent, SubmitEvent } from '@ng-forge/dynamic-form';
 import { MatButtonComponent, MatButtonProps } from './mat-button.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -21,6 +21,7 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color || 'primary'"
       [class]="className() || ''"
       [disabled]="disabled() || false"
+      [attr.data-testid]="buttonTestId()"
       (click)="triggerEvent()"
     >
       {{ label() | dynamicText | async }}
@@ -40,6 +41,27 @@ export default class MatButtonFieldComponent<TEvent extends FormEvent> implement
 
   readonly event = input.required<FormEventConstructor<TEvent>>();
   readonly props = input<MatButtonProps>();
+
+  /**
+   * Computed test ID based on button event type
+   * - Submit buttons: 'submit-button'
+   * - Next buttons: 'next-button'
+   * - Previous buttons: 'previous-button'
+   * - Custom buttons: use the key
+   */
+  readonly buttonTestId = computed(() => {
+    const eventConstructor = this.event();
+
+    if (eventConstructor === SubmitEvent) {
+      return 'submit-button';
+    } else if (eventConstructor === NextPageEvent) {
+      return 'next-button';
+    } else if (eventConstructor === PreviousPageEvent) {
+      return 'previous-button';
+    }
+
+    return this.key();
+  });
 
   triggerEvent(): void {
     this.eventBus.dispatch(this.event());

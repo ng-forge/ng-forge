@@ -1,4 +1,4 @@
-import { FormConfig, NextPageEvent, PreviousPageEvent, SubmitEvent } from '@ng-forge/dynamic-form';
+import { FormConfig } from '@ng-forge/dynamic-form';
 
 export const surveyConfig = {
   fields: [
@@ -48,12 +48,8 @@ export const surveyConfig = {
         },
         {
           key: 'nextToExperience',
-          type: 'button',
+          type: 'next',
           label: 'Next',
-          event: NextPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 12,
         },
       ],
@@ -109,22 +105,14 @@ export const surveyConfig = {
           fields: [
             {
               key: 'previousToIntro',
-              type: 'button',
-              label: 'Previous',
-              event: PreviousPageEvent,
-              props: {
-                type: 'button',
-              },
+              type: 'previous',
+          label: 'Previous',
               col: 6,
             },
             {
               key: 'nextToFeedback',
-              type: 'button',
-              label: 'Next',
-              event: NextPageEvent,
-              props: {
-                type: 'button',
-              },
+              type: 'next',
+          label: 'Next',
               col: 6,
             },
           ],
@@ -172,22 +160,14 @@ export const surveyConfig = {
         },
         {
           key: 'previousToExperience',
-          type: 'button',
+          type: 'previous',
           label: 'Previous',
-          event: PreviousPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 6,
         },
         {
           key: 'submitSurvey',
-          type: 'button',
+          type: 'submit',
           label: 'Submit Survey',
-          event: SubmitEvent,
-          props: {
-            type: 'submit',
-          },
           col: 6,
         },
       ],

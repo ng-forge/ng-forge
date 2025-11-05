@@ -1,4 +1,4 @@
-import { FormConfig, NextPageEvent, PreviousPageEvent, SubmitEvent } from '@ng-forge/dynamic-form';
+import { FormConfig } from '@ng-forge/dynamic-form';
 
 export const registrationConfig = {
   fields: [
@@ -49,12 +49,8 @@ export const registrationConfig = {
         },
         {
           key: 'nextToPersonal',
-          type: 'button',
+          type: 'next',
           label: 'Next',
-          event: NextPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 12,
         },
       ],
@@ -126,22 +122,14 @@ export const registrationConfig = {
           fields: [
             {
               key: 'previousToWelcome',
-              type: 'button',
-              label: 'Previous',
-              event: PreviousPageEvent,
-              props: {
-                type: 'button',
-              },
+              type: 'previous',
+          label: 'Previous',
               col: 6,
             },
             {
               key: 'nextToSecurity',
-              type: 'button',
-              label: 'Next',
-              event: NextPageEvent,
-              props: {
-                type: 'button',
-              },
+              type: 'next',
+          label: 'Next',
               col: 6,
             },
           ],
@@ -215,22 +203,14 @@ export const registrationConfig = {
           fields: [
             {
               key: 'previousToPersonal',
-              type: 'button',
-              label: 'Previous',
-              event: PreviousPageEvent,
-              props: {
-                type: 'button',
-              },
+              type: 'previous',
+          label: 'Previous',
               col: 6,
             },
             {
               key: 'nextToPreferences',
-              type: 'button',
-              label: 'Next',
-              event: NextPageEvent,
-              props: {
-                type: 'button',
-              },
+              type: 'next',
+          label: 'Next',
               col: 6,
             },
           ],
@@ -287,22 +267,14 @@ export const registrationConfig = {
           fields: [
             {
               key: 'previousToSecurity',
-              type: 'button',
-              label: 'Previous',
-              event: PreviousPageEvent,
-              props: {
-                type: 'button',
-              },
+              type: 'previous',
+          label: 'Previous',
               col: 6,
             },
             {
               key: 'submit',
-              type: 'button',
-              label: 'Complete Registration',
-              event: SubmitEvent,
-              props: {
-                type: 'submit',
-              },
+              type: 'submit',
+          label: 'Complete Registration',
               col: 6,
             },
           ],

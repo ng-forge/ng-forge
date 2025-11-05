@@ -1,4 +1,4 @@
-import { FormConfig, NextPageEvent, PreviousPageEvent, SubmitEvent } from '@ng-forge/dynamic-form';
+import { FormConfig } from '@ng-forge/dynamic-form';
 
 export const checkoutConfig = {
   fields: [
@@ -41,12 +41,8 @@ export const checkoutConfig = {
         },
         {
           key: 'nextToShipping',
-          type: 'button',
+          type: 'next',
           label: 'Continue to Shipping',
-          event: NextPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 12,
         },
       ],
@@ -98,22 +94,14 @@ export const checkoutConfig = {
         },
         {
           key: 'backToCart',
-          type: 'button',
+          type: 'previous',
           label: 'Back to Cart',
-          event: PreviousPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 6,
         },
         {
           key: 'nextToPayment',
-          type: 'button',
+          type: 'next',
           label: 'Continue to Payment',
-          event: NextPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 6,
         },
       ],
@@ -168,22 +156,14 @@ export const checkoutConfig = {
           fields: [
             {
               key: 'backToShipping',
-              type: 'button',
-              label: 'Back to Shipping',
-              event: PreviousPageEvent,
-              props: {
-                type: 'button',
-              },
+              type: 'previous',
+          label: 'Back to Shipping',
               col: 6,
             },
             {
               key: 'placeOrder',
-              type: 'button',
-              label: 'Place Order',
-              event: SubmitEvent,
-              props: {
-                type: 'submit',
-              },
+              type: 'submit',
+          label: 'Place Order',
               col: 6,
             },
           ],

@@ -1,4 +1,4 @@
-import { FormConfig, NextPageEvent, PreviousPageEvent, SubmitEvent } from '@ng-forge/dynamic-form';
+import { FormConfig } from '@ng-forge/dynamic-form';
 
 export const applicationConfig = {
   fields: [
@@ -59,12 +59,8 @@ export const applicationConfig = {
         },
         {
           key: 'nextToExperienceApp',
-          type: 'button',
+          type: 'next',
           label: 'Next',
-          event: NextPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 12,
         },
       ],
@@ -123,22 +119,14 @@ export const applicationConfig = {
         },
         {
           key: 'previousToBasicInfo',
-          type: 'button',
+          type: 'previous',
           label: 'Previous',
-          event: PreviousPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 6,
         },
         {
           key: 'nextToAdditional',
-          type: 'button',
+          type: 'next',
           label: 'Next',
-          event: NextPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 6,
         },
       ],
@@ -183,22 +171,14 @@ export const applicationConfig = {
         },
         {
           key: 'previousToExperienceApp',
-          type: 'button',
+          type: 'previous',
           label: 'Previous',
-          event: PreviousPageEvent,
-          props: {
-            type: 'button',
-          },
           col: 6,
         },
         {
           key: 'submitApplication',
-          type: 'button',
+          type: 'submit',
           label: 'Submit Application',
-          event: SubmitEvent,
-          props: {
-            type: 'submit',
-          },
           col: 6,
         },
       ],

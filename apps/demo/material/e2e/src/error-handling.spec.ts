@@ -34,11 +34,8 @@ test.describe('Error Handling and Edge Cases', () => {
           },
           {
             key: 'submitInvalid',
-            type: 'button',
+            type: 'submit',
             label: 'Submit Invalid Config',
-            props: {
-              type: 'submit',
-            },
           },
         ],
       };
