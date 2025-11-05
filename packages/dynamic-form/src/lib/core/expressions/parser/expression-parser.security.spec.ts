@@ -328,7 +328,7 @@ describe('ExpressionParser - Security Tests', () => {
     });
 
     it('should handle circular references safely in context', () => {
-      const scope: any = { obj: {} };
+      const scope: { obj: { circular?: unknown } } = { obj: {} };
       scope.obj.circular = scope.obj;
 
       // Should not cause stack overflow or expose internals
