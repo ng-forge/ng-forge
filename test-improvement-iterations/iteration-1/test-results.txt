@@ -1,6 +1,0 @@
-npm warn exec The following package was not found and will be installed: nx@22.0.2
-
- NX   Could not find Nx modules at "/home/user/ng-forge".
-
-Have you run npm/yarn install?
-
