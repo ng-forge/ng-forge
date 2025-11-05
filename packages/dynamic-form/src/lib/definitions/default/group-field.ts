@@ -6,8 +6,11 @@ import { FieldComponent, FieldDef } from '../base';
  * This is a programmatic grouping only - users cannot customize this field type
  *
  * The generic parameter preserves the exact field types for proper inference
+ *
+ * Note: We use `any[]` here instead of `RegisteredFieldTypes[]` to avoid circular dependency.
+ * Type safety is enforced at the FormConfig level using `satisfies`.
  */
-export interface GroupField<TFields extends unknown[] = unknown[]> extends FieldDef<never> {
+export interface GroupField<TFields extends any[] = any[]> extends FieldDef<never> {
   /** Field type identifier */
   type: 'group';
 
@@ -22,4 +25,4 @@ export function isGroupField(field: FieldDef<Record<string, unknown>>): field is
   return field.type === 'group' && 'fields' in field;
 }
 
-export type GroupComponent<T extends unknown[]> = FieldComponent<GroupField<T>>;
+export type GroupComponent<T extends any[]> = FieldComponent<GroupField<T>>;

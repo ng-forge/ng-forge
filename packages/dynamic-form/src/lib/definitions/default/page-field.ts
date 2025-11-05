@@ -16,8 +16,10 @@ interface ContainerFieldWithFields extends FieldDef<Record<string, unknown>> {
  * This is a programmatic field type only - users cannot customize this field type
  *
  * The generic parameter preserves the exact field types for proper inference
+ * Note: We use `any[]` here instead of `RegisteredFieldTypes[]` to avoid circular dependency.
+ * Type safety is enforced at the FormConfig level using `satisfies`.
  */
-export interface PageField<TFields extends unknown[] = unknown[]> extends FieldDef<never> {
+export interface PageField<TFields extends any[] = any[]> extends FieldDef<never> {
   /** Field type identifier */
   type: 'page';
 
@@ -39,14 +41,14 @@ export function isPageField(field: FieldDef<Record<string, unknown>>): field is 
   return field.type === 'page' && 'fields' in field && isArray((field as PageField).fields);
 }
 
-export type PageComponent = FieldComponent<PageField<unknown[]>>;
+export type PageComponent = FieldComponent<PageField<any[]>>;
 
 /**
  * Validates that a page field doesn't contain nested page fields
  * @param pageField The page field to validate
  * @returns true if valid (no nested pages), false otherwise
  */
-export function validatePageNesting(pageField: PageField<unknown[]>): boolean {
+export function validatePageNesting(pageField: PageField<any[]>): boolean {
   return !hasNestedPages(pageField.fields as FieldDef<Record<string, unknown>>[]);
 }
 

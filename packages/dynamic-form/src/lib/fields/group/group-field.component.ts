@@ -44,7 +44,7 @@ import { flattenFields } from '../../utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
-export default class GroupFieldComponent<T extends FieldDef<Record<string, unknown>>[], TModel = Record<string, unknown>> {
+export default class GroupFieldComponent<T extends any[], TModel = Record<string, unknown>> {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);

@@ -6,8 +6,11 @@ import { isArray } from 'lodash-es';
  * This is a special field type that contains other definitions arranged horizontally
  * The row itself doesn't have a value - it's a layout container
  * This is a programmatic field type only - users cannot customize this field type
+ *
+ * Note: We use `any[]` here instead of `RegisteredFieldTypes[]` to avoid circular dependency.
+ * Type safety is enforced at the FormConfig level using `satisfies`.
  */
-export interface RowField<TFields extends unknown[] = unknown[]> extends FieldDef<never> {
+export interface RowField<TFields extends any[] = any[]> extends FieldDef<never> {
   /** Field type identifier */
   type: 'row';
 
@@ -23,7 +26,7 @@ export function isRowField(field: FieldDef<Record<string, unknown>>): field is R
   return field.type === 'row' && 'fields' in field && isArray((field as RowField).fields);
 }
 
-export type RowComponent = FieldComponent<RowField<unknown[]>>;
+export type RowComponent = FieldComponent<RowField<any[]>>;
 
 /**
  * Row child field with column layout properties
