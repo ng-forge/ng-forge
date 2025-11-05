@@ -24,71 +24,70 @@ describe('validator-factory', () => {
       it('should handle min validator with undefined value without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 25 });
+          const config: ValidatorConfig = { type: 'min' };
+
           const formInstance = form(
             formValue,
             schema<typeof formValue>((path) => {
-              // WIP: Attempting to create controls via schema - not working yet
-              void path.age;
+              expect(() => {
+                applyValidator(config, path.age);
+              }).not.toThrow();
             })
           );
           rootFormRegistry.registerRootForm(formInstance);
-
-          const config: ValidatorConfig = { type: 'min' };
-
-          expect(() => {
-            applyValidator(config, formInstance().controls.age);
-          }).not.toThrow();
         });
       });
 
       it('should handle min validator with wrong type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 25 });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const config: ValidatorConfig = { type: 'min', value: 'ten' as any };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.age);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.age);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle pattern validator with undefined value without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: ValidatorConfig = { type: 'pattern' };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.username);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle pattern validator with wrong type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const config: ValidatorConfig = { type: 'pattern', value: 123 as any };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.username);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -97,41 +96,41 @@ describe('validator-factory', () => {
       it('should handle min validator with both value and expression', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 25 });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: ValidatorConfig = {
             type: 'min',
-            value: 10,
-            expression: '20',
+            value: 18,
+            expression: '21',
           };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.age);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.age);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle min validator with only static value', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 25 });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: ValidatorConfig = {
             type: 'min',
-            value: 10,
+            value: 18,
           };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.age);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.age);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -140,80 +139,80 @@ describe('validator-factory', () => {
       it('should convert string pattern to RegExp without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: ValidatorConfig = {
             type: 'pattern',
             value: '^[a-z]+$',
           };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.username);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should throw when pattern string is invalid regex', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: ValidatorConfig = {
             type: 'pattern',
             value: '[unclosed',
           };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.username);
-          }).toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle empty string pattern', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: ValidatorConfig = {
             type: 'pattern',
             value: '',
           };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.username);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle RegExp pattern directly', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: ValidatorConfig = {
             type: 'pattern',
             value: /^[a-z]+$/,
           };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.username);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.username);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -221,67 +220,66 @@ describe('validator-factory', () => {
     describe('conditional required validator', () => {
       it('should handle required with when condition', () => {
         runInInjectionContext(injector, () => {
-          const formValue = signal({ email: '', contactMethod: 'email' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
+          const formValue = signal({ email: '', subscribeNewsletter: false });
           const config: ValidatorConfig = {
             type: 'required',
             when: {
-              type: 'fieldValue',
-              fieldPath: 'contactMethod',
-              operator: 'equals',
-              value: 'email',
+              type: 'javascript',
+              expression: 'subscribeNewsletter === true',
             },
           };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle required without when condition', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: ValidatorConfig = {
             type: 'required',
           };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle invalid when expression without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: ValidatorConfig = {
             type: 'required',
             when: {
-              type: 'invalidType' as any,
+              type: 'javascript',
+              expression: 'this.will.cause.error()',
             },
           };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -290,17 +288,18 @@ describe('validator-factory', () => {
       it('should handle unknown validator type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: 'value' });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const config: ValidatorConfig = { type: 'unknownType' as any };
+
           const formInstance = form(
             formValue,
-            schema<typeof formValue>(() => void 0)
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.field);
+              }).not.toThrow();
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
-
-          const config: ValidatorConfig = { type: 'customValidator' as any };
-
-          expect(() => {
-            applyValidator(config, formInstance().controls.field);
-          }).not.toThrow();
         });
       });
     });
@@ -308,18 +307,18 @@ describe('validator-factory', () => {
     describe('email validator', () => {
       it('should handle email validator without throwing', () => {
         runInInjectionContext(injector, () => {
-          const formValue = signal({ email: '' });
-          const formInstance = form(
-            formValue,
-            schema<typeof formValue>(() => void 0)
-          );
-          rootFormRegistry.registerRootForm(formInstance);
-
+          const formValue = signal({ email: 'test@example.com' });
           const config: ValidatorConfig = { type: 'email' };
 
-          expect(() => {
-            applyValidator(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyValidator(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -329,51 +328,52 @@ describe('validator-factory', () => {
     it('should apply multiple validators without throwing', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(
-          formValue,
-          schema<typeof formValue>(() => void 0)
-        );
-        rootFormRegistry.registerRootForm(formInstance);
-
         const configs: ValidatorConfig[] = [{ type: 'required' }, { type: 'email' }];
 
-        expect(() => {
-          applyValidators(configs, formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              applyValidators(configs, path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
 
     it('should handle empty validator array', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(
-          formValue,
-          schema<typeof formValue>(() => void 0)
-        );
-        rootFormRegistry.registerRootForm(formInstance);
-
         const configs: ValidatorConfig[] = [];
 
-        expect(() => {
-          applyValidators(configs, formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              applyValidators(configs, path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
 
     it('should handle validators with unknown types', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const configs: ValidatorConfig[] = [{ type: 'unknown1' as any }, { type: 'unknown2' as any }];
+
         const formInstance = form(
           formValue,
-          schema<typeof formValue>(() => void 0)
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              applyValidators(configs, path.email);
+            }).not.toThrow();
+          })
         );
         rootFormRegistry.registerRootForm(formInstance);
-
-        const configs: ValidatorConfig[] = [{ type: 'required' }, { type: 'unknownType' as any }, { type: 'email' }];
-
-        expect(() => {
-          applyValidators(configs, formInstance().controls.email);
-        }).not.toThrow();
       });
     });
   });

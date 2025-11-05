@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { form } from '@angular/forms/signals';
+import { form, schema } from '@angular/forms/signals';
 import { LogicConfig } from '../../models/logic';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { applyLogic, applyMultipleLogic } from './logic-applicator';
@@ -24,26 +24,26 @@ describe('logic-applicator', () => {
       it('should handle boolean condition without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: LogicConfig = {
             type: 'hidden',
             condition: true,
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle ConditionalExpression condition without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ contactMethod: 'email', email: 'test@example.com' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: LogicConfig = {
             type: 'hidden',
             condition: {
@@ -54,96 +54,120 @@ describe('logic-applicator', () => {
             },
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle undefined condition without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
+           
           const config: LogicConfig = {
             type: 'hidden',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             condition: undefined as any,
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle null condition without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: LogicConfig = {
             type: 'hidden',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             condition: null as any,
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
 
-    describe('logic type routing', () => {
+    describe('logic type handling', () => {
       it('should handle hidden logic without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: LogicConfig = {
             type: 'hidden',
-            condition: true,
+            condition: false,
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle readonly logic without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: LogicConfig = {
             type: 'readonly',
             condition: true,
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle required logic without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: LogicConfig = {
             type: 'required',
             condition: true,
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -152,16 +176,20 @@ describe('logic-applicator', () => {
       it('should log warning for disabled logic', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
           const config: LogicConfig = {
             type: 'disabled',
             condition: true,
           };
 
-          applyLogic(config, formInstance().controls.email);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              applyLogic(config, path.email);
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
 
           expect(consoleWarnSpy).toHaveBeenCalledWith('Disabled logic must be handled at component level');
           consoleWarnSpy.mockRestore();
@@ -173,55 +201,68 @@ describe('logic-applicator', () => {
       it('should handle unknown logic type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: 'value' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: LogicConfig = {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             type: 'customLogic' as any,
             condition: true,
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.field);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.field);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
 
-    describe('invalid condition expressions', () => {
+    describe('edge cases', () => {
       it('should handle invalid ConditionalExpression type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: LogicConfig = {
             type: 'hidden',
             condition: {
-              type: 'invalidType' as any,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              type: 'unknownType' as any,
+              expression: 'someExpression',
             },
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle malformed ConditionalExpression without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const config: LogicConfig = {
             type: 'hidden',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             condition: {} as any,
           };
 
-          expect(() => {
-            applyLogic(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applyLogic(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -230,67 +271,79 @@ describe('logic-applicator', () => {
   describe('applyMultipleLogic', () => {
     it('should apply multiple logic configurations without throwing', () => {
       runInInjectionContext(injector, () => {
-        const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
+        const formValue = signal({ email: 'test@example.com' });
         const configs: LogicConfig[] = [
           { type: 'hidden', condition: false },
           { type: 'readonly', condition: true },
         ];
 
-        expect(() => {
-          applyMultipleLogic(configs, formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              applyMultipleLogic(configs, path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
 
     it('should handle empty logic array without throwing', () => {
       runInInjectionContext(injector, () => {
-        const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
+        const formValue = signal({ email: 'test@example.com' });
         const configs: LogicConfig[] = [];
 
-        expect(() => {
-          applyMultipleLogic(configs, formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              applyMultipleLogic(configs, path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
 
     it('should continue with invalid configs without throwing', () => {
       runInInjectionContext(injector, () => {
-        const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
+        const formValue = signal({ email: 'test@example.com' });
         const configs: LogicConfig[] = [
-          { type: 'hidden', condition: true },
-          { type: 'unknownType' as any, condition: true },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          { type: 'unknown' as any, condition: true },
           { type: 'readonly', condition: true },
         ];
 
-        expect(() => {
-          applyMultipleLogic(configs, formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              applyMultipleLogic(configs, path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
 
     it('should handle disabled logic in sequence', () => {
       runInInjectionContext(injector, () => {
-        const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
+        const formValue = signal({ email: 'test@example.com' });
         const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
         const configs: LogicConfig[] = [
-          { type: 'hidden', condition: true },
           { type: 'disabled', condition: true },
           { type: 'readonly', condition: true },
         ];
 
-        applyMultipleLogic(configs, formInstance().controls.email);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyMultipleLogic(configs, path.email);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         expect(consoleWarnSpy).toHaveBeenCalledWith('Disabled logic must be handled at component level');
         consoleWarnSpy.mockRestore();
