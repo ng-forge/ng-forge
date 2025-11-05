@@ -23,14 +23,7 @@ The **[Material Design integration](../material)** is production-ready and fully
 
 ### 2. Build Your Own Integration
 
-You can create Ionic field components using our integration system. The **[Material integration source code](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-form-material)** serves as a complete reference implementation:
-
-- **Field Components**: See how Material components are implemented
-- **Type Safety**: Module augmentation patterns for custom props
-- **Validation Integration**: How Material displays validation errors
-- **Field Mappers**: Registration and configuration patterns
-
-Start with the **[Custom Integration Guide](../../guide)** which walks through the process step-by-step.
+Follow our **[Custom Integration Guide](../../guide)** to create Ionic field components yourself. The guide includes examples from the Material integration showing how to implement field components, type safety, and validation.
 
 ## Stay Updated
 
