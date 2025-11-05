@@ -383,9 +383,10 @@ describe('Signal Forms Integration Tests', () => {
 
   describe('Error Handling', () => {
     it('should handle invalid expressions gracefully', () => {
+      // Test with an expression that causes a parsing error
       const invalidExpression: ConditionalExpression = {
         type: 'javascript',
-        expression: 'this.will.throw.error',
+        expression: 'invalid @@ syntax',
       };
 
       const context = {

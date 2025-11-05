@@ -189,9 +189,10 @@ describe('SignalFormsAdapterService Unit Tests', () => {
       });
 
       it('should handle JavaScript expression errors gracefully', () => {
+        // Test with an expression that causes a parsing error
         const expression: ConditionalExpression = {
           type: 'javascript',
-          expression: 'invalidExpression.that.throws',
+          expression: 'invalid @@ syntax',
         };
 
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);

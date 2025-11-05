@@ -180,7 +180,7 @@ describe('dynamic-value-factory', () => {
         { expression: '"computed string"', expected: 'computed string' },
         { expression: '42', expected: 42 },
         { expression: 'true', expected: true },
-        { expression: '{ result: "object" }', expected: { result: 'object' } },
+        // Note: Object literals are not supported by the secure parser for security reasons
         { expression: '[1, 2, 3]', expected: [1, 2, 3] },
       ];
 

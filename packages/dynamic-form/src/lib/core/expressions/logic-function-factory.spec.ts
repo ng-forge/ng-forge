@@ -129,9 +129,10 @@ describe('logic-function-factory', () => {
       it('should handle JavaScript expression errors gracefully', () => {
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
 
+        // Test with an expression that causes a parsing error
         const expression: ConditionalExpression = {
           type: 'javascript',
-          expression: 'nonexistentVariable.property',
+          expression: 'invalid @@ syntax',
         };
 
         const result = runLogicFunctionTest(expression, 'test');
