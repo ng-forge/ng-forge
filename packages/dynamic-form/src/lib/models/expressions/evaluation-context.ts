@@ -13,4 +13,7 @@ export interface EvaluationContext<TValue = unknown> {
 
   /** Custom evaluation functions */
   customFunctions?: Record<string, (context: EvaluationContext) => unknown>;
+
+  /** Allow additional properties for flexible expression evaluation */
+  [key: string]: unknown;
 }
