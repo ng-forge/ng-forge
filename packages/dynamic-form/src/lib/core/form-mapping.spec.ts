@@ -3,7 +3,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { form } from '@angular/forms/signals';
 import { FieldDef, FieldWithValidation } from '../definitions';
-import { RootFormRegistryService } from './registry';
+import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from './registry';
 import { mapFieldToForm } from './form-mapping';
 
 describe('form-mapping', () => {
@@ -12,7 +12,7 @@ describe('form-mapping', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService],
+      providers: [RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService],
     });
 
     injector = TestBed.inject(Injector);

@@ -3,7 +3,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { form } from '@angular/forms/signals';
 import { LogicConfig } from '../../models/logic';
-import { RootFormRegistryService } from '../registry';
+import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { applyLogic, applyMultipleLogic } from './logic-applicator';
 
 describe('logic-applicator', () => {
@@ -12,7 +12,7 @@ describe('logic-applicator', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService],
+      providers: [RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService],
     });
 
     injector = TestBed.inject(Injector);

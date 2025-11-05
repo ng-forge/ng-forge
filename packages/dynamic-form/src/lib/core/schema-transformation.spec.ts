@@ -5,7 +5,7 @@ import { form } from '@angular/forms/signals';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
 import { FieldDef } from '../definitions';
 import { FieldTypeDefinition } from '../models/field-type';
-import { RootFormRegistryService, SchemaRegistryService } from './registry';
+import { RootFormRegistryService, SchemaRegistryService, FunctionRegistryService, FieldContextRegistryService } from './registry';
 import { applySchema, createSchemaFunction } from './schema-application';
 import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
 
@@ -16,7 +16,7 @@ describe('schema-transformation', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService, SchemaRegistryService],
+      providers: [RootFormRegistryService, SchemaRegistryService, FunctionRegistryService, FieldContextRegistryService],
     });
 
     injector = TestBed.inject(Injector);
@@ -344,9 +344,7 @@ describe('schema-transformation', () => {
     describe('value handling modes', () => {
       it('should handle exclude value handling', () => {
         runInInjectionContext(injector, () => {
-          const registry = new Map<string, FieldTypeDefinition>([
-            ['excludeType', { valueHandling: 'exclude' }],
-          ]);
+          const registry = new Map<string, FieldTypeDefinition>([['excludeType', { valueHandling: 'exclude' }]]);
 
           const fields: FieldDef[] = [{ key: 'field1', type: 'excludeType' }];
 
