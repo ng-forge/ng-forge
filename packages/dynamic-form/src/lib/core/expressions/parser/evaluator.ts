@@ -8,24 +8,26 @@ export interface EvaluationScope {
 }
 
 /**
- * Methods that should be blocked for security reasons across all types
+ * Security Model: Whitelist-only approach for method calls
+ *
+ * A method is considered SAFE if it meets ALL criteria:
+ * 1. Pure data access/transformation (no side effects)
+ * 2. No code execution capabilities
+ * 3. No global state modification
+ * 4. No prototype chain modification
+ * 5. No information disclosure about system internals
+ *
+ * Methods NOT included (unsafe):
+ * - constructor: Could enable code execution via Function constructor
+ * - valueOf: Could enable type confusion attacks
+ * - __proto__, __defineGetter__, etc: Direct prototype manipulation
+ * - hasOwnProperty, isPrototypeOf, propertyIsEnumerable: Leak object structure
+ * - toLocaleString: Could expose locale/system information
  */
-const UNSAFE_METHODS = new Set<string>([
-  'constructor',
-  'valueOf',
-  '__proto__',
-  '__defineGetter__',
-  '__defineSetter__',
-  '__lookupGetter__',
-  '__lookupSetter__',
-  'hasOwnProperty',
-  'isPrototypeOf',
-  'propertyIsEnumerable',
-  'toLocaleString', // Can expose locale information
-]);
 
 /**
  * Type-safe method whitelists derived from TypeScript primitive types
+ * Only methods explicitly listed here are allowed - this is a whitelist-only approach
  */
 const STRING_SAFE_METHODS: ReadonlyArray<keyof string> = [
   'charAt',
@@ -107,13 +109,28 @@ const DATE_SAFE_METHODS: ReadonlyArray<keyof Date> = [
 
 /**
  * Whitelist of safe methods that can be called on values
+ * Using Set for O(1) lookup performance
  */
-const SAFE_METHODS: Record<string, Set<string>> = {
-  string: new Set(STRING_SAFE_METHODS.filter((m) => !UNSAFE_METHODS.has(m as string)) as string[]),
-  number: new Set(NUMBER_SAFE_METHODS.filter((m) => !UNSAFE_METHODS.has(m as string)) as string[]),
-  array: new Set(ARRAY_SAFE_METHODS.filter((m) => !UNSAFE_METHODS.has(m as string)) as string[]),
-  date: new Set(DATE_SAFE_METHODS.filter((m) => !UNSAFE_METHODS.has(m as string)) as string[]),
+const SAFE_METHODS: Record<string, ReadonlySet<string>> = {
+  string: new Set(STRING_SAFE_METHODS as readonly string[]),
+  number: new Set(NUMBER_SAFE_METHODS as readonly string[]),
+  array: new Set(ARRAY_SAFE_METHODS as readonly string[]),
+  date: new Set(DATE_SAFE_METHODS as readonly string[]),
 };
+
+/**
+ * Blacklist of property names that should not be accessible
+ * These properties can leak information about object structure or enable attacks
+ */
+const BLOCKED_PROPERTIES = new Set<string>([
+  'constructor',
+  '__proto__',
+  'prototype',
+  '__defineGetter__',
+  '__defineSetter__',
+  '__lookupGetter__',
+  '__lookupSetter__',
+]);
 
 /**
  * Safely evaluates an AST node with a given context
@@ -170,6 +187,11 @@ export class Evaluator {
 
     if (obj === null || obj === undefined) {
       return undefined;
+    }
+
+    // Block access to dangerous properties that could leak information or enable attacks
+    if (BLOCKED_PROPERTIES.has(node.property)) {
+      throw new ExpressionParserError(`Property "${node.property}" is not accessible for security reasons`, 0, this.expression);
     }
 
     // Allow property access on plain objects and primitives
@@ -251,6 +273,11 @@ export class Evaluator {
 
     const obj = this.evaluate(node.callee.object);
     const methodName = node.callee.property;
+
+    // Block access to dangerous properties (must check before method call)
+    if (BLOCKED_PROPERTIES.has(methodName)) {
+      throw new ExpressionParserError(`Property "${methodName}" is not accessible for security reasons`, 0, this.expression);
+    }
 
     // Check if the method is in the whitelist
     if (!this.isMethodSafe(obj, methodName)) {
