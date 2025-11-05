@@ -248,21 +248,24 @@ For dynamic forms, the parser prevents:
 
 ## What You Must Handle
 
-The parser only prevents code injection. If you're using form data elsewhere:
-
-- ❌ **SQL Queries**: Use parameterized queries
-- ❌ **HTML Rendering**: Sanitize before showing to users
-- ❌ **File Operations**: Validate paths
-- ❌ **API Calls**: Validate/sanitize data
+The parser only protects expressions from code injection. When you submit the form, you still need to validate and sanitize the data:
 
 ```typescript
-// ❌ WRONG: Direct SQL injection risk
-const username = form.value.username;
-db.query(`SELECT * FROM users WHERE name = '${username}'`);
+// When the form is submitted
+onSubmit(formValue: any) {
+  // ✅ Validate the data
+  if (!this.isValidEmail(formValue.email)) {
+    throw new Error('Invalid email');
+  }
 
-// ✅ CORRECT: Parameterized query
-db.query('SELECT * FROM users WHERE name = ?', [form.value.username]);
+  // ✅ Send to your API
+  this.api.createUser(formValue).subscribe(...);
+
+  // Your backend should also validate and use parameterized queries
+}
 ```
+
+**Remember**: The expression parser prevents malicious code in expressions like `formValue.age >= 18`. It doesn't validate that the age value itself is reasonable or that the email is properly formatted.
 
 ## Custom Functions
 
