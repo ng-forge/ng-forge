@@ -157,16 +157,120 @@ Numeric slider control.
 - `color`: `'primary' | 'accent' | 'warn'` (default: 'primary')
 - `hint`: Help text
 
-### Submit Button
+### Buttons
 
-Form submission button (automatically disabled when form is invalid).
+Material provides multiple prebuilt button types for common form actions.
 
 {{ NgDocActions.demo("SubmitDemoComponent") }}
 
-**Props:**
+#### Submit Button
 
-- `color`: `'primary' | 'accent' | 'warn'`
-- `type`: `'button' | 'submit' | 'reset'` (default: 'button')
+Form submission button - automatically disabled when the form is invalid.
+
+```typescript
+import { submitButton } from '@ng-forge/dynamic-form-material';
+
+const config = {
+  fields: [
+    submitButton({
+      key: 'submit',
+      label: 'Submit Form',
+      props: { color: 'primary' },
+    }),
+  ],
+} as const satisfies FormConfig;
+```
+
+Or use the field type directly:
+
+```typescript
+{
+  type: 'submit',
+  key: 'submit',
+  label: 'Submit Form',
+  props: { color: 'primary' }
+}
+```
+
+#### Next/Previous Buttons
+
+Navigation buttons for multi-step (paged) forms.
+
+```typescript
+import { nextPageButton, previousPageButton } from '@ng-forge/dynamic-form-material';
+
+const config = {
+  fields: [
+    {
+      key: 'page1',
+      type: 'page',
+      title: 'Personal Info',
+      fields: [
+        { key: 'name', type: 'input', value: '', label: 'Name' },
+        nextPageButton({
+          key: 'next',
+          label: 'Next',
+          props: { color: 'primary' },
+        }),
+      ],
+    },
+    {
+      key: 'page2',
+      type: 'page',
+      title: 'Contact Info',
+      fields: [
+        { key: 'email', type: 'input', value: '', label: 'Email' },
+        previousPageButton({
+          key: 'back',
+          label: 'Back',
+        }),
+        submitButton({
+          key: 'submit',
+          label: 'Submit',
+        }),
+      ],
+    },
+  ],
+} as const satisfies FormConfig;
+```
+
+Or use field types directly:
+
+```typescript
+{ type: 'next', key: 'next', label: 'Next' }
+{ type: 'previous', key: 'back', label: 'Back' }
+```
+
+#### Custom Action Button
+
+Generic button for custom events.
+
+```typescript
+import { actionButton } from '@ng-forge/dynamic-form-material';
+
+const config = {
+  fields: [
+    actionButton({
+      key: 'reset',
+      label: 'Reset Form',
+      event: ResetFormEvent,
+      props: { color: 'warn' },
+    }),
+  ],
+} as const satisfies FormConfig;
+```
+
+**Button Props:**
+
+- `color`: `'primary' | 'accent' | 'warn'` - Material theme color
+- `type`: `'button' | 'submit' | 'reset'` - HTML button type (default: 'button')
+
+**Button Types:**
+
+- `type: 'submit'` - Preconfigured with SubmitEvent, auto-disables when form invalid
+- `type: 'next'` - Preconfigured with NextPageEvent for page navigation
+- `type: 'previous'` - Preconfigured with PreviousPageEvent for page navigation
+- `type: 'button'` - Generic button requiring custom `event` property
 
 ## Comprehensive Examples
 
