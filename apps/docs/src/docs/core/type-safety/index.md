@@ -1,4 +1,4 @@
-> **Prerequisites**: [Getting Started](../../getting-started), [Field Types](../field-types)
+> Prerequisites: [Getting Started](../../getting-started), [Field Types](../field-types)
 
 ng-forge dynamic forms provides compile-time type inference for form configurations, eliminating manual type definitions and catching errors before runtime.
 

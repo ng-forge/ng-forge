@@ -1,4 +1,4 @@
-> **Prerequisites**: [Getting Started](../../getting-started), [Field Types](../field-types)
+> Prerequisites: [Getting Started](../../getting-started), [Field Types](../field-types)
 
 ng-forge dynamic forms provides comprehensive validation through direct integration with Angular's signal forms validation system. All validators map directly to Angular's built-in validators, ensuring type-safe, reactive validation with minimal configuration.
 

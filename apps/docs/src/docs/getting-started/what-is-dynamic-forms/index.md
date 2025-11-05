@@ -284,88 +284,6 @@ export class MyField {
 }
 ```
 
-## Get Started in 3 Minutes
-
-### 1. Install
-
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
-```
-
-### 2. Add to Your App Config
-
-```typescript name="app.config.ts"
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withMaterialFields())],
-};
-```
-
-### 3. Create a Form
-
-```typescript name="login.component.ts"
-import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
-
-@Component({
-  selector: 'app-login',
-  imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
-})
-export class LoginComponent {
-  config = {
-    fields: [
-      {
-        key: 'email',
-        type: 'input',
-        value: '',
-        label: 'Email',
-        required: true,
-        email: true,
-      },
-      {
-        key: 'password',
-        type: 'input',
-        value: '',
-        label: 'Password',
-        required: true,
-        minLength: 8,
-        props: { type: 'password' },
-      },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Sign In',
-        props: { color: 'primary' },
-      },
-    ],
-  } as const satisfies FormConfig;
-
-  onSubmit(value: ExtractFormValue<typeof this.config>) {
-    // TypeScript knows: { email: string, password: string }
-    console.log('Login:', value);
-  }
-}
-```
-
-**Done!** You now have:
-
-- ✅ Real-time validation with custom error messages
-- ✅ Full TypeScript type inference
-- ✅ Beautiful Material Design UI
-- ✅ Accessibility built-in
-- ✅ Submit button auto-disables when invalid
-
 ## See It In Action
 
 {{ NgDocActions.playground("DemoFormPlayground") }}
@@ -552,36 +470,30 @@ provideDynamicForm(
 
 ### Core Concepts
 
-- **[Field Types](../core/field-types)** - All available field types and their properties
-- **[Validation](../core/validation)** - Validation strategies with decision matrix
-- **[Conditional Logic](../core/conditional-logic)** - Show/hide fields dynamically
-- **[Type Safety](../core/type-safety)** - Advanced TypeScript inference patterns
+- **[Field Types](../../core/field-types)** - All available field types and their properties
+- **[Validation](../../core/validation)** - Validation strategies with decision matrix
+- **[Conditional Logic](../../core/conditional-logic)** - Show/hide fields dynamically
+- **[Type Safety](../../core/type-safety)** - Advanced TypeScript inference patterns
 
 ### UI Implementations
 
-- **[Material Design](../custom-integrations/reference/material)** - Production-ready Material integration
-- **[Custom Integration Guide](../custom-integrations/guide)** - Build your own UI integration
+- **[Material Design](../../custom-integrations/reference/material)** - Production-ready Material integration
+- **[Custom Integration Guide](../../custom-integrations/guide)** - Build your own UI integration
 
 ### Advanced Topics
 
-- **[i18n Setup](../i18n/setup)** - Multi-language support
-- **[Events](../core/events)** - Form event bus and custom events
+- **[i18n Setup](../../i18n/setup)** - Multi-language support
+- **[Events](../../core/events)** - Form event bus and custom events
 
 ---
 
 ## Join the Community
 
-- 📖 **[Documentation](../)** - Comprehensive guides and examples
+- 📖 **[Documentation](../../)** - Comprehensive guides and examples
 - 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions, share tips
 - 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs, request features
 - ⭐ **[Star on GitHub](https://github.com/ng-forge/ng-forge)** - Support the project
 
 ---
 
-**Ready to transform your Angular forms?**
-
-```bash
-npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material
-```
-
-Stop writing boilerplate. Start shipping features.
+**Ready to transform your Angular forms?** Check out the [Installation](../installation) guide to get started!

@@ -1,8 +1,8 @@
 import { NgDocPage } from '@ng-doc/core';
-import { QuickStartDemoComponent } from './examples/quick-start-demo.component';
+import { QuickStartDemoComponent } from '../examples/quick-start-demo.component';
 
-const GettingStartedPage: NgDocPage = {
-  title: 'Getting Started',
+const WhatIsDynamicFormsPage: NgDocPage = {
+  title: 'What is Dynamic Forms?',
   mdFile: './index.md',
   order: 0,
   playgrounds: {
@@ -13,4 +13,4 @@ const GettingStartedPage: NgDocPage = {
   },
 };
 
-export default GettingStartedPage;
+export default WhatIsDynamicFormsPage;
