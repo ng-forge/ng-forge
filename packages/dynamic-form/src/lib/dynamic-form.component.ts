@@ -18,7 +18,7 @@ import {
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { filter, forkJoin, map, Observable, of, switchMap } from 'rxjs';
+import { filter, forkJoin, map, Observable, of, ReplaySubject, shareReplay, switchMap, take } from 'rxjs';
 import { isEqual, keyBy, memoize } from 'lodash-es';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FormConfig, FormOptions, RegisteredFieldTypes } from './models';
@@ -436,9 +436,15 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   /**
    * Observable that emits when all components (pages + rows + groups + dynamic-form) are initialized.
-   * Uses the external utility function to track initialization count.
+   * Uses a ReplaySubject to ensure exactly one emission that can be received by late subscribers.
    */
-  readonly initialized$ = this.createInitializedObservable();
+  private readonly initializedSubject = new ReplaySubject<boolean>(1);
+  readonly initialized$ = this.initializedSubject.asObservable();
+
+  constructor() {
+    // Set up initialization tracking
+    this.setupInitializationTracking();
+  }
 
   /**
    * Emitted when all form components are initialized and ready for interaction.
@@ -520,7 +526,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * Creates an observable that tracks when all form components are initialized.
    * The count includes: 1 dynamic-form + pages + rows + groups
    */
-  private createInitializedObservable(): Observable<boolean> {
+  private setupInitializationTracking(): void {
     const totalComponentsCount = computed(() => {
       const fields = this.formSetup().fields;
       if (!fields) return 1; // Just the dynamic-form component
@@ -532,19 +538,33 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       return componentCount + 1; // +1 for dynamic-form component
     });
 
-    return toObservable(totalComponentsCount).pipe(
-      switchMap((count) => {
-        if (count === 1) {
-          // Only dynamic-form component, emit immediately when it initializes
-          return this.eventBus.subscribe<ComponentInitializedEvent>('component-initialized').pipe(
-            filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
-            map(() => true)
-          );
-        }
+    // Only track initialization for the initial component count
+    // Use take(1) to prevent re-subscriptions if totalComponentsCount changes
+    toObservable(totalComponentsCount)
+      .pipe(
+        take(1),
+        switchMap((count) => {
+          if (count === 1) {
+            // Only dynamic-form component, emit immediately when it initializes
+            return this.eventBus.subscribe<ComponentInitializedEvent>('component-initialized').pipe(
+              filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
+              map(() => true),
+              take(1) // Only take the first initialization event
+            );
+          }
 
-        return createInitializationTracker(this.eventBus, count);
-      })
-    );
+          return createInitializationTracker(this.eventBus, count);
+        })
+      )
+      .subscribe({
+        next: (initialized) => {
+          this.initializedSubject.next(initialized);
+          this.initializedSubject.complete();
+        },
+        error: (error) => {
+          this.initializedSubject.error(error);
+        },
+      });
   }
 
   /**
