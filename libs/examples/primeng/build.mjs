@@ -1,8 +1,12 @@
 import * as esbuild from 'esbuild';
-import { writeFile } from 'fs/promises';
+import { writeFile, rm, mkdir } from 'fs/promises';
 import { join } from 'path';
 
 const distPath = 'dist/libs/examples/primeng';
+
+// Clean and create dist directory
+await rm(distPath, { recursive: true, force: true });
+await mkdir(distPath, { recursive: true });
 
 // Build the bundled web components library
 await esbuild.build({
