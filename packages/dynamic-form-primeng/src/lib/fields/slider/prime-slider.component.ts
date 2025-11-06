@@ -12,12 +12,13 @@ import { Slider } from 'primeng/slider';
 @Component({
   selector: 'df-prime-slider',
   imports: [Slider, Field, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe],
+  styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
 
-    <div class="p-field">
+    <div class="df-prime-field">
       @if (label(); as label) {
-      <label [for]="key()">{{ label | dynamicText | async }}</label>
+      <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       }
 
       <p-slider

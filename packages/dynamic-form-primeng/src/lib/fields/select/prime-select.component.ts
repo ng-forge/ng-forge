@@ -10,12 +10,13 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
 @Component({
   selector: 'df-prime-select',
   imports: [Field, Select, MultiSelect, DynamicTextPipe, AsyncPipe, PrimeErrorsComponent],
+  styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
 
-    <div class="p-field" [class]="className() || ''">
+    <div class="df-prime-field">
       @if (label(); as label) {
-      <label [for]="key()">{{ label | dynamicText | async }}</label>
+      <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       } @if (isMultiple()) {
       <p-multiSelect
         [field]="f"

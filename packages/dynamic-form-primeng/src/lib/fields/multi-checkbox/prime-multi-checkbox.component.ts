@@ -13,6 +13,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'df-prime-multi-checkbox',
   imports: [Checkbox, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @if (label(); as label) {
     <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>

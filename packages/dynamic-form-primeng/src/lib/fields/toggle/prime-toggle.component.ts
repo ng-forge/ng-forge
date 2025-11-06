@@ -12,12 +12,13 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 @Component({
   selector: 'df-prime-toggle',
   imports: [ToggleSwitch, Field, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe],
+  styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
 
-    <div class="p-field">
+    <div class="df-prime-field">
       @if (label()) {
-      <label [for]="key()">{{ label() | dynamicText | async }}</label>
+      <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
       <p-toggleSwitch

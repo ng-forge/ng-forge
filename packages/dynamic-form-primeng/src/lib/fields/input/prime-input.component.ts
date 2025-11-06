@@ -12,12 +12,13 @@ import { InputText } from 'primeng/inputtext';
 @Component({
   selector: 'df-prime-input',
   imports: [InputText, Field, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe],
+  styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
 
-    <div class="p-field">
+    <div class="df-prime-field">
       @if (label()) {
-      <label [for]="key()">{{ label() | dynamicText | async }}</label>
+      <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
       <input
@@ -30,7 +31,7 @@ import { InputText } from 'primeng/inputtext';
       />
 
       @if (props()?.hint; as hint) {
-      <small class="p-hint">{{ hint | dynamicText | async }}</small>
+      <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
       }
 
       <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />

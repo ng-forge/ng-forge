@@ -9,6 +9,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'df-prime-checkbox',
   imports: [Checkbox, PrimeErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
 

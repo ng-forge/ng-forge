@@ -5,30 +5,19 @@ import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { TextareaModule } from 'primeng/textarea';
-import { FloatLabelModule } from 'primeng/floatlabel';
 
 @Component({
   selector: 'df-prime-textarea',
-  imports: [TextareaModule, FloatLabelModule, PrimeErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [TextareaModule, PrimeErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
 
-    <div class="p-field" [class]="className() || ''">
+    <div class="df-prime-field">
       @if (label()) {
-      <p-floatlabel>
-        <textarea
-          pInputTextarea
-          [field]="f"
-          [id]="key()"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [rows]="props()?.rows || 4"
-          [autoResize]="props()?.autoResize ?? false"
-          [attr.tabindex]="tabIndex()"
-          [class]="props()?.styleClass || ''"
-        ></textarea>
-        <label [for]="key()">{{ label() | dynamicText | async }}</label>
-      </p-floatlabel>
-      } @else {
+      <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
+      }
+
       <textarea
         pInputTextarea
         [field]="f"
@@ -39,8 +28,9 @@ import { FloatLabelModule } from 'primeng/floatlabel';
         [attr.tabindex]="tabIndex()"
         [class]="props()?.styleClass || ''"
       ></textarea>
-      } @if (props()?.hint; as hint) {
-      <small class="p-text-secondary">{{ hint | dynamicText | async }}</small>
+
+      @if (props()?.hint; as hint) {
+      <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
       }
 
       <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
