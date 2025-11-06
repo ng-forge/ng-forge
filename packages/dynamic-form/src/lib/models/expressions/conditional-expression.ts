@@ -3,7 +3,7 @@
  */
 export interface ConditionalExpression {
   /** Expression type */
-  type: 'fieldValue' | 'formValue' | 'custom' | 'javascript';
+  type: 'fieldValue' | 'formValue' | 'custom' | 'javascript' | 'and' | 'or';
 
   /** Field path for fieldValue type */
   fieldPath?: string;
@@ -27,9 +27,6 @@ export interface ConditionalExpression {
   /** JavaScript expression for custom logic */
   expression?: string;
 
-  /** Multiple conditions with logical operators */
-  conditions?: {
-    logic: 'and' | 'or';
-    expressions: ConditionalExpression[];
-  };
+  /** Array of sub-conditions for 'and' and 'or' types */
+  conditions?: ConditionalExpression[];
 }
