@@ -892,9 +892,7 @@ describe('DynamicFormComponent', () => {
 
     it('should emit validityChange when validity state changes', async () => {
       const config: TestFormConfig = {
-        fields: [
-          { key: 'email', type: 'input', label: 'Email', required: true, defaultValue: '' }
-        ]
+        fields: [{ key: 'email', type: 'input', label: 'Email', required: true, defaultValue: '' }],
       };
       const { component, fixture } = createComponent(config);
 
@@ -904,7 +902,7 @@ describe('DynamicFormComponent', () => {
       // ITERATION 2 FIX: Verify output actually emits values
       // Previous: Only checked output exists, not that it emits
       let emittedValue: boolean | undefined;
-      component.validityChange.subscribe(valid => emittedValue = valid);
+      component.validityChange.subscribe((valid) => (emittedValue = valid));
 
       await delay();
       fixture.detectChanges();
@@ -915,9 +913,7 @@ describe('DynamicFormComponent', () => {
 
     it('should emit dirtyChange when form is modified', async () => {
       const config: TestFormConfig = {
-        fields: [
-          { key: 'firstName', type: 'input', label: 'Name', defaultValue: 'John' }
-        ]
+        fields: [{ key: 'firstName', type: 'input', label: 'Name', defaultValue: 'John' }],
       };
       const { component, fixture } = createComponent(config);
 
@@ -927,7 +923,7 @@ describe('DynamicFormComponent', () => {
       // ITERATION 2 FIX: Verify output actually emits values
       // Previous: Only checked output exists, not that it emits
       const dirtyValues: boolean[] = [];
-      component.dirtyChange.subscribe(dirty => dirtyValues.push(dirty));
+      component.dirtyChange.subscribe((dirty) => dirtyValues.push(dirty));
 
       await delay();
       fixture.detectChanges();
@@ -1324,7 +1320,7 @@ describe('DynamicFormComponent', () => {
       fixture.detectChanges();
 
       let submittedValue: any;
-      component.submitted.subscribe(value => submittedValue = value);
+      component.submitted.subscribe((value) => (submittedValue = value));
 
       // Find and submit the form element
       const formElement = fixture.nativeElement.querySelector('form');
@@ -1360,7 +1356,7 @@ describe('DynamicFormComponent', () => {
       fixture.detectChanges();
 
       let submittedValue: any;
-      component.submitted.subscribe(value => submittedValue = value);
+      component.submitted.subscribe((value) => (submittedValue = value));
 
       const formElement = fixture.nativeElement.querySelector('form');
       formElement.dispatchEvent(new Event('submit', { bubbles: true }));
@@ -1393,7 +1389,7 @@ describe('DynamicFormComponent', () => {
       expect(component.valid()).toBe(true);
 
       let submittedValue: any;
-      component.submitted.subscribe(value => submittedValue = value);
+      component.submitted.subscribe((value) => (submittedValue = value));
 
       const formElement = fixture.nativeElement.querySelector('form');
       formElement.dispatchEvent(new Event('submit', { bubbles: true }));
@@ -1424,7 +1420,7 @@ describe('DynamicFormComponent', () => {
 
       let submittedValue: any;
       let submissionOccurred = false;
-      component.submitted.subscribe(value => {
+      component.submitted.subscribe((value) => {
         submittedValue = value;
         submissionOccurred = true;
       });
@@ -1874,7 +1870,7 @@ describe('DynamicFormComponent', () => {
       fixture.detectChanges();
 
       expect(component.formValue()).toEqual({ firstName: 'John' });
-      expect(component.formValue().hasOwnProperty('email')).toBe(false);
+      expect(Object.hasOwn(component.formValue(), 'email')).toBe(false);
     });
 
     it('should preserve values for fields that remain after config change', async () => {
@@ -1938,7 +1934,7 @@ describe('DynamicFormComponent', () => {
       const formValue = component.formValue();
       expect(formValue.firstName).toBe('Jane');
       expect(formValue.email).toBe('test@example.com');
-      expect(formValue.hasOwnProperty('lastName')).toBe(false);
+      expect(Object.hasOwn(formValue, 'lastName')).toBe(false);
     });
 
     it('should clear values for removed fields', async () => {

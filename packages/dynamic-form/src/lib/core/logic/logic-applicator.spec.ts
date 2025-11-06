@@ -69,10 +69,10 @@ describe('logic-applicator', () => {
       it('should handle undefined condition without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-           
+
           const config: LogicConfig = {
             type: 'hidden',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             condition: undefined as any,
           };
 
@@ -93,7 +93,7 @@ describe('logic-applicator', () => {
           const formValue = signal({ email: 'test@example.com' });
           const config: LogicConfig = {
             type: 'hidden',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             condition: null as any,
           };
 
@@ -202,7 +202,6 @@ describe('logic-applicator', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: 'value' });
           const config: LogicConfig = {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             type: 'customLogic' as any,
             condition: true,
           };
@@ -227,7 +226,6 @@ describe('logic-applicator', () => {
           const config: LogicConfig = {
             type: 'hidden',
             condition: {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               type: 'unknownType' as any,
               expression: 'someExpression',
             },
@@ -250,7 +248,7 @@ describe('logic-applicator', () => {
           const formValue = signal({ email: 'test@example.com' });
           const config: LogicConfig = {
             type: 'hidden',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             condition: {} as any,
           };
 
@@ -310,7 +308,6 @@ describe('logic-applicator', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: 'test@example.com' });
         const configs: LogicConfig[] = [
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           { type: 'unknown' as any, condition: true },
           { type: 'readonly', condition: true },
         ];

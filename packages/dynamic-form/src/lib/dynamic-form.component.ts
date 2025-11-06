@@ -86,7 +86,7 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
   template: `
     <form
       class="df-form"
-      [class.disabled]="formOptions().disabled"
+      [class.disabled]="effectiveFormOptions().disabled"
       [class.df-form-paged]="formModeDetection().mode === 'paged'"
       [class.df-form-non-paged]="formModeDetection().mode === 'non-paged'"
       (submit)="onSubmit($event)"
@@ -210,7 +210,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    *
    * @defaultValue undefined
    */
-  formOptionsInput = input<FormOptions | undefined>(undefined, { alias: 'formOptions' });
+  formOptions = input<FormOptions | undefined>(undefined);
 
   /**
    * Form values for two-way data binding.
@@ -316,10 +316,10 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     return combined as TModel;
   });
 
-  readonly formOptions = computed(() => {
+  readonly effectiveFormOptions = computed(() => {
     const config = this.config();
     const configOptions = config.options || {};
-    const inputOptions = this.formOptionsInput();
+    const inputOptions = this.formOptions();
 
     // Merge config options with input options, input takes precedence
     return { ...configOptions, ...inputOptions };
@@ -396,7 +396,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * @returns `true` if form is disabled through configuration or programmatically
    */
   readonly disabled = computed(() => {
-    const optionsDisabled = this.formOptions().disabled;
+    const optionsDisabled = this.effectiveFormOptions().disabled;
     const formDisabled = this.form()().disabled();
     return optionsDisabled ?? formDisabled;
   });

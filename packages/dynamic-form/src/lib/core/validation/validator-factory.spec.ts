@@ -41,7 +41,7 @@ describe('validator-factory', () => {
       it('should handle min validator with wrong type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ age: 25 });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           const config: ValidatorConfig = { type: 'min', value: 'ten' as any };
 
           const formInstance = form(
@@ -76,7 +76,7 @@ describe('validator-factory', () => {
       it('should handle pattern validator with wrong type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ username: 'test' });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           const config: ValidatorConfig = { type: 'pattern', value: 123 as any };
 
           const formInstance = form(
@@ -288,7 +288,7 @@ describe('validator-factory', () => {
       it('should handle unknown validator type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ field: 'value' });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           const config: ValidatorConfig = { type: 'unknownType' as any };
 
           const formInstance = form(
@@ -362,7 +362,7 @@ describe('validator-factory', () => {
     it('should handle validators with unknown types', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const configs: ValidatorConfig[] = [{ type: 'unknown1' as any }, { type: 'unknown2' as any }];
 
         const formInstance = form(
