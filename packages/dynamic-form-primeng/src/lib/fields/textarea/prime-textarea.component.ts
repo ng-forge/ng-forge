@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
@@ -15,13 +15,13 @@ import { TextareaModule } from 'primeng/textarea';
 
     <div class="df-prime-field">
       @if (label()) {
-      <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
+      <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
       <textarea
         pInputTextarea
         [field]="f"
-        [id]="key()"
+        [id]="inputId()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [autoResize]="props()?.autoResize ?? false"
@@ -51,4 +51,6 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeTextareaProps>();
+
+  readonly inputId = computed(() => `${this.key()}-textarea`);
 }

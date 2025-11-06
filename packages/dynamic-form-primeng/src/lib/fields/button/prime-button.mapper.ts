@@ -1,8 +1,7 @@
-import { FieldDef } from '@ng-forge/dynamic-form';
+import { baseFieldMapper, FieldDef } from '@ng-forge/dynamic-form';
 import { Binding, inputBinding } from '@angular/core';
-import { baseFieldMapper } from '@ng-forge/dynamic-form';
 
-export function buttonFieldMapper(fieldDef: FieldDef<unknown>): Binding[] {
+export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Add disabled binding since baseFieldMapper excludes it

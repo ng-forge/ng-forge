@@ -18,12 +18,12 @@ import { InputText } from 'primeng/inputtext';
 
     <div class="df-prime-field">
       @if (label()) {
-      <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
+      <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
       <input
         pInputText
-        [id]="key()"
+        [id]="inputId()"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
@@ -74,4 +74,6 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
 
     return classes.join(' ');
   });
+
+  readonly inputId = computed(() => `${this.key()}-input`);
 }

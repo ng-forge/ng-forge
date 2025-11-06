@@ -51,6 +51,9 @@ dependencies:
   '@ng-doc/ui-kit':
     specifier: ^20.1.0
     version: 20.1.1(@angular/animations@21.0.0-next.9)(@angular/cdk@21.0.0-rc.0)(@angular/common@21.0.0-rc.1)(@angular/core@21.0.0-rc.1)(@tinkoff/ng-polymorpheus@4.3.0)(di-controls@2.1.0)(rxjs@7.8.2)
+  '@primeuix/themes':
+    specifier: ^1.2.5
+    version: 1.2.5
   date-fns:
     specifier: ^4.1.0
     version: 4.1.0
@@ -8088,6 +8091,12 @@ packages:
 
   /@primeuix/styles@1.2.5:
     resolution: {integrity: sha512-nypFRct/oaaBZqP4jinT0puW8ZIfs4u+l/vqUFmJEPU332fl5ePj6DoOpQgTLzo3OfmvSmz5a5/5b4OJJmmi7Q==}
+    dependencies:
+      '@primeuix/styled': 0.7.4
+    dev: false
+
+  /@primeuix/themes@1.2.5:
+    resolution: {integrity: sha512-n3YkwJrHQaEESc/D/A/iD815sxp8cKnmzscA6a8Tm8YvMtYU32eCahwLLe6h5rywghVwxASWuG36XBgISYOIjQ==}
     dependencies:
       '@primeuix/styled': 0.7.4
     dev: false
@@ -19411,7 +19420,7 @@ packages:
       immutable: 5.1.4
       source-map-js: 1.2.1
     optionalDependencies:
-      '@parcel/watcher': 2.4.1
+      '@parcel/watcher': 2.5.1
     dev: false
 
   /sass@1.93.2:

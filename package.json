@@ -108,6 +108,7 @@
     "@ng-doc/builder": "^20.1.0",
     "@ng-doc/core": "^20.1.0",
     "@ng-doc/ui-kit": "^20.1.0",
+    "@primeuix/themes": "^1.2.5",
     "date-fns": "^4.1.0",
     "lodash-es": "^4.17.21",
     "ngxtension": "^6.0.0",
