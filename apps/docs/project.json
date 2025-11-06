@@ -32,8 +32,7 @@
           }
         ],
         "styles": ["apps/docs/src/styles.scss"],
-        "allowedCommonJsDependencies": ["dayjs", "@braintree/sanitize-url", "dompurify", "cytoscape-cose-bilkent", "elkjs", "@ng-doc/core"],
-        "externalDependencies": ["@ng-forge/dynamic-form-primeng", "primeng", "primeicons"]
+        "allowedCommonJsDependencies": ["dayjs", "@braintree/sanitize-url", "dompurify", "cytoscape-cose-bilkent", "elkjs", "@ng-doc/core"]
       },
       "configurations": {
         "production": {
