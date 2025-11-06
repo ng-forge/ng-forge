@@ -4,7 +4,6 @@ import {
   ComponentRef,
   computed,
   DestroyRef,
-  effect,
   inject,
   Injector,
   input,
@@ -346,14 +345,24 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly cleanupRemovedFields = (() => {
     let previousFieldKeys: Set<string> | null = null;
 
-    return effect(() => {
-      const setup = this.formSetup();
+    return explicitEffect([this.formSetup], ([setup]) => {
       const currentFieldKeys = new Set(
         setup.schemaFields.map((field: any) => field.key).filter((key: string | undefined) => key !== undefined)
       );
 
       // Skip on first run (no previous keys to compare)
       if (previousFieldKeys === null) {
+        previousFieldKeys = currentFieldKeys;
+        return;
+      }
+
+      // Only proceed if field keys have actually changed
+      const hasChanges =
+        currentFieldKeys.size !== previousFieldKeys!.size ||
+        Array.from(currentFieldKeys).some((key: unknown) => !previousFieldKeys!.has(key as string)) ||
+        Array.from(previousFieldKeys!).some((key: unknown) => !currentFieldKeys.has(key as string));
+
+      if (!hasChanges) {
         previousFieldKeys = currentFieldKeys;
         return;
       }
@@ -366,7 +375,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         // Create new entity without orphaned keys
         const cleanedEntity = { ...currentEntity } as Record<string, unknown>;
         orphanedKeys.forEach((key) => delete cleanedEntity[key]);
-        untracked(() => this.entity.set(cleanedEntity as TModel));
+        this.entity.set(cleanedEntity as TModel);
       }
 
       previousFieldKeys = currentFieldKeys;
