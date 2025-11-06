@@ -21,7 +21,7 @@ import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs
 import { filter, forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { isEqual, keyBy, memoize } from 'lodash-es';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
-import { FormConfig, RegisteredFieldTypes } from './models';
+import { FormConfig, FormOptions, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
@@ -194,6 +194,25 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   config: InputSignal<FormConfig<TFields>> = input.required<FormConfig<TFields>>();
 
   /**
+   * Form options input for dynamic runtime configuration.
+   *
+   * When provided, overrides options from config. Useful for dynamically
+   * enabling/disabling the form or changing validation behavior at runtime.
+   *
+   * @example
+   * ```typescript
+   * // Dynamically disable form
+   * formOptionsSignal = signal<FormOptions>({ disabled: true });
+   *
+   * // In template
+   * <dynamic-form [config]="config" [formOptions]="formOptionsSignal()" />
+   * ```
+   *
+   * @defaultValue undefined
+   */
+  formOptionsInput = input<FormOptions | undefined>(undefined, { alias: 'formOptions' });
+
+  /**
    * Form values for two-way data binding.
    *
    * Supports both partial and complete form values. When used with two-way binding,
@@ -282,7 +301,11 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   readonly formOptions = computed(() => {
     const config = this.config();
-    return config.options || {};
+    const configOptions = config.options || {};
+    const inputOptions = this.formOptionsInput();
+
+    // Merge config options with input options, input takes precedence
+    return { ...configOptions, ...inputOptions };
   });
 
   private readonly form = computed<ReturnType<typeof form<TModel>>>(() => {
@@ -355,7 +378,11 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    *
    * @returns `true` if form is disabled through configuration or programmatically
    */
-  readonly disabled = computed(() => this.form()().disabled());
+  readonly disabled = computed(() => {
+    const optionsDisabled = this.formOptions().disabled;
+    const formDisabled = this.form()().disabled();
+    return optionsDisabled ?? formDisabled;
+  });
 
   /**
    * Emitted when form validity state changes.
