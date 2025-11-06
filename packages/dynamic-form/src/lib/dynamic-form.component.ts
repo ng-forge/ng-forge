@@ -359,12 +359,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       }
 
       const currentEntity = this.entity();
-      const entityKeys = Object.keys(currentEntity);
+      const entityKeys = Object.keys(currentEntity as Record<string, unknown>);
       const orphanedKeys = entityKeys.filter((key) => !currentFieldKeys.has(key));
 
       if (orphanedKeys.length > 0) {
         // Create new entity without orphaned keys
-        const cleanedEntity = { ...currentEntity };
+        const cleanedEntity = { ...currentEntity } as Record<string, unknown>;
         orphanedKeys.forEach((key) => delete cleanedEntity[key]);
         untracked(() => this.entity.set(cleanedEntity as TModel));
       }
