@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Checkbox } from 'primeng/checkbox';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
@@ -93,7 +94,7 @@ describe('PrimeCheckboxFieldComponent', () => {
         enableNotifications: false,
       });
 
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(checkboxComponent.checked()).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['acceptTerms']).toBe(true);
@@ -308,7 +309,7 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       // Try to click disabled checkbox - should not change value since it's disabled
       checkbox.nativeElement.click();
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       // Verify the checkbox remains disabled and doesn't change
       expect(checkboxInput.nativeElement.disabled).toBe(true);
@@ -390,7 +391,7 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       // Update via programmatic value change
       fixture.componentRef.setInput('value', { acceptTerms: true });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(checkboxComponent.checked()).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['acceptTerms']).toBe(true);
@@ -434,7 +435,7 @@ describe('PrimeCheckboxFieldComponent', () => {
           'form.terms.hint': 'Por favor lea y acepte nuestros términos',
         });
         translationService.setLanguage('es');
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
 
         expect(checkbox.nativeElement.textContent.trim()).toBe('Aceptar Términos y Condiciones');
         expect(hint.nativeElement.textContent.trim()).toBe('Por favor lea y acepte nuestros términos');

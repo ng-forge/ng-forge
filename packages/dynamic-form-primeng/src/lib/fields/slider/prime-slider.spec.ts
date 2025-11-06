@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
@@ -81,7 +82,7 @@ describe('PrimeSliderFieldComponent', () => {
       const sliderInput = fixture.debugElement.query(By.css('p-slider input'));
       sliderInput.nativeElement.value = 75;
       sliderInput.nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component).volume).toBe(75);
@@ -117,7 +118,7 @@ describe('PrimeSliderFieldComponent', () => {
         temperature: 0,
         speed: 0,
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).volume).toBe(80);
     });
@@ -173,7 +174,7 @@ describe('PrimeSliderFieldComponent', () => {
       const sliderInput = fixture.debugElement.query(By.css('p-slider input'));
       sliderInput.nativeElement.value = 7.5;
       sliderInput.nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).rating).toBe(7.5);
     });
@@ -204,7 +205,7 @@ describe('PrimeSliderFieldComponent', () => {
         temperature: 0,
         speed: 0,
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       const formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.volume).toBe(85);
@@ -304,7 +305,7 @@ describe('PrimeSliderFieldComponent', () => {
       // Change first slider
       sliderInputs[0].nativeElement.value = 70;
       sliderInputs[0].nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.volume).toBe(70);
@@ -313,7 +314,7 @@ describe('PrimeSliderFieldComponent', () => {
       // Change second slider
       sliderInputs[1].nativeElement.value = 200;
       sliderInputs[1].nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.volume).toBe(70);
@@ -370,7 +371,7 @@ describe('PrimeSliderFieldComponent', () => {
       // Simulate focus and then blur
       sliderInput.nativeElement.focus();
       sliderInput.nativeElement.dispatchEvent(new Event('blur'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       // Note: The touched state is handled internally by the component
       // We can't directly access it from the form, but we can verify the event was handled
@@ -429,7 +430,7 @@ describe('PrimeSliderFieldComponent', () => {
       const sliderInput = fixture.debugElement.query(By.css('p-slider input'));
       sliderInput.nativeElement.value = -5;
       sliderInput.nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       await fixture.whenStable();
 
@@ -452,7 +453,7 @@ describe('PrimeSliderFieldComponent', () => {
       const sliderInput = fixture.debugElement.query(By.css('p-slider input'));
       sliderInput.nativeElement.value = 4.2;
       sliderInput.nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       await fixture.whenStable();
 
@@ -476,7 +477,7 @@ describe('PrimeSliderFieldComponent', () => {
       for (const value of testValues) {
         sliderInput.nativeElement.value = value;
         sliderInput.nativeElement.dispatchEvent(new Event('input'));
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
       }
 
       await fixture.whenStable();
@@ -526,7 +527,7 @@ describe('PrimeSliderFieldComponent', () => {
           'form.volume.hint': 'Ajusta el volumen según tu preferencia',
         });
         translationService.setLanguage('es');
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
 
         expect(labelElement.nativeElement.textContent.trim()).toBe('Nivel de Volumen');
         expect(hintElement.nativeElement.textContent.trim()).toBe('Ajusta el volumen según tu preferencia');

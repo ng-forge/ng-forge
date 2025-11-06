@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Calendar } from 'primeng/calendar';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
@@ -73,7 +74,7 @@ describe('PrimeDatepickerFieldComponent', () => {
       const testDate = new Date(1995, 5, 15);
       calendarInput.nativeElement.value = testDate.toLocaleDateString();
       calendarInput.nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component).birthDate).toBeDefined();
@@ -103,7 +104,7 @@ describe('PrimeDatepickerFieldComponent', () => {
         endDate: null,
         appointmentDate: null,
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).birthDate).toEqual(testDate);
     });
@@ -234,7 +235,7 @@ describe('PrimeDatepickerFieldComponent', () => {
       // Change third datepicker
       calendarInputs[2].nativeElement.value = newDate.toLocaleDateString();
       calendarInputs[2].nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       const formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.startDate).toEqual(new Date(2024, 0, 1));
@@ -319,7 +320,7 @@ describe('PrimeDatepickerFieldComponent', () => {
       // Change first datepicker
       calendarInputs[0].nativeElement.value = newDate.toLocaleDateString();
       calendarInputs[0].nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.startDate).toBeDefined();
@@ -329,7 +330,7 @@ describe('PrimeDatepickerFieldComponent', () => {
       const anotherDate = new Date(2024, 8, 20);
       calendarInputs[1].nativeElement.value = anotherDate.toLocaleDateString();
       calendarInputs[1].nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.startDate).toBeDefined();
@@ -419,7 +420,7 @@ describe('PrimeDatepickerFieldComponent', () => {
 
       // Update via programmatic value change
       fixture.componentRef.setInput('value', { birthDate: testDate });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).birthDate).toEqual(testDate);
     });
@@ -465,7 +466,7 @@ describe('PrimeDatepickerFieldComponent', () => {
       // Simulate date selection within constraints
       calendarInput.nativeElement.value = testDate.toLocaleDateString();
       calendarInput.nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).birthDate).toBeDefined();
     });
@@ -513,7 +514,7 @@ describe('PrimeDatepickerFieldComponent', () => {
           'form.birthDate.hint': 'Elige la fecha en que naciste',
         });
         translationService.setLanguage('es');
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
 
         expect(label.nativeElement.textContent.trim()).toBe('Fecha de Nacimiento');
         expect(calendarInput.nativeElement.getAttribute('placeholder')).toBe('Selecciona tu fecha de nacimiento');

@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { BehaviorSubject, of } from 'rxjs';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
@@ -75,7 +76,7 @@ describe('PrimeInputFieldComponent', () => {
 
       // Update form model programmatically
       fixture.componentRef.setInput('value', { email: 'user@domain.com' });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).email).toBe('user@domain.com');
     });
@@ -148,7 +149,7 @@ describe('PrimeInputFieldComponent', () => {
         website: 'https://example.com',
         phone: '555-0123',
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       const formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.firstName).toBe('John');
@@ -431,7 +432,7 @@ describe('PrimeInputFieldComponent', () => {
 
         // Update Observable
         labelSubject.next('Updated Label');
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
 
         label = fixture.debugElement.query(By.css('label'));
         expect(label.nativeElement.textContent.trim()).toBe('Updated Label');
@@ -459,7 +460,7 @@ describe('PrimeInputFieldComponent', () => {
 
         // Update Observable
         placeholderSubject.next('Updated placeholder');
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
 
         input = fixture.debugElement.query(By.css('input'));
         expect(input.nativeElement.getAttribute('placeholder')).toBe('Updated placeholder');
@@ -500,7 +501,7 @@ describe('PrimeInputFieldComponent', () => {
           'form.email.placeholder': 'Ingrese su correo electrónico',
         });
         translationService.setLanguage('es');
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
 
         expect(label.nativeElement.textContent.trim()).toBe('Dirección de Correo Electrónico');
         expect(input.nativeElement.getAttribute('placeholder')).toBe('Ingrese su correo electrónico');

@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { SubmitEvent } from '@ng-forge/dynamic-form';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
@@ -211,7 +212,7 @@ describe('PrimeButtonFieldComponent', () => {
 
       // Update form value programmatically
       fixture.componentRef.setInput('value', { firstName: 'Jane' });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       // Button should maintain its properties
       buttonElement = fixture.debugElement.query(By.css('button'));
@@ -414,7 +415,7 @@ describe('PrimeButtonFieldComponent', () => {
           'form.submit.label': 'Enviar Formulario',
         });
         translationService.setLanguage('es');
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
 
         expect(buttonElement.nativeElement.textContent.trim()).toBe('Enviar Formulario');
       });

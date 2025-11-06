@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
@@ -94,7 +95,7 @@ describe('PrimeToggleFieldComponent', () => {
         notifications: false,
         enableFeature: false,
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(toggleInput.checked).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['darkMode']).toBe(true);
@@ -233,7 +234,7 @@ describe('PrimeToggleFieldComponent', () => {
       // Simulate first toggle click using direct component interaction
       const firstToggleInput = toggles[0].nativeElement.querySelector('input');
       firstToggleInput.click();
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue['darkMode']).toBe(true);
@@ -243,7 +244,7 @@ describe('PrimeToggleFieldComponent', () => {
       // Simulate third toggle click using direct component interaction
       const thirdToggleInput = toggles[2].nativeElement.querySelector('input');
       thirdToggleInput.click();
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue['darkMode']).toBe(true);
@@ -279,7 +280,7 @@ describe('PrimeToggleFieldComponent', () => {
 
       // Try to click disabled toggle - should not change value since it's disabled
       toggle.nativeElement.click();
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       // Verify the toggle remains disabled and doesn't change
       expect(toggleInput.nativeElement.disabled).toBe(true);
@@ -337,7 +338,7 @@ describe('PrimeToggleFieldComponent', () => {
 
       // Update via programmatic value change
       fixture.componentRef.setInput('value', { darkMode: true });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(toggleInput.checked).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['darkMode']).toBe(true);
@@ -381,7 +382,7 @@ describe('PrimeToggleFieldComponent', () => {
           'form.darkMode.hint': 'Alternar entre temas claro y oscuro',
         });
         translationService.setLanguage('es');
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
 
         expect(label.nativeElement.textContent.trim()).toBe('Habilitar Modo Oscuro');
         expect(hint.nativeElement.textContent.trim()).toBe('Alternar entre temas claro y oscuro');

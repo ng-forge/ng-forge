@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { RadioButton } from 'primeng/radiobutton';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
@@ -89,7 +90,7 @@ describe('PrimeRadioFieldComponent', () => {
 
       // Simulate user click on radio button
       secondRadioInput.click();
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component)['preference']).toBe('option2');
@@ -124,7 +125,7 @@ describe('PrimeRadioFieldComponent', () => {
         preference: 'option3',
         priority: '',
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(radioButtons[2].componentInstance.checked).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['preference']).toBe('option3');
@@ -343,7 +344,7 @@ describe('PrimeRadioFieldComponent', () => {
       // Simulate first group selection
       const firstGroupFirstRadio = firstGroupRadios[0].nativeElement.querySelector('input[type="radio"]');
       firstGroupFirstRadio.click();
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue['gender']).toBe('male');
@@ -352,7 +353,7 @@ describe('PrimeRadioFieldComponent', () => {
       // Simulate second group selection
       const secondGroupSecondRadio = secondGroupRadios[1].nativeElement.querySelector('input[type="radio"]');
       secondGroupSecondRadio.click();
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue['gender']).toBe('male');
@@ -414,7 +415,7 @@ describe('PrimeRadioFieldComponent', () => {
 
       // Try to click disabled radio - should not change value since it's disabled
       firstRadioInput.click();
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       // Verify the radio group remains disabled and doesn't change
       expect(firstRadioInput.disabled).toBe(true);
@@ -487,7 +488,7 @@ describe('PrimeRadioFieldComponent', () => {
 
       // Update via programmatic value change
       fixture.componentRef.setInput('value', { preference: 'option2' });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(radioButtons[1].componentInstance.checked).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['preference']).toBe('option2');
@@ -575,7 +576,7 @@ describe('PrimeRadioFieldComponent', () => {
         });
         translationService.setLanguage('es');
 
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
         await fixture.whenStable();
 
         expect(labelElement.nativeElement.textContent.trim()).toBe('Seleccionar Género');

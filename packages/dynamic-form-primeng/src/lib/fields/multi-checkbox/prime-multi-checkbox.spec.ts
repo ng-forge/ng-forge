@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Checkbox } from 'primeng/checkbox';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
@@ -112,7 +113,7 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
         skills: [],
         preferences: [],
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).hobbies).toEqual(['reading', 'cooking']);
 
@@ -528,7 +529,7 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
         });
         translationService.setLanguage('es');
 
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
         await fixture.whenStable();
 
         expect(labelElement.nativeElement.textContent.trim()).toBe('Seleccionar Pasatiempos');

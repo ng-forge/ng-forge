@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
@@ -99,7 +100,7 @@ describe('PrimeTextareaFieldComponent', () => {
         bio: '',
         notes: '',
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).comments).toBe('Updated comments\nwith multiple lines');
     });
@@ -223,7 +224,7 @@ describe('PrimeTextareaFieldComponent', () => {
       // Change first textarea
       textareas[0].nativeElement.value = 'Updated description\nwith new lines';
       textareas[0].nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.description).toBe('Updated description\nwith new lines');
@@ -232,7 +233,7 @@ describe('PrimeTextareaFieldComponent', () => {
       // Change second textarea
       textareas[1].nativeElement.value = 'Updated feedback\nwith multiple lines\nof text';
       textareas[1].nativeElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.description).toBe('Updated description\nwith new lines');
@@ -320,7 +321,7 @@ describe('PrimeTextareaFieldComponent', () => {
       for (const value of testValues) {
         textarea.nativeElement.value = value;
         textarea.nativeElement.dispatchEvent(new Event('input'));
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
       }
 
       // Should have the final value
@@ -388,7 +389,7 @@ describe('PrimeTextareaFieldComponent', () => {
           'form.comments.hint': 'Proporcione sus comentarios',
         });
         translationService.setLanguage('es');
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
 
         expect(label.nativeElement.textContent.trim()).toBe('Comentarios');
         expect(textarea.nativeElement.getAttribute('placeholder')).toBe('Ingrese sus comentarios');

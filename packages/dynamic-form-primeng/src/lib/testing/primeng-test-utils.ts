@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { untracked } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { DynamicForm, FormConfig, FormEvent, provideDynamicForm, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
 import { delay } from './delay';
@@ -152,7 +153,8 @@ export class PrimeNGFormTestUtils {
       fixture.componentRef.setInput('value', testConfig.initialValue);
     }
 
-    fixture.detectChanges();
+    // Wrap detectChanges in untracked to allow PrimeNG signal writes
+    untracked(() => fixture.detectChanges());
     await PrimeNGFormTestUtils.waitForInit(fixture);
 
     return {
@@ -166,7 +168,7 @@ export class PrimeNGFormTestUtils {
    */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
-    fixture.detectChanges();
+    untracked(() => fixture.detectChanges());
     await delay(0);
   }
 
@@ -182,7 +184,7 @@ export class PrimeNGFormTestUtils {
     input.value = value;
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('blur', { bubbles: true }));
-    fixture.detectChanges();
+    untracked(() => fixture.detectChanges());
     await delay(0);
   }
 
@@ -207,7 +209,7 @@ export class PrimeNGFormTestUtils {
       });
     }
 
-    fixture.detectChanges();
+    untracked(() => fixture.detectChanges());
     await delay(0);
   }
 
@@ -262,7 +264,7 @@ export class PrimeNGFormTestUtils {
       input.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    fixture.detectChanges();
+    untracked(() => fixture.detectChanges());
     await delay(0);
   }
 
@@ -285,7 +287,7 @@ export class PrimeNGFormTestUtils {
       }
     }
 
-    fixture.detectChanges();
+    untracked(() => fixture.detectChanges());
     await delay(0);
   }
 
@@ -299,7 +301,7 @@ export class PrimeNGFormTestUtils {
     }
 
     button.click();
-    fixture.detectChanges();
+    untracked(() => fixture.detectChanges());
     await delay(0);
   }
 

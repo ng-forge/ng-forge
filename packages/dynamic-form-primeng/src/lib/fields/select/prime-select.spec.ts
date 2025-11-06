@@ -1,3 +1,4 @@
+import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
@@ -206,7 +207,7 @@ describe('PrimeSelectFieldComponent', () => {
         value: ['en', 'es', 'fr'],
         originalEvent: new Event('change'),
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).languages).toEqual(['en', 'es', 'fr']);
     });
@@ -243,7 +244,7 @@ describe('PrimeSelectFieldComponent', () => {
         priority: 0,
         categories: [],
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).languages).toEqual(['fr', 'de']);
     });
@@ -433,7 +434,7 @@ describe('PrimeSelectFieldComponent', () => {
         value: 'CA',
         originalEvent: new Event('change'),
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.country).toBe('CA');
@@ -445,7 +446,7 @@ describe('PrimeSelectFieldComponent', () => {
         value: ['tech', 'business'],
         originalEvent: new Event('change'),
       });
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.country).toBe('CA');
@@ -485,7 +486,7 @@ describe('PrimeSelectFieldComponent', () => {
 
       // Try to click disabled select - should not change value since it's disabled
       select.nativeElement.click();
-      fixture.detectChanges();
+      untracked(() => fixture.detectChanges());
 
       // Verify the select remains disabled and doesn't change
       expect(selectComponent.disabled).toBe(true);
@@ -633,7 +634,7 @@ describe('PrimeSelectFieldComponent', () => {
 
         // Open select to check options
         select.nativeElement.click();
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
         await fixture.whenStable();
 
         const options = fixture.debugElement.queryAll(By.css('p-dropdownItem'));
@@ -654,7 +655,7 @@ describe('PrimeSelectFieldComponent', () => {
         });
         translationService.setLanguage('es');
 
-        fixture.detectChanges();
+        untracked(() => fixture.detectChanges());
         await fixture.whenStable();
 
         expect(label.nativeElement.textContent.trim()).toBe('País');
