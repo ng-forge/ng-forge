@@ -47,7 +47,7 @@ export class MyFormComponent {
 
 ### Input Field
 
-{{ InputDemoComponent }}
+{{ NgDocActions.demo("InputDemoComponent") }}
 
 ## Compatibility Status
 

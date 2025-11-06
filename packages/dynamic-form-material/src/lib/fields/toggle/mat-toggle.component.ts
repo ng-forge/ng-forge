@@ -19,7 +19,6 @@ import { AsyncPipe } from '@angular/common';
       [labelPosition]="props()?.labelPosition || 'after'"
       [hideIcon]="props()?.hideIcon || false"
       [disableRipple]="props()?.disableRipple || false"
-      [disabled]="f().disabled()"
       [attr.tabindex]="tabIndex()"
       class="toggle-container"
     >

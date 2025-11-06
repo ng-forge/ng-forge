@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig, FormEvent, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withPrimeNGFields, submitButton, nextPageButton, previousPageButton, actionButton } from '@ng-forge/dynamic-form-primeng';
+import { nextPageButton, previousPageButton, submitButton, withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
 
 @Component({
   selector: 'app-button-demo',
@@ -102,7 +102,7 @@ export class ButtonDemoComponent {
         key: 'submitRaised',
         label: 'Submit (Raised)',
         props: {
-          severity: 'warning',
+          severity: 'warn',
           raised: true, // Raised button style with shadow
         },
       }),
@@ -143,16 +143,16 @@ export class ButtonDemoComponent {
       }),
 
       // Custom Action Button
-      actionButton({
-        key: 'customAction',
-        label: 'Custom Action',
-        event: this.onCustomAction.bind(this),
-        props: {
-          severity: 'help',
-          icon: 'pi pi-cog',
-          iconPos: 'left',
-        },
-      }),
+      // actionButton({
+      //   key: 'customAction',
+      //   label: 'Custom Action',
+      //   event: this.onCustomAction.bind(this),
+      //   props: {
+      //     severity: 'help',
+      //     icon: 'pi pi-cog',
+      //     iconPos: 'left',
+      //   },
+      // }),
 
       // Button with all style combinations
       submitButton({

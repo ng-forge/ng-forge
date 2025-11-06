@@ -46,8 +46,6 @@ import { AsyncPipe } from '@angular/common';
         [matDatepicker]="picker"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [min]="minDate()"
-        [max]="maxDate()"
         [attr.tabindex]="tabIndex()"
       />
 
@@ -65,7 +63,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatDatepickerFieldComponent implements MatDatepickerComponent {
-  readonly field = input.required<FieldTree<Date | null>>();
+  readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
