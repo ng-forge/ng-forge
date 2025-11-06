@@ -12,7 +12,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-prime-multi-checkbox',
-  imports: [Checkbox, PrimeErrorsComponent, ValueInArrayPipe, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [Checkbox, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
   template: `
     @let f = field(); @if (label(); as label) {
     <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
@@ -43,17 +43,6 @@ import { AsyncPipe } from '@angular/common';
       :host {
         display: block;
       }
-
-      .checkbox-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .checkbox-group-label {
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-      }
     `,
   ],
   host: {
@@ -77,13 +66,7 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<PrimeMultiCheckboxProps<T>>();
 
-  valueViewModel = linkedSignal<T[]>(
-    () => {
-      const currentValues = this.field()().value();
-      return currentValues;
-    },
-    { equal: isEqual }
-  );
+  valueViewModel = linkedSignal<T[]>(() => this.field()().value(), { equal: isEqual });
 
   constructor() {
     explicitEffect([this.valueViewModel], ([selectedValues]) => {

@@ -17,14 +17,7 @@ import { AsyncPipe } from '@angular/common';
     <div class="radio-group">
       @for (option of options(); track option.value) {
       <div class="radio-option">
-        <p-radioButton
-          [field]="f"
-          [value]="option.value"
-          [disabled]="option.disabled || f().disabled()"
-          [name]="props()?.name || key()"
-          [styleClass]="props()?.styleClass"
-          [inputId]="key() + '-' + option.value"
-        />
+        <p-radioButton [field]="f" [styleClass]="props()?.styleClass" [inputId]="key() + '-' + option.value" />
         <label [for]="key() + '-' + option.value" class="radio-option-label">
           {{ option.label | dynamicText | async }}
         </label>

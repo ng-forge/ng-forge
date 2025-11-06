@@ -23,7 +23,6 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
       <p-toggleSwitch
         [id]="key()"
         [field]="f"
-        [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"

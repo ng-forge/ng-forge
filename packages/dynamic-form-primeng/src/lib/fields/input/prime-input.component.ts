@@ -24,9 +24,7 @@ import { InputText } from 'primeng/inputtext';
         pInputText
         [id]="key()"
         [field]="f"
-        [type]="props()?.type || 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
         [class]="inputClasses()"
       />

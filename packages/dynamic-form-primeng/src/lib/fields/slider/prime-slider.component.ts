@@ -23,12 +23,9 @@ import { Slider } from 'primeng/slider';
       <p-slider
         [id]="key()"
         [field]="f"
-        [min]="minValue()"
-        [max]="maxValue()"
         [step]="step()"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
-        [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
         [styleClass]="props()?.styleClass || ''"
       />

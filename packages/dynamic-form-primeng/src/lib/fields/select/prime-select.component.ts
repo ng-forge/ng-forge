@@ -27,7 +27,6 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
-        [disabled]="f().disabled()"
       />
       } @else {
       <p-select
@@ -40,7 +39,6 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
-        [disabled]="f().disabled()"
       />
       }
 

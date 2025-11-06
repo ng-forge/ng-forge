@@ -23,7 +23,6 @@ import { FloatLabelModule } from 'primeng/floatlabel';
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [rows]="props()?.rows || 4"
           [autoResize]="props()?.autoResize ?? false"
-          [attr.maxlength]="props()?.maxlength"
           [attr.tabindex]="tabIndex()"
           [class]="props()?.styleClass || ''"
         ></textarea>
@@ -37,7 +36,6 @@ import { FloatLabelModule } from 'primeng/floatlabel';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [autoResize]="props()?.autoResize ?? false"
-        [attr.maxlength]="props()?.maxlength"
         [attr.tabindex]="tabIndex()"
         [class]="props()?.styleClass || ''"
       ></textarea>

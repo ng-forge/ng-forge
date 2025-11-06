@@ -24,7 +24,6 @@ import { DatePicker } from 'primeng/datepicker';
         [inputId]="key()"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
         [dateFormat]="props()?.dateFormat || 'mm/dd/yy'"
         [inline]="props()?.inline ?? false"
