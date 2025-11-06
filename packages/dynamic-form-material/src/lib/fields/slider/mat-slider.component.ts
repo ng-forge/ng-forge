@@ -25,13 +25,13 @@ import { AsyncPipe } from '@angular/common';
       class="slider-container"
     >
       <!-- TODO: integrate input with the field -->
-      <input matSliderThumb [(value)]="f().value" [disabled]="f().disabled()" [attr.tabindex]="tabIndex()" />
+      <input matSliderThumb [(value)]="f.value" [disabled]="f.disabled()" [attr.tabindex]="tabIndex()" />
     </mat-slider>
 
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint | dynamicText | async }}</div>
     }
-    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
+    <mat-error><df-mat-errors [errors]="f.errors()" [invalid]="f.invalid()" [touched]="f.touched()" /></mat-error>
   `,
   styles: [
     `

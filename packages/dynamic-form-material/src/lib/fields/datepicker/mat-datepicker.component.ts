@@ -58,7 +58,7 @@ import { AsyncPipe } from '@angular/common';
       <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
       }
 
-      <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
+      <mat-error><df-mat-errors [errors]="f.errors()" [invalid]="f.invalid()" [touched]="f.touched()" /></mat-error>
     </mat-form-field>
   `,
   providers: [provideNativeDateAdapter()],
