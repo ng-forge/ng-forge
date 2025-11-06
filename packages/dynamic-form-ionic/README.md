@@ -127,6 +127,68 @@ export class ContactFormComponent {
 }
 ```
 
+## Customization
+
+### Using with Multiple UI Libraries
+
+If you're using multiple UI libraries (e.g., Material + Ionic) in the same app, use the `/no-augmentation` entry point to avoid TypeScript module augmentation conflicts:
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withIonicFields } from '@ng-forge/dynamic-form-ionic/no-augmentation';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideIonicAngular({ mode: 'md' }),
+    provideDynamicForm(...withIonicFields()),
+  ],
+};
+```
+
+### CSS Variables
+
+All field components use customizable CSS variables for consistent styling:
+
+```scss
+:root {
+  // Field layout
+  --df-ionic-field-gap: 0.5rem;        // Gap between label, input, and hint
+
+  // Label styling
+  --df-ionic-label-font-weight: 500;    // Label font weight
+  --df-ionic-label-font-size: 1rem;     // Label font size
+  --df-ionic-label-color: var(--ion-text-color, #000);
+
+  // Hint text styling
+  --df-ionic-hint-color: var(--ion-color-medium, #92949c);
+  --df-ionic-hint-font-size: 0.875rem;
+  --df-ionic-hint-line-height: 1.25rem;
+}
+```
+
+### Component-Specific Styling
+
+You can further customize the appearance using these CSS classes:
+
+- `.df-ionic-field` - Wrapper div for field layout
+- `.df-ionic-label` - Label element styling
+- `.df-ionic-hint` - Hint text element styling
+
+Example:
+
+```scss
+.df-ionic-field {
+  --df-ionic-field-gap: 1rem; // Increase spacing
+}
+
+.df-ionic-label {
+  --df-ionic-label-font-weight: 600;
+  text-transform: uppercase;
+}
+```
+
 ## Available Field Types
 
 ### Text Input

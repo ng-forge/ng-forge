@@ -1,0 +1,58 @@
+/**
+ * Ionic Dynamic Form Field Styling
+ *
+ * Provides consistent styling for form fields across all Ionic components.
+ * Works alongside Ionic's built-in component styling.
+ */
+
+:host {
+  // Field layout
+  --df-ionic-field-gap: 0.5rem;
+
+  // Label styling
+  --df-ionic-label-font-weight: 500;
+  --df-ionic-label-font-size: 1rem;
+  --df-ionic-label-color: var(--ion-text-color, #000);
+
+  // Hint text styling
+  --df-ionic-hint-color: var(--ion-color-medium, #92949c);
+  --df-ionic-hint-font-size: 0.875rem;
+  --df-ionic-hint-line-height: 1.25rem;
+}
+
+/**
+ * Field wrapper - provides consistent vertical layout
+ */
+.df-ionic-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--df-ionic-field-gap);
+  width: 100%;
+}
+
+/**
+ * Label styling - used for fields that don't have built-in labels
+ */
+.df-ionic-label {
+  font-weight: var(--df-ionic-label-font-weight);
+  font-size: var(--df-ionic-label-font-size);
+  color: var(--df-ionic-label-color);
+  margin: 0;
+  padding: 0;
+}
+
+/**
+ * Hint text - helper text below inputs
+ */
+.df-ionic-hint {
+  color: var(--df-ionic-hint-color);
+  font-size: var(--df-ionic-hint-font-size);
+  line-height: var(--df-ionic-hint-line-height);
+  margin: 0;
+  padding: 0;
+}
+
+/**
+ * Error messages - styled by IonicErrorsComponent
+ * Using ion-note with color="danger" provides appropriate styling
+ */
