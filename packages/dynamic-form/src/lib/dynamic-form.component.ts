@@ -330,57 +330,27 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   readonly formValue = computed(() => this.form()().value());
 
-  private readonly syncEntityToValue = explicitEffect([this.entity], ([currentEntity]) => {
+  private readonly syncEntityToValue = explicitEffect([this.entity, this.formSetup], ([currentEntity, setup]) => {
     const currentValue = this.value();
 
-    if (!isEqual(currentEntity, currentValue)) {
-      this.value.set(currentEntity);
+    // Filter entity to only include keys that are in the current schema
+    let filteredEntity = currentEntity;
+    if (setup.schemaFields && setup.schemaFields.length > 0) {
+      const validKeys = new Set(setup.schemaFields.map((field: any) => field.key).filter((key: string | undefined) => key !== undefined));
+
+      const filtered: Record<string, unknown> = {};
+      for (const key of Object.keys(currentEntity as Record<string, unknown>)) {
+        if (validKeys.has(key)) {
+          filtered[key] = (currentEntity as Record<string, unknown>)[key];
+        }
+      }
+      filteredEntity = filtered as typeof currentEntity;
+    }
+
+    if (!isEqual(filteredEntity, currentValue)) {
+      this.value.set(filteredEntity);
     }
   });
-
-  /**
-   * Effect that removes orphaned field values when fields are removed from config.
-   * This ensures that when a field is removed, its value is also removed from the form.
-   */
-  private readonly cleanupRemovedFields = (() => {
-    let previousFieldKeys: Set<string> | null = null;
-
-    return explicitEffect([this.formSetup], ([setup]) => {
-      const currentFieldKeys = new Set(
-        setup.schemaFields.map((field: any) => field.key).filter((key: string | undefined) => key !== undefined)
-      );
-
-      // Skip on first run (no previous keys to compare)
-      if (previousFieldKeys === null) {
-        previousFieldKeys = currentFieldKeys;
-        return;
-      }
-
-      // Only proceed if field keys have actually changed
-      const hasChanges =
-        currentFieldKeys.size !== previousFieldKeys!.size ||
-        Array.from(currentFieldKeys).some((key: unknown) => !previousFieldKeys!.has(key as string)) ||
-        Array.from(previousFieldKeys!).some((key: unknown) => !currentFieldKeys.has(key as string));
-
-      if (!hasChanges) {
-        previousFieldKeys = currentFieldKeys;
-        return;
-      }
-
-      const currentEntity = this.entity();
-      const entityKeys = Object.keys(currentEntity as Record<string, unknown>);
-      const orphanedKeys = entityKeys.filter((key) => !currentFieldKeys.has(key));
-
-      if (orphanedKeys.length > 0) {
-        // Create new entity without orphaned keys
-        const cleanedEntity = { ...currentEntity } as Record<string, unknown>;
-        orphanedKeys.forEach((key) => delete cleanedEntity[key]);
-        this.entity.set(cleanedEntity as TModel);
-      }
-
-      previousFieldKeys = currentFieldKeys;
-    });
-  })();
 
   /**
    * Signal indicating whether the form is valid.
