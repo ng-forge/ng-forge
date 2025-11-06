@@ -31,7 +31,6 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
       />
       } @else {
       <p-select
-        [field]="f"
         [inputId]="key()"
         [options]="options()"
         optionLabel="label"
