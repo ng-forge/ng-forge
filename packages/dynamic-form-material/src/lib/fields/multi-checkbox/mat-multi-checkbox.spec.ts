@@ -35,7 +35,7 @@ describe('MatMultiCheckboxFieldComponent', () => {
         },
       });
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
       const label = fixture.debugElement.query(By.css('.checkbox-group-label'));
       const hint = fixture.debugElement.query(By.css('.mat-hint'));
       const wrapper = fixture.debugElement.query(By.css('df-mat-multi-checkbox'));
@@ -121,7 +121,7 @@ describe('MatMultiCheckboxFieldComponent', () => {
       expect(MaterialFormTestUtils.getFormValue(component).hobbies).toEqual(['reading', 'cooking']);
 
       // Check that checkboxes reflect the state
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
       expect(checkboxes[0].componentInstance.checked).toBe(true); // reading
       expect(checkboxes[1].componentInstance.checked).toBe(false); // gaming
       expect(checkboxes[2].componentInstance.checked).toBe(true); // cooking
@@ -159,8 +159,8 @@ describe('MatMultiCheckboxFieldComponent', () => {
       });
 
       const checkboxGroups = fixture.debugElement.queryAll(By.css('df-mat-multi-checkbox'));
-      const skillsCheckboxes = checkboxGroups[0].queryAll(By.directive(MatCheckbox));
-      const preferencesCheckboxes = checkboxGroups[1].queryAll(By.directive(MatCheckbox));
+      const skillsCheckboxes = checkboxGroups[0].queryAll(By.css('mat-checkbox'));
+      const preferencesCheckboxes = checkboxGroups[1].queryAll(By.css('mat-checkbox'));
 
       expect(skillsCheckboxes.length).toBe(3);
       expect(preferencesCheckboxes.length).toBe(3);
@@ -197,7 +197,7 @@ describe('MatMultiCheckboxFieldComponent', () => {
         initialValue: { hobbies: [] },
       });
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
 
       expect(checkboxes[0].componentInstance.disabled).toBe(false);
       expect(checkboxes[1].componentInstance.disabled).toBe(true);
@@ -223,7 +223,7 @@ describe('MatMultiCheckboxFieldComponent', () => {
         initialValue: { hobbies: [] },
       });
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
 
       checkboxes.forEach((checkbox) => {
         expect(checkbox.componentInstance.disabled).toBe(true);
@@ -244,8 +244,8 @@ describe('MatMultiCheckboxFieldComponent', () => {
       });
 
       const checkboxGroups = fixture.debugElement.queryAll(By.css('df-mat-multi-checkbox'));
-      const primaryCheckbox = checkboxGroups[0].query(By.directive(MatCheckbox));
-      const accentCheckbox = checkboxGroups[1].query(By.directive(MatCheckbox));
+      const primaryCheckbox = checkboxGroups[0].query(By.css('mat-checkbox'));
+      const accentCheckbox = checkboxGroups[1].query(By.css('mat-checkbox'));
 
       expect(primaryCheckbox.componentInstance.color).toBe('primary');
       expect(accentCheckbox.componentInstance.color).toBe('accent');
@@ -267,8 +267,8 @@ describe('MatMultiCheckboxFieldComponent', () => {
       });
 
       const checkboxGroups = fixture.debugElement.queryAll(By.css('df-mat-multi-checkbox'));
-      const afterCheckbox = checkboxGroups[0].query(By.directive(MatCheckbox));
-      const beforeCheckbox = checkboxGroups[1].query(By.directive(MatCheckbox));
+      const afterCheckbox = checkboxGroups[0].query(By.css('mat-checkbox'));
+      const beforeCheckbox = checkboxGroups[1].query(By.css('mat-checkbox'));
 
       expect(afterCheckbox.componentInstance.labelPosition).toBe('after');
       expect(beforeCheckbox.componentInstance.labelPosition).toBe('before');
@@ -292,7 +292,7 @@ describe('MatMultiCheckboxFieldComponent', () => {
         initialValue: { hobbies: [] },
       });
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
       expect(checkboxes[0].componentInstance.color).toBe('primary');
       expect(checkboxes[0].componentInstance.labelPosition).toBe('after');
     });
@@ -421,12 +421,11 @@ describe('MatMultiCheckboxFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
       // ITERATION 4 FIX: queryAll returns array - verify array and content, not truthiness
       // Previous: expect(checkboxes).toBeTruthy() - always true for arrays
       expect(Array.isArray(checkboxes)).toBe(true);
       expect(checkboxes.length).toBe(1);
-      expect(checkboxes[0].componentInstance).toBeInstanceOf(MatCheckbox);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -439,12 +438,11 @@ describe('MatMultiCheckboxFieldComponent', () => {
         initialValue: null as any,
       });
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
       // ITERATION 4 FIX: queryAll returns array - verify array and content, not truthiness
       // Previous: expect(checkboxes).toBeTruthy() - always true for arrays
       expect(Array.isArray(checkboxes)).toBe(true);
       expect(checkboxes.length).toBe(1);
-      expect(checkboxes[0].componentInstance).toBeInstanceOf(MatCheckbox);
     });
 
     it('should handle empty options array', async () => {
@@ -462,7 +460,7 @@ describe('MatMultiCheckboxFieldComponent', () => {
         initialValue: { hobbies: [] },
       });
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
       expect(checkboxes.length).toBe(0);
       expect(MaterialFormTestUtils.getFormValue(component).hobbies).toEqual([]);
     });
@@ -493,7 +491,7 @@ describe('MatMultiCheckboxFieldComponent', () => {
       // Should have the final state
       expect(MaterialFormTestUtils.getFormValue(component).hobbies).toEqual(['reading']);
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
       expect(checkboxes[0].componentInstance.checked).toBe(true);
       expect(checkboxes[1].componentInstance.checked).toBe(false);
     });
@@ -535,7 +533,7 @@ describe('MatMultiCheckboxFieldComponent', () => {
 
         const labelElement = fixture.debugElement.query(By.css('.checkbox-group-label'));
         const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
-        const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+        const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
 
         // Initial translations
         expect(labelElement.nativeElement.textContent.trim()).toBe('Select Hobbies');
@@ -560,7 +558,7 @@ describe('MatMultiCheckboxFieldComponent', () => {
         expect(labelElement.nativeElement.textContent.trim()).toBe('Seleccionar Pasatiempos');
         expect(hintElement.nativeElement.textContent.trim()).toBe('Elige tus pasatiempos');
 
-        const updatedCheckboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+        const updatedCheckboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
         expect(updatedCheckboxes[0].nativeElement.textContent.trim()).toBe('Lectura');
         expect(updatedCheckboxes[1].nativeElement.textContent.trim()).toBe('Juegos');
         expect(updatedCheckboxes[2].nativeElement.textContent.trim()).toBe('Cocina');

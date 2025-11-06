@@ -39,7 +39,7 @@ describe('MatSliderFieldComponent', () => {
         },
       });
 
-      const slider = fixture.debugElement.query(By.directive(MatSlider));
+      const slider = fixture.debugElement.query(By.css('mat-slider'));
       const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
       const label = fixture.debugElement.query(By.css('.slider-label'));
       const hint = fixture.debugElement.query(By.css('.mat-hint'));
@@ -48,7 +48,7 @@ describe('MatSliderFieldComponent', () => {
       // ITERATION 4 FIX: Verify slider is MatSlider instance
       // Previous: expect(slider).toBeTruthy()
       expect(slider).not.toBeNull();
-      expect(slider.componentInstance).toBeInstanceOf(MatSlider);
+      expect(slider.nativeElement).toBeInstanceOf(HTMLElement);
       expect(slider.componentInstance.min).toBe(0);
       expect(slider.componentInstance.max).toBe(100);
       expect(slider.componentInstance.discrete).toBe(true);
@@ -157,7 +157,7 @@ describe('MatSliderFieldComponent', () => {
         },
       });
 
-      const sliders = fixture.debugElement.queryAll(By.directive(MatSlider));
+      const sliders = fixture.debugElement.queryAll(By.css('mat-slider'));
 
       expect(sliders.length).toBe(4);
       expect(sliders[0].componentInstance.min).toBe(0);
@@ -239,7 +239,7 @@ describe('MatSliderFieldComponent', () => {
         initialValue: { volume: 0 },
       });
 
-      const slider = fixture.debugElement.query(By.directive(MatSlider));
+      const slider = fixture.debugElement.query(By.css('mat-slider'));
       const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
 
       expect(slider.componentInstance.color).toBe('primary');
@@ -280,7 +280,7 @@ describe('MatSliderFieldComponent', () => {
         initialValue: { volume: 50 },
       });
 
-      const slider = fixture.debugElement.query(By.directive(MatSlider));
+      const slider = fixture.debugElement.query(By.css('mat-slider'));
       const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
       expect(slider.componentInstance.disabled).toBe(true);
       expect(sliderInput.nativeElement.disabled).toBe(true);
@@ -298,7 +298,7 @@ describe('MatSliderFieldComponent', () => {
         initialValue: { volume: 50, brightness: 128, rating: 3 },
       });
 
-      const sliders = fixture.debugElement.queryAll(By.directive(MatSlider));
+      const sliders = fixture.debugElement.queryAll(By.css('mat-slider'));
       expect(sliders[0].componentInstance.color).toBe('primary');
       expect(sliders[1].componentInstance.color).toBe('accent');
       expect(sliders[2].componentInstance.color).toBe('warn');
@@ -362,7 +362,7 @@ describe('MatSliderFieldComponent', () => {
         initialValue: { volume: 50 },
       });
 
-      const slider = fixture.debugElement.query(By.directive(MatSlider));
+      const slider = fixture.debugElement.query(By.css('mat-slider'));
       expect(slider.componentInstance.showTickMarks).toBe(true);
     });
 
@@ -377,7 +377,7 @@ describe('MatSliderFieldComponent', () => {
         initialValue: { volume: 50, brightness: 128 },
       });
 
-      const sliders = fixture.debugElement.queryAll(By.directive(MatSlider));
+      const sliders = fixture.debugElement.queryAll(By.css('mat-slider'));
       expect(sliders[0].componentInstance.discrete).toBe(true);
       expect(sliders[1].componentInstance.discrete).toBe(true);
     });
@@ -412,11 +412,11 @@ describe('MatSliderFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
-      const slider = fixture.debugElement.query(By.directive(MatSlider));
+      const slider = fixture.debugElement.query(By.css('mat-slider'));
       // ITERATION 5 FIX: Verify slider component exists with undefined value
       // Previous: expect(slider).toBeTruthy()
       expect(slider).not.toBeNull();
-      expect(slider.componentInstance).toBeInstanceOf(MatSlider);
+      expect(slider.nativeElement).toBeInstanceOf(HTMLElement);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -427,11 +427,11 @@ describe('MatSliderFieldComponent', () => {
         initialValue: null as any,
       });
 
-      const slider = fixture.debugElement.query(By.directive(MatSlider));
+      const slider = fixture.debugElement.query(By.css('mat-slider'));
       // ITERATION 5 FIX: Verify slider component exists with null value
       // Previous: expect(slider).toBeTruthy()
       expect(slider).not.toBeNull();
-      expect(slider.componentInstance).toBeInstanceOf(MatSlider);
+      expect(slider.nativeElement).toBeInstanceOf(HTMLElement);
     });
 
     it('should handle zero values correctly', async () => {

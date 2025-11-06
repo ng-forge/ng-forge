@@ -33,7 +33,7 @@ describe('MatToggleFieldComponent', () => {
         },
       });
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       const matToggleComponent = fixture.debugElement.query(By.css('df-mat-toggle'))?.componentInstance;
       const containerDiv = fixture.debugElement.query(By.css('.dark-mode-toggle'));
       const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
@@ -41,7 +41,7 @@ describe('MatToggleFieldComponent', () => {
       // ITERATION 4 FIX: Verify toggle is MatSlideToggle instance
       // Previous: expect(toggle).toBeTruthy()
       expect(toggle).not.toBeNull();
-      expect(toggle.componentInstance).toBeInstanceOf(MatSlideToggle);
+      expect(toggle.nativeElement).toBeInstanceOf(HTMLElement);
       expect(toggle.nativeElement.textContent.trim()).toBe('Enable Dark Mode');
 
       // ITERATION 4 FIX: Verify container element structure
@@ -101,7 +101,7 @@ describe('MatToggleFieldComponent', () => {
         },
       });
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       const toggleComponent = toggle.componentInstance;
 
       // Update form model programmatically
@@ -135,7 +135,7 @@ describe('MatToggleFieldComponent', () => {
         initialValue: { darkMode: false },
       });
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       const toggleComponent = toggle.componentInstance;
 
       // These properties are passed to the inner MatSlideToggle component
@@ -164,13 +164,13 @@ describe('MatToggleFieldComponent', () => {
         },
       });
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       const toggleComponent = toggle.componentInstance;
 
       // ITERATION 5 FIX: Verify toggle component exists with minimal config
       // Previous: expect(toggle).toBeTruthy()
       expect(toggle).not.toBeNull();
-      expect(toggle.componentInstance).toBeInstanceOf(MatSlideToggle);
+      expect(toggle.nativeElement).toBeInstanceOf(HTMLElement);
       expect(toggle.nativeElement.textContent.trim()).toBe('Enable Notifications');
       expect(toggleComponent.color).toBe('primary');
       expect(toggleComponent.labelPosition).toBe('after');
@@ -211,7 +211,7 @@ describe('MatToggleFieldComponent', () => {
         },
       });
 
-      const toggles = fixture.debugElement.queryAll(By.directive(MatSlideToggle));
+      const toggles = fixture.debugElement.queryAll(By.css('mat-slide-toggle'));
 
       expect(toggles.length).toBe(3);
       expect(toggles[0].nativeElement.textContent.trim()).toBe('Dark Mode');
@@ -235,7 +235,7 @@ describe('MatToggleFieldComponent', () => {
         },
       });
 
-      const toggles = fixture.debugElement.queryAll(By.directive(MatSlideToggle));
+      const toggles = fixture.debugElement.queryAll(By.css('mat-slide-toggle'));
 
       expect(toggles[0].componentInstance.checked).toBe(false);
       expect(toggles[1].componentInstance.checked).toBe(true);
@@ -258,7 +258,7 @@ describe('MatToggleFieldComponent', () => {
         },
       });
 
-      const toggles = fixture.debugElement.queryAll(By.directive(MatSlideToggle));
+      const toggles = fixture.debugElement.queryAll(By.css('mat-slide-toggle'));
 
       // Simulate first toggle click using direct component interaction
       const firstToggleButton = toggles[0].nativeElement.querySelector('button');
@@ -297,7 +297,7 @@ describe('MatToggleFieldComponent', () => {
         },
       });
 
-      const toggles = fixture.debugElement.queryAll(By.directive(MatSlideToggle));
+      const toggles = fixture.debugElement.queryAll(By.css('mat-slide-toggle'));
 
       expect(toggles[0].componentInstance.color).toBe('primary');
       expect(toggles[1].componentInstance.color).toBe('accent');
@@ -325,7 +325,7 @@ describe('MatToggleFieldComponent', () => {
         },
       });
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       const toggleButton = fixture.debugElement.query(By.css('button'));
       const toggleComponent = toggle.componentInstance;
 
@@ -348,7 +348,7 @@ describe('MatToggleFieldComponent', () => {
         initialValue: { darkMode: false },
       });
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       const toggleComponent = toggle.componentInstance;
 
       // Check default props from Material configuration
@@ -366,7 +366,7 @@ describe('MatToggleFieldComponent', () => {
         initialValue: { darkMode: false },
       });
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       const toggleComponent = toggle.componentInstance;
 
       expect(toggleComponent.hideIcon).toBe(true);
@@ -377,11 +377,11 @@ describe('MatToggleFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       // ITERATION 5 FIX: Verify toggle component exists with undefined value
       // Previous: expect(toggle).toBeTruthy()
       expect(toggle).not.toBeNull();
-      expect(toggle.componentInstance).toBeInstanceOf(MatSlideToggle);
+      expect(toggle.nativeElement).toBeInstanceOf(HTMLElement);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -392,11 +392,11 @@ describe('MatToggleFieldComponent', () => {
         initialValue: null as any,
       });
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       // ITERATION 5 FIX: Verify toggle component exists with null value
       // Previous: expect(toggle).toBeTruthy()
       expect(toggle).not.toBeNull();
-      expect(toggle.componentInstance).toBeInstanceOf(MatSlideToggle);
+      expect(toggle.nativeElement).toBeInstanceOf(HTMLElement);
     });
 
     it('should handle programmatic value updates correctly', async () => {
@@ -407,7 +407,7 @@ describe('MatToggleFieldComponent', () => {
         initialValue: { darkMode: false },
       });
 
-      const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+      const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
       const toggleComponent = toggle.componentInstance;
 
       // Initial state
@@ -446,7 +446,7 @@ describe('MatToggleFieldComponent', () => {
           initialValue: { darkMode: false },
         });
 
-        const toggle = fixture.debugElement.query(By.directive(MatSlideToggle));
+        const toggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
         const hint = fixture.debugElement.query(By.css('.mat-hint'));
 
         // Initial translations

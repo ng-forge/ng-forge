@@ -22,7 +22,7 @@ describe('MatButtonFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config });
 
-      const button = fixture.debugElement.query(By.directive(MatButton));
+      const button = fixture.debugElement.query(By.css('button[mat-button], button[mat-raised-button], button[mat-flat-button]'));
       const buttonElement = fixture.debugElement.query(By.css('button'));
 
       expect(button).toBeTruthy();
@@ -361,7 +361,7 @@ describe('MatButtonFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config });
 
-      const button = fixture.debugElement.query(By.directive(MatButton));
+      const button = fixture.debugElement.query(By.css('button[mat-button], button[mat-raised-button], button[mat-flat-button]'));
       const buttonElement = fixture.debugElement.query(By.css('button'));
 
       expect(button).toBeTruthy();
@@ -438,7 +438,7 @@ describe('MatButtonFieldComponent', () => {
 
         const { fixture } = await MaterialFormTestUtils.createTest({ config });
 
-        const button = fixture.debugElement.query(By.directive(MatButton));
+        const button = fixture.debugElement.query(By.css('button[mat-button], button[mat-raised-button], button[mat-flat-button]'));
         const buttonElement = fixture.debugElement.query(By.css('button'));
 
         expect(button).toBeTruthy();
@@ -509,7 +509,7 @@ describe('MatButtonFieldComponent', () => {
 
         const { fixture } = await MaterialFormTestUtils.createTest({ config });
 
-        const button = fixture.debugElement.query(By.directive(MatButton));
+        const button = fixture.debugElement.query(By.css('button[mat-button], button[mat-raised-button], button[mat-flat-button]'));
         const buttonElement = fixture.debugElement.query(By.css('button'));
 
         expect(button).toBeTruthy();
@@ -546,7 +546,7 @@ describe('MatButtonFieldComponent', () => {
 
         const { fixture } = await MaterialFormTestUtils.createTest({ config });
 
-        const button = fixture.debugElement.query(By.directive(MatButton));
+        const button = fixture.debugElement.query(By.css('button[mat-button], button[mat-raised-button], button[mat-flat-button]'));
         const buttonElement = fixture.debugElement.query(By.css('button'));
 
         expect(button).toBeTruthy();

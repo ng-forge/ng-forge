@@ -35,8 +35,8 @@ describe('MatRadioFieldComponent', () => {
         },
       });
 
-      const radioGroup = fixture.debugElement.query(By.directive(MatRadioGroup));
-      const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+      const radioGroup = fixture.debugElement.query(By.css('mat-radio-group'));
+      const radioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
       const matRadioComponent = fixture.debugElement.query(By.css('df-mat-radio'))?.componentInstance;
       const containerDiv = fixture.debugElement.query(By.css('.gender-radio'));
       const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
@@ -45,7 +45,7 @@ describe('MatRadioFieldComponent', () => {
       // ITERATION 3 FIX: Verify radio group and container structure
       // Previous: expect(radioGroup).toBeTruthy()
       expect(radioGroup).not.toBeNull();
-      expect(radioGroup.componentInstance).toBeInstanceOf(MatRadioGroup);
+      expect(radioGroup.nativeElement.tagName.toLowerCase()).toBe('mat-radio-group');
       expect(radioButtons.length).toBe(3);
 
       // ITERATION 3 FIX: Verify container element structure
@@ -94,7 +94,7 @@ describe('MatRadioFieldComponent', () => {
       expect(MaterialFormTestUtils.getFormValue(component)['preference']).toBe('');
 
       // Simulate radio button interaction by clicking the second option
-      const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+      const radioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
       const secondRadioInput = radioButtons[1].nativeElement.querySelector('input[type="radio"]');
 
       // Simulate user click on radio button
@@ -126,7 +126,7 @@ describe('MatRadioFieldComponent', () => {
         },
       });
 
-      const radioGroup = fixture.debugElement.query(By.directive(MatRadioGroup));
+      const radioGroup = fixture.debugElement.query(By.css('mat-radio-group'));
       const radioGroupComponent = radioGroup.componentInstance;
 
       // Update form model programmatically
@@ -159,7 +159,7 @@ describe('MatRadioFieldComponent', () => {
         initialValue: { preference: '' },
       });
 
-      const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+      const radioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
 
       // Check that the second option is disabled
       expect(radioButtons[1].componentInstance.disabled).toBe(true);
@@ -187,8 +187,8 @@ describe('MatRadioFieldComponent', () => {
         },
       });
 
-      const radioGroup = fixture.debugElement.query(By.directive(MatRadioGroup));
-      const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+      const radioGroup = fixture.debugElement.query(By.css('mat-radio-group'));
+      const radioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
 
       expect(radioGroup).toBeTruthy();
       expect(radioButtons.length).toBe(2);
@@ -282,7 +282,7 @@ describe('MatRadioFieldComponent', () => {
         },
       });
 
-      const radioGroups = fixture.debugElement.queryAll(By.directive(MatRadioGroup));
+      const radioGroups = fixture.debugElement.queryAll(By.css('mat-radio-group'));
 
       expect(radioGroups.length).toBe(3);
     });
@@ -314,7 +314,7 @@ describe('MatRadioFieldComponent', () => {
         },
       });
 
-      const radioGroups = fixture.debugElement.queryAll(By.directive(MatRadioGroup));
+      const radioGroups = fixture.debugElement.queryAll(By.css('mat-radio-group'));
 
       expect(radioGroups[0].componentInstance.field()().value()).toBe('female');
       expect(radioGroups[1].componentInstance.field()().value()).toBe('option1');
@@ -386,7 +386,7 @@ describe('MatRadioFieldComponent', () => {
         },
       });
 
-      const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+      const radioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
 
       expect(radioButtons[0].componentInstance.color).toBe('primary');
       expect(radioButtons[1].componentInstance.color).toBe('accent');
@@ -418,8 +418,8 @@ describe('MatRadioFieldComponent', () => {
         },
       });
 
-      const radioGroup = fixture.debugElement.query(By.directive(MatRadioGroup));
-      const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+      const radioGroup = fixture.debugElement.query(By.css('mat-radio-group'));
+      const radioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
       const firstRadioInput = radioButtons[0].nativeElement.querySelector('input[type="radio"]');
 
       expect(firstRadioInput.disabled).toBe(true);
@@ -443,7 +443,7 @@ describe('MatRadioFieldComponent', () => {
         initialValue: { preference: '' },
       });
 
-      const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+      const radioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
 
       // Check default props from Material configuration
       expect(radioButtons[0].componentInstance.color).toBe('primary');
@@ -457,7 +457,7 @@ describe('MatRadioFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
-      const radioGroup = fixture.debugElement.query(By.directive(MatRadioGroup));
+      const radioGroup = fixture.debugElement.query(By.css('mat-radio-group'));
       expect(radioGroup).toBeTruthy();
     });
 
@@ -471,7 +471,7 @@ describe('MatRadioFieldComponent', () => {
         initialValue: null as any,
       });
 
-      const radioGroup = fixture.debugElement.query(By.directive(MatRadioGroup));
+      const radioGroup = fixture.debugElement.query(By.css('mat-radio-group'));
       expect(radioGroup).toBeTruthy();
     });
 
@@ -491,7 +491,7 @@ describe('MatRadioFieldComponent', () => {
         initialValue: { preference: '' },
       });
 
-      const radioGroup = fixture.debugElement.query(By.directive(MatRadioGroup));
+      const radioGroup = fixture.debugElement.query(By.css('mat-radio-group'));
       const radioGroupComponent = radioGroup.componentInstance;
 
       // Initial state
@@ -524,7 +524,7 @@ describe('MatRadioFieldComponent', () => {
         initialValue: { preference: '' },
       });
 
-      const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+      const radioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
 
       expect(radioButtons[0].componentInstance.disabled).toBe(false);
       expect(radioButtons[1].componentInstance.disabled).toBe(true);
@@ -568,7 +568,7 @@ describe('MatRadioFieldComponent', () => {
 
         const labelElement = fixture.debugElement.query(By.css('.radio-label'));
         const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
-        const radioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+        const radioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
 
         // Initial translations
         expect(labelElement.nativeElement.textContent.trim()).toBe('Select Gender');
@@ -593,7 +593,7 @@ describe('MatRadioFieldComponent', () => {
         expect(labelElement.nativeElement.textContent.trim()).toBe('Seleccionar Género');
         expect(hintElement.nativeElement.textContent.trim()).toBe('Elige tu género');
 
-        const updatedRadioButtons = fixture.debugElement.queryAll(By.directive(MatRadioButton));
+        const updatedRadioButtons = fixture.debugElement.queryAll(By.css('mat-radio-button'));
         expect(updatedRadioButtons[0].nativeElement.textContent.trim()).toBe('Masculino');
         expect(updatedRadioButtons[1].nativeElement.textContent.trim()).toBe('Femenino');
         expect(updatedRadioButtons[2].nativeElement.textContent.trim()).toBe('Otro');

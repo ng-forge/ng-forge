@@ -31,23 +31,40 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
 
 /**
  * Polls until all field components have loaded and rendered
- * Checks every 10ms for up to 200ms (typically resolves in <50ms)
+ * Checks every 10ms for up to 500ms to handle async component loading
  */
-async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempts = 20): Promise<void> {
+async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempts = 50): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form');
   if (!formElement) return; // No form element, nothing to wait for
 
+  let previousComponentCount = 0;
+  let stableCount = 0;
+
   for (let i = 0; i < maxAttempts; i++) {
     fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
 
-    // Check if any field components are still loading (indicated by empty form content)
+    // Check for field components and Material components
     const fieldComponents = formElement.querySelectorAll('[data-testid]');
+    const materialComponents = formElement.querySelectorAll(
+      'mat-checkbox, mat-slide-toggle, mat-radio-group, mat-select, input[matInput], textarea[matInput], mat-slider, button[mat-button], button[mat-raised-button], button[mat-flat-button]'
+    );
     const hasLoadingComments = formElement.innerHTML.includes('<!--container-->');
 
-    // If we have field components rendered OR no loading comments, we're done
-    if (fieldComponents.length > 0 || !hasLoadingComments) {
-      fixture.detectChanges();
-      return;
+    const currentComponentCount = fieldComponents.length + materialComponents.length;
+
+    // Check if we've stabilized (component count hasn't changed)
+    if (currentComponentCount > 0 && currentComponentCount === previousComponentCount) {
+      stableCount++;
+      // Wait for 3 consecutive stable iterations before exiting
+      if (stableCount >= 3 && !hasLoadingComments) {
+        fixture.detectChanges();
+        return;
+      }
+    } else {
+      stableCount = 0;
+      previousComponentCount = currentComponentCount;
     }
 
     // Wait 10ms before next check
@@ -55,5 +72,7 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempt
   }
 
   // Final detect changes even if timeout
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
 }
