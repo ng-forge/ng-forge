@@ -18,19 +18,19 @@ import { AsyncPipe } from '@angular/common';
       [labelPosition]="props()?.labelPosition || 'after'"
       [indeterminate]="props()?.indeterminate || false"
       [color]="props()?.color || 'primary'"
-      [disabled]="f.disabled()"
+      [disabled]="f().disabled()"
       [disableRipple]="props()?.disableRipple || false"
       [attr.tabindex]="tabIndex()"
-      [attr.hidden]="f.hidden() || null"
+      [attr.hidden]="f().hidden() || null"
     >
       {{ label() | dynamicText | async }}
     </mat-checkbox>
 
     @if (props()?.hint; as hint) {
-    <div class="mat-hint" [attr.hidden]="f.hidden() || null">{{ hint | dynamicText | async }}</div>
+    <div class="mat-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
     }
-    <mat-error [attr.hidden]="f.hidden() || null"
-      ><df-mat-errors [errors]="f.errors()" [invalid]="f.invalid()" [touched]="f.touched()"
+    <mat-error [attr.hidden]="f().hidden() || null"
+      ><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()"
     /></mat-error>
   `,
   styles: [
@@ -48,7 +48,7 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'field().hidden() || null',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

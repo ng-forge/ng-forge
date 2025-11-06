@@ -26,7 +26,7 @@ import { AsyncPipe } from '@angular/common';
         [field]="f"
         [type]="props()?.type || 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [disabled]="f.disabled()"
+        [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
       />
 
@@ -34,7 +34,7 @@ import { AsyncPipe } from '@angular/common';
       <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
       }
 
-      <mat-error><df-mat-errors [errors]="f.errors()" [invalid]="f.invalid()" [touched]="f.touched()" /></mat-error>
+      <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
     </mat-form-field>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

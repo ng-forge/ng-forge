@@ -22,7 +22,7 @@ import { AsyncPipe } from '@angular/common';
       @for (option of options(); track option.value) {
       <mat-checkbox
         [checked]="option | inArray : valueViewModel()"
-        [disabled]="f.disabled() || option.disabled"
+        [disabled]="f().disabled() || option.disabled"
         [color]="props()?.color || 'primary'"
         [labelPosition]="props()?.labelPosition || 'after'"
         (change)="onCheckboxChange(option, $event.checked)"
@@ -36,7 +36,7 @@ import { AsyncPipe } from '@angular/common';
     <div class="mat-hint">{{ hint | dynamicText | async }}</div>
     }
 
-    <mat-error><df-mat-errors [errors]="f.errors()" [invalid]="f.invalid()" [touched]="f.touched()" /></mat-error>
+    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `
@@ -68,7 +68,7 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
 
   valueViewModel = linkedSignal<FieldOption<T>[]>(
     () => {
-      const currentValues = this.field().value();
+      const currentValues = this.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
     { equal: isEqual }
@@ -78,8 +78,8 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);
 
-      if (!isEqual(selectedValues, this.field().value())) {
-        this.field().value.set(selectedValues);
+      if (!isEqual(selectedValues, this.field()().value())) {
+        this.field()().value.set(selectedValues);
       }
     });
 

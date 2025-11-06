@@ -19,7 +19,7 @@ import { AsyncPipe } from '@angular/common';
       [labelPosition]="props()?.labelPosition || 'after'"
       [hideIcon]="props()?.hideIcon || false"
       [disableRipple]="props()?.disableRipple || false"
-      [disabled]="f.disabled()"
+      [disabled]="f().disabled()"
       [attr.tabindex]="tabIndex()"
       class="toggle-container"
     >
@@ -29,7 +29,7 @@ import { AsyncPipe } from '@angular/common';
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint | dynamicText | async }}</div>
     }
-    <mat-error><df-mat-errors [errors]="f.errors()" [invalid]="f.invalid()" [touched]="f.touched()" /></mat-error>
+    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `
