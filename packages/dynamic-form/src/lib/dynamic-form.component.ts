@@ -18,7 +18,7 @@ import {
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { filter, forkJoin, map, Observable, of, ReplaySubject, shareReplay, switchMap, take } from 'rxjs';
+import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs';
 import { isEqual, keyBy, memoize } from 'lodash-es';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FormConfig, FormOptions, RegisteredFieldTypes } from './models';
