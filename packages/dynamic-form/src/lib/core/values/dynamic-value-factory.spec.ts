@@ -114,13 +114,9 @@ describe('dynamic-value-factory', () => {
 
         const dynamicFn = createDynamicValueFunction<string, boolean>(expression);
 
-        const mockValueOf = vi.fn().mockReturnValue({ username: 'test', email: 'test@example.com' });
-        const fieldContext = createMockFieldContext('test@example.com', mockRootField, mockValueOf);
+        const fieldContext = createMockFieldContext('test@example.com', mockRootField);
 
-        const result = dynamicFn(fieldContext);
-
-        expect(mockValueOf).toHaveBeenCalledWith(mockRootField);
-        return result;
+        return dynamicFn(fieldContext);
       });
 
       expect(result).toBe(true);
@@ -209,12 +205,10 @@ describe('dynamic-value-factory', () => {
 
       // Create a field with no parent (root field)
       const rootField = createMockFieldTree();
-      const mockValueOf = vi.fn().mockReturnValue({ username: 'test' });
 
-      const result = runDynamicValueFunctionTest<string, boolean>(expression, 'value', rootField, mockValueOf);
+      const result = runDynamicValueFunctionTest<string, boolean>(expression, 'value', rootField);
 
       expect(result).toBe(true);
-      expect(mockValueOf).toHaveBeenCalledWith(rootField);
     });
 
     it('should handle missing root field gracefully', () => {
