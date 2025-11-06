@@ -5,6 +5,7 @@ import { applyLogic } from './logic';
 import { applySchema } from './schema-application';
 import { isGroupField } from '../definitions/default/group-field';
 import { isPageField } from '../definitions/default/page-field';
+import { isRowField } from '../definitions/default/row-field';
 
 /**
  * Single entry point to map field data into form
@@ -17,6 +18,12 @@ export function mapFieldToForm<TValue>(fieldDef: FieldDef<Record<string, unknown
   // Special handling for page fields - flatten child fields to root level
   if (isPageField(fieldDef)) {
     mapPageFieldToForm(fieldDef, fieldPath);
+    return;
+  }
+
+  // Special handling for row fields - flatten child fields to root level (like pages)
+  if (isRowField(fieldDef)) {
+    mapRowFieldToForm(fieldDef, fieldPath);
     return;
   }
 
@@ -130,6 +137,34 @@ function mapPageFieldToForm<TValue>(pageField: FieldDef<Record<string, unknown>>
     }
 
     // Get the field path for this child at the root level (not nested under the page)
+    const childPath = (rootPath as any)[childField.key];
+    if (childPath) {
+      // Recursively apply field mapping to the child field at root level
+      mapFieldToForm(childField, childPath);
+    }
+  }
+}
+
+/**
+ * Maps row field children to the root form schema
+ * Row fields are layout containers (horizontal) that don't create their own form controls
+ * Their children are flattened to the root level of the form, similar to page fields
+ */
+function mapRowFieldToForm<TValue>(rowField: FieldDef<Record<string, unknown>>, rootPath: FieldPath<TValue>): void {
+  if (!isRowField(rowField) || !rowField.fields) {
+    return;
+  }
+
+  // Row fields don't create their own form controls
+  // Instead, their child fields are mapped directly to the root form
+  // Type assertion: After isRowField guard, we know fields contains FieldDef instances
+  const fields = rowField.fields as FieldDef<Record<string, unknown>>[];
+  for (const childField of fields) {
+    if (!childField.key) {
+      continue;
+    }
+
+    // Get the field path for this child at the root level (not nested under the row)
     const childPath = (rootPath as any)[childField.key];
     if (childPath) {
       // Recursively apply field mapping to the child field at root level

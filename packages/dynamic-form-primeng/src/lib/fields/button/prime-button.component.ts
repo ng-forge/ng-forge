@@ -1,35 +1,35 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { Button } from 'primeng/button';
+import { AsyncPipe } from '@angular/common';
+import { ButtonDirective } from 'primeng/button';
 import { DynamicText, DynamicTextPipe, EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
 import { PrimeButtonComponent, PrimeButtonProps } from './prime-button.type';
-import { AsyncPipe } from '@angular/common';
 
 /**
  * PrimeNG button field component
  */
 @Component({
   selector: 'df-prime-button',
-  imports: [Button, DynamicTextPipe, AsyncPipe],
+  imports: [ButtonDirective, DynamicTextPipe, AsyncPipe],
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
   template: `
-    <p-button
+    <button
+      pButton
       [type]="props()?.type || 'button'"
       [severity]="props()?.severity || 'primary'"
       [text]="props()?.text || false"
       [outlined]="props()?.outlined || false"
       [raised]="props()?.raised || false"
       [rounded]="props()?.rounded || false"
-      [icon]="props()?.icon || ''"
-      [iconPos]="props()?.iconPos || 'left'"
-      [label]="(label() | dynamicText | async) ?? ''"
-      [styleClass]="className() || ''"
+      [class]="className() || ''"
       [disabled]="disabled() || false"
       [attr.data-testid]="buttonTestId()"
-      (onClick)="triggerEvent()"
-    />
+      (click)="triggerEvent()"
+    >
+      {{ label() | dynamicText | async }}
+    </button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { untracked } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { DynamicForm, FormConfig, FormEvent, provideDynamicForm, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
 import { providePrimeNG } from 'primeng/config';
 import { delay } from './delay';
@@ -9,16 +8,16 @@ import { waitForDFInit } from './wait-for-df';
 import { withPrimeNGFields } from '../providers/primeng-providers';
 import { PrimeField } from '../types/types';
 import {
-  PrimeInputField,
-  PrimeSelectField,
-  PrimeCheckboxField,
-  PrimeRadioField,
-  PrimeToggleField,
-  PrimeDatepickerField,
-  PrimeSliderField,
   PrimeButtonField,
+  PrimeCheckboxField,
+  PrimeDatepickerField,
+  PrimeInputField,
   PrimeMultiCheckboxField,
+  PrimeRadioField,
+  PrimeSelectField,
+  PrimeSliderField,
   PrimeTextareaField,
+  PrimeToggleField,
 } from '../types/field-types';
 
 /**
@@ -177,6 +176,12 @@ export class PrimeNGFormTestUtils {
     await waitForDFInit(fixture.componentInstance, fixture);
     untracked(() => fixture.detectChanges());
     await delay(0);
+    // Additional change detection cycles for PrimeNG directives to fully initialize
+    // PrimeNG directives need extra cycles to process bindings and apply styles
+    untracked(() => fixture.detectChanges());
+    await delay(100); // Small delay to allow async operations
+    untracked(() => fixture.detectChanges());
+    await delay(0);
   }
 
   /**
@@ -196,24 +201,30 @@ export class PrimeNGFormTestUtils {
   }
 
   /**
-   * Simulates user selection on a PrimeNG dropdown
+   * Simulates user selection on a PrimeNG dropdown/select
    */
-  static async simulatePrimeDropdown(fixture: ComponentFixture<DynamicForm>, selectSelector: string, value: string): Promise<void> {
-    // Find the p-dropdown component
-    const pDropdown = fixture.nativeElement.querySelector(selectSelector);
-    if (!pDropdown) {
+  static async simulatePrimeDropdown(
+    fixture: ComponentFixture<DynamicForm>,
+    selectSelector: string,
+    value: string | string[]
+  ): Promise<void> {
+    // Find the select component (works with both p-select and p-dropdown CSS selectors)
+    const selectElement = fixture.nativeElement.querySelector(selectSelector);
+    if (!selectElement) {
       throw new Error(`PrimeNG dropdown element not found with selector: ${selectSelector}`);
     }
 
-    // Get the component instance and simulate selection
-    const dropdownComponent = fixture.debugElement.query((el) => el.nativeElement === pDropdown)?.componentInstance;
+    // Get the component instance
+    const selectDebugElement = fixture.debugElement.query((el) => el.nativeElement === selectElement);
+    const selectComponent = selectDebugElement?.componentInstance;
 
-    if (dropdownComponent) {
-      dropdownComponent.value = value;
-      dropdownComponent.onChange?.emit({
-        value,
-        originalEvent: new Event('change'),
-      });
+    if (selectComponent) {
+      // Write directly to the underlying form field using Field directive
+      // PrimeNG Select components use the [field] directive which binds to form signals
+      const fieldInstance = selectComponent.field?.();
+      if (fieldInstance && fieldInstance.value) {
+        fieldInstance.value.set(value);
+      }
     }
 
     untracked(() => fixture.detectChanges());
@@ -227,23 +238,51 @@ export class PrimeNGFormTestUtils {
     let checkboxElement: Element | null = null;
 
     // Handle complex selectors with multi-checkbox components
-    if (selector.includes('df-prime-multi-checkbox') && selector.includes('p-checkbox:last-of-type')) {
-      // Extract the multi-checkbox selector and the p-checkbox selector
+    if (selector.includes('df-prime-multi-checkbox')) {
       const parts = selector.split(' ');
       const multiCheckboxSelector = parts[0];
       const pCheckboxSelector = parts[1];
 
-      const multiCheckboxElement = fixture.nativeElement.querySelector(multiCheckboxSelector);
-      if (multiCheckboxElement && pCheckboxSelector.includes(':last-of-type')) {
+      // Find the multi-checkbox container
+      let multiCheckboxElement: Element | null = null;
+      if (multiCheckboxSelector.includes(':nth-of-type')) {
+        const match = multiCheckboxSelector.match(/:nth-of-type\((\d+)\)/);
+        if (match) {
+          const index = parseInt(match[1], 10) - 1; // Convert to 0-indexed
+          const allMultiCheckboxes = fixture.nativeElement.querySelectorAll('df-prime-multi-checkbox');
+          multiCheckboxElement = allMultiCheckboxes[index];
+        }
+      } else {
+        multiCheckboxElement = fixture.nativeElement.querySelector(multiCheckboxSelector);
+      }
+
+      if (multiCheckboxElement) {
         const checkboxes = multiCheckboxElement.querySelectorAll('p-checkbox');
-        checkboxElement = checkboxes[checkboxes.length - 1];
+        // Handle p-checkbox selector
+        if (pCheckboxSelector.includes(':nth-of-type')) {
+          const match = pCheckboxSelector.match(/:nth-of-type\((\d+)\)/);
+          if (match) {
+            const index = parseInt(match[1], 10) - 1; // Convert to 0-indexed
+            checkboxElement = checkboxes[index];
+          }
+        } else if (pCheckboxSelector.includes(':first-of-type')) {
+          checkboxElement = checkboxes[0];
+        } else if (pCheckboxSelector.includes(':last-of-type')) {
+          checkboxElement = checkboxes[checkboxes.length - 1];
+        }
       }
     }
     // Handle simple selectors that might not work in test environment
-    else if (selector.includes(':nth-of-type(3)') || selector.includes(':last-of-type')) {
+    else if (selector.includes(':nth-of-type') || selector.includes(':first-of-type') || selector.includes(':last-of-type')) {
       const allCheckboxes = fixture.nativeElement.querySelectorAll('p-checkbox');
-      if (selector.includes(':nth-of-type(3)')) {
-        checkboxElement = allCheckboxes[2]; // 0-indexed
+      if (selector.includes(':nth-of-type')) {
+        const match = selector.match(/:nth-of-type\((\d+)\)/);
+        if (match) {
+          const index = parseInt(match[1], 10) - 1; // Convert to 0-indexed
+          checkboxElement = allCheckboxes[index];
+        }
+      } else if (selector.includes(':first-of-type')) {
+        checkboxElement = allCheckboxes[0];
       } else if (selector.includes(':last-of-type')) {
         checkboxElement = allCheckboxes[allCheckboxes.length - 1];
       }

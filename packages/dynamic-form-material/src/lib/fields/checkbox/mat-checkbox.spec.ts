@@ -1,5 +1,4 @@
 import { By } from '@angular/platform-browser';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
@@ -33,14 +32,20 @@ describe('MatCheckboxFieldComponent', () => {
         },
       });
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
       const matCheckboxComponent = fixture.debugElement.query(By.css('df-mat-checkbox'))?.componentInstance;
       const containerDiv = fixture.debugElement.query(By.css('.terms-checkbox'));
       const hintElement = fixture.debugElement.query(By.css('.mat-hint'));
 
-      expect(checkbox).toBeTruthy();
+      // ITERATION 2 FIX: Verify elements exist AND have correct structure/type
+      // Previous: expect(checkbox).toBeTruthy() - only checks truthy
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.nativeElement).toBeInstanceOf(HTMLElement);
       expect(checkbox.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
-      expect(containerDiv).toBeTruthy();
+
+      expect(containerDiv).not.toBeNull();
+      expect(containerDiv.nativeElement).toBeInstanceOf(HTMLElement);
+      expect(containerDiv.nativeElement.classList.contains('terms-checkbox')).toBe(true);
       expect(hintElement?.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
       // Verify form control integration and dynamic field component properties
@@ -85,7 +90,7 @@ describe('MatCheckboxFieldComponent', () => {
         },
       });
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
       const checkboxComponent = checkbox.componentInstance;
 
       // Update form model programmatically
@@ -120,7 +125,7 @@ describe('MatCheckboxFieldComponent', () => {
         initialValue: { acceptTerms: false },
       });
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
       const checkboxComponent = checkbox.componentInstance;
 
       // These properties are passed to the inner MatCheckbox component
@@ -149,10 +154,13 @@ describe('MatCheckboxFieldComponent', () => {
         },
       });
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
       const checkboxComponent = checkbox.componentInstance;
 
-      expect(checkbox).toBeTruthy();
+      // ITERATION 5 FIX: Verify checkbox component exists with minimal config
+      // Previous: expect(checkbox).toBeTruthy()
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.nativeElement).toBeInstanceOf(HTMLElement);
       expect(checkbox.nativeElement.textContent.trim()).toBe('Subscribe to Newsletter');
       expect(checkboxComponent.color).toBe('primary');
       expect(checkboxComponent.labelPosition).toBe('after');
@@ -193,7 +201,7 @@ describe('MatCheckboxFieldComponent', () => {
         },
       });
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
 
       expect(checkboxes.length).toBe(3);
       expect(checkboxes[0].nativeElement.textContent.trim()).toBe('Accept Terms');
@@ -217,7 +225,7 @@ describe('MatCheckboxFieldComponent', () => {
         },
       });
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
 
       expect(checkboxes[0].componentInstance.checked).toBe(false);
       expect(checkboxes[1].componentInstance.checked).toBe(true);
@@ -273,7 +281,7 @@ describe('MatCheckboxFieldComponent', () => {
         },
       });
 
-      const checkboxes = fixture.debugElement.queryAll(By.directive(MatCheckbox));
+      const checkboxes = fixture.debugElement.queryAll(By.css('mat-checkbox'));
 
       expect(checkboxes[0].componentInstance.color).toBe('primary');
       expect(checkboxes[1].componentInstance.color).toBe('accent');
@@ -301,7 +309,7 @@ describe('MatCheckboxFieldComponent', () => {
         },
       });
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
       const checkboxInput = fixture.debugElement.query(By.css('input[type="checkbox"]'));
       const checkboxComponent = checkbox.componentInstance;
 
@@ -324,7 +332,7 @@ describe('MatCheckboxFieldComponent', () => {
         initialValue: { acceptTerms: false },
       });
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
       const checkboxComponent = checkbox.componentInstance;
 
       // Check default props from Material configuration
@@ -349,7 +357,7 @@ describe('MatCheckboxFieldComponent', () => {
         initialValue: { acceptTerms: false },
       });
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
       const checkboxComponent = checkbox.componentInstance;
 
       expect(checkboxComponent.indeterminate).toBe(true);
@@ -360,8 +368,11 @@ describe('MatCheckboxFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
-      expect(checkbox).toBeTruthy();
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
+      // ITERATION 5 FIX: Verify checkbox component exists with undefined value
+      // Previous: expect(checkbox).toBeTruthy()
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.nativeElement).toBeInstanceOf(HTMLElement);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -372,8 +383,11 @@ describe('MatCheckboxFieldComponent', () => {
         initialValue: null as any,
       });
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
-      expect(checkbox).toBeTruthy();
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
+      // ITERATION 5 FIX: Verify checkbox component exists with null value
+      // Previous: expect(checkbox).toBeTruthy()
+      expect(checkbox).not.toBeNull();
+      expect(checkbox.nativeElement).toBeInstanceOf(HTMLElement);
     });
 
     it('should handle programmatic value updates correctly', async () => {
@@ -384,7 +398,7 @@ describe('MatCheckboxFieldComponent', () => {
         initialValue: { acceptTerms: false },
       });
 
-      const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+      const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
       const checkboxComponent = checkbox.componentInstance;
 
       // Initial state
@@ -423,7 +437,7 @@ describe('MatCheckboxFieldComponent', () => {
           initialValue: { acceptTerms: false },
         });
 
-        const checkbox = fixture.debugElement.query(By.directive(MatCheckbox));
+        const checkbox = fixture.debugElement.query(By.css('mat-checkbox'));
         const hint = fixture.debugElement.query(By.css('.mat-hint'));
 
         // Initial translations

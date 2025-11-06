@@ -20,6 +20,12 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
     case 'custom':
       return evaluateCustomFunction(expression, context);
 
+    case 'and':
+      return evaluateAndCondition(expression, context);
+
+    case 'or':
+      return evaluateOrCondition(expression, context);
+
     default:
       return false;
   }
@@ -65,4 +71,18 @@ function evaluateCustomFunction(expression: ConditionalExpression, context: Eval
     console.error('Error executing custom function:', expression.expression, error);
     return false;
   }
+}
+
+function evaluateAndCondition(expression: ConditionalExpression, context: EvaluationContext): boolean {
+  if (!expression.conditions || expression.conditions.length === 0) return false;
+
+  // All conditions must be true for AND logic
+  return expression.conditions.every((condition) => evaluateCondition(condition, context));
+}
+
+function evaluateOrCondition(expression: ConditionalExpression, context: EvaluationContext): boolean {
+  if (!expression.conditions || expression.conditions.length === 0) return false;
+
+  // At least one condition must be true for OR logic
+  return expression.conditions.some((condition) => evaluateCondition(condition, context));
 }

@@ -41,7 +41,10 @@ describe('MatTextareaFieldComponent', () => {
       const label = fixture.debugElement.query(By.css('mat-label'));
       const hint = fixture.debugElement.query(By.css('mat-hint'));
 
-      expect(textarea).toBeTruthy();
+      // ITERATION 4 FIX: Verify textarea element is correct type
+      // Previous: expect(textarea).toBeTruthy()
+      expect(textarea).not.toBeNull();
+      expect(textarea.nativeElement).toBeInstanceOf(HTMLTextAreaElement);
       expect(textarea.nativeElement.getAttribute('placeholder')).toBe('Enter your comments');
       expect(textarea.nativeElement.getAttribute('rows')).toBe('6');
       expect(textarea.nativeElement.getAttribute('cols')).toBe('50');
@@ -248,7 +251,10 @@ describe('MatTextareaFieldComponent', () => {
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
       const textarea = fixture.debugElement.query(By.css('textarea[matInput]'));
-      expect(textarea).toBeTruthy();
+      // ITERATION 5 FIX: Verify textarea element exists with undefined value
+      // Previous: expect(textarea).toBeTruthy()
+      expect(textarea).not.toBeNull();
+      expect(textarea.nativeElement).toBeInstanceOf(HTMLTextAreaElement);
     });
 
     it('should handle null form values gracefully', async () => {
@@ -260,7 +266,10 @@ describe('MatTextareaFieldComponent', () => {
       });
 
       const textarea = fixture.debugElement.query(By.css('textarea[matInput]'));
-      expect(textarea).toBeTruthy();
+      // ITERATION 5 FIX: Verify textarea element exists with null value
+      // Previous: expect(textarea).toBeTruthy()
+      expect(textarea).not.toBeNull();
+      expect(textarea.nativeElement).toBeInstanceOf(HTMLTextAreaElement);
     });
 
     it('should handle empty string values correctly', async () => {

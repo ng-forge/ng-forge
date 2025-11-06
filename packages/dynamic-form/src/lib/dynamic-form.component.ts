@@ -18,10 +18,10 @@ import {
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { filter, forkJoin, map, Observable, of, switchMap } from 'rxjs';
+import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs';
 import { isEqual, keyBy, memoize } from 'lodash-es';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
-import { FormConfig, RegisteredFieldTypes } from './models';
+import { FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
@@ -86,9 +86,10 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
   template: `
     <form
       class="df-form"
-      [class.disabled]="formOptions().disabled"
+      [class.disabled]="effectiveFormOptions().disabled"
       [class.df-form-paged]="formModeDetection().mode === 'paged'"
       [class.df-form-non-paged]="formModeDetection().mode === 'non-paged'"
+      (submit)="onSubmit($event)"
     >
       @if (formModeDetection().mode === 'paged') {
       <!-- Paged form: Use page orchestrator with page fields -->
@@ -131,7 +132,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: FieldDef<Record<string, unknown>>[], registry: Map<string, any>) => flattenFields(fields, registry),
+    (fields: FieldDef<Record<string, unknown>>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
   );
@@ -142,7 +143,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>, registry: Map<string, any>) => {
+    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
       const result: Record<string, unknown> = {};
       for (const [key, field] of Object.entries(fieldsById)) {
         const defaultValue = getFieldDefaultValue(field, registry);
@@ -191,6 +192,25 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * ```
    */
   config: InputSignal<FormConfig<TFields>> = input.required<FormConfig<TFields>>();
+
+  /**
+   * Form options input for dynamic runtime configuration.
+   *
+   * When provided, overrides options from config. Useful for dynamically
+   * enabling/disabling the form or changing validation behavior at runtime.
+   *
+   * @example
+   * ```typescript
+   * // Dynamically disable form
+   * formOptionsSignal = signal<FormOptions>({ disabled: true });
+   *
+   * // In template
+   * <dynamic-form [config]="config" [formOptions]="formOptionsSignal()" />
+   * ```
+   *
+   * @defaultValue undefined
+   */
+  formOptions = input<FormOptions | undefined>(undefined);
 
   /**
    * Form values for two-way data binding.
@@ -275,13 +295,34 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly entity = linkedSignal(() => {
     const inputValue = this.value();
     const defaults = this.defaultValues();
+    const setup = this.formSetup();
 
-    return { ...defaults, ...inputValue } as TModel;
+    const combined = { ...defaults, ...inputValue };
+
+    // Filter to only include fields that exist in the current schema
+    // This prevents "orphan field" errors during field removal
+    if (setup.schemaFields && setup.schemaFields.length > 0) {
+      const validKeys = new Set(setup.schemaFields.map((field) => field.key).filter((key: string | undefined) => key !== undefined));
+
+      const filtered: Record<string, unknown> = {};
+      for (const key of Object.keys(combined)) {
+        if (validKeys.has(key)) {
+          filtered[key] = (combined as Record<string, unknown>)[key];
+        }
+      }
+      return filtered as TModel;
+    }
+
+    return combined as TModel;
   });
 
-  readonly formOptions = computed(() => {
+  readonly effectiveFormOptions = computed(() => {
     const config = this.config();
-    return config.options || {};
+    const configOptions = config.options || {};
+    const inputOptions = this.formOptions();
+
+    // Merge config options with input options, input takes precedence
+    return { ...configOptions, ...inputOptions };
   });
 
   private readonly form = computed<ReturnType<typeof form<TModel>>>(() => {
@@ -354,7 +395,11 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    *
    * @returns `true` if form is disabled through configuration or programmatically
    */
-  readonly disabled = computed(() => this.form()().disabled());
+  readonly disabled = computed(() => {
+    const optionsDisabled = this.effectiveFormOptions().disabled;
+    const formDisabled = this.form()().disabled();
+    return optionsDisabled ?? formDisabled;
+  });
 
   /**
    * Emitted when form validity state changes.
@@ -408,9 +453,15 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   /**
    * Observable that emits when all components (pages + rows + groups + dynamic-form) are initialized.
-   * Uses the external utility function to track initialization count.
+   * Uses a ReplaySubject to ensure exactly one emission that can be received by late subscribers.
    */
-  readonly initialized$ = this.createInitializedObservable();
+  private readonly initializedSubject = new ReplaySubject<boolean>(1);
+  readonly initialized$ = this.initializedSubject.asObservable();
+
+  constructor() {
+    // Set up initialization tracking
+    this.setupInitializationTracking();
+  }
 
   /**
    * Emitted when all form components are initialized and ready for interaction.
@@ -480,10 +531,19 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   }
 
   /**
+   * Handles form submission. Prevents default form submission behavior
+   * and emits the submit event through the event bus.
+   */
+  onSubmit(event: Event): void {
+    event.preventDefault();
+    this.eventBus.dispatch(SubmitEvent, this.value());
+  }
+
+  /**
    * Creates an observable that tracks when all form components are initialized.
    * The count includes: 1 dynamic-form + pages + rows + groups
    */
-  private createInitializedObservable(): Observable<boolean> {
+  private setupInitializationTracking(): void {
     const totalComponentsCount = computed(() => {
       const fields = this.formSetup().fields;
       if (!fields) return 1; // Just the dynamic-form component
@@ -495,35 +555,51 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       return componentCount + 1; // +1 for dynamic-form component
     });
 
-    return toObservable(totalComponentsCount).pipe(
-      switchMap((count) => {
-        if (count === 1) {
-          // Only dynamic-form component, emit immediately when it initializes
-          return this.eventBus.subscribe<ComponentInitializedEvent>('component-initialized').pipe(
-            filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
-            map(() => true)
-          );
-        }
+    // Only track initialization for the initial component count
+    // Use take(1) to prevent re-subscriptions if totalComponentsCount changes
+    toObservable(totalComponentsCount)
+      .pipe(
+        take(1),
+        switchMap((count) => {
+          if (count === 1) {
+            // Only dynamic-form component, emit immediately when it initializes
+            return this.eventBus.subscribe<ComponentInitializedEvent>('component-initialized').pipe(
+              filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
+              map(() => true),
+              take(1) // Only take the first initialization event
+            );
+          }
 
-        return createInitializationTracker(this.eventBus, count);
-      })
-    );
+          return createInitializationTracker(this.eventBus, count);
+        })
+      )
+      .subscribe({
+        next: (initialized) => {
+          this.initializedSubject.next(initialized);
+          this.initializedSubject.complete();
+        },
+        error: (error) => {
+          this.initializedSubject.error(error);
+        },
+      });
   }
 
   /**
    * Handle page change events from the page orchestrator
-   * @param event The page change event
+   * @param _event The page change event
    */
-  onPageChanged(event: any): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onPageChanged(_event: unknown): void {
     // Re-emit the page change event for external consumers
     // This allows users to listen to page changes at the form level
   }
 
   /**
    * Handle navigation state changes from the page orchestrator
-   * @param state The new navigation state
+   * @param _state The new navigation state
    */
-  onNavigationStateChanged(state: any): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onNavigationStateChanged(_state: unknown): void {
     // Could be used for additional state management or logging
     // Currently just provides a hook for future functionality
   }

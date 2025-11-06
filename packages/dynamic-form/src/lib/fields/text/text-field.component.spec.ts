@@ -31,12 +31,17 @@ describe('TextFieldComponent', () => {
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    // Verify test host component is created
+    expect(component).toBeDefined();
+    expect(component).toBeInstanceOf(TestHostComponent);
   });
 
   it('should render text content in paragraph by default', () => {
     const element = fixture.nativeElement.querySelector('p');
-    expect(element).toBeTruthy();
+    // ITERATION 6 FIX: Verify element is correct HTML type
+    // Previous: expect(element).toBeTruthy()
+    expect(element).not.toBeNull();
+    expect(element).toBeInstanceOf(HTMLParagraphElement);
     expect(element.textContent.trim()).toBe('Test content');
   });
 
@@ -50,7 +55,10 @@ describe('TextFieldComponent', () => {
     fixture.detectChanges();
 
     const h1Element = fixture.nativeElement.querySelector('h1');
-    expect(h1Element).toBeTruthy();
+    // ITERATION 6 FIX: Verify element is correct HTML heading type
+    // Previous: expect(h1Element).toBeTruthy()
+    expect(h1Element).not.toBeNull();
+    expect(h1Element).toBeInstanceOf(HTMLHeadingElement);
     expect(h1Element.textContent.trim()).toBe('Test content');
   });
 
@@ -62,7 +70,10 @@ describe('TextFieldComponent', () => {
       fixture.detectChanges();
 
       const element = fixture.nativeElement.querySelector(elementType);
-      expect(element).toBeTruthy();
+      // ITERATION 6 FIX: Verify element exists and is HTML element
+      // Previous: expect(element).toBeTruthy()
+      expect(element).not.toBeNull();
+      expect(element).toBeInstanceOf(HTMLElement);
       expect(element.textContent.trim()).toBe('Test content');
     });
   });
