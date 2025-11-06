@@ -140,7 +140,7 @@ export class PrimeNGFormTestUtils {
   static async createTest(testConfig: PrimeNGFormTestConfig): Promise<PrimeNGFormTestResult> {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
-      providers: [provideAnimations(), providePrimeNG(), provideDynamicForm(...withPrimeNGFields()), ...(testConfig.providers || [])],
+      providers: [provideAnimations(), providePrimeNG({}), provideDynamicForm(...withPrimeNGFields()), ...(testConfig.providers || [])],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(DynamicForm<RegisteredFieldTypes[]>);
