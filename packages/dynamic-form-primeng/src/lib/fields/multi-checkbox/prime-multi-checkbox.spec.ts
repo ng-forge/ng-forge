@@ -119,9 +119,9 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
 
       // Check that checkboxes reflect the state
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
-      expect(checkboxes[0].componentInstance.checked()).toBe(true); // reading
-      expect(checkboxes[1].componentInstance.checked()).toBe(false); // gaming
-      expect(checkboxes[2].componentInstance.checked()).toBe(true); // cooking
+      expect(checkboxes[0].componentInstance.checked).toBe(true); // reading
+      expect(checkboxes[1].componentInstance.checked).toBe(false); // gaming
+      expect(checkboxes[2].componentInstance.checked).toBe(true); // cooking
     });
   });
 
@@ -196,9 +196,9 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
 
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
 
-      expect(checkboxes[0].componentInstance.disabled()).toBe(false);
-      expect(checkboxes[1].componentInstance.disabled()).toBe(true);
-      expect(checkboxes[2].componentInstance.disabled()).toBe(false);
+      expect(checkboxes[0].componentInstance.disabled).toBe(false);
+      expect(checkboxes[1].componentInstance.disabled).toBe(true);
+      expect(checkboxes[2].componentInstance.disabled).toBe(false);
     });
 
     it('should handle field-level disabled state', async () => {
@@ -223,7 +223,7 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
 
       checkboxes.forEach((checkbox) => {
-        expect(checkbox.componentInstance.disabled()).toBe(true);
+        expect(checkbox.componentInstance.disabled).toBe(true);
       });
     });
   });
@@ -252,8 +252,8 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
       const primaryCheckbox = checkboxGroups[0].query(By.directive(Checkbox));
       const accentCheckbox = checkboxGroups[1].query(By.directive(Checkbox));
 
-      expect(primaryCheckbox.componentInstance.styleClass()).toBe('primary-checkbox');
-      expect(accentCheckbox.componentInstance.styleClass()).toBe('accent-checkbox');
+      expect(primaryCheckbox.componentInstance.styleClass).toBe('primary-checkbox');
+      expect(accentCheckbox.componentInstance.styleClass).toBe('accent-checkbox');
     });
   });
 
@@ -275,7 +275,7 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
       });
 
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
-      expect(checkboxes[0].componentInstance.binary()).toBe(false);
+      expect(checkboxes[0].componentInstance.binary).toBe(false);
     });
 
     it('should not display hint when not provided', async () => {
@@ -469,8 +469,8 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
       expect(PrimeNGFormTestUtils.getFormValue(component).hobbies).toEqual(['reading']);
 
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
-      expect(checkboxes[0].componentInstance.checked()).toBe(true);
-      expect(checkboxes[1].componentInstance.checked()).toBe(false);
+      expect(checkboxes[0].componentInstance.checked).toBe(true);
+      expect(checkboxes[1].componentInstance.checked).toBe(false);
     });
   });
 

@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { untracked } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { DynamicForm, FormConfig, FormEvent, provideDynamicForm, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import { providePrimeNG } from 'primeng/config';
 import { delay } from './delay';
 import { waitForDFInit } from './wait-for-df';
 import { withPrimeNGFields } from '../providers/primeng-providers';
@@ -139,7 +140,7 @@ export class PrimeNGFormTestUtils {
   static async createTest(testConfig: PrimeNGFormTestConfig): Promise<PrimeNGFormTestResult> {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
-      providers: [provideAnimations(), provideDynamicForm(...withPrimeNGFields()), ...(testConfig.providers || [])],
+      providers: [provideAnimations(), providePrimeNG(), provideDynamicForm(...withPrimeNGFields()), ...(testConfig.providers || [])],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(DynamicForm<RegisteredFieldTypes[]>);
