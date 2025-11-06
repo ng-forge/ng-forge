@@ -4,6 +4,7 @@ import {
   ComponentRef,
   computed,
   DestroyRef,
+  effect,
   inject,
   Injector,
   input,
@@ -337,6 +338,40 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       this.value.set(currentEntity);
     }
   });
+
+  /**
+   * Effect that removes orphaned field values when fields are removed from config.
+   * This ensures that when a field is removed, its value is also removed from the form.
+   */
+  private readonly cleanupRemovedFields = (() => {
+    let previousFieldKeys: Set<string> | null = null;
+
+    return effect(() => {
+      const setup = this.formSetup();
+      const currentFieldKeys = new Set(
+        setup.schemaFields.map((field: any) => field.key).filter((key: string | undefined) => key !== undefined)
+      );
+
+      // Skip on first run (no previous keys to compare)
+      if (previousFieldKeys === null) {
+        previousFieldKeys = currentFieldKeys;
+        return;
+      }
+
+      const currentEntity = this.entity();
+      const entityKeys = Object.keys(currentEntity);
+      const orphanedKeys = entityKeys.filter((key) => !currentFieldKeys.has(key));
+
+      if (orphanedKeys.length > 0) {
+        // Create new entity without orphaned keys
+        const cleanedEntity = { ...currentEntity };
+        orphanedKeys.forEach((key) => delete cleanedEntity[key]);
+        untracked(() => this.entity.set(cleanedEntity as TModel));
+      }
+
+      previousFieldKeys = currentFieldKeys;
+    });
+  })();
 
   /**
    * Signal indicating whether the form is valid.
