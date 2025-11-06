@@ -132,7 +132,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: FieldDef<Record<string, unknown>>[], registry: Map<string, any>) => flattenFields(fields, registry),
+    (fields: FieldDef<Record<string, unknown>>[], registry: Map<string, unknown>) => flattenFields(fields, registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
   );
@@ -143,7 +143,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>, registry: Map<string, any>) => {
+    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>, registry: Map<string, unknown>) => {
       const result: Record<string, unknown> = {};
       for (const [key, field] of Object.entries(fieldsById)) {
         const defaultValue = getFieldDefaultValue(field, registry);
@@ -302,7 +302,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     // Filter to only include fields that exist in the current schema
     // This prevents "orphan field" errors during field removal
     if (setup.schemaFields && setup.schemaFields.length > 0) {
-      const validKeys = new Set(setup.schemaFields.map((field: any) => field.key).filter((key: string | undefined) => key !== undefined));
+      const validKeys = new Set(setup.schemaFields.map((field) => field.key).filter((key: string | undefined) => key !== undefined));
 
       const filtered: Record<string, unknown> = {};
       for (const key of Object.keys(combined)) {
@@ -586,18 +586,20 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   /**
    * Handle page change events from the page orchestrator
-   * @param event The page change event
+   * @param _event The page change event
    */
-  onPageChanged(event: any): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onPageChanged(_event: unknown): void {
     // Re-emit the page change event for external consumers
     // This allows users to listen to page changes at the form level
   }
 
   /**
    * Handle navigation state changes from the page orchestrator
-   * @param state The new navigation state
+   * @param _state The new navigation state
    */
-  onNavigationStateChanged(state: any): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onNavigationStateChanged(_state: unknown): void {
     // Could be used for additional state management or logging
     // Currently just provides a hook for future functionality
   }

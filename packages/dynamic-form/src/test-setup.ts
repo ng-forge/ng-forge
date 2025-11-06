@@ -31,7 +31,7 @@ import { getTestBed } from '@angular/core/testing';
  * from failing the test suite.
  */
 class TestErrorHandler implements ErrorHandler {
-  handleError(error: any): void {
+  handleError(error: unknown): void {
     const message = error?.message || error?.toString() || '';
 
     // Suppress orphan field errors during dynamic field removal
