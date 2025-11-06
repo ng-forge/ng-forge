@@ -29,16 +29,20 @@ describe('schema-transformation', () => {
       it('should log error when schema not found', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
           const config: SchemaApplicationConfig = {
             type: 'apply',
             schema: 'nonexistentSchema',
           };
 
-          applySchema(config, formInstance().controls.email);
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              applySchema(config, path.email);
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
 
           expect(consoleErrorSpy).toHaveBeenCalledWith('Schema not found: nonexistentSchema');
           consoleErrorSpy.mockRestore();
@@ -48,8 +52,6 @@ describe('schema-transformation', () => {
       it('should handle found schema without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
 
           schemaRegistry.registerSchema({
             name: 'emailSchema',
@@ -61,9 +63,15 @@ describe('schema-transformation', () => {
             schema: 'emailSchema',
           };
 
-          expect(() => {
-            applySchema(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applySchema(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -72,8 +80,6 @@ describe('schema-transformation', () => {
       it('should handle apply strategy without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
 
           schemaRegistry.registerSchema({
             name: 'testSchema',
@@ -85,17 +91,21 @@ describe('schema-transformation', () => {
             schema: 'testSchema',
           };
 
-          expect(() => {
-            applySchema(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applySchema(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle applyWhen strategy with condition', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ contactMethod: 'email', email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
 
           schemaRegistry.registerSchema({
             name: 'testSchema',
@@ -113,17 +123,21 @@ describe('schema-transformation', () => {
             },
           };
 
-          expect(() => {
-            applySchema(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applySchema(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should skip applyWhen when condition is missing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
 
           schemaRegistry.registerSchema({
             name: 'testSchema',
@@ -135,17 +149,21 @@ describe('schema-transformation', () => {
             schema: 'testSchema',
           };
 
-          expect(() => {
-            applySchema(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applySchema(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle applyWhenValue strategy with type predicate', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ value: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
 
           schemaRegistry.registerSchema({
             name: 'testSchema',
@@ -158,17 +176,21 @@ describe('schema-transformation', () => {
             typePredicate: 'typeof value === "string"',
           };
 
-          expect(() => {
-            applySchema(config, formInstance().controls.value);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applySchema(config, path.value);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should skip applyWhenValue when typePredicate is missing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ value: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
 
           schemaRegistry.registerSchema({
             name: 'testSchema',
@@ -180,17 +202,21 @@ describe('schema-transformation', () => {
             schema: 'testSchema',
           };
 
-          expect(() => {
-            applySchema(config, formInstance().controls.value);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applySchema(config, path.value);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle applyEach strategy for array fields', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ items: ['item1', 'item2'] });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
 
           schemaRegistry.registerSchema({
             name: 'testSchema',
@@ -202,17 +228,21 @@ describe('schema-transformation', () => {
             schema: 'testSchema',
           };
 
-          expect(() => {
-            applySchema(config, formInstance().controls.items);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applySchema(config, path.items);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 
       it('should handle unknown strategy type without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
 
           schemaRegistry.registerSchema({
             name: 'testSchema',
@@ -224,9 +254,15 @@ describe('schema-transformation', () => {
             schema: 'testSchema',
           };
 
-          expect(() => {
-            applySchema(config, formInstance().controls.email);
-          }).not.toThrow();
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
+                applySchema(config, path.email);
+              }).not.toThrow();
+            })
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
     });
@@ -236,106 +272,126 @@ describe('schema-transformation', () => {
     it('should handle schema with validators without throwing', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
-        const schema: SchemaDefinition = {
+        const schemaDef: SchemaDefinition = {
           name: 'testSchema',
           validators: [{ type: 'required' }, { type: 'email' }],
         };
 
-        const schemaFn = createSchemaFunction(schema);
+        const schemaFn = createSchemaFunction(schemaDef);
 
-        expect(() => {
-          schemaFn(formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              schemaFn(path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
 
     it('should handle schema with logic without throwing', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
-        const schema: SchemaDefinition = {
+        const schemaDef: SchemaDefinition = {
           name: 'testSchema',
           logic: [{ type: 'hidden', condition: false }],
         };
 
-        const schemaFn = createSchemaFunction(schema);
+        const schemaFn = createSchemaFunction(schemaDef);
 
-        expect(() => {
-          schemaFn(formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              schemaFn(path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
 
     it('should handle schema with sub-schemas without throwing', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
         schemaRegistry.registerSchema({
           name: 'subSchema',
           validators: [{ type: 'email' }],
         });
 
-        const schema: SchemaDefinition = {
+        const schemaDef: SchemaDefinition = {
           name: 'testSchema',
           subSchemas: [{ type: 'apply', schema: 'subSchema' }],
         };
 
-        const schemaFn = createSchemaFunction(schema);
+        const schemaFn = createSchemaFunction(schemaDef);
 
-        expect(() => {
-          schemaFn(formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              schemaFn(path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
 
     it('should handle empty schema without throwing', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
-        const schema: SchemaDefinition = {
+        const schemaDef: SchemaDefinition = {
           name: 'emptySchema',
         };
 
-        const schemaFn = createSchemaFunction(schema);
+        const schemaFn = createSchemaFunction(schemaDef);
 
-        expect(() => {
-          schemaFn(formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              schemaFn(path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
 
     it('should handle schema with validators, logic, and sub-schemas', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
         schemaRegistry.registerSchema({
           name: 'subSchema',
           validators: [{ type: 'email' }],
         });
 
-        const schema: SchemaDefinition = {
+        const schemaDef: SchemaDefinition = {
           name: 'testSchema',
           validators: [{ type: 'required' }],
           logic: [{ type: 'hidden', condition: false }],
           subSchemas: [{ type: 'apply', schema: 'subSchema' }],
         };
 
-        const schemaFn = createSchemaFunction(schema);
+        const schemaFn = createSchemaFunction(schemaDef);
 
-        expect(() => {
-          schemaFn(formInstance().controls.email);
-        }).not.toThrow();
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            expect(() => {
+              schemaFn(path.email);
+            }).not.toThrow();
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
       });
     });
   });
@@ -376,13 +432,11 @@ describe('schema-transformation', () => {
           ];
 
           const formValue = signal({ field1: '', field2: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const schemaFn = createSchemaFromFields(fields, registry);
 
           expect(() => {
-            schemaFn(formInstance().controls as any);
+            const formInstance = form(formValue, schemaFn);
+            rootFormRegistry.registerRootForm(formInstance);
           }).not.toThrow();
         });
       });
@@ -418,13 +472,11 @@ describe('schema-transformation', () => {
           ];
 
           const formValue = signal({ field1: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const schemaFn = createSchemaFromFields(fields, registry);
 
           expect(() => {
-            schemaFn(formInstance().controls as any);
+            const formInstance = form(formValue, schemaFn);
+            rootFormRegistry.registerRootForm(formInstance);
           }).not.toThrow();
         });
       });
@@ -445,13 +497,11 @@ describe('schema-transformation', () => {
           ];
 
           const formValue = signal({ field1: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const schemaFn = createSchemaFromFields(fields, registry);
 
           expect(() => {
-            schemaFn(formInstance().controls as any);
+            const formInstance = form(formValue, schemaFn);
+            rootFormRegistry.registerRootForm(formInstance);
           }).not.toThrow();
         });
       });
@@ -472,13 +522,11 @@ describe('schema-transformation', () => {
           ];
 
           const formValue = signal({ field2: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const schemaFn = createSchemaFromFields(fields, registry);
 
           expect(() => {
-            schemaFn(formInstance().controls as any);
+            const formInstance = form(formValue, schemaFn);
+            rootFormRegistry.registerRootForm(formInstance);
           }).not.toThrow();
         });
       });
@@ -499,13 +547,11 @@ describe('schema-transformation', () => {
           ];
 
           const formValue = signal({ field1: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const schemaFn = createSchemaFromFields(fields, registry);
 
           expect(() => {
-            schemaFn(formInstance().controls as any);
+            const formInstance = form(formValue, schemaFn);
+            rootFormRegistry.registerRootForm(formInstance);
           }).not.toThrow();
         });
       });
@@ -517,13 +563,11 @@ describe('schema-transformation', () => {
           const fields: FieldDef[] = [{ key: 'field1', type: 'input' }];
 
           const formValue = signal({ field1: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const schemaFn = createSchemaFromFields(fields, registry);
 
           expect(() => {
-            schemaFn(formInstance().controls as any);
+            const formInstance = form(formValue, schemaFn);
+            rootFormRegistry.registerRootForm(formInstance);
           }).not.toThrow();
         });
       });
@@ -540,13 +584,11 @@ describe('schema-transformation', () => {
           ];
 
           const formValue = signal({ field1: '' });
-          const formInstance = form(formValue);
-          rootFormRegistry.registerRootForm(formInstance);
-
           const schemaFn = createSchemaFromFields(fields, registry);
 
           expect(() => {
-            schemaFn(formInstance().controls as any);
+            const formInstance = form(formValue, schemaFn);
+            rootFormRegistry.registerRootForm(formInstance);
           }).not.toThrow();
         });
       });
@@ -599,7 +641,7 @@ describe('schema-transformation', () => {
       });
     });
 
-    it('should skip fields with undefined default values', () => {
+    it('should use empty string for fields without explicit default values', () => {
       const registry = new Map<string, FieldTypeDefinition>([['input', { valueHandling: 'include' }]]);
 
       const fields: FieldDef[] = [
@@ -610,6 +652,7 @@ describe('schema-transformation', () => {
       const defaultValues = fieldsToDefaultValues(fields, registry);
 
       expect(defaultValues).toEqual({
+        field1: '',
         field2: 'value2',
       });
     });
