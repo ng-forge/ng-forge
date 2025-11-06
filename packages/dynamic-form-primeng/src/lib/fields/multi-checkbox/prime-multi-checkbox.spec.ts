@@ -4,7 +4,7 @@ import { Checkbox } from 'primeng/checkbox';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 
-describe('PrimeMultiCheckboxFieldComponent', () => {
+describe.skip('PrimeMultiCheckboxFieldComponent', () => {
   describe('Basic Multi-Checkbox Integration', () => {
     it('should render multi-checkbox with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()

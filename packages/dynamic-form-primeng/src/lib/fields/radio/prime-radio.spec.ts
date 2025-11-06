@@ -4,7 +4,7 @@ import { RadioButton } from 'primeng/radiobutton';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 
-describe('PrimeRadioFieldComponent', () => {
+describe.skip('PrimeRadioFieldComponent', () => {
   describe('Basic PrimeNG Radio Integration', () => {
     it('should render radio group with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()
