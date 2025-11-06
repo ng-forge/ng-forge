@@ -21,14 +21,7 @@ import { AsyncPipe } from '@angular/common';
       <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }
 
-      <input
-        matInput
-        [field]="f"
-        [type]="props()?.type || 'text'"
-        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [disabled]="f().disabled()"
-        [attr.tabindex]="tabIndex()"
-      />
+      <input matInput [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
 
       @if (props()?.hint; as hint) {
       <mat-hint>{{ hint | dynamicText | async }}</mat-hint>

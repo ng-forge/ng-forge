@@ -18,7 +18,6 @@ import { AsyncPipe } from '@angular/common';
       [labelPosition]="props()?.labelPosition || 'after'"
       [indeterminate]="props()?.indeterminate || false"
       [color]="props()?.color || 'primary'"
-      [disabled]="f().disabled()"
       [disableRipple]="props()?.disableRipple || false"
       [attr.tabindex]="tabIndex()"
       [attr.hidden]="f().hidden() || null"

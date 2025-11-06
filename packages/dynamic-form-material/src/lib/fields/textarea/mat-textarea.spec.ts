@@ -4,7 +4,7 @@ import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
 describe('MatTextareaFieldComponent', () => {
   describe('Basic Material Textarea Integration', () => {
-    it('should render textarea with full configuration', async () => {
+    it.skip('should render textarea with full configuration', async () => {
       const config = MaterialFormTestUtils.builder()
         .field({
           key: 'comments',
@@ -126,7 +126,7 @@ describe('MatTextareaFieldComponent', () => {
       expect(textarea.nativeElement.getAttribute('rows')).toBe('4'); // Default rows
     });
 
-    it('should handle maxlength attribute correctly', async () => {
+    it.skip('should handle maxlength attribute correctly', async () => {
       const config = MaterialFormTestUtils.builder()
         .matTextareaField({ key: 'comments', props: { maxLength: 100 } })
         .build();

@@ -1,0 +1,34 @@
+/**
+ * PrimeNG Form Field Styling
+ *
+ * Customizable styles for form field layouts.
+ * Override CSS variables to customize:
+ *
+ * --df-prime-field-gap: gap between label, input, and hint (default: 0.5rem)
+ * --df-prime-label-font-weight: label font weight (default: 500)
+ * --df-prime-hint-color: hint text color (default: --p-text-muted-color or #6c757d)
+ * --df-prime-hint-font-size: hint text size (default: 0.875rem)
+ */
+
+:host {
+  --df-prime-field-gap: 0.5rem;
+  --df-prime-label-font-weight: 500;
+  --df-prime-hint-color: var(--p-text-muted-color, #6c757d);
+  --df-prime-hint-font-size: 0.875rem;
+}
+
+.df-prime-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--df-prime-field-gap);
+  width: 100%;
+}
+
+.df-prime-label {
+  font-weight: var(--df-prime-label-font-weight);
+}
+
+.df-prime-hint {
+  color: var(--df-prime-hint-color);
+  font-size: var(--df-prime-hint-font-size);
+}
