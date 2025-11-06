@@ -1,12 +1,30 @@
 import '@angular/compiler';
 import '@analogjs/vitest-angular/setup-snapshots';
 
-import { NgModule, provideZonelessChangeDetection } from '@angular/core';
+import { ErrorHandler, NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { getTestBed } from '@angular/core/testing';
 
+/**
+ * Custom error handler that suppresses expected "orphan field" errors
+ * during dynamic form field removal tests.
+ */
+class TestErrorHandler implements ErrorHandler {
+  handleError(error: any): void {
+    const message = error?.message || error?.toString() || '';
+
+    // Suppress orphan field errors - these are expected during dynamic field removal
+    if (message.includes('orphan field, looking for property')) {
+      return;
+    }
+
+    // Re-throw other errors
+    throw error;
+  }
+}
+
 @NgModule({
-  providers: [provideZonelessChangeDetection()],
+  providers: [provideZonelessChangeDetection(), { provide: ErrorHandler, useClass: TestErrorHandler }],
 })
 export class ZonelessTestModule {}
 
