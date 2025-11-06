@@ -9,8 +9,8 @@
 // ============================================
 // PRIMENG THEME
 // ============================================
-@import 'primeng/resources/themes/lara-light-blue/theme.css';
-@import 'primeng/resources/primeng.css';
+// PrimeNG theme is configured via providePrimeNG in app.config.ts
+// Only need to import primeicons
 @import 'primeicons/primeicons.css';
 
 // ============================================
@@ -42,5 +42,5 @@
 
 .theme-ionic {
   // Ionic-specific overrides if needed
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Roboto", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Roboto', sans-serif;
 }
