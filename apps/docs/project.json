@@ -9,6 +9,7 @@
     "build": {
       "executor": "@ng-doc/builder:application",
       "outputs": ["{options.outputPath}"],
+      "dependsOn": ["^build"],
       "options": {
         "outputPath": "dist/apps/docs",
         "browser": "apps/docs/src/main.ts",

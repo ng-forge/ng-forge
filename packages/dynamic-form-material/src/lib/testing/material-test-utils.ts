@@ -1,13 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import {
-  DynamicForm,
-  FormConfig,
-  FormEvent,
-  provideDynamicForm,
-  RegisteredFieldTypes,
-  TextareaField
-} from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormEvent, provideDynamicForm, TextareaField } from '@ng-forge/dynamic-form';
 import { delay } from './delay';
 import { waitForDFInit } from './wait-for-df';
 import { withMaterialFields } from '../providers/material-providers';
@@ -36,7 +29,7 @@ export interface MaterialFormTestConfig {
  */
 export interface MaterialFormTestResult {
   component: DynamicForm;
-  fixture: ComponentFixture<DynamicForm<readonly RegisteredFieldTypes[]>>;
+  fixture: ComponentFixture<DynamicForm>;
 }
 
 /**
@@ -145,7 +138,7 @@ export class MaterialFormTestUtils {
       providers: [provideAnimations(), provideDynamicForm(...withMaterialFields()), ...(testConfig.providers || [])],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(DynamicForm<readonly RegisteredFieldTypes[]>);
+    const fixture = TestBed.createComponent(DynamicForm);
     const component = fixture.componentInstance;
 
     // Set up the component
