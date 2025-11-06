@@ -15,15 +15,14 @@ import { AsyncPipe } from '@angular/common';
 
     <p-checkbox
       [field]="f"
+      [label]="(label() | dynamicText | async) ?? undefined"
       [binary]="props()?.binary ?? true"
       [trueValue]="props()?.trueValue"
       [falseValue]="props()?.falseValue"
       [styleClass]="props()?.styleClass"
       [attr.tabindex]="tabIndex()"
       [attr.hidden]="f().hidden() || null"
-    >
-      {{ label() | dynamicText | async }}
-    </p-checkbox>
+    />
 
     @if (props()?.hint; as hint) {
     <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>

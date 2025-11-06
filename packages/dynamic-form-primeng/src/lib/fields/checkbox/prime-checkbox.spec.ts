@@ -34,6 +34,8 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       await fixture.whenStable();
       untracked(() => fixture.detectChanges());
+      await fixture.whenStable(); // Extra cycle for async pipes
+      untracked(() => fixture.detectChanges());
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const primeCheckboxComponent = fixture.debugElement.query(By.css('df-prime-checkbox'))?.componentInstance;
       const containerDiv = fixture.debugElement.query(By.css('.terms-checkbox'));
