@@ -38,6 +38,7 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
       const label = fixture.debugElement.query(By.css('.checkbox-group-label'));
       const hint = fixture.debugElement.query(By.css('.p-hint'));
       const wrapper = fixture.debugElement.query(By.css('df-prime-multi-checkbox'));
+      const optionLabels = fixture.debugElement.queryAll(By.css('.checkbox-option label'));
 
       expect(checkboxes.length).toBe(3);
       expect(label.nativeElement.textContent.trim()).toBe('Hobbies');
@@ -45,9 +46,9 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
       expect(wrapper.nativeElement.className).toContain('hobbies-checkbox');
 
       // Check individual checkbox labels
-      expect(checkboxes[0].nativeElement.textContent.trim()).toBe('Reading');
-      expect(checkboxes[1].nativeElement.textContent.trim()).toBe('Gaming');
-      expect(checkboxes[2].nativeElement.textContent.trim()).toBe('Cooking');
+      expect(optionLabels[0]?.nativeElement.textContent.trim()).toBe('Reading');
+      expect(optionLabels[1]?.nativeElement.textContent.trim()).toBe('Gaming');
+      expect(optionLabels[2]?.nativeElement.textContent.trim()).toBe('Cooking');
     });
 
     it('should handle user checkbox selection and update form value', async () => {
@@ -510,14 +511,14 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
 
         const labelElement = fixture.debugElement.query(By.css('.checkbox-group-label'));
         const hintElement = fixture.debugElement.query(By.css('.p-hint'));
-        const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
+        let optionLabels = fixture.debugElement.queryAll(By.css('.checkbox-option label'));
 
         // Initial translations
         expect(labelElement.nativeElement.textContent.trim()).toBe('Select Hobbies');
         expect(hintElement.nativeElement.textContent.trim()).toBe('Choose your hobbies');
-        expect(checkboxes[0].nativeElement.textContent.trim()).toBe('Reading');
-        expect(checkboxes[1].nativeElement.textContent.trim()).toBe('Gaming');
-        expect(checkboxes[2].nativeElement.textContent.trim()).toBe('Cooking');
+        expect(optionLabels[0]?.nativeElement.textContent.trim()).toBe('Reading');
+        expect(optionLabels[1]?.nativeElement.textContent.trim()).toBe('Gaming');
+        expect(optionLabels[2]?.nativeElement.textContent.trim()).toBe('Cooking');
 
         // Update to Spanish
         translationService.addTranslations({
@@ -535,10 +536,10 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
         expect(labelElement.nativeElement.textContent.trim()).toBe('Seleccionar Pasatiempos');
         expect(hintElement.nativeElement.textContent.trim()).toBe('Elige tus pasatiempos');
 
-        const updatedCheckboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
-        expect(updatedCheckboxes[0].nativeElement.textContent.trim()).toBe('Lectura');
-        expect(updatedCheckboxes[1].nativeElement.textContent.trim()).toBe('Juegos');
-        expect(updatedCheckboxes[2].nativeElement.textContent.trim()).toBe('Cocina');
+        optionLabels = fixture.debugElement.queryAll(By.css('.checkbox-option label'));
+        expect(optionLabels[0]?.nativeElement.textContent.trim()).toBe('Lectura');
+        expect(optionLabels[1]?.nativeElement.textContent.trim()).toBe('Juegos');
+        expect(optionLabels[2]?.nativeElement.textContent.trim()).toBe('Cocina');
       });
     });
   });
