@@ -1,5 +1,4 @@
 import { By } from '@angular/platform-browser';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 

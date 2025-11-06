@@ -1,5 +1,4 @@
 import { By } from '@angular/platform-browser';
-import { MatInput } from '@angular/material/input';
 import { BehaviorSubject, of } from 'rxjs';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';

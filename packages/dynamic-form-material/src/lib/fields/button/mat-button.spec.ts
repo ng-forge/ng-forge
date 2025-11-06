@@ -1,5 +1,4 @@
 import { By } from '@angular/platform-browser';
-import { MatButton } from '@angular/material/button';
 import { SubmitEvent } from '@ng-forge/dynamic-form';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';

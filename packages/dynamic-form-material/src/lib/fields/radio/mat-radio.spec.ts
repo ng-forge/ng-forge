@@ -1,5 +1,4 @@
 import { By } from '@angular/platform-browser';
-import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 

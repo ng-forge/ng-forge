@@ -1,5 +1,4 @@
 import { By } from '@angular/platform-browser';
-import { MatSelect } from '@angular/material/select';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
