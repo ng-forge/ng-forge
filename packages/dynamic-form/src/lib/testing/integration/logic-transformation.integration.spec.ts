@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { form, FieldPath } from '@angular/forms/signals';
+import { form, FieldPath, schema } from '@angular/forms/signals';
 import { applyLogic, applyMultipleLogic } from '../../core/logic/logic-applicator';
 import { LogicConfig } from '../../models/logic';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
@@ -23,15 +23,18 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should apply hidden logic with boolean condition', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: 'test@example.com' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'hidden',
           condition: true,
         };
 
-        applyLogic(config, formInstance().controls.email);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.email);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Field should be hidden
         expect(formInstance().controls.email.hidden()).toBe(true);
@@ -41,15 +44,18 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should apply readonly logic with boolean condition', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ username: 'admin' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'readonly',
           condition: true,
         };
 
-        applyLogic(config, formInstance().controls.username);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.username);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Field should be readonly
         expect(formInstance().controls.username.readonly()).toBe(true);
@@ -59,15 +65,18 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should apply conditional required with boolean', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'required',
           condition: true,
         };
 
-        applyLogic(config, formInstance().controls.email);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.email);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Field should be required
         expect(formInstance().valid()).toBe(false);
@@ -82,9 +91,6 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should hide field when condition evaluates to true', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ contactMethod: 'phone', email: 'test@example.com' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -95,7 +101,13 @@ describe('Logic Transformation Pipeline Integration', () => {
           },
         };
 
-        applyLogic(config, formInstance().controls.email);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.email);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Email field should be hidden when contactMethod is not 'email'
         expect(formInstance().controls.email.hidden()).toBe(true);
@@ -109,9 +121,6 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should show field when condition evaluates to false', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ showAdvanced: false, advancedOption: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -122,7 +131,13 @@ describe('Logic Transformation Pipeline Integration', () => {
           },
         };
 
-        applyLogic(config, formInstance().controls.advancedOption);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.advancedOption);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Field should be hidden when showAdvanced is false
         expect(formInstance().controls.advancedOption.hidden()).toBe(true);
@@ -136,9 +151,6 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should make field readonly based on condition', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ userType: 'guest', username: 'guest_user' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'readonly',
           condition: {
@@ -149,7 +161,13 @@ describe('Logic Transformation Pipeline Integration', () => {
           },
         };
 
-        applyLogic(config, formInstance().controls.username);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.username);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Username readonly for guests
         expect(formInstance().controls.username.readonly()).toBe(true);
@@ -163,9 +181,6 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should update logic state when dependencies change', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ country: 'USA', state: 'CA' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -176,7 +191,13 @@ describe('Logic Transformation Pipeline Integration', () => {
           },
         };
 
-        applyLogic(config, formInstance().controls.state);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.state);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // State visible for USA
         expect(formInstance().controls.state.hidden()).toBe(false);
@@ -196,9 +217,6 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should apply logic with AND conditions', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ role: 'admin', department: 'IT', specialAccess: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -220,7 +238,13 @@ describe('Logic Transformation Pipeline Integration', () => {
           },
         };
 
-        applyLogic(config, formInstance().controls.specialAccess);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.specialAccess);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Special access visible for admin in IT
         expect(formInstance().controls.specialAccess.hidden()).toBe(false);
@@ -238,9 +262,6 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should apply logic with OR conditions', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ isPremium: false, isVIP: false, exclusiveFeature: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -262,7 +283,13 @@ describe('Logic Transformation Pipeline Integration', () => {
           },
         };
 
-        applyLogic(config, formInstance().controls.exclusiveFeature);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.exclusiveFeature);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Feature hidden for regular users
         expect(formInstance().controls.exclusiveFeature.hidden()).toBe(false);
@@ -289,9 +316,6 @@ describe('Logic Transformation Pipeline Integration', () => {
         });
 
         const formValue = signal({ weekdayOption: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -300,7 +324,13 @@ describe('Logic Transformation Pipeline Integration', () => {
           },
         };
 
-        applyLogic(config, formInstance().controls.weekdayOption);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.weekdayOption);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // This test will vary by day - just verify it doesn't error
         const isHidden = formInstance().controls.weekdayOption.hidden();
@@ -313,9 +343,6 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should apply multiple logic rules to same field', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ isLocked: true, isArchived: false, data: 'test' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const configs: LogicConfig[] = [
           {
             type: 'readonly',
@@ -337,7 +364,13 @@ describe('Logic Transformation Pipeline Integration', () => {
           },
         ];
 
-        applyMultipleLogic(configs, formInstance().controls.data);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyMultipleLogic(configs, path.data);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Field is readonly (locked) but not hidden (not archived)
         expect(formInstance().controls.data.readonly()).toBe(true);
@@ -360,15 +393,18 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should handle false boolean condition for hidden', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ field: 'test' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'hidden',
           condition: false,
         };
 
-        applyLogic(config, formInstance().controls.field);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.field);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Field should not be hidden
         expect(formInstance().controls.field.hidden()).toBe(false);
@@ -381,9 +417,6 @@ describe('Logic Transformation Pipeline Integration', () => {
           user: { role: 'admin' },
           adminPanel: '',
         });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
-
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -394,7 +427,13 @@ describe('Logic Transformation Pipeline Integration', () => {
           },
         };
 
-        applyLogic(config, formInstance().controls.adminPanel);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyLogic(config, path.adminPanel);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Admin panel visible for admin role
         expect(formInstance().controls.adminPanel.hidden()).toBe(false);

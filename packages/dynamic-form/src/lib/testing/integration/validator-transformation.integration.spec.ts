@@ -386,10 +386,11 @@ describe('Validator Transformation Pipeline Integration', () => {
         expect(formInstance().valid()).toBe(false);
         expect(formInstance().errors()).toBeDefined();
 
-        // Valid username
+        // Valid username - no errors (Angular returns empty array)
         formValue.set({ username: 'alice' });
         expect(formInstance().valid()).toBe(true);
-        expect(formInstance().errors()).toEqual({});
+        const errors = formInstance().errors();
+        expect(Array.isArray(errors) ? errors.length === 0 : Object.keys(errors).length === 0).toBe(true);
       });
     });
   });
