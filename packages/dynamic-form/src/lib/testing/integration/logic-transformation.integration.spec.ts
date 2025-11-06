@@ -37,7 +37,7 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Field should be hidden
-        expect(formInstance().controls.email.hidden()).toBe(true);
+        expect(formInstance.email().hidden()).toBe(true);
       });
     });
 
@@ -58,7 +58,7 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Field should be readonly
-        expect(formInstance().controls.username.readonly()).toBe(true);
+        expect(formInstance.username().readonly()).toBe(true);
       });
     });
 
@@ -110,11 +110,11 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Email field should be hidden when contactMethod is not 'email'
-        expect(formInstance().controls.email.hidden()).toBe(true);
+        expect(formInstance.email().hidden()).toBe(true);
 
         // Change contactMethod to 'email'
         formValue.set({ contactMethod: 'email', email: 'test@example.com' });
-        expect(formInstance().controls.email.hidden()).toBe(false);
+        expect(formInstance.email().hidden()).toBe(false);
       });
     });
 
@@ -140,11 +140,11 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Field should be hidden when showAdvanced is false
-        expect(formInstance().controls.advancedOption.hidden()).toBe(true);
+        expect(formInstance.advancedOption().hidden()).toBe(true);
 
         // Show advanced options
         formValue.set({ showAdvanced: true, advancedOption: '' });
-        expect(formInstance().controls.advancedOption.hidden()).toBe(false);
+        expect(formInstance.advancedOption().hidden()).toBe(false);
       });
     });
 
@@ -170,11 +170,11 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Username readonly for guests
-        expect(formInstance().controls.username.readonly()).toBe(true);
+        expect(formInstance.username().readonly()).toBe(true);
 
         // Change to admin
         formValue.set({ userType: 'admin', username: 'admin_user' });
-        expect(formInstance().controls.username.readonly()).toBe(false);
+        expect(formInstance.username().readonly()).toBe(false);
       });
     });
 
@@ -200,15 +200,15 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // State visible for USA
-        expect(formInstance().controls.state.hidden()).toBe(false);
+        expect(formInstance.state().hidden()).toBe(false);
 
         // Change to Canada - state should be hidden
         formValue.set({ country: 'Canada', state: 'CA' });
-        expect(formInstance().controls.state.hidden()).toBe(true);
+        expect(formInstance.state().hidden()).toBe(true);
 
         // Change back to USA - state visible again
         formValue.set({ country: 'USA', state: 'CA' });
-        expect(formInstance().controls.state.hidden()).toBe(false);
+        expect(formInstance.state().hidden()).toBe(false);
       });
     });
   });
@@ -247,15 +247,15 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Special access visible for admin in IT
-        expect(formInstance().controls.specialAccess.hidden()).toBe(false);
+        expect(formInstance.specialAccess().hidden()).toBe(false);
 
         // Change role to user - still visible (IT department)
         formValue.set({ role: 'user', department: 'IT', specialAccess: '' });
-        expect(formInstance().controls.specialAccess.hidden()).toBe(false);
+        expect(formInstance.specialAccess().hidden()).toBe(false);
 
         // Change to user in Sales - should be hidden
         formValue.set({ role: 'user', department: 'Sales', specialAccess: '' });
-        expect(formInstance().controls.specialAccess.hidden()).toBe(true);
+        expect(formInstance.specialAccess().hidden()).toBe(true);
       });
     });
 
@@ -292,15 +292,15 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Feature hidden for regular users
-        expect(formInstance().controls.exclusiveFeature.hidden()).toBe(false);
+        expect(formInstance.exclusiveFeature().hidden()).toBe(false);
 
         // Show for premium
         formValue.set({ isPremium: true, isVIP: false, exclusiveFeature: '' });
-        expect(formInstance().controls.exclusiveFeature.hidden()).toBe(true);
+        expect(formInstance.exclusiveFeature().hidden()).toBe(true);
 
         // Show for VIP
         formValue.set({ isPremium: false, isVIP: true, exclusiveFeature: '' });
-        expect(formInstance().controls.exclusiveFeature.hidden()).toBe(true);
+        expect(formInstance.exclusiveFeature().hidden()).toBe(true);
       });
     });
 
@@ -333,7 +333,7 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // This test will vary by day - just verify it doesn't error
-        const isHidden = formInstance().controls.weekdayOption.hidden();
+        const isHidden = formInstance.weekdayOption().hidden();
         expect(typeof isHidden).toBe('boolean');
       });
     });
@@ -373,18 +373,18 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Field is readonly (locked) but not hidden (not archived)
-        expect(formInstance().controls.data.readonly()).toBe(true);
-        expect(formInstance().controls.data.hidden()).toBe(false);
+        expect(formInstance.data().readonly()).toBe(true);
+        expect(formInstance.data().hidden()).toBe(false);
 
         // Archive the field
         formValue.set({ isLocked: true, isArchived: true, data: 'test' });
-        expect(formInstance().controls.data.readonly()).toBe(true);
-        expect(formInstance().controls.data.hidden()).toBe(true);
+        expect(formInstance.data().readonly()).toBe(true);
+        expect(formInstance.data().hidden()).toBe(true);
 
         // Unlock but keep archived
         formValue.set({ isLocked: false, isArchived: true, data: 'test' });
-        expect(formInstance().controls.data.readonly()).toBe(false);
-        expect(formInstance().controls.data.hidden()).toBe(true);
+        expect(formInstance.data().readonly()).toBe(false);
+        expect(formInstance.data().hidden()).toBe(true);
       });
     });
   });
@@ -407,7 +407,7 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Field should not be hidden
-        expect(formInstance().controls.field.hidden()).toBe(false);
+        expect(formInstance.field().hidden()).toBe(false);
       });
     });
 
@@ -436,7 +436,7 @@ describe('Logic Transformation Pipeline Integration', () => {
         rootFormRegistry.registerRootForm(formInstance);
 
         // Admin panel visible for admin role
-        expect(formInstance().controls.adminPanel.hidden()).toBe(false);
+        expect(formInstance.adminPanel().hidden()).toBe(false);
       });
     });
   });
