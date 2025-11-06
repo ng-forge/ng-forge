@@ -1,0 +1,109 @@
+import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
+import { FormsModule } from '@angular/forms';
+import { Checkbox } from 'primeng/checkbox';
+import { DynamicText, DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-form';
+import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
+import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
+import { isEqual } from 'lodash-es';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+import { PrimeMultiCheckboxComponent, PrimeMultiCheckboxProps } from './prime-multi-checkbox.type';
+import { AsyncPipe } from '@angular/common';
+
+@Component({
+  selector: 'df-prime-multi-checkbox',
+  imports: [Checkbox, PrimeErrorsComponent, ValueInArrayPipe, DynamicTextPipe, AsyncPipe, FormsModule],
+  template: `
+    @let f = field(); @if (label(); as label) {
+    <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
+    }
+
+    <div class="checkbox-group" [class]="props()?.styleClass || ''">
+      @for (option of options(); track option.value) {
+      <p-checkbox
+        [binary]="false"
+        [value]="option.value"
+        [ngModel]="valueViewModel()"
+        [disabled]="f().disabled() || option.disabled || false"
+        (ngModelChange)="onCheckboxChange($event)"
+      >
+        {{ option.label | dynamicText | async }}
+      </p-checkbox>
+      }
+    </div>
+
+    @if (props()?.hint; as hint) {
+    <small class="p-hint">{{ hint | dynamicText | async }}</small>
+    }
+
+    <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+  `,
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+
+      .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .checkbox-group-label {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+    `,
+  ],
+  host: {
+    '[class]': 'className() || ""',
+    '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
+  },
+  providers: [ValueInArrayPipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> implements PrimeMultiCheckboxComponent<T> {
+  readonly field = input.required<FieldTree<T[]>>();
+  readonly key = input.required<string>();
+
+  readonly label = input<DynamicText>();
+  readonly placeholder = input<DynamicText>();
+
+  readonly className = input<string>('');
+  readonly tabIndex = input<number>();
+
+  readonly options = input<FieldOption<T>[]>([]);
+  readonly props = input<PrimeMultiCheckboxProps<T>>();
+
+  valueViewModel = linkedSignal<T[]>(
+    () => {
+      const currentValues = this.field()().value();
+      return currentValues;
+    },
+    { equal: isEqual }
+  );
+
+  constructor() {
+    explicitEffect([this.valueViewModel], ([selectedValues]) => {
+      if (!isEqual(selectedValues, this.field()().value())) {
+        this.field()().value.set(selectedValues);
+      }
+    });
+
+    explicitEffect([this.options], ([options]) => {
+      const values = options.map((option) => option.value);
+      const uniqueValues = new Set(values);
+
+      if (values.length !== uniqueValues.size) {
+        const duplicates = values.filter((value, index) => values.indexOf(value) !== index);
+        throw new Error(`Duplicate option values detected in prime-multi-checkbox: ${duplicates.join(', ')}`);
+      }
+    });
+  }
+
+  onCheckboxChange(newValues: T[]): void {
+    this.valueViewModel.set(newValues);
+  }
+}

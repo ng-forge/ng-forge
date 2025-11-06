@@ -1,5 +1,26 @@
 @use '@ng-doc/app/styles/global';
 @use '@ng-doc/app/styles/themes/dark.css';
 
+// ============================================
+// MATERIAL THEME
+// ============================================
 // Material Design theme (required for Material integration examples)
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+// ============================================
+// PRIMENG THEME
+// ============================================
+@import 'primeng/resources/themes/lara-light-blue/theme.css';
+@import 'primeng/resources/primeng.css';
+@import 'primeicons/primeicons.css';
+
+// ============================================
+// THEME ISOLATION
+// ============================================
+.theme-material {
+  // Material-specific overrides if needed
+}
+
+.theme-primeng {
+  // PrimeNG-specific overrides if needed
+}
