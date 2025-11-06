@@ -295,8 +295,25 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly entity = linkedSignal(() => {
     const inputValue = this.value();
     const defaults = this.defaultValues();
+    const setup = this.formSetup();
 
-    return { ...defaults, ...inputValue } as TModel;
+    const combined = { ...defaults, ...inputValue };
+
+    // Filter to only include fields that exist in the current schema
+    // This prevents "orphan field" errors during field removal
+    if (setup.schemaFields && setup.schemaFields.length > 0) {
+      const validKeys = new Set(setup.schemaFields.map((field: any) => field.key).filter((key: string | undefined) => key !== undefined));
+
+      const filtered: Record<string, unknown> = {};
+      for (const key of Object.keys(combined)) {
+        if (validKeys.has(key)) {
+          filtered[key] = (combined as Record<string, unknown>)[key];
+        }
+      }
+      return filtered as TModel;
+    }
+
+    return combined as TModel;
   });
 
   readonly formOptions = computed(() => {
@@ -328,45 +345,13 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     });
   });
 
-  readonly formValue = computed(() => {
-    const rawValue = this.form()().value();
-    const setup = this.formSetup();
+  readonly formValue = computed(() => this.form()().value());
 
-    // Filter to only include fields present in the current schema
-    if (setup.schemaFields && setup.schemaFields.length > 0) {
-      const validKeys = new Set(setup.schemaFields.map((field: any) => field.key).filter((key: string | undefined) => key !== undefined));
-
-      const filtered: Record<string, unknown> = {};
-      for (const key of Object.keys(rawValue as Record<string, unknown>)) {
-        if (validKeys.has(key)) {
-          filtered[key] = (rawValue as Record<string, unknown>)[key];
-        }
-      }
-      return filtered as typeof rawValue;
-    }
-
-    return rawValue;
-  });
-
-  private readonly syncEntityToValue = explicitEffect([this.entity, this.formSetup], ([currentEntity, setup]) => {
+  private readonly syncEntityToValue = explicitEffect([this.entity], ([currentEntity]) => {
     const currentValue = this.value();
 
-    // Filter entity to only include keys that are in the current schema
-    let filteredEntity = currentEntity;
-    if (setup.schemaFields && setup.schemaFields.length > 0) {
-      const validKeys = new Set(setup.schemaFields.map((field: any) => field.key).filter((key: string | undefined) => key !== undefined));
-
-      const filtered: Record<string, unknown> = {};
-      for (const key of Object.keys(currentEntity as Record<string, unknown>)) {
-        if (validKeys.has(key)) {
-          filtered[key] = (currentEntity as Record<string, unknown>)[key];
-        }
-      }
-      filteredEntity = filtered as typeof currentEntity;
-    }
-
-    if (!isEqual(filteredEntity, currentValue)) {
-      this.value.set(filteredEntity);
+    if (!isEqual(currentEntity, currentValue)) {
+      this.value.set(currentEntity);
     }
   });
 
