@@ -373,8 +373,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
     it('should apply simple validation rules from field properties', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
         // Using deprecated properties
         const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
@@ -386,7 +384,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           maxLength: 50,
         };
 
-        mapFieldToForm(fieldDef, formInstance.email);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            mapFieldToForm(fieldDef, path.email);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -398,8 +402,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
     it('should combine simple and advanced validators', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ password: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
         const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
           key: 'password',
@@ -411,7 +413,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           validators: [{ type: 'pattern', value: /[A-Z]/ }],
         };
 
-        mapFieldToForm(fieldDef, formInstance.password);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            mapFieldToForm(fieldDef, path.password);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Empty - fails required
         expect(formInstance().valid()).toBe(false);
@@ -433,8 +441,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
     it('should handle numeric validation properties', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ age: 0 });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
         const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
           key: 'age',
@@ -443,7 +449,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           max: 100,
         };
 
-        mapFieldToForm(fieldDef, formInstance.age);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            mapFieldToForm(fieldDef, path.age);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Too young
         formValue.set({ age: 10 });
@@ -462,8 +474,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
     it('should apply pattern validation from field property', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ zipCode: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
         const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
           key: 'zipCode',
@@ -471,7 +481,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           pattern: /^\d{5}$/,
         };
 
-        mapFieldToForm(fieldDef, formInstance.zipCode);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            mapFieldToForm(fieldDef, path.zipCode);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         formValue.set({ zipCode: '123' });
         expect(formInstance().valid()).toBe(false);
@@ -486,8 +502,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
     it('should handle field with disabled property', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ field: 'test' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
         const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
           key: 'field',
@@ -495,7 +509,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           disabled: true,
         };
 
-        mapFieldToForm(fieldDef, formInstance.field);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            mapFieldToForm(fieldDef, path.field);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         expect(formInstance.field().disabled()).toBe(true);
       });
@@ -504,8 +524,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
     it('should handle field with no validation', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ field: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
         const fieldDef: FieldDef<Record<string, unknown>> = {
           key: 'field',
@@ -513,7 +531,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         };
 
         // Should not throw
-        mapFieldToForm(fieldDef, formInstance.field);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            mapFieldToForm(fieldDef, path.field);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Should be valid (no validation rules)
         expect(formInstance().valid()).toBe(true);
@@ -535,8 +559,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         });
 
         const formValue = signal({ email: '' });
-        const formInstance = form(formValue);
-        rootFormRegistry.registerRootForm(formInstance);
 
         const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
           key: 'email',
@@ -544,7 +566,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           schemas: [{ type: 'apply', schema: 'emailValidation' }],
         };
 
-        mapFieldToForm(fieldDef, formInstance.email);
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            mapFieldToForm(fieldDef, path.email);
+          })
+        );
+        rootFormRegistry.registerRootForm(formInstance);
 
         // Should have both required (from nested schema) and email validation
         expect(formInstance().valid()).toBe(false);
