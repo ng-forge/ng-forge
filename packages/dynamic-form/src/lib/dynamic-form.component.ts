@@ -328,7 +328,25 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     });
   });
 
-  readonly formValue = computed(() => this.form()().value());
+  readonly formValue = computed(() => {
+    const rawValue = this.form()().value();
+    const setup = this.formSetup();
+
+    // Filter to only include fields present in the current schema
+    if (setup.schemaFields && setup.schemaFields.length > 0) {
+      const validKeys = new Set(setup.schemaFields.map((field: any) => field.key).filter((key: string | undefined) => key !== undefined));
+
+      const filtered: Record<string, unknown> = {};
+      for (const key of Object.keys(rawValue as Record<string, unknown>)) {
+        if (validKeys.has(key)) {
+          filtered[key] = (rawValue as Record<string, unknown>)[key];
+        }
+      }
+      return filtered as typeof rawValue;
+    }
+
+    return rawValue;
+  });
 
   private readonly syncEntityToValue = explicitEffect([this.entity, this.formSetup], ([currentEntity, setup]) => {
     const currentValue = this.value();
