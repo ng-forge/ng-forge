@@ -7,20 +7,11 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/angular:package",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/libs/examples/primeng"],
       "options": {
-        "project": "libs/examples/primeng/ng-package.json"
-      },
-      "configurations": {
-        "production": {
-          "tsConfig": "libs/examples/primeng/tsconfig.lib.json"
-        },
-        "development": {
-          "tsConfig": "libs/examples/primeng/tsconfig.lib.json"
-        }
-      },
-      "defaultConfiguration": "production"
+        "command": "node libs/examples/primeng/build.mjs"
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint"
