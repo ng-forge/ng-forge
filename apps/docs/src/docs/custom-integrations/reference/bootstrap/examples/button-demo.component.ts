@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { submitButton, withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
+import { submitButton, withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap/no-augmentation';
 import { BootstrapDesignContainer } from '../bootstrap.container';
 
 @Component({

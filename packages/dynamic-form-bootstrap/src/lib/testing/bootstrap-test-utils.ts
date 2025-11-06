@@ -43,9 +43,9 @@ export interface BootstrapFormTestResult {
  * Fluent API for building Bootstrap form configurations
  */
 export class BootstrapFormConfigBuilder {
-  private fields: any[] = [];
+  private fields: unknown[] = [];
 
-  field(field: any): BootstrapFormConfigBuilder {
+  field(field: unknown): BootstrapFormConfigBuilder {
     this.fields.push(field);
     return this;
   }
@@ -373,7 +373,7 @@ export class BootstrapFormTestUtils {
   /**
    * Gets validation errors from the component
    */
-  static getFormErrors(component: DynamicForm): any[] {
+  static getFormErrors(component: DynamicForm): unknown[] {
     return component.errors();
   }
 

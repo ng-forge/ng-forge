@@ -10,6 +10,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'df-bs-multi-checkbox',
   imports: [BsErrorsComponent, DynamicTextPipe, AsyncPipe],
+  styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
 

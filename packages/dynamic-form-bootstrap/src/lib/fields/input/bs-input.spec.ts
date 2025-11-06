@@ -23,13 +23,12 @@ describe('BsInputFieldComponent', () => {
         })
         .build();
 
-      const { component, fixture } = await BootstrapFormTestUtils.createTest({
+      const { fixture } = await BootstrapFormTestUtils.createTest({
         config,
         initialValue: { email: '', password: '', firstName: '', age: 0, website: '', phone: '' },
       });
 
       const input = fixture.debugElement.query(By.css('input[type="email"]'));
-      const container = fixture.debugElement.query(By.css('.mb-3'));
       const label = fixture.debugElement.query(By.css('.form-label'));
       const helpText = fixture.debugElement.query(By.css('.form-text'));
 
@@ -330,8 +329,6 @@ describe('BsInputFieldComponent', () => {
         config,
         initialValue: { firstName: '' },
       });
-
-      const testValues = ['A', 'Ab', 'Abc', 'Abcd', 'Alice'];
 
       // Simulate rapid typing using utility (final value)
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="text"]', 'Alice');

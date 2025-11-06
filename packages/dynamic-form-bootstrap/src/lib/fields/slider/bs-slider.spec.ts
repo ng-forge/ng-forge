@@ -123,7 +123,7 @@ describe('BsSliderFieldComponent', () => {
         .bsSliderField({ key: 'temperature', minValue: -10, maxValue: 40, step: 1 })
         .build();
 
-      const { component, fixture } = await BootstrapFormTestUtils.createTest({
+      const { fixture } = await BootstrapFormTestUtils.createTest({
         config,
         initialValue: {
           volume: 50,

@@ -12,6 +12,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'df-bs-input',
   imports: [Field, BsErrorsComponent, DynamicTextPipe, AsyncPipe],
+  styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
     @let p = props();

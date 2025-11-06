@@ -123,6 +123,54 @@ Use `className` to add Bootstrap grid classes:
 }
 ```
 
+## Customization
+
+All field components use customizable CSS variables for consistent styling across your application.
+
+### CSS Variables
+
+```scss
+:root {
+  // Spacing
+  --df-bs-field-gap: 0.5rem;              // Gap between label, input, and hint
+
+  // Label styling
+  --df-bs-label-font-weight: 500;          // Label font weight
+  --df-bs-label-color: inherit;            // Label text color
+
+  // Hint text styling
+  --df-bs-hint-color: #6c757d;             // Hint text color (default: Bootstrap secondary)
+  --df-bs-hint-font-size: 0.875rem;        // Hint text size
+
+  // Error styling
+  --df-bs-error-color: #dc3545;            // Error text color (default: Bootstrap danger)
+  --df-bs-error-font-size: 0.875rem;       // Error text size
+}
+```
+
+### Component-Specific Styling
+
+All Bootstrap field components use these consistent classes:
+
+- `.df-bs-field` - Wrapper div for vertical layout
+- `.df-bs-label` - Label element styling
+- `.df-bs-hint` - Hint text element
+
+You can override these in your global styles or target specific components:
+
+```scss
+// Global customization
+.df-bs-field {
+  --df-bs-field-gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+// Component-specific
+df-bs-input {
+  --df-bs-label-font-weight: 600;
+}
+```
+
 ## Testing
 
 Import testing utilities from the `/testing` entry point:

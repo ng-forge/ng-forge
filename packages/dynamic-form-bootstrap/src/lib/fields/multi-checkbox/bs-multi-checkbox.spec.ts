@@ -80,7 +80,6 @@ describe('BsMultiCheckboxFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component).hobbies).toEqual(['reading']);
 
       // Check second checkbox using utility
-      const checkboxes = fixture.debugElement.queryAll(By.css('.form-check-input[type="checkbox"]'));
       await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]:nth-of-type(2)', true);
 
       expect(BootstrapFormTestUtils.getFormValue(component).hobbies).toEqual(['reading', 'gaming']);
@@ -169,7 +168,6 @@ describe('BsMultiCheckboxFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component).skills).toEqual(['typescript', 'react']);
 
       // Test number options using utility
-      const allCheckboxes = fixture.debugElement.queryAll(By.css('.form-check-input[type="checkbox"]'));
       await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]:nth-of-type(4)', true);
       await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]:nth-of-type(5)', true);
 
@@ -463,7 +461,6 @@ describe('BsMultiCheckboxFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component).skills).toEqual(['typescript']);
 
       // Change hobbies using utility (last checkbox in first group)
-      const allCheckboxes = fixture.debugElement.queryAll(By.css('.form-check-input[type="checkbox"]'));
       await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]:nth-of-type(2)', true);
 
       let formValue = BootstrapFormTestUtils.getFormValue(component);

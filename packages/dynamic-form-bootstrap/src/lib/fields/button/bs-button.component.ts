@@ -9,6 +9,7 @@ import { BsButtonComponent, BsButtonProps } from './bs-button.type';
 @Component({
   selector: 'df-bs-button',
   imports: [DynamicTextPipe, AsyncPipe],
+  styleUrl: '../../styles/_form-field.scss',
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
