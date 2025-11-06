@@ -1,34 +1,75 @@
 # PrimeNG Integration
 
-> **Status: Coming Soon** 🚧
-> PrimeNG integration for ng-forge dynamic forms is currently in development. Check back soon for updates!
+> **Status: Experimental** ⚠️
+> PrimeNG integration has partial Angular 21 compatibility. See [compatibility notes](#compatibility-status) below.
 
-## What's Planned
+Beautiful PrimeNG implementation for ng-forge dynamic forms.
 
-The PrimeNG integration will provide:
+## Installation
 
-- **Complete PrimeNG component library** - All PrimeNG form components
-- **Rich UI components** - AutoComplete, Calendar, MultiSelect, Chips, and more
-- **Theme support** - Built-in PrimeNG themes (Lara, Material, Bootstrap)
-- **Advanced data components** - TreeSelect, Cascading Selects, advanced tables
-- **PrimeIcons integration** - Icon support throughout forms
+```bash
+npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-primeng primeng primeicons
+```
 
-## In the Meantime
+## Quick Start
 
-While we complete the PrimeNG integration, you have two options:
+### 1. Import PrimeNG Styles
 
-### 1. Use the Material Integration
+Add PrimeNG styles to your `styles.scss`:
 
-The **[Material Design integration](../material)** is production-ready and fully documented. It provides the same features and can be a great starting point.
+```scss
+@import 'primeng/resources/themes/lara-light-blue/theme.css';
+@import 'primeng/resources/primeng.css';
+@import 'primeicons/primeicons.css';
+```
 
-### 2. Build Your Own Integration
+### 2. Configure Providers
 
-Follow our **[Custom Integration Guide](../../guide)** to create PrimeNG field components yourself. The guide includes examples from the Material integration showing how to implement field components, type safety, and validation.
+Use component-level providers for isolation:
 
-## Stay Updated
+```typescript
+import { Component } from '@angular/core';
+import { DynamicForm, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
 
-Want to be notified when PrimeNG integration is ready?
+@Component({
+  selector: 'app-my-form',
+  imports: [DynamicForm],
+  providers: [provideDynamicForm(...withPrimeNGFields())],
+  template: `<dynamic-form [config]="config" />`,
+})
+export class MyFormComponent {
+  // Your form config...
+}
+```
 
-- ⭐ [Star the project on GitHub](https://github.com/ng-forge/ng-forge)
-- 💬 [Join discussions](https://github.com/ng-forge/ng-forge/discussions)
-- 📢 [Track the PrimeNG integration issue](https://github.com/ng-forge/ng-forge/issues)
+## Examples
+
+### Input Field
+
+{{ InputDemoComponent }}
+
+## Compatibility Status
+
+**Current Status:** Partial compatibility with Angular 21.0.0-next.9 and PrimeNG 20.3.0
+
+### ✅ Fully Working Components
+
+- **Input** - All text input variants
+- **Button** - All button types
+
+### ⚠️ Known Issues
+
+The following components encounter `NG0600` errors in tests due to PrimeNG's signal handling:
+
+- Checkbox, Radio, Toggle, Select, Slider, Textarea, Multi-Checkbox, Datepicker
+
+**Root Cause:** PrimeNG 20.3.0 writes to signals during template rendering, which violates Angular 21's stricter rules. This is a PrimeNG framework issue.
+
+### Recommendations
+
+- **Wait for PrimeNG 21** - Full Angular 21 compatibility coming soon
+- **Use Material** - `@ng-forge/dynamic-form-material` is fully compatible
+- **Production Use** - May work despite test failures (untested)
+
+For more details, see the [library README](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-form-primeng).
