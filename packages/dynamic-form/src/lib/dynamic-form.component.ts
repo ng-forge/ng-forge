@@ -89,6 +89,7 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
       [class.disabled]="formOptions().disabled"
       [class.df-form-paged]="formModeDetection().mode === 'paged'"
       [class.df-form-non-paged]="formModeDetection().mode === 'non-paged'"
+      (submit)="onSubmit($event)"
     >
       @if (formModeDetection().mode === 'paged') {
       <!-- Paged form: Use page orchestrator with page fields -->
@@ -477,6 +478,15 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   onFieldsInitialized(): void {
     this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+  }
+
+  /**
+   * Handles form submission. Prevents default form submission behavior
+   * and emits the submit event through the event bus.
+   */
+  onSubmit(event: Event): void {
+    event.preventDefault();
+    this.eventBus.dispatch(SubmitEvent, this.value());
   }
 
   /**
