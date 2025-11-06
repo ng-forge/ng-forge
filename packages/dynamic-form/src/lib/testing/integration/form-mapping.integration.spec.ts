@@ -35,7 +35,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           minLength: 3,
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.username);
+        mapFieldToForm(fieldDef, formInstance.username);
 
         // Should be invalid (empty + required)
         expect(formInstance().valid()).toBe(false);
@@ -62,7 +62,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           validators: [{ type: 'required' }, { type: 'email' }],
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.email);
+        mapFieldToForm(fieldDef, formInstance.email);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -96,13 +96,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           ],
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.field);
+        mapFieldToForm(fieldDef, formInstance.field);
 
         // Hidden when show is false
-        expect(formInstance().controls.field.hidden()).toBe(true);
+        expect(formInstance.field().hidden()).toBe(true);
 
         formValue.set({ show: true, field: 'test' });
-        expect(formInstance().controls.field.hidden()).toBe(false);
+        expect(formInstance.field().hidden()).toBe(false);
       });
     });
 
@@ -124,7 +124,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           schemas: [{ type: 'apply', schema: 'emailSchema' }],
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.email);
+        mapFieldToForm(fieldDef, formInstance.email);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -164,10 +164,10 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           schemas: [{ type: 'apply', schema: 'strongPassword' }],
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.password);
+        mapFieldToForm(fieldDef, formInstance.password);
 
         // Visible and invalid (required + too short)
-        expect(formInstance().controls.password.hidden()).toBe(false);
+        expect(formInstance.password().hidden()).toBe(false);
         expect(formInstance().valid()).toBe(false);
 
         // Still invalid (too short)
@@ -180,7 +180,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         // Hidden but still validated
         formValue.set({ requirePassword: false, password: 'password123' });
-        expect(formInstance().controls.password.hidden()).toBe(true);
+        expect(formInstance.password().hidden()).toBe(true);
       });
     });
 
@@ -202,7 +202,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           logic: [{ type: 'readonly', condition: false }],
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.username);
+        mapFieldToForm(fieldDef, formInstance.username);
 
         // All validators should be applied
         expect(formInstance().valid()).toBe(false);
@@ -217,7 +217,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         expect(formInstance().valid()).toBe(false);
 
         // Logic should be applied
-        expect(formInstance().controls.username.readonly()).toBe(false);
+        expect(formInstance.username().readonly()).toBe(false);
       });
     });
   });
@@ -362,7 +362,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           maxLength: 50,
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.email);
+        mapFieldToForm(fieldDef, formInstance.email);
 
         expect(formInstance().valid()).toBe(false);
 
@@ -387,7 +387,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           validators: [{ type: 'pattern', value: /[A-Z]/ }],
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.password);
+        mapFieldToForm(fieldDef, formInstance.password);
 
         // Empty - fails required
         expect(formInstance().valid()).toBe(false);
@@ -419,7 +419,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           max: 100,
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.age);
+        mapFieldToForm(fieldDef, formInstance.age);
 
         // Too young
         formValue.set({ age: 10 });
@@ -447,7 +447,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           pattern: /^\d{5}$/,
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.zipCode);
+        mapFieldToForm(fieldDef, formInstance.zipCode);
 
         formValue.set({ zipCode: '123' });
         expect(formInstance().valid()).toBe(false);
@@ -471,9 +471,9 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           disabled: true,
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.field);
+        mapFieldToForm(fieldDef, formInstance.field);
 
-        expect(formInstance().controls.field.disabled()).toBe(true);
+        expect(formInstance.field().disabled()).toBe(true);
       });
     });
 
@@ -489,7 +489,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         };
 
         // Should not throw
-        mapFieldToForm(fieldDef, formInstance().controls.field);
+        mapFieldToForm(fieldDef, formInstance.field);
 
         // Should be valid (no validation rules)
         expect(formInstance().valid()).toBe(true);
@@ -520,7 +520,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           schemas: [{ type: 'apply', schema: 'emailValidation' }],
         };
 
-        mapFieldToForm(fieldDef, formInstance().controls.email);
+        mapFieldToForm(fieldDef, formInstance.email);
 
         // Should have both required (from nested schema) and email validation
         expect(formInstance().valid()).toBe(false);

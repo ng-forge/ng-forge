@@ -45,10 +45,24 @@ describe('dynamic-value-factory', () => {
     }
 
     function createMockFieldTree(parentField?: FieldTree<any>, key?: string | number): FieldTree<any> {
-      return {
-        parent: parentField,
-        key,
-      } as any;
+      // Create a mock FieldTree that returns mock form data
+      const mockFormValue = signal({ username: 'test', email: 'test@example.com' });
+      const mockRootField = Object.assign(
+        () => ({
+          value: mockFormValue,
+          valid: signal(true),
+          errors: signal(null),
+          touched: signal(false),
+          dirty: signal(false),
+        }),
+        {
+          formValue: mockFormValue,
+          parent: parentField,
+          key,
+        }
+      ) as any;
+
+      return mockRootField;
     }
 
     function runDynamicValueFunctionTest<TValue, TReturn>(
