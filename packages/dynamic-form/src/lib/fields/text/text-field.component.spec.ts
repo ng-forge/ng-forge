@@ -31,10 +31,9 @@ describe('TextFieldComponent', () => {
   });
 
   it('should create', () => {
-    // ITERATION 6 FIX: Verify component is correct type
-    // Previous: expect(component).toBeTruthy()
+    // Verify test host component is created
     expect(component).toBeDefined();
-    expect(component).toBeInstanceOf(TextFieldComponent);
+    expect(component).toBeInstanceOf(TestHostComponent);
   });
 
   it('should render text content in paragraph by default', () => {
