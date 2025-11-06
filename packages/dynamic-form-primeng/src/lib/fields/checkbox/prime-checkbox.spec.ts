@@ -40,9 +40,10 @@ describe('PrimeCheckboxFieldComponent', () => {
       const primeCheckboxComponent = fixture.debugElement.query(By.css('df-prime-checkbox'))?.componentInstance;
       const containerDiv = fixture.debugElement.query(By.css('.terms-checkbox'));
       const hintElement = fixture.debugElement.query(By.css('.p-hint'));
+      const labelElement = fixture.debugElement.query(By.css('label'));
 
       expect(checkbox).toBeTruthy();
-      expect(checkbox.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
+      expect(labelElement?.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
       expect(containerDiv).toBeTruthy();
       expect(hintElement?.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
@@ -156,9 +157,10 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const checkboxComponent = checkbox.componentInstance;
+      const labelElement = fixture.debugElement.query(By.css('label'));
 
       expect(checkbox).toBeTruthy();
-      expect(checkbox.nativeElement.textContent.trim()).toBe('Subscribe to Newsletter');
+      expect(labelElement?.nativeElement.textContent.trim()).toBe('Subscribe to Newsletter');
       expect(checkboxComponent.binary).toBe(true);
     });
 
@@ -200,11 +202,12 @@ describe('PrimeCheckboxFieldComponent', () => {
       await fixture.whenStable();
       untracked(() => fixture.detectChanges());
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
+      const labels = fixture.debugElement.queryAll(By.css('label'));
 
       expect(checkboxes.length).toBe(3);
-      expect(checkboxes[0].nativeElement.textContent.trim()).toBe('Accept Terms');
-      expect(checkboxes[1].nativeElement.textContent.trim()).toBe('Newsletter');
-      expect(checkboxes[2].nativeElement.textContent.trim()).toBe('Enablenotifications');
+      expect(labels[0]?.nativeElement.textContent.trim()).toBe('Accept Terms');
+      expect(labels[1]?.nativeElement.textContent.trim()).toBe('Newsletter');
+      expect(labels[2]?.nativeElement.textContent.trim()).toBe('Enablenotifications');
     });
 
     it('should reflect individual checkbox states from form model', async () => {
@@ -438,10 +441,11 @@ describe('PrimeCheckboxFieldComponent', () => {
         await fixture.whenStable();
         untracked(() => fixture.detectChanges());
         const checkbox = fixture.debugElement.query(By.directive(Checkbox));
+        let labelElement = fixture.debugElement.query(By.css('label'));
         const hint = fixture.debugElement.query(By.css('.p-hint'));
 
         // Initial translations
-        expect(checkbox.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
+        expect(labelElement?.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
         expect(hint.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
         // Update to Spanish
@@ -451,8 +455,9 @@ describe('PrimeCheckboxFieldComponent', () => {
         });
         translationService.setLanguage('es');
         untracked(() => fixture.detectChanges());
+        labelElement = fixture.debugElement.query(By.css('label'));
 
-        expect(checkbox.nativeElement.textContent.trim()).toBe('Aceptar Términos y Condiciones');
+        expect(labelElement?.nativeElement.textContent.trim()).toBe('Aceptar Términos y Condiciones');
         expect(hint.nativeElement.textContent.trim()).toBe('Por favor lea y acepte nuestros términos');
       });
     });

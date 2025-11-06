@@ -11,18 +11,23 @@ import { AsyncPipe } from '@angular/common';
   imports: [Checkbox, PrimeErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
+    @let f = field(); @let checkboxId = key() + '-checkbox';
 
-    <p-checkbox
-      [field]="f"
-      [label]="(label() | dynamicText | async) ?? undefined"
-      [binary]="props()?.binary ?? true"
-      [trueValue]="props()?.trueValue"
-      [falseValue]="props()?.falseValue"
-      [styleClass]="props()?.styleClass"
-      [attr.tabindex]="tabIndex()"
-      [attr.hidden]="f().hidden() || null"
-    />
+    <div class="flex items-center">
+      <p-checkbox
+        [field]="f"
+        [inputId]="checkboxId"
+        [binary]="props()?.binary ?? true"
+        [trueValue]="props()?.trueValue"
+        [falseValue]="props()?.falseValue"
+        [styleClass]="props()?.styleClass"
+        [attr.tabindex]="tabIndex()"
+        [attr.hidden]="f().hidden() || null"
+      />
+      @if (label(); as labelText) {
+      <label [for]="checkboxId" class="ml-2">{{ labelText | dynamicText | async }}</label>
+      }
+    </div>
 
     @if (props()?.hint; as hint) {
     <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
