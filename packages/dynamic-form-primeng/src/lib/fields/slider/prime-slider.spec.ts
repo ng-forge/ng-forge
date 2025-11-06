@@ -132,7 +132,7 @@ describe('PrimeSliderFieldComponent', () => {
         .primeSliderField({ key: 'temperature', props: { min: -10, max: 40, step: 1 } })
         .build();
 
-      const { component, fixture } = await PrimeNGFormTestUtils.createTest({
+      const { fixture } = await PrimeNGFormTestUtils.createTest({
         config,
         initialValue: {
           volume: 50,
@@ -393,7 +393,7 @@ describe('PrimeSliderFieldComponent', () => {
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({
         config,
-        initialValue: null as any,
+        initialValue: null as unknown,
       });
 
       const slider = fixture.debugElement.query(By.css('p-slider'));

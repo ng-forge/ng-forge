@@ -526,7 +526,7 @@ describe('PrimeSelectFieldComponent', () => {
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({
         config,
-        initialValue: null as any,
+        initialValue: null as unknown,
       });
 
       const select = fixture.debugElement.query(By.css('p-dropdown'));

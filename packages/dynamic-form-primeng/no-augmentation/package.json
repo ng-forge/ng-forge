@@ -3,5 +3,18 @@
     "lib": {
       "entryFile": "../src/no-augmentation/index.ts"
     }
+  },
+  "dependencies": {
+    "@analogjs/vite-plugin-angular": "^1.21.3",
+    "@angular/common": "~21.0.0-next.9",
+    "@angular/core": "~21.0.0-next.9",
+    "@angular/forms": "~21.0.0-next.9",
+    "@angular/platform-browser": "~21.0.0-next.9",
+    "@ng-forge/dynamic-form": "0.0.1",
+    "@nx/vite": "21.6.5",
+    "lodash-es": "^4.17.21",
+    "ngxtension": "^6.0.0",
+    "primeng": "^20.3.0",
+    "rxjs": "~7.8.0"
   }
 }

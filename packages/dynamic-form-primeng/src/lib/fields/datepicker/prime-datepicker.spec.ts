@@ -398,7 +398,7 @@ describe('PrimeDatepickerFieldComponent', () => {
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({
         config,
-        initialValue: null as any,
+        initialValue: null as unknown,
       });
 
       const calendar = fixture.debugElement.query(By.directive(Calendar));

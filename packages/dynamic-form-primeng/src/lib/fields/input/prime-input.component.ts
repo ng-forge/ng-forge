@@ -56,8 +56,9 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly inputClasses = computed(() => {
     const classes: string[] = [];
 
-    if (this.props()?.styleClass) {
-      classes.push(this.props()!.styleClass!);
+    const styleClass = this.props()?.styleClass;
+    if (styleClass) {
+      classes.push(styleClass);
     }
 
     if (this.props()?.size === 'small') {

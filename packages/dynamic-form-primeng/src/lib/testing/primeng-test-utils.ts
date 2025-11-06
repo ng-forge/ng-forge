@@ -39,9 +39,9 @@ export interface PrimeNGFormTestResult {
  * Fluent API for building PrimeNG form configurations
  */
 export class PrimeNGFormConfigBuilder {
-  private fields: any[] = [];
+  private fields: unknown[] = [];
 
-  field(field: any): PrimeNGFormConfigBuilder {
+  field(field: unknown): PrimeNGFormConfigBuilder {
     this.fields.push(field);
     return this;
   }
@@ -313,7 +313,7 @@ export class PrimeNGFormTestUtils {
   /**
    * Gets validation errors from the component
    */
-  static getFormErrors(component: DynamicForm): any[] {
+  static getFormErrors(component: DynamicForm): unknown[] {
     return component.errors();
   }
 

@@ -456,7 +456,7 @@ describe('PrimeRadioFieldComponent', () => {
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({
         config,
-        initialValue: null as any,
+        initialValue: null as unknown,
       });
 
       const radioButtons = fixture.debugElement.queryAll(By.directive(RadioButton));

@@ -23,13 +23,12 @@ describe('PrimeInputFieldComponent', () => {
         })
         .build();
 
-      const { component, fixture } = await PrimeNGFormTestUtils.createTest({
+      const { fixture } = await PrimeNGFormTestUtils.createTest({
         config,
         initialValue: { email: '', password: '', firstName: '', age: 0, website: '', phone: '' },
       });
 
       const input = fixture.debugElement.query(By.css('input[pInputText]'));
-      const fieldWrapper = fixture.debugElement.query(By.css('df-prime-input'));
       const label = fixture.debugElement.query(By.css('label'));
       const hint = fixture.debugElement.query(By.css('.p-hint'));
 
@@ -274,7 +273,7 @@ describe('PrimeInputFieldComponent', () => {
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({
         config,
-        initialValue: null as any,
+        initialValue: null as unknown,
       });
 
       const input = fixture.debugElement.query(By.css('input[pInputText]'));
@@ -332,8 +331,6 @@ describe('PrimeInputFieldComponent', () => {
         config,
         initialValue: { firstName: '' },
       });
-
-      const testValues = ['A', 'Ab', 'Abc', 'Abcd', 'Alice'];
 
       // Simulate rapid typing using utility (final value)
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'input[type="text"]', 'Alice');

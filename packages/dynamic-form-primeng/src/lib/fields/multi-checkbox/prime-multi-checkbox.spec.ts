@@ -413,7 +413,7 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({
         config,
-        initialValue: null as any,
+        initialValue: null as unknown,
       });
 
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));

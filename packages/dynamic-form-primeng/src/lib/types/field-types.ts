@@ -12,7 +12,6 @@ import type {
   SliderField,
   FormEvent,
 } from '@ng-forge/dynamic-form';
-import type { PrimeField } from './types';
 
 // ============================================
 // INPUT FIELD

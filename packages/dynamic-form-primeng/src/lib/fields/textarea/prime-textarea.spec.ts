@@ -255,7 +255,7 @@ describe('PrimeTextareaFieldComponent', () => {
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({
         config,
-        initialValue: null as any,
+        initialValue: null as unknown,
       });
 
       const textarea = fixture.debugElement.query(By.css('textarea[pInputTextarea]'));
