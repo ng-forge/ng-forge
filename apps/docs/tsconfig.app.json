@@ -2,30 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "types": [],
-    "paths": {
-      "@ng-doc/generated": ["dist/ng-doc/docs"],
-      "@ng-forge/dynamic-form": ["packages/dynamic-form/src/index.ts"],
-      "@ng-forge/dynamic-form-material": ["packages/dynamic-form-material/src/index.ts"],
-      "@ng-forge/dynamic-form-primeng": ["this-path-should-not-be-used-in-docs"],
-      "@ng-forge/examples-primeng": ["dist/libs/examples/primeng"]
-    }
+    "types": []
   },
   "include": ["src/**/*.ts"],
-  "exclude": [
-    "vite.config.ts",
-    "src/test-setup.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/checkbox-demo.component.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/slider-demo.component.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/select-demo.component.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/datepicker-demo.component.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/radio-demo.component.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/textarea-demo.component.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/complete-prime-form.component.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/multi-checkbox-demo.component.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/button-demo.component.ts",
-    "src/docs/custom-integrations/reference/primeng/examples/toggle-demo.component.ts"
-  ]
+  "exclude": ["vite.config.ts", "src/test-setup.ts", "src/**/*.test.ts", "src/**/*.spec.ts"]
 }

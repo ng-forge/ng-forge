@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withPrimeNGFields, submitButton } from '@ng-forge/dynamic-form-primeng';
+import { withPrimeNGFields, submitButton } from '@ng-forge/dynamic-form-primeng/no-augmentation';
 
 @Component({
   selector: 'app-complete-prime-form',

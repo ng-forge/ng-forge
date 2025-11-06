@@ -16,7 +16,7 @@ import {
   PrimeButtonField,
   PrimeMultiCheckboxField,
   PrimeTextareaField,
-} from '../types/registry-augmentation';
+} from '../types/field-types';
 
 /**
  * Configuration for creating a PrimeNG dynamic form test

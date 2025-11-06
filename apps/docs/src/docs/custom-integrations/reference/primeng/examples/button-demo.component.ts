@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig, FormEvent, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { nextPageButton, previousPageButton, submitButton, withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+import { nextPageButton, previousPageButton, submitButton, withPrimeNGFields } from '@ng-forge/dynamic-form-primeng/no-augmentation';
 
 @Component({
   selector: 'app-button-demo',
@@ -21,7 +21,7 @@ export class ButtonDemoComponent {
   formOutput = signal({});
   eventLog = signal<string[]>([]);
 
-  onSubmit(event: FormEvent): void {
+  onSubmit(event: unknown): void {
     console.log('Form submitted!', event);
     this.eventLog.update((log) => [...log, 'Form submitted']);
   }

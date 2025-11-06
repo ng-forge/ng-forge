@@ -1,26 +1,60 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng/no-augmentation';
 
 @Component({
   selector: 'app-input-demo',
   standalone: true,
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [DynamicForm, JsonPipe],
+  providers: [provideDynamicForm(...withPrimeNGFields())],
   template: `
-    <div class="demo-container">
-      <prime-input-example></prime-input-example>
+    <dynamic-form [config]="config" (submit)="onSubmit($event)" />
+    @if (submittedData) {
+    <div class="result">
+      <h4>Submitted Data:</h4>
+      <pre>{{ submittedData | json }}</pre>
     </div>
+    }
   `,
-  styles: [
-    `
-      .demo-container {
-        margin: 1rem 0;
-      }
-    `,
-  ],
+  styles: `
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InputDemoComponent implements OnInit {
-  async ngOnInit() {
-    // Lazy load and register the web component
-    const { registerPrimeExample } = await import('@ng-forge/examples-primeng');
-    await registerPrimeExample('prime-input-example');
+export class InputDemoComponent {
+  submittedData: unknown = null;
+
+  config: FormConfig = {
+    fields: [
+      {
+        key: 'email',
+        type: 'input',
+        value: '',
+        label: 'Email Address',
+        props: {
+          type: 'email',
+          styleClass: 'w-full',
+          hint: 'Enter your email address',
+        },
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Submit',
+        props: {
+          severity: 'primary',
+        },
+      },
+    ],
+  };
+
+  onSubmit(data: unknown) {
+    this.submittedData = data;
   }
 }
