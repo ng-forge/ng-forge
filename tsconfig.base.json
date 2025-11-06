@@ -19,7 +19,7 @@
       "@ng-forge/dynamic-form": ["packages/dynamic-form/src/index.ts"],
       "@ng-forge/dynamic-form-material": ["packages/dynamic-form-material/src/index.ts"],
       "@ng-forge/dynamic-form-primeng": ["packages/dynamic-form-primeng/src/index.ts"],
-      "@ng-forge/examples-primeng": ["libs/examples/primeng/src/index.ts"]
+      "@ng-forge/examples-primeng": ["dist/libs/examples/primeng"]
     }
   },
   "exclude": ["node_modules", "tmp"]

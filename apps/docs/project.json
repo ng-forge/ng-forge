@@ -9,6 +9,7 @@
     "build": {
       "executor": "@ng-doc/builder:application",
       "outputs": ["{options.outputPath}"],
+      "dependsOn": ["^build"],
       "options": {
         "outputPath": "dist/apps/docs",
         "browser": "apps/docs/src/main.ts",
@@ -31,7 +32,8 @@
           }
         ],
         "styles": ["apps/docs/src/styles.scss"],
-        "allowedCommonJsDependencies": ["dayjs", "@braintree/sanitize-url", "dompurify", "cytoscape-cose-bilkent", "elkjs", "@ng-doc/core"]
+        "allowedCommonJsDependencies": ["dayjs", "@braintree/sanitize-url", "dompurify", "cytoscape-cose-bilkent", "elkjs", "@ng-doc/core"],
+        "externalDependencies": ["@ng-forge/dynamic-form-primeng", "primeng", "primeicons"]
       },
       "configurations": {
         "production": {

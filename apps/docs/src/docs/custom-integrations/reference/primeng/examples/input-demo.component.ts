@@ -11,10 +11,6 @@ import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   `,
   styles: [
     `
-      @import 'primeng/resources/themes/lara-light-blue/theme.css';
-      @import 'primeng/resources/primeng.css';
-      @import 'primeicons/primeicons.css';
-
       .demo-container {
         margin: 1rem 0;
       }
