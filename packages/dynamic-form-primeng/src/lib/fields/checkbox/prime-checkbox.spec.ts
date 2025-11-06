@@ -32,13 +32,18 @@ describe('PrimeCheckboxFieldComponent', () => {
         },
       });
 
+      await fixture.whenStable();
+      untracked(() => fixture.detectChanges());
+      await fixture.whenStable(); // Extra cycle for async pipes
+      untracked(() => fixture.detectChanges());
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const primeCheckboxComponent = fixture.debugElement.query(By.css('df-prime-checkbox'))?.componentInstance;
       const containerDiv = fixture.debugElement.query(By.css('.terms-checkbox'));
       const hintElement = fixture.debugElement.query(By.css('.p-hint'));
+      const labelElement = fixture.debugElement.query(By.css('label'));
 
       expect(checkbox).toBeTruthy();
-      expect(checkbox.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
+      expect(labelElement?.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
       expect(containerDiv).toBeTruthy();
       expect(hintElement?.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
@@ -96,7 +101,7 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       untracked(() => fixture.detectChanges());
 
-      expect(checkboxComponent.checked()).toBe(true);
+      expect(checkboxComponent.checked).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['acceptTerms']).toBe(true);
     });
 
@@ -125,9 +130,9 @@ describe('PrimeCheckboxFieldComponent', () => {
       const checkboxComponent = checkbox.componentInstance;
 
       // These properties are passed to the inner Checkbox component
-      expect(checkboxComponent.binary()).toBe(true);
-      expect(checkboxComponent.trueValue()).toBe('yes');
-      expect(checkboxComponent.falseValue()).toBe('no');
+      expect(checkboxComponent.binary).toBe(true);
+      expect(checkboxComponent.trueValue).toBe('yes');
+      expect(checkboxComponent.falseValue).toBe('no');
     });
   });
 
@@ -152,10 +157,11 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const checkboxComponent = checkbox.componentInstance;
+      const labelElement = fixture.debugElement.query(By.css('label'));
 
       expect(checkbox).toBeTruthy();
-      expect(checkbox.nativeElement.textContent.trim()).toBe('Subscribe to Newsletter');
-      expect(checkboxComponent.binary()).toBe(true);
+      expect(labelElement?.nativeElement.textContent.trim()).toBe('Subscribe to Newsletter');
+      expect(checkboxComponent.binary).toBe(true);
     });
 
     it('should not display hint when not provided', async () => {
@@ -193,12 +199,15 @@ describe('PrimeCheckboxFieldComponent', () => {
         },
       });
 
+      await fixture.whenStable();
+      untracked(() => fixture.detectChanges());
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
+      const labels = fixture.debugElement.queryAll(By.css('label'));
 
       expect(checkboxes.length).toBe(3);
-      expect(checkboxes[0].nativeElement.textContent.trim()).toBe('Accept Terms');
-      expect(checkboxes[1].nativeElement.textContent.trim()).toBe('Newsletter');
-      expect(checkboxes[2].nativeElement.textContent.trim()).toBe('Enablenotifications');
+      expect(labels[0]?.nativeElement.textContent.trim()).toBe('Accept Terms');
+      expect(labels[1]?.nativeElement.textContent.trim()).toBe('Newsletter');
+      expect(labels[2]?.nativeElement.textContent.trim()).toBe('Enablenotifications');
     });
 
     it('should reflect individual checkbox states from form model', async () => {
@@ -217,11 +226,13 @@ describe('PrimeCheckboxFieldComponent', () => {
         },
       });
 
+      await fixture.whenStable();
+      untracked(() => fixture.detectChanges());
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
 
-      expect(checkboxes[0].componentInstance.checked()).toBe(false);
-      expect(checkboxes[1].componentInstance.checked()).toBe(true);
-      expect(checkboxes[2].componentInstance.checked()).toBe(false);
+      expect(checkboxes[0].componentInstance.checked).toBe(false);
+      expect(checkboxes[1].componentInstance.checked).toBe(true);
+      expect(checkboxes[2].componentInstance.checked).toBe(false);
     });
 
     it('should handle independent checkbox interactions', async () => {
@@ -242,6 +253,8 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       // Simulate first checkbox click using utility
       await PrimeNGFormTestUtils.simulatePrimeCheckbox(fixture, 'p-checkbox:first-of-type', true);
+      await fixture.whenStable();
+      untracked(() => fixture.detectChanges());
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue['acceptTerms']).toBe(true);
@@ -275,9 +288,9 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       const checkboxes = fixture.debugElement.queryAll(By.directive(Checkbox));
 
-      expect(checkboxes[0].componentInstance.styleClass()).toBeUndefined();
-      expect(checkboxes[1].componentInstance.styleClass()).toBe('accent-checkbox');
-      expect(checkboxes[2].componentInstance.styleClass()).toBe('warn-checkbox');
+      expect(checkboxes[0].componentInstance.styleClass).toBeFalsy();
+      expect(checkboxes[1].componentInstance.styleClass).toBe('accent-checkbox');
+      expect(checkboxes[2].componentInstance.styleClass).toBe('warn-checkbox');
     });
   });
 
@@ -301,6 +314,7 @@ describe('PrimeCheckboxFieldComponent', () => {
         },
       });
 
+      await fixture.whenStable();
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const checkboxInput = fixture.debugElement.query(By.css('input[type="checkbox"]'));
       const checkboxComponent = checkbox.componentInstance;
@@ -313,7 +327,7 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       // Verify the checkbox remains disabled and doesn't change
       expect(checkboxInput.nativeElement.disabled).toBe(true);
-      expect(checkboxComponent.checked()).toBe(false);
+      expect(checkboxComponent.checked).toBe(false);
     });
 
     it('should apply default PrimeNG configuration', async () => {
@@ -328,7 +342,7 @@ describe('PrimeCheckboxFieldComponent', () => {
       const checkboxComponent = checkbox.componentInstance;
 
       // Check default props from PrimeNG configuration
-      expect(checkboxComponent.binary()).toBe(true);
+      expect(checkboxComponent.binary).toBe(true);
     });
 
     it('should handle binary mode correctly', async () => {
@@ -351,7 +365,7 @@ describe('PrimeCheckboxFieldComponent', () => {
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const checkboxComponent = checkbox.componentInstance;
 
-      expect(checkboxComponent.binary()).toBe(false);
+      expect(checkboxComponent.binary).toBe(false);
     });
 
     it('should handle undefined form values gracefully', async () => {
@@ -387,13 +401,15 @@ describe('PrimeCheckboxFieldComponent', () => {
       const checkboxComponent = checkbox.componentInstance;
 
       // Initial state
-      expect(checkboxComponent.checked()).toBe(false);
+      expect(checkboxComponent.checked).toBe(false);
 
       // Update via programmatic value change
       fixture.componentRef.setInput('value', { acceptTerms: true });
       untracked(() => fixture.detectChanges());
+      await fixture.whenStable();
+      untracked(() => fixture.detectChanges());
 
-      expect(checkboxComponent.checked()).toBe(true);
+      expect(checkboxComponent.checked).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['acceptTerms']).toBe(true);
     });
   });
@@ -422,11 +438,14 @@ describe('PrimeCheckboxFieldComponent', () => {
           initialValue: { acceptTerms: false },
         });
 
+        await fixture.whenStable();
+        untracked(() => fixture.detectChanges());
         const checkbox = fixture.debugElement.query(By.directive(Checkbox));
+        let labelElement = fixture.debugElement.query(By.css('label'));
         const hint = fixture.debugElement.query(By.css('.p-hint'));
 
         // Initial translations
-        expect(checkbox.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
+        expect(labelElement?.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
         expect(hint.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
         // Update to Spanish
@@ -436,8 +455,9 @@ describe('PrimeCheckboxFieldComponent', () => {
         });
         translationService.setLanguage('es');
         untracked(() => fixture.detectChanges());
+        labelElement = fixture.debugElement.query(By.css('label'));
 
-        expect(checkbox.nativeElement.textContent.trim()).toBe('Aceptar Términos y Condiciones');
+        expect(labelElement?.nativeElement.textContent.trim()).toBe('Aceptar Términos y Condiciones');
         expect(hint.nativeElement.textContent.trim()).toBe('Por favor lea y acepte nuestros términos');
       });
     });
