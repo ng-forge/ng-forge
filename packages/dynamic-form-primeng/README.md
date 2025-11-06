@@ -96,6 +96,57 @@ export class ContactFormComponent {
 }
 ```
 
+## Customization
+
+### CSS Variables
+
+All field components use customizable CSS variables for styling. You can override these in your global styles to customize the appearance:
+
+```scss
+// In your styles.scss or component styles
+:root {
+  // Gap between label, input, and hint
+  --df-prime-field-gap: 0.75rem; // default: 0.5rem
+
+  // Label font weight
+  --df-prime-label-font-weight: 600; // default: 500
+
+  // Hint text color
+  --df-prime-hint-color: #999; // default: --p-text-muted-color or #6c757d
+
+  // Hint text size
+  --df-prime-hint-font-size: 0.8125rem; // default: 0.875rem
+}
+```
+
+### Component-Specific Styling
+
+Each field component applies these classes that you can target for further customization:
+
+- `.df-prime-field` - The wrapper div for each field
+- `.df-prime-label` - The label element
+- `.df-prime-hint` - The hint text element
+
+Example:
+
+```scss
+// Custom styling for a specific form
+.my-custom-form {
+  .df-prime-field {
+    margin-bottom: 1.5rem;
+  }
+
+  .df-prime-label {
+    text-transform: uppercase;
+    font-size: 0.875rem;
+  }
+
+  .df-prime-hint {
+    font-style: italic;
+  }
+}
+```
+
 ## Available Field Types
 
 ### Text Input (`input`)
