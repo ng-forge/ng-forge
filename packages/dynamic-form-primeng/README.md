@@ -5,6 +5,45 @@ Beautiful PrimeNG implementation for ng-forge dynamic forms.
 [![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-form-primeng.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form-primeng)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## ⚠️ Angular 21 Compatibility Status
+
+**Current Status:** Partial compatibility with Angular 21.0.0-next.9 and PrimeNG 20.3.0
+
+This library is built against Angular 21's signal-based forms, but PrimeNG 20.3.0 has not yet been fully updated for Angular 21's stricter signal change detection rules. This results in the following compatibility matrix:
+
+### ✅ Fully Working Components
+
+- **Input** - All text input variants (email, password, text, etc.)
+- **Button** - All button types (button, submit, next, previous)
+
+### ⚠️ Known Issues
+
+The following components encounter `NG0600: Writing to signals is not allowed while Angular renders the template` errors in tests:
+
+- **Checkbox** - PrimeNG writes to signals during `writeValue()`
+- **Radio** - PrimeNG writes to signals during `writeValue()`
+- **Toggle** - PrimeNG writes to signals during `writeValue()`
+- **Select** - PrimeNG writes to signals during `writeValue()`
+- **Slider** - PrimeNG writes to signals during `setDisabledState()`
+- **Textarea** - Configuration issue with auto-resize feature
+- **Multi-Checkbox** - Partial compatibility
+- **Datepicker** - Likely affected (not yet fully tested)
+
+### Root Cause
+
+PrimeNG 20.3.0 components call `writeModelValue()`, `writeControlValue()`, and `setDisabledState()` during template rendering, which violates Angular 21's signal change detection rules. This is a PrimeNG framework issue, not an issue with this library's implementation.
+
+### Recommended Actions
+
+1. **Wait for PrimeNG 21** - PrimeNG maintainers are working on Angular 21 compatibility
+2. **Production Use** - The components may work in production despite test failures, but this hasn't been verified
+3. **Alternative** - Use `@ng-forge/dynamic-form-material` which is fully compatible with Angular 21
+
+### Tracking
+
+- [PrimeNG Roadmap - Angular 21 Support](https://primeng.org/roadmap)
+- [PrimeNG Issue #16546 - Modernize Components for Signals](https://github.com/primefaces/primeng/issues/16546)
+
 ## Overview
 
 `@ng-forge/dynamic-form-primeng` provides a complete set of PrimeNG field components for ng-forge. Built with PrimeNG, these components offer beautiful, accessible, and production-ready form controls.
