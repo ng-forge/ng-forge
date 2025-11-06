@@ -21,18 +21,19 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="checkbox-group" [class]="props()?.styleClass || ''">
       @for (option of options(); track option.value) {
-      <p-checkbox
-        [binary]="false"
-        [value]="option.value"
-        [ngModel]="valueViewModel()"
-        [disabled]="f().disabled() || option.disabled || false"
-        (ngModelChange)="onCheckboxChange($event)"
-      >
-        {{ option.label | dynamicText | async }}
-      </p-checkbox>
+      <div class="checkbox-option">
+        <p-checkbox
+          [inputId]="key() + '-' + option.value"
+          [binary]="false"
+          [value]="option.value"
+          [ngModel]="valueViewModel()"
+          [disabled]="f().disabled() || option.disabled || false"
+          (ngModelChange)="onCheckboxChange($event)"
+        />
+        <label [for]="key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
+      </div>
       }
     </div>
-
     @if (props()?.hint; as hint) {
     <small class="p-hint">{{ hint | dynamicText | async }}</small>
     }
@@ -43,6 +44,12 @@ import { AsyncPipe } from '@angular/common';
     `
       :host {
         display: block;
+      }
+
+      .checkbox-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
     `,
   ],
