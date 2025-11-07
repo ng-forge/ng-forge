@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
 import { BsErrorsComponent } from '../../shared/bs-errors.component';
 import { BsRadioComponent, BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-bs-radio',
-  imports: [Field, BsErrorsComponent, DynamicTextPipe, AsyncPipe],
+  imports: [BsErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -20,8 +21,7 @@ import { AsyncPipe } from '@angular/common';
         @for (option of options(); track option.value; let i = $index) {
         <input
           type="radio"
-          [field]="f"
-          [value]="option.value"
+          [(ngModel)]="option.value"
           [disabled]="option.disabled || f().disabled()"
           class="btn-check"
           [id]="key() + '_' + i"
@@ -41,8 +41,7 @@ import { AsyncPipe } from '@angular/common';
       <div class="form-check" [class.form-check-inline]="props()?.inline" [class.form-check-reverse]="props()?.reverse">
         <input
           type="radio"
-          [field]="f"
-          [value]="option.value"
+          [(ngModel)]="option.value"
           [disabled]="option.disabled || f().disabled()"
           class="form-check-input"
           [id]="key() + '_' + i"

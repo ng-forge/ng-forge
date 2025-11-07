@@ -1,4 +1,4 @@
-import { ComponentRef, Directive, ElementRef, inject, input, OnDestroy, Renderer2 } from '@angular/core';
+import { afterNextRender, ComponentRef, Directive, ElementRef, inject, Injector, input, OnDestroy, Renderer2 } from '@angular/core';
 import { FormUiControl } from '@angular/forms/signals';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
@@ -18,6 +18,7 @@ import { Subject } from 'rxjs';
   selector: '[fieldRenderer]',
 })
 export class FieldRendererDirective implements OnDestroy {
+  private readonly injector = inject(Injector);
   private readonly elementRef = inject(ElementRef<HTMLFormElement>);
   private readonly renderer = inject(Renderer2);
 
@@ -52,9 +53,12 @@ export class FieldRendererDirective implements OnDestroy {
       }
     });
 
-    setTimeout(() => {
-      this.fieldsInitializedSubject.next();
-    }, 0);
+    afterNextRender(
+      () => {
+        this.fieldsInitializedSubject.next();
+      },
+      { injector: this.injector }
+    );
   }
 
   private clearFields(): void {
