@@ -43,7 +43,7 @@ Import Bootstrap styles:
 
 Text-based inputs with Bootstrap styling and optional floating labels.
 
-{{ NgDocActions.demo("InputDemoComponent") }}
+{{ NgDocActions.demo("InputIframeDemoComponent") }}
 
 **Props:**
 
@@ -58,7 +58,7 @@ Text-based inputs with Bootstrap styling and optional floating labels.
 
 Dropdown selection (single or multiple) with Bootstrap form-select styling.
 
-{{ NgDocActions.demo("SelectDemoComponent") }}
+{{ NgDocActions.demo("SelectIframeDemoComponent") }}
 
 **Props:**
 
@@ -71,7 +71,7 @@ Dropdown selection (single or multiple) with Bootstrap form-select styling.
 
 Boolean checkbox control with optional switch styling.
 
-{{ NgDocActions.demo("CheckboxDemoComponent") }}
+{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
 
 **Props:**
 
@@ -83,7 +83,7 @@ Boolean checkbox control with optional switch styling.
 
 Always renders as a Bootstrap switch control (alias for checkbox with switch=true).
 
-{{ NgDocActions.demo("ToggleDemoComponent") }}
+{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
 
 **Props:**
 
@@ -94,7 +94,7 @@ Always renders as a Bootstrap switch control (alias for checkbox with switch=tru
 
 Action button with Bootstrap variants and styles.
 
-{{ NgDocActions.demo("ButtonDemoComponent") }}
+{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
 
 **Props:**
 
@@ -114,7 +114,7 @@ Action button with Bootstrap variants and styles.
 
 Multi-line text input with Bootstrap form-control styling.
 
-{{ NgDocActions.demo("TextareaDemoComponent") }}
+{{ NgDocActions.demo("TextareaIframeDemoComponent") }}
 
 **Props:**
 
@@ -127,7 +127,7 @@ Multi-line text input with Bootstrap form-control styling.
 
 Radio button group for single selection with optional button group styling.
 
-{{ NgDocActions.demo("RadioDemoComponent") }}
+{{ NgDocActions.demo("RadioIframeDemoComponent") }}
 
 **Props:**
 
@@ -141,7 +141,7 @@ Radio button group for single selection with optional button group styling.
 
 Multiple checkbox selection for array values.
 
-{{ NgDocActions.demo("MultiCheckboxDemoComponent") }}
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
 
 **Props:**
 
@@ -154,7 +154,7 @@ Multiple checkbox selection for array values.
 
 Native HTML5 date input with Bootstrap styling.
 
-{{ NgDocActions.demo("DatepickerDemoComponent") }}
+{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
 
 **Props:**
 
@@ -167,7 +167,7 @@ Native HTML5 date input with Bootstrap styling.
 
 Range slider for numeric input with value display.
 
-{{ NgDocActions.demo("SliderDemoComponent") }}
+{{ NgDocActions.demo("SliderIframeDemoComponent") }}
 
 **Props:**
 
@@ -181,7 +181,15 @@ Range slider for numeric input with value display.
 
 A comprehensive form demonstrating all Bootstrap field types together:
 
-{{ NgDocActions.demo("CompleteFormDemoComponent") }}
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
+
+## Additional Examples
+
+### User Registration Form
+
+Complete user registration form with validation:
+
+{{ NgDocActions.demo("UserRegistrationIframeDemoComponent") }}
 
 ## Bootstrap-Specific Features
 
