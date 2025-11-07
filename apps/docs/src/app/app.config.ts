@@ -14,7 +14,7 @@ import {
 import { provideNgDocContext } from '@ng-doc/generated';
 import { appRoutes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { ENVIRONMENT, environment, environmentProd } from './config/environment';
+import { ENVIRONMENT, environment } from './config/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -42,15 +42,7 @@ export const appConfig: ApplicationConfig = {
     providePageSkeleton(NG_DOC_DEFAULT_PAGE_SKELETON),
     provideMainPageProcessor(NG_DOC_DEFAULT_PAGE_PROCESSORS),
     // Environment configuration for iframe example URLs
-    {
-      provide: ENVIRONMENT,
-      useFactory: () => {
-        // Detect production environment
-        if (typeof window !== 'undefined' && window.location.hostname.includes('github.io')) {
-          return environmentProd;
-        }
-        return environment;
-      },
-    },
+    // Values are injected at build time via --define
+    { provide: ENVIRONMENT, useValue: environment },
   ],
 };

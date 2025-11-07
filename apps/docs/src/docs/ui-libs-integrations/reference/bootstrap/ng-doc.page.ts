@@ -1,10 +1,10 @@
 import { NgDocPage } from '@ng-doc/core';
-import CustomIntegrationsCategory from '../../ng-doc.category';
+import UiLibsIntegrationCategory from '../../ng-doc.category';
 
 const BootstrapPage: NgDocPage = {
   title: 'Bootstrap',
   mdFile: './index.md',
-  category: CustomIntegrationsCategory,
+  category: UiLibsIntegrationCategory,
   order: 3,
 };
 

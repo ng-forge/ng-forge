@@ -50,6 +50,9 @@
           ],
           "outputHashing": "all",
           "baseHref": "/ng-forge/",
+          "define": {
+            "EXAMPLE_BASE_PATH": "process.env['EXAMPLE_BASE_PATH'] || '/ng-forge/examples'"
+          },
           "ngDoc": {
             "config": "apps/docs/ng-doc.config.ts"
           }
@@ -58,6 +61,9 @@
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true,
+          "define": {
+            "EXAMPLE_BASE_PATH": "process.env['EXAMPLE_BASE_PATH'] || 'http://localhost:420'"
+          },
           "ngDoc": {
             "config": "apps/docs/ng-doc.config.ts"
           }

@@ -30,27 +30,31 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            // Get the branch that triggered this workflow
+            const branch = context.ref.replace('refs/heads/', '');
+            console.log(`Checking CI status for branch: ${branch}`);
+
             const { data: runs } = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'ci.yml',
-              branch: 'main',
+              branch: branch,
               status: 'completed',
               per_page: 1
             });
 
             if (runs.total_count === 0) {
-              core.setFailed('No CI runs found');
+              core.setFailed(`No CI runs found for branch: ${branch}`);
               return;
             }
 
             const latestRun = runs.workflow_runs[0];
-            console.log(`Latest CI run: ${latestRun.conclusion} (${latestRun.html_url})`);
+            console.log(`Latest CI run on ${branch}: ${latestRun.conclusion} (${latestRun.html_url})`);
 
             if (latestRun.conclusion === 'success') {
               core.setOutput('success', 'true');
             } else {
-              core.setFailed(`Latest CI run failed: ${latestRun.html_url}`);
+              core.setFailed(`Latest CI run failed on ${branch}: ${latestRun.html_url}`);
             }
 
   build-and-deploy:
@@ -94,44 +98,62 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build all libraries
-        run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic
+      - name: Build example apps
+        run: |
+          echo "Building example apps (Nx will build library dependencies automatically)..."
+          pnpm run build:examples
+
+      - name: Verify example builds exist
+        run: |
+          echo "🔍 Verifying example builds..."
+          MISSING=false
+
+          if [ ! -d "dist/apps/examples/material/browser" ]; then
+            echo "❌ Material examples build output missing!"
+            MISSING=true
+          else
+            echo "✅ Material examples build found"
+          fi
+
+          if [ ! -d "dist/apps/examples/primeng/browser" ]; then
+            echo "❌ PrimeNG examples build output missing!"
+            MISSING=true
+          else
+            echo "✅ PrimeNG examples build found"
+          fi
+
+          if [ ! -d "dist/apps/examples/ionic/browser" ]; then
+            echo "❌ Ionic examples build output missing!"
+            MISSING=true
+          else
+            echo "✅ Ionic examples build found"
+          fi
+
+          if [ "$MISSING" = true ]; then
+            echo ""
+            echo "❌ Example builds incomplete! Cannot proceed with deployment."
+            exit 1
+          fi
+
+          echo "✅ All example builds present"
 
       - name: Build documentation app
         run: |
           echo "Building documentation app..."
           pnpm run build:docs:prod
-
-      - name: Build example apps
-        run: |
-          echo "Building example apps..."
-          pnpm run build:examples
+        env:
+          EXAMPLE_BASE_PATH: /ng-forge/examples
 
       - name: Prepare deployment directory
         run: |
           echo "Preparing unified deployment directory..."
           pnpm run prepare:deploy
-
-      - name: Verify deployment structure
-        run: |
-          echo "📂 Deployment directory structure:"
-          ls -la dist/deploy/
           echo ""
-          echo "📂 Examples directory:"
-          ls -la dist/deploy/examples/ || echo "Examples directory not found"
+          echo "📂 Deployment structure summary:"
+          ls -la dist/deploy/ | head -n 10
           echo ""
-          if [ -d "dist/deploy/examples/material" ]; then
-            echo "📂 Material examples:"
-            ls -la dist/deploy/examples/material/ | head -n 10
-          fi
-          if [ -d "dist/deploy/examples/primeng" ]; then
-            echo "📂 PrimeNG examples:"
-            ls -la dist/deploy/examples/primeng/ | head -n 10
-          fi
-          if [ -d "dist/deploy/examples/ionic" ]; then
-            echo "📂 Ionic examples:"
-            ls -la dist/deploy/examples/ionic/ | head -n 10
-          fi
+          echo "📂 Example apps:"
+          ls -la dist/deploy/examples/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

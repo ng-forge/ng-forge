@@ -1,5 +1,5 @@
 import { NgDocPage } from '@ng-doc/core';
-import CustomIntegrationsCategory from '../../ng-doc.category';
+import UiLibsIntegrationCategory from '../../ng-doc.category';
 import { InputIframeDemoComponent } from './examples/input-iframe-demo.component';
 import { SelectIframeDemoComponent } from './examples/select-iframe-demo.component';
 import { CheckboxIframeDemoComponent } from './examples/checkbox-iframe-demo.component';
@@ -15,7 +15,7 @@ import { CompleteFormIframeDemoComponent } from './examples/complete-form-iframe
 const PrimeNGPage: NgDocPage = {
   title: 'PrimeNG',
   mdFile: './index.md',
-  category: CustomIntegrationsCategory,
+  category: UiLibsIntegrationCategory,
   order: 4,
   demos: {
     InputIframeDemoComponent,

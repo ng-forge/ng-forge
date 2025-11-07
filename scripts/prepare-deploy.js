@@ -60,46 +60,55 @@ console.log('\n📦 Setting up examples directory...');
 const examplesDir = join(deployDir, 'examples');
 mkdirSync(examplesDir, { recursive: true });
 
-// Copy Material examples (if exists)
-const materialSrc = join(distDir, 'apps', 'demo', 'material', 'browser');
-if (existsSync(materialSrc)) {
-  console.log('   📦 Copying Material examples...');
-  try {
-    cpSync(materialSrc, join(examplesDir, 'material'), { recursive: true });
-    console.log('   ✅ Material examples copied');
-  } catch (error) {
-    console.warn('   ⚠️  Failed to copy Material examples:', error.message);
-  }
-} else {
-  console.log('   ⏭️  Material examples not found, skipping');
+// Copy Material examples (required)
+const materialSrc = join(distDir, 'apps', 'examples', 'material', 'browser');
+if (!existsSync(materialSrc)) {
+  console.error('❌ Error: Material examples build output not found!');
+  console.error('   Expected at:', materialSrc);
+  console.error('   Please run: pnpm nx build material-examples --configuration=production');
+  process.exit(1);
+}
+console.log('   📦 Copying Material examples...');
+try {
+  cpSync(materialSrc, join(examplesDir, 'material'), { recursive: true });
+  console.log('   ✅ Material examples copied');
+} catch (error) {
+  console.error('   ❌ Failed to copy Material examples:', error.message);
+  process.exit(1);
 }
 
-// Copy PrimeNG examples (if exists)
-const primengSrc = join(distDir, 'docs-examples', 'primeng', 'browser');
-if (existsSync(primengSrc)) {
-  console.log('   📦 Copying PrimeNG examples...');
-  try {
-    cpSync(primengSrc, join(examplesDir, 'primeng'), { recursive: true });
-    console.log('   ✅ PrimeNG examples copied');
-  } catch (error) {
-    console.warn('   ⚠️  Failed to copy PrimeNG examples:', error.message);
-  }
-} else {
-  console.log('   ⏭️  PrimeNG examples not found, skipping');
+// Copy PrimeNG examples (required)
+const primengSrc = join(distDir, 'apps', 'examples', 'primeng', 'browser');
+if (!existsSync(primengSrc)) {
+  console.error('❌ Error: PrimeNG examples build output not found!');
+  console.error('   Expected at:', primengSrc);
+  console.error('   Please run: pnpm nx build primeng-examples --configuration=production');
+  process.exit(1);
+}
+console.log('   📦 Copying PrimeNG examples...');
+try {
+  cpSync(primengSrc, join(examplesDir, 'primeng'), { recursive: true });
+  console.log('   ✅ PrimeNG examples copied');
+} catch (error) {
+  console.error('   ❌ Failed to copy PrimeNG examples:', error.message);
+  process.exit(1);
 }
 
-// Copy Ionic examples (if exists)
-const ionicSrc = join(distDir, 'docs-examples', 'ionic', 'browser');
-if (existsSync(ionicSrc)) {
-  console.log('   📦 Copying Ionic examples...');
-  try {
-    cpSync(ionicSrc, join(examplesDir, 'ionic'), { recursive: true });
-    console.log('   ✅ Ionic examples copied');
-  } catch (error) {
-    console.warn('   ⚠️  Failed to copy Ionic examples:', error.message);
-  }
-} else {
-  console.log('   ⏭️  Ionic examples not found, skipping');
+// Copy Ionic examples (required)
+const ionicSrc = join(distDir, 'apps', 'examples', 'ionic', 'browser');
+if (!existsSync(ionicSrc)) {
+  console.error('❌ Error: Ionic examples build output not found!');
+  console.error('   Expected at:', ionicSrc);
+  console.error('   Please run: pnpm nx build ionic-examples --configuration=production');
+  process.exit(1);
+}
+console.log('   📦 Copying Ionic examples...');
+try {
+  cpSync(ionicSrc, join(examplesDir, 'ionic'), { recursive: true });
+  console.log('   ✅ Ionic examples copied');
+} catch (error) {
+  console.error('   ❌ Failed to copy Ionic examples:', error.message);
+  process.exit(1);
 }
 
 console.log('\n✅ Deployment directory prepared successfully!\n');

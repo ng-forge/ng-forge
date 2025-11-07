@@ -1,7 +1,6 @@
 import { InjectionToken } from '@angular/core';
 
 export interface Environment {
-  production: boolean;
   exampleBaseUrls: {
     material: string;
     primeng: string;
@@ -11,23 +10,13 @@ export interface Environment {
 
 export const ENVIRONMENT = new InjectionToken<Environment>('ENVIRONMENT');
 
-// Development environment
+// Base path is injected at build time via --define
+// Development default: 'http://localhost:420' (port added per library)
+// Production default: '/ng-forge/examples'
 export const environment: Environment = {
-  production: false,
   exampleBaseUrls: {
-    material: 'http://localhost:4201',
-    primeng: 'http://localhost:4202',
-    ionic: 'http://localhost:4203',
-  },
-};
-
-// Production environment
-export const environmentProd: Environment = {
-  production: true,
-  exampleBaseUrls: {
-    // Same domain paths - no CORS issues!
-    material: '/ng-forge/examples/material',
-    primeng: '/ng-forge/examples/primeng',
-    ionic: '/ng-forge/examples/ionic',
+    material: `${EXAMPLE_BASE_PATH}1`,
+    primeng: `${EXAMPLE_BASE_PATH}2`,
+    ionic: `${EXAMPLE_BASE_PATH}3`,
   },
 };
