@@ -477,8 +477,8 @@ provideDynamicForm(
 
 ### UI Implementations
 
-- **[Material Design](../../custom-integrations/reference/material)** - Production-ready Material integration
-- **[Custom Integration Guide](../../custom-integrations/guide)** - Build your own UI integration
+- **[Material Design](../../ui-libs-integrations/reference/material)** - Production-ready Material integration
+- **[Custom Integration Guide](../../ui-libs-integrations/guide)** - Build your own UI integration
 
 ### Advanced Topics
 

@@ -39,11 +39,30 @@ describe('logic-function-factory', () => {
       } as any;
     }
 
-    function runLogicFunctionTest<T>(expression: ConditionalExpression, fieldValue: T, mockValueOf?: (path: any) => any): boolean {
+    function runLogicFunctionTest<T>(
+      expression: ConditionalExpression,
+      fieldValue: T,
+      mockValueOf?: (path: any) => any,
+      customFormValue?: any
+    ): boolean {
       return runInInjectionContext(injector, () => {
         // Set up the root form registry with mock data
         const rootFormRegistry = TestBed.inject(RootFormRegistryService);
-        const mockRootField = {} as any;
+
+        // Create a mock FieldTree that returns mock form data
+        const formValueObj = customFormValue || { username: 'test', email: 'test@example.com' };
+        const mockFormValue = signal(formValueObj);
+        const mockRootField = Object.assign(
+          () => ({
+            value: mockFormValue,
+            valid: signal(true),
+            errors: signal(null),
+            touched: signal(false),
+            dirty: signal(false),
+          }),
+          { formValue: mockFormValue }
+        ) as any;
+
         rootFormRegistry.registerRootForm(mockRootField);
 
         const logicFn = createLogicFunction(expression);
@@ -99,7 +118,7 @@ describe('logic-function-factory', () => {
         };
 
         const mockValueOf = vi.fn().mockReturnValue(mockFormValue);
-        const result = runLogicFunctionTest(expression, 'value', mockValueOf);
+        const result = runLogicFunctionTest(expression, 'value', mockValueOf, mockFormValue);
         // compareValues uses === which returns true when comparing the same object instance
         expect(result).toBe(true);
       });

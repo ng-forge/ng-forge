@@ -90,12 +90,11 @@ describe('PrimeToggleFieldComponent', () => {
       const toggleInput = toggle.nativeElement.querySelector('input');
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         darkMode: true,
         notifications: false,
         enableFeature: false,
       });
-      untracked(() => fixture.detectChanges());
 
       expect(toggleInput.checked).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['darkMode']).toBe(true);
@@ -337,8 +336,7 @@ describe('PrimeToggleFieldComponent', () => {
       expect(toggleInput.checked).toBe(false);
 
       // Update via programmatic value change
-      fixture.componentRef.setInput('value', { darkMode: true });
-      untracked(() => fixture.detectChanges());
+      await PrimeNGFormTestUtils.updateFormValue(fixture, { darkMode: true });
 
       expect(toggleInput.checked).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['darkMode']).toBe(true);

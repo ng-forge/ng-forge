@@ -14,8 +14,7 @@ import {
 import { provideNgDocContext } from '@ng-doc/generated';
 import { appRoutes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
+import { ENVIRONMENT, environment } from './config/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -42,10 +41,8 @@ export const appConfig: ApplicationConfig = {
     provideSearchEngine(NgDocDefaultSearchEngine),
     providePageSkeleton(NG_DOC_DEFAULT_PAGE_SKELETON),
     provideMainPageProcessor(NG_DOC_DEFAULT_PAGE_PROCESSORS),
-    providePrimeNG({
-      theme: {
-        preset: Aura,
-      },
-    }),
+    // Environment configuration for iframe example URLs
+    // Values are injected at build time via --define
+    { provide: ENVIRONMENT, useValue: environment },
   ],
 };

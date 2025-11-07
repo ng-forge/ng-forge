@@ -16,7 +16,10 @@ describe('RowFieldComponent', () => {
       field,
     });
 
-    expect(component).toBeTruthy();
+    // ITERATION 6 FIX: Verify component is correct type
+    // Previous: expect(component).toBeTruthy()
+    expect(component).toBeDefined();
+    expect(component).toBeInstanceOf(RowFieldComponent);
   });
 
   it('should have field input property', () => {

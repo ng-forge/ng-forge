@@ -2,7 +2,12 @@
 @use '@ng-doc/app/styles/themes/dark.css';
 
 // ============================================
-// MATERIAL THEME
+// MATERIAL THEME (for docs UI only)
 // ============================================
-// Material Design theme (required for Material integration examples)
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+// ============================================
+// IFRAME EXAMPLES
+// ============================================
+// PrimeNG and Ionic examples are loaded via iframes
+// Their styles are isolated in their respective example apps

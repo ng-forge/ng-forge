@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@playwright/test';
 
 test.describe('Navigation Edge Cases and Error Handling Tests', () => {
@@ -67,7 +67,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               {
                 key: 'submitBrowserNav',
                 type: 'submit',
-            label: 'Submit',
+                label: 'Submit',
                 col: 12,
               },
             ],
@@ -192,7 +192,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               {
                 key: 'submitRefresh',
                 type: 'submit',
-            label: 'Submit After Refresh',
+                label: 'Submit After Refresh',
                 col: 12,
               },
             ],
@@ -305,7 +305,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               {
                 key: 'submitRapid',
                 type: 'submit',
-            label: 'Submit',
+                label: 'Submit',
                 col: 12,
               },
             ],
@@ -409,7 +409,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               {
                 key: 'submitNetwork',
                 type: 'submit',
-            label: 'Submit',
+                label: 'Submit',
                 col: 12,
               },
             ],
@@ -507,7 +507,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               {
                 key: 'submitInvalid',
                 type: 'submit',
-            label: 'Submit',
+                label: 'Submit',
                 col: 12,
               },
             ],
@@ -597,7 +597,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               {
                 key: 'submitDestruct',
                 type: 'submit',
-            label: 'Submit',
+                label: 'Submit',
                 col: 12,
               },
             ],
@@ -656,7 +656,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
               {
                 key: 'submitReconstruct',
                 type: 'submit',
-            label: 'Submit Reconstructed',
+                label: 'Submit Reconstructed',
                 col: 12,
               },
             ],

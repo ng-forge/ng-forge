@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@playwright/test';
 
 test.describe('User Journey Flow Tests', () => {
@@ -280,7 +280,7 @@ test.describe('User Journey Flow Tests', () => {
               {
                 key: 'submitRegistration',
                 type: 'submit',
-            label: 'Complete Registration',
+                label: 'Complete Registration',
                 col: 12,
               },
             ],
@@ -634,7 +634,7 @@ test.describe('User Journey Flow Tests', () => {
               {
                 key: 'placeOrder',
                 type: 'submit',
-            label: 'Place Order',
+                label: 'Place Order',
                 col: 12,
               },
             ],
@@ -957,7 +957,7 @@ test.describe('User Journey Flow Tests', () => {
               {
                 key: 'submitSurvey',
                 type: 'submit',
-            label: 'Submit Survey',
+                label: 'Submit Survey',
                 col: 12,
               },
             ],

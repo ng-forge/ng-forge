@@ -227,9 +227,29 @@ export class DynamicFormTestUtils {
    * Waits for the dynamic form to initialize
    */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
-    await delay(0);
-    fixture.detectChanges();
-    await delay(0);
+    const component = fixture.componentInstance;
+
+    // Wait for the initialized event to fire
+    await new Promise<void>((resolve) => {
+      let subscription: ReturnType<typeof component.initialized.subscribe> | null = null;
+
+      subscription = component.initialized.subscribe(() => {
+        if (subscription) {
+          subscription.unsubscribe();
+        }
+        resolve();
+      });
+
+      // Trigger change detection to start initialization process
+      fixture.detectChanges();
+    });
+
+    // Additional change detection cycles to ensure all components are fully rendered
+    // Field components are dynamically created and may need multiple cycles
+    for (let i = 0; i < 3; i++) {
+      fixture.detectChanges();
+      await delay(10);
+    }
   }
 
   /**

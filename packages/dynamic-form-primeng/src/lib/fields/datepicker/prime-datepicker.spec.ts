@@ -98,13 +98,12 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
       const testDate = new Date(1995, 5, 15);
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         birthDate: testDate,
         startDate: null,
         endDate: null,
         appointmentDate: null,
       });
-      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).birthDate).toEqual(testDate);
     });
@@ -419,8 +418,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
       const testDate = new Date(2024, 5, 15);
 
       // Update via programmatic value change
-      fixture.componentRef.setInput('value', { birthDate: testDate });
-      untracked(() => fixture.detectChanges());
+      await PrimeNGFormTestUtils.updateFormValue(fixture, { birthDate: testDate });
 
       expect(PrimeNGFormTestUtils.getFormValue(component).birthDate).toEqual(testDate);
     });

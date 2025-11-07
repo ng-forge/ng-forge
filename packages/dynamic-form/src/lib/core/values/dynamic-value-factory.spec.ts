@@ -45,10 +45,24 @@ describe('dynamic-value-factory', () => {
     }
 
     function createMockFieldTree(parentField?: FieldTree<any>, key?: string | number): FieldTree<any> {
-      return {
-        parent: parentField,
-        key,
-      } as any;
+      // Create a mock FieldTree that returns mock form data
+      const mockFormValue = signal({ username: 'test', email: 'test@example.com' });
+      const mockRootField = Object.assign(
+        () => ({
+          value: mockFormValue,
+          valid: signal(true),
+          errors: signal(null),
+          touched: signal(false),
+          dirty: signal(false),
+        }),
+        {
+          formValue: mockFormValue,
+          parent: parentField,
+          key,
+        }
+      ) as any;
+
+      return mockRootField;
     }
 
     function runDynamicValueFunctionTest<TValue, TReturn>(
@@ -100,13 +114,9 @@ describe('dynamic-value-factory', () => {
 
         const dynamicFn = createDynamicValueFunction<string, boolean>(expression);
 
-        const mockValueOf = vi.fn().mockReturnValue({ username: 'test', email: 'test@example.com' });
-        const fieldContext = createMockFieldContext('test@example.com', mockRootField, mockValueOf);
+        const fieldContext = createMockFieldContext('test@example.com', mockRootField);
 
-        const result = dynamicFn(fieldContext);
-
-        expect(mockValueOf).toHaveBeenCalledWith(mockRootField);
-        return result;
+        return dynamicFn(fieldContext);
       });
 
       expect(result).toBe(true);
@@ -195,12 +205,10 @@ describe('dynamic-value-factory', () => {
 
       // Create a field with no parent (root field)
       const rootField = createMockFieldTree();
-      const mockValueOf = vi.fn().mockReturnValue({ username: 'test' });
 
-      const result = runDynamicValueFunctionTest<string, boolean>(expression, 'value', rootField, mockValueOf);
+      const result = runDynamicValueFunctionTest<string, boolean>(expression, 'value', rootField);
 
       expect(result).toBe(true);
-      expect(mockValueOf).toHaveBeenCalledWith(rootField);
     });
 
     it('should handle missing root field gracefully', () => {

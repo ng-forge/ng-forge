@@ -211,8 +211,7 @@ describe('PrimeButtonFieldComponent', () => {
       expect(buttonElement).toBeTruthy();
 
       // Update form value programmatically
-      fixture.componentRef.setInput('value', { firstName: 'Jane' });
-      untracked(() => fixture.detectChanges());
+      await PrimeNGFormTestUtils.updateFormValue(fixture, { firstName: 'Jane' });
 
       // Button should maintain its properties
       buttonElement = fixture.debugElement.query(By.css('button'));

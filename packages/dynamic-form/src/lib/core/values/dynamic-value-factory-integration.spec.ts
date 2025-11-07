@@ -21,7 +21,17 @@ describe('dynamic-value-factory (integration)', () => {
     value: T,
     mockFormValue: Record<string, unknown> = { username: 'test', email: 'test@example.com' }
   ): FieldContext<T> {
-    const mockRootField = {} as FieldTree<unknown>;
+    const formValueSignal = signal(mockFormValue);
+    const mockRootField = Object.assign(
+      () => ({
+        value: formValueSignal,
+        valid: signal(true),
+        errors: signal(null),
+        touched: signal(false),
+        dirty: signal(false),
+      }),
+      { formValue: formValueSignal }
+    ) as FieldTree<unknown>;
 
     return {
       value: signal(value),
@@ -44,7 +54,17 @@ describe('dynamic-value-factory (integration)', () => {
   it('should evaluate expressions with access to form values', () => {
     const result = runInInjectionContext(injector, () => {
       // Register a mock root form
-      const mockRootField = {} as FieldTree<unknown>;
+      const mockFormValue = signal({ username: 'test', email: 'test@example.com' });
+      const mockRootField = Object.assign(
+        () => ({
+          value: mockFormValue,
+          valid: signal(true),
+          errors: signal(null),
+          touched: signal(false),
+          dirty: signal(false),
+        }),
+        { formValue: mockFormValue }
+      ) as FieldTree<unknown>;
       rootFormRegistry.registerRootForm(mockRootField);
 
       const dynamicFn = createDynamicValueFunction<string, boolean>('formValue.username === "test"');
@@ -57,7 +77,17 @@ describe('dynamic-value-factory (integration)', () => {
 
   it('should evaluate expressions with complex logic', () => {
     const result = runInInjectionContext(injector, () => {
-      const mockRootField = {} as FieldTree<unknown>;
+      const mockFormValue = signal({ username: 'test', email: 'test@example.com' });
+      const mockRootField = Object.assign(
+        () => ({
+          value: mockFormValue,
+          valid: signal(true),
+          errors: signal(null),
+          touched: signal(false),
+          dirty: signal(false),
+        }),
+        { formValue: mockFormValue }
+      ) as FieldTree<unknown>;
       rootFormRegistry.registerRootForm(mockRootField);
 
       const dynamicFn = createDynamicValueFunction<string, number>('fieldValue.length + formValue.username.length');

@@ -32,10 +32,11 @@ export class FieldContextRegistryService {
     const rootForm = this.rootFormRegistry.getRootForm(formId);
     let formValue: Record<string, unknown> = {};
 
-    if (rootForm) {
+    if (rootForm && typeof rootForm === 'function') {
       try {
-        // Use valueOf from fieldContext to get the form value, passing the root form as the path
-        const rootValue = fieldContext.valueOf(rootForm as any);
+        // Call rootForm() to get FieldState, then call value() to get the current form value reactively
+        // This establishes a reactive dependency so the logic function re-evaluates when form values change
+        const rootValue = rootForm().value();
         if (rootValue && typeof rootValue === 'object' && !Array.isArray(rootValue)) {
           formValue = rootValue as Record<string, unknown>;
         }

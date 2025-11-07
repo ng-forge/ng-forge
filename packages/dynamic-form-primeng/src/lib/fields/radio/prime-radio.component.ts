@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FieldTree } from '@angular/forms/signals';
 import { RadioButton } from 'primeng/radiobutton';
 import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
 import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-prime-radio',
-  imports: [RadioButton, PrimeErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [RadioButton, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @if (label()) {
@@ -18,7 +19,13 @@ import { AsyncPipe } from '@angular/common';
     <div class="radio-group">
       @for (option of options(); track option.value) {
       <div class="radio-option">
-        <p-radioButton [field]="f" [styleClass]="props()?.styleClass" [inputId]="key() + '-' + option.value" />
+        <p-radioButton
+          [(ngModel)]="f().value"
+          [value]="option.value"
+          [disabled]="option.disabled || f().disabled()"
+          [styleClass]="props()?.styleClass"
+          [inputId]="key() + '-' + option.value"
+        />
         <label [for]="key() + '-' + option.value" class="radio-option-label">
           {{ option.label | dynamicText | async }}
         </label>

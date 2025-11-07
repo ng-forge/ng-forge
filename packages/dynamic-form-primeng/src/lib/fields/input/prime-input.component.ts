@@ -1,17 +1,18 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
 
 /**
  * PrimeNG input field component
  */
 @Component({
   selector: 'df-prime-input',
-  imports: [InputText, Field, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe],
+  imports: [InputText, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -24,10 +25,12 @@ import { InputText } from 'primeng/inputtext';
       <input
         pInputText
         [id]="inputId()"
-        [field]="f"
+        [(ngModel)]="f().value"
+        [attr.type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
         [class]="inputClasses()"
+        [disabled]="f().disabled()"
       />
 
       @if (props()?.hint; as hint) {

@@ -93,13 +93,11 @@ describe('PrimeCheckboxFieldComponent', () => {
       const checkboxComponent = checkbox.componentInstance;
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         acceptTerms: true,
         newsletter: false,
         enableNotifications: false,
       });
-
-      untracked(() => fixture.detectChanges());
 
       expect(checkboxComponent.checked).toBe(true);
       expect(PrimeNGFormTestUtils.getFormValue(component)['acceptTerms']).toBe(true);
@@ -404,8 +402,7 @@ describe('PrimeCheckboxFieldComponent', () => {
       expect(checkboxComponent.checked).toBe(false);
 
       // Update via programmatic value change
-      fixture.componentRef.setInput('value', { acceptTerms: true });
-      untracked(() => fixture.detectChanges());
+      await PrimeNGFormTestUtils.updateFormValue(fixture, { acceptTerms: true });
       await fixture.whenStable();
       untracked(() => fixture.detectChanges());
 
