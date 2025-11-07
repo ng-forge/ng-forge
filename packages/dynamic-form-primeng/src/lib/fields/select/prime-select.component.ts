@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
 import { AsyncPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { MultiSelect } from 'primeng/multiselect';
 import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
@@ -9,7 +10,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
 
 @Component({
   selector: 'df-prime-select',
-  imports: [Field, Select, MultiSelect, DynamicTextPipe, AsyncPipe, PrimeErrorsComponent],
+  imports: [FormsModule, Select, MultiSelect, DynamicTextPipe, AsyncPipe, PrimeErrorsComponent],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -19,7 +20,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
       <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       } @if (isMultiple()) {
       <p-multiSelect
-        [field]="f"
+        [(ngModel)]="f().value"
         [inputId]="key()"
         [options]="options()"
         optionLabel="label"
@@ -28,10 +29,11 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
+        [disabled]="f().disabled()"
       />
       } @else {
       <p-select
-        [field]="f"
+        [(ngModel)]="f().value"
         [inputId]="key()"
         [options]="options()"
         optionLabel="label"
@@ -40,6 +42,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
+        [disabled]="f().disabled()"
       />
       }
 

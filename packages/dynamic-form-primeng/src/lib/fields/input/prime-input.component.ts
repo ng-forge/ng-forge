@@ -30,6 +30,7 @@ import { FormsModule } from '@angular/forms';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
         [class]="inputClasses()"
+        [disabled]="f().disabled()"
       />
 
       @if (props()?.hint; as hint) {

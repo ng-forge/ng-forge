@@ -109,12 +109,11 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
       });
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         hobbies: ['reading', 'cooking'],
         skills: [],
         preferences: [],
       });
-      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).hobbies).toEqual(['reading', 'cooking']);
 

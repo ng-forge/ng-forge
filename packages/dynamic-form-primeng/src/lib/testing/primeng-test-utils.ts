@@ -185,6 +185,21 @@ export class PrimeNGFormTestUtils {
   }
 
   /**
+   * Updates form value programmatically and waits for PrimeNG to synchronize
+   * Use this instead of directly calling fixture.componentRef.setInput('value', ...)
+   */
+  static async updateFormValue(fixture: ComponentFixture<DynamicForm>, value: Record<string, unknown>): Promise<void> {
+    fixture.componentRef.setInput('value', value);
+    // First change detection cycle to process the value change
+    untracked(() => fixture.detectChanges());
+    // Small delay to allow PrimeNG's async operations to complete
+    await delay(0);
+    // Second cycle to update PrimeNG component DOM state
+    untracked(() => fixture.detectChanges());
+    await delay(0);
+  }
+
+  /**
    * Simulates user input on a PrimeNG input field
    */
   static async simulatePrimeInput(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {

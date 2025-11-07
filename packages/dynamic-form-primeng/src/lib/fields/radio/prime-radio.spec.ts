@@ -114,10 +114,9 @@ describe('PrimeRadioFieldComponent', () => {
       });
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         preference: 'option3',
       });
-      untracked(() => fixture.detectChanges());
 
       // Verify form value updated correctly
       expect(PrimeNGFormTestUtils.getFormValue(component)['preference']).toBe('option3');
@@ -477,8 +476,7 @@ describe('PrimeRadioFieldComponent', () => {
       expect(PrimeNGFormTestUtils.getFormValue(component)['preference']).toBe('');
 
       // Update via programmatic value change
-      fixture.componentRef.setInput('value', { preference: 'option2' });
-      untracked(() => fixture.detectChanges());
+      await PrimeNGFormTestUtils.updateFormValue(fixture, { preference: 'option2' });
 
       // Verify the form value was updated
       expect(PrimeNGFormTestUtils.getFormValue(component)['preference']).toBe('option2');

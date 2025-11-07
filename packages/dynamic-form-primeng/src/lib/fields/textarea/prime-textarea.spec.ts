@@ -93,14 +93,13 @@ describe.skip('PrimeTextareaFieldComponent', () => {
       });
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         comments: 'Updated comments\nwith multiple lines',
         description: '',
         feedback: '',
         bio: '',
         notes: '',
       });
-      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).comments).toBe('Updated comments\nwith multiple lines');
     });

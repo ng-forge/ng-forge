@@ -111,14 +111,13 @@ describe('PrimeSliderFieldComponent', () => {
       });
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         volume: 80,
         brightness: 0,
         rating: 0,
         temperature: 0,
         speed: 0,
       });
-      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).volume).toBe(80);
     });
@@ -198,14 +197,13 @@ describe('PrimeSliderFieldComponent', () => {
       });
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         volume: 85,
         brightness: 200,
         rating: 4.7,
         temperature: 0,
         speed: 0,
       });
-      untracked(() => fixture.detectChanges());
 
       const formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.volume).toBe(85);

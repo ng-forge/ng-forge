@@ -20,8 +20,9 @@ import { FormsModule } from '@angular/forms';
       @for (option of options(); track option.value) {
       <div class="radio-option">
         <p-radioButton
-          [(ngModel)]="option.value"
-          [disabled]="option.disabled || false"
+          [(ngModel)]="f().value"
+          [value]="option.value"
+          [disabled]="option.disabled || f().disabled()"
           [styleClass]="props()?.styleClass"
           [inputId]="key() + '-' + option.value"
         />

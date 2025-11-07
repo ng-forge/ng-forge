@@ -78,13 +78,12 @@ describe('PrimeSelectFieldComponent', () => {
       // Simulate selection change by updating form value
       // Note: PrimeNG Select with Field directive doesn't expose a simple way to simulate user clicks
       // so we test the integration by updating the form value programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         country: 'CA',
         languages: [],
         priority: 0,
         categories: [],
       });
-      untracked(() => fixture.detectChanges());
 
       // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component).country).toBe('CA');
@@ -113,7 +112,7 @@ describe('PrimeSelectFieldComponent', () => {
       });
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         country: 'UK',
         languages: [],
         priority: 0,
@@ -212,10 +211,9 @@ describe('PrimeSelectFieldComponent', () => {
       expect(PrimeNGFormTestUtils.getFormValue(component).languages).toEqual(['en', 'es']);
 
       // Simulate multi-selection change by updating form value
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         languages: ['en', 'es', 'fr'],
       });
-      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).languages).toEqual(['en', 'es', 'fr']);
     });
@@ -246,13 +244,12 @@ describe('PrimeSelectFieldComponent', () => {
       });
 
       // Update form model programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         country: '',
         languages: ['fr', 'de'],
         priority: 0,
         categories: [],
       });
-      untracked(() => fixture.detectChanges());
 
       expect(PrimeNGFormTestUtils.getFormValue(component).languages).toEqual(['fr', 'de']);
     });
@@ -434,22 +431,20 @@ describe('PrimeSelectFieldComponent', () => {
       });
 
       // Change country programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         country: 'CA',
         categories: ['tech'],
       });
-      untracked(() => fixture.detectChanges());
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.country).toBe('CA');
       expect(formValue.categories).toEqual(['tech']);
 
       // Change categories programmatically
-      fixture.componentRef.setInput('value', {
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
         country: 'CA',
         categories: ['tech', 'business'],
       });
-      untracked(() => fixture.detectChanges());
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.country).toBe('CA');
@@ -554,7 +549,7 @@ describe('PrimeSelectFieldComponent', () => {
       expect(PrimeNGFormTestUtils.getFormValue(component).country).toBe('opt1');
 
       // Update via programmatic value change (like the working test above)
-      fixture.componentRef.setInput('value', { country: 'opt2' });
+      await PrimeNGFormTestUtils.updateFormValue(fixture, { country: 'opt2' });
 
       // Verify form value updated correctly
       expect(PrimeNGFormTestUtils.getFormValue(component).country).toBe('opt2');
