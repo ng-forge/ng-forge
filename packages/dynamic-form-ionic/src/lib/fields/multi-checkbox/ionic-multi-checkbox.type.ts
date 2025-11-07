@@ -1,7 +1,6 @@
-import { FieldOption, ValueFieldComponent, MultiCheckboxField } from '@ng-forge/dynamic-form';
+import { ValueFieldComponent, MultiCheckboxField } from '@ng-forge/dynamic-form';
 
 export interface IonicMultiCheckboxProps<T> extends Record<string, unknown> {
-  options: FieldOption<T>[];
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
   justify?: 'start' | 'end' | 'space-between';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';

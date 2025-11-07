@@ -1,7 +1,6 @@
-import { FieldOption, ValueFieldComponent, RadioField } from '@ng-forge/dynamic-form';
+import { ValueFieldComponent, RadioField } from '@ng-forge/dynamic-form';
 
 export interface IonicRadioProps<T> extends Record<string, unknown> {
-  options: FieldOption<T>[];
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
   justify?: 'start' | 'end' | 'space-between';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
