@@ -12,12 +12,10 @@ export class RadioIframeDemoComponent {
   key: 'subscriptionPlan',
   type: 'radio',
   label: 'Subscription Plan',
-  props: {
-    options: [
-      { value: 'free', label: 'Free' },
-      { value: 'pro', label: 'Pro' },
-      { value: 'enterprise', label: 'Enterprise' },
-    ],
-  },
+  options: [
+    { value: 'free', label: 'Free' },
+    { value: 'pro', label: 'Pro' },
+    { value: 'enterprise', label: 'Enterprise' },
+  ],
 }`;
 }

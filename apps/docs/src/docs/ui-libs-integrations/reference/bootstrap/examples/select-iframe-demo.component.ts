@@ -14,16 +14,16 @@ export class SelectIframeDemoComponent {
   label: 'Country',
   value: '',
   required: true,
+  options: [
+    { label: 'United States', value: 'us' },
+    { label: 'Canada', value: 'ca' },
+    { label: 'United Kingdom', value: 'uk' },
+  ],
   props: {
     placeholder: 'Select a country',
     floatingLabel: true,
     size: 'md',
     helpText: 'Choose your country of residence',
-    options: [
-      { label: 'United States', value: 'us' },
-      { label: 'Canada', value: 'ca' },
-      { label: 'United Kingdom', value: 'uk' },
-    ],
   },
 }`;
 }
