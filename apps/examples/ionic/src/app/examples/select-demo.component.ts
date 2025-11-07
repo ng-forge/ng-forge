@@ -35,29 +35,29 @@ export class SelectDemoComponent {
         key: 'framework',
         type: 'select',
         label: 'Framework',
+        options: [
+          { value: 'angular', label: 'Angular' },
+          { value: 'react', label: 'React' },
+          { value: 'vue', label: 'Vue.js' },
+          { value: 'svelte', label: 'Svelte' },
+        ],
         props: {
           placeholder: 'Choose a framework',
-          options: [
-            { value: 'angular', label: 'Angular' },
-            { value: 'react', label: 'React' },
-            { value: 'vue', label: 'Vue.js' },
-            { value: 'svelte', label: 'Svelte' },
-          ],
         },
       },
       {
         key: 'language',
         type: 'select',
         label: 'Language',
+        options: [
+          { value: 'typescript', label: 'TypeScript' },
+          { value: 'javascript', label: 'JavaScript' },
+          { value: 'python', label: 'Python' },
+          { value: 'java', label: 'Java' },
+        ],
         props: {
           placeholder: 'Choose a language',
           multiple: true,
-          options: [
-            { value: 'typescript', label: 'TypeScript' },
-            { value: 'javascript', label: 'JavaScript' },
-            { value: 'python', label: 'Python' },
-            { value: 'java', label: 'Java' },
-          ],
         },
       },
     ],
