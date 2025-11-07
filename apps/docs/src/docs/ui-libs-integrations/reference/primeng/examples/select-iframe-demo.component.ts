@@ -12,15 +12,15 @@ export class SelectIframeDemoComponent {
   key: 'framework',
   type: 'select',
   label: 'Choose Framework',
+  options: [
+    { value: 'angular', label: 'Angular' },
+    { value: 'react', label: 'React' },
+    { value: 'vue', label: 'Vue.js' },
+  ],
   props: {
     placeholder: 'Select a framework...',
     filter: true,  // Enable search
     showClear: true,  // Show clear button
-    options: [
-      { value: 'angular', label: 'Angular' },
-      { value: 'react', label: 'React' },
-      { value: 'vue', label: 'Vue.js' },
-    ],
   },
 }`;
 }

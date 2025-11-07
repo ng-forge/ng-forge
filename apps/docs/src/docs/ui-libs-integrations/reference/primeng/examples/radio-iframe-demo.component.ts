@@ -12,13 +12,13 @@ export class RadioIframeDemoComponent {
   key: 'subscriptionPlan',
   type: 'radio',
   label: 'Subscription Plan',
+  options: [
+    { value: 'free', label: 'Free' },
+    { value: 'pro', label: 'Pro' },
+    { value: 'enterprise', label: 'Enterprise' },
+  ],
   props: {
     hint: 'Choose your plan',
-    options: [
-      { value: 'free', label: 'Free' },
-      { value: 'pro', label: 'Pro' },
-      { value: 'enterprise', label: 'Enterprise' },
-    ],
   },
 }`;
 }

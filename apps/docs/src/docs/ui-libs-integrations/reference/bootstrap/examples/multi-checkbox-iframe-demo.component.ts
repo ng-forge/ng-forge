@@ -13,15 +13,15 @@ export class MultiCheckboxIframeDemoComponent {
   type: 'multi-checkbox',
   label: 'Your interests',
   value: [],
+  options: [
+    { label: 'Sports', value: 'sports' },
+    { label: 'Technology', value: 'tech' },
+    { label: 'Music', value: 'music' },
+    { label: 'Travel', value: 'travel' },
+  ],
   props: {
     inline: false,
     helpText: 'Select all that apply',
-    options: [
-      { label: 'Sports', value: 'sports' },
-      { label: 'Technology', value: 'tech' },
-      { label: 'Music', value: 'music' },
-      { label: 'Travel', value: 'travel' },
-    ],
   },
 }`;
 }

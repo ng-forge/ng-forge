@@ -12,13 +12,11 @@ export class MultiCheckboxIframeDemoComponent {
   key: 'interests',
   type: 'multi-checkbox',
   label: 'Interests',
-  props: {
-    options: [
-      { value: 'sports', label: 'Sports' },
-      { value: 'music', label: 'Music' },
-      { value: 'technology', label: 'Technology' },
-      { value: 'art', label: 'Art' },
-    ],
-  },
+  options: [
+    { value: 'sports', label: 'Sports' },
+    { value: 'music', label: 'Music' },
+    { value: 'technology', label: 'Technology' },
+    { value: 'art', label: 'Art' },
+  ],
 }`;
 }

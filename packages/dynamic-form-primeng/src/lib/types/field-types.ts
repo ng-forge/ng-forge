@@ -57,10 +57,6 @@ export type PrimeInputField = InputField<PrimeInputProps>;
  */
 export interface PrimeSelectProps<T> extends Record<string, unknown> {
   /**
-   * Array of options to display in the dropdown.
-   */
-  options: FieldOption<T>[];
-  /**
    * Enable multiple selection mode.
    */
   multiple?: boolean;
@@ -224,10 +220,6 @@ export type PrimeTextareaField = TextareaField<PrimeTextareaProps>;
  */
 export interface PrimeRadioProps<T> extends Record<string, unknown> {
   /**
-   * Array of options to display as radio buttons.
-   */
-  options: FieldOption<T>[];
-  /**
    * CSS class to apply to the radio group.
    */
   styleClass?: string;
@@ -250,10 +242,6 @@ export type PrimeRadioField<T> = RadioField<T, PrimeRadioProps<T>>;
  * Configuration props for PrimeNG multi-checkbox field component.
  */
 export interface PrimeMultiCheckboxProps<T> extends Record<string, unknown> {
-  /**
-   * Array of options to display as checkboxes.
-   */
-  options: FieldOption<T>[];
   /**
    * CSS class to apply to the checkbox group.
    */
@@ -324,18 +312,6 @@ export type PrimeDatepickerField = DatepickerField<PrimeDatepickerProps>;
  * Configuration props for PrimeNG slider field component.
  */
 export interface PrimeSliderProps extends Record<string, unknown> {
-  /**
-   * Minimum value of the slider.
-   */
-  min?: number;
-  /**
-   * Maximum value of the slider.
-   */
-  max?: number;
-  /**
-   * Step increment for slider values.
-   */
-  step?: number;
   /**
    * Enable range mode with two handles.
    */

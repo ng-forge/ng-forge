@@ -49,12 +49,12 @@ export class UserRegistrationIframeDemoComponent {
     type: 'radio',
     label: 'Account Type',
     required: true,
+    options: [
+      { label: 'Free', value: 'free' },
+      { label: 'Premium', value: 'premium' },
+    ],
     props: {
       inline: true,
-      options: [
-        { label: 'Free', value: 'free' },
-        { label: 'Premium', value: 'premium' },
-      ],
     },
   },
   {

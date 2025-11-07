@@ -14,14 +14,14 @@ export class RadioIframeDemoComponent {
   label: 'Choose your plan',
   value: '',
   required: true,
+  options: [
+    { label: 'Basic', value: 'basic' },
+    { label: 'Pro', value: 'pro' },
+    { label: 'Enterprise', value: 'enterprise' },
+  ],
   props: {
     inline: true,
     helpText: 'Select a subscription plan',
-    options: [
-      { label: 'Basic', value: 'basic' },
-      { label: 'Pro', value: 'pro' },
-      { label: 'Enterprise', value: 'enterprise' },
-    ],
   },
 }`;
 }

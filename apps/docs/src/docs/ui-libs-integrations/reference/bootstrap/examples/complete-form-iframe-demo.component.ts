@@ -29,12 +29,12 @@ export class CompleteFormIframeDemoComponent {
     type: 'select',
     label: 'Country',
     required: true,
+    options: [
+      { label: 'USA', value: 'us' },
+      { label: 'UK', value: 'uk' },
+    ],
     props: {
       floatingLabel: true,
-      options: [
-        { label: 'USA', value: 'us' },
-        { label: 'UK', value: 'uk' },
-      ],
     },
   },
   {

@@ -97,40 +97,36 @@ export class CompleteFormDemoComponent {
         key: 'country',
         type: 'select',
         label: 'Country',
+        options: [
+          { value: 'us', label: 'United States' },
+          { value: 'uk', label: 'United Kingdom' },
+          { value: 'ca', label: 'Canada' },
+          { value: 'au', label: 'Australia' },
+        ],
         props: {
           placeholder: 'Select your country',
-          options: [
-            { value: 'us', label: 'United States' },
-            { value: 'uk', label: 'United Kingdom' },
-            { value: 'ca', label: 'Canada' },
-            { value: 'au', label: 'Australia' },
-          ],
         },
       },
       {
         key: 'plan',
         type: 'radio',
         label: 'Subscription Plan',
-        props: {
-          options: [
-            { value: 'free', label: 'Free' },
-            { value: 'pro', label: 'Pro' },
-            { value: 'enterprise', label: 'Enterprise' },
-          ],
-        },
+        options: [
+          { value: 'free', label: 'Free' },
+          { value: 'pro', label: 'Pro' },
+          { value: 'enterprise', label: 'Enterprise' },
+        ],
       },
       {
         key: 'interests',
         type: 'multi-checkbox',
         label: 'Interests',
-        props: {
-          options: [
-            { value: 'sports', label: 'Sports' },
-            { value: 'music', label: 'Music' },
-            { value: 'technology', label: 'Technology' },
-            { value: 'art', label: 'Art' },
-          ],
-        },
+        options: [
+          { value: 'sports', label: 'Sports' },
+          { value: 'music', label: 'Music' },
+          { value: 'technology', label: 'Technology' },
+          { value: 'art', label: 'Art' },
+        ],
       },
       {
         key: 'volume',

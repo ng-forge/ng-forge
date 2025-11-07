@@ -13,10 +13,10 @@ export class SliderIframeDemoComponent {
   type: 'slider',
   label: 'Volume',
   value: 50,
+  minValue: 0,
+  maxValue: 100,
+  step: 5,
   props: {
-    min: 0,
-    max: 100,
-    step: 5,
     helpText: 'Adjust the volume level',
   },
 }`;
