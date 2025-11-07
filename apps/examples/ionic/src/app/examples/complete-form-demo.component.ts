@@ -25,6 +25,9 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
       </div>
     </ion-content>
   `,
+  host: {
+    class: 'example-container',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompleteFormDemoComponent {

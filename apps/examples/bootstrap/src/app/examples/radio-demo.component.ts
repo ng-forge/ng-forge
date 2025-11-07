@@ -5,21 +5,16 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'bs-example-radio-demo',
   imports: [DynamicForm, JsonPipe],
+  host: {
+    class: 'example-container',
+  },
   template: `
     <dynamic-form [config]="config" (submit)="onSubmit($event)" />
     @if (submittedData) {
-    <div class="result">
+    <div class="example-result">
       <h4>Submitted Data:</h4>
       <pre>{{ submittedData | json }}</pre>
     </div>
-    }
-  `,
-  styles: `
-    .result {
-      margin-top: 1rem;
-      padding: 1rem;
-      background: #f8f9fa;
-      border-radius: 0.375rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

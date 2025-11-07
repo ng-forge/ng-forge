@@ -13,6 +13,21 @@ const api: NgDocApi = {
       route: 'material',
       include: 'packages/dynamic-form-material/src/lib/**/*.ts',
     },
+    {
+      name: 'dynamic-form-ionic',
+      route: 'ionic',
+      include: 'packages/dynamic-form-ionic/src/lib/**/*.ts',
+    },
+    {
+      name: 'dynamic-form-bootstrap',
+      route: 'bootstrap',
+      include: 'packages/dynamic-form-bootstrap/src/lib/**/*.ts',
+    },
+    {
+      name: 'dynamic-form-primeng',
+      route: 'primeng',
+      include: 'packages/dynamic-form-primeng/src/lib/**/*.ts',
+    },
   ],
 };
 

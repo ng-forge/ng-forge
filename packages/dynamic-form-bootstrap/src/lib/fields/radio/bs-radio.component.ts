@@ -14,68 +14,48 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="mb-3">
       @if (label(); as label) {
-        <div class="form-label">{{ label | dynamicText | async }}</div>
-      }
-
-      @if (props()?.buttonGroup) {
-        <div
-          class="btn-group"
-          role="group"
-          [attr.aria-label]="label() | dynamicText | async"
-        >
-          @for (option of options(); track option.value; let i = $index) {
-            <input
-              type="radio"
-              [field]="f"
-              class="btn-check"
-              [id]="key() + '_' + i"
-              [name]="key()"
-              [value]="option.value"
-              [disabled]="f().disabled() || option.disabled || false"
-              autocomplete="off"
-            />
-            <label
-              class="btn btn-outline-primary"
-              [class.btn-sm]="props()?.buttonSize === 'sm'"
-              [class.btn-lg]="props()?.buttonSize === 'lg'"
-              [for]="key() + '_' + i"
-            >
-              {{ option.label | dynamicText | async }}
-            </label>
-          }
-        </div>
-      } @else {
+      <div class="form-label">{{ label | dynamicText | async }}</div>
+      } @if (props()?.buttonGroup) {
+      <div class="btn-group" role="group" [attr.aria-label]="label() | dynamicText | async">
         @for (option of options(); track option.value; let i = $index) {
-          <div
-            class="form-check"
-            [class.form-check-inline]="props()?.inline"
-            [class.form-check-reverse]="props()?.reverse"
-          >
-            <input
-              type="radio"
-              [field]="f"
-              class="form-check-input"
-              [id]="key() + '_' + i"
-              [name]="key()"
-              [value]="option.value"
-              [disabled]="f().disabled() || option.disabled || false"
-            />
-            <label class="form-check-label" [for]="key() + '_' + i">
-              {{ option.label | dynamicText | async }}
-            </label>
-          </div>
+        <input
+          type="radio"
+          [field]="f"
+          [value]="option.value"
+          [disabled]="option.disabled || f().disabled()"
+          class="btn-check"
+          [id]="key() + '_' + i"
+          autocomplete="off"
+        />
+        <label
+          class="btn btn-outline-primary"
+          [class.btn-sm]="props()?.buttonSize === 'sm'"
+          [class.btn-lg]="props()?.buttonSize === 'lg'"
+          [for]="key() + '_' + i"
+        >
+          {{ option.label | dynamicText | async }}
+        </label>
         }
+      </div>
+      } @else { @for (option of options(); track option.value; let i = $index) {
+      <div class="form-check" [class.form-check-inline]="props()?.inline" [class.form-check-reverse]="props()?.reverse">
+        <input
+          type="radio"
+          [field]="f"
+          [value]="option.value"
+          [disabled]="option.disabled || f().disabled()"
+          class="form-check-input"
+          [id]="key() + '_' + i"
+        />
+        <label class="form-check-label" [for]="key() + '_' + i">
+          {{ option.label | dynamicText | async }}
+        </label>
+      </div>
+      } } @if (props()?.helpText; as helpText) {
+      <div class="form-text">{{ helpText | dynamicText | async }}</div>
       }
 
-      @if (props()?.helpText; as helpText) {
-        <div class="form-text">{{ helpText | dynamicText | async }}</div>
-      }
-
-      <df-bs-errors
-        [errors]="f().errors()"
-        [invalid]="f().invalid()"
-        [touched]="f().touched()"
-      />
+      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </div>
   `,
   styles: [
@@ -92,7 +72,7 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
   },
 })
-export default class BsRadioFieldComponent<T> implements BsRadioComponent<T> {
+export default class BsRadioFieldComponent<T extends string> implements BsRadioComponent<T> {
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 

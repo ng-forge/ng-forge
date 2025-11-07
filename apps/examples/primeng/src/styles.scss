@@ -12,3 +12,29 @@ body {
   font-family: var(--font-family);
   overflow: auto !important;
 }
+
+/* Example demo component shared styles */
+.example-container {
+  display: block;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.example-result {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 0.375rem;
+
+  h4 {
+    margin-top: 0;
+    color: #333;
+  }
+
+  pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+}

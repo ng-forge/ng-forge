@@ -62,7 +62,7 @@
       },
       "defaultConfiguration": "development",
       "options": {
-        "port": 4203
+        "port": 4204
       }
     },
     "extract-i18n": {
@@ -79,7 +79,7 @@
       "executor": "@nx/web:file-server",
       "options": {
         "buildTarget": "bootstrap-examples:build",
-        "port": 4203,
+        "port": 4204,
         "staticFilePath": "dist/apps/examples/bootstrap/browser",
         "spa": true
       }

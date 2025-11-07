@@ -16,7 +16,7 @@ const IonicPage: NgDocPage = {
   title: 'Ionic',
   mdFile: './index.md',
   category: UiLibsIntegrationCategory,
-  order: 5,
+  order: 3,
   demos: {
     InputIframeDemoComponent,
     SelectIframeDemoComponent,

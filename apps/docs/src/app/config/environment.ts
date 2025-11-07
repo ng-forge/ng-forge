@@ -5,6 +5,7 @@ export interface Environment {
     material: string;
     primeng: string;
     ionic: string;
+    bootstrap: string;
   };
 }
 
@@ -18,5 +19,6 @@ export const environment: Environment = {
     material: MATERIAL_EXAMPLES_URL,
     primeng: PRIMENG_EXAMPLES_URL,
     ionic: IONIC_EXAMPLES_URL,
+    bootstrap: BOOTSTRAP_EXAMPLES_URL,
   },
 };

@@ -14,14 +14,12 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="mb-3">
       @if (label(); as label) {
-        <label [for]="key()" class="form-label">
-          {{ label | dynamicText | async }}
-          @if (props()?.showValue) {
-            <span class="ms-2 badge bg-secondary">
-              {{ props()?.valuePrefix }}{{ f().value() }}{{ props()?.valueSuffix }}
-            </span>
-          }
-        </label>
+      <label [for]="key()" class="form-label">
+        {{ label | dynamicText | async }}
+        @if (props()?.showValue) {
+        <span class="ms-2 badge bg-secondary"> {{ props()?.valuePrefix }}{{ f().value() }}{{ props()?.valueSuffix }} </span>
+        }
+      </label>
       }
 
       <input
@@ -31,22 +29,17 @@ import { AsyncPipe } from '@angular/common';
         [min]="minValue()"
         [max]="maxValue()"
         [step]="step()"
-        [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
         class="form-range"
       />
 
       @if (props()?.helpText; as helpText) {
-        <div class="form-text">
-          {{ helpText | dynamicText | async }}
-        </div>
+      <div class="form-text">
+        {{ helpText | dynamicText | async }}
+      </div>
       }
 
-      <df-bs-errors
-        [errors]="f().errors()"
-        [invalid]="f().invalid()"
-        [touched]="f().touched()"
-      />
+      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </div>
   `,
   styles: [

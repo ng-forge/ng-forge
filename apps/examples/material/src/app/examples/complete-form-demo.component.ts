@@ -22,6 +22,9 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
       border-radius: 4px;
     }
   `,
+  host: {
+    class: 'example-container',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompleteFormDemoComponent {

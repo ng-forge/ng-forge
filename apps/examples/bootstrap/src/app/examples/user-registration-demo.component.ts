@@ -5,39 +5,16 @@ import { JsonPipe } from '@angular/common';
 @Component({
   selector: 'bs-example-user-registration-demo',
   imports: [DynamicForm, JsonPipe],
+  host: {
+    class: 'example-container',
+  },
   template: `
     <dynamic-form [config]="config" (submit)="onSubmit($event)" />
     @if (submittedData) {
-    <div class="result">
+    <div class="example-result">
       <h4>Submitted Data:</h4>
       <pre>{{ submittedData | json }}</pre>
     </div>
-    }
-  `,
-  styles: `
-    :host {
-      display: block;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    .result {
-      margin-top: 24px;
-      padding: 16px;
-      background: #f8f9fa;
-      border-radius: 0.375rem;
-    }
-
-    .result h4 {
-      margin-top: 0;
-      color: #333;
-    }
-
-    .result pre {
-      margin: 0;
-      white-space: pre-wrap;
-      word-wrap: break-word;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

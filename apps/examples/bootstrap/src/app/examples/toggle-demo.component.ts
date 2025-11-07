@@ -1,25 +1,20 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'bs-example-toggle-demo',
   imports: [DynamicForm, JsonPipe],
+  host: {
+    class: 'example-container',
+  },
   template: `
     <dynamic-form [config]="config" (submit)="onSubmit($event)" />
     @if (submittedData) {
-    <div class="result">
+    <div class="example-result">
       <h4>Submitted Data:</h4>
       <pre>{{ submittedData | json }}</pre>
     </div>
-    }
-  `,
-  styles: `
-    .result {
-      margin-top: 1rem;
-      padding: 1rem;
-      background: #f8f9fa;
-      border-radius: 0.375rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,7 +22,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 export class ToggleDemoComponent {
   submittedData: unknown = null;
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'basicToggle',
@@ -59,7 +54,7 @@ export class ToggleDemoComponent {
         key: 'notifications',
         type: 'toggle',
         label: 'Enable Notifications',
-        value: true,
+        checked: true,
         props: {
           helpText: 'Pre-checked toggle',
         },

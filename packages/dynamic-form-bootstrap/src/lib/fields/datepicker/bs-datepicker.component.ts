@@ -17,84 +17,63 @@ import { AsyncPipe } from '@angular/common';
   imports: [Field, BsErrorsComponent, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-    @let p = props();
-
-    @if (p?.floatingLabel) {
-      <!-- Floating label variant -->
-      <div class="form-floating mb-3">
-        <input
-          [field]="f"
-          [id]="key()"
-          type="date"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [disabled]="f().disabled()"
-          [attr.tabindex]="tabIndex()"
-          [min]="minDate()"
-          [max]="maxDate()"
-          class="form-control"
-          [class.form-control-sm]="p?.size === 'sm'"
-          [class.form-control-lg]="p?.size === 'lg'"
-          [class.is-invalid]="f().invalid() && f().touched()"
-          [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-        />
-        @if (label()) {
-          <label [for]="key()">{{ label() | dynamicText | async }}</label>
-        }
-
-        @if (p?.validFeedback && f().valid() && f().touched()) {
-          <div class="valid-feedback d-block">
-            {{ p?.validFeedback | dynamicText | async }}
-          </div>
-        }
-
-        <df-bs-errors
-          [errors]="f().errors()"
-          [invalid]="f().invalid()"
-          [touched]="f().touched()"
-        />
+    @let f = field(); @let p = props(); @if (p?.floatingLabel) {
+    <!-- Floating label variant -->
+    <div class="form-floating mb-3">
+      <input
+        [field]="f"
+        [id]="key()"
+        type="date"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      @if (label()) {
+      <label [for]="key()">{{ label() | dynamicText | async }}</label>
+      } @if (p?.validFeedback && f().valid() && f().touched()) {
+      <div class="valid-feedback d-block">
+        {{ p?.validFeedback | dynamicText | async }}
       </div>
+      }
+
+      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    </div>
     } @else {
-      <!-- Standard variant -->
-      <div class="mb-3">
-        @if (label()) {
-          <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
-        }
+    <!-- Standard variant -->
+    <div class="mb-3">
+      @if (label()) {
+      <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
+      }
 
-        <input
-          [field]="f"
-          [id]="key()"
-          type="date"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [disabled]="f().disabled()"
-          [attr.tabindex]="tabIndex()"
-          [min]="minDate()"
-          [max]="maxDate()"
-          class="form-control"
-          [class.form-control-sm]="p?.size === 'sm'"
-          [class.form-control-lg]="p?.size === 'lg'"
-          [class.is-invalid]="f().invalid() && f().touched()"
-          [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-        />
+      <input
+        [field]="f"
+        [id]="key()"
+        type="date"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
 
-        @if (p?.helpText) {
-          <div class="form-text">
-            {{ p?.helpText | dynamicText | async }}
-          </div>
-        }
-
-        @if (p?.validFeedback && f().valid() && f().touched()) {
-          <div class="valid-feedback d-block">
-            {{ p?.validFeedback | dynamicText | async }}
-          </div>
-        }
-
-        <df-bs-errors
-          [errors]="f().errors()"
-          [invalid]="f().invalid()"
-          [touched]="f().touched()"
-        />
+      @if (p?.helpText) {
+      <div class="form-text">
+        {{ p?.helpText | dynamicText | async }}
       </div>
+      } @if (p?.validFeedback && f().valid() && f().touched()) {
+      <div class="valid-feedback d-block">
+        {{ p?.validFeedback | dynamicText | async }}
+      </div>
+      }
+
+      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    </div>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

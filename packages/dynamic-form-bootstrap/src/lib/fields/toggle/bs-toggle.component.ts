@@ -26,7 +26,6 @@ import { AsyncPipe } from '@angular/common';
         [id]="key()"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
-        [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
         [attr.hidden]="f().hidden() || null"
       />
@@ -36,17 +35,12 @@ import { AsyncPipe } from '@angular/common';
     </div>
 
     @if (props()?.helpText; as helpText) {
-      <div class="form-text" [attr.hidden]="f().hidden() || null">
-        {{ helpText | dynamicText | async }}
-      </div>
+    <div class="form-text" [attr.hidden]="f().hidden() || null">
+      {{ helpText | dynamicText | async }}
+    </div>
     }
 
-    <df-bs-errors
-      [errors]="f().errors()"
-      [invalid]="f().invalid()"
-      [touched]="f().touched()"
-      [attr.hidden]="f().hidden() || null"
-    />
+    <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" [attr.hidden]="f().hidden() || null" />
   `,
   styles: [
     `
@@ -76,7 +70,6 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
-    '[attr.hidden]': 'field()().hidden() || null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

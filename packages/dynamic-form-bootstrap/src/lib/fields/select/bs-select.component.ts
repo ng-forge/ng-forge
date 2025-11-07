@@ -14,7 +14,7 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="mb-3">
       @if (label(); as label) {
-        <label [for]="key()" class="form-label">{{ label | dynamicText | async }}</label>
+      <label [for]="key()" class="form-label">{{ label | dynamicText | async }}</label>
       }
       <select
         [field]="f"
@@ -28,28 +28,19 @@ import { AsyncPipe } from '@angular/common';
         [attr.aria-describedby]="props()?.helpText ? key() + '-help' : null"
       >
         @if (placeholder(); as placeholder) {
-          <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>
-        }
-        @for (option of options(); track option.value) {
-          <option
-            [value]="option.value"
-            [disabled]="option.disabled || false"
-            [selected]="isSelected(option.value, f().value())"
-          >
-            {{ option.label | dynamicText | async }}
-          </option>
+        <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>
+        } @for (option of options(); track option.value) {
+        <option [value]="option.value" [disabled]="option.disabled || false" [selected]="isSelected(option.value, f().value())">
+          {{ option.label | dynamicText | async }}
+        </option>
         }
       </select>
 
       @if (props()?.helpText; as helpText) {
-        <div class="form-text" [id]="key() + '-help'">{{ helpText | dynamicText | async }}</div>
+      <div class="form-text" [id]="key() + '-help'">{{ helpText | dynamicText | async }}</div>
       }
 
-      <df-bs-errors
-        [errors]="f().errors()"
-        [invalid]="f().invalid()"
-        [touched]="f().touched()"
-      />
+      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,7 +50,7 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
   },
 })
-export default class BsSelectFieldComponent<T> implements BsSelectComponent<T> {
+export default class BsSelectFieldComponent<T extends string> implements BsSelectComponent<T> {
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 
@@ -78,7 +69,7 @@ export default class BsSelectFieldComponent<T> implements BsSelectComponent<T> {
     const compareWith = this.props()?.compareWith || this.defaultCompare;
 
     if (Array.isArray(fieldValue)) {
-      return fieldValue.some(v => compareWith(v, optionValue));
+      return fieldValue.some((v) => compareWith(v, optionValue));
     }
 
     return fieldValue !== null && compareWith(fieldValue, optionValue);

@@ -17,7 +17,7 @@ const BootstrapPage: NgDocPage = {
   title: 'Bootstrap',
   mdFile: './index.md',
   category: UiLibsIntegrationCategory,
-  order: 3,
+  order: 2,
   demos: {
     InputIframeDemoComponent,
     SelectIframeDemoComponent,

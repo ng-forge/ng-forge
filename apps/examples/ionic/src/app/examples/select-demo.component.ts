@@ -6,6 +6,9 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
 @Component({
   selector: 'example-select-demo',
   imports: [DynamicForm, JsonPipe, IonContent, IonHeader, IonTitle, IonToolbar],
+  host: {
+    class: 'example-container',
+  },
   template: `
     <ion-header>
       <ion-toolbar>
@@ -14,7 +17,7 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
     </ion-header>
 
     <ion-content>
-      <div style="padding: 1rem;">
+      <div>
         <dynamic-form [config]="config" [(value)]="formOutput" />
         <h4>Form Data:</h4>
         <pre>{{ formOutput() | json }}</pre>

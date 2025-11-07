@@ -5,6 +5,9 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'app-textarea-demo',
   imports: [DynamicForm, JsonPipe],
+  host: {
+    class: 'example-container',
+  },
   template: `
     <dynamic-form [config]="fields" [(value)]="formOutput" />
     <h4>Form Data:</h4>

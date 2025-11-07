@@ -10,7 +10,10 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-    "module": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "emitDecoratorMetadata": false,
     "lib": ["ES2022", "dom"]
   },
   "angularCompilerOptions": {

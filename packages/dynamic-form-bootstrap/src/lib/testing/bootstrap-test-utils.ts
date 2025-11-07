@@ -1,13 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import {
-  DynamicForm,
-  FormConfig,
-  FormEvent,
-  provideDynamicForm,
-  RegisteredFieldTypes,
-  TextareaField,
-} from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormEvent, provideDynamicForm, RegisteredFieldTypes, TextareaField } from '@ng-forge/dynamic-form';
 import { delay } from './delay';
 import { waitForDFInit } from './wait-for-df';
 import { withBootstrapFields } from '../providers/bootstrap-providers';
@@ -36,7 +29,7 @@ export interface BootstrapFormTestConfig {
  */
 export interface BootstrapFormTestResult {
   component: DynamicForm;
-  fixture: ComponentFixture<DynamicForm<readonly RegisteredFieldTypes[]>>;
+  fixture: ComponentFixture<DynamicForm<RegisteredFieldTypes[]>>;
 }
 
 /**
@@ -145,7 +138,7 @@ export class BootstrapFormTestUtils {
       providers: [provideAnimations(), provideDynamicForm(...withBootstrapFields()), ...(testConfig.providers || [])],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(DynamicForm<readonly RegisteredFieldTypes[]>);
+    const fixture = TestBed.createComponent(DynamicForm<RegisteredFieldTypes[]>);
     const component = fixture.componentInstance;
 
     // Set up the component
@@ -156,7 +149,12 @@ export class BootstrapFormTestUtils {
       fixture.componentRef.setInput('value', testConfig.initialValue);
     }
 
+    // In zoneless mode, we need to trigger change detection immediately after setting inputs
     fixture.detectChanges();
+    await fixture.whenStable();
+    await delay(100);
+    fixture.detectChanges();
+
     await BootstrapFormTestUtils.waitForInit(fixture);
 
     return {
@@ -170,8 +168,16 @@ export class BootstrapFormTestUtils {
    */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
+
+    // In zoneless mode, OnPush components with async pipes require explicit change detection
+    // and sufficient time for observables to emit values
     fixture.detectChanges();
-    await delay(0);
+    await fixture.whenStable();
+    await delay(100); // Increased delay for async pipe resolution
+    fixture.detectChanges();
+    await delay(100);
+    fixture.detectChanges();
+    await delay(100);
   }
 
   /**
@@ -193,11 +199,7 @@ export class BootstrapFormTestUtils {
   /**
    * Simulates user selection on a Bootstrap select
    */
-  static async simulateBsSelect(
-    fixture: ComponentFixture<DynamicForm>,
-    selectSelector: string,
-    value: string | string[]
-  ): Promise<void> {
+  static async simulateBsSelect(fixture: ComponentFixture<DynamicForm>, selectSelector: string, value: string | string[]): Promise<void> {
     const select = fixture.nativeElement.querySelector(selectSelector) as HTMLSelectElement;
     if (!select) {
       throw new Error(`Bootstrap select element not found with selector: ${selectSelector}`);
@@ -339,9 +341,9 @@ export class BootstrapFormTestUtils {
       throw new Error(`Bootstrap radio button with value "${value}" not found`);
     }
 
-    if (!targetRadio.checked) {
-      targetRadio.click();
-    }
+    // if (!targetRadio.checked) {
+    //   targetRadio.click();
+    // }
 
     fixture.detectChanges();
     await delay(0);

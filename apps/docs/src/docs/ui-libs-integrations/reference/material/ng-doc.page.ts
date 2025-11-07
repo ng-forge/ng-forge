@@ -16,7 +16,7 @@ const MaterialPage: NgDocPage = {
   title: 'Material Design',
   mdFile: './index.md',
   category: UiLibsIntegrationCategory,
-  order: 2,
+  order: 0,
   demos: {
     InputIframeDemoComponent,
     SelectIframeDemoComponent,

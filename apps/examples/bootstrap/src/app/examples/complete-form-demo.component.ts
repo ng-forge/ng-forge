@@ -17,8 +17,8 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
           <h4>Form Data:</h4>
           <pre>{{ model() | json }}</pre>
           @if (submittedData()) {
-            <h4>Submitted:</h4>
-            <pre>{{ submittedData() | json }}</pre>
+          <h4>Submitted:</h4>
+          <pre>{{ submittedData() | json }}</pre>
           }
         </div>
       </div>
@@ -36,6 +36,9 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
       overflow-x: auto;
     }
   `,
+  host: {
+    class: 'example-container',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompleteFormDemoComponent {
