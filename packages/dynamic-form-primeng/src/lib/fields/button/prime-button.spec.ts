@@ -22,10 +22,6 @@ describe('PrimeButtonFieldComponent', () => {
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({ config });
 
-      await fixture.whenStable();
-      untracked(() => fixture.detectChanges());
-      await fixture.whenStable();
-      untracked(() => fixture.detectChanges());
       const buttonElement = fixture.debugElement.query(By.css('button'));
 
       expect(buttonElement).toBeTruthy();

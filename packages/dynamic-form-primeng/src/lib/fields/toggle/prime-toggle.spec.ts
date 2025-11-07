@@ -29,10 +29,6 @@ describe('PrimeToggleFieldComponent', () => {
         },
       });
 
-      await fixture.whenStable();
-      untracked(() => fixture.detectChanges());
-      await fixture.whenStable(); // Extra cycle for async pipes
-      untracked(() => fixture.detectChanges());
       const toggle = fixture.debugElement.query(By.css('p-toggleswitch'));
       const primeToggleComponent = fixture.debugElement.query(By.css('df-prime-toggle'))?.componentInstance;
       const containerDiv = fixture.debugElement.query(By.css('.dark-mode-toggle'));
@@ -121,10 +117,6 @@ describe('PrimeToggleFieldComponent', () => {
         initialValue: { darkMode: false },
       });
 
-      await fixture.whenStable();
-      untracked(() => fixture.detectChanges());
-      await fixture.whenStable();
-      untracked(() => fixture.detectChanges());
       const toggle = fixture.debugElement.query(By.css('p-toggleswitch'));
 
       // These properties are passed to the inner InputSwitch component
@@ -152,10 +144,6 @@ describe('PrimeToggleFieldComponent', () => {
         },
       });
 
-      await fixture.whenStable();
-      untracked(() => fixture.detectChanges());
-      await fixture.whenStable();
-      untracked(() => fixture.detectChanges());
       const toggle = fixture.debugElement.query(By.css('p-toggleswitch'));
 
       expect(toggle).toBeTruthy();

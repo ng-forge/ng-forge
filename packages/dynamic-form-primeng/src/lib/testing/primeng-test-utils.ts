@@ -164,10 +164,13 @@ export class PrimeNGFormTestUtils {
     await PrimeNGFormTestUtils.waitForInit(fixture);
 
     // Additional stabilization for reliable DOM querying
+    // PrimeNG components need extra time to fully render, especially under load
     await fixture.whenStable();
     untracked(() => fixture.detectChanges());
+    await delay(200); // Increased delay for parallel test execution
     await fixture.whenStable(); // Extra cycle for async pipes
     untracked(() => fixture.detectChanges());
+    await delay(100); // Final stabilization
 
     return {
       component,
