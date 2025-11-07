@@ -163,6 +163,12 @@ export class PrimeNGFormTestUtils {
     untracked(() => fixture.detectChanges());
     await PrimeNGFormTestUtils.waitForInit(fixture);
 
+    // Additional stabilization for reliable DOM querying
+    await fixture.whenStable();
+    untracked(() => fixture.detectChanges());
+    await fixture.whenStable(); // Extra cycle for async pipes
+    untracked(() => fixture.detectChanges());
+
     return {
       component,
       fixture,
