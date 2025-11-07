@@ -24,6 +24,8 @@ import { Slider } from 'primeng/slider';
       <p-slider
         [id]="key()"
         [field]="f"
+        [min]="props()?.min ?? minValue()"
+        [max]="props()?.max ?? maxValue()"
         [step]="props()?.step ?? step()"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
