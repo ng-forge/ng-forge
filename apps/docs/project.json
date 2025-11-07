@@ -51,7 +51,9 @@
           "outputHashing": "all",
           "baseHref": "/ng-forge/",
           "define": {
-            "EXAMPLE_BASE_PATH": "process.env['EXAMPLE_BASE_PATH'] || '/ng-forge/examples'"
+            "MATERIAL_EXAMPLES_URL": "process.env['MATERIAL_EXAMPLES_URL'] || '/ng-forge/examples/material'",
+            "PRIMENG_EXAMPLES_URL": "process.env['PRIMENG_EXAMPLES_URL'] || '/ng-forge/examples/primeng'",
+            "IONIC_EXAMPLES_URL": "process.env['IONIC_EXAMPLES_URL'] || '/ng-forge/examples/ionic'"
           },
           "ngDoc": {
             "config": "apps/docs/ng-doc.config.ts"
@@ -62,7 +64,9 @@
           "extractLicenses": false,
           "sourceMap": true,
           "define": {
-            "EXAMPLE_BASE_PATH": "process.env['EXAMPLE_BASE_PATH'] || 'http://localhost:420'"
+            "MATERIAL_EXAMPLES_URL": "process.env['MATERIAL_EXAMPLES_URL'] || 'http://localhost:4201'",
+            "PRIMENG_EXAMPLES_URL": "process.env['PRIMENG_EXAMPLES_URL'] || 'http://localhost:4202'",
+            "IONIC_EXAMPLES_URL": "process.env['IONIC_EXAMPLES_URL'] || 'http://localhost:4203'"
           },
           "ngDoc": {
             "config": "apps/docs/ng-doc.config.ts"

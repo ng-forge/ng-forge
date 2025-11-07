@@ -10,13 +10,13 @@ export interface Environment {
 
 export const ENVIRONMENT = new InjectionToken<Environment>('ENVIRONMENT');
 
-// Base path is injected at build time via --define
-// Development default: 'http://localhost:420' (port added per library)
-// Production default: '/ng-forge/examples'
+// URLs are injected at build time via --define
+// Development: Individual localhost URLs with different ports
+// Production: GitHub Pages subdirectories
 export const environment: Environment = {
   exampleBaseUrls: {
-    material: `${EXAMPLE_BASE_PATH}1`,
-    primeng: `${EXAMPLE_BASE_PATH}2`,
-    ionic: `${EXAMPLE_BASE_PATH}3`,
+    material: MATERIAL_EXAMPLES_URL,
+    primeng: PRIMENG_EXAMPLES_URL,
+    ionic: IONIC_EXAMPLES_URL,
   },
 };

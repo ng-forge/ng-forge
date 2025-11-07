@@ -142,7 +142,9 @@ jobs:
           echo "Building documentation app..."
           pnpm run build:docs:prod
         env:
-          EXAMPLE_BASE_PATH: /ng-forge/examples
+          MATERIAL_EXAMPLES_URL: /ng-forge/examples/material
+          PRIMENG_EXAMPLES_URL: /ng-forge/examples/primeng
+          IONIC_EXAMPLES_URL: /ng-forge/examples/ionic
 
       - name: Prepare deployment directory
         run: |
