@@ -1,12 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import {
-  DynamicForm,
-  FormConfig,
-  FormEvent,
-  provideDynamicForm,
-  RegisteredFieldTypes,
-} from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormEvent, provideDynamicForm, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
 import { delay } from './delay';
 import { waitForDFInit } from './wait-for-df';
 import { withIonicFields } from '../providers/ionic-providers';
@@ -16,12 +10,9 @@ import {
   IonicDatepickerField,
   IonicInputField,
   IonicMultiCheckboxField,
-  IonicNextButtonField,
-  IonicPreviousButtonField,
   IonicRadioField,
   IonicSelectField,
   IonicSliderField,
-  IonicSubmitButtonField,
   IonicTextareaField,
   IonicToggleField,
 } from '../fields';
@@ -180,17 +171,46 @@ export class IonicFormTestUtils {
   }
 
   /**
+   * Helper to query into Shadow DOM
+   */
+  private static queryShadowDom(element: Element, selector: string): Element | null {
+    // Try to find in shadow root first
+    if (element.shadowRoot) {
+      const found = element.shadowRoot.querySelector(selector);
+      if (found) return found;
+    }
+    // Fallback to regular query
+    return element.querySelector(selector);
+  }
+
+  /**
    * Simulates user input on an Ionic input field
+   * Works by finding the ion-input component and using its public API
    */
   static async simulateIonicInput(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
-    const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
-    if (!input) {
+    const ionInput = fixture.nativeElement.querySelector(selector.replace(' input', '').replace(' textarea', ''));
+    if (!ionInput) {
       throw new Error(`Ionic input element not found with selector: ${selector}`);
     }
 
-    input.value = value;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    // Try to access the input through shadow DOM
+    const input = this.queryShadowDom(ionInput, 'input, textarea') as HTMLInputElement | HTMLTextAreaElement;
+
+    if (input) {
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+      input.dispatchEvent(new Event('blur', { bubbles: true, composed: true }));
+    } else {
+      // Fallback: dispatch event on the ion-input itself
+      ionInput.dispatchEvent(
+        new CustomEvent('ionInput', {
+          detail: { value },
+          bubbles: true,
+          composed: true,
+        })
+      );
+    }
+
     fixture.detectChanges();
     await delay(0);
   }
@@ -222,19 +242,17 @@ export class IonicFormTestUtils {
 
   /**
    * Simulates Ionic checkbox toggle
+   * Works by finding the checkbox through shadow DOM and toggling it
    */
   static async simulateIonicCheckbox(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     let checkboxElement: Element | null = null;
 
     // Handle complex selectors with multi-checkbox components
     if (selector.includes('df-ionic-multi-checkbox') && selector.includes('ion-checkbox:last-of-type')) {
-      // Extract the multi-checkbox selector and the ion-checkbox selector
       const parts = selector.split(' ');
       const multiCheckboxSelector = parts[0];
-      const ionCheckboxSelector = parts[1];
-
       const multiCheckboxElement = fixture.nativeElement.querySelector(multiCheckboxSelector);
-      if (multiCheckboxElement && ionCheckboxSelector.includes(':last-of-type')) {
+      if (multiCheckboxElement) {
         const checkboxes = multiCheckboxElement.querySelectorAll('ion-checkbox');
         checkboxElement = checkboxes[checkboxes.length - 1];
       }
@@ -243,7 +261,7 @@ export class IonicFormTestUtils {
     else if (selector.includes(':nth-of-type(3)') || selector.includes(':last-of-type')) {
       const allCheckboxes = fixture.nativeElement.querySelectorAll('ion-checkbox');
       if (selector.includes(':nth-of-type(3)')) {
-        checkboxElement = allCheckboxes[2]; // 0-indexed
+        checkboxElement = allCheckboxes[2];
       } else if (selector.includes(':last-of-type')) {
         checkboxElement = allCheckboxes[allCheckboxes.length - 1];
       }
@@ -255,20 +273,20 @@ export class IonicFormTestUtils {
       throw new Error(`Ionic checkbox element not found with selector: ${selector}`);
     }
 
-    // Use the more direct input element approach with click simulation
-    const input = checkboxElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
-    if (!input) {
-      throw new Error(`Input element not found within checkbox for selector: ${selector}`);
-    }
+    // Try to access the input through shadow DOM
+    const input = this.queryShadowDom(checkboxElement, 'input[type="checkbox"]') as HTMLInputElement;
 
-    if (input.checked !== checked) {
-      // Simulate actual user click on the input element
+    if (input && input.checked !== checked) {
       input.click();
     } else {
-      // Ensure the state is set and events are dispatched
-      input.checked = checked;
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      input.dispatchEvent(new Event('change', { bubbles: true }));
+      // Fallback: dispatch event on the ion-checkbox itself
+      checkboxElement.dispatchEvent(
+        new CustomEvent('ionChange', {
+          detail: { checked },
+          bubbles: true,
+          composed: true,
+        })
+      );
     }
 
     fixture.detectChanges();
@@ -277,6 +295,7 @@ export class IonicFormTestUtils {
 
   /**
    * Simulates Ionic toggle switch
+   * Works by finding the toggle through shadow DOM and toggling it
    */
   static async simulateIonicToggle(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     const toggle = fixture.nativeElement.querySelector(selector);
@@ -284,14 +303,23 @@ export class IonicFormTestUtils {
       throw new Error(`Ionic toggle element not found with selector: ${selector}`);
     }
 
-    // Find the button element within the Ionic toggle
-    const button = toggle.querySelector('button[role="switch"]') as HTMLButtonElement;
+    // Try to access the button through shadow DOM
+    const button = this.queryShadowDom(toggle, 'button[role="switch"]') as HTMLButtonElement;
+
     if (button) {
-      // Only click if the current state doesn't match the desired state
       const currentChecked = button.getAttribute('aria-checked') === 'true';
       if (currentChecked !== checked) {
         button.click();
       }
+    } else {
+      // Fallback: dispatch event on the ion-toggle itself
+      toggle.dispatchEvent(
+        new CustomEvent('ionChange', {
+          detail: { checked },
+          bubbles: true,
+          composed: true,
+        })
+      );
     }
 
     fixture.detectChanges();
@@ -300,14 +328,31 @@ export class IonicFormTestUtils {
 
   /**
    * Simulates Ionic button click
+   * Works by finding the button (either in shadow DOM or directly) and clicking it
    */
   static async simulateIonicButtonClick(fixture: ComponentFixture<DynamicForm>, selector: string): Promise<void> {
-    const button = fixture.nativeElement.querySelector(selector) as HTMLButtonElement;
-    if (!button) {
+    // If selector includes 'button', it's trying to access shadow DOM
+    const isInnerButton = selector.includes('button');
+    const ionButtonSelector = isInnerButton ? selector.split(' button')[0] : selector;
+
+    const ionButton = fixture.nativeElement.querySelector(ionButtonSelector);
+    if (!ionButton) {
       throw new Error(`Ionic button element not found with selector: ${selector}`);
     }
 
-    button.click();
+    if (isInnerButton) {
+      // Try to access the button through shadow DOM
+      const button = this.queryShadowDom(ionButton, 'button') as HTMLButtonElement;
+      if (button) {
+        button.click();
+      } else {
+        // Fallback: click the ion-button itself
+        ionButton.click();
+      }
+    } else {
+      ionButton.click();
+    }
+
     fixture.detectChanges();
     await delay(0);
   }
