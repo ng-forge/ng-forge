@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Field, FieldTree, MAX, MIN } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
 import { PrimeSliderComponent, PrimeSliderProps } from './prime-slider.type';
@@ -24,8 +24,8 @@ import { Slider } from 'primeng/slider';
       <p-slider
         [id]="key()"
         [field]="f"
-        [min]="props()?.min ?? minValue()"
-        [max]="props()?.max ?? maxValue()"
+        [min]="minFromMetadata()"
+        [max]="maxFromMetadata()"
         [step]="props()?.step ?? step()"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
@@ -61,4 +61,17 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
   readonly step = input<number>(1);
 
   readonly props = input<PrimeSliderProps>();
+
+  // Read min/max from field metadata (set by validation constraints)
+  readonly minFromMetadata = computed(() => {
+    const fieldState = this.field()();
+    const metadataMin = fieldState.metadata(MIN);
+    return metadataMin ?? this.minValue();
+  });
+
+  readonly maxFromMetadata = computed(() => {
+    const fieldState = this.field()();
+    const metadataMax = fieldState.metadata(MAX);
+    return metadataMax ?? this.maxValue();
+  });
 }
