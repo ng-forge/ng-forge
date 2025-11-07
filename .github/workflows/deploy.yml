@@ -140,11 +140,10 @@ jobs:
       - name: Build documentation app
         run: |
           echo "Building documentation app..."
-          pnpm run build:docs:prod
-        env:
-          MATERIAL_EXAMPLES_URL: /ng-forge/examples/material
-          PRIMENG_EXAMPLES_URL: /ng-forge/examples/primeng
-          IONIC_EXAMPLES_URL: /ng-forge/examples/ionic
+          pnpm nx build docs --configuration=production \
+            --define "MATERIAL_EXAMPLES_URL='/ng-forge/examples/material'" \
+            --define "PRIMENG_EXAMPLES_URL='/ng-forge/examples/primeng'" \
+            --define "IONIC_EXAMPLES_URL='/ng-forge/examples/ionic'"
 
       - name: Prepare deployment directory
         run: |
