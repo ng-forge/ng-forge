@@ -21,7 +21,6 @@ import { AsyncPipe } from '@angular/common';
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"
       [indeterminate]="props()?.indeterminate ?? false"
-      [disabled]="f().disabled()"
       [attr.tabindex]="tabIndex()"
     >
       {{ label() | dynamicText | async }}

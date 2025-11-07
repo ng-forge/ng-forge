@@ -19,8 +19,6 @@ import { AsyncPipe } from '@angular/common';
       [field]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
-      [min]="minValue()"
-      [max]="maxValue()"
       [step]="step()"
       [dualKnobs]="props()?.dualKnobs ?? false"
       [pin]="props()?.pin ?? false"
@@ -28,7 +26,6 @@ import { AsyncPipe } from '@angular/common';
       [ticks]="props()?.ticks ?? false"
       [snaps]="props()?.snaps ?? false"
       [color]="props()?.color ?? 'primary'"
-      [disabled]="f().disabled()"
       [attr.tabindex]="tabIndex()"
     />
 

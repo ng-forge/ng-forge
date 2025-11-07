@@ -1,7 +1,5 @@
 The `@ng-forge/dynamic-form-primeng` package provides PrimeNG field components with a beautiful, modern design system.
 
-> **Note:** When using PrimeNG fields alongside Material fields in the same application, import from `@ng-forge/dynamic-form-primeng/no-augmentation` to avoid TypeScript conflicts.
-
 ## Installation
 
 ```bash
@@ -22,27 +20,29 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-Import PrimeNG theme:
+Import PrimeNG styles:
 
 ```scss
 // styles.scss
-@import 'primeng/resources/themes/lara-light-blue/theme.css';
-@import 'primeng/resources/primeng.css';
 @import 'primeicons/primeicons.css';
 ```
 
-### Using with Other Field Libraries
-
-If you're using PrimeNG fields alongside Material fields in the same app:
+Configure PrimeNG theme via provider:
 
 ```typescript
-// Use the no-augmentation entry point
-import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng/no-augmentation';
+// app.config.ts
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeuix/themes/aura';
 
-@Component({
-  providers: [provideDynamicForm(...withPrimeNGFields())],
-})
-export class MyPrimeNGComponent {}
+export const appConfig: ApplicationConfig = {
+  providers: [
+    providePrimeNG({
+      theme: {
+        preset: Aura,
+      },
+    }),
+  ],
+};
 ```
 
 ## Field Components
@@ -51,7 +51,7 @@ export class MyPrimeNGComponent {}
 
 Text input with PrimeNG styling.
 
-{{ NgDocActions.demo("InputDemoComponent") }}
+{{ NgDocActions.demo("InputIframeDemoComponent") }}
 
 **Props:**
 
@@ -65,7 +65,7 @@ Text input with PrimeNG styling.
 
 Dropdown selection with search capability.
 
-{{ NgDocActions.demo("SelectDemoComponent") }}
+{{ NgDocActions.demo("SelectIframeDemoComponent") }}
 
 **Props:**
 
@@ -80,7 +80,7 @@ Dropdown selection with search capability.
 
 Boolean checkbox control.
 
-{{ NgDocActions.demo("CheckboxDemoComponent") }}
+{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
 
 **Props:**
 
@@ -93,7 +93,7 @@ Boolean checkbox control.
 
 Radio button group.
 
-{{ NgDocActions.demo("RadioDemoComponent") }}
+{{ NgDocActions.demo("RadioIframeDemoComponent") }}
 
 **Props:**
 
@@ -104,7 +104,7 @@ Radio button group.
 
 Multiple checkbox selection.
 
-{{ NgDocActions.demo("MultiCheckboxDemoComponent") }}
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
 
 **Props:**
 
@@ -115,7 +115,7 @@ Multiple checkbox selection.
 
 Slide toggle switch (InputSwitch).
 
-{{ NgDocActions.demo("ToggleDemoComponent") }}
+{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
 
 **Props:**
 
@@ -128,7 +128,7 @@ Slide toggle switch (InputSwitch).
 
 Multi-line text input.
 
-{{ NgDocActions.demo("TextareaDemoComponent") }}
+{{ NgDocActions.demo("TextareaIframeDemoComponent") }}
 
 **Field properties:**
 
@@ -146,7 +146,7 @@ Multi-line text input.
 
 Date selection with calendar popup (p-calendar).
 
-{{ NgDocActions.demo("DatepickerDemoComponent") }}
+{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
 
 **Field properties:**
 
@@ -166,7 +166,7 @@ Date selection with calendar popup (p-calendar).
 
 Numeric slider control.
 
-{{ NgDocActions.demo("SliderDemoComponent") }}
+{{ NgDocActions.demo("SliderIframeDemoComponent") }}
 
 **Field properties:**
 
@@ -184,7 +184,7 @@ Numeric slider control.
 
 PrimeNG provides multiple prebuilt button types for common form actions.
 
-{{ NgDocActions.demo("ButtonDemoComponent") }}
+{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
 
 #### Submit Button
 
@@ -377,7 +377,7 @@ actionButton({
 
 ### Full Form
 
-{{ NgDocActions.demo("CompletePrimeFormComponent") }}
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
 
 ## Type Safety
 

@@ -1,18 +1,16 @@
 import { NgDocPage } from '@ng-doc/core';
 import CustomIntegrationsCategory from '../../ng-doc.category';
-
-// Individual field demos
-import { InputDemoComponent } from './examples/input-demo.component';
-import { SelectDemoComponent } from './examples/select-demo.component';
-import { CheckboxDemoComponent } from './examples/checkbox-demo.component';
-import { RadioDemoComponent } from './examples/radio-demo.component';
-import { MultiCheckboxDemoComponent } from './examples/multi-checkbox-demo.component';
-import { ToggleDemoComponent } from './examples/toggle-demo.component';
-import { TextareaDemoComponent } from './examples/textarea-demo.component';
-import { DatepickerDemoComponent } from './examples/datepicker-demo.component';
-import { SliderDemoComponent } from './examples/slider-demo.component';
-import { ButtonDemoComponent } from './examples/button-demo.component';
-import { CompletePrimeFormComponent } from './examples/complete-prime-form.component';
+import { InputIframeDemoComponent } from './examples/input-iframe-demo.component';
+import { SelectIframeDemoComponent } from './examples/select-iframe-demo.component';
+import { CheckboxIframeDemoComponent } from './examples/checkbox-iframe-demo.component';
+import { ToggleIframeDemoComponent } from './examples/toggle-iframe-demo.component';
+import { RadioIframeDemoComponent } from './examples/radio-iframe-demo.component';
+import { MultiCheckboxIframeDemoComponent } from './examples/multi-checkbox-iframe-demo.component';
+import { TextareaIframeDemoComponent } from './examples/textarea-iframe-demo.component';
+import { DatepickerIframeDemoComponent } from './examples/datepicker-iframe-demo.component';
+import { SliderIframeDemoComponent } from './examples/slider-iframe-demo.component';
+import { ButtonIframeDemoComponent } from './examples/button-iframe-demo.component';
+import { CompleteFormIframeDemoComponent } from './examples/complete-form-iframe-demo.component';
 
 const PrimeNGPage: NgDocPage = {
   title: 'PrimeNG',
@@ -20,19 +18,17 @@ const PrimeNGPage: NgDocPage = {
   category: CustomIntegrationsCategory,
   order: 4,
   demos: {
-    // Individual field type demos
-    InputDemoComponent,
-    SelectDemoComponent,
-    CheckboxDemoComponent,
-    RadioDemoComponent,
-    MultiCheckboxDemoComponent,
-    ToggleDemoComponent,
-    TextareaDemoComponent,
-    DatepickerDemoComponent,
-    SliderDemoComponent,
-    ButtonDemoComponent,
-    // Complete form example
-    CompletePrimeFormComponent,
+    InputIframeDemoComponent,
+    SelectIframeDemoComponent,
+    CheckboxIframeDemoComponent,
+    ToggleIframeDemoComponent,
+    RadioIframeDemoComponent,
+    MultiCheckboxIframeDemoComponent,
+    TextareaIframeDemoComponent,
+    DatepickerIframeDemoComponent,
+    SliderIframeDemoComponent,
+    ButtonIframeDemoComponent,
+    CompleteFormIframeDemoComponent,
   },
 };
 

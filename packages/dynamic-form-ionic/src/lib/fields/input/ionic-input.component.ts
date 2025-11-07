@@ -17,13 +17,10 @@ import { AsyncPipe } from '@angular/common';
 
     <ion-input
       [field]="f"
-      [type]="props()?.type || 'text'"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-      [disabled]="f().disabled()"
       [clearInput]="props()?.clearInput ?? false"
-      [maxlength]="props()?.maxlength"
       [counter]="props()?.counter ?? false"
       [color]="props()?.color"
       [fill]="props()?.fill ?? 'outline'"
@@ -33,9 +30,9 @@ import { AsyncPipe } from '@angular/common';
       [attr.tabindex]="tabIndex()"
     >
       @if (f().invalid() && f().touched()) {
-        <div slot="error">
-          <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
-        </div>
+      <div slot="error">
+        <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      </div>
       }
     </ion-input>
   `,

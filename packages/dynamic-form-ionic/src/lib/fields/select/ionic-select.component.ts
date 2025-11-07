@@ -20,7 +20,6 @@ import { AsyncPipe } from '@angular/common';
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() ?? props()?.placeholder | dynamicText | async) ?? ''"
-      [disabled]="f().disabled()"
       [multiple]="props()?.multiple ?? false"
       [compareWith]="props()?.compareWith ?? defaultCompare"
       [interface]="props()?.interface ?? 'alert'"
@@ -33,15 +32,13 @@ import { AsyncPipe } from '@angular/common';
       [attr.tabindex]="tabIndex()"
     >
       @for (option of options(); track option.value) {
-        <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
-          {{ option.label | dynamicText | async }}
-        </ion-select-option>
-      }
-
-      @if (f().invalid() && f().touched()) {
-        <div slot="error">
-          <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
-        </div>
+      <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
+        {{ option.label | dynamicText | async }}
+      </ion-select-option>
+      } @if (f().invalid() && f().touched()) {
+      <div slot="error">
+        <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      </div>
       }
     </ion-select>
   `,

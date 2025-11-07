@@ -2,45 +2,12 @@
 @use '@ng-doc/app/styles/themes/dark.css';
 
 // ============================================
-// MATERIAL THEME
+// MATERIAL THEME (for docs UI only)
 // ============================================
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 // ============================================
-// PRIMENG THEME
+// IFRAME EXAMPLES
 // ============================================
-// PrimeNG theme is configured via providePrimeNG in app.config.ts
-// Only need to import primeicons
-@import 'primeicons/primeicons.css';
-
-// ============================================
-// IONIC THEME
-// ============================================
-@import '@ionic/angular/css/core.css';
-@import '@ionic/angular/css/normalize.css';
-@import '@ionic/angular/css/structure.css';
-@import '@ionic/angular/css/typography.css';
-@import '@ionic/angular/css/display.css';
-
-/* Optional Ionic CSS utilities */
-@import '@ionic/angular/css/padding.css';
-@import '@ionic/angular/css/float-elements.css';
-@import '@ionic/angular/css/text-alignment.css';
-@import '@ionic/angular/css/text-transformation.css';
-@import '@ionic/angular/css/flex-utils.css';
-
-// ============================================
-// THEME ISOLATION
-// ============================================
-.theme-material {
-  // Material-specific overrides if needed
-}
-
-.theme-primeng {
-  // PrimeNG-specific overrides if needed
-}
-
-.theme-ionic {
-  // Ionic-specific overrides if needed
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Roboto', sans-serif;
-}
+// PrimeNG and Ionic examples are loaded via iframes
+// Their styles are isolated in their respective example apps

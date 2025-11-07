@@ -1,7 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { provideIonicAngular } from '@ionic/angular/standalone';
 import {
   NG_DOC_DEFAULT_PAGE_PROCESSORS,
   NG_DOC_DEFAULT_PAGE_SKELETON,
@@ -15,8 +14,7 @@ import {
 import { provideNgDocContext } from '@ng-doc/generated';
 import { appRoutes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
+import { ENVIRONMENT, environment, environmentProd } from './config/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,9 +29,6 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(),
     provideAnimationsAsync(),
-    provideIonicAngular({
-      mode: 'md', // 'ios' or 'md' (Material Design)
-    }),
     provideNgDocContext(),
     provideNgDocApp({
       shiki: {
@@ -46,10 +41,16 @@ export const appConfig: ApplicationConfig = {
     provideSearchEngine(NgDocDefaultSearchEngine),
     providePageSkeleton(NG_DOC_DEFAULT_PAGE_SKELETON),
     provideMainPageProcessor(NG_DOC_DEFAULT_PAGE_PROCESSORS),
-    providePrimeNG({
-      theme: {
-        preset: Aura,
+    // Environment configuration for iframe example URLs
+    {
+      provide: ENVIRONMENT,
+      useFactory: () => {
+        // Detect production environment
+        if (typeof window !== 'undefined' && window.location.hostname.includes('github.io')) {
+          return environmentProd;
+        }
+        return environment;
       },
-    }),
+    },
   ],
 };

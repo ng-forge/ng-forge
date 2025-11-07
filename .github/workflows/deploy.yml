@@ -94,19 +94,49 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build libraries
-        run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material
+      - name: Build all libraries
+        run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic
 
-      - name: Build documentation
+      - name: Build documentation app
         run: |
-          echo "Building documentation with Angular version patch..."
+          echo "Building documentation app..."
           pnpm run build:docs:prod
-          ls -la dist/apps/docs/
+
+      - name: Build example apps
+        run: |
+          echo "Building example apps..."
+          pnpm run build:examples
+
+      - name: Prepare deployment directory
+        run: |
+          echo "Preparing unified deployment directory..."
+          pnpm run prepare:deploy
+
+      - name: Verify deployment structure
+        run: |
+          echo "📂 Deployment directory structure:"
+          ls -la dist/deploy/
+          echo ""
+          echo "📂 Examples directory:"
+          ls -la dist/deploy/examples/ || echo "Examples directory not found"
+          echo ""
+          if [ -d "dist/deploy/examples/material" ]; then
+            echo "📂 Material examples:"
+            ls -la dist/deploy/examples/material/ | head -n 10
+          fi
+          if [ -d "dist/deploy/examples/primeng" ]; then
+            echo "📂 PrimeNG examples:"
+            ls -la dist/deploy/examples/primeng/ | head -n 10
+          fi
+          if [ -d "dist/deploy/examples/ionic" ]; then
+            echo "📂 Ionic examples:"
+            ls -la dist/deploy/examples/ionic/ | head -n 10
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/apps/docs/browser
+          path: dist/deploy
 
       - name: Deploy to GitHub Pages
         id: deployment
