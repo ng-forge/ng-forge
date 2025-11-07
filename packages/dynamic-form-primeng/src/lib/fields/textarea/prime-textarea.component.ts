@@ -20,7 +20,6 @@ import { TextareaModule } from 'primeng/textarea';
 
       <textarea
         pInputTextarea
-        [field]="f"
         [id]="inputId()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
