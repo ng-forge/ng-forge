@@ -148,7 +148,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExampleIframeComponent {
-  library = input.required<'material' | 'primeng' | 'ionic'>();
+  library = input.required<'material' | 'primeng' | 'ionic' | 'bootstrap'>();
   example = input.required<string>();
   height = input<string>('500px');
   width = input<string>('100%');

@@ -6,6 +6,9 @@ import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dyna
 @Component({
   selector: 'app-button-demo',
   imports: [DynamicForm, JsonPipe],
+  host: {
+    class: 'example-container',
+  },
   template: `
     <h4>Button Examples</h4>
     <p>Showcasing all PrimeNG button types with various severities and styles.</p>

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-primeng';
@@ -13,6 +13,10 @@ import { submitButton } from '@ng-forge/dynamic-form-primeng';
     <h4>Form Data:</h4>
     <pre>{{ model() | json }}</pre>
   `,
+  host: {
+    class: 'example-container',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompletePrimeFormComponent {
   model = signal({

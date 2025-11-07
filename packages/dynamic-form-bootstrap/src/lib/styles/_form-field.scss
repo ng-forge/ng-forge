@@ -1,0 +1,49 @@
+/**
+ * Standardized form field styling for Bootstrap components
+ *
+ * This provides consistent vertical layout and spacing for all field types.
+ * Bootstrap components use native HTML with Bootstrap CSS classes, so this
+ * ensures proper structure similar to Material's mat-form-field wrapper.
+ */
+
+:host {
+  // Spacing
+  --df-bs-field-gap: 0.5rem;
+
+  // Label styling
+  --df-bs-label-font-weight: 500;
+  --df-bs-label-color: inherit;
+
+  // Hint text styling
+  --df-bs-hint-color: var(--bs-secondary-color, #6c757d);
+  --df-bs-hint-font-size: 0.875rem;
+
+  // Error styling (inherits from Bootstrap's .invalid-feedback)
+  --df-bs-error-color: var(--bs-danger, #dc3545);
+  --df-bs-error-font-size: 0.875rem;
+}
+
+.df-bs-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--df-bs-field-gap);
+  width: 100%;
+  margin-bottom: 1rem; // Standard Bootstrap form spacing
+}
+
+.df-bs-label {
+  font-weight: var(--df-bs-label-font-weight);
+  color: var(--df-bs-label-color);
+  margin-bottom: 0; // Override Bootstrap's default label margin
+}
+
+.df-bs-hint {
+  color: var(--df-bs-hint-color);
+  font-size: var(--df-bs-hint-font-size);
+  margin-top: 0.25rem;
+}
+
+// Ensure proper spacing when hint is present
+.df-bs-field:has(.df-bs-hint) {
+  margin-bottom: 0.5rem;
+}

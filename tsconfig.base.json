@@ -17,12 +17,15 @@
     "paths": {
       "@ng-doc/generated": ["dist/ng-doc/docs"],
       "@ng-forge/dynamic-form": ["packages/dynamic-form/src/index.ts"],
+      "@ng-forge/dynamic-form-bootstrap": ["packages/dynamic-form-bootstrap/src/index.ts"],
+      "@ng-forge/dynamic-form-bootstrap/no-augmentation": ["packages/dynamic-form-bootstrap/src/no-augmentation/index.ts"],
       "@ng-forge/dynamic-form-ionic": ["packages/dynamic-form-ionic/src/index.ts"],
       "@ng-forge/dynamic-form-material": ["packages/dynamic-form-material/src/index.ts"],
       "@ng-forge/dynamic-form-primeng": ["packages/dynamic-form-primeng/src/index.ts"],
       "@examples/material/*": ["apps/examples/material/src/app/examples/*"],
       "@examples/ionic/*": ["apps/examples/ionic/src/app/examples/*"],
-      "@examples/primeng/*": ["apps/examples/primeng/src/app/examples/*"]
+      "@examples/primeng/*": ["apps/examples/primeng/src/app/examples/*"],
+      "@examples/bootstrap/*": ["apps/examples/bootstrap/src/app/examples/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

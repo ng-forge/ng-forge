@@ -5,7 +5,7 @@ const CustomIntegrationsGuidePage: NgDocPage = {
   title: 'Building Custom Integrations',
   mdFile: './index.md',
   category: UiLibsIntegrationCategory,
-  order: 1,
+  order: 4,
 };
 
 export default CustomIntegrationsGuidePage;

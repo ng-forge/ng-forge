@@ -6,6 +6,9 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
 @Component({
   selector: 'example-button-demo',
   imports: [DynamicForm, JsonPipe, IonContent, IonHeader, IonTitle, IonToolbar],
+  host: {
+    class: 'example-container',
+  },
   template: `
     <ion-header>
       <ion-toolbar>
@@ -14,7 +17,7 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
     </ion-header>
 
     <ion-content>
-      <div style="padding: 1rem;">
+      <div>
         <h4>Button Examples</h4>
         <p>Showcasing all Ionic button types with various colors and styles.</p>
 

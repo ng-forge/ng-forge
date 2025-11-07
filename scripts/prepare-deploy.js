@@ -13,6 +13,7 @@
  * ├── assets/                 (docs assets)
  * └── examples/               (example apps)
  *     ├── material/           (Material examples)
+ *     ├── bootstrap/          (Bootstrap examples)
  *     ├── primeng/            (PrimeNG examples)
  *     └── ionic/              (Ionic examples)
  */
@@ -94,6 +95,23 @@ try {
   process.exit(1);
 }
 
+// Copy Bootstrap examples (required)
+const bootstrapSrc = join(distDir, 'apps', 'examples', 'bootstrap', 'browser');
+if (!existsSync(bootstrapSrc)) {
+  console.error('❌ Error: Bootstrap examples build output not found!');
+  console.error('   Expected at:', bootstrapSrc);
+  console.error('   Please run: pnpm nx build bootstrap-examples --configuration=production');
+  process.exit(1);
+}
+console.log('   📦 Copying Bootstrap examples...');
+try {
+  cpSync(bootstrapSrc, join(examplesDir, 'bootstrap'), { recursive: true });
+  console.log('   ✅ Bootstrap examples copied');
+} catch (error) {
+  console.error('   ❌ Failed to copy Bootstrap examples:', error.message);
+  process.exit(1);
+}
+
 // Copy Ionic examples (required)
 const ionicSrc = join(distDir, 'apps', 'examples', 'ionic', 'browser');
 if (!existsSync(ionicSrc)) {
@@ -118,11 +136,13 @@ console.log('   ├── index.html           (docs app)');
 console.log('   ├── assets/              (docs assets)');
 console.log('   └── examples/            (example apps)');
 console.log('       ├── material/        (Material examples)');
+console.log('       ├── bootstrap/       (Bootstrap examples)');
 console.log('       ├── primeng/         (PrimeNG examples)');
 console.log('       └── ionic/           (Ionic examples)\n');
 
 console.log('🌐 GitHub Pages URLs:');
-console.log('   Docs:     https://ng-forge.github.io/ng-forge/');
-console.log('   Material: https://ng-forge.github.io/ng-forge/examples/material/');
-console.log('   PrimeNG:  https://ng-forge.github.io/ng-forge/examples/primeng/');
-console.log('   Ionic:    https://ng-forge.github.io/ng-forge/examples/ionic/\n');
+console.log('   Docs:      https://ng-forge.github.io/ng-forge/');
+console.log('   Material:  https://ng-forge.github.io/ng-forge/examples/material/');
+console.log('   Bootstrap: https://ng-forge.github.io/ng-forge/examples/bootstrap/');
+console.log('   PrimeNG:   https://ng-forge.github.io/ng-forge/examples/primeng/');
+console.log('   Ionic:     https://ng-forge.github.io/ng-forge/examples/ionic/\n');

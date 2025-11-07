@@ -16,7 +16,7 @@ const PrimeNGPage: NgDocPage = {
   title: 'PrimeNG',
   mdFile: './index.md',
   category: UiLibsIntegrationCategory,
-  order: 4,
+  order: 1,
   demos: {
     InputIframeDemoComponent,
     SelectIframeDemoComponent,

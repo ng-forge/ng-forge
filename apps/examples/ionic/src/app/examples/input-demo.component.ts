@@ -15,6 +15,9 @@ import {
 @Component({
   selector: 'example-input-demo',
   imports: [DynamicForm, JsonPipe, IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardHeader, IonCardTitle, IonCardContent],
+  host: {
+    class: 'example-container',
+  },
   template: `
     <ion-header>
       <ion-toolbar>
@@ -23,7 +26,7 @@ import {
     </ion-header>
 
     <ion-content>
-      <div style="padding: 1rem;">
+      <div>
         <dynamic-form [config]="config()" (submit)="onSubmit($event)" />
 
         @if (submittedData()) {

@@ -115,6 +115,13 @@ jobs:
             echo "✅ Material examples build found"
           fi
 
+          if [ ! -d "dist/apps/examples/bootstrap/browser" ]; then
+            echo "❌ Bootstrap examples build output missing!"
+            MISSING=true
+          else
+            echo "✅ Bootstrap examples build found"
+          fi
+
           if [ ! -d "dist/apps/examples/primeng/browser" ]; then
             echo "❌ PrimeNG examples build output missing!"
             MISSING=true
