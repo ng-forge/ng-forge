@@ -119,7 +119,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [Material Integration](../../custom-integrations/reference/material) for full documentation.
+See [Material Integration](../../ui-libs-integrations/reference/material) for full documentation.
 
 ### Bootstrap (Coming Soon)
 
@@ -127,7 +127,7 @@ See [Material Integration](../../custom-integrations/reference/material) for ful
 npm install @ng-forge/dynamic-form-bootstrap
 ```
 
-See [Bootstrap Integration](../../custom-integrations/reference/bootstrap) for status and alternatives.
+See [Bootstrap Integration](../../ui-libs-integrations/reference/bootstrap) for status and alternatives.
 
 ### PrimeNG (Coming Soon)
 
@@ -135,7 +135,7 @@ See [Bootstrap Integration](../../custom-integrations/reference/bootstrap) for s
 npm install @ng-forge/dynamic-form-primeng
 ```
 
-See [PrimeNG Integration](../../custom-integrations/reference/primeng) for status and alternatives.
+See [PrimeNG Integration](../../ui-libs-integrations/reference/primeng) for status and alternatives.
 
 ### Ionic (Coming Soon)
 
@@ -143,7 +143,7 @@ See [PrimeNG Integration](../../custom-integrations/reference/primeng) for statu
 npm install @ng-forge/dynamic-form-ionic
 ```
 
-See [Ionic Integration](../../custom-integrations/reference/ionic) for status and alternatives.
+See [Ionic Integration](../../ui-libs-integrations/reference/ionic) for status and alternatives.
 
 ### Custom UI Components
 
@@ -165,7 +165,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [Custom Integration Guide](../../custom-integrations/guide) for building custom field components.
+See [Custom Integration Guide](../../ui-libs-integrations/guide) for building custom field components.
 
 ## Next Steps
 
@@ -188,7 +188,7 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 
 - **[i18n Setup](../../i18n/setup)** - Add multi-language support to your forms
 - **[Events](../../core/events)** - Handle custom form events
-- **[Custom Fields](../../custom-integrations/guide)** - Create your own field types
+- **[Custom Fields](../../ui-libs-integrations/guide)** - Create your own field types
 
 ## Troubleshooting
 
@@ -239,4 +239,4 @@ If you see import errors for `@ng-forge/dynamic-form`, ensure:
 - **[What is Dynamic Forms?](../what-is-dynamic-forms)** - Learn about features and benefits
 - **[Field Types](../../core/field-types)** - Explore all available field types
 - **[Validation](../../core/validation)** - Add validation to your forms
-- **[Material Integration](../../custom-integrations/reference/material)** - Material Design field reference
+- **[Material Integration](../../ui-libs-integrations/reference/material)** - Material Design field reference

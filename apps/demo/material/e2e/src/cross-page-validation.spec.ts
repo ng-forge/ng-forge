@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@playwright/test';
 
 test.describe('Cross-Page Validation Tests', () => {
@@ -159,7 +159,7 @@ test.describe('Cross-Page Validation Tests', () => {
               {
                 key: 'submitEmailVerification',
                 type: 'submit',
-            label: 'Complete Registration',
+                label: 'Complete Registration',
                 col: 12,
               },
             ],
@@ -392,7 +392,7 @@ test.describe('Cross-Page Validation Tests', () => {
               {
                 key: 'submitConditional',
                 type: 'submit',
-            label: 'Create Account',
+                label: 'Create Account',
                 col: 12,
               },
             ],
@@ -528,7 +528,7 @@ test.describe('Cross-Page Validation Tests', () => {
               {
                 key: 'submitBusiness',
                 type: 'submit',
-            label: 'Create Business Account',
+                label: 'Create Business Account',
                 col: 12,
               },
             ],
@@ -752,7 +752,7 @@ test.describe('Cross-Page Validation Tests', () => {
               {
                 key: 'submitCascade',
                 type: 'submit',
-            label: 'Complete Setup',
+                label: 'Complete Setup',
                 col: 12,
               },
             ],
@@ -938,7 +938,7 @@ test.describe('Cross-Page Validation Tests', () => {
               {
                 key: 'submitProgressive',
                 type: 'submit',
-            label: 'Complete Verification',
+                label: 'Complete Verification',
                 col: 12,
               },
             ],

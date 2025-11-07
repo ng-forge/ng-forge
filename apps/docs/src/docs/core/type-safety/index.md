@@ -666,5 +666,5 @@ Type inference only works for **static**, **compile-time constant** configuratio
 
 - **[Validation](../validation)** - How validators affect inferred types
 - **[Field Types](../field-types)** - Understanding field types for better inference
-- **[Custom Integration Guide](../../custom-integrations/guide)** - Creating type-safe custom fields
+- **[Custom Integration Guide](../../ui-libs-integrations/guide)** - Creating type-safe custom fields
 - **[Conditional Logic](../conditional-logic)** - Type-safe conditional expressions

@@ -1,0 +1,62 @@
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+
+@Component({
+  selector: 'example-select-demo',
+  imports: [DynamicForm, JsonPipe, IonContent, IonHeader, IonTitle, IonToolbar],
+  template: `
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Select Example</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <div style="padding: 1rem;">
+        <dynamic-form [config]="config" [(value)]="formOutput" />
+        <h4>Form Data:</h4>
+        <pre>{{ formOutput() | json }}</pre>
+      </div>
+    </ion-content>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class SelectDemoComponent {
+  formOutput = signal({});
+
+  config: FormConfig = {
+    fields: [
+      {
+        key: 'framework',
+        type: 'select',
+        label: 'Framework',
+        props: {
+          placeholder: 'Choose a framework',
+          options: [
+            { value: 'angular', label: 'Angular' },
+            { value: 'react', label: 'React' },
+            { value: 'vue', label: 'Vue.js' },
+            { value: 'svelte', label: 'Svelte' },
+          ],
+        },
+      },
+      {
+        key: 'language',
+        type: 'select',
+        label: 'Language',
+        props: {
+          placeholder: 'Choose a language',
+          multiple: true,
+          options: [
+            { value: 'typescript', label: 'TypeScript' },
+            { value: 'javascript', label: 'JavaScript' },
+            { value: 'python', label: 'Python' },
+            { value: 'java', label: 'Java' },
+          ],
+        },
+      },
+    ],
+  };
+}

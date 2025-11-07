@@ -2,41 +2,12 @@
 @use '@ng-doc/app/styles/themes/dark.css';
 
 // ============================================
-// MATERIAL THEME
+// MATERIAL THEME (for docs UI only)
 // ============================================
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 // ============================================
-// PRIMENG THEME
+// IFRAME EXAMPLES
 // ============================================
-// Add PrimeNG theme imports here if needed
-
-// ============================================
-// IONIC THEME
-// ============================================
-// Add Ionic theme imports here if needed
-
-// ============================================
-// BOOTSTRAP THEME
-// ============================================
-@import 'bootstrap/dist/css/bootstrap.min.css';
-
-// ============================================
-// THEME ISOLATION
-// ============================================
-.theme-material {
-  // Material-specific overrides if needed
-}
-
-.theme-primeng {
-  // PrimeNG-specific overrides if needed
-}
-
-.theme-ionic {
-  // Ionic-specific overrides if needed
-}
-
-.theme-bootstrap {
-  // Bootstrap-specific overrides if needed
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
+// PrimeNG and Ionic examples are loaded via iframes
+// Their styles are isolated in their respective example apps

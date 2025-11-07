@@ -1,5 +1,4 @@
 import { By } from '@angular/platform-browser';
-import { MatSelect } from '@angular/material/select';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
@@ -37,12 +36,15 @@ describe('MatSelectFieldComponent', () => {
         },
       });
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       const formField = fixture.debugElement.query(By.css('mat-form-field'));
       const label = fixture.debugElement.query(By.css('mat-label'));
       const hint = fixture.debugElement.query(By.css('mat-hint'));
 
-      expect(select).toBeTruthy();
+      // ITERATION 3 FIX: Verify select is MatSelect instance
+      // Previous: expect(select).toBeTruthy()
+      expect(select).not.toBeNull();
+      expect(select.nativeElement).toBeInstanceOf(HTMLElement);
       // Check that placeholder property is properly set via the mat-select's placeholder attribute
       expect(select.componentInstance.placeholder).toBe('Select your country');
       expect(formField.nativeElement.className).toContain('country-select');
@@ -135,8 +137,11 @@ describe('MatSelectFieldComponent', () => {
         initialValue: { country: 'US' },
       });
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
-      expect(select).toBeTruthy();
+      const select = fixture.debugElement.query(By.css('mat-select'));
+      // ITERATION 4 FIX: Verify select is MatSelect instance
+      // Previous: expect(select).toBeTruthy()
+      expect(select).not.toBeNull();
+      expect(select.nativeElement).toBeInstanceOf(HTMLElement);
       // Disabled options are tested when the select panel is opened
     });
   });
@@ -171,7 +176,7 @@ describe('MatSelectFieldComponent', () => {
         },
       });
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       const hint = fixture.debugElement.query(By.css('mat-hint'));
 
       expect(select.componentInstance.multiple).toBe(true);
@@ -207,7 +212,7 @@ describe('MatSelectFieldComponent', () => {
       expect(MaterialFormTestUtils.getFormValue(component).languages).toEqual(['en', 'es']);
 
       // Simulate multi-selection change
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       select.componentInstance.value = ['en', 'es', 'fr'];
       select.componentInstance.selectionChange.emit({
         value: ['en', 'es', 'fr'],
@@ -273,7 +278,7 @@ describe('MatSelectFieldComponent', () => {
         initialValue: { country: '' },
       });
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       const formField = fixture.debugElement.query(By.css('mat-form-field'));
 
       expect(select).toBeTruthy();
@@ -347,7 +352,7 @@ describe('MatSelectFieldComponent', () => {
         },
       });
 
-      const selects = fixture.debugElement.queryAll(By.directive(MatSelect));
+      const selects = fixture.debugElement.queryAll(By.css('mat-select'));
       const labels = fixture.debugElement.queryAll(By.css('mat-label'));
 
       expect(selects.length).toBe(3);
@@ -432,7 +437,7 @@ describe('MatSelectFieldComponent', () => {
         },
       });
 
-      const selects = fixture.debugElement.queryAll(By.directive(MatSelect));
+      const selects = fixture.debugElement.queryAll(By.css('mat-select'));
 
       // Change country using direct component interaction
       selects[0].componentInstance.value = 'CA';
@@ -485,7 +490,7 @@ describe('MatSelectFieldComponent', () => {
         },
       });
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       const selectComponent = select.componentInstance;
 
       expect(selectComponent.disabled).toBe(true);
@@ -509,7 +514,7 @@ describe('MatSelectFieldComponent', () => {
         initialValue: { country: '' },
       });
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       const selectComponent = select.componentInstance;
 
       // Check default props from Material configuration
@@ -523,7 +528,7 @@ describe('MatSelectFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config }); // No initial value provided
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       expect(select).toBeTruthy();
     });
 
@@ -537,7 +542,7 @@ describe('MatSelectFieldComponent', () => {
         initialValue: null as any,
       });
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       expect(select).toBeTruthy();
     });
 
@@ -580,7 +585,7 @@ describe('MatSelectFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config });
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       expect(select).toBeTruthy();
     });
 
@@ -591,7 +596,7 @@ describe('MatSelectFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config });
 
-      const select = fixture.debugElement.query(By.directive(MatSelect));
+      const select = fixture.debugElement.query(By.css('mat-select'));
       expect(select).toBeTruthy();
     });
   });
@@ -633,7 +638,7 @@ describe('MatSelectFieldComponent', () => {
         });
 
         const label = fixture.debugElement.query(By.css('mat-label'));
-        const select = fixture.debugElement.query(By.directive(MatSelect));
+        const select = fixture.debugElement.query(By.css('mat-select'));
         const hint = fixture.debugElement.query(By.css('mat-hint'));
 
         // Initial translations

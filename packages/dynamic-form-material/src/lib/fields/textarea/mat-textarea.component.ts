@@ -28,7 +28,6 @@ import { AsyncPipe } from '@angular/common';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
-        [attr.maxlength]="props()?.maxLength || null"
         [attr.tabindex]="tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
