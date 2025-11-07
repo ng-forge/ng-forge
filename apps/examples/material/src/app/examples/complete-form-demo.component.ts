@@ -1,0 +1,170 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+
+@Component({
+  selector: 'example-complete-form-demo',
+  imports: [DynamicForm, JsonPipe],
+  template: `
+    <dynamic-form [config]="config" (submit)="onSubmit($event)" />
+    @if (submittedData) {
+    <div class="result">
+      <h4>Submitted Data:</h4>
+      <pre>{{ submittedData | json }}</pre>
+    </div>
+    }
+  `,
+  styles: `
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class CompleteFormDemoComponent {
+  submittedData: unknown = null;
+
+  config: FormConfig = {
+    fields: [
+      {
+        key: 'firstName',
+        type: 'input',
+        label: 'First Name',
+        value: '',
+        required: true,
+        props: {
+          placeholder: 'Your first name',
+        },
+      },
+      {
+        key: 'lastName',
+        type: 'input',
+        label: 'Last Name',
+        value: '',
+        required: true,
+        props: {
+          placeholder: 'Your last name',
+        },
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: 'Email Address',
+        value: '',
+        required: true,
+        email: true,
+        props: {
+          type: 'email',
+          placeholder: 'email@example.com',
+        },
+      },
+      {
+        key: 'phone',
+        type: 'input',
+        label: 'Phone Number',
+        value: '',
+        props: {
+          type: 'tel',
+          placeholder: '+1 (555) 000-0000',
+        },
+      },
+      {
+        key: 'birthDate',
+        type: 'datepicker',
+        label: 'Birth Date',
+        props: {
+          placeholder: 'Select your birth date',
+        },
+      },
+      {
+        key: 'bio',
+        type: 'textarea',
+        label: 'Biography',
+        value: '',
+        maxLength: 500,
+        props: {
+          rows: 4,
+          placeholder: 'Tell us about yourself',
+        },
+      },
+      {
+        key: 'country',
+        type: 'select',
+        label: 'Country',
+        props: {
+          placeholder: 'Select your country',
+          options: [
+            { value: 'us', label: 'United States' },
+            { value: 'uk', label: 'United Kingdom' },
+            { value: 'ca', label: 'Canada' },
+            { value: 'au', label: 'Australia' },
+          ],
+        },
+      },
+      {
+        key: 'plan',
+        type: 'radio',
+        label: 'Subscription Plan',
+        props: {
+          options: [
+            { value: 'free', label: 'Free' },
+            { value: 'pro', label: 'Pro' },
+            { value: 'enterprise', label: 'Enterprise' },
+          ],
+        },
+      },
+      {
+        key: 'interests',
+        type: 'multi-checkbox',
+        label: 'Interests',
+        props: {
+          options: [
+            { value: 'sports', label: 'Sports' },
+            { value: 'music', label: 'Music' },
+            { value: 'technology', label: 'Technology' },
+            { value: 'art', label: 'Art' },
+          ],
+        },
+      },
+      {
+        key: 'volume',
+        type: 'slider',
+        label: 'Notification Volume',
+        minValue: 0,
+        maxValue: 100,
+        step: 10,
+      },
+      {
+        key: 'darkMode',
+        type: 'toggle',
+        label: 'Dark Mode',
+      },
+      {
+        key: 'newsletter',
+        type: 'checkbox',
+        label: 'Subscribe to newsletter',
+      },
+      {
+        key: 'terms',
+        type: 'checkbox',
+        label: 'I agree to the terms and conditions',
+        required: true,
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Create Account',
+        props: {
+          color: 'primary',
+        },
+      },
+    ],
+  };
+
+  onSubmit(data: unknown) {
+    this.submittedData = data;
+  }
+}

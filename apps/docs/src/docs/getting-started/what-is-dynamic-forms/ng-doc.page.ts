@@ -1,5 +1,5 @@
 import { NgDocPage } from '@ng-doc/core';
-import { QuickStartDemoComponent } from '../examples/quick-start-demo.component';
+import { DemoFormPlayground } from './demo-form-playground.component';
 import GettingStartedCategory from '../ng-doc.category';
 
 const WhatIsDynamicFormsPage: NgDocPage = {
@@ -9,8 +9,8 @@ const WhatIsDynamicFormsPage: NgDocPage = {
   category: GettingStartedCategory,
   playgrounds: {
     DemoFormPlayground: {
-      target: QuickStartDemoComponent,
-      template: `<app-quick-start-demo />`,
+      target: DemoFormPlayground,
+      template: `<demo-form-playground />`,
     },
   },
 };

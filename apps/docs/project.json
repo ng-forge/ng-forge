@@ -115,6 +115,18 @@
         "staticFilePath": "dist/apps/docs/browser",
         "spa": true
       }
+    },
+    "serve-all": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx serve material-examples",
+          "nx serve ionic-examples",
+          "nx serve primeng-examples",
+          "npx wait-on http://localhost:4201 http://localhost:4202 http://localhost:4203 -t 60000 && nx serve docs"
+        ],
+        "parallel": true
+      }
     }
   }
 }

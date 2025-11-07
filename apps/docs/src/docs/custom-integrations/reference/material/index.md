@@ -33,7 +33,7 @@ Import Material theme:
 
 Text input with Material styling.
 
-{{ NgDocActions.demo("InputDemoComponent") }}
+{{ NgDocActions.demo("InputIframeDemoComponent") }}
 
 **Props:**
 
@@ -46,7 +46,7 @@ Text input with Material styling.
 
 Dropdown selection (single or multi-select).
 
-{{ NgDocActions.demo("SelectDemoComponent") }}
+{{ NgDocActions.demo("SelectIframeDemoComponent") }}
 
 **Props:**
 
@@ -58,7 +58,7 @@ Dropdown selection (single or multi-select).
 
 Boolean checkbox control.
 
-{{ NgDocActions.demo("CheckboxDemoComponent") }}
+{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
 
 **Props:**
 
@@ -69,7 +69,7 @@ Boolean checkbox control.
 
 Radio button group.
 
-{{ NgDocActions.demo("RadioDemoComponent") }}
+{{ NgDocActions.demo("RadioIframeDemoComponent") }}
 
 **Props:**
 
@@ -80,7 +80,7 @@ Radio button group.
 
 Multiple checkbox selection.
 
-{{ NgDocActions.demo("MultiCheckboxDemoComponent") }}
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
 
 **Props:**
 
@@ -91,7 +91,7 @@ Multiple checkbox selection.
 
 Slide toggle switch.
 
-{{ NgDocActions.demo("ToggleDemoComponent") }}
+{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
 
 **Props:**
 
@@ -102,7 +102,7 @@ Slide toggle switch.
 
 Multi-line text input.
 
-{{ NgDocActions.demo("TextareaDemoComponent") }}
+{{ NgDocActions.demo("TextareaIframeDemoComponent") }}
 
 **Field properties:**
 
@@ -121,7 +121,7 @@ Multi-line text input.
 
 Date selection with calendar popup.
 
-{{ NgDocActions.demo("DatepickerDemoComponent") }}
+{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
 
 **Field properties:**
 
@@ -142,7 +142,7 @@ Date selection with calendar popup.
 
 Numeric slider control.
 
-{{ NgDocActions.demo("SliderDemoComponent") }}
+{{ NgDocActions.demo("SliderIframeDemoComponent") }}
 
 **Field properties:**
 
@@ -161,7 +161,7 @@ Numeric slider control.
 
 Material provides multiple prebuilt button types for common form actions.
 
-{{ NgDocActions.demo("SubmitDemoComponent") }}
+{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
 
 #### Submit Button
 
@@ -359,25 +359,9 @@ actionButton({
 
 ## Comprehensive Examples
 
-### All Field Types
-
-{{ NgDocActions.demo("MaterialFieldTypesComponent") }}
-
-### Theming
-
-{{ NgDocActions.demo("MaterialThemingComponent") }}
-
-### Validation
-
-{{ NgDocActions.demo("MaterialValidationComponent") }}
-
-### Type-Safe Implementation
-
-{{ NgDocActions.demo("ControlFieldTypesDemoComponent") }}
-
 ### Complete Form
 
-{{ NgDocActions.demo("CompleteMaterialFormComponent") }}
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
 
 ## Type Safety
 

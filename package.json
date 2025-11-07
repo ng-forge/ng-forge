@@ -14,7 +14,7 @@
     "build:all:prod": "pnpm run build:libs && pnpm run build:docs:prod && pnpm run build:examples",
     "prepare:deploy": "node scripts/prepare-deploy.js",
     "deploy:prep": "pnpm run build:all:prod && pnpm run prepare:deploy",
-    "serve:all": "nx run-many -t serve -p docs,primeng-examples,ionic-examples --parallel=4",
+    "serve:all": "bash scripts/serve-with-examples.sh",
     "test": "nx run-many -t test",
     "test:ci": "nx run-many -t test --configuration=ci --coverage",
     "test:watch": "nx run-many -t test --watch",
@@ -94,7 +94,8 @@
     "verdaccio": "^6.0.5",
     "vite": "^7.1.11",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "wait-on": "^9.0.1"
   },
   "dependencies": {
     "@angular/animations": "21.0.0-next.9",

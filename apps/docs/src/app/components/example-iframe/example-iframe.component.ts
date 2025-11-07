@@ -25,7 +25,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     </div>
     @if (code()) {
     <details open>
-      <summary>View Code</summary>
+      <summary>View Config</summary>
       <pre><code>{{ code() }}</code></pre>
     </details>
     }
