@@ -3,7 +3,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicDatepickerFieldComponent', () => {
   describe('Basic Ionic Datepicker Integration', () => {
-    it.skip('should render datepicker with full configuration', async () => {
+    it('should render datepicker with full configuration', async () => {
       const today = new Date();
       const minDate = new Date(today.getFullYear() - 1, 0, 1);
       const maxDate = new Date(today.getFullYear() + 1, 11, 31);
@@ -46,7 +46,7 @@ describe('IonicDatepickerFieldComponent', () => {
       // //       expect(ionDatetime.nativeElement.getAttribute('ng-reflect-presentation')).toBe('date');
     });
 
-    it.skip('should handle date selection and update form value', async () => {
+    it('should handle date selection and update form value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicDatepickerField({
           key: 'appointmentDate',
@@ -122,7 +122,7 @@ describe('IonicDatepickerFieldComponent', () => {
       //       expect(ionDatetimes[2].nativeElement.getAttribute('ng-reflect-presentation')).toBe('time');
     });
 
-    it.skip('should display formatted date in input', async () => {
+    it('should display formatted date in input', async () => {
       const testDate = new Date(2024, 5, 15); // June 15, 2024
 
       const config = IonicFormTestUtils.builder()
@@ -160,8 +160,8 @@ describe('IonicDatepickerFieldComponent', () => {
     });
   });
 
-  describe.skip('Date Range Tests', () => {
-    it.skip('should handle min and max date constraints', async () => {
+  describe('Date Range Tests', () => {
+    it('should handle min and max date constraints', async () => {
       const minDate = new Date(2020, 0, 1);
       const maxDate = new Date(2025, 11, 31);
 
@@ -188,7 +188,7 @@ describe('IonicDatepickerFieldComponent', () => {
       expect(maxAttr).toBeTruthy();
     });
 
-    it.skip('should handle only min date constraint', async () => {
+    it('should handle only min date constraint', async () => {
       const minDate = new Date(2020, 0, 1);
 
       const config = IonicFormTestUtils.builder()
@@ -209,7 +209,7 @@ describe('IonicDatepickerFieldComponent', () => {
       expect(minAttr).toBeTruthy();
     });
 
-    it.skip('should handle only max date constraint', async () => {
+    it('should handle only max date constraint', async () => {
       const maxDate = new Date(2025, 11, 31);
 
       const config = IonicFormTestUtils.builder()
@@ -231,8 +231,8 @@ describe('IonicDatepickerFieldComponent', () => {
     });
   });
 
-  describe.skip('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'date',
@@ -251,7 +251,7 @@ describe('IonicDatepickerFieldComponent', () => {
       //       expect(ionInput.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
     });
 
-    it.skip('should apply required validation', async () => {
+    it('should apply required validation', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'mandatoryDate',
@@ -391,7 +391,7 @@ describe('IonicDatepickerFieldComponent', () => {
   });
 
   describe('Edge Cases and Robustness Tests', () => {
-    it.skip('should handle undefined initial value', async () => {
+    it('should handle undefined initial value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicDatepickerField({
           key: 'date',
@@ -405,7 +405,7 @@ describe('IonicDatepickerFieldComponent', () => {
       expect(ionInput).not.toBeNull();
     });
 
-    it.skip('should handle null form values gracefully', async () => {
+    it('should handle null form values gracefully', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicDatepickerField({
           key: 'date',
@@ -422,7 +422,7 @@ describe('IonicDatepickerFieldComponent', () => {
       expect(ionInput).not.toBeNull();
     });
 
-    it.skip('should display error messages when validation fails', async () => {
+    it('should display error messages when validation fails', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'date',
@@ -494,7 +494,7 @@ describe('IonicDatepickerFieldComponent', () => {
       expect(formValue.toDateString()).toBe(today.toDateString());
     });
 
-    it.skip('should handle modal open and close', async () => {
+    it('should handle modal open and close', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicDatepickerField({
           key: 'date',

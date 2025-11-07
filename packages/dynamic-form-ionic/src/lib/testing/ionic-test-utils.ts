@@ -166,8 +166,23 @@ export class IonicFormTestUtils {
    */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
+
+    // Flush effects critical for zoneless change detection
+    TestBed.flushEffects();
     fixture.detectChanges();
-    await delay(0);
+    await fixture.whenStable();
+
+    // Additional cycles for Ionic components to fully initialize
+    for (let i = 0; i < 2; i++) {
+      TestBed.flushEffects();
+      fixture.detectChanges();
+      await delay(0);
+    }
+
+    // Final stabilization
+    await fixture.whenStable();
+    TestBed.flushEffects();
+    fixture.detectChanges();
   }
 
   /**

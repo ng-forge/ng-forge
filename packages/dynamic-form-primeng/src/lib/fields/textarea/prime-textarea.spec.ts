@@ -3,7 +3,7 @@ import { By } from '@angular/platform-browser';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 
-describe.skip('PrimeTextareaFieldComponent', () => {
+describe('PrimeTextareaFieldComponent', () => {
   describe('Basic PrimeNG Textarea Integration', () => {
     it('should render textarea with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()

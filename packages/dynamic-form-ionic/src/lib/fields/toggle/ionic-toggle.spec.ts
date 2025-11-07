@@ -3,7 +3,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicToggleFieldComponent', () => {
   describe('Basic Ionic Toggle Integration', () => {
-    it.skip('should render toggle with full configuration', async () => {
+    it('should render toggle with full configuration', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicToggleField({
           key: 'notifications',
@@ -36,7 +36,7 @@ describe('IonicToggleFieldComponent', () => {
       //       expect(button).not.toBeNull();
     });
 
-    it.skip('should handle user toggle interaction and update form value', async () => {
+    it('should handle user toggle interaction and update form value', async () => {
       const config = IonicFormTestUtils.builder().ionicToggleField({ key: 'darkMode', label: 'Dark Mode' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -70,8 +70,8 @@ describe('IonicToggleFieldComponent', () => {
     });
   });
 
-  describe.skip('Toggle State Tests', () => {
-    it.skip('should toggle state correctly', async () => {
+  describe('Toggle State Tests', () => {
+    it('should toggle state correctly', async () => {
       const config = IonicFormTestUtils.builder().ionicToggleField({ key: 'feature', label: 'Enable Feature' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -91,7 +91,7 @@ describe('IonicToggleFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).feature).toBe(false);
     });
 
-    it.skip('should handle multiple toggles independently', async () => {
+    it('should handle multiple toggles independently', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicToggleField({ key: 'wifi', label: 'WiFi' })
         .ionicToggleField({ key: 'bluetooth', label: 'Bluetooth' })
@@ -122,8 +122,8 @@ describe('IonicToggleFieldComponent', () => {
     });
   });
 
-  describe.skip('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'feature',
@@ -142,7 +142,7 @@ describe('IonicToggleFieldComponent', () => {
       //       expect(button.nativeElement.disabled).toBe(true);
     });
 
-    it.skip('should apply required validation', async () => {
+    it('should apply required validation', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'acceptTerms',
@@ -239,8 +239,8 @@ describe('IonicToggleFieldComponent', () => {
     });
   });
 
-  describe.skip('Edge Cases and Robustness Tests', () => {
-    it.skip('should handle undefined initial value', async () => {
+  describe('Edge Cases and Robustness Tests', () => {
+    it('should handle undefined initial value', async () => {
       const config = IonicFormTestUtils.builder().ionicToggleField({ key: 'feature', label: 'Feature' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({ config });
@@ -249,7 +249,7 @@ describe('IonicToggleFieldComponent', () => {
       expect(ionToggle).not.toBeNull();
     });
 
-    it.skip('should handle null form values gracefully', async () => {
+    it('should handle null form values gracefully', async () => {
       const config = IonicFormTestUtils.builder().ionicToggleField({ key: 'feature', label: 'Feature' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({
@@ -261,7 +261,7 @@ describe('IonicToggleFieldComponent', () => {
       expect(ionToggle).not.toBeNull();
     });
 
-    it.skip('should display error messages when validation fails', async () => {
+    it('should display error messages when validation fails', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'acceptTerms',

@@ -3,7 +3,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicCheckboxFieldComponent', () => {
   describe('Basic Ionic Checkbox Integration', () => {
-    it.skip('should render checkbox with full configuration', async () => {
+    it('should render checkbox with full configuration', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicCheckboxField({
           key: 'agreeToTerms',
@@ -35,7 +35,7 @@ describe('IonicCheckboxFieldComponent', () => {
       //       expect(input.nativeElement.type).toBe('checkbox');
     });
 
-    it.skip('should handle user checkbox interaction and update form value', async () => {
+    it('should handle user checkbox interaction and update form value', async () => {
       const config = IonicFormTestUtils.builder().ionicCheckboxField({ key: 'agreeToTerms', label: 'Agree' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -69,8 +69,8 @@ describe('IonicCheckboxFieldComponent', () => {
     });
   });
 
-  describe.skip('Checkbox State Tests', () => {
-    it.skip('should toggle checkbox state correctly', async () => {
+  describe('Checkbox State Tests', () => {
+    it('should toggle checkbox state correctly', async () => {
       const config = IonicFormTestUtils.builder().ionicCheckboxField({ key: 'subscribe', label: 'Subscribe to newsletter' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -90,7 +90,7 @@ describe('IonicCheckboxFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).subscribe).toBe(false);
     });
 
-    it.skip('should handle multiple checkboxes independently', async () => {
+    it('should handle multiple checkboxes independently', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicCheckboxField({ key: 'option1', label: 'Option 1' })
         .ionicCheckboxField({ key: 'option2', label: 'Option 2' })
@@ -121,8 +121,8 @@ describe('IonicCheckboxFieldComponent', () => {
     });
   });
 
-  describe.skip('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'agreeToTerms',
@@ -141,7 +141,7 @@ describe('IonicCheckboxFieldComponent', () => {
       //       expect(input.nativeElement.disabled).toBe(true);
     });
 
-    it.skip('should apply required validation', async () => {
+    it('should apply required validation', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'agreeToTerms',
@@ -224,8 +224,8 @@ describe('IonicCheckboxFieldComponent', () => {
     });
   });
 
-  describe.skip('Edge Cases and Robustness Tests', () => {
-    it.skip('should handle undefined initial value', async () => {
+  describe('Edge Cases and Robustness Tests', () => {
+    it('should handle undefined initial value', async () => {
       const config = IonicFormTestUtils.builder().ionicCheckboxField({ key: 'agreeToTerms', label: 'Agree' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({ config });
@@ -234,7 +234,7 @@ describe('IonicCheckboxFieldComponent', () => {
       expect(ionCheckbox).not.toBeNull();
     });
 
-    it.skip('should handle null form values gracefully', async () => {
+    it('should handle null form values gracefully', async () => {
       const config = IonicFormTestUtils.builder().ionicCheckboxField({ key: 'agreeToTerms', label: 'Agree' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({
@@ -246,7 +246,7 @@ describe('IonicCheckboxFieldComponent', () => {
       expect(ionCheckbox).not.toBeNull();
     });
 
-    it.skip('should display error messages when validation fails', async () => {
+    it('should display error messages when validation fails', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'agreeToTerms',

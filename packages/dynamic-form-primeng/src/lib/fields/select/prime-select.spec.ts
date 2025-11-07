@@ -586,7 +586,7 @@ describe('PrimeSelectFieldComponent', () => {
 
   describe('Dynamic Text Support', () => {
     describe('Translation Service Integration', () => {
-      it.skip('should handle translation service with dynamic language updates for labels and options', async () => {
+      it('should handle translation service with dynamic language updates for labels and options', async () => {
         const translationService = createTestTranslationService({
           'form.country.label': 'Country',
           'form.country.placeholder': 'Select your country',

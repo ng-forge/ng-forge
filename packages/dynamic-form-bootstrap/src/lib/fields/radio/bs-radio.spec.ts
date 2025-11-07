@@ -2,7 +2,7 @@ import { By } from '@angular/platform-browser';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { BootstrapFormTestUtils } from '../../testing/bootstrap-test-utils';
 
-describe.skip('BsRadioFieldComponent', () => {
+describe('BsRadioFieldComponent', () => {
   describe('Basic Bootstrap Radio Integration', () => {
     it('should render radio group with full configuration', async () => {
       const config = BootstrapFormTestUtils.builder()
@@ -421,7 +421,7 @@ describe.skip('BsRadioFieldComponent', () => {
     // Note: Initial value reflection is tested through external value changes test
     // which properly handles the signal-based forms initialization sequence
 
-    it.skip('should handle independent radio group interactions', async () => {
+    it('should handle independent radio group interactions', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsRadioField({
           key: 'gender',
@@ -548,7 +548,7 @@ describe.skip('BsRadioFieldComponent', () => {
       expect(radioInputs.length).toBe(1);
     });
 
-    it.skip('should handle programmatic value updates correctly', async () => {
+    it('should handle programmatic value updates correctly', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsRadioField({
           key: 'preference',

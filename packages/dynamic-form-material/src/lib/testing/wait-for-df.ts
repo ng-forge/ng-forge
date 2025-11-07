@@ -1,4 +1,4 @@
-import { ComponentFixture } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DynamicForm } from '@ng-forge/dynamic-form';
 import { firstValueFrom } from 'rxjs';
 
@@ -20,6 +20,8 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
   // Wait for the form to be initialized (all definitions created and bound)
   await firstValueFrom(component.initialized$);
 
+  // Flush effects to ensure all reactive updates are processed (zoneless mode)
+  TestBed.flushEffects();
   fixture.detectChanges();
 
   // Wait for all field components to actually render in the DOM
@@ -41,8 +43,10 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempt
   let stableCount = 0;
 
   for (let i = 0; i < maxAttempts; i++) {
+    TestBed.flushEffects();
     fixture.detectChanges();
     await fixture.whenStable();
+    TestBed.flushEffects();
     fixture.detectChanges();
 
     // Check for field components and Material components

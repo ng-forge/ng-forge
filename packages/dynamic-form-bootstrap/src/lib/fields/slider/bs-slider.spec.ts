@@ -2,9 +2,9 @@ import { By } from '@angular/platform-browser';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { BootstrapFormTestUtils } from '../../testing/bootstrap-test-utils';
 
-describe.skip('BsSliderFieldComponent', () => {
+describe('BsSliderFieldComponent', () => {
   describe('Basic Bootstrap Slider Integration', () => {
-    it.skip('should render volume slider with full configuration', async () => {
+    it('should render volume slider with full configuration', async () => {
       const config = BootstrapFormTestUtils.builder()
         .field({
           key: 'volume',
@@ -115,7 +115,7 @@ describe.skip('BsSliderFieldComponent', () => {
   });
 
   describe('Different Slider Configurations Integration', () => {
-    it.skip('should render various slider configurations with correct attributes', async () => {
+    it('should render various slider configurations with correct attributes', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsSliderField({ key: 'volume', minValue: 0, maxValue: 100, step: 1 })
         .bsSliderField({ key: 'brightness', minValue: 0, maxValue: 255, step: 5 })
@@ -457,7 +457,7 @@ describe.skip('BsSliderFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component).volume).toBe(0);
     });
 
-    it.skip('should handle negative values correctly', async () => {
+    it('should handle negative values correctly', async () => {
       const config = BootstrapFormTestUtils.builder().bsSliderField({ key: 'temperature', minValue: -20, maxValue: 40 }).build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({

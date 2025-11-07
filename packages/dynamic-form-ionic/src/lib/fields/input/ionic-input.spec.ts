@@ -3,7 +3,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicInputFieldComponent', () => {
   describe('Basic Ionic Input Integration', () => {
-    it.skip('should render email input with full configuration', async () => {
+    it('should render email input with full configuration', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicInputField({
           key: 'email',
@@ -39,7 +39,7 @@ describe('IonicInputFieldComponent', () => {
       //       expect(input.nativeElement.tagName.toLowerCase()).toBe('input');
     });
 
-    it.skip('should handle user input and update form value', async () => {
+    it('should handle user input and update form value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicInputField({ key: 'email', props: { fill: 'outline' } })
         .build();
@@ -76,7 +76,7 @@ describe('IonicInputFieldComponent', () => {
   });
 
   describe('Different Input Types Integration', () => {
-    it.skip('should render various input types with correct attributes', async () => {
+    it('should render various input types with correct attributes', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicInputField({ key: 'firstName' })
         .ionicInputField({ key: 'password', props: { fill: 'outline' } })
@@ -100,7 +100,7 @@ describe('IonicInputFieldComponent', () => {
       expect(ionInputs[4]).not.toBeNull();
     });
 
-    it.skip('should handle number input value changes', async () => {
+    it('should handle number input value changes', async () => {
       const config = IonicFormTestUtils.builder().ionicInputField({ key: 'age' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -166,7 +166,7 @@ describe('IonicInputFieldComponent', () => {
       //       expect(ionInput.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('stacked');
     });
 
-    it.skip('should not display helper text when not provided', async () => {
+    it('should not display helper text when not provided', async () => {
       const config = IonicFormTestUtils.builder().ionicInputField({ key: 'firstName' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({
@@ -180,8 +180,8 @@ describe('IonicInputFieldComponent', () => {
     });
   });
 
-  describe.skip('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'firstName',
@@ -216,7 +216,7 @@ describe('IonicInputFieldComponent', () => {
       //       expect(ionInputs[1].nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
     });
 
-    it.skip('should handle multiple inputs with independent value changes', async () => {
+    it('should handle multiple inputs with independent value changes', async () => {
       const config = IonicFormTestUtils.builder().ionicInputField({ key: 'firstName' }).ionicInputField({ key: 'email' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -248,7 +248,7 @@ describe('IonicInputFieldComponent', () => {
   });
 
   describe('Edge Cases and Robustness Tests', () => {
-    it.skip('should handle undefined form values gracefully', async () => {
+    it('should handle undefined form values gracefully', async () => {
       const config = IonicFormTestUtils.builder().ionicInputField({ key: 'firstName' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({ config }); // No initial value
@@ -258,7 +258,7 @@ describe('IonicInputFieldComponent', () => {
       expect(ionInput.nativeElement.tagName.toLowerCase()).toBe('ion-input');
     });
 
-    it.skip('should handle null form values gracefully', async () => {
+    it('should handle null form values gracefully', async () => {
       const config = IonicFormTestUtils.builder().ionicInputField({ key: 'firstName' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({
@@ -282,7 +282,7 @@ describe('IonicInputFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).firstName).toBe('');
     });
 
-    it.skip('should handle special characters and unicode input', async () => {
+    it('should handle special characters and unicode input', async () => {
       const config = IonicFormTestUtils.builder().ionicInputField({ key: 'firstName' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -298,7 +298,7 @@ describe('IonicInputFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).firstName).toBe(specialText);
     });
 
-    it.skip('should handle rapid value changes correctly', async () => {
+    it('should handle rapid value changes correctly', async () => {
       const config = IonicFormTestUtils.builder().ionicInputField({ key: 'firstName' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({

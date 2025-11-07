@@ -3,7 +3,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicSliderFieldComponent', () => {
   describe('Basic Ionic Slider Integration', () => {
-    it.skip('should render slider with full configuration', async () => {
+    it('should render slider with full configuration', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSliderField({
           key: 'volume',
@@ -41,7 +41,7 @@ describe('IonicSliderFieldComponent', () => {
       expect(ionRange.nativeElement.getAttribute('tabindex')).toBe('1');
     });
 
-    it.skip('should handle user slider interaction and update form value', async () => {
+    it('should handle user slider interaction and update form value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSliderField({
           key: 'brightness',
@@ -159,8 +159,8 @@ describe('IonicSliderFieldComponent', () => {
     });
   });
 
-  describe.skip('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'slider',
@@ -183,7 +183,7 @@ describe('IonicSliderFieldComponent', () => {
       expect(ionRange).not.toBeNull();
     });
 
-    it.skip('should apply required validation', async () => {
+    it('should apply required validation', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'rating',
@@ -354,7 +354,7 @@ describe('IonicSliderFieldComponent', () => {
   });
 
   describe('Edge Cases and Robustness Tests', () => {
-    it.skip('should handle undefined initial value', async () => {
+    it('should handle undefined initial value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSliderField({
           key: 'volume',
@@ -371,7 +371,7 @@ describe('IonicSliderFieldComponent', () => {
       expect(ionRange).not.toBeNull();
     });
 
-    it.skip('should handle null form values gracefully', async () => {
+    it('should handle null form values gracefully', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSliderField({
           key: 'volume',
@@ -429,7 +429,7 @@ describe('IonicSliderFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).temperature).toBe(-25);
     });
 
-    it.skip('should display error messages when validation fails', async () => {
+    it('should display error messages when validation fails', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'rating',

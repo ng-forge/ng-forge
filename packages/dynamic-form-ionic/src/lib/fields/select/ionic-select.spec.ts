@@ -3,7 +3,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicSelectFieldComponent', () => {
   describe('Basic Ionic Select Integration', () => {
-    it.skip('should render select with full configuration', async () => {
+    it('should render select with full configuration', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSelectField({
           key: 'country',
@@ -44,7 +44,7 @@ describe('IonicSelectFieldComponent', () => {
       expect(ionSelectOptions.length).toBe(3);
     });
 
-    it.skip('should handle user select and update form value', async () => {
+    it('should handle user select and update form value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSelectField({
           key: 'fruit',
@@ -100,7 +100,7 @@ describe('IonicSelectFieldComponent', () => {
     });
   });
 
-  describe.skip('Multiple Selection Tests', () => {
+  describe('Multiple Selection Tests', () => {
     it('should handle multiple selection mode', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSelectField({
@@ -155,7 +155,7 @@ describe('IonicSelectFieldComponent', () => {
   });
 
   describe('Option Configuration Tests', () => {
-    it.skip('should render all options correctly', async () => {
+    it('should render all options correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSelectField({
           key: 'color',
@@ -227,8 +227,8 @@ describe('IonicSelectFieldComponent', () => {
     });
   });
 
-  describe.skip('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'country',
@@ -254,7 +254,7 @@ describe('IonicSelectFieldComponent', () => {
       }
     });
 
-    it.skip('should apply required validation', async () => {
+    it('should apply required validation', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'country',
@@ -388,7 +388,7 @@ describe('IonicSelectFieldComponent', () => {
   });
 
   describe('Edge Cases and Robustness Tests', () => {
-    it.skip('should handle undefined initial value', async () => {
+    it('should handle undefined initial value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSelectField({
           key: 'option',
@@ -406,7 +406,7 @@ describe('IonicSelectFieldComponent', () => {
       expect(ionSelect).not.toBeNull();
     });
 
-    it.skip('should handle null form values gracefully', async () => {
+    it('should handle null form values gracefully', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSelectField({
           key: 'option',
@@ -448,7 +448,7 @@ describe('IonicSelectFieldComponent', () => {
       expect(ionSelectOptions.length).toBe(0);
     });
 
-    it.skip('should display error messages when validation fails', async () => {
+    it('should display error messages when validation fails', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'option',
@@ -477,7 +477,7 @@ describe('IonicSelectFieldComponent', () => {
       //       expect(errorComponent).not.toBeNull();
     });
 
-    it.skip('should handle rapid selection changes', async () => {
+    it('should handle rapid selection changes', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSelectField({
           key: 'option',

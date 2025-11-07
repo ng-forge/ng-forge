@@ -244,12 +244,23 @@ export class DynamicFormTestUtils {
       fixture.detectChanges();
     });
 
-    // Additional change detection cycles to ensure all components are fully rendered
-    // Field components are dynamically created and may need multiple cycles
-    for (let i = 0; i < 3; i++) {
+    // Flush all pending effects (critical for zoneless change detection)
+    TestBed.flushEffects();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    // Additional cycles to ensure all dynamic components and their effects are processed
+    // In zoneless mode, effects may trigger additional effects that need time to settle
+    for (let i = 0; i < 2; i++) {
+      TestBed.flushEffects();
       fixture.detectChanges();
-      await delay(10);
+      await delay(0);
     }
+
+    // Final stabilization
+    await fixture.whenStable();
+    TestBed.flushEffects();
+    fixture.detectChanges();
   }
 
   /**

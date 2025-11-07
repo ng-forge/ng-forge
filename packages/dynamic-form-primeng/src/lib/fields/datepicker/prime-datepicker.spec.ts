@@ -4,7 +4,7 @@ import { createTestTranslationService } from '../../testing/fake-translation.ser
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 import { DatePicker } from 'primeng/datepicker';
 
-describe.skip('PrimeDatepickerFieldComponent', () => {
+describe('PrimeDatepickerFieldComponent', () => {
   describe('Basic PrimeNG Datepicker Integration', () => {
     it('should render datepicker with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()
