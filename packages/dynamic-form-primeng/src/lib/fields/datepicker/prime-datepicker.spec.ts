@@ -41,7 +41,7 @@ describe('PrimeDatepickerFieldComponent', () => {
       const calendarInput = fixture.debugElement.query(By.css('p-calendar input'));
       const fieldWrapper = fixture.debugElement.query(By.css('df-prime-datepicker'));
       const label = fixture.debugElement.query(By.css('label'));
-      const hint = fixture.debugElement.query(By.css('small.p-hint'));
+      const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
       expect(calendar).toBeTruthy();
       expect(calendarInput.nativeElement.getAttribute('placeholder')).toBe('Select your birth date');
@@ -158,7 +158,7 @@ describe('PrimeDatepickerFieldComponent', () => {
         initialValue: { startDate: null },
       });
 
-      const hint = fixture.debugElement.query(By.css('small.p-hint'));
+      const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
       expect(hint).toBeNull();
     });
   });
@@ -361,7 +361,7 @@ describe('PrimeDatepickerFieldComponent', () => {
       });
 
       const calendar = fixture.debugElement.query(By.directive(DatePicker));
-      const hint = fixture.debugElement.query(By.css('small.p-hint'));
+      const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
       expect(calendar).toBeTruthy();
       expect(hint.nativeElement.textContent.trim()).toBe('Select date between 2020 and 2025');
@@ -498,7 +498,7 @@ describe('PrimeDatepickerFieldComponent', () => {
 
         const label = fixture.debugElement.query(By.css('label'));
         const calendarInput = fixture.debugElement.query(By.css('p-calendar input'));
-        const hint = fixture.debugElement.query(By.css('small.p-hint'));
+        const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
         // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Birth Date');
