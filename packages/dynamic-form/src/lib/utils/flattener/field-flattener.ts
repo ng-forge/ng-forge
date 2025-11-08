@@ -10,7 +10,7 @@ import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-t
  *
  * @public
  */
-export interface FlattenedField extends FieldDef<Record<string, unknown>> {
+export interface FlattenedField extends FieldDef<any> {
   /** Guaranteed non-empty key for form binding and field identification */
   readonly key: string;
 }
@@ -74,7 +74,7 @@ export interface FlattenedField extends FieldDef<Record<string, unknown>> {
  *
  * @public
  */
-export function flattenFields(fields: FieldDef<Record<string, unknown>>[], registry: Map<string, FieldTypeDefinition>): FlattenedField[] {
+export function flattenFields(fields: FieldDef<any>[], registry: Map<string, FieldTypeDefinition>): FlattenedField[] {
   const result: FlattenedField[] = [];
   let autoKeyCounter = 0;
 
@@ -87,13 +87,13 @@ export function flattenFields(fields: FieldDef<Record<string, unknown>>[], regis
         // Handle both array (page/row fields) and object (group fields)
         // Type assertion: fields can be unknown[] from container field generics, but we know they're FieldDef[]
         const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-        const flattenedChildren = flattenFields(fieldsArray as FieldDef<Record<string, unknown>>[], registry);
+        const flattenedChildren = flattenFields(fieldsArray as FieldDef<any>[], registry);
         result.push(...flattenedChildren);
       }
     } else if (isGroupField(field)) {
       // Groups always maintain their structure (even if they have 'include' handling)
       // Type assertion: After isGroupField guard, we know fields contains FieldDef instances
-      const childFieldsArray = Object.values(field.fields) as FieldDef<Record<string, unknown>>[];
+      const childFieldsArray = Object.values(field.fields) as FieldDef<any>[];
       const flattenedChildren = flattenFields(childFieldsArray, registry);
 
       // Add only the group field with its flattened children, not the children separately

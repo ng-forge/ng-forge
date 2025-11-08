@@ -32,7 +32,7 @@ export type ValueHandlingMode = 'include' | 'exclude' | 'flatten';
  * provideDynamicForm(CustomInputType)
  * ```
  */
-export interface FieldTypeDefinition<T extends FieldDef<Record<string, unknown>> = any> {
+export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   /** Unique identifier for the field type */
   name: string;
   /** Field definition type marker (internal use) */

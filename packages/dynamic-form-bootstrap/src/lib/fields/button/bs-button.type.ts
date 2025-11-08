@@ -1,6 +1,6 @@
 import { ButtonField, FieldComponent, FieldDef, FormEvent } from '@ng-forge/dynamic-form';
 
-export interface BsButtonProps extends Record<string, unknown> {
+export interface BsButtonProps {
   variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'link';
   outline?: boolean;
   size?: 'sm' | 'lg';

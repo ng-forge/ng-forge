@@ -1,6 +1,6 @@
-import { DynamicText, InputField, ValueFieldComponent } from '@ng-forge/dynamic-form';
+import { DynamicText, InputField, InputProps, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface PrimeInputProps extends Record<string, unknown> {
+export interface PrimeInputProps extends InputProps {
   /**
    * CSS class to apply to the input element.
    */
@@ -20,7 +20,7 @@ export interface PrimeInputProps extends Record<string, unknown> {
   /**
    * Type of the input element.
    */
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
 }
 
 export type PrimeInputField = InputField<PrimeInputProps>;

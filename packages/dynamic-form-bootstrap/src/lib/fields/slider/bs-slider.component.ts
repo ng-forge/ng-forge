@@ -1,11 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import {
-  DynamicText, DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { BsSliderComponent, BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -26,19 +21,15 @@ import { AsyncPipe } from '@angular/common';
       </label>
       }
 
-      <input type="range" [field]="f" [id]="key()" [step]="props()?.step ?? 1" [attr.tabindex]="tabIndex()" class="form-range" />
+      <input type="range" [field]="f" [id]="key()" [attr.tabindex]="tabIndex()" class="form-range" />
 
       @if (props()?.helpText; as helpText) {
       <div class="form-text">
         {{ helpText | dynamicText | async }}
       </div>
-      }
-
-      @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <div class="invalid-feedback d-block">{{ error.message }}</div>
-      }
-    }
+      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
+      } }
     </div>
   `,
   styles: [

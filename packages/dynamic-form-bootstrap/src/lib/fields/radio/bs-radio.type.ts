@@ -1,7 +1,6 @@
 import { DynamicText, RadioField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface BsRadioProps<T> extends Record<string, unknown> {
+export interface BsRadioProps {
   inline?: boolean;
   reverse?: boolean;
   buttonGroup?: boolean;
@@ -9,6 +8,6 @@ export interface BsRadioProps<T> extends Record<string, unknown> {
   helpText?: DynamicText;
 }
 
-export type BsRadioField<T> = RadioField<T, BsRadioProps<T>>;
+export type BsRadioField<T> = RadioField<T, BsRadioProps>;
 
 export type BsRadioComponent<T> = ValueFieldComponent<BsRadioField<T>>;

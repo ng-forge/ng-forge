@@ -18,12 +18,12 @@ import { isArray } from 'lodash-es';
  * export class MyFormComponent {
  *   constructor(private eventBus: EventBus) {
  *     // Subscribe to form submission events
- *     this.eventBus.subscribe('submit').subscribe(() => {
+ *     this.eventBus.on(SubmitEvent).subscribe(() => {
  *       console.log('Form was submitted');
  *     });
  *
  *     // Subscribe to multiple event types
- *     this.eventBus.subscribe(['submit', 'reset']).subscribe(event => {
+ *     this.eventBus.on([SubmitEvent, ResetEvent]).subscribe(event => {
  *       console.log('Form event:', event.type);
  *     });
  *   }
@@ -68,14 +68,14 @@ export class EventBus {
    * @param eventType - The type of event to subscribe to
    * @returns Observable that emits events of the specified type
    */
-  subscribe<T extends FormEvent>(eventType: T['type']): Observable<T>;
+  on<T extends FormEvent>(eventType: T['type']): Observable<T>;
   /**
    * Subscribes to events of multiple types.
    *
    * @param eventType - Array of event types to subscribe to
    * @returns Observable that emits events matching any of the specified types
    */
-  subscribe<T extends FormEvent>(eventType: Array<T['type']>): Observable<T>;
+  on<T extends FormEvent>(eventType: Array<T['type']>): Observable<T>;
   /**
    * Subscribes to form events with type-safe filtering.
    *
@@ -88,7 +88,7 @@ export class EventBus {
    * @example
    * ```typescript
    * // Subscribe to a single event type
-   * eventBus.subscribe('submit').subscribe(event => {
+   * eventBus.on(SubmitEvent).subscribe(event => {
    *   console.log('Submit event received');
    * });
    *
@@ -108,7 +108,7 @@ export class EventBus {
    * });
    * ```
    */
-  subscribe<T extends FormEvent>(eventType: T['type'] | Array<T['type']>): Observable<T> {
+  on<T extends FormEvent>(eventType: T['type'] | Array<T['type']>): Observable<T> {
     if (isArray(eventType)) {
       return this.pipeline$.pipe(filter((event): event is T => eventType.includes(event.type)));
     }

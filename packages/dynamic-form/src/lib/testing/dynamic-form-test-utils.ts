@@ -79,20 +79,20 @@ export class FormConfigBuilder {
     });
   }
 
-  rowField(key: string, fields: FieldDef<Record<string, unknown>>[]): FormConfigBuilder {
+  rowField(key: string, fields: FieldDef<any>[]): FormConfigBuilder {
     return this.field({
       key,
       type: 'row',
       fields,
-    } as FieldDef<Record<string, unknown>>);
+    } as FieldDef<any>);
   }
 
-  groupField(key: string, fields: FieldDef<Record<string, unknown>>[]): FormConfigBuilder {
+  groupField(key: string, fields: FieldDef<any>[]): FormConfigBuilder {
     return this.field({
       key,
       type: 'group',
       fields,
-    } as FieldDef<Record<string, unknown>>);
+    } as FieldDef<any>);
   }
 
   buttonField(key: string, props?: Record<string, unknown>): FormConfigBuilder {
@@ -104,13 +104,13 @@ export class FormConfigBuilder {
     });
   }
 
-  pageField(key: string, fields: FieldDef<Record<string, unknown>>[], title?: string): FormConfigBuilder {
+  pageField(key: string, fields: FieldDef<any>[], title?: string): FormConfigBuilder {
     return this.field({
       key,
       type: 'page',
       title,
       fields,
-    } as FieldDef<Record<string, unknown>>);
+    } as FieldDef<any>);
   }
 
   build(): FormConfig {
@@ -163,7 +163,7 @@ export class DynamicFormTestUtils {
    */
   static registerTestFields(fieldRegistry: ReturnType<typeof injectFieldRegistry>): void {
     // Input field mapper that extends value field mapper
-    const inputMapper = (fieldDef: FieldDef<Record<string, unknown>>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
+    const inputMapper = (fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
       const bindings = valueFieldMapper(fieldDef, options);
 
       // Add input-specific bindings
@@ -176,7 +176,7 @@ export class DynamicFormTestUtils {
     };
 
     // Select field mapper that extends value field mapper
-    const selectMapper = (fieldDef: FieldDef<Record<string, unknown>>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
+    const selectMapper = (fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
       const bindings = valueFieldMapper(fieldDef, options);
 
       // Add select-specific bindings - options should be at root level
@@ -186,12 +186,12 @@ export class DynamicFormTestUtils {
     };
 
     // Checkbox field mapper - uses checked instead of value
-    const checkboxMapper = (fieldDef: FieldDef<Record<string, unknown>>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
+    const checkboxMapper = (fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
       return checkboxFieldMapper(fieldDef, options);
     };
 
     // Button field mapper that extends value field mapper
-    const buttonMapper = (fieldDef: FieldDef<Record<string, unknown>>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
+    const buttonMapper = (fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
       return valueFieldMapper(fieldDef, options);
     };
 

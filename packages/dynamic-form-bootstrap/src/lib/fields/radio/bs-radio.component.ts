@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import {
-  DynamicText, DynamicTextPipe, FieldOption,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
   ValidationMessages,
   createResolvedErrorsSignal,
   shouldShowErrors,
@@ -56,13 +58,9 @@ import { FormsModule } from '@angular/forms';
       </div>
       } } @if (props()?.helpText; as helpText) {
       <div class="form-text">{{ helpText | dynamicText | async }}</div>
-      }
-
-      @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <div class="invalid-feedback d-block">{{ error.message }}</div>
-      }
-    }
+      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
+      } }
     </div>
   `,
   styles: [
@@ -90,5 +88,5 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
   readonly tabIndex = input<number>();
 
   readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<BsRadioProps<T>>();
+  readonly props = input<BsRadioProps>();
 }

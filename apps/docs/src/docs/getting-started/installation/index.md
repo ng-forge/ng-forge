@@ -150,17 +150,14 @@ See [Ionic Integration](../../ui-libs-integrations/reference/ionic) for status a
 You can also build your own field components using any UI library or custom styling:
 
 ```typescript
-import { withFieldTypes } from '@ng-forge/dynamic-form';
 import { MyCustomInputComponent } from './my-custom-input.component';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideDynamicForm(
-      withFieldTypes([
-        { name: 'input', loadComponent: () => MyCustomInputComponent },
-        // ... more custom field types
-      ])
-    ),
+    provideDynamicForm([
+      { name: 'input', loadComponent: () => MyCustomInputComponent },
+      // ... more custom field types
+    ]),
   ],
 };
 ```

@@ -1,11 +1,11 @@
 import { BaseValueField } from '../base';
+import { DynamicText } from '../../models';
 
 type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
 
-type InputProps = {
-  type: InputType;
-};
-
-export interface InputField<TProps extends Record<string, unknown> = InputProps> extends BaseValueField<TProps, string> {
-  type: 'input';
+export interface InputProps {
+  type?: InputType;
+  placeholder?: DynamicText;
 }
+
+export type InputField<TProps = InputProps> = BaseValueField<TProps, string>;

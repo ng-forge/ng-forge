@@ -1,65 +1,62 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import '@ng-forge/dynamic-form-ionic';
+import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'example-select-demo',
-  imports: [DynamicForm, JsonPipe, IonContent, IonHeader, IonTitle, IonToolbar],
+  imports: [DynamicForm, JsonPipe, IonContent],
   host: {
     class: 'example-container',
   },
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Select Example</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content>
       <div>
-        <dynamic-form [config]="config" [(value)]="formOutput" />
-        <h4>Form Data:</h4>
-        <pre>{{ formOutput() | json }}</pre>
+        <dynamic-form [config]="config" [(value)]="formValue" />
+        <div class="example-result">
+          <h4>Form Data:</h4>
+          <pre>{{ formValue() | json }}</pre>
+        </div>
       </div>
     </ion-content>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectDemoComponent {
-  formOutput = signal({});
+  formValue = signal({});
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'framework',
         type: 'select',
         label: 'Framework',
+        options: [
+          { value: 'angular', label: 'Angular' },
+          { value: 'react', label: 'React' },
+          { value: 'vue', label: 'Vue.js' },
+          { value: 'svelte', label: 'Svelte' },
+        ],
         props: {
           placeholder: 'Choose a framework',
-          options: [
-            { value: 'angular', label: 'Angular' },
-            { value: 'react', label: 'React' },
-            { value: 'vue', label: 'Vue.js' },
-            { value: 'svelte', label: 'Svelte' },
-          ],
         },
       },
       {
         key: 'language',
         type: 'select',
         label: 'Language',
+        options: [
+          { value: 'typescript', label: 'TypeScript' },
+          { value: 'javascript', label: 'JavaScript' },
+          { value: 'python', label: 'Python' },
+          { value: 'java', label: 'Java' },
+        ],
         props: {
           placeholder: 'Choose a language',
           multiple: true,
-          options: [
-            { value: 'typescript', label: 'TypeScript' },
-            { value: 'javascript', label: 'JavaScript' },
-            { value: 'python', label: 'Python' },
-            { value: 'java', label: 'Java' },
-          ],
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 }

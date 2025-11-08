@@ -1,6 +1,6 @@
-import { DynamicText, InputField, ValueFieldComponent } from '@ng-forge/dynamic-form';
+import { DynamicText, InputField, InputProps, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface IonicInputProps extends Record<string, unknown> {
+export interface IonicInputProps extends InputProps {
   fill?: 'solid' | 'outline';
   shape?: 'round';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
@@ -10,7 +10,7 @@ export interface IonicInputProps extends Record<string, unknown> {
   counter?: boolean;
   maxlength?: number;
   clearInput?: boolean;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date' | 'time';
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
 }
 
 export type IonicInputField = InputField<IonicInputProps>;

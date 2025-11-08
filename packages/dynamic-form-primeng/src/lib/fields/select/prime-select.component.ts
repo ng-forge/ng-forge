@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import {
-  DynamicText, DynamicTextPipe, FieldOption,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
   ValidationMessages,
   createResolvedErrorsSignal,
   shouldShowErrors,
@@ -24,7 +26,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
       <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       } @if (isMultiple()) {
       <p-multiSelect
-        [(ngModel)]="f().value"
+        [field]="f"
         [inputId]="key()"
         [options]="options()"
         optionLabel="label"
@@ -37,7 +39,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
       />
       } @else {
       <p-select
-        [(ngModel)]="f().value"
+        [field]="f"
         [inputId]="key()"
         [options]="options()"
         optionLabel="label"
@@ -48,13 +50,9 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [styleClass]="props()?.styleClass ?? ''"
         [disabled]="f().disabled()"
       />
-      }
-
-      @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <small class="p-error">{{ error.message }}</small>
-      }
-    }
+      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      <small class="p-error">{{ error.message }}</small>
+      } }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,7 +73,11 @@ export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponen
   readonly tabIndex = input<number>();
 
   readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<PrimeSelectProps<T>>();
+  readonly props = input<PrimeSelectProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   readonly isMultiple = computed(() => this.props()?.multiple ?? false);
 }

@@ -1,7 +1,7 @@
 import { DynamicText, MultiCheckboxField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 import { ThemePalette } from '@angular/material/core';
 
-export interface MatMultiCheckboxProps extends Record<string, unknown> {
+export interface MatMultiCheckboxProps {
   disableRipple?: boolean;
   tabIndex?: number;
   hint?: DynamicText;

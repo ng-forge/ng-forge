@@ -71,10 +71,9 @@ export const personalInfoConfig = {
         },
         {
           key: 'dateOfBirth',
-          type: 'input',
+          type: 'datepicker',
           label: 'Date of Birth',
           props: {
-            type: 'date',
             appearance: 'outline',
           },
           required: true,

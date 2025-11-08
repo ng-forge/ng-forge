@@ -1,11 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import {
-  DynamicText, DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { TextareaModule } from 'primeng/textarea';
@@ -23,6 +18,7 @@ import { FormsModule } from '@angular/forms';
       <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
+      <!-- TODO: integrate with field when subscribe to control is fixed -->
       <textarea
         pInputTextarea
         [id]="inputId()"
@@ -39,13 +35,9 @@ import { FormsModule } from '@angular/forms';
 
       @if (props()?.hint; as hint) {
       <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
-      }
-
-      @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <small class="p-error">{{ error.message }}</small>
-      }
-    }
+      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      <small class="p-error">{{ error.message }}</small>
+      } }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,6 +55,10 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeTextareaProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   readonly inputId = computed(() => `${this.key()}-textarea`);
 }

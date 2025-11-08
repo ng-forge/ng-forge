@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import '@ng-forge/dynamic-form-material';
 
 @Component({
   selector: 'example-input-demo',
@@ -9,20 +10,18 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
     class: 'example-container',
   },
   template: `
-    <dynamic-form [config]="config" (submit)="onSubmit($event)" />
-    @if (submittedData) {
+    <dynamic-form [config]="config" [(value)]="formValue" />
     <div class="example-result">
-      <h4>Submitted Data:</h4>
-      <pre>{{ submittedData | json }}</pre>
+      <h4>Form Data:</h4>
+      <pre>{{ formValue() | json }}</pre>
     </div>
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputDemoComponent {
-  submittedData: unknown = null;
+  formValue = signal({});
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'email',
@@ -47,15 +46,6 @@ export class InputDemoComponent {
           placeholder: 'Choose a username',
         },
       },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Submit',
-      },
     ],
-  };
-
-  onSubmit(data: unknown) {
-    this.submittedData = data;
-  }
+  } as const satisfies FormConfig;
 }

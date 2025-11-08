@@ -1,6 +1,6 @@
 import { DynamicText, SliderField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface BsSliderProps extends Record<string, unknown> {
+export interface BsSliderProps {
   showValue?: boolean;
   valuePrefix?: string;
   valueSuffix?: string;

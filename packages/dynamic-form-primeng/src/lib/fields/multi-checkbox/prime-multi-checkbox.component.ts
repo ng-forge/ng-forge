@@ -3,7 +3,10 @@ import { FieldTree } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
 import { Checkbox } from 'primeng/checkbox';
 import {
-  DynamicText, DynamicTextPipe, FieldOption, ValueType,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  ValueType,
   ValidationMessages,
   createResolvedErrorsSignal,
   shouldShowErrors,
@@ -40,13 +43,9 @@ import { AsyncPipe } from '@angular/common';
     </div>
     @if (props()?.hint; as hint) {
     <small class="p-hint">{{ hint | dynamicText | async }}</small>
-    }
-
-    @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <small class="p-error">{{ error.message }}</small>
-      }
-    }
+    } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    <small class="p-error">{{ error.message }}</small>
+    } }
   `,
   styles: [
     `
@@ -80,7 +79,7 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
   readonly tabIndex = input<number>();
 
   readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<PrimeMultiCheckboxProps<T>>();
+  readonly props = input<PrimeMultiCheckboxProps>();
 
   valueViewModel = linkedSignal<T[]>(() => this.field()().value(), { equal: isEqual });
 

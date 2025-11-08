@@ -1,12 +1,12 @@
 import { BaseValueField } from '../base';
+import { DynamicText } from '../../models';
 
-type TextareaProps = {
+export interface TextareaProps {
+  placeholder?: DynamicText;
   rows?: number;
   cols?: number | undefined;
-};
+}
 
-export interface TextareaField<TProps extends Record<string, unknown> = TextareaProps> extends BaseValueField<TProps, string> {
-  type: 'textarea';
-
+export interface TextareaField<TProps = TextareaProps> extends BaseValueField<TProps, string> {
   maxLength?: number | undefined;
 }

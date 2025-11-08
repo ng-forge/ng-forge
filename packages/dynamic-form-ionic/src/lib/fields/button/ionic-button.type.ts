@@ -1,6 +1,6 @@
 import { ButtonField, FieldComponent, FieldDef, FormEvent } from '@ng-forge/dynamic-form';
 
-export interface IonicButtonProps extends Record<string, unknown> {
+export interface IonicButtonProps {
   expand?: 'full' | 'block';
   fill?: 'clear' | 'outline' | 'solid' | 'default';
   shape?: 'round';

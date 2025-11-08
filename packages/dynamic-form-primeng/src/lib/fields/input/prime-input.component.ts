@@ -1,11 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import {
-  DynamicText, DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
@@ -29,7 +24,7 @@ import { FormsModule } from '@angular/forms';
       <input
         pInputText
         [id]="inputId()"
-        [(ngModel)]="f().value"
+        [field]="f"
         [attr.type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
@@ -39,13 +34,9 @@ import { FormsModule } from '@angular/forms';
 
       @if (props()?.hint; as hint) {
       <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
-      }
-
-      @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <small class="p-error">{{ error.message }}</small>
-      }
-    }
+      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      <small class="p-error">{{ error.message }}</small>
+      } }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,6 +55,10 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeInputProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   readonly inputClasses = computed(() => {
     const classes: string[] = [];

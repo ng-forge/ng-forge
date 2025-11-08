@@ -1,12 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
-import {
-  DynamicText, DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { PrimeCheckboxComponent, PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -20,15 +15,13 @@ import { FormsModule } from '@angular/forms';
 
     <div class="flex items-center">
       <p-checkbox
-        [(ngModel)]="f().value"
-        [disabled]="f().disabled()"
+        [field]="f"
         [inputId]="checkboxId"
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
         [styleClass]="props()?.styleClass"
         [attr.tabindex]="tabIndex()"
-        [attr.hidden]="f().hidden() || null"
       />
       @if (label(); as labelText) {
       <label [for]="checkboxId" class="ml-2">{{ labelText | dynamicText | async }}</label>
@@ -37,12 +30,9 @@ import { FormsModule } from '@angular/forms';
 
     @if (props()?.hint; as hint) {
     <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
-    }
-    @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <small class="p-error">{{ error.message }}</small>
-      }
-    }
+    } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    <small class="p-error">{{ error.message }}</small>
+    } }
   `,
   styles: [
     `

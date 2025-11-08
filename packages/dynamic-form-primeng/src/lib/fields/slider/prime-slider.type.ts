@@ -1,6 +1,6 @@
 import { DynamicText, SliderField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface PrimeSliderProps extends Record<string, unknown> {
+export interface PrimeSliderProps {
   /**
    * Minimum value of the slider.
    */

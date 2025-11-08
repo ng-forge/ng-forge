@@ -51,10 +51,4 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
-  {
-    files: ['**/no-augmentation/**/*.ts'],
-    rules: {
-      '@nx/enforce-module-boundaries': 'off',
-    },
-  },
 ];

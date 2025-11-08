@@ -87,7 +87,7 @@ export class PageOrchestratorComponent {
   /**
    * Emitted when page changes
    */
-  readonly pageChanged = outputFromObservable(this.eventBus.subscribe<PageChangeEvent>('page-change').pipe(map((event) => event)));
+  readonly pageChanged = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change').pipe(map((event) => event)));
 
   /**
    * Emitted when navigation state changes
@@ -237,7 +237,7 @@ export class PageOrchestratorComponent {
   private setupEventListeners(): void {
     // Listen for next page events
     this.eventBus
-      .subscribe<NextPageEvent>('next-page')
+      .on<NextPageEvent>('next-page')
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
         this.navigateToNextPage();
@@ -245,7 +245,7 @@ export class PageOrchestratorComponent {
 
     // Listen for previous page events
     this.eventBus
-      .subscribe<PreviousPageEvent>('previous-page')
+      .on<PreviousPageEvent>('previous-page')
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
         this.navigateToPreviousPage();

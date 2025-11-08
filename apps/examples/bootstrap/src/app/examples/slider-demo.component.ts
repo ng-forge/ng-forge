@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
@@ -9,30 +9,28 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
     class: 'example-container',
   },
   template: `
-    <dynamic-form [config]="config" (submit)="onSubmit($event)" />
-    @if (submittedData) {
+    <dynamic-form [config]="config" [(value)]="formValue" />
     <div class="example-result">
-      <h4>Submitted Data:</h4>
-      <pre>{{ submittedData | json }}</pre>
+      <h4>Form Data:</h4>
+      <pre>{{ formValue() | json }}</pre>
     </div>
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SliderDemoComponent {
-  submittedData: unknown = null;
+  formValue = signal({});
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'volume',
         type: 'slider',
         label: 'Volume',
         value: 50,
+        min: 0,
+        max: 100,
+        step: 1,
         props: {
-          min: 0,
-          max: 100,
-          step: 1,
           showValue: true,
           valueSuffix: '%',
           helpText: 'Adjust the volume level',
@@ -43,10 +41,10 @@ export class SliderDemoComponent {
         type: 'slider',
         label: 'Temperature',
         value: 20,
+        min: -10,
+        max: 40,
+        step: 0.5,
         props: {
-          min: -10,
-          max: 40,
-          step: 0.5,
           showValue: true,
           valueSuffix: '°C',
           helpText: 'Set temperature',
@@ -57,10 +55,10 @@ export class SliderDemoComponent {
         type: 'slider',
         label: 'Years of Experience',
         value: 5,
+        min: 0,
+        max: 20,
+        step: 1,
         props: {
-          min: 0,
-          max: 20,
-          step: 1,
           showValue: true,
           valueSuffix: ' years',
           helpText: 'Drag to select your experience',
@@ -71,26 +69,14 @@ export class SliderDemoComponent {
         type: 'slider',
         label: 'Brightness',
         value: 75,
+        min: 0,
+        max: 100,
+        step: 5,
         props: {
-          min: 0,
-          max: 100,
-          step: 5,
           showValue: true,
           valueSuffix: '%',
         },
       },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Submit',
-        props: {
-          variant: 'primary',
-        },
-      },
     ],
-  };
-
-  onSubmit(data: unknown) {
-    this.submittedData = data;
-  }
+  } as const satisfies FormConfig;
 }
