@@ -1,4 +1,4 @@
-import { isSignal, Signal, Injector } from '@angular/core';
+import { isSignal, Injector } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { isObservable, Observable, of } from 'rxjs';
 import { DynamicText } from '../models/types/dynamic-text';
@@ -11,10 +11,7 @@ import { DynamicText } from '../models/types/dynamic-text';
  * @param injector - Optional injector for signal conversion
  * @returns Observable<string> - The value as an observable stream
  */
-export function dynamicTextToObservable(
-  value: DynamicText | undefined,
-  injector?: Injector
-): Observable<string> {
+export function dynamicTextToObservable(value: DynamicText | undefined, injector?: Injector): Observable<string> {
   if (value === undefined) {
     return of('');
   }
