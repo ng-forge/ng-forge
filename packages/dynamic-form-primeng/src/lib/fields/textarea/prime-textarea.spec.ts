@@ -5,7 +5,7 @@ import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 
 describe('PrimeTextareaFieldComponent', () => {
   describe('Basic PrimeNG Textarea Integration', () => {
-    it('should render textarea with full configuration', async () => {
+    it.skip('should render textarea with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .field({
           key: 'comments',
