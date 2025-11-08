@@ -1,7 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
 @use '@angular/material' as mat;
-@import '../../_shared-example-styles';
+@import '../../_shared-example-styles.scss';
 
 @include mat.core();
 
