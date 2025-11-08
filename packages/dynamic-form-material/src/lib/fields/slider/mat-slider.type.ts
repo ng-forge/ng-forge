@@ -8,6 +8,7 @@ export interface MatSliderProps {
   thumbLabel?: boolean;
   showThumbLabel?: boolean;
   tickInterval?: number | 'auto';
+  step?: number;
 }
 
 export type MatSliderField = SliderField<MatSliderProps>;
