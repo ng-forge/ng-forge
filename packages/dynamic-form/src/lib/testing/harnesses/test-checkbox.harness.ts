@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
+import { ValidationMessages } from '../../models/validation-types';
 
 @Component({
   selector: 'df-test-checkbox',
@@ -15,4 +16,5 @@ export default class TestCheckboxHarness {
   readonly label = input<string>('');
   readonly props = input<Record<string, any>>({});
   readonly className = input<string>('');
+  readonly validationMessages = input<ValidationMessages>();
 }

@@ -1,4 +1,4 @@
-import { Signal, Injector, inject } from '@angular/core';
+import { Signal, Injector, inject, computed } from '@angular/core';
 import { FieldTree, ValidationError } from '@angular/forms/signals';
 import { derivedFrom } from 'ngxtension/derived-from';
 import { combineLatest, of, Observable } from 'rxjs';
@@ -39,29 +39,39 @@ export function createResolvedErrorsSignal<T>(
 ): Signal<ResolvedError[]> {
   const _injector = injector ?? inject(Injector);
 
-  // derivedFrom accepts signals directly!
-  return derivedFrom(
-    { field, validationMessages },
-    switchMap(({ field: fieldTree, validationMessages: messages }) => {
-      const control = fieldTree();
-      const errors = control.errors();
+  // Lazy initialization - derivedFrom is only created when first accessed
+  // This avoids NG0950 errors when trying to read inputs during construction
+  let cachedSignal: Signal<ResolvedError[]> | undefined;
 
-      // No errors - return empty array
-      if (!errors || errors.length === 0) {
-        return of([]);
-      }
+  return computed(() => {
+    // Initialize derivedFrom on first access (when inputs are available)
+    if (!cachedSignal) {
+      cachedSignal = derivedFrom(
+        { field, validationMessages },
+        switchMap(({ field: fieldTree, validationMessages: messages }) => {
+          const control = fieldTree();
+          const errors = control.errors();
 
-      // Create observable for each error's resolved message
-      const errorResolvers = errors.map((error: ValidationError) => resolveErrorMessage(error, messages, _injector));
+          // No errors - return empty array
+          if (!errors || errors.length === 0) {
+            return of([]);
+          }
 
-      // Combine all error message observables into single array emission
-      return errorResolvers.length > 0 ? combineLatest(errorResolvers) : of([]);
-    }),
-    {
-      initialValue: [],
-      injector: _injector,
+          // Create observable for each error's resolved message
+          const errorResolvers = errors.map((error: ValidationError) => resolveErrorMessage(error, messages, _injector));
+
+          // Combine all error message observables into single array emission
+          return errorResolvers.length > 0 ? combineLatest(errorResolvers) : of([]);
+        }),
+        {
+          initialValue: [],
+          injector: _injector,
+        }
+      ) as Signal<ResolvedError[]>;
     }
-  ) as Signal<ResolvedError[]>;
+
+    return cachedSignal();
+  });
 }
 
 /**
