@@ -24,7 +24,7 @@ import { Slider } from 'primeng/slider';
       <p-slider
         [id]="key()"
         [field]="f"
-        [step]="props()?.step ?? step()"
+        [step]="props()?.step ?? 1"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
         [attr.tabindex]="tabIndex()"
@@ -53,10 +53,6 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
   readonly placeholder = input<DynamicText>();
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
-
-  readonly minValue = input<number>(0);
-  readonly maxValue = input<number>(100);
-  readonly step = input<number>(1);
 
   readonly props = input<PrimeSliderProps>();
 }

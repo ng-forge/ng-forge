@@ -33,4 +33,5 @@ export interface PrimeSliderProps extends Record<string, unknown> {
 
 export type PrimeSliderField = SliderField<PrimeSliderProps>;
 
-export type PrimeSliderComponent = ValueFieldComponent<PrimeSliderField>;
+// Exclude minValue, maxValue, step from component interface since they're handled by Field directive metadata
+export type PrimeSliderComponent = Omit<ValueFieldComponent<PrimeSliderField>, 'minValue' | 'maxValue' | 'step'>;
