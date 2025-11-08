@@ -13,8 +13,5 @@ import './types/registry-augmentation';
 // Providers
 export { withPrimeNGFields } from './providers/primeng-providers';
 
-// Shared components
-export { PrimeErrorsComponent } from './shared/prime-errors.component';
-
 // Testing utilities
 export * from './testing';

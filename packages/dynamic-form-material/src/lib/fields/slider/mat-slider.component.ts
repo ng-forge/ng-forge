@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -28,7 +28,7 @@ import { AsyncPipe } from '@angular/common';
 
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint | dynamicText | async }}</div>
-    } (showErrors()) { (error of resolvedErrors(); track error.kind) {
+    } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
     <mat-error>{{ error.message }}</mat-error>
     } }
   `,

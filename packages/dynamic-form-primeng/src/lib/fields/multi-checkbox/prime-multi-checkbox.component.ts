@@ -80,6 +80,10 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<PrimeMultiCheckboxProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   valueViewModel = linkedSignal<T[]>(() => this.field()().value(), { equal: isEqual });
 

@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonRadioGroup, IonRadio, IonItem } from '@ionic/angular/standalone';
+import { IonRadioGroup, IonRadio, IonItem, IonNote } from '@ionic/angular/standalone';
 import {
-  DynamicText, DynamicTextPipe, FieldOption,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
   ValidationMessages,
   createResolvedErrorsSignal,
   shouldShowErrors,
@@ -15,18 +17,13 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-radio',
-  imports: [IonRadioGroup, IonRadio, IonItem, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonRadioGroup, IonRadio, IonItem, IonNote, Field, DynamicTextPipe, AsyncPipe],
   template: `
-    @let f = field();
-
-    @if (label(); as label) {
+    @let f = field(); @if (label(); as label) {
     <div class="radio-label">{{ label | dynamicText | async }}</div>
     }
 
-    <ion-radio-group
-      [field]="f"
-      [compareWith]="props()?.compareWith || defaultCompare"
-    >
+    <ion-radio-group [field]="f" [compareWith]="props()?.compareWith || defaultCompare">
       @for (option of options(); track option.value) {
       <ion-item [lines]="'none'">
         <ion-radio
@@ -42,11 +39,9 @@ import { AsyncPipe } from '@angular/common';
       }
     </ion-radio-group>
 
-    @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <ion-note color="danger">{{ error.message }}</ion-note>
-      }
-    }
+    @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    <ion-note color="danger">{{ error.message }}</ion-note>
+    } }
   `,
   styles: [
     `
@@ -85,6 +80,10 @@ export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<
   readonly tabIndex = input<number>();
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<IonicRadioProps<T>>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   defaultCompare = Object.is;
 }

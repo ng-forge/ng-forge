@@ -1,11 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, ElementRef, input, viewChild } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import {
-  DynamicText, DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { BsCheckboxComponent, BsCheckboxProps } from './bs-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -42,13 +37,9 @@ import { AsyncPipe } from '@angular/common';
     <div class="form-text" [attr.hidden]="f().hidden() || null">
       {{ helpText | dynamicText | async }}
     </div>
-    }
-
-    @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <div class="invalid-feedback d-block">{{ error.message }}</div>
-      }
-    }
+    } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    <div class="invalid-feedback d-block">{{ error.message }}</div>
+    } }
   `,
   styles: [
     `
@@ -77,6 +68,10 @@ export default class BsCheckboxFieldComponent implements BsCheckboxComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<BsCheckboxProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   readonly checkboxInput = viewChild<ElementRef<HTMLInputElement>>('checkboxInput');
 

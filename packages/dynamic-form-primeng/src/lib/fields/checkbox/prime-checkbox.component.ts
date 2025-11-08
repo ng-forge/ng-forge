@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
 import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { PrimeCheckboxComponent, PrimeCheckboxProps } from './prime-checkbox.type';
@@ -15,7 +15,7 @@ import { FormsModule } from '@angular/forms';
 
     <div class="flex items-center">
       <p-checkbox
-        [field]="f"
+        [(ngModel)]="f().value"
         [inputId]="checkboxId"
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"

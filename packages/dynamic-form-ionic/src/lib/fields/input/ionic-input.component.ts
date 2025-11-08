@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonInput } from '@ionic/angular/standalone';
+import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
@@ -10,7 +10,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-input',
-  imports: [IonInput, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonInput, IonNote, Field, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 

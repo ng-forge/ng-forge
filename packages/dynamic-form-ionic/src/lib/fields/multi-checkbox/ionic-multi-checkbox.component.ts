@@ -1,8 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { IonCheckbox, IonItem, IonLabel } from '@ionic/angular/standalone';
+import { IonCheckbox, IonItem, IonLabel, IonNote } from '@ionic/angular/standalone';
 import {
-  DynamicText, DynamicTextPipe, FieldOption, ValueType,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  ValueType,
   ValidationMessages,
   createResolvedErrorsSignal,
   shouldShowErrors,
@@ -18,35 +21,32 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-multi-checkbox',
-  imports: [IonCheckbox, IonItem, IonLabel, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],
+  imports: [IonCheckbox, IonItem, IonLabel, IonNote, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],
   template: `
-    @let f = field();
-    @if (label(); as label) {
-      <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
+    @let f = field(); @if (label(); as label) {
+    <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
     <div class="checkbox-group">
       @for (option of options(); track option.value) {
-        <ion-item lines="none">
-          <ion-checkbox
-            [checked]="option | inArray : valueViewModel()"
-            [disabled]="f().disabled() || option.disabled"
-            [labelPlacement]="props()?.labelPlacement ?? 'end'"
-            [justify]="props()?.justify ?? 'start'"
-            [color]="props()?.color ?? 'primary'"
-            (ionChange)="onCheckboxChange(option, $event.detail.checked)"
-          >
-            {{ option.label | dynamicText | async }}
-          </ion-checkbox>
-        </ion-item>
+      <ion-item lines="none">
+        <ion-checkbox
+          [checked]="option | inArray : valueViewModel()"
+          [disabled]="f().disabled() || option.disabled"
+          [labelPlacement]="props()?.labelPlacement ?? 'end'"
+          [justify]="props()?.justify ?? 'start'"
+          [color]="props()?.color ?? 'primary'"
+          (ionChange)="onCheckboxChange(option, $event.detail.checked)"
+        >
+          {{ option.label | dynamicText | async }}
+        </ion-checkbox>
+      </ion-item>
       }
     </div>
 
-    @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <ion-note color="danger">{{ error.message }}</ion-note>
-      }
-    }
+    @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    <ion-note color="danger">{{ error.message }}</ion-note>
+    } }
   `,
   styles: [
     `
@@ -96,6 +96,10 @@ export default class IonicMultiCheckboxFieldComponent<T extends ValueType> imple
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<IonicMultiCheckboxProps<T>>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   valueViewModel = linkedSignal<FieldOption<T>[]>(
     () => {

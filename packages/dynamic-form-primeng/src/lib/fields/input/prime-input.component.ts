@@ -24,7 +24,7 @@ import { FormsModule } from '@angular/forms';
       <input
         pInputText
         [id]="inputId()"
-        [field]="f"
+        [(ngModel)]="f().value"
         [attr.type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"

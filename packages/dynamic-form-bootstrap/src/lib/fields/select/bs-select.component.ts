@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import {
-  DynamicText, DynamicTextPipe, FieldOption,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
   ValidationMessages,
   createResolvedErrorsSignal,
   shouldShowErrors,
@@ -42,13 +44,9 @@ import { AsyncPipe } from '@angular/common';
 
       @if (props()?.helpText; as helpText) {
       <div class="form-text" [id]="key() + '-help'">{{ helpText | dynamicText | async }}</div>
-      }
-
-      @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <div class="invalid-feedback d-block">{{ error.message }}</div>
-      }
-    }
+      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
+      } }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,6 +68,10 @@ export default class BsSelectFieldComponent<T extends string> implements BsSelec
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<BsSelectProps<T>>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   defaultCompare = Object.is;
 

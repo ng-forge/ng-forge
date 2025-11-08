@@ -26,7 +26,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
       <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       } @if (isMultiple()) {
       <p-multiSelect
-        [field]="f"
+        [(ngModel)]="f().value"
         [inputId]="key()"
         [options]="options()"
         optionLabel="label"
@@ -39,7 +39,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
       />
       } @else {
       <p-select
-        [field]="f"
+        [(ngModel)]="f().value"
         [inputId]="key()"
         [options]="options()"
         optionLabel="label"

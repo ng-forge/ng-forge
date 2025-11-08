@@ -1,12 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonToggle } from '@ionic/angular/standalone';
-import {
-  DynamicText, DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { IonToggle, IonNote } from '@ionic/angular/standalone';
+import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { IonicToggleComponent, IonicToggleProps } from './ionic-toggle.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -15,7 +10,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-toggle',
-  imports: [IonToggle, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonToggle, IonNote, Field, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -30,11 +25,9 @@ import { AsyncPipe } from '@angular/common';
       {{ label() | dynamicText | async }}
     </ion-toggle>
 
-    @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <ion-note color="danger">{{ error.message }}</ion-note>
-      }
-    }
+    @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    <ion-note color="danger">{{ error.message }}</ion-note>
+    } }
   `,
   styles: [
     `

@@ -23,7 +23,7 @@ import { FormsModule } from '@angular/forms';
 
       <p-toggleSwitch
         [id]="key()"
-        [field]="f"
+        [(ngModel)]="f().value"
         [attr.tabindex]="tabIndex()"
         [trueValue]="true"
         [falseValue]="false"

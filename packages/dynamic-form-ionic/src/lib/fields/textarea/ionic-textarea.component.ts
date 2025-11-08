@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonTextarea } from '@ionic/angular/standalone';
+import { IonTextarea, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { IonicTextareaComponent, IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
@@ -10,7 +10,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-textarea',
-  imports: [IonTextarea, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonTextarea, IonNote, Field, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
