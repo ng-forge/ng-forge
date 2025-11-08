@@ -1,11 +1,15 @@
-# ng-forge
+# Ng-Forge Dynamic Forms
 
 **Stop writing repetitive form code.** Build type-safe, dynamic Angular forms in minutes, not hours.
 
 [![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-form.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **📖 [View Documentation](./internal/)** • Get started quickly with our comprehensive guides: [Quick Start](./internal/QUICK_START_GUIDE.md) • [Getting Started](./internal/GETTING_STARTED.md) • [API Reference](./internal/API_REFERENCE.md) • [Technical Architecture](./internal/TECHNICAL_ARCHITECTURE.md)
+**📖 [View Documentation](https://ng-forge.github.io/ng-forge/)**
+
+Get started quickly with our comprehensive guides:
+• [Getting Started](https://ng-forge.github.io/ng-forge/getting-started/installation)
+• [API Reference](https://ng-forge.github.io/ng-forge/api)
 
 ng-forge dynamic forms is a modern forms library for Angular 21+ that eliminates boilerplate while providing full type safety, validation, and conditional logic - all powered by Angular's signal forms.
 
