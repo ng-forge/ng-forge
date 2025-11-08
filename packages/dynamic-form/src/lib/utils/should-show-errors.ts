@@ -8,9 +8,10 @@ import { FieldTree } from '@angular/forms/signals';
  * @param field - Signal containing FieldTree
  * @returns Signal<boolean> - True if errors should be displayed
  */
-export function shouldShowErrors(field: Signal<FieldTree>): Signal<boolean> {
+export function shouldShowErrors<T>(field: Signal<FieldTree<T>>): Signal<boolean> {
   return computed(() => {
-    const f = field();
-    return f.invalid() && f.touched() && f.errors().length > 0;
+    const fieldTree = field();
+    const control = fieldTree();
+    return control.invalid() && control.touched() && control.errors().length > 0;
   });
 }

@@ -1,7 +1,15 @@
 import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText, DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-form';
+import {
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  ValueType,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -33,13 +41,9 @@ import { AsyncPipe } from '@angular/common';
 
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint | dynamicText | async }}</div>
-    }
-
-     (showErrors()) {
-       (error of resolvedErrors(); track error.kind) {
-        <mat-error>{{ error.message }}</mat-error>
-      }
-    }
+    } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    <mat-error>{{ error.message }}</mat-error>
+    } }
   `,
   styles: [
     `

@@ -32,8 +32,8 @@ export interface ResolvedError {
  * );
  * ```
  */
-export function createResolvedErrorsSignal(
-  field: Signal<FieldTree>,
+export function createResolvedErrorsSignal<T>(
+  field: Signal<FieldTree<T>>,
   validationMessages: Signal<ValidationMessages | undefined>,
   injector?: Injector
 ): Signal<ResolvedError[]> {
@@ -42,8 +42,9 @@ export function createResolvedErrorsSignal(
   // derivedFrom accepts signals directly!
   return derivedFrom(
     { field, validationMessages },
-    switchMap(({ field: fieldValue, validationMessages: messages }) => {
-      const errors = fieldValue.errors();
+    switchMap(({ field: fieldTree, validationMessages: messages }) => {
+      const control = fieldTree();
+      const errors = control.errors();
 
       // No errors - return empty array
       if (!errors || errors.length === 0) {
@@ -51,9 +52,7 @@ export function createResolvedErrorsSignal(
       }
 
       // Create observable for each error's resolved message
-      const errorResolvers = errors.map((error) =>
-        resolveErrorMessage(error, messages, _injector)
-      );
+      const errorResolvers = errors.map((error: ValidationError) => resolveErrorMessage(error, messages, _injector));
 
       // Combine all error message observables into single array emission
       return errorResolvers.length > 0 ? combineLatest(errorResolvers) : of([]);
@@ -62,7 +61,7 @@ export function createResolvedErrorsSignal(
       initialValue: [],
       injector: _injector,
     }
-  );
+  ) as Signal<ResolvedError[]>;
 }
 
 /**
@@ -78,9 +77,7 @@ function resolveErrorMessage(
   const customMessage = messages?.[error.kind];
 
   // Convert DynamicText to Observable
-  const messageObservable = customMessage
-    ? dynamicTextToObservable(customMessage, injector)
-    : of(error.message || 'Validation error');
+  const messageObservable = customMessage ? dynamicTextToObservable(customMessage, injector) : of(error.message || 'Validation error');
 
   // Apply parameter interpolation
   return messageObservable.pipe(
