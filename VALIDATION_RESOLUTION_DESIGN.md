@@ -81,7 +81,6 @@ function extractErrorParams(error: ValidationError): Record<string, unknown> {
 ```typescript
 // packages/dynamic-form/src/lib/utils/create-resolved-errors-signal.ts
 import { Signal, Injector, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree, ValidationError } from '@angular/forms/signals';
 import { derivedFrom } from 'ngxtension/derived-from';
 import { combineLatest, of } from 'rxjs';
@@ -101,7 +100,7 @@ export interface ResolvedError {
  *
  * @param field - Signal containing FieldTree
  * @param validationMessages - Signal containing custom validation messages
- * @param injector - Optional injector for signal conversion
+ * @param injector - Optional injector for DynamicText resolution
  * @returns Signal<ResolvedError[]> - Reactively resolved error messages
  */
 export function createResolvedErrorsSignal(
@@ -111,12 +110,10 @@ export function createResolvedErrorsSignal(
 ): Signal<ResolvedError[]> {
   const _injector = injector ?? inject(Injector);
 
+  // derivedFrom accepts signals directly!
   return derivedFrom(
-    {
-      field: toObservable(field, { injector: _injector }),
-      messages: toObservable(validationMessages, { injector: _injector }),
-    },
-    switchMap(({ field: fieldValue, messages }) => {
+    { field, validationMessages },
+    switchMap(({ field: fieldValue, validationMessages: messages }) => {
       const errors = fieldValue.errors();
 
       // No errors - return empty array
