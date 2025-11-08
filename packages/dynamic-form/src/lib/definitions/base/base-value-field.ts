@@ -35,6 +35,9 @@ type ExcludedKeys =
   | 'readonly'
   | 'hidden'
   | 'col'
+  | 'minValue'
+  | 'maxValue'
+  | 'step'
   | keyof FieldWithValidation;
 
 export type ValueFieldComponent<T extends BaseValueField<any, unknown>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

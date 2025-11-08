@@ -5,6 +5,9 @@ export interface MatSliderProps {
   hint?: DynamicText;
   color?: 'primary' | 'accent' | 'warn';
   appearance?: MatFormFieldAppearance;
+  thumbLabel?: boolean;
+  showThumbLabel?: boolean;
+  tickInterval?: number | 'auto';
 }
 
 export type MatSliderField = SliderField<MatSliderProps>;

@@ -6,6 +6,7 @@ import { checkboxFieldMapper, valueFieldMapper } from './mappers';
 import { BUILT_IN_FIELDS } from './providers/built-in-fields';
 import { BaseCheckedField, BaseValueField } from './definitions';
 import { DebugElement } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 // Test specific form config type
 type TestFormConfig = {
@@ -1732,21 +1733,13 @@ describe('DynamicFormComponent', () => {
 
       const { component, fixture } = createComponent(config);
 
-      let initializationEmitted = false;
-      let emissionTime: number;
-      component.initialized.subscribe(() => {
-        initializationEmitted = true;
-        emissionTime = Date.now();
-      });
-
-      const startTime = Date.now();
+      const initializationPromise = firstValueFrom(component.initialized$);
 
       await delay();
       fixture.detectChanges();
 
-      expect(initializationEmitted).toBe(true);
-      // Verify it emitted after async components loaded
-      expect(emissionTime!).toBeGreaterThanOrEqual(startTime);
+      await initializationPromise;
+      // If we reach here, initialization was emitted successfully
     });
 
     it('should not emit initialized multiple times', async () => {

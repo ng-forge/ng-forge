@@ -73,12 +73,16 @@ function applySimpleValidationRules<TValue>(fieldDef: FieldDef<any> & FieldWithV
     email(fieldPath as FieldPath<string>);
   }
 
-  if (fieldDef.min !== undefined) {
-    min(fieldPath as FieldPath<number>, fieldDef.min);
+  // Check for min in top-level field or props (for components like slider)
+  const minValue = fieldDef.min !== undefined ? fieldDef.min : (fieldDef.props as any)?.min;
+  if (minValue !== undefined) {
+    min(fieldPath as FieldPath<number>, minValue);
   }
 
-  if (fieldDef.max !== undefined) {
-    max(fieldPath as FieldPath<number>, fieldDef.max);
+  // Check for max in top-level field or props (for components like slider)
+  const maxValue = fieldDef.max !== undefined ? fieldDef.max : (fieldDef.props as any)?.max;
+  if (maxValue !== undefined) {
+    max(fieldPath as FieldPath<number>, maxValue);
   }
 
   if (fieldDef.minLength !== undefined) {

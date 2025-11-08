@@ -3,7 +3,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicToggleFieldComponent', () => {
   describe('Basic Ionic Toggle Integration', () => {
-    it.skip('should render toggle with full configuration', async () => {
+    it('should render toggle with full configuration', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicToggleField({
           key: 'notifications',
@@ -122,8 +122,8 @@ describe('IonicToggleFieldComponent', () => {
     });
   });
 
-  describe.skip('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'feature',
@@ -239,8 +239,8 @@ describe('IonicToggleFieldComponent', () => {
     });
   });
 
-  describe.skip('Edge Cases and Robustness Tests', () => {
-    it.skip('should handle undefined initial value', async () => {
+  describe('Edge Cases and Robustness Tests', () => {
+    it('should handle undefined initial value', async () => {
       const config = IonicFormTestUtils.builder().ionicToggleField({ key: 'feature', label: 'Feature' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({ config });
@@ -249,7 +249,7 @@ describe('IonicToggleFieldComponent', () => {
       expect(ionToggle).not.toBeNull();
     });
 
-    it.skip('should handle null form values gracefully', async () => {
+    it('should handle null form values gracefully', async () => {
       const config = IonicFormTestUtils.builder().ionicToggleField({ key: 'feature', label: 'Feature' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({
@@ -261,7 +261,7 @@ describe('IonicToggleFieldComponent', () => {
       expect(ionToggle).not.toBeNull();
     });
 
-    it.skip('should display error messages when validation fails', async () => {
+    it('should display error messages when validation fails', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'acceptTerms',

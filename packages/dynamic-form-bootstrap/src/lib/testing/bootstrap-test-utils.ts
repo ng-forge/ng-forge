@@ -151,10 +151,6 @@ export class BootstrapFormTestUtils {
 
     // In zoneless mode, we need to trigger change detection immediately after setting inputs
     fixture.detectChanges();
-    await fixture.whenStable();
-    await delay(100);
-    fixture.detectChanges();
-
     await BootstrapFormTestUtils.waitForInit(fixture);
 
     return {
@@ -169,15 +165,22 @@ export class BootstrapFormTestUtils {
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
 
-    // In zoneless mode, OnPush components with async pipes require explicit change detection
-    // and sufficient time for observables to emit values
+    // Flush effects critical for zoneless change detection
+    TestBed.flushEffects();
     fixture.detectChanges();
     await fixture.whenStable();
-    await delay(100); // Increased delay for async pipe resolution
+
+    // Additional cycles for Bootstrap components to fully initialize
+    for (let i = 0; i < 2; i++) {
+      TestBed.flushEffects();
+      fixture.detectChanges();
+      await delay(0);
+    }
+
+    // Final stabilization
+    await fixture.whenStable();
+    TestBed.flushEffects();
     fixture.detectChanges();
-    await delay(100);
-    fixture.detectChanges();
-    await delay(100);
   }
 
   /**

@@ -6,7 +6,7 @@ import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 
 describe('PrimeInputFieldComponent', () => {
   describe('Basic PrimeNG Input Integration', () => {
-    it.skip('should render email input with full configuration', async () => {
+    it('should render email input with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .field({
           key: 'email',
@@ -44,7 +44,7 @@ describe('PrimeInputFieldComponent', () => {
       expect(hint.nativeElement.textContent.trim()).toBe('We will never share your email');
     });
 
-    it.skip('should handle user input and update form value', async () => {
+    it('should handle user input and update form value', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeInputField({ key: 'email', props: { type: 'email' } })
         .build();

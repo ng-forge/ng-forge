@@ -2,6 +2,7 @@ import { checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-
 import { MatField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/mat-button.mapper';
 import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/mat-specific-button.mapper';
+import { matSliderFieldMapper } from '../fields/slider/mat-slider.mapper';
 
 /**
  * Material Design field type definitions
@@ -70,7 +71,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: MatField.Slider,
     loadComponent: () => import('../fields/slider/mat-slider.component'),
-    mapper: valueFieldMapper,
+    mapper: matSliderFieldMapper,
   },
   {
     name: MatField.Toggle,

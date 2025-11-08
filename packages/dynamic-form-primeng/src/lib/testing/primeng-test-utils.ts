@@ -163,15 +163,6 @@ export class PrimeNGFormTestUtils {
     untracked(() => fixture.detectChanges());
     await PrimeNGFormTestUtils.waitForInit(fixture);
 
-    // Additional stabilization for reliable DOM querying
-    // PrimeNG components need extra time to fully render, especially under load
-    await fixture.whenStable();
-    untracked(() => fixture.detectChanges());
-    await delay(200); // Increased delay for parallel test execution
-    await fixture.whenStable(); // Extra cycle for async pipes
-    untracked(() => fixture.detectChanges());
-    await delay(100); // Final stabilization
-
     return {
       component,
       fixture,
@@ -183,14 +174,24 @@ export class PrimeNGFormTestUtils {
    */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
+
+    // Flush effects critical for zoneless change detection
+    TestBed.flushEffects();
     untracked(() => fixture.detectChanges());
-    await delay(0);
-    // Additional change detection cycles for PrimeNG directives to fully initialize
+    await fixture.whenStable();
+
+    // Additional cycles for PrimeNG directives to fully initialize
     // PrimeNG directives need extra cycles to process bindings and apply styles
+    for (let i = 0; i < 2; i++) {
+      TestBed.flushEffects();
+      untracked(() => fixture.detectChanges());
+      await delay(0);
+    }
+
+    // Final stabilization
+    await fixture.whenStable();
+    TestBed.flushEffects();
     untracked(() => fixture.detectChanges());
-    await delay(100); // Small delay to allow async operations
-    untracked(() => fixture.detectChanges());
-    await delay(0);
   }
 
   /**

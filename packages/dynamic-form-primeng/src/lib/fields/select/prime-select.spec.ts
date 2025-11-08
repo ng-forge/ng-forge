@@ -621,7 +621,7 @@ describe('PrimeSelectFieldComponent', () => {
         });
 
         const label = fixture.debugElement.query(By.css('label'));
-        const hint = fixture.debugElement.query(By.css('.p-hint'));
+        const hint = fixture.debugElement.query(By.css('.df-prime-hint'));
 
         // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Country');

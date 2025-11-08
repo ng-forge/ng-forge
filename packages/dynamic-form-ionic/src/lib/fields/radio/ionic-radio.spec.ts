@@ -3,7 +3,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicRadioFieldComponent', () => {
   describe('Basic Ionic Radio Integration', () => {
-    it.skip('should render radio group with full configuration', async () => {
+    it('should render radio group with full configuration', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicRadioField({
           key: 'paymentMethod',
@@ -179,8 +179,8 @@ describe('IonicRadioFieldComponent', () => {
     });
   });
 
-  describe.skip('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'option',
@@ -336,7 +336,7 @@ describe('IonicRadioFieldComponent', () => {
   });
 
   describe('Edge Cases and Robustness Tests', () => {
-    it.skip('should handle undefined initial value', async () => {
+    it('should handle undefined initial value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicRadioField({
           key: 'option',
@@ -354,7 +354,7 @@ describe('IonicRadioFieldComponent', () => {
       expect(ionRadioGroup).not.toBeNull();
     });
 
-    it.skip('should handle null form values gracefully', async () => {
+    it('should handle null form values gracefully', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicRadioField({
           key: 'option',
@@ -375,7 +375,7 @@ describe('IonicRadioFieldComponent', () => {
       expect(ionRadioGroup).not.toBeNull();
     });
 
-    it.skip('should display error messages when validation fails', async () => {
+    it('should display error messages when validation fails', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'option',
@@ -404,7 +404,7 @@ describe('IonicRadioFieldComponent', () => {
       //       expect(errorComponent).not.toBeNull();
     });
 
-    it.skip('should render label correctly when provided', async () => {
+    it('should render label correctly when provided', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicRadioField({
           key: 'choice',

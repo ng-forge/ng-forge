@@ -92,7 +92,7 @@ describe('IonicButtonFieldComponent', () => {
   });
 
   describe('Button State Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicButtonField({
           key: 'disabledBtn',
