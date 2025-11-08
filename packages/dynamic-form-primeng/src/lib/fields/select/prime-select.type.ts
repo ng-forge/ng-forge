@@ -24,6 +24,10 @@ export interface PrimeSelectProps extends SelectProps {
    * CSS class to apply to the dropdown element.
    */
   styleClass?: string;
+  /**
+   * Hint text displayed below the select.
+   */
+  hint?: DynamicText;
 }
 
 export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;
