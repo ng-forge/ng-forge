@@ -16,15 +16,12 @@ import { AsyncPipe } from '@angular/common';
     }
 
     <mat-slider
-      [min]="minValue()"
-      [max]="maxValue()"
-      [step]="step()"
+      [step]="props()?.step ?? 1"
       [discrete]="props()?.thumbLabel || props()?.showThumbLabel"
       [showTickMarks]="props()?.tickInterval !== undefined"
       [color]="props()?.color || 'primary'"
       class="slider-container"
     >
-      <!-- TODO: integrate input with the field -->
       <input matSliderThumb [(value)]="f().value" [disabled]="f().disabled()" [attr.tabindex]="tabIndex()" />
     </mat-slider>
 
@@ -56,10 +53,6 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
 
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
-
-  readonly minValue = input<number>(0);
-  readonly maxValue = input<number>(100);
-  readonly step = input<number>(1);
 
   readonly props = input<MatSliderProps>();
 }

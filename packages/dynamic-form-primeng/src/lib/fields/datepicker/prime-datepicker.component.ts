@@ -33,8 +33,6 @@ import { DatePicker } from 'primeng/datepicker';
         [selectionMode]="props()?.selectionMode || 'single'"
         [touchUI]="props()?.touchUI ?? false"
         [view]="props()?.view || 'date'"
-        [minDate]="minDate()"
-        [maxDate]="maxDate()"
         [styleClass]="props()?.styleClass || ''"
       />
 

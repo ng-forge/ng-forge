@@ -5,7 +5,7 @@ import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 
 describe('PrimeToggleFieldComponent', () => {
   describe('Basic PrimeNG Toggle Integration', () => {
-    it.skip('should render toggle with full configuration', async () => {
+    it('should render toggle with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .field({
           key: 'darkMode',
@@ -44,7 +44,7 @@ describe('PrimeToggleFieldComponent', () => {
       }
     });
 
-    it.skip('should handle user interactions and update form value', async () => {
+    it('should handle user interactions and update form value', async () => {
       const config = PrimeNGFormTestUtils.builder().primeToggleField({ key: 'darkMode' }).build();
 
       const { component, fixture } = await PrimeNGFormTestUtils.createTest({

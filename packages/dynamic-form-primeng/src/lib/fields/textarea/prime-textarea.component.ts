@@ -5,10 +5,11 @@ import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { TextareaModule } from 'primeng/textarea';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-prime-textarea',
-  imports: [TextareaModule, PrimeErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [TextareaModule, PrimeErrorsComponent, Field, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -21,11 +22,15 @@ import { TextareaModule } from 'primeng/textarea';
       <textarea
         pInputTextarea
         [id]="inputId()"
+        [(ngModel)]="f().value"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
+        [cols]="props()?.cols"
+        [maxlength]="props()?.maxlength ?? null"
         [autoResize]="props()?.autoResize ?? false"
         [attr.tabindex]="tabIndex()"
         [class]="props()?.styleClass || ''"
+        [disabled]="f().disabled()"
       ></textarea>
 
       @if (props()?.hint; as hint) {

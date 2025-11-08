@@ -4,9 +4,9 @@ import { createTestTranslationService } from '../../testing/fake-translation.ser
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 import { DatePicker } from 'primeng/datepicker';
 
-describe.skip('PrimeDatepickerFieldComponent', () => {
+describe('PrimeDatepickerFieldComponent', () => {
   describe('Basic PrimeNG Datepicker Integration', () => {
-    it('should render datepicker with full configuration', async () => {
+    it.skip('should render datepicker with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .field({
           key: 'birthDate',
@@ -41,7 +41,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
       const calendarInput = fixture.debugElement.query(By.css('p-calendar input'));
       const fieldWrapper = fixture.debugElement.query(By.css('df-prime-datepicker'));
       const label = fixture.debugElement.query(By.css('label'));
-      const hint = fixture.debugElement.query(By.css('small.p-hint'));
+      const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
       expect(calendar).toBeTruthy();
       expect(calendarInput.nativeElement.getAttribute('placeholder')).toBe('Select your birth date');
@@ -51,7 +51,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
       expect(hint.nativeElement.textContent.trim()).toBe('Choose the date you were born');
     });
 
-    it('should handle user input and update form value', async () => {
+    it.skip('should handle user input and update form value', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeDatepickerField({ key: 'birthDate', props: { view: 'month' } })
         .build();
@@ -158,7 +158,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
         initialValue: { startDate: null },
       });
 
-      const hint = fixture.debugElement.query(By.css('small.p-hint'));
+      const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
       expect(hint).toBeNull();
     });
   });
@@ -212,7 +212,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
       expect(formValue.appointmentDate).toBe(null);
     });
 
-    it('should handle independent datepicker interactions', async () => {
+    it.skip('should handle independent datepicker interactions', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeDatepickerField({ key: 'startDate' })
         .primeDatepickerField({ key: 'endDate' })
@@ -260,7 +260,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
   });
 
   describe('Field State and Configuration Tests', () => {
-    it('should handle disabled state correctly', async () => {
+    it.skip('should handle disabled state correctly', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .field({
           key: 'birthDate',
@@ -295,7 +295,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
       expect(calendars[1]).toBeTruthy();
     });
 
-    it('should handle multiple datepickers with independent value changes', async () => {
+    it.skip('should handle multiple datepickers with independent value changes', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeDatepickerField({ key: 'startDate' })
         .primeDatepickerField({ key: 'endDate' })
@@ -338,7 +338,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
   });
 
   describe('Datepicker-Specific Features', () => {
-    it('should apply date range constraints', async () => {
+    it.skip('should apply date range constraints', async () => {
       const minDate = new Date(2020, 0, 1);
       const maxDate = new Date(2025, 11, 31);
 
@@ -361,7 +361,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
       });
 
       const calendar = fixture.debugElement.query(By.directive(DatePicker));
-      const hint = fixture.debugElement.query(By.css('small.p-hint'));
+      const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
       expect(calendar).toBeTruthy();
       expect(hint.nativeElement.textContent.trim()).toBe('Select date between 2020 and 2025');
@@ -439,7 +439,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
       expect(fieldWrapper).toBeTruthy();
     });
 
-    it('should handle date inputs with special format requirements', async () => {
+    it.skip('should handle date inputs with special format requirements', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .field({
           key: 'birthDate',
@@ -472,7 +472,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
 
   describe('Dynamic Text Support', () => {
     describe('Translation Service Integration', () => {
-      it('should handle translation service with dynamic language updates for labels and placeholders', async () => {
+      it.skip('should handle translation service with dynamic language updates for labels and placeholders', async () => {
         const translationService = createTestTranslationService({
           'form.birthDate.label': 'Birth Date',
           'form.birthDate.placeholder': 'Select your birth date',
@@ -498,7 +498,7 @@ describe.skip('PrimeDatepickerFieldComponent', () => {
 
         const label = fixture.debugElement.query(By.css('label'));
         const calendarInput = fixture.debugElement.query(By.css('p-calendar input'));
-        const hint = fixture.debugElement.query(By.css('small.p-hint'));
+        const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
         // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Birth Date');

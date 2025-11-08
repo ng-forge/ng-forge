@@ -3,7 +3,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicTextareaFieldComponent', () => {
   describe('Basic Ionic Textarea Integration', () => {
-    it.skip('should render textarea with full configuration', async () => {
+    it('should render textarea with full configuration', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicTextareaField({
           key: 'description',
@@ -42,7 +42,7 @@ describe('IonicTextareaFieldComponent', () => {
       //       expect(textarea).not.toBeNull();
     });
 
-    it.skip('should handle user input and update form value', async () => {
+    it('should handle user input and update form value', async () => {
       const config = IonicFormTestUtils.builder().ionicTextareaField({ key: 'comments', label: 'Comments' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -77,7 +77,7 @@ describe('IonicTextareaFieldComponent', () => {
   });
 
   describe('Multiline Text Tests', () => {
-    it.skip('should handle multiline text correctly', async () => {
+    it('should handle multiline text correctly', async () => {
       const config = IonicFormTestUtils.builder().ionicTextareaField({ key: 'message', label: 'Message' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -106,7 +106,7 @@ describe('IonicTextareaFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).article).toBe(longText);
     });
 
-    it.skip('should preserve whitespace and formatting', async () => {
+    it('should preserve whitespace and formatting', async () => {
       const config = IonicFormTestUtils.builder().ionicTextareaField({ key: 'code', label: 'Code' }).build();
 
       const formattedText = '  function test() {\n    return true;\n  }';
@@ -122,8 +122,8 @@ describe('IonicTextareaFieldComponent', () => {
     });
   });
 
-  describe.skip('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+  describe('Field State and Configuration Tests', () => {
+    it('should handle disabled state correctly', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'description',
@@ -275,7 +275,7 @@ describe('IonicTextareaFieldComponent', () => {
       expect(ionTextarea.nativeElement.tagName.toLowerCase()).toBe('ion-textarea');
     });
 
-    it.skip('should handle null form values gracefully', async () => {
+    it('should handle null form values gracefully', async () => {
       const config = IonicFormTestUtils.builder().ionicTextareaField({ key: 'description' }).build();
 
       const { fixture } = await IonicFormTestUtils.createTest({
@@ -299,7 +299,7 @@ describe('IonicTextareaFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).description).toBe('');
     });
 
-    it.skip('should handle special characters and unicode input', async () => {
+    it('should handle special characters and unicode input', async () => {
       const config = IonicFormTestUtils.builder().ionicTextareaField({ key: 'message' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -314,7 +314,7 @@ describe('IonicTextareaFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).message).toBe(specialText);
     });
 
-    it.skip('should handle rapid value changes correctly', async () => {
+    it('should handle rapid value changes correctly', async () => {
       const config = IonicFormTestUtils.builder().ionicTextareaField({ key: 'content' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
@@ -365,7 +365,7 @@ describe('IonicTextareaFieldComponent', () => {
       //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-rows')).toBe('4');
     });
 
-    it.skip('should handle validation with maxlength', async () => {
+    it('should handle validation with maxlength', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicTextareaField({
           key: 'bio',
@@ -385,7 +385,7 @@ describe('IonicTextareaFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).bio).toBe(shortText);
     });
 
-    it.skip('should handle tab characters in text', async () => {
+    it('should handle tab characters in text', async () => {
       const config = IonicFormTestUtils.builder().ionicTextareaField({ key: 'code' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({

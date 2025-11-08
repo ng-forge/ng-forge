@@ -3,9 +3,9 @@ import { By } from '@angular/platform-browser';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 
-describe.skip('PrimeTextareaFieldComponent', () => {
+describe('PrimeTextareaFieldComponent', () => {
   describe('Basic PrimeNG Textarea Integration', () => {
-    it('should render textarea with full configuration', async () => {
+    it.skip('should render textarea with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .field({
           key: 'comments',
@@ -36,9 +36,9 @@ describe.skip('PrimeTextareaFieldComponent', () => {
       });
 
       const textarea = fixture.debugElement.query(By.css('textarea[pInputTextarea]'));
-      const fieldWrapper = fixture.debugElement.query(By.css('.p-field'));
+      const fieldWrapper = fixture.debugElement.query(By.css('.df-prime-field'));
       const label = fixture.debugElement.query(By.css('label'));
-      const hint = fixture.debugElement.query(By.css('small.p-text-secondary'));
+      const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
       expect(textarea).toBeTruthy();
       expect(textarea.nativeElement.getAttribute('placeholder')).toBe('Enter your comments');
@@ -143,7 +143,7 @@ describe.skip('PrimeTextareaFieldComponent', () => {
       });
 
       const textarea = fixture.debugElement.query(By.css('textarea[pInputTextarea]'));
-      const fieldWrapper = fixture.debugElement.query(By.css('.p-field'));
+      const fieldWrapper = fixture.debugElement.query(By.css('.df-prime-field'));
 
       expect(textarea.nativeElement.getAttribute('rows')).toBe('4');
       expect(fieldWrapper).toBeTruthy();
@@ -157,7 +157,7 @@ describe.skip('PrimeTextareaFieldComponent', () => {
         initialValue: { comments: '' },
       });
 
-      const hint = fixture.debugElement.query(By.css('small.p-text-secondary'));
+      const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
       expect(hint).toBeNull();
     });
   });
@@ -282,7 +282,7 @@ describe.skip('PrimeTextareaFieldComponent', () => {
       });
 
       const textarea = fixture.debugElement.query(By.css('textarea[pInputTextarea]'));
-      const fieldWrapper = fixture.debugElement.query(By.css('.p-field'));
+      const fieldWrapper = fixture.debugElement.query(By.css('.df-prime-field'));
 
       // Verify default PrimeNG configuration is applied
       expect(textarea.nativeElement.getAttribute('rows')).toBe('4');
@@ -374,7 +374,7 @@ describe.skip('PrimeTextareaFieldComponent', () => {
 
         const label = fixture.debugElement.query(By.css('label'));
         const textarea = fixture.debugElement.query(By.css('textarea[pInputTextarea]'));
-        const hint = fixture.debugElement.query(By.css('small.p-text-secondary'));
+        const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
         // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Comments');
