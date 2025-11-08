@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { FieldTree, MAX, MIN } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { MatErrorsComponent } from '../../shared/mat-errors.component';
@@ -16,15 +16,12 @@ import { AsyncPipe } from '@angular/common';
     }
 
     <mat-slider
-      [min]="minFromMetadata()"
-      [max]="maxFromMetadata()"
       [step]="props()?.step ?? 1"
       [discrete]="props()?.thumbLabel || props()?.showThumbLabel"
       [showTickMarks]="props()?.tickInterval !== undefined"
       [color]="props()?.color || 'primary'"
       class="slider-container"
     >
-      <!-- TODO: integrate input with the field -->
       <input matSliderThumb [(value)]="f().value" [disabled]="f().disabled()" [attr.tabindex]="tabIndex()" />
     </mat-slider>
 
@@ -58,15 +55,4 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
   readonly tabIndex = input<number>();
 
   readonly props = input<MatSliderProps>();
-
-  // Read min/max from field metadata (set by validation constraints)
-  readonly minFromMetadata = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.metadata(MIN) ?? 0;
-  });
-
-  readonly maxFromMetadata = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.metadata(MAX) ?? 100;
-  });
 }

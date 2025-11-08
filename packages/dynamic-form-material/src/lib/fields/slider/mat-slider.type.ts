@@ -9,5 +9,4 @@ export interface MatSliderProps extends Record<string, unknown> {
 
 export type MatSliderField = SliderField<MatSliderProps>;
 
-// Exclude minValue, maxValue, step from component interface since they're handled by Field directive metadata
-export type MatSliderComponent = Omit<ValueFieldComponent<MatSliderField>, 'minValue' | 'maxValue' | 'step'>;
+export type MatSliderComponent = ValueFieldComponent<MatSliderField>;
