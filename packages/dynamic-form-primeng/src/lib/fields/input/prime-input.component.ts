@@ -30,6 +30,7 @@ import { FormsModule } from '@angular/forms';
         [attr.tabindex]="tabIndex()"
         [class]="inputClasses()"
         [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
       />
 
       @if (props()?.hint; as hint) {

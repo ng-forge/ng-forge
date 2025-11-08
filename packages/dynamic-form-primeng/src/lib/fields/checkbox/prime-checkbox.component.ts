@@ -20,6 +20,8 @@ import { FormsModule } from '@angular/forms';
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
         [styleClass]="props()?.styleClass"
         [attr.tabindex]="tabIndex()"
       />

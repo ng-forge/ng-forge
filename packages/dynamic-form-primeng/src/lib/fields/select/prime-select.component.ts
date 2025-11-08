@@ -36,6 +36,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
         [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
       />
       } @else {
       <p-select
@@ -49,6 +50,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
         [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
       />
       } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
       <small class="p-error">{{ error.message }}</small>
