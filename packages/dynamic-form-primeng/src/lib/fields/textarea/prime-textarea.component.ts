@@ -26,7 +26,7 @@ import { FormsModule } from '@angular/forms';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
-        [maxlength]="props()?.maxlength"
+        [maxlength]="props()?.maxlength ?? null"
         [autoResize]="props()?.autoResize ?? false"
         [attr.tabindex]="tabIndex()"
         [class]="props()?.styleClass || ''"
