@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import {
-  DynamicText, DynamicTextPipe, FieldOption,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
   ValidationMessages,
   createResolvedErrorsSignal,
   shouldShowErrors,
@@ -39,13 +41,11 @@ import { AsyncPipe } from '@angular/common';
       <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
         {{ option.label | dynamicText | async }}
       </ion-select-option>
-      } @if (f().invalid() && f().touched()) {
+      } @if (showErrors()) {
       <div slot="error">
-        @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
+        @for (error of resolvedErrors(); track error.kind) {
         <ion-note color="danger">{{ error.message }}</ion-note>
-      }
-    }
+        }
       </div>
       }
     </ion-select>

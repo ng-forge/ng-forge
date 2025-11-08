@@ -1,12 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { IonDatetime, IonInput, IonModal } from '@ionic/angular/standalone';
-import {
-  DynamicText, DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
@@ -16,16 +11,9 @@ import { format } from 'date-fns';
  */
 @Component({
   selector: 'df-ionic-datepicker',
-  imports: [
-    IonInput,
-    IonModal,
-    IonDatetime,
-    DynamicTextPipe,
-    AsyncPipe,
-  ],
+  imports: [IonInput, IonModal, IonDatetime, DynamicTextPipe, AsyncPipe],
   template: `
-    @let f = field();
-    @let dateValue = f().value();
+    @let f = field(); @let dateValue = f().value();
 
     <ion-input
       [label]="(label() | dynamicText | async) ?? undefined"
@@ -38,23 +26,16 @@ import { format } from 'date-fns';
       [attr.tabindex]="tabIndex()"
       (click)="!f().disabled() && openModal()"
     >
-      @if (f().invalid() && f().touched()) {
-        <div slot="error">
-          @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
+      @if (showErrors()) {
+      <div slot="error">
+        @for (error of resolvedErrors(); track error.kind) {
         <ion-note color="danger">{{ error.message }}</ion-note>
-      }
-    }
-        </div>
+        }
+      </div>
       }
     </ion-input>
 
-    <ion-modal
-      #modal
-      [trigger]="key()"
-      [isOpen]="isModalOpen()"
-      (didDismiss)="closeModal()"
-    >
+    <ion-modal #modal [trigger]="key()" [isOpen]="isModalOpen()" (didDismiss)="closeModal()">
       <ion-datetime
         [presentation]="props()?.presentation ?? 'date'"
         [value]="dateToIsoString(dateValue)"

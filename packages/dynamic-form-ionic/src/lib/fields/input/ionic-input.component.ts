@@ -1,12 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonInput } from '@ionic/angular/standalone';
-import {
-  DynamicText, DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -33,13 +28,11 @@ import { AsyncPipe } from '@angular/common';
       [errorText]="f().invalid() && f().touched() ? (props()?.errorText | dynamicText | async) ?? undefined : undefined"
       [attr.tabindex]="tabIndex()"
     >
-      @if (f().invalid() && f().touched()) {
+      @if (showErrors()) {
       <div slot="error">
-        @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
+        @for (error of resolvedErrors(); track error.kind) {
         <ion-note color="danger">{{ error.message }}</ion-note>
-      }
-    }
+        }
       </div>
       }
     </ion-input>
