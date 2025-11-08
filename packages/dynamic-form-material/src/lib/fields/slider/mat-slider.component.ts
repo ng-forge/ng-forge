@@ -16,6 +16,8 @@ import { AsyncPipe } from '@angular/common';
     }
 
     <mat-slider
+      [min]="f().min?.() ?? 0"
+      [max]="f().max?.() ?? 100"
       [step]="props()?.step ?? 1"
       [discrete]="props()?.thumbLabel || props()?.showThumbLabel"
       [showTickMarks]="props()?.tickInterval !== undefined"

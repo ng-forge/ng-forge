@@ -54,7 +54,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: FieldDef<Record<string, unknown>>[], registry: Map<string, any>) => flattenFields(fields, registry),
+    (fields: FieldDef<any>[], registry: Map<string, any>) => flattenFields(fields, registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
   );
@@ -65,7 +65,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   );
 
   private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>, registry: Map<string, any>) =>
+    <T extends FieldDef<any>>(fieldsById: Record<string, T>, registry: Map<string, any>) =>
       mapValues(fieldsById, (field) => getFieldDefaultValue(field, registry)),
     (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(',')
   );
@@ -142,7 +142,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
 
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
-  readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit'));
+  readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit'));
 
   // Convert field setup to observable for field mapping
   fields$ = toObservable(computed(() => this.formSetup().fields));
@@ -150,7 +150,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   // Create field fields following the dynamic form pattern
   fields = toSignal(
     this.fields$.pipe(
-      switchMap((fields: FieldDef<Record<string, unknown>>[]) => {
+      switchMap((fields: FieldDef<any>[]) => {
         if (!fields || fields.length === 0) {
           return of([]);
         }
@@ -162,13 +162,13 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
     { initialValue: [] }
   );
 
-  private mapFields(fields: FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: FieldDef<any>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map((fieldDef) => this.mapSingleField(fieldDef))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
   }
 
-  private async mapSingleField(fieldDef: FieldDef<Record<string, unknown>>): Promise<ComponentRef<FormUiControl> | undefined> {
+  private async mapSingleField(fieldDef: FieldDef<any>): Promise<ComponentRef<FormUiControl> | undefined> {
     return this.fieldRegistry
       .loadTypeComponent(fieldDef.type)
       .then((componentType) => {

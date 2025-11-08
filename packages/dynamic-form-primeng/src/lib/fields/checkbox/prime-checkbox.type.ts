@@ -1,6 +1,6 @@
 import { CheckboxField, CheckedFieldComponent, DynamicText } from '@ng-forge/dynamic-form';
 
-export interface PrimeCheckboxProps extends Record<string, unknown> {
+export interface PrimeCheckboxProps {
   /**
    * Binary mode for boolean values.
    */

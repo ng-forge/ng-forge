@@ -1,7 +1,7 @@
 import { DynamicText, RadioField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 import { ThemePalette } from '@angular/material/core';
 
-export interface MatRadioProps extends Record<string, unknown> {
+export interface MatRadioProps {
   disableRipple?: boolean;
   color?: ThemePalette;
   labelPosition?: 'before' | 'after';

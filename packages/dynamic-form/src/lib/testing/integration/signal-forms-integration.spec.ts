@@ -140,7 +140,7 @@ describe('Signal Forms Integration Tests', () => {
     });
 
     it('should handle field configuration with multiple validator types', () => {
-      const fieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+      const fieldConfig: FieldDef<any> & FieldWithValidation = {
         key: 'age',
         type: 'input',
         label: 'Age',
@@ -226,7 +226,7 @@ describe('Signal Forms Integration Tests', () => {
     });
 
     it('should handle conditional field visibility based on form state', () => {
-      const fieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+      const fieldConfig: FieldDef<any> & FieldWithValidation = {
         key: 'email',
         type: 'input',
         label: 'Email',
@@ -265,7 +265,7 @@ describe('Signal Forms Integration Tests', () => {
     });
 
     it('should handle dynamic validation based on other field values', () => {
-      const ageFieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+      const ageFieldConfig: FieldDef<any> & FieldWithValidation = {
         key: 'age',
         type: 'input',
         label: 'Age',
@@ -318,7 +318,7 @@ describe('Signal Forms Integration Tests', () => {
     });
 
     it('should handle array field validation with applyEach', () => {
-      const arrayFieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+      const arrayFieldConfig: FieldDef<any> & FieldWithValidation = {
         key: 'contacts',
         type: 'array',
         label: 'Contact Information',
@@ -458,7 +458,7 @@ describe('Signal Forms Integration Tests', () => {
         });
       }
 
-      const fieldConfig: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+      const fieldConfig: FieldDef<any> & FieldWithValidation = {
         key: 'testField',
         type: 'input',
         label: 'Test Field',

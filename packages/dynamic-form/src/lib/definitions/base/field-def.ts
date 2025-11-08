@@ -44,7 +44,7 @@ import { DynamicText } from '../../pipes';
  *
  * @public
  */
-export interface FieldDef<TProps extends Record<string, unknown>> {
+export interface FieldDef<TProps> {
   /**
    * Unique field identifier used for form binding and value tracking.
    *
@@ -232,4 +232,4 @@ type IncludedKeys = 'label' | 'className' | 'hidden' | 'tabIndex';
  *
  * @public
  */
-export type FieldComponent<T extends FieldDef<Record<string, unknown>>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;
+export type FieldComponent<T extends FieldDef<any>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;

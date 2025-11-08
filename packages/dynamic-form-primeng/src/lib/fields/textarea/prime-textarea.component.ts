@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-prime-textarea',
-  imports: [TextareaModule, PrimeErrorsComponent, Field, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [TextareaModule, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -19,6 +19,7 @@ import { FormsModule } from '@angular/forms';
       <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
+      <!-- TODO: integrate with field when subscribe to control is fixed -->
       <textarea
         pInputTextarea
         [id]="inputId()"

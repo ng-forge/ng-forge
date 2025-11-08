@@ -1,6 +1,6 @@
-import { ValueFieldComponent, DatepickerField } from '@ng-forge/dynamic-form';
+import { DatepickerField, DatepickerProps, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface IonicDatepickerProps extends Record<string, unknown> {
+export interface IonicDatepickerProps extends DatepickerProps {
   presentation?: 'date' | 'date-time' | 'time' | 'time-date' | 'month' | 'month-year' | 'year';
   multiple?: boolean;
   preferWheel?: boolean;

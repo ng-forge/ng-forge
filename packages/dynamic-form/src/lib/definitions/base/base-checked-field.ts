@@ -4,7 +4,7 @@ import { WithInputSignals } from '../../models';
 import { Prettify } from '../../models/prettify';
 import { DynamicText } from '../../pipes';
 
-export interface BaseCheckedField<TProps extends Record<string, unknown>> extends FieldDef<TProps>, FieldWithValidation {
+export interface BaseCheckedField<TProps> extends FieldDef<TProps>, FieldWithValidation {
   checked?: boolean;
 
   defaultValue?: boolean;
@@ -18,7 +18,7 @@ export interface BaseCheckedField<TProps extends Record<string, unknown>> extend
   required?: boolean;
 }
 
-export function isCheckedField<TProps extends Record<string, unknown>>(field: FieldDef<TProps>): field is BaseCheckedField<TProps> {
+export function isCheckedField<TProps>(field: FieldDef<TProps>): field is BaseCheckedField<TProps> {
   return 'checked' in field && typeof (field as { checked: unknown }).checked === 'boolean';
 }
 
@@ -33,4 +33,4 @@ type ExcludedKeys =
   | 'col'
   | keyof FieldWithValidation;
 
-export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown>>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;
+export type CheckedFieldComponent<T extends BaseCheckedField<any>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

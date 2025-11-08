@@ -204,7 +204,7 @@ provideDynamicForm(...withMaterialFields());
 provideDynamicForm(...withBootstrapFields());
 
 // Or use your custom components
-provideDynamicForm(withFieldTypes([{ name: 'my-input', loadComponent: () => MyCustomInput }]));
+provideDynamicForm([{ name: 'my-input', loadComponent: () => MyCustomInput }]);
 ```
 
 ### 🔥 Complex Features, Simple API
@@ -427,11 +427,9 @@ export class StarRatingComponent {
 }
 
 // 2. Register it
-provideDynamicForm(
-  withFieldTypes([
-    { name: 'star-rating', loadComponent: () => StarRatingComponent }
-  ])
-);
+provideDynamicForm([
+  { name: 'star-rating', loadComponent: () => StarRatingComponent }
+]);
 
 // 3. Use it in your forms
 {

@@ -82,5 +82,5 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
   readonly tabIndex = input<number>();
 
   readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<BsRadioProps<T>>();
+  readonly props = input<BsRadioProps>();
 }

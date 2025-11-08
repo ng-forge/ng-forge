@@ -42,7 +42,7 @@ import { FieldDef } from '../../definitions';
  *
  * @public
  */
-export function getGridClassString(fieldDef: FieldDef<Record<string, unknown>>): string {
+export function getGridClassString(fieldDef: FieldDef<any>): string {
   const classes: string[] = [];
 
   if (typeof fieldDef.col === 'number' && fieldDef.col > 0 && fieldDef.col <= 12) {

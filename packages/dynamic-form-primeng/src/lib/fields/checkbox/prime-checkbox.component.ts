@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
 import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
@@ -9,22 +9,20 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-prime-checkbox',
-  imports: [Checkbox, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [Checkbox, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let checkboxId = key() + '-checkbox';
 
     <div class="flex items-center">
       <p-checkbox
-        [(ngModel)]="f().value"
-        [disabled]="f().disabled()"
+        [field]="f"
         [inputId]="checkboxId"
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
         [styleClass]="props()?.styleClass"
         [attr.tabindex]="tabIndex()"
-        [attr.hidden]="f().hidden() || null"
       />
       @if (label(); as labelText) {
       <label [for]="checkboxId" class="ml-2">{{ labelText | dynamicText | async }}</label>

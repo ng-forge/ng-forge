@@ -2,7 +2,7 @@ import { CheckedFieldComponent, DynamicText, ToggleField } from '@ng-forge/dynam
 import { MatFormFieldAppearance } from '@angular/material/form-field';
 import { ThemePalette } from '@angular/material/core';
 
-export interface MatToggleProps extends Record<string, unknown> {
+export interface MatToggleProps {
   hint?: DynamicText;
   appearance?: MatFormFieldAppearance;
   color?: ThemePalette;

@@ -1,6 +1,6 @@
 import { CheckboxField, CheckedFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface IonicToggleProps extends Record<string, unknown> {
+export interface IonicToggleProps {
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
   justify?: 'start' | 'end' | 'space-between';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';

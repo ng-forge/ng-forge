@@ -6,10 +6,7 @@ import { baseFieldMapper, FieldMapperOptions } from '../../mappers';
  * Main field mapper function that uses the field registry to get the appropriate mapper
  * based on the field's type property
  */
-export function mapFieldToBindings<TModel = any>(
-  fieldDef: FieldDef<Record<string, unknown>>,
-  options: FieldMapperOptions<TModel>
-): Binding[] {
+export function mapFieldToBindings<TModel = any>(fieldDef: FieldDef<any>, options: FieldMapperOptions<TModel>): Binding[] {
   const fieldRegistry = options.fieldRegistry;
 
   // Get the field type definition from registry

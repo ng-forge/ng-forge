@@ -5,6 +5,8 @@
 [![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-form.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+> **📖 [View Documentation](./internal/)** • Get started quickly with our comprehensive guides: [Quick Start](./internal/QUICK_START_GUIDE.md) • [Getting Started](./internal/GETTING_STARTED.md) • [API Reference](./internal/API_REFERENCE.md) • [Technical Architecture](./internal/TECHNICAL_ARCHITECTURE.md)
+
 ng-forge dynamic forms is a modern forms library for Angular 21+ that eliminates boilerplate while providing full type safety, validation, and conditional logic - all powered by Angular's signal forms.
 
 ## ✨ How It Works
@@ -269,11 +271,9 @@ export class RatingFieldComponent {
 }
 
 // Register it
-provideDynamicForm(
-  withFieldTypes([
-    { name: 'rating', loadComponent: () => RatingFieldComponent }
-  ])
-);
+provideDynamicForm([
+  { name: 'rating', loadComponent: () => RatingFieldComponent }
+]);
 
 // Use it
 { key: 'userRating', type: 'rating', value: 0, label: 'Rate your experience' }
@@ -314,7 +314,7 @@ provideDynamicForm(...withIonicFields());
 ### Your Custom Components
 
 ```typescript
-provideDynamicForm(withFieldTypes([{ name: 'custom-input', loadComponent: () => MyInputComponent }]));
+provideDynamicForm([{ name: 'custom-input', loadComponent: () => import('./input-component') }]);
 ```
 
 ## 📚 Documentation

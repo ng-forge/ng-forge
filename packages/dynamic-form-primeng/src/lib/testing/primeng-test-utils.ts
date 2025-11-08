@@ -18,7 +18,7 @@ import {
   PrimeSliderField,
   PrimeTextareaField,
   PrimeToggleField,
-} from '../types/field-types';
+} from '../fields';
 
 /**
  * Configuration for creating a PrimeNG dynamic form test

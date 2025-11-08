@@ -4,7 +4,6 @@ import { FormEvent, FormEventConstructor } from '../../events';
 /**
  * Interface for button fields
  */
-export interface ButtonField<TProps extends Record<string, unknown>, TEvent extends FormEvent> extends FieldDef<TProps> {
-  type: 'button';
+export interface ButtonField<TProps, TEvent extends FormEvent> extends FieldDef<TProps> {
   event: FormEventConstructor<TEvent>;
 }

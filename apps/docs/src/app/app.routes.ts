@@ -5,12 +5,12 @@ import { NG_DOC_ROUTING } from '@ng-doc/generated';
 export const appRoutes: Route[] = [
   {
     path: '',
-    redirectTo: '/getting-started',
+    redirectTo: '/getting-started/what-is-dynamic-forms',
     pathMatch: 'full',
   },
   ...NG_DOC_ROUTING,
   {
     path: '**',
-    redirectTo: '/getting-started',
+    redirectTo: '/getting-started/what-is-dynamic-forms',
   },
 ];

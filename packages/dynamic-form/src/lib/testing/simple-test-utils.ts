@@ -11,7 +11,7 @@ import { EventBus } from '../events/event.bus';
  * Simple form configuration interface for testing
  */
 export interface TestFormConfig {
-  fields: FieldDef<Record<string, unknown>>[];
+  fields: FieldDef<any>[];
 }
 
 /**
@@ -34,9 +34,9 @@ export interface SimpleTestResult {
  * Fluent API for building form configurations using existing field structure
  */
 export class TestFormConfigBuilder<T = Record<string, unknown>> {
-  private fields: FieldDef<Record<string, unknown>>[] = [];
+  private fields: FieldDef<any>[] = [];
 
-  field(field: FieldDef<Record<string, unknown>>): TestFormConfigBuilder<T> {
+  field(field: FieldDef<any>): TestFormConfigBuilder<T> {
     this.fields.push(field);
     return this;
   }
@@ -172,7 +172,7 @@ export class TestFieldComponent {
  * Configuration for setting up a simple component test
  */
 export interface SimpleComponentTestConfig<T = any> {
-  field: FieldDef<Record<string, unknown>>;
+  field: FieldDef<any>;
   value?: T;
 }
 
@@ -223,7 +223,7 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
 /**
  * Creates a simple test field definition
  */
-export function createSimpleTestField(key: string, label: string): FieldDef<Record<string, unknown>> {
+export function createSimpleTestField(key: string, label: string): FieldDef<any> {
   return {
     key,
     type: 'test',

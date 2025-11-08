@@ -1,4 +1,4 @@
-import { FormConfig } from '@ng-forge/dynamic-form';
+import { FormConfig, SubmitEvent } from '@ng-forge/dynamic-form';
 
 export const preferencesConfig = {
   fields: [
@@ -180,8 +180,11 @@ export const preferencesConfig = {
           label: 'Reset to Defaults',
           props: {
             type: 'button',
-            className: 'secondary-button',
           },
+          event: class ResetDefaultsEvent {
+            readonly type = 'reset-defaults' as const;
+          },
+          className: 'secondary-button',
           col: 6,
         },
         {
@@ -191,6 +194,7 @@ export const preferencesConfig = {
           props: {
             type: 'submit',
           },
+          event: SubmitEvent,
           col: 6,
         },
       ],

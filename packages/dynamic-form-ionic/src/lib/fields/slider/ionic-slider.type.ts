@@ -1,6 +1,6 @@
 import { ValueFieldComponent, SliderField } from '@ng-forge/dynamic-form';
 
-export interface IonicSliderProps extends Record<string, unknown> {
+export interface IonicSliderProps {
   min?: number;
   max?: number;
   step?: number;

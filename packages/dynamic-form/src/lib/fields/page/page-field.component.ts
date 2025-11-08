@@ -87,11 +87,11 @@ export default class PageFieldComponent {
   readonly isVisible = computed(() => this._isVisible());
 
   // EventBus outputs for page navigation
-  readonly nextPage = outputFromObservable(this.eventBus.subscribe<NextPageEvent>('next-page'));
+  readonly nextPage = outputFromObservable(this.eventBus.on<NextPageEvent>('next-page'));
 
-  readonly previousPage = outputFromObservable(this.eventBus.subscribe<PreviousPageEvent>('previous-page'));
+  readonly previousPage = outputFromObservable(this.eventBus.on<PreviousPageEvent>('previous-page'));
 
-  readonly pageChange = outputFromObservable(this.eventBus.subscribe<PageChangeEvent>('page-change'));
+  readonly pageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
 
   // Validate that this page doesn't contain nested pages
   readonly isValid = computed(() => {

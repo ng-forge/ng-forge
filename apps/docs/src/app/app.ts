@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
-import { startWith, tap } from 'rxjs';
+import { map, startWith } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -11,8 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   templateUrl: './app.html',
   styleUrl: './app.scss',
   host: {
-    'class.dark-theme': 'isDark()',
-    'class.light-theme': '!isDark()',
+    'class.dark': 'isDark()',
   },
 })
 export class App {
@@ -21,7 +20,7 @@ export class App {
   isDark = toSignal(
     this.themeService.themeChanges().pipe(
       startWith(this.themeService.currentTheme),
-      tap((theme) => theme === 'dark')
+      map((theme) => theme === 'dark')
     ),
     { requireSync: true }
   );

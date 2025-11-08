@@ -219,7 +219,7 @@ Date selection with calendar:
 ```typescript
 {
   key: 'birthdate',
-  type: 'date',
+  type: 'datepicker',
   value: null,
   label: 'Date of Birth',
   required: true,
@@ -251,29 +251,6 @@ Numeric value selection:
     showTicks: true,
     thumbLabel: true,
     color: 'primary',
-  },
-}
-```
-
-### Autocomplete
-
-Input with suggestions:
-
-```typescript
-{
-  key: 'city',
-  type: 'autocomplete',
-  value: '',
-  label: 'City',
-  required: true,
-  props: {
-    appearance: 'outline',
-    options: [
-      { label: 'New York', value: 'NY' },
-      { label: 'Los Angeles', value: 'LA' },
-      { label: 'Chicago', value: 'CHI' },
-    ],
-    displayWith: (option) => option?.label || '',
   },
 }
 ```
@@ -520,7 +497,7 @@ export class RegistrationComponent {
           },
           {
             key: 'birthdate',
-            type: 'date',
+            type: 'datepicker',
             value: null,
             label: 'Date of Birth',
             required: true,
@@ -592,9 +569,10 @@ export class RegistrationComponent {
 - `select` - Dropdown selection
 - `checkbox` - Boolean checkbox
 - `radio` - Radio group
-- `date` - Date picker
+- `datepicker` - Date picker
 - `slider` - Numeric slider
-- `autocomplete` - Autocomplete input
+- `toggle` - Toggle switch
+- `multi-checkbox` - Multiple checkboxes
 - `submit` - Submit button
 - `next` - Next page button
 - `previous` - Previous page button

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-primeng';
 
 @Component({
@@ -45,7 +45,7 @@ export class CompletePrimeFormComponent {
     alert('Form submitted successfully! Check the console for details.');
   }
 
-  config: FormConfig = {
+  config = {
     fields: [
       // ============================================
       // PERSONAL INFORMATION SECTION

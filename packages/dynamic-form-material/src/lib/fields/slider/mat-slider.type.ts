@@ -1,10 +1,14 @@
 import { DynamicText, SliderField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 import { MatFormFieldAppearance } from '@angular/material/form-field';
 
-export interface MatSliderProps extends Record<string, unknown> {
+export interface MatSliderProps {
   hint?: DynamicText;
   color?: 'primary' | 'accent' | 'warn';
   appearance?: MatFormFieldAppearance;
+  thumbLabel?: boolean;
+  showThumbLabel?: boolean;
+  tickInterval?: number | 'auto';
+  step?: number;
 }
 
 export type MatSliderField = SliderField<MatSliderProps>;

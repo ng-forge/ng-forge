@@ -1,6 +1,6 @@
 import { ButtonField, FieldComponent, FieldDef, FormEvent } from '@ng-forge/dynamic-form';
 
-export interface MatButtonProps extends Record<string, unknown> {
+export interface MatButtonProps {
   color?: 'primary' | 'accent' | 'warn';
   type?: 'button' | 'submit' | 'reset';
 }

@@ -1,8 +1,11 @@
 import { BaseValueField } from '../base';
+import { DynamicText } from '../../models';
 
-export interface DatepickerField<TProps extends Record<string, unknown>> extends BaseValueField<TProps, Date | string> {
-  type: 'date';
+export interface DatepickerProps {
+  placeholder?: DynamicText;
+}
 
+export interface DatepickerField<TProps> extends BaseValueField<TProps, Date | string> {
   minDate?: Date | string | null;
   maxDate?: Date | string | null;
   startAt?: Date | null;

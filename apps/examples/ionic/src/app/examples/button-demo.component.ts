@@ -1,39 +1,36 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import '@ng-forge/dynamic-form-ionic';
+import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'example-button-demo',
-  imports: [DynamicForm, JsonPipe, IonContent, IonHeader, IonTitle, IonToolbar],
+  imports: [DynamicForm, JsonPipe, IonContent],
   host: {
     class: 'example-container',
   },
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Button Example</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content>
       <div>
         <h4>Button Examples</h4>
         <p>Showcasing all Ionic button types with various colors and styles.</p>
 
-        <dynamic-form [config]="config" [(value)]="formOutput" />
+        <dynamic-form [config]="config" [(value)]="formValue" />
 
-        <h4>Form Data:</h4>
-        <pre>{{ formOutput() | json }}</pre>
+        <div class="example-result">
+          <h4>Form Data:</h4>
+          <pre>{{ formValue() | json }}</pre>
+        </div>
       </div>
     </ion-content>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ButtonDemoComponent {
-  formOutput = signal({});
+  formValue = signal({});
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'email',
@@ -46,39 +43,6 @@ export class ButtonDemoComponent {
           placeholder: 'Enter email',
         },
       },
-      {
-        type: 'submit',
-        key: 'submitPrimary',
-        label: 'Submit (Primary)',
-        props: {
-          color: 'primary',
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitSuccess',
-        label: 'Submit (Success)',
-        props: {
-          color: 'success',
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitOutline',
-        label: 'Submit (Outline)',
-        props: {
-          fill: 'outline',
-          color: 'primary',
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitClear',
-        label: 'Submit (Clear)',
-        props: {
-          fill: 'clear',
-        },
-      },
     ],
-  };
+  } as const satisfies FormConfig;
 }

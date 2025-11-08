@@ -1,7 +1,35 @@
-import { SelectField, ValueFieldComponent } from '@ng-forge/dynamic-form';
-import { PrimeSelectProps as PrimeSelectPropsType } from '../../types/field-types';
+import { DynamicText, SelectField, SelectProps, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export type PrimeSelectProps<T> = PrimeSelectPropsType<T>;
-export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps<T>>;
+/**
+ * Configuration props for PrimeNG select field component.
+ */
+export interface PrimeSelectProps extends SelectProps {
+  /**
+   * Enable multiple selection mode.
+   */
+  multiple?: boolean;
+  /**
+   * Enable filtering/search functionality.
+   */
+  filter?: boolean;
+  /**
+   * Placeholder text when no option is selected.
+   */
+  placeholder?: DynamicText;
+  /**
+   * Show clear button to deselect value.
+   */
+  showClear?: boolean;
+  /**
+   * CSS class to apply to the dropdown element.
+   */
+  styleClass?: string;
+  /**
+   * Hint text displayed below the select.
+   */
+  hint?: DynamicText;
+}
+
+export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;
 
 export type PrimeSelectComponent<T> = ValueFieldComponent<PrimeSelectField<T>>;

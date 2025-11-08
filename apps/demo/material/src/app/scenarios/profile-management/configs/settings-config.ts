@@ -1,4 +1,4 @@
-import { FormConfig } from '@ng-forge/dynamic-form';
+import { FormConfig, SubmitEvent } from '@ng-forge/dynamic-form';
 
 export const settingsConfig = {
   fields: [
@@ -165,8 +165,11 @@ export const settingsConfig = {
           label: 'Export My Data',
           props: {
             type: 'button',
-            className: 'secondary-button',
           },
+          event: class ExportDataEvent {
+            readonly type = 'export-data' as const;
+          },
+          className: 'secondary-button',
           col: 4,
         },
         {
@@ -175,8 +178,11 @@ export const settingsConfig = {
           label: 'Deactivate Account',
           props: {
             type: 'button',
-            className: 'danger-button',
           },
+          event: class DeactivateAccountEvent {
+            readonly type = 'deactivate-account' as const;
+          },
+          className: 'danger-button',
           col: 4,
         },
         {
@@ -186,6 +192,7 @@ export const settingsConfig = {
           props: {
             type: 'submit',
           },
+          event: SubmitEvent,
           col: 4,
         },
       ],

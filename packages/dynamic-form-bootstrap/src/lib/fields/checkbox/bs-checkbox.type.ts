@@ -1,6 +1,6 @@
 import { CheckboxField, CheckedFieldComponent, DynamicText } from '@ng-forge/dynamic-form';
 
-export interface BsCheckboxProps extends Record<string, unknown> {
+export interface BsCheckboxProps {
   switch?: boolean;
   inline?: boolean;
   reverse?: boolean;

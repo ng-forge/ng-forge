@@ -90,11 +90,11 @@ export const dependentValidationConfig = {
       label: 'Age',
       props: {
         type: 'number',
-        min: 1,
-        max: 120,
         placeholder: 'Enter your age',
         appearance: 'outline',
       },
+      min: 1,
+      max: 120,
       required: true,
       col: 6,
     },
