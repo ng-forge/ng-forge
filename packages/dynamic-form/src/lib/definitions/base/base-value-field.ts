@@ -7,7 +7,7 @@ import { DynamicText } from '../../pipes';
 export const ValueType = ['string', 'number', 'boolean', 'object', 'array', 'date'] as const;
 export type ValueType = (typeof ValueType)[number];
 
-export interface BaseValueField<TProps extends Record<string, unknown>, TValue> extends FieldDef<TProps>, FieldWithValidation {
+export interface BaseValueField<TProps, TValue> extends FieldDef<TProps>, FieldWithValidation {
   value?: TValue;
 
   defaultValue?: TValue;
@@ -21,7 +21,7 @@ export interface BaseValueField<TProps extends Record<string, unknown>, TValue> 
   required?: boolean;
 }
 
-export function isValueField<TProps extends Record<string, unknown>>(field: FieldDef<TProps>): field is BaseValueField<TProps, ValueType> {
+export function isValueField<TProps>(field: FieldDef<TProps>): field is BaseValueField<TProps, ValueType> {
   return 'value' in field;
 }
 
@@ -37,6 +37,4 @@ type ExcludedKeys =
   | 'col'
   | keyof FieldWithValidation;
 
-export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown>, unknown>> = Prettify<
-  WithInputSignals<Omit<T, ExcludedKeys>>
->;
+export type ValueFieldComponent<T extends BaseValueField<any, unknown>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

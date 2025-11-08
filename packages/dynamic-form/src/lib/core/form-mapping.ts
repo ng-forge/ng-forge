@@ -11,9 +11,9 @@ import { isRowField } from '../definitions/default/row-field';
  * Single entry point to map field data into form
  * This is the main function that should be called from the dynamic form component
  */
-export function mapFieldToForm<TValue>(fieldDef: FieldDef<Record<string, unknown>>, fieldPath: FieldPath<TValue>): void {
+export function mapFieldToForm<TValue>(fieldDef: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
   // Cast to FieldWithValidation to access validation properties
-  const validationField = fieldDef as FieldDef<Record<string, unknown>> & FieldWithValidation;
+  const validationField = fieldDef as FieldDef<any> & FieldWithValidation;
 
   // Special handling for page fields - flatten child fields to root level
   if (isPageField(fieldDef)) {
@@ -64,10 +64,7 @@ export function mapFieldToForm<TValue>(fieldDef: FieldDef<Record<string, unknown
 /**
  * Apply simple validation rules from field properties for backward compatibility
  */
-function applySimpleValidationRules<TValue>(
-  fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation,
-  fieldPath: FieldPath<TValue>
-): void {
+function applySimpleValidationRules<TValue>(fieldDef: FieldDef<any> & FieldWithValidation, fieldPath: FieldPath<TValue>): void {
   if (fieldDef.required) {
     required(fieldPath);
   }
@@ -101,7 +98,7 @@ function applySimpleValidationRules<TValue>(
 /**
  * Handle field-specific configuration that doesn't fit into validators/logic/schemas
  */
-function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<Record<string, unknown>>, fieldPath: FieldPath<TValue>): void {
+function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
   // Handle disabled state
   if (fieldDef.disabled) {
     disabled(fieldPath);
@@ -122,7 +119,7 @@ function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<Record<string,
  * Page fields are layout containers that don't create their own form controls
  * Their children are flattened to the root level of the form
  */
-function mapPageFieldToForm<TValue>(pageField: FieldDef<Record<string, unknown>>, rootPath: FieldPath<TValue>): void {
+function mapPageFieldToForm<TValue>(pageField: FieldDef<any>, rootPath: FieldPath<TValue>): void {
   if (!isPageField(pageField) || !pageField.fields) {
     return;
   }
@@ -130,7 +127,7 @@ function mapPageFieldToForm<TValue>(pageField: FieldDef<Record<string, unknown>>
   // Page fields don't create their own form controls
   // Instead, their child fields are mapped directly to the root form
   // Type assertion: After isPageField guard, we know fields contains FieldDef instances
-  const fields = pageField.fields as FieldDef<Record<string, unknown>>[];
+  const fields = pageField.fields as FieldDef<any>[];
   for (const childField of fields) {
     if (!childField.key) {
       continue;
@@ -150,7 +147,7 @@ function mapPageFieldToForm<TValue>(pageField: FieldDef<Record<string, unknown>>
  * Row fields are layout containers (horizontal) that don't create their own form controls
  * Their children are flattened to the root level of the form, similar to page fields
  */
-function mapRowFieldToForm<TValue>(rowField: FieldDef<Record<string, unknown>>, rootPath: FieldPath<TValue>): void {
+function mapRowFieldToForm<TValue>(rowField: FieldDef<any>, rootPath: FieldPath<TValue>): void {
   if (!isRowField(rowField) || !rowField.fields) {
     return;
   }
@@ -158,7 +155,7 @@ function mapRowFieldToForm<TValue>(rowField: FieldDef<Record<string, unknown>>, 
   // Row fields don't create their own form controls
   // Instead, their child fields are mapped directly to the root form
   // Type assertion: After isRowField guard, we know fields contains FieldDef instances
-  const fields = rowField.fields as FieldDef<Record<string, unknown>>[];
+  const fields = rowField.fields as FieldDef<any>[];
   for (const childField of fields) {
     if (!childField.key) {
       continue;
@@ -177,14 +174,14 @@ function mapRowFieldToForm<TValue>(rowField: FieldDef<Record<string, unknown>>, 
  * Maps group field children to the parent form schema
  * This ensures that validation from child fields is applied to the parent form
  */
-function mapGroupFieldToForm<TValue>(groupField: FieldDef<Record<string, unknown>>, fieldPath: FieldPath<TValue>): void {
+function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
   if (!isGroupField(groupField) || !groupField.fields) {
     return;
   }
 
   // Apply validation for each child field to the appropriate nested path in the parent form
   // Type assertion: After isGroupField guard, we know fields contains FieldDef instances
-  const fields = groupField.fields as FieldDef<Record<string, unknown>>[];
+  const fields = groupField.fields as FieldDef<any>[];
   for (const childField of fields) {
     if (!childField.key) {
       continue;

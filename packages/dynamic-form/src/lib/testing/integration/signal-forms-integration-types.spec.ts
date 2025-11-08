@@ -8,7 +8,7 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
 
 // Type aliases for the unified field definition
-type EnhancedFieldDef = FieldDef<Record<string, unknown>> & FieldWithValidation;
+type EnhancedFieldDef = FieldDef<any> & FieldWithValidation;
 
 describe('Signal Forms Integration Types', () => {
   describe('ValidatorConfig', () => {

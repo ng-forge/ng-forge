@@ -6,6 +6,6 @@ type InputProps = {
   type: InputType;
 };
 
-export interface InputField<TProps extends Record<string, unknown> = InputProps> extends BaseValueField<TProps, string> {
+export interface InputField<TProps = InputProps> extends BaseValueField<TProps, string> {
   type: 'input';
 }

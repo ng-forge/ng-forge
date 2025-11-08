@@ -8,14 +8,14 @@ export { isPageField };
 /**
  * Helper interface for container fields with fields property
  */
-interface ContainerFieldWithFields extends FieldDef<Record<string, unknown>> {
-  fields: FieldDef<Record<string, unknown>>[];
+interface ContainerFieldWithFields extends FieldDef<any> {
+  fields: FieldDef<any>[];
 }
 
 /**
  * Type guard to check if a field is a container with fields
  */
-function isContainerWithFields(field: FieldDef<Record<string, unknown>>): field is ContainerFieldWithFields {
+function isContainerWithFields(field: FieldDef<any>): field is ContainerFieldWithFields {
   return (
     (field.type === 'row' || field.type === 'group' || field.type === 'page') &&
     'fields' in field &&
@@ -123,7 +123,7 @@ export function detectFormMode<TFields extends RegisteredFieldTypes[]>(fields: T
  * @param fields Array of field definitions to check
  * @returns true if any page field is found at any level
  */
-function hasAnyPageFields(fields: FieldDef<Record<string, unknown>>[]): boolean {
+function hasAnyPageFields(fields: FieldDef<any>[]): boolean {
   for (const field of fields) {
     if (isPageField(field)) {
       return true;
@@ -145,7 +145,7 @@ function hasAnyPageFields(fields: FieldDef<Record<string, unknown>>[]): boolean 
  * @param fields Array of field definitions to check
  * @returns true if nested page fields found
  */
-function hasNestedPageFields(fields: FieldDef<Record<string, unknown>>[]): boolean {
+function hasNestedPageFields(fields: FieldDef<any>[]): boolean {
   for (const field of fields) {
     // If this is a page field, check if its children contain pages
     if (isPageField(field) && isContainerWithFields(field)) {

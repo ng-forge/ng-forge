@@ -26,7 +26,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ username: '' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'username',
           type: 'input',
           required: true,
@@ -58,7 +58,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'email',
           type: 'input',
           validators: [{ type: 'required' }, { type: 'email' }],
@@ -86,7 +86,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ show: false, field: 'test' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'field',
           type: 'input',
           logic: [
@@ -128,7 +128,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formValue = signal({ email: '' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'email',
           type: 'input',
           schemas: [{ type: 'apply', schema: 'emailSchema' }],
@@ -160,7 +160,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formValue = signal({ requirePassword: true, password: '' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'password',
           type: 'input',
           validators: [{ type: 'required' }],
@@ -208,7 +208,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ username: '' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'username',
           type: 'input',
           // Simple validators (backward compat)
@@ -251,7 +251,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ firstName: '', lastName: '' });
         const formSchema = schema<typeof formValue>((path) => {
-          const pageField: FieldDef<Record<string, unknown>> = {
+          const pageField: FieldDef<any> = {
             key: 'page1',
             type: 'page',
             fields: [
@@ -259,12 +259,12 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
                 key: 'firstName',
                 type: 'input',
                 required: true,
-              } as FieldDef<Record<string, unknown>> & FieldWithValidation,
+              } as FieldDef<any> & FieldWithValidation,
               {
                 key: 'lastName',
                 type: 'input',
                 required: true,
-              } as FieldDef<Record<string, unknown>> & FieldWithValidation,
+              } as FieldDef<any> & FieldWithValidation,
             ],
           };
 
@@ -293,7 +293,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         });
 
         const formSchema = schema<typeof formValue>((path) => {
-          const groupField: FieldDef<Record<string, unknown>> = {
+          const groupField: FieldDef<any> = {
             key: 'address',
             type: 'group',
             fields: [
@@ -301,12 +301,12 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
                 key: 'street',
                 type: 'input',
                 required: true,
-              } as FieldDef<Record<string, unknown>> & FieldWithValidation,
+              } as FieldDef<any> & FieldWithValidation,
               {
                 key: 'city',
                 type: 'input',
                 required: true,
-              } as FieldDef<Record<string, unknown>> & FieldWithValidation,
+              } as FieldDef<any> & FieldWithValidation,
             ],
           };
 
@@ -335,7 +335,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: '', phone: '' });
         const formSchema = schema<typeof formValue>((path) => {
-          const rowField: FieldDef<Record<string, unknown>> = {
+          const rowField: FieldDef<any> = {
             key: 'row1',
             type: 'row',
             fields: [
@@ -343,12 +343,12 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
                 key: 'email',
                 type: 'input',
                 email: true,
-              } as FieldDef<Record<string, unknown>> & FieldWithValidation,
+              } as FieldDef<any> & FieldWithValidation,
               {
                 key: 'phone',
                 type: 'input',
                 pattern: /^\d{10}$/,
-              } as FieldDef<Record<string, unknown>> & FieldWithValidation,
+              } as FieldDef<any> & FieldWithValidation,
             ],
           };
 
@@ -375,7 +375,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         const formValue = signal({ email: '' });
 
         // Using deprecated properties
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'email',
           type: 'input',
           required: true,
@@ -403,7 +403,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ password: '' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'password',
           type: 'input',
           // Old API
@@ -442,7 +442,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ age: 0 });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'age',
           type: 'input',
           min: 18,
@@ -475,7 +475,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ zipCode: '' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'zipCode',
           type: 'input',
           pattern: /^\d{5}$/,
@@ -503,7 +503,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ field: 'test' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'field',
           type: 'input',
           disabled: true,
@@ -525,7 +525,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ field: '' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> = {
+        const fieldDef: FieldDef<any> = {
           key: 'field',
           type: 'input',
         };
@@ -560,7 +560,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formValue = signal({ email: '' });
 
-        const fieldDef: FieldDef<Record<string, unknown>> & FieldWithValidation = {
+        const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'email',
           type: 'input',
           schemas: [{ type: 'apply', schema: 'emailValidation' }],

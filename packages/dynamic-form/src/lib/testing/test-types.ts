@@ -7,7 +7,7 @@ import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field
  * Simple form configuration interface for testing
  */
 export interface TestFormConfig {
-  fields: FieldDef<Record<string, unknown>>[];
+  fields: FieldDef<any>[];
 }
 
 /**
@@ -34,7 +34,7 @@ export interface TestResult<T = unknown> {
  * Configuration for setting up individual field component tests
  */
 export interface ComponentTestConfig<T = unknown> {
-  field: FieldDef<Record<string, unknown>>;
+  field: FieldDef<any>;
   value?: T;
 }
 

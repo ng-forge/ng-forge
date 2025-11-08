@@ -38,7 +38,7 @@ describe('RowFieldComponent', () => {
   });
 
   it('should render with child fields', () => {
-    const field: RowField<readonly FieldDef<Record<string, unknown>>[]> = {
+    const field: RowField<readonly FieldDef<any>[]> = {
       key: 'testRow',
       type: 'row',
       label: 'Test Row',

@@ -24,7 +24,7 @@ export interface RowField<TFields extends RowAllowedChildren[] = RowAllowedChild
  * Type guard for RowField with proper type narrowing
  * After this guard, TypeScript knows the field is a RowField and can access its properties safely
  */
-export function isRowField(field: FieldDef<Record<string, unknown>>): field is RowField {
+export function isRowField(field: FieldDef<any>): field is RowField {
   return field.type === 'row' && 'fields' in field && isArray((field as RowField).fields);
 }
 
@@ -33,7 +33,7 @@ export type RowComponent = FieldComponent<RowField<RowAllowedChildren[]>>;
 /**
  * Row child field with column layout properties
  */
-export interface RowChildField extends Omit<FieldDef<Record<string, unknown>>, 'col'> {
+export interface RowChildField extends Omit<FieldDef<any>, 'col'> {
   col?: {
     span?: number;
     start?: number;

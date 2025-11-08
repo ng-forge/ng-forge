@@ -21,7 +21,7 @@ export interface GroupField<TFields extends GroupAllowedChildren[] = GroupAllowe
  * Type guard for GroupField with proper type narrowing
  * After this guard, TypeScript knows the field is a GroupField and can access its properties safely
  */
-export function isGroupField(field: FieldDef<Record<string, unknown>>): field is GroupField {
+export function isGroupField(field: FieldDef<any>): field is GroupField {
   return field.type === 'group' && 'fields' in field;
 }
 

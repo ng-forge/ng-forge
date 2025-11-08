@@ -5,7 +5,7 @@ type TextareaProps = {
   cols?: number | undefined;
 };
 
-export interface TextareaField<TProps extends Record<string, unknown> = TextareaProps> extends BaseValueField<TProps, string> {
+export interface TextareaField<TProps = TextareaProps> extends BaseValueField<TProps, string> {
   type: 'textarea';
 
   maxLength?: number | undefined;

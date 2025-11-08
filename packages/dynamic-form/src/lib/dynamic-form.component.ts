@@ -132,7 +132,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: FieldDef<Record<string, unknown>>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
+    (fields: FieldDef<any>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
   );
@@ -143,7 +143,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<Record<string, unknown>>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
+    <T extends FieldDef<any>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
       const result: Record<string, unknown> = {};
       for (const [key, field] of Object.entries(fieldsById)) {
         const defaultValue = getFieldDefaultValue(field, registry);
@@ -495,13 +495,13 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     { initialValue: [] }
   );
 
-  private mapFields(fields: FieldDef<Record<string, unknown>>[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: FieldDef<any>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map((fieldDef) => this.mapSingleField(fieldDef))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
   }
 
-  private async mapSingleField(fieldDef: FieldDef<Record<string, unknown>>): Promise<ComponentRef<FormUiControl> | undefined> {
+  private async mapSingleField(fieldDef: FieldDef<any>): Promise<ComponentRef<FormUiControl> | undefined> {
     return this.fieldRegistry
       .loadTypeComponent(fieldDef.type)
       .then((componentType) => {

@@ -5,8 +5,8 @@ import { isArray } from 'lodash-es';
 /**
  * Helper interface for container fields (row/group) within nested checking
  */
-interface ContainerFieldWithFields extends FieldDef<Record<string, unknown>> {
-  fields: FieldDef<Record<string, unknown>>[];
+interface ContainerFieldWithFields extends FieldDef<any> {
+  fields: FieldDef<any>[];
 }
 
 /**
@@ -32,7 +32,7 @@ export interface PageField<TFields extends PageAllowedChildren[] = PageAllowedCh
  * Type guard for PageField with proper type narrowing
  * After this guard, TypeScript knows the field is a PageField and can access its properties safely
  */
-export function isPageField(field: FieldDef<Record<string, unknown>>): field is PageField {
+export function isPageField(field: FieldDef<any>): field is PageField {
   return field.type === 'page' && 'fields' in field && isArray((field as PageField).fields);
 }
 
@@ -44,13 +44,13 @@ export type PageComponent = FieldComponent<PageField>;
  * @returns true if valid (no nested pages), false otherwise
  */
 export function validatePageNesting(pageField: PageField): boolean {
-  return !hasNestedPages(pageField.fields as FieldDef<Record<string, unknown>>[]);
+  return !hasNestedPages(pageField.fields as FieldDef<any>[]);
 }
 
 /**
  * Type guard to check if a field is a container with fields property
  */
-function isContainerWithFields(field: FieldDef<Record<string, unknown>>): field is ContainerFieldWithFields {
+function isContainerWithFields(field: FieldDef<any>): field is ContainerFieldWithFields {
   return (field.type === 'row' || field.type === 'group') && 'fields' in field && isArray((field as ContainerFieldWithFields).fields);
 }
 
@@ -59,7 +59,7 @@ function isContainerWithFields(field: FieldDef<Record<string, unknown>>): field 
  * @param fields Array of field definitions to check
  * @returns true if nested pages found, false otherwise
  */
-function hasNestedPages(fields: FieldDef<Record<string, unknown>>[]): boolean {
+function hasNestedPages(fields: FieldDef<any>[]): boolean {
   for (const field of fields) {
     if (isPageField(field)) {
       return true;
