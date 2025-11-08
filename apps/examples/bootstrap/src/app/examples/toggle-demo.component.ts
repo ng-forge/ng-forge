@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'bs-example-toggle-demo',
@@ -68,7 +68,7 @@ export class ToggleDemoComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmit(data: unknown) {
     this.submittedData = data;

@@ -73,7 +73,7 @@ export class InputDemoComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmit(data: unknown) {
     this.submittedData = data;

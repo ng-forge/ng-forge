@@ -169,5 +169,5 @@ export class ButtonDemoComponent {
         },
       }),
     ],
-  };
+  } as const satisfies FormConfig;
 }

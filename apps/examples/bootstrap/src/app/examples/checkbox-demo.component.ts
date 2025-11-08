@@ -77,7 +77,7 @@ export class CheckboxDemoComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmit(data: unknown) {
     this.submittedData = data;

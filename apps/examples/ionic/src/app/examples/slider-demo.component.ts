@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import '@ng-forge/dynamic-form-ionic';
 import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 
 @Component({
@@ -56,5 +57,5 @@ export class SliderDemoComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 }

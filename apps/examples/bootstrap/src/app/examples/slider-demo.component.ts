@@ -88,7 +88,7 @@ export class SliderDemoComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmit(data: unknown) {
     this.submittedData = data;

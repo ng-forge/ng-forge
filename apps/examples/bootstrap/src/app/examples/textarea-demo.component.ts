@@ -77,7 +77,7 @@ export class TextareaDemoComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmit(data: unknown) {
     this.submittedData = data;

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import '@ng-forge/dynamic-form-material';
 
 @Component({
   selector: 'example-select-demo',
@@ -29,14 +30,14 @@ export class SelectDemoComponent {
         type: 'select',
         label: 'Country',
         required: true,
+        options: [
+          { value: 'us', label: 'United States' },
+          { value: 'uk', label: 'United Kingdom' },
+          { value: 'ca', label: 'Canada' },
+          { value: 'au', label: 'Australia' },
+        ],
         props: {
           placeholder: 'Select your country',
-          options: [
-            { value: 'us', label: 'United States' },
-            { value: 'uk', label: 'United Kingdom' },
-            { value: 'ca', label: 'Canada' },
-            { value: 'au', label: 'Australia' },
-          ],
         },
       },
       {
@@ -45,7 +46,7 @@ export class SelectDemoComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmit(data: unknown) {
     this.submittedData = data;

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import type {} from '@ng-forge/dynamic-form-bootstrap';
 
 @Component({
   selector: 'bs-example-datepicker-demo',
@@ -35,7 +36,7 @@ export class DatepickerDemoComponent {
       },
       {
         key: 'appointmentDate',
-        type: 'datepicker',
+        type: 'datepicker' as const,
         label: 'Appointment Date',
         props: {
           floatingLabel: true,
@@ -47,7 +48,7 @@ export class DatepickerDemoComponent {
         type: 'datepicker',
         label: 'Start Date',
         props: {
-          size: 'lg',
+          size: 'lg' as const,
           helpText: 'Project start date',
         },
       },
@@ -60,7 +61,7 @@ export class DatepickerDemoComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmit(data: unknown) {
     this.submittedData = data;

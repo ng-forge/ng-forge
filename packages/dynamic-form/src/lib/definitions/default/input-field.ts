@@ -8,6 +8,4 @@ export interface InputProps {
   placeholder?: DynamicText;
 }
 
-export interface InputField<TProps = InputProps> extends BaseValueField<TProps, string> {
-  type: 'input';
-}
+export type InputField<TProps = InputProps> = BaseValueField<TProps, string>;

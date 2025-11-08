@@ -12,7 +12,6 @@ import { GroupAllowedChildren } from '../../models/types/nesting-constraints';
  */
 export interface GroupField<TFields extends GroupAllowedChildren[] = GroupAllowedChildren[]> extends FieldDef<never> {
   /** Field type identifier */
-  type: 'group';
 
   fields: TFields;
 }

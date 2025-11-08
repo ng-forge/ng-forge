@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import type {} from '@ng-forge/dynamic-form-bootstrap';
 
 @Component({
   selector: 'bs-example-complete-form-demo',
@@ -74,7 +75,7 @@ export class CompleteFormDemoComponent {
     this.submittedData.set({ timestamp: new Date().toISOString(), data: value });
   }
 
-  config: FormConfig = {
+  config = {
     fields: [
       // Personal Information Section
       {
@@ -282,10 +283,10 @@ export class CompleteFormDemoComponent {
         key: 'experienceYears',
         type: 'slider',
         label: 'Years of Experience',
+        minValue: 0,
+        maxValue: 20,
+        step: 1,
         props: {
-          min: 0,
-          max: 20,
-          step: 1,
           showValue: true,
           valueSuffix: ' years',
           helpText: 'Total years of professional experience',
@@ -366,5 +367,5 @@ export class CompleteFormDemoComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 }

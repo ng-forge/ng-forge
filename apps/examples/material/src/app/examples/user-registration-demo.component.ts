@@ -148,7 +148,7 @@ export class UserRegistrationDemoComponent {
         },
       }),
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmit(data: unknown) {
     this.submittedData = data;

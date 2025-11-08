@@ -22,7 +22,6 @@ interface ContainerFieldWithFields extends FieldDef<any> {
  */
 export interface PageField<TFields extends PageAllowedChildren[] = PageAllowedChildren[]> extends FieldDef<never> {
   /** Field type identifier */
-  type: 'page';
 
   /** Child field definitions to render within this page */
   fields: TFields;
