@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonSelect, IonSelectOption } from '@ionic/angular/standalone';
+import { IonSelect, IonSelectOption, IonNote } from '@ionic/angular/standalone';
 import {
   DynamicText,
   DynamicTextPipe,
@@ -17,7 +17,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-select',
-  imports: [IonSelect, IonSelectOption, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonSelect, IonSelectOption, IonNote, Field, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -69,6 +69,10 @@ export default class IonicSelectFieldComponent<T> implements IonicSelectComponen
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<IonicSelectProps<T>>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   defaultCompare = Object.is;
 }

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { IonDatetime, IonInput, IonModal } from '@ionic/angular/standalone';
+import { IonDatetime, IonInput, IonModal, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
@@ -11,7 +11,7 @@ import { format } from 'date-fns';
  */
 @Component({
   selector: 'df-ionic-datepicker',
-  imports: [IonInput, IonModal, IonDatetime, DynamicTextPipe, AsyncPipe],
+  imports: [IonInput, IonModal, IonDatetime, IonNote, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field(); @let dateValue = f().value();
 
@@ -77,6 +77,10 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<IonicDatepickerProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 
   readonly isModalOpen = signal(false);
 
