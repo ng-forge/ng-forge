@@ -23,14 +23,14 @@ export class MultiCheckboxDemoComponent {
         key: 'interests',
         type: 'multi-checkbox',
         label: 'Interests',
+        options: [
+          { value: 'sports', label: 'Sports' },
+          { value: 'music', label: 'Music' },
+          { value: 'reading', label: 'Reading' },
+          { value: 'travel', label: 'Travel' },
+          { value: 'gaming', label: 'Gaming' },
+        ],
         props: {
-          options: [
-            { value: 'sports', label: 'Sports' },
-            { value: 'music', label: 'Music' },
-            { value: 'reading', label: 'Reading' },
-            { value: 'travel', label: 'Travel' },
-            { value: 'gaming', label: 'Gaming' },
-          ],
           hint: 'Select all that apply',
         },
       },
@@ -38,14 +38,14 @@ export class MultiCheckboxDemoComponent {
         key: 'skills',
         type: 'multi-checkbox',
         label: 'Technical Skills',
+        options: [
+          { value: 'typescript', label: 'TypeScript' },
+          { value: 'angular', label: 'Angular' },
+          { value: 'react', label: 'React' },
+          { value: 'vue', label: 'Vue.js' },
+          { value: 'node', label: 'Node.js' },
+        ],
         props: {
-          options: [
-            { value: 'typescript', label: 'TypeScript' },
-            { value: 'angular', label: 'Angular' },
-            { value: 'react', label: 'React' },
-            { value: 'vue', label: 'Vue.js' },
-            { value: 'node', label: 'Node.js' },
-          ],
           hint: 'Select your technical skills',
         },
         required: true,
@@ -54,28 +54,26 @@ export class MultiCheckboxDemoComponent {
         key: 'languages',
         type: 'multi-checkbox',
         label: 'Languages Spoken',
-        props: {
-          options: [
-            { value: 'en', label: 'English' },
-            { value: 'es', label: 'Spanish' },
-            { value: 'fr', label: 'French' },
-            { value: 'de', label: 'German' },
-            { value: 'ja', label: 'Japanese' },
-            { value: 'zh', label: 'Chinese' },
-          ],
-        },
+        options: [
+          { value: 'en', label: 'English' },
+          { value: 'es', label: 'Spanish' },
+          { value: 'fr', label: 'French' },
+          { value: 'de', label: 'German' },
+          { value: 'ja', label: 'Japanese' },
+          { value: 'zh', label: 'Chinese' },
+        ],
       },
       {
         key: 'permissions',
         type: 'multi-checkbox',
         label: 'User Permissions',
+        options: [
+          { value: 'read', label: 'Read' },
+          { value: 'write', label: 'Write' },
+          { value: 'delete', label: 'Delete' },
+          { value: 'admin', label: 'Admin' },
+        ],
         props: {
-          options: [
-            { value: 'read', label: 'Read' },
-            { value: 'write', label: 'Write' },
-            { value: 'delete', label: 'Delete' },
-            { value: 'admin', label: 'Admin' },
-          ],
           styleClass: 'custom-multi-checkbox-class', // Custom CSS class
           hint: 'Assign permissions to the user',
         },

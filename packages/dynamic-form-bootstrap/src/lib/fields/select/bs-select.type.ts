@@ -1,6 +1,6 @@
 import { DynamicText, SelectField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface BsSelectProps<T> extends Record<string, unknown> {
+export interface BsSelectProps<T> {
   multiple?: boolean;
   size?: 'sm' | 'lg';
   htmlSize?: number;

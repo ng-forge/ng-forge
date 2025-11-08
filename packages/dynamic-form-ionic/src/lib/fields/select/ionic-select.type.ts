@@ -1,6 +1,6 @@
 import { DynamicText, FieldOption, SelectField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface IonicSelectProps<T> extends Record<string, unknown> {
+export interface IonicSelectProps<T> {
   multiple?: boolean;
   interface?: 'action-sheet' | 'popover' | 'alert';
   interfaceOptions?: any;

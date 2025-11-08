@@ -35,27 +35,23 @@ export class MultiCheckboxDemoComponent {
         key: 'interests',
         type: 'multi-checkbox',
         label: 'Interests',
-        props: {
-          options: [
-            { value: 'sports', label: 'Sports' },
-            { value: 'music', label: 'Music' },
-            { value: 'technology', label: 'Technology' },
-            { value: 'art', label: 'Art' },
-          ],
-        },
+        options: [
+          { value: 'sports', label: 'Sports' },
+          { value: 'music', label: 'Music' },
+          { value: 'technology', label: 'Technology' },
+          { value: 'art', label: 'Art' },
+        ],
       },
       {
         key: 'skills',
         type: 'multi-checkbox',
         label: 'Technical Skills',
-        props: {
-          options: [
-            { value: 'angular', label: 'Angular' },
-            { value: 'react', label: 'React' },
-            { value: 'vue', label: 'Vue.js' },
-            { value: 'node', label: 'Node.js' },
-          ],
-        },
+        options: [
+          { value: 'angular', label: 'Angular' },
+          { value: 'react', label: 'React' },
+          { value: 'vue', label: 'Vue.js' },
+          { value: 'node', label: 'Node.js' },
+        ],
       },
     ],
   };

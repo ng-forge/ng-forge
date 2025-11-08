@@ -35,25 +35,21 @@ export class RadioDemoComponent {
         key: 'plan',
         type: 'radio',
         label: 'Subscription Plan',
-        props: {
-          options: [
-            { value: 'free', label: 'Free' },
-            { value: 'pro', label: 'Pro' },
-            { value: 'enterprise', label: 'Enterprise' },
-          ],
-        },
+        options: [
+          { value: 'free', label: 'Free' },
+          { value: 'pro', label: 'Pro' },
+          { value: 'enterprise', label: 'Enterprise' },
+        ],
       },
       {
         key: 'contactMethod',
         type: 'radio',
         label: 'Preferred Contact Method',
-        props: {
-          options: [
-            { value: 'email', label: 'Email' },
-            { value: 'phone', label: 'Phone' },
-            { value: 'sms', label: 'SMS' },
-          ],
-        },
+        options: [
+          { value: 'email', label: 'Email' },
+          { value: 'phone', label: 'Phone' },
+          { value: 'sms', label: 'SMS' },
+        ],
       },
     ],
   };

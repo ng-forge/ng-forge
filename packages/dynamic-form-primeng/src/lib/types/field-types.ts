@@ -20,7 +20,7 @@ import type {
 /**
  * Configuration props for PrimeNG input field component.
  */
-export interface PrimeInputProps extends Record<string, unknown> {
+export interface PrimeInputProps {
   /**
    * CSS class to apply to the input element.
    */
@@ -55,7 +55,7 @@ export type PrimeInputField = InputField<PrimeInputProps>;
 /**
  * Configuration props for PrimeNG select field component.
  */
-export interface PrimeSelectProps<T> extends Record<string, unknown> {
+export interface PrimeSelectProps<T> {
   /**
    * Enable multiple selection mode.
    */
@@ -90,7 +90,7 @@ export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps<T>>;
 /**
  * Configuration props for PrimeNG checkbox field component.
  */
-export interface PrimeCheckboxProps extends Record<string, unknown> {
+export interface PrimeCheckboxProps {
   /**
    * Binary mode for boolean values.
    */
@@ -125,7 +125,7 @@ export type PrimeCheckboxField = CheckboxField<PrimeCheckboxProps>;
 /**
  * Configuration props for PrimeNG button field component.
  */
-export interface PrimeButtonProps extends Record<string, unknown> {
+export interface PrimeButtonProps {
   /**
    * Severity/color variant of the button.
    */
@@ -183,7 +183,7 @@ export type PrimePreviousButtonField = PrimeButtonField<FormEvent>;
 /**
  * Configuration props for PrimeNG textarea field component.
  */
-export interface PrimeTextareaProps extends Record<string, unknown> {
+export interface PrimeTextareaProps {
   /**
    * Number of visible text lines.
    */
@@ -218,7 +218,7 @@ export type PrimeTextareaField = TextareaField<PrimeTextareaProps>;
 /**
  * Configuration props for PrimeNG radio field component.
  */
-export interface PrimeRadioProps<T> extends Record<string, unknown> {
+export interface PrimeRadioProps<T> {
   /**
    * CSS class to apply to the radio group.
    */
@@ -241,7 +241,7 @@ export type PrimeRadioField<T> = RadioField<T, PrimeRadioProps<T>>;
 /**
  * Configuration props for PrimeNG multi-checkbox field component.
  */
-export interface PrimeMultiCheckboxProps<T> extends Record<string, unknown> {
+export interface PrimeMultiCheckboxProps<T> {
   /**
    * CSS class to apply to the checkbox group.
    */
@@ -264,7 +264,7 @@ export type PrimeMultiCheckboxField<T> = MultiCheckboxField<T, PrimeMultiCheckbo
 /**
  * Configuration props for PrimeNG datepicker field component.
  */
-export interface PrimeDatepickerProps extends Record<string, unknown> {
+export interface PrimeDatepickerProps {
   /**
    * Format string for displaying dates.
    */
@@ -311,7 +311,7 @@ export type PrimeDatepickerField = DatepickerField<PrimeDatepickerProps>;
 /**
  * Configuration props for PrimeNG slider field component.
  */
-export interface PrimeSliderProps extends Record<string, unknown> {
+export interface PrimeSliderProps {
   /**
    * Enable range mode with two handles.
    */
@@ -342,7 +342,7 @@ export type PrimeSliderField = SliderField<PrimeSliderProps>;
 /**
  * Configuration props for PrimeNG toggle field component.
  */
-export interface PrimeToggleProps extends Record<string, unknown> {
+export interface PrimeToggleProps {
   /**
    * CSS class to apply to the toggle element.
    */
