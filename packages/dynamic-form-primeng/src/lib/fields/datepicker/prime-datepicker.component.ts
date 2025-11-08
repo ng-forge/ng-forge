@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
+import {
+  DynamicText, DynamicTextPipe,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { PrimeDatepickerComponent, PrimeDatepickerProps } from './prime-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { DatePicker } from 'primeng/datepicker';
@@ -11,7 +15,7 @@ import { DatePicker } from 'primeng/datepicker';
  */
 @Component({
   selector: 'df-prime-datepicker',
-  imports: [DatePicker, Field, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe],
+  imports: [DatePicker, Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -40,7 +44,11 @@ import { DatePicker } from 'primeng/datepicker';
       <small class="p-hint">{{ hint | dynamicText | async }}</small>
       }
 
-      <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <small class="p-error">{{ error.message }}</small>
+      }
+    }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,4 +72,8 @@ export default class PrimeDatepickerFieldComponent implements PrimeDatepickerCom
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<PrimeDatepickerProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 }

@@ -2,8 +2,12 @@ import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angula
 import { FieldTree } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
 import { Checkbox } from 'primeng/checkbox';
-import { DynamicText, DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-form';
-import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
+import {
+  DynamicText, DynamicTextPipe, FieldOption, ValueType,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -12,7 +16,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-prime-multi-checkbox',
-  imports: [Checkbox, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @if (label(); as label) {
@@ -38,7 +42,11 @@ import { AsyncPipe } from '@angular/common';
     <small class="p-hint">{{ hint | dynamicText | async }}</small>
     }
 
-    <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <small class="p-error">{{ error.message }}</small>
+      }
+    }
   `,
   styles: [
     `

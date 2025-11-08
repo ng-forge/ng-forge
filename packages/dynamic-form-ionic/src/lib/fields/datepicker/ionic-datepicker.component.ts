@@ -1,8 +1,12 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { IonDatetime, IonInput, IonModal } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { IonicErrorsComponent } from '../../shared/ionic-errors.component';
+import {
+  DynamicText, DynamicTextPipe,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
@@ -16,7 +20,6 @@ import { format } from 'date-fns';
     IonInput,
     IonModal,
     IonDatetime,
-    IonicErrorsComponent,
     DynamicTextPipe,
     AsyncPipe,
   ],
@@ -37,7 +40,11 @@ import { format } from 'date-fns';
     >
       @if (f().invalid() && f().touched()) {
         <div slot="error">
-          <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+          @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <ion-note color="danger">{{ error.message }}</ion-note>
+      }
+    }
         </div>
       }
     </ion-input>

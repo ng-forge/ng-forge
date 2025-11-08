@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { BsErrorsComponent } from '../../shared/bs-errors.component';
+import {
+  DynamicText, DynamicTextPipe,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { BsInputComponent, BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -11,7 +15,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-bs-input',
-  imports: [Field, BsErrorsComponent, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @if (p?.floatingLabel) {
@@ -37,7 +41,11 @@ import { AsyncPipe } from '@angular/common';
       </div>
       }
 
-      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    }
     </div>
     } @else {
     <!-- Standard variant -->
@@ -69,7 +77,11 @@ import { AsyncPipe } from '@angular/common';
       </div>
       }
 
-      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    }
     </div>
     }
   `,
@@ -89,4 +101,8 @@ export default class BsInputFieldComponent implements BsInputComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<BsInputProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 }

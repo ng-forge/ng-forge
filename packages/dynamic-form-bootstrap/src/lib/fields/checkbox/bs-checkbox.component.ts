@@ -1,13 +1,17 @@
 import { ChangeDetectionStrategy, Component, effect, ElementRef, input, viewChild } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { BsErrorsComponent } from '../../shared/bs-errors.component';
+import {
+  DynamicText, DynamicTextPipe,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { BsCheckboxComponent, BsCheckboxProps } from './bs-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-checkbox',
-  imports: [Field, BsErrorsComponent, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -40,7 +44,11 @@ import { AsyncPipe } from '@angular/common';
     </div>
     }
 
-    <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" [attr.hidden]="f().hidden() || null" />
+    @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    }
   `,
   styles: [
     `

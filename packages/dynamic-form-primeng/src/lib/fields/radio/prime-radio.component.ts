@@ -1,15 +1,19 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { RadioButton } from 'primeng/radiobutton';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
-import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
+import {
+  DynamicText, DynamicTextPipe, FieldOption,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-prime-radio',
-  imports: [RadioButton, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [RadioButton, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @if (label()) {
@@ -36,7 +40,11 @@ import { FormsModule } from '@angular/forms';
     @if (props()?.hint; as hint) {
     <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
     }
-    <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" [attr.hidden]="f().hidden() || null" />
+    @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <small class="p-error">{{ error.message }}</small>
+      }
+    }
   `,
   styles: [
     `
@@ -91,4 +99,8 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<PrimeRadioProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 }

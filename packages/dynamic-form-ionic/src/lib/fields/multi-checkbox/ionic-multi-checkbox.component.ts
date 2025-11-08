@@ -1,8 +1,12 @@
 import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonItem, IonLabel } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-form';
-import { IonicErrorsComponent } from '../../shared/ionic-errors.component';
+import {
+  DynamicText, DynamicTextPipe, FieldOption, ValueType,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -14,7 +18,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-multi-checkbox',
-  imports: [IonCheckbox, IonItem, IonLabel, IonicErrorsComponent, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],
+  imports: [IonCheckbox, IonItem, IonLabel, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
     @if (label(); as label) {
@@ -38,7 +42,11 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
 
-    <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <ion-note color="danger">{{ error.message }}</ion-note>
+      }
+    }
   `,
   styles: [
     `

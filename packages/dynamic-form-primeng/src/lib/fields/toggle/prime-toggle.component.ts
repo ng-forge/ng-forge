@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
+import {
+  DynamicText, DynamicTextPipe,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { PrimeToggleComponent, PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';
 import { ToggleSwitch } from 'primeng/toggleswitch';
@@ -12,7 +16,7 @@ import { FormsModule } from '@angular/forms';
  */
 @Component({
   selector: 'df-prime-toggle',
-  imports: [ToggleSwitch, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -36,7 +40,11 @@ import { FormsModule } from '@angular/forms';
       <small class="p-hint">{{ hint | dynamicText | async }}</small>
       }
 
-      <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <small class="p-error">{{ error.message }}</small>
+      }
+    }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,4 +63,8 @@ export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeToggleProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 }

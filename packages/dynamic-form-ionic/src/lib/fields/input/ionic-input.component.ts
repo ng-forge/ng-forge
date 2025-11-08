@@ -1,8 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonInput } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { IonicErrorsComponent } from '../../shared/ionic-errors.component';
+import {
+  DynamicText, DynamicTextPipe,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -11,7 +15,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-input',
-  imports: [IonInput, IonicErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonInput, Field, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -31,7 +35,11 @@ import { AsyncPipe } from '@angular/common';
     >
       @if (f().invalid() && f().touched()) {
       <div slot="error">
-        <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+        @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <ion-note color="danger">{{ error.message }}</ion-note>
+      }
+    }
       </div>
       }
     </ion-input>
@@ -52,4 +60,8 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<IonicInputProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 }

@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
+import {
+  DynamicText, DynamicTextPipe,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { TextareaModule } from 'primeng/textarea';
@@ -9,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-prime-textarea',
-  imports: [TextareaModule, PrimeErrorsComponent, Field, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [TextareaModule, Field, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -37,7 +41,11 @@ import { FormsModule } from '@angular/forms';
       <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
       }
 
-      <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <small class="p-error">{{ error.message }}</small>
+      }
+    }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

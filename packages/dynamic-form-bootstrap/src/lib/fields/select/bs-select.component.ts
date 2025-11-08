@@ -1,13 +1,17 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
-import { BsErrorsComponent } from '../../shared/bs-errors.component';
+import {
+  DynamicText, DynamicTextPipe, FieldOption,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { BsSelectComponent, BsSelectProps } from './bs-select.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-select',
-  imports: [Field, BsErrorsComponent, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -40,7 +44,11 @@ import { AsyncPipe } from '@angular/common';
       <div class="form-text" [id]="key() + '-help'">{{ helpText | dynamicText | async }}</div>
       }
 
-      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

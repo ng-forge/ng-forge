@@ -1,14 +1,18 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
-import { BsErrorsComponent } from '../../shared/bs-errors.component';
+import {
+  DynamicText, DynamicTextPipe, FieldOption,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { BsRadioComponent, BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-bs-radio',
-  imports: [BsErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -54,7 +58,11 @@ import { FormsModule } from '@angular/forms';
       <div class="form-text">{{ helpText | dynamicText | async }}</div>
       }
 
-      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+      @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    }
     </div>
   `,
   styles: [

@@ -1,8 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonRadioGroup, IonRadio, IonItem } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
-import { IonicErrorsComponent } from '../../shared/ionic-errors.component';
+import {
+  DynamicText, DynamicTextPipe, FieldOption,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { IonicRadioComponent, IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -11,7 +15,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-radio',
-  imports: [IonRadioGroup, IonRadio, IonItem, IonicErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonRadioGroup, IonRadio, IonItem, Field, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -38,7 +42,11 @@ import { AsyncPipe } from '@angular/common';
       }
     </ion-radio-group>
 
-    <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <ion-note color="danger">{{ error.message }}</ion-note>
+      }
+    }
   `,
   styles: [
     `
