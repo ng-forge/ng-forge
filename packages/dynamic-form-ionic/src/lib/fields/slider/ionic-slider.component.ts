@@ -19,7 +19,7 @@ import { AsyncPipe } from '@angular/common';
       [field]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
-      [step]="step()"
+      [step]="props()?.step ?? 1"
       [dualKnobs]="props()?.dualKnobs ?? false"
       [pin]="props()?.pin ?? false"
       [pinFormatter]="props()?.pinFormatter"
@@ -58,10 +58,6 @@ export default class IonicSliderFieldComponent implements IonicSliderComponent {
   readonly placeholder = input<DynamicText>();
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
-
-  readonly minValue = input<number>(0);
-  readonly maxValue = input<number>(100);
-  readonly step = input<number>(1);
 
   readonly props = input<IonicSliderProps>();
 }

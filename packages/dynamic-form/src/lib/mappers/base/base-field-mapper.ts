@@ -50,6 +50,9 @@ export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
     'readonly',
     'hidden',
     'required',
+    'minValue', // Handled by Field directive metadata (MIN)
+    'maxValue', // Handled by Field directive metadata (MAX)
+    'step', // Passed via props instead
   ]);
 
   for (const [key, value] of entries(fieldDef)) {

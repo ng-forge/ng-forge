@@ -15,4 +15,5 @@ export interface IonicSliderProps extends Record<string, unknown> {
 
 export type IonicSliderField = SliderField<IonicSliderProps>;
 
-export type IonicSliderComponent = ValueFieldComponent<IonicSliderField>;
+// Exclude minValue, maxValue, step from component interface since they're handled by Field directive metadata
+export type IonicSliderComponent = Omit<ValueFieldComponent<IonicSliderField>, 'minValue' | 'maxValue' | 'step'>;
