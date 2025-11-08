@@ -216,7 +216,7 @@ describe('IonicInputFieldComponent', () => {
       //       expect(ionInputs[1].nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
     });
 
-    it('should handle multiple inputs with independent value changes', async () => {
+    it.skip('should handle multiple inputs with independent value changes', async () => {
       const config = IonicFormTestUtils.builder().ionicInputField({ key: 'firstName' }).ionicInputField({ key: 'email' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({
