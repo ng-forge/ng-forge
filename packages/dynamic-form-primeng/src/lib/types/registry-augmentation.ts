@@ -10,20 +10,20 @@
 
 import type { FormEvent } from '@ng-forge/dynamic-form';
 import type {
-  PrimeInputField,
-  PrimeSelectField,
-  PrimeCheckboxField,
   PrimeButtonField,
-  PrimeSubmitButtonField,
+  PrimeCheckboxField,
+  PrimeDatepickerField,
+  PrimeInputField,
+  PrimeMultiCheckboxField,
   PrimeNextButtonField,
   PrimePreviousButtonField,
-  PrimeTextareaField,
   PrimeRadioField,
-  PrimeMultiCheckboxField,
-  PrimeDatepickerField,
+  PrimeSelectField,
   PrimeSliderField,
+  PrimeSubmitButtonField,
+  PrimeTextareaField,
   PrimeToggleField,
-} from './field-types';
+} from '../fields';
 
 declare module '@ng-forge/dynamic-form' {
   interface FieldRegistryLeaves {

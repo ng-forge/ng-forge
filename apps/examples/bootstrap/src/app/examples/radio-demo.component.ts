@@ -78,7 +78,7 @@ export class RadioDemoComponent {
         props: {
           buttonGroup: true,
           outline: true,
-          variant: 'success',
+          variant: 'success' as const,
           helpText: 'Outline style button group',
         },
       },

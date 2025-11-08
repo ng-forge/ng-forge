@@ -1,6 +1,6 @@
-import { DatepickerField, DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-form';
+import { DatepickerField, DatepickerProps, DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface BsDatepickerProps {
+export interface BsDatepickerProps extends DatepickerProps {
   useNgBootstrap?: boolean;
   size?: 'sm' | 'lg';
   floatingLabel?: boolean;

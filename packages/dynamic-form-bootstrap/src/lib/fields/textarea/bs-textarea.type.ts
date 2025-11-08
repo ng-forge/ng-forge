@@ -1,6 +1,6 @@
-import { DynamicText, TextareaField, ValueFieldComponent } from '@ng-forge/dynamic-form';
+import { DynamicText, TextareaField, TextareaProps, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface BsTextareaProps {
+export interface BsTextareaProps extends TextareaProps {
   rows?: number;
   size?: 'sm' | 'lg';
   floatingLabel?: boolean;

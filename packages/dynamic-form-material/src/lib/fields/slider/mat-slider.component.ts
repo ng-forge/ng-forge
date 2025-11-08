@@ -15,15 +15,7 @@ import { AsyncPipe } from '@angular/common';
     <div class="slider-label">{{ label | dynamicText | async }}</div>
     }
 
-    <mat-slider
-      [min]="minValue()"
-      [max]="maxValue()"
-      [step]="step()"
-      [discrete]="props()?.thumbLabel || props()?.showThumbLabel"
-      [showTickMarks]="props()?.tickInterval !== undefined"
-      [color]="props()?.color || 'primary'"
-      class="slider-container"
-    >
+    <mat-slider [min]="minValue()" [max]="maxValue()" [step]="step()" [color]="props()?.color || 'primary'" class="slider-container">
       <!-- TODO: integrate input with the field -->
       <input matSliderThumb [(value)]="f().value" [disabled]="f().disabled()" [attr.tabindex]="tabIndex()" />
     </mat-slider>

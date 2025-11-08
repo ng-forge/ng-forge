@@ -67,7 +67,7 @@ export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponen
   readonly tabIndex = input<number>();
 
   readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<PrimeSelectProps<T>>();
+  readonly props = input<PrimeSelectProps>();
 
   readonly isMultiple = computed(() => this.props()?.multiple ?? false);
 }

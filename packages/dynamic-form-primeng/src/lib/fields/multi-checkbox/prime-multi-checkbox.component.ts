@@ -72,7 +72,7 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
   readonly tabIndex = input<number>();
 
   readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<PrimeMultiCheckboxProps<T>>();
+  readonly props = input<PrimeMultiCheckboxProps>();
 
   valueViewModel = linkedSignal<T[]>(() => this.field()().value(), { equal: isEqual });
 

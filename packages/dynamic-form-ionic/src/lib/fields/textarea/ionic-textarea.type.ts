@@ -1,6 +1,6 @@
-import { DynamicText, TextareaField, ValueFieldComponent } from '@ng-forge/dynamic-form';
+import { DynamicText, TextareaField, TextareaProps, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface IonicTextareaProps {
+export interface IonicTextareaProps extends TextareaProps {
   rows?: number;
   autoGrow?: boolean;
   maxlength?: number;

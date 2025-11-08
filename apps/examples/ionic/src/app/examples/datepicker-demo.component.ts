@@ -37,7 +37,7 @@ export class DatepickerDemoComponent {
         label: 'Birth Date',
         props: {
           placeholder: 'Select your birth date',
-          presentation: 'date',
+          presentation: 'date' as const,
         },
       },
       {
@@ -46,7 +46,7 @@ export class DatepickerDemoComponent {
         label: 'Appointment Time',
         props: {
           placeholder: 'Select appointment time',
-          presentation: 'time',
+          presentation: 'time' as const,
         },
       },
       {
@@ -55,7 +55,7 @@ export class DatepickerDemoComponent {
         label: 'Event Date & Time',
         props: {
           placeholder: 'Select date and time',
-          presentation: 'date-time',
+          presentation: 'date-time' as const,
         },
       },
     ],
