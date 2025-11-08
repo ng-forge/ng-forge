@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
-import type {} from '@ng-forge/dynamic-form-bootstrap';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'bs-example-datepicker-demo',
@@ -10,20 +9,18 @@ import type {} from '@ng-forge/dynamic-form-bootstrap';
     class: 'example-container',
   },
   template: `
-    <dynamic-form [config]="config" (submit)="onSubmit($event)" />
-    @if (submittedData) {
+    <dynamic-form [config]="config" [(value)]="formValue" />
     <div class="example-result">
-      <h4>Submitted Data:</h4>
-      <pre>{{ submittedData | json }}</pre>
+      <h4>Form Data:</h4>
+      <pre>{{ formValue() | json }}</pre>
     </div>
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DatepickerDemoComponent {
-  submittedData: unknown = null;
+  formValue = signal({});
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'birthDate',
@@ -52,18 +49,6 @@ export class DatepickerDemoComponent {
           helpText: 'Project start date',
         },
       },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Submit',
-        props: {
-          variant: 'primary',
-        },
-      },
     ],
   } as const satisfies FormConfig;
-
-  onSubmit(data: unknown) {
-    this.submittedData = data;
-  }
 }

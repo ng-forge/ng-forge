@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
  */
 @Component({
   selector: 'df-prime-input',
-  imports: [InputText, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [InputText, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -25,7 +25,7 @@ import { FormsModule } from '@angular/forms';
       <input
         pInputText
         [id]="inputId()"
-        [(ngModel)]="f().value"
+        [field]="f"
         [attr.type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"

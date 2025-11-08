@@ -131,22 +131,6 @@ export class ContactFormComponent {
 
 ### Using with Multiple UI Libraries
 
-If you're using multiple UI libraries (e.g., Material + Ionic) in the same app, use the `/no-augmentation` entry point to avoid TypeScript module augmentation conflicts:
-
-```typescript
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withIonicFields } from '@ng-forge/dynamic-form-ionic/no-augmentation';
-import { provideIonicAngular } from '@ionic/angular/standalone';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideIonicAngular({ mode: 'md' }),
-    provideDynamicForm(...withIonicFields()),
-  ],
-};
-```
-
 ### CSS Variables
 
 All field components use customizable CSS variables for consistent styling:
@@ -154,11 +138,11 @@ All field components use customizable CSS variables for consistent styling:
 ```scss
 :root {
   // Field layout
-  --df-ionic-field-gap: 0.5rem;        // Gap between label, input, and hint
+  --df-ionic-field-gap: 0.5rem; // Gap between label, input, and hint
 
   // Label styling
-  --df-ionic-label-font-weight: 500;    // Label font weight
-  --df-ionic-label-font-size: 1rem;     // Label font size
+  --df-ionic-label-font-weight: 500; // Label font weight
+  --df-ionic-label-font-size: 1rem; // Label font size
   --df-ionic-label-color: var(--ion-text-color, #000);
 
   // Hint text styling

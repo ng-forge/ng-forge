@@ -1,54 +1,33 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import '@ng-forge/dynamic-form-ionic';
-import {
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'example-input-demo',
-  imports: [DynamicForm, JsonPipe, IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardHeader, IonCardTitle, IonCardContent],
+  imports: [DynamicForm, JsonPipe, IonContent],
   host: {
     class: 'example-container',
   },
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Input Example</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content>
       <div>
-        <dynamic-form [config]="config()" (submit)="onSubmit($event)" />
+        <dynamic-form [config]="config" [(value)]="formValue" />
 
-        @if (submittedData()) {
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Submitted Data</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <pre>{{ submittedData() | json }}</pre>
-          </ion-card-content>
-        </ion-card>
-        }
+        <div class="example-result">
+          <h4>Form Data:</h4>
+          <pre>{{ formValue() | json }}</pre>
+        </div>
       </div>
     </ion-content>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputDemoComponent {
-  submittedData = signal<unknown>(null);
+  formValue = signal({});
 
-  config = signal<FormConfig>({
+  config = {
     fields: [
       {
         key: 'email',
@@ -60,15 +39,6 @@ export class InputDemoComponent {
           placeholder: 'Enter your email',
         },
       },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Submit',
-      },
     ],
-  });
-
-  onSubmit(data: unknown) {
-    this.submittedData.set(data);
-  }
+  } as const satisfies FormConfig;
 }

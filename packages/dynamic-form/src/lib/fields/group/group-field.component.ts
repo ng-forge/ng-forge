@@ -142,7 +142,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
 
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
-  readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit'));
+  readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit'));
 
   // Convert field setup to observable for field mapping
   fields$ = toObservable(computed(() => this.formSetup().fields));

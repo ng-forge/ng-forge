@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import '@ng-forge/dynamic-form-primeng';
 
 @Component({
@@ -10,13 +10,15 @@ import '@ng-forge/dynamic-form-primeng';
     class: 'example-container',
   },
   template: `
-    <dynamic-form [config]="fields" [(value)]="formOutput" />
-    <h4>Form Data:</h4>
-    <pre>{{ formOutput() | json }}</pre>
+    <dynamic-form [config]="fields" [(value)]="formValue" />
+    <div class="example-result">
+      <h4>Form Data:</h4>
+      <pre>{{ formValue() | json }}</pre>
+    </div>
   `,
 })
 export class MultiCheckboxDemoComponent {
-  formOutput = signal({});
+  formValue = signal({});
 
   fields = {
     fields: [

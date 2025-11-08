@@ -3,9 +3,6 @@
  *
  * This file augments the FieldRegistryLeaves interface to include PrimeNG-specific field types.
  * Import this file in your main entry point to get global type safety for PrimeNG fields.
- *
- * For applications that need to use multiple field libraries without conflicts,
- * use the `/no-augmentation` entry point instead.
  */
 
 import type { FormEvent } from '@ng-forge/dynamic-form';

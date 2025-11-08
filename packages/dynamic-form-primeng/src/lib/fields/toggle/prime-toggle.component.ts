@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
 import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
 import { PrimeToggleComponent, PrimeToggleProps } from './prime-toggle.type';
@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
  */
 @Component({
   selector: 'df-prime-toggle',
-  imports: [ToggleSwitch, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [ToggleSwitch, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -24,11 +24,10 @@ import { FormsModule } from '@angular/forms';
 
       <p-toggleSwitch
         [id]="key()"
-        [(ngModel)]="f().value"
-        [disabled]="f().disabled()"
+        [field]="f"
         [attr.tabindex]="tabIndex()"
-        [trueValue]="props()?.trueValue ?? true"
-        [falseValue]="props()?.falseValue ?? false"
+        [trueValue]="true"
+        [falseValue]="false"
         [styleClass]="props()?.styleClass ?? ''"
       />
 

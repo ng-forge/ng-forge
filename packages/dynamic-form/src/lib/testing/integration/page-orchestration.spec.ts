@@ -187,7 +187,7 @@ describe('Page Orchestration Integration', () => {
 
       let pageChangeEvent: PageChangeEvent | null = null;
 
-      eventBus.subscribe<PageChangeEvent>('page-change').subscribe((event) => {
+      eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
         pageChangeEvent = event;
       });
 
@@ -216,7 +216,7 @@ describe('Page Orchestration Integration', () => {
       eventBus = testResult.fixture.debugElement.injector.get(EventBus);
 
       let navigationAttempts = 0;
-      eventBus.subscribe<PageChangeEvent>('page-change').subscribe(() => {
+      eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
         navigationAttempts++;
       });
 

@@ -6,14 +6,6 @@ export interface PrimeToggleProps {
    */
   styleClass?: string;
   /**
-   * Value to use when toggled on.
-   */
-  trueValue?: unknown;
-  /**
-   * Value to use when toggled off.
-   */
-  falseValue?: unknown;
-  /**
    * Hint text displayed below the toggle.
    */
   hint?: DynamicText;

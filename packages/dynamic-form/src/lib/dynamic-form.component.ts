@@ -445,7 +445,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * }
    * ```
    */
-  readonly submitted = outputFromObservable(this.eventBus.subscribe<SubmitEvent>('submit').pipe(map(() => this.value())));
+  readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit').pipe(map(() => this.value())));
 
   readonly events = outputFromObservable(this.eventBus.events$);
 
@@ -563,7 +563,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         switchMap((count) => {
           if (count === 1) {
             // Only dynamic-form component, emit immediately when it initializes
-            return this.eventBus.subscribe<ComponentInitializedEvent>('component-initialized').pipe(
+            return this.eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
               filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
               map(() => true),
               take(1) // Only take the first initialization event

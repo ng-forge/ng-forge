@@ -41,7 +41,7 @@ export class CustomSubmitButton {
 Fired when form is submitted.
 
 ```typescript
-eventBus.subscribe('submit').subscribe(() => {
+eventBus.on(SubmitEvent).subscribe(() => {
   // Handle form submission
   console.log('Form submitted');
 });
@@ -52,7 +52,7 @@ eventBus.subscribe('submit').subscribe(() => {
 Fired when navigating between wizard pages.
 
 ```typescript
-eventBus.subscribe('page-change').subscribe((event) => {
+eventBus.on(PageChangeEvent).subscribe((event) => {
   console.log(`Page ${event.currentPageIndex + 1} of ${event.totalPages}`);
   console.log(`Previous page: ${event.previousPageIndex}`);
 });
@@ -85,7 +85,7 @@ eventBus.dispatch(PreviousPageEvent);
 Subscribe to multiple event types:
 
 ```typescript
-eventBus.subscribe(['submit', 'page-change', 'next-page']).subscribe((event) => {
+eventBus.on([SubmitEvent, PageChangeEvent, NextPageEvent]).subscribe((event) => {
   switch (event.type) {
     case 'submit':
       handleSubmit();
@@ -130,11 +130,11 @@ eventBus.dispatch(SaveDraftEvent);
 eventBus.dispatch(ValidationErrorEvent, 'email', 'Invalid email format');
 
 // Subscribe to custom event
-eventBus.subscribe('save-draft').subscribe(() => {
+eventBus.on(SaveDraftEvent).subscribe(() => {
   saveDraft();
 });
 
-eventBus.subscribe('validation-error').subscribe((event) => {
+eventBus.on(ValidationErrorEvent).subscribe((event) => {
   showError(event.fieldKey, event.errorMessage);
 });
 ```
@@ -150,7 +150,7 @@ export class AutoSaveFormComponent {
 
   ngOnInit() {
     // Auto-save on page change
-    this.eventBus.subscribe('page-change').subscribe(() => {
+    this.eventBus.on(PageChangeEvent).subscribe(() => {
       this.saveDraft();
     });
   }
@@ -197,7 +197,7 @@ export class ProgressTrackerComponent {
   progress = signal(0);
 
   ngOnInit() {
-    this.eventBus.subscribe('page-change').subscribe((event) => {
+    this.eventBus.on(PageChangeEvent).subscribe((event) => {
       const percentage = ((event.currentPageIndex + 1) / event.totalPages) * 100;
       this.progress.set(percentage);
     });
@@ -214,7 +214,7 @@ export class DynamicFieldsComponent {
 
   ngOnInit() {
     // Listen for custom field change events
-    this.eventBus.subscribe('field-changed').subscribe((event) => {
+    this.eventBus.on(FieldChangeEvent).subscribe((event) => {
       if (event.fieldKey === 'accountType') {
         this.updateVisibleFields(event.value);
       }
@@ -266,7 +266,7 @@ class UserUpdatedEvent implements FormEvent {
 }
 
 // ✗ Avoid string types
-eventBus.subscribe('some-random-event'); // No type checking
+eventBus.on('some-random-event'); // No type checking
 ```
 
 ## Event Flow

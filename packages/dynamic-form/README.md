@@ -325,21 +325,21 @@ Create your own field components:
 @Component({
   selector: 'app-custom-field',
   template: `
+    @let f = field();
+
     <label>{{ label() }}</label>
-    <input [(ngModel)]="value" />
+    <input [field]="f" />
   `,
 })
 export class CustomFieldComponent {
   label = input<string>();
-  value = model<string>('');
+  field = input.required<FieldTree<string>>();
 }
 
 // Register it
-provideDynamicForm(
-  withFieldTypes([
-    { name: 'custom', loadComponent: () => CustomFieldComponent }
-  ])
-);
+provideDynamicForm([
+  { name: 'custom', loadComponent: () => CustomFieldComponent }
+]);
 
 // Use it
 { key: 'myField', type: 'custom', value: '', label: 'Custom Field' }
@@ -507,9 +507,6 @@ interface ConditionalExpression {
 ```typescript
 // Provider function
 function provideDynamicForm(...features: DynamicFormFeature[]): EnvironmentProviders;
-
-// Field type registration
-function withFieldTypes(types: FieldTypeDefinition[]): DynamicFormFeature;
 
 // Schema registration
 function withSchemas(schemas: SchemaDefinition[]): DynamicFormFeature;

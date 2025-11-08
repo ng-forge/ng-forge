@@ -29,7 +29,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
  * ```
  */
 export function createInitializationTracker(eventBus: EventBus, expectedCount: number): Observable<boolean> {
-  return eventBus.subscribe<ComponentInitializedEvent>('component-initialized').pipe(
+  return eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
     scan((count, _event) => count + 1, 0),
     map((currentCount) => currentCount >= expectedCount),
     filter((isComplete) => isComplete)
@@ -62,7 +62,7 @@ export function createDetailedInitializationTracker(
   eventBus: EventBus,
   expectedCount: number
 ): Observable<{ currentCount: number; expectedCount: number; isComplete: boolean }> {
-  return eventBus.subscribe<ComponentInitializedEvent>('component-initialized').pipe(
+  return eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
     scan((count, _event) => count + 1, 0),
     map((currentCount) => ({
       currentCount,

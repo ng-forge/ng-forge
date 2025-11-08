@@ -1,28 +1,24 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import '@ng-forge/dynamic-form-ionic';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'example-complete-form-demo',
-  imports: [DynamicForm, JsonPipe, IonContent, IonHeader, IonTitle, IonToolbar],
+  imports: [DynamicForm, JsonPipe, IonContent],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Complete Form Example</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content>
       <div style="padding: 1rem;">
         <h4>Complete Ionic Form</h4>
         <p>Comprehensive form showcasing all Ionic field components with validation.</p>
 
-        <dynamic-form [config]="config" [(value)]="formOutput" />
+        <dynamic-form [config]="config" [(value)]="formValue" />
 
-        <h4>Form Data:</h4>
-        <pre>{{ formOutput() | json }}</pre>
+        <div class="example-result">
+          <h4>Form Data:</h4>
+          <pre>{{ formValue() | json }}</pre>
+        </div>
       </div>
     </ion-content>
   `,
@@ -32,9 +28,9 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompleteFormDemoComponent {
-  formOutput = signal({});
+  formValue = signal({});
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'firstName',
