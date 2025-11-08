@@ -1,6 +1,6 @@
 import { ButtonField, FieldComponent, FieldDef, FormEvent } from '@ng-forge/dynamic-form';
 
-export interface PrimeButtonProps extends Record<string, unknown> {
+export interface PrimeButtonProps {
   severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
   text?: boolean;
   outlined?: boolean;

@@ -1,6 +1,6 @@
 import { CheckedFieldComponent, DynamicText, ToggleField } from '@ng-forge/dynamic-form';
 
-export interface PrimeToggleProps extends Record<string, unknown> {
+export interface PrimeToggleProps {
   /**
    * CSS class to apply to the toggle element.
    */

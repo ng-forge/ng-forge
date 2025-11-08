@@ -1,6 +1,6 @@
 import { CheckboxField, CheckedFieldComponent, DynamicText } from '@ng-forge/dynamic-form';
 
-export interface BsToggleProps extends Record<string, unknown> {
+export interface BsToggleProps {
   size?: 'sm' | 'lg';
   reverse?: boolean;
   inline?: boolean;

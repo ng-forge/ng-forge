@@ -1,6 +1,6 @@
 import { DynamicText, InputField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface IonicInputProps extends Record<string, unknown> {
+export interface IonicInputProps {
   fill?: 'solid' | 'outline';
   shape?: 'round';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';

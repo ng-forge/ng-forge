@@ -1,6 +1,6 @@
 import { DynamicText, TextareaField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface BsTextareaProps extends Record<string, unknown> {
+export interface BsTextareaProps {
   rows?: number;
   size?: 'sm' | 'lg';
   floatingLabel?: boolean;

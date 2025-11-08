@@ -1,7 +1,7 @@
 import { DatepickerField, DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-form';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
-export interface MatDatepickerProps extends Record<string, unknown> {
+export interface MatDatepickerProps {
   appearance?: MatFormFieldAppearance;
   color?: 'primary' | 'accent' | 'warn';
   disableRipple?: boolean;

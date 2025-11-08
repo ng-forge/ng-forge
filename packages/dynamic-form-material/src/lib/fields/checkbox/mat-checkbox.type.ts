@@ -1,7 +1,7 @@
 import { CheckboxField, CheckedFieldComponent, DynamicText } from '@ng-forge/dynamic-form';
 import { ThemePalette } from '@angular/material/core';
 
-export interface MatCheckboxProps extends Record<string, unknown> {
+export interface MatCheckboxProps {
   color?: ThemePalette;
   disableRipple?: boolean;
   labelPosition?: 'before' | 'after';

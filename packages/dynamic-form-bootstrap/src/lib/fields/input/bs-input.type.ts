@@ -1,13 +1,26 @@
 import { DynamicText, InputField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface BsInputProps extends Record<string, unknown> {
+export interface BsInputProps {
   size?: 'sm' | 'lg';
   floatingLabel?: boolean;
   helpText?: DynamicText;
   validFeedback?: DynamicText;
   invalidFeedback?: DynamicText;
   plaintext?: boolean;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date' | 'time' | 'datetime-local' | 'month' | 'week' | 'color';
+  type?:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'number'
+    | 'tel'
+    | 'url'
+    | 'search'
+    | 'date'
+    | 'time'
+    | 'datetime-local'
+    | 'month'
+    | 'week'
+    | 'color';
 }
 
 export type BsInputField = InputField<BsInputProps>;

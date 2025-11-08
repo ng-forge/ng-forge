@@ -1,6 +1,6 @@
 import { DynamicText, RadioField, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface PrimeRadioProps extends Record<string, unknown> {
+export interface PrimeRadioProps {
   /**
    * Name of the radio button group.
    */

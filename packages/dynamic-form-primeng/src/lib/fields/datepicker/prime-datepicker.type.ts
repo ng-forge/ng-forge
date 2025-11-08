@@ -1,6 +1,6 @@
 import { DatepickerField, DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-form';
 
-export interface PrimeDatepickerProps extends Record<string, unknown> {
+export interface PrimeDatepickerProps {
   /**
    * Format string for displaying dates.
    */
