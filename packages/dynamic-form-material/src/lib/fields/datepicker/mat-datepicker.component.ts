@@ -3,8 +3,13 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import {
+  DynamicText,
+  DynamicTextPipe,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
@@ -16,7 +21,6 @@ import { AsyncPipe } from '@angular/common';
     MatLabel,
     MatInput,
     MatHint,
-    MatErrorsComponent,
     MatDatepicker,
     MatDatepickerInput,
     MatDatepickerToggle,
@@ -56,7 +60,11 @@ import { AsyncPipe } from '@angular/common';
       <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
       }
 
-      <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
+      @if (showErrors()) {
+        @for (error of resolvedErrors(); track error.kind) {
+          <mat-error>{{ error.message }}</mat-error>
+        }
+      }
     </mat-form-field>
   `,
   providers: [provideNativeDateAdapter()],
@@ -76,4 +84,8 @@ export default class MatDatepickerFieldComponent implements MatDatepickerCompone
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<MatDatepickerProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 }

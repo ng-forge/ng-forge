@@ -1,15 +1,20 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import {
+  DynamicText,
+  DynamicTextPipe,
+  ValidationMessages,
+  createResolvedErrorsSignal,
+  shouldShowErrors,
+} from '@ng-forge/dynamic-form';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, MatErrorsComponent, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatCheckbox, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -28,9 +33,11 @@ import { AsyncPipe } from '@angular/common';
     @if (props()?.hint; as hint) {
     <div class="mat-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
     }
-    <mat-error [attr.hidden]="f().hidden() || null"
-      ><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()"
-    /></mat-error>
+    @if (showErrors()) {
+      @for (error of resolvedErrors(); track error.kind) {
+        <mat-error [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
+      }
+    }
   `,
   styles: [
     `
@@ -61,4 +68,8 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<MatCheckboxProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
 }
