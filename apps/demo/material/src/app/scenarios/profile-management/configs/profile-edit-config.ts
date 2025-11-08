@@ -1,4 +1,4 @@
-import { FormConfig } from '@ng-forge/dynamic-form';
+import { FormConfig, SubmitEvent } from '@ng-forge/dynamic-form';
 
 export const profileEditConfig = {
   fields: [
@@ -170,6 +170,9 @@ export const profileEditConfig = {
           props: {
             type: 'button',
           },
+          event: class ResetEvent {
+            readonly type = 'reset' as const;
+          },
           className: 'secondary-button',
           col: 6,
         },
@@ -180,6 +183,7 @@ export const profileEditConfig = {
           props: {
             type: 'submit',
           },
+          event: SubmitEvent,
           col: 6,
         },
       ],
