@@ -25,6 +25,7 @@ import { FormsModule } from '@angular/forms';
         pInputText
         [id]="inputId()"
         [(ngModel)]="f().value"
+        (ngModelChange)="onValueChange($event)"
         [attr.type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
@@ -83,4 +84,16 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   });
 
   readonly inputId = computed(() => `${this.key()}-input`);
+
+  onValueChange(value: string): void {
+    // Convert to number for number inputs (ngModel returns strings)
+    if (this.props()?.type === 'number' && value !== '' && value != null) {
+      const numValue = Number(value);
+      if (!isNaN(numValue)) {
+        this.field()().value.set(numValue as any);
+        return;
+      }
+    }
+    // For other types, value is already set by ngModel
+  }
 }
