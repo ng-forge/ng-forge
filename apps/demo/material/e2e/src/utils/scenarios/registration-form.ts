@@ -80,7 +80,9 @@ export const registrationFormConfig = {
       label: 'Age',
       required: true,
       defaultValue: '25',
-      props: { type: 'number', min: 18, max: 120 },
+      props: { type: 'number' },
+      min: 18,
+      max: 120,
       validators: [
         { type: 'required' },
         { type: 'min', value: 18, errorMessage: 'You must be at least 18 years old' },

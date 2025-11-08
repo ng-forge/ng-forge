@@ -169,8 +169,8 @@ export const profileEditConfig = {
           label: 'Reset Changes',
           props: {
             type: 'button',
-            className: 'secondary-button',
           },
+          className: 'secondary-button',
           col: 6,
         },
         {

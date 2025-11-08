@@ -165,8 +165,8 @@ export const settingsConfig = {
           label: 'Export My Data',
           props: {
             type: 'button',
-            className: 'secondary-button',
           },
+          className: 'secondary-button',
           col: 4,
         },
         {
@@ -175,8 +175,8 @@ export const settingsConfig = {
           label: 'Deactivate Account',
           props: {
             type: 'button',
-            className: 'danger-button',
           },
+          className: 'danger-button',
           col: 4,
         },
         {

@@ -180,8 +180,8 @@ export const preferencesConfig = {
           label: 'Reset to Defaults',
           props: {
             type: 'button',
-            className: 'secondary-button',
           },
+          className: 'secondary-button',
           col: 6,
         },
         {

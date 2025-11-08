@@ -20,7 +20,7 @@ export const ecommerceCheckoutConfig = {
               type: 'input',
               label: 'Subtotal',
               defaultValue: '$129.97',
-              props: { readonly: true },
+              readonly: true,
               col: 6,
             },
             {
@@ -28,7 +28,7 @@ export const ecommerceCheckoutConfig = {
               type: 'input',
               label: 'Tax',
               defaultValue: '$10.40',
-              props: { readonly: true },
+              readonly: true,
               col: 6,
             },
             {
@@ -36,7 +36,7 @@ export const ecommerceCheckoutConfig = {
               type: 'input',
               label: 'Shipping',
               defaultValue: '$4.99',
-              props: { readonly: true },
+              readonly: true,
               col: 6,
             },
             {
@@ -44,7 +44,7 @@ export const ecommerceCheckoutConfig = {
               type: 'input',
               label: 'Total',
               defaultValue: '$145.36',
-              props: { readonly: true },
+              readonly: true,
               col: 6,
             },
           ],

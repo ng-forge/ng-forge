@@ -122,8 +122,8 @@ describe('PrimeInputFieldComponent', () => {
       // Simulate typing a number using utility
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'input[type="number"]', '25');
 
-      // Note: HTML input with ngModel always returns string values, even for type="number"
-      expect(PrimeNGFormTestUtils.getFormValue(component).age).toBe('25');
+      // Note: PrimeNG inputs with type="number" correctly return numeric values
+      expect(PrimeNGFormTestUtils.getFormValue(component).age).toBe(25);
     });
 
     it('should reflect external value changes for all input types', async () => {

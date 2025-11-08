@@ -22,7 +22,7 @@ import { AsyncPipe } from '@angular/common';
       [step]="props()?.step ?? 1"
       [dualKnobs]="props()?.dualKnobs ?? false"
       [pin]="props()?.pin ?? false"
-      [pinFormatter]="props()?.pinFormatter"
+      [pinFormatter]="props()?.pinFormatter ?? defaultPinFormatter"
       [ticks]="props()?.ticks ?? false"
       [snaps]="props()?.snaps ?? false"
       [color]="props()?.color ?? 'primary'"
@@ -60,4 +60,6 @@ export default class IonicSliderFieldComponent implements IonicSliderComponent {
   readonly tabIndex = input<number>();
 
   readonly props = input<IonicSliderProps>();
+
+  protected defaultPinFormatter = (value: number) => String(value);
 }
