@@ -11,8 +11,8 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<any>, options: Ch
 
   const bindings: Binding[] = baseFieldMapper(omittedFields);
 
-  // Always pass validationMessages even if undefined - required for error display signals
-  bindings.push(inputBinding('validationMessages', () => fieldDef.validationMessages));
+  // Always pass validationMessages (or empty object) - required for error display signals
+  bindings.push(inputBinding('validationMessages', () => fieldDef.validationMessages ?? {}));
 
   const formRoot = options.fieldSignalContext.form();
   const childrenMap = (formRoot as any).structure?.childrenMap?.();
