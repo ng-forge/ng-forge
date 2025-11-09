@@ -1,7 +1,18 @@
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { IonDatetime, IonInput, IonModal, IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
+import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonDatetime,
+  IonHeader,
+  IonInput,
+  IonModal,
+  IonNote,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/angular/standalone';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
@@ -11,7 +22,20 @@ import { format } from 'date-fns';
  */
 @Component({
   selector: 'df-ionic-datepicker',
-  imports: [IonInput, IonModal, IonDatetime, IonNote, DynamicTextPipe, AsyncPipe],
+  imports: [
+    IonInput,
+    IonModal,
+    IonDatetime,
+    IonNote,
+    IonButtons,
+    IonHeader,
+    IonContent,
+    IonToolbar,
+    IonTitle,
+    IonButton,
+    DynamicTextPipe,
+    AsyncPipe,
+  ],
   template: `
     @let f = field(); @let dateValue = f().value();
 
@@ -23,38 +47,49 @@ import { format } from 'date-fns';
       [value]="formatDisplayDate(dateValue)"
       [readonly]="true"
       [fill]="'outline'"
-      [attr.tabindex]="tabIndex()"
       (click)="!f().disabled() && openModal()"
     >
-      @if (showErrors()) {
       <div slot="error">
-        @for (error of resolvedErrors(); track error.kind) {
+        @for (error of errorsToDisplay(); track error.kind) {
         <ion-note color="danger">{{ error.message }}</ion-note>
         }
       </div>
-      }
     </ion-input>
 
-    <ion-modal #modal [trigger]="key()" [isOpen]="isModalOpen()" (didDismiss)="closeModal()">
-      <ion-datetime
-        [presentation]="props()?.presentation ?? 'date'"
-        [value]="dateToIsoString(dateValue)"
-        [multiple]="props()?.multiple ?? false"
-        [preferWheel]="props()?.preferWheel ?? false"
-        [showDefaultButtons]="props()?.showDefaultButtons ?? true"
-        [showDefaultTitle]="props()?.showDefaultTitle ?? true"
-        [showDefaultTimeLabel]="props()?.showDefaultTimeLabel ?? true"
-        [showClearButton]="props()?.showClearButton ?? false"
-        [doneText]="props()?.doneText ?? 'Done'"
-        [cancelText]="props()?.cancelText ?? 'Cancel'"
-        [size]="props()?.size ?? 'fixed'"
-        [color]="props()?.color"
-        [min]="dateToIsoString(minDate())"
-        [max]="dateToIsoString(maxDate())"
-        (ionChange)="onDateChange($event)"
-      >
-      </ion-datetime>
+    <ion-modal [isOpen]="isModalOpen()" (didDismiss)="closeModal()">
+      <ng-template>
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>{{ label() | dynamicText | async }}</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="closeModal()">Close</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content>
+          <ion-datetime
+            [presentation]="props()?.presentation ?? 'date'"
+            [value]="dateToIsoString(dateValue)"
+            [multiple]="props()?.multiple ?? false"
+            [preferWheel]="props()?.preferWheel ?? false"
+            [showDefaultButtons]="props()?.showDefaultButtons ?? false"
+            [showDefaultTitle]="props()?.showDefaultTitle ?? false"
+            [showDefaultTimeLabel]="props()?.showDefaultTimeLabel ?? true"
+            [showClearButton]="props()?.showClearButton ?? false"
+            [color]="props()?.color"
+            [min]="dateToIsoString(minDate())"
+            [max]="dateToIsoString(maxDate())"
+            (ionChange)="onDateChange($event)"
+          >
+          </ion-datetime>
+        </ion-content>
+      </ng-template>
     </ion-modal>
+  `,
+  styles: `
+    ion-input {
+      cursor: pointer;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -81,6 +116,9 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly isModalOpen = signal(false);
 

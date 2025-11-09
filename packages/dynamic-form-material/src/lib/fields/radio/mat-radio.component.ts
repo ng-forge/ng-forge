@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import {
+  createResolvedErrorsSignal,
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  ValidationMessages,
-  createResolvedErrorsSignal,
   shouldShowErrors,
+  ValidationMessages,
 } from '@ng-forge/dynamic-form';
 import { MatRadioComponent, MatRadioProps } from './mat-radio.type';
 import { MatError } from '@angular/material/input';
@@ -36,9 +36,9 @@ import { AsyncPipe } from '@angular/common';
 
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint | dynamicText | async }}</div>
-    } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    } @for (error of errorsToDisplay(); track error.kind) {
     <mat-error>{{ error.message }}</mat-error>
-    } }
+    }
   `,
   styles: [
     `
@@ -70,4 +70,7 @@ export default class MatRadioFieldComponent<T> implements MatRadioComponent<T> {
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

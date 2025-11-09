@@ -1,17 +1,16 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { PrimeToggleComponent, PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';
 import { ToggleSwitch } from 'primeng/toggleswitch';
-import { FormsModule } from '@angular/forms';
 
 /**
  * PrimeNG toggle field component
  */
 @Component({
   selector: 'df-prime-toggle',
-  imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -23,9 +22,7 @@ import { FormsModule } from '@angular/forms';
 
       <p-toggleSwitch
         [id]="key()"
-        [(ngModel)]="f().value"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
+        [field]="f"
         [attr.tabindex]="tabIndex()"
         [trueValue]="true"
         [falseValue]="false"
@@ -34,9 +31,9 @@ import { FormsModule } from '@angular/forms';
 
       @if (props()?.hint; as hint) {
       <small class="p-hint">{{ hint | dynamicText | async }}</small>
-      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      } @for (error of errorsToDisplay(); track error.kind) {
       <small class="p-error">{{ error.message }}</small>
-      } }
+      }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,4 +56,7 @@ export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

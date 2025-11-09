@@ -1,15 +1,15 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatHint } from '@angular/material/input';
 import {
+  createResolvedErrorsSignal,
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  ValidationMessages,
-  createResolvedErrorsSignal,
   shouldShowErrors,
+  ValidationMessages,
 } from '@ng-forge/dynamic-form';
 import { MatSelectComponent, MatSelectProps } from './mat-select.type';
 import { AsyncPipe } from '@angular/common';
@@ -44,12 +44,8 @@ import { AsyncPipe } from '@angular/common';
 
       @if (props()?.hint; as hint) {
       <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
-      }
-
-      @if (showErrors()) {
-        @for (error of resolvedErrors(); track error.kind) {
-          <mat-error>{{ error.message }}</mat-error>
-        }
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <mat-error>{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,
@@ -76,6 +72,9 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
 }

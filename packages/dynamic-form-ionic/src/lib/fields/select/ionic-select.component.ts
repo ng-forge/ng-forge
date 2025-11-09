@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonSelect, IonSelectOption, IonNote } from '@ionic/angular/standalone';
+import { IonNote, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import {
+  createResolvedErrorsSignal,
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  ValidationMessages,
-  createResolvedErrorsSignal,
   shouldShowErrors,
+  ValidationMessages,
 } from '@ng-forge/dynamic-form';
 import { IonicSelectComponent, IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
@@ -29,7 +29,7 @@ import { AsyncPipe } from '@angular/common';
       [multiple]="props()?.multiple ?? false"
       [compareWith]="props()?.compareWith ?? defaultCompare"
       [interface]="props()?.interface ?? 'alert'"
-      [interfaceOptions]="props()?.interfaceOptions"
+      [interfaceOptions]="props()?.interfaceOptions ?? {}"
       [cancelText]="props()?.cancelText ?? 'Cancel'"
       [okText]="props()?.okText ?? 'OK'"
       [color]="props()?.color"
@@ -41,13 +41,12 @@ import { AsyncPipe } from '@angular/common';
       <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
         {{ option.label | dynamicText | async }}
       </ion-select-option>
-      } @if (showErrors()) {
+      }
       <div slot="error">
-        @for (error of resolvedErrors(); track error.kind) {
+        @for (error of errorsToDisplay(); track error.kind) {
         <ion-note color="danger">{{ error.message }}</ion-note>
         }
       </div>
-      }
     </ion-select>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,6 +72,9 @@ export default class IonicSelectFieldComponent<T> implements IonicSelectComponen
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
 }

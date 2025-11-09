@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonTextarea, IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
+import { IonNote, IonTextarea } from '@ionic/angular/standalone';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { IonicTextareaComponent, IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -29,13 +29,11 @@ import { AsyncPipe } from '@angular/common';
       [errorText]="f().invalid() && f().touched() ? (props()?.errorText | dynamicText | async) ?? undefined : undefined"
       [attr.tabindex]="tabIndex()"
     >
-      @if (showErrors()) {
       <div slot="error">
-        @for (error of resolvedErrors(); track error.kind) {
+        @for (error of errorsToDisplay(); track error.kind) {
         <ion-note color="danger">{{ error.message }}</ion-note>
         }
       </div>
-      }
     </ion-textarea>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,4 +56,7 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

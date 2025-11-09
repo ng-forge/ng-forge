@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonRadioGroup, IonRadio, IonItem, IonNote } from '@ionic/angular/standalone';
+import { IonItem, IonNote, IonRadio, IonRadioGroup } from '@ionic/angular/standalone';
 import {
+  createResolvedErrorsSignal,
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  ValidationMessages,
-  createResolvedErrorsSignal,
   shouldShowErrors,
+  ValidationMessages,
 } from '@ng-forge/dynamic-form';
 import { IonicRadioComponent, IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
@@ -39,9 +39,9 @@ import { AsyncPipe } from '@angular/common';
       }
     </ion-radio-group>
 
-    @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    @for (error of errorsToDisplay(); track error.kind) {
     <ion-note color="danger">{{ error.message }}</ion-note>
-    } }
+    }
   `,
   styles: [
     `
@@ -84,6 +84,9 @@ export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
 }

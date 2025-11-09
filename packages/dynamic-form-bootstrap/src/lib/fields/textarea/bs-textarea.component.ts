@@ -1,11 +1,6 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import {
-  DynamicText, DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { BsTextareaComponent, BsTextareaProps } from './bs-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -40,13 +35,9 @@ import { AsyncPipe } from '@angular/common';
       <div class="valid-feedback d-block">
         {{ p?.validFeedback | dynamicText | async }}
       </div>
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
-
-      @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <div class="invalid-feedback d-block">{{ error.message }}</div>
-      }
-    }
     </div>
     } @else {
     <!-- Standard variant -->
@@ -76,13 +67,9 @@ import { AsyncPipe } from '@angular/common';
       <div class="valid-feedback d-block">
         {{ p?.validFeedback | dynamicText | async }}
       </div>
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
-
-      @if (showErrors()) {
-      @for (error of resolvedErrors(); track error.kind) {
-        <div class="invalid-feedback d-block">{{ error.message }}</div>
-      }
-    }
     </div>
     }
   `,
@@ -106,4 +93,7 @@ export default class BsTextareaFieldComponent implements BsTextareaComponent {
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

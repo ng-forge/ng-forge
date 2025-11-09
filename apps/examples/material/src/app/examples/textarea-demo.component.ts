@@ -29,6 +29,9 @@ export class TextareaDemoComponent {
         label: 'Biography',
         value: '',
         maxLength: 500,
+        validationMessages: {
+          maxLength: 'Must not exceed {maxLength} characters',
+        },
         props: {
           rows: 4,
           placeholder: 'Tell us about yourself',

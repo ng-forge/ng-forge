@@ -10,9 +10,6 @@ import { IonContent } from '@ionic/angular/standalone';
   template: `
     <ion-content>
       <div style="padding: 1rem;">
-        <h4>Complete Ionic Form</h4>
-        <p>Comprehensive form showcasing all Ionic field components with validation.</p>
-
         <dynamic-form [config]="config" [(value)]="formValue" />
 
         <div class="example-result">
@@ -33,120 +30,132 @@ export class CompleteFormDemoComponent {
   config = {
     fields: [
       {
+        key: 'title',
+        type: 'text',
+        label: 'User Registration Form',
+        props: {
+          elementType: 'h2',
+        },
+      },
+      {
+        key: 'subtitle',
+        type: 'text',
+        label: 'Raw ng-forge form without custom styling - showing Ionic integration',
+      },
+
+      // Personal Info
+      {
         key: 'firstName',
         type: 'input',
         label: 'First Name',
-        value: '',
         required: true,
+        minLength: 2,
+        validationMessages: {
+          required: 'This field is required',
+          minLength: 'Must be at least {requiredLength} characters',
+        },
         props: {
-          placeholder: 'Your first name',
+          placeholder: 'Enter your first name',
         },
       },
       {
         key: 'lastName',
         type: 'input',
         label: 'Last Name',
-        value: '',
         required: true,
+        minLength: 2,
+        validationMessages: {
+          required: 'This field is required',
+          minLength: 'Must be at least {requiredLength} characters',
+        },
         props: {
-          placeholder: 'Your last name',
+          placeholder: 'Enter your last name',
         },
       },
       {
         key: 'email',
         type: 'input',
         label: 'Email Address',
-        value: '',
         required: true,
         email: true,
+        validationMessages: {
+          required: 'This field is required',
+          email: 'Please enter a valid email address',
+        },
         props: {
           type: 'email',
-          placeholder: 'email@example.com',
+          placeholder: 'user@example.com',
+          helperText: 'We will never share your email',
         },
       },
+
+      // Demographics
       {
-        key: 'phone',
+        key: 'age',
         type: 'input',
-        label: 'Phone Number',
-        value: '',
-        props: {
-          type: 'tel',
-          placeholder: '+1 (555) 000-0000',
+        label: 'Age',
+        required: true,
+        min: 18,
+        max: 120,
+        validationMessages: {
+          required: 'This field is required',
+          min: 'Must be at least {min}',
+          max: 'Must not exceed {max}',
         },
-      },
-      {
-        key: 'birthDate',
-        type: 'datepicker',
-        label: 'Birth Date',
         props: {
-          placeholder: 'Select your birth date',
-          presentation: 'date' as const,
-        },
-      },
-      {
-        key: 'bio',
-        type: 'textarea',
-        label: 'Biography',
-        value: '',
-        maxLength: 500,
-        props: {
-          rows: 4,
-          placeholder: 'Tell us about yourself',
-          autoGrow: true,
+          type: 'number',
+          placeholder: '18',
         },
       },
       {
         key: 'country',
         type: 'select',
         label: 'Country',
+        required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'us', label: 'United States' },
           { value: 'uk', label: 'United Kingdom' },
           { value: 'ca', label: 'Canada' },
           { value: 'au', label: 'Australia' },
+          { value: 'de', label: 'Germany' },
+          { value: 'fr', label: 'France' },
+          { value: 'jp', label: 'Japan' },
         ],
         props: {
           placeholder: 'Select your country',
         },
       },
+
+      // Preferences
       {
         key: 'plan',
-        type: 'radio',
+        type: 'select',
         label: 'Subscription Plan',
+        required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
-          { value: 'free', label: 'Free' },
-          { value: 'pro', label: 'Pro' },
-          { value: 'enterprise', label: 'Enterprise' },
+          { value: 'free', label: 'Free - $0/month' },
+          { value: 'pro', label: 'Pro - $10/month' },
+          { value: 'enterprise', label: 'Enterprise - $50/month' },
         ],
-      },
-      {
-        key: 'interests',
-        type: 'multi-checkbox',
-        label: 'Interests',
-        options: [
-          { value: 'sports', label: 'Sports' },
-          { value: 'music', label: 'Music' },
-          { value: 'technology', label: 'Technology' },
-          { value: 'art', label: 'Art' },
-        ],
-      },
-      {
-        key: 'volume',
-        type: 'slider',
-        label: 'Notification Volume',
-        minValue: 0,
-        maxValue: 100,
-        step: 10,
         props: {
-          pin: true,
+          placeholder: 'Choose a plan',
         },
       },
       {
-        key: 'darkMode',
-        type: 'toggle',
-        label: 'Dark Mode',
+        key: 'bio',
+        type: 'textarea',
+        label: 'Bio',
         props: {
-          labelPlacement: 'start',
+          placeholder: 'Tell us about yourself',
+          helperText: 'Optional - share a bit about yourself',
+          rows: 4,
+          autoGrow: true,
         },
       },
       {
@@ -155,23 +164,18 @@ export class CompleteFormDemoComponent {
         label: 'Subscribe to newsletter',
         props: {
           labelPlacement: 'end',
+          helperText: 'Get updates about new features and special offers',
         },
       },
-      {
-        key: 'terms',
-        type: 'checkbox',
-        label: 'I agree to the terms and conditions',
-        required: true,
-        props: {
-          labelPlacement: 'end',
-        },
-      },
+
+      // Submit button
       {
         type: 'submit',
         key: 'submit',
         label: 'Create Account',
         props: {
           color: 'primary',
+          expand: 'block',
         },
       },
     ],

@@ -1,15 +1,15 @@
-import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
 import { Checkbox } from 'primeng/checkbox';
 import {
+  createResolvedErrorsSignal,
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  ValueType,
-  ValidationMessages,
-  createResolvedErrorsSignal,
   shouldShowErrors,
+  ValidationMessages,
+  ValueType,
 } from '@ng-forge/dynamic-form';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
@@ -33,9 +33,8 @@ import { AsyncPipe } from '@angular/common';
           [inputId]="key() + '-' + option.value"
           [binary]="false"
           [value]="option.value"
-          [ngModel]="valueViewModel()"
+          [(ngModel)]="valueViewModel"
           [disabled]="f().disabled() || option.disabled || false"
-          (ngModelChange)="onCheckboxChange($event)"
         />
         <label [for]="key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
       </div>
@@ -43,9 +42,9 @@ import { AsyncPipe } from '@angular/common';
     </div>
     @if (props()?.hint; as hint) {
     <small class="p-hint">{{ hint | dynamicText | async }}</small>
-    } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    } @for (error of errorsToDisplay(); track error.kind) {
     <small class="p-error">{{ error.message }}</small>
-    } }
+    }
   `,
   styles: [
     `
@@ -85,6 +84,9 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
   valueViewModel = linkedSignal<T[]>(() => this.field()().value(), { equal: isEqual });
 
   constructor() {
@@ -103,9 +105,5 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
         throw new Error(`Duplicate option values detected in prime-multi-checkbox: ${duplicates.join(', ')}`);
       }
     });
-  }
-
-  onCheckboxChange(newValues: T[]): void {
-    this.valueViewModel.set(newValues);
   }
 }

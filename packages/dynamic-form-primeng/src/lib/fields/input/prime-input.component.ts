@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
+import { Field, FieldTree } from '@angular/forms/signals';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
-import { FormsModule } from '@angular/forms';
 
 /**
  * PrimeNG input field component
  */
 @Component({
   selector: 'df-prime-input',
-  imports: [InputText, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [InputText, DynamicTextPipe, AsyncPipe, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -24,21 +23,18 @@ import { FormsModule } from '@angular/forms';
       <input
         pInputText
         [id]="inputId()"
-        [(ngModel)]="f().value"
-        (ngModelChange)="onValueChange($event)"
+        [field]="f"
         [attr.type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
         [class]="inputClasses()"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
       />
 
       @if (props()?.hint; as hint) {
       <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
-      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      } @for (error of errorsToDisplay(); track error.kind) {
       <small class="p-error">{{ error.message }}</small>
-      } }
+      }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,6 +58,9 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
   readonly inputClasses = computed(() => {
     const classes: string[] = [];
 
@@ -84,16 +83,4 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   });
 
   readonly inputId = computed(() => `${this.key()}-input`);
-
-  onValueChange(value: string): void {
-    // Convert to number for number inputs (ngModel returns strings)
-    if (this.props()?.type === 'number' && value !== '' && value != null) {
-      const numValue = Number(value);
-      if (!isNaN(numValue)) {
-        this.field()().value.set(numValue as any);
-        return;
-      }
-    }
-    // For other types, value is already set by ngModel
-  }
 }

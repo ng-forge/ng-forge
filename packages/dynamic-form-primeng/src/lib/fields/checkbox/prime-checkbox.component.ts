@@ -1,27 +1,24 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
-import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { PrimeCheckboxComponent, PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-prime-checkbox',
-  imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [Checkbox, DynamicTextPipe, AsyncPipe, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let checkboxId = key() + '-checkbox';
 
     <div class="flex items-center">
       <p-checkbox
-        [(ngModel)]="f().value"
+        [field]="f"
         [inputId]="checkboxId"
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
         [styleClass]="props()?.styleClass"
         [attr.tabindex]="tabIndex()"
       />
@@ -32,9 +29,9 @@ import { FormsModule } from '@angular/forms';
 
     @if (props()?.hint; as hint) {
     <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
-    } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    } @for (error of errorsToDisplay(); track error.kind) {
     <small class="p-error">{{ error.message }}</small>
-    } }
+    }
   `,
   styles: [
     `
@@ -69,4 +66,7 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import {
+  createResolvedErrorsSignal,
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  ValidationMessages,
-  createResolvedErrorsSignal,
   shouldShowErrors,
+  ValidationMessages,
 } from '@ng-forge/dynamic-form';
 import { BsRadioComponent, BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
@@ -58,9 +58,9 @@ import { FormsModule } from '@angular/forms';
       </div>
       } } @if (props()?.helpText; as helpText) {
       <div class="form-text">{{ helpText | dynamicText | async }}</div>
-      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      } @for (error of errorsToDisplay(); track error.kind) {
       <div class="invalid-feedback d-block">{{ error.message }}</div>
-      } }
+      }
     </div>
   `,
   styles: [
@@ -93,4 +93,7 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

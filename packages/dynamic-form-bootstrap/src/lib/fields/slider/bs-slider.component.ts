@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages, createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-form';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { BsSliderComponent, BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -27,9 +27,9 @@ import { AsyncPipe } from '@angular/common';
       <div class="form-text">
         {{ helpText | dynamicText | async }}
       </div>
-      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      } @for (error of errorsToDisplay(); track error.kind) {
       <div class="invalid-feedback d-block">{{ error.message }}</div>
-      } }
+      }
     </div>
   `,
   styles: [
@@ -65,4 +65,7 @@ export default class BsSliderFieldComponent implements BsSliderComponent {
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { IonCheckbox, IonItem, IonLabel, IonNote } from '@ionic/angular/standalone';
+import { IonCheckbox, IonItem, IonNote } from '@ionic/angular/standalone';
 import {
+  createResolvedErrorsSignal,
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  ValueType,
-  ValidationMessages,
-  createResolvedErrorsSignal,
   shouldShowErrors,
+  ValidationMessages,
+  ValueType,
 } from '@ng-forge/dynamic-form';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
@@ -21,7 +21,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-multi-checkbox',
-  imports: [IonCheckbox, IonItem, IonLabel, IonNote, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],
+  imports: [IonCheckbox, IonItem, IonNote, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field(); @if (label(); as label) {
     <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
@@ -44,9 +44,9 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
 
-    @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    @for (error of errorsToDisplay(); track error.kind) {
     <ion-note color="danger">{{ error.message }}</ion-note>
-    } }
+    }
   `,
   styles: [
     `
@@ -100,6 +100,9 @@ export default class IonicMultiCheckboxFieldComponent<T extends ValueType> imple
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   valueViewModel = linkedSignal<FieldOption<T>[]>(
     () => {

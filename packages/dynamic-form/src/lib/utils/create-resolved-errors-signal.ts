@@ -1,8 +1,8 @@
-import { Signal, Injector, inject, computed, untracked } from '@angular/core';
+import { computed, inject, Injector, Signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, ValidationError } from '@angular/forms/signals';
-import { derivedFrom } from 'ngxtension/derived-from';
-import { combineLatest, of, Observable } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { ValidationMessages } from '../models/validation-types';
 import { dynamicTextToObservable } from './dynamic-text-to-observable';
 import { interpolateParams } from './interpolate-params';
@@ -40,42 +40,36 @@ export function createResolvedErrorsSignal<T>(
   // Ensure validationMessages is never undefined (mappers pass {} if not defined)
   const messages = computed(() => validationMessages() ?? {});
 
-  // Lazy initialization to avoid NG0950 errors during component construction
-  // derivedFrom will only be created on first access when inputs are available
-  let cachedSignal: Signal<ResolvedError[]> | undefined;
-
-  return computed(() => {
-    if (!cachedSignal) {
-      // Use untracked to avoid NG0602 when creating effect inside computed
-      // Pass injector to derivedFrom to use correct injection context
-      cachedSignal = untracked(() =>
-        derivedFrom(
-          { field, messages },
-          switchMap(({ field, messages }) => {
-            const control = field();
-            const errors = control.errors();
-
-            // No errors - return empty array
-            if (!errors || errors.length === 0) {
-              return of([]);
-            }
-
-            // Create observable for each error's resolved message
-            const errorResolvers = errors.map((error: ValidationError) => resolveErrorMessage(error, messages, injector));
-
-            // Combine all error message observables into single array emission
-            return errorResolvers.length > 0 ? combineLatest(errorResolvers) : of([]);
-          }),
-          {
-            initialValue: [] as ResolvedError[],
-            injector,
-          }
-        )
-      ) as Signal<ResolvedError[]>;
-    }
-
-    return cachedSignal();
+  // Create a computed signal that reads the actual errors from the field
+  // This ensures the signal tracks changes to field().errors(), not just the field reference
+  const errors = computed(() => {
+    const control = field()();
+    return control.errors();
   });
+
+  // Convert signals to observables using toObservable with injector
+  const errors$ = toObservable(errors, { injector });
+  const messages$ = toObservable(messages, { injector });
+
+  // Combine observables and process errors
+  const resolvedErrors$ = combineLatest([errors$, messages$]).pipe(
+    switchMap(([currentErrors, msgs]) => {
+      // No errors - return empty array
+      if (!currentErrors || currentErrors.length === 0) {
+        return of([]);
+      }
+
+      // Create observable for each error's resolved message
+      const errorResolvers = currentErrors.map((error: ValidationError) => resolveErrorMessage(error, msgs, injector));
+
+      // Combine all error message observables into single array emission
+      return errorResolvers.length > 0 ? combineLatest(errorResolvers) : of([]);
+    })
+  );
+
+  // Convert observable back to signal using toSignal with injector
+  // toSignal properly handles the injection context and manages subscriptions
+  return toSignal(resolvedErrors$, { initialValue: [] as ResolvedError[], injector });
 }
 
 /**

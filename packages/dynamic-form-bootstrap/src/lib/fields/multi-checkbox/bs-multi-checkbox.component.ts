@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import {
+  createResolvedErrorsSignal,
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  ValueType,
-  ValidationMessages,
-  createResolvedErrorsSignal,
   shouldShowErrors,
+  ValidationMessages,
+  ValueType,
 } from '@ng-forge/dynamic-form';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -52,9 +52,9 @@ import { AsyncPipe } from '@angular/common';
     <div class="form-text">
       {{ helpText | dynamicText | async }}
     </div>
-    } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+    } @for (error of errorsToDisplay(); track error.kind) {
     <div class="invalid-feedback d-block">{{ error.message }}</div>
-    } }
+    }
   `,
   styles: [
     `
@@ -94,6 +94,9 @@ export default class BsMultiCheckboxFieldComponent<T extends ValueType> implemen
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   valueViewModel = linkedSignal<FieldOption<T>[]>(
     () => {

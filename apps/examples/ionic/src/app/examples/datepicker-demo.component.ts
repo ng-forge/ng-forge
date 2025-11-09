@@ -33,27 +33,12 @@ export class DatepickerDemoComponent {
         key: 'birthDate',
         type: 'datepicker',
         label: 'Birth Date',
+        required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         props: {
           placeholder: 'Select your birth date',
-          presentation: 'date' as const,
-        },
-      },
-      {
-        key: 'appointmentTime',
-        type: 'datepicker',
-        label: 'Appointment Time',
-        props: {
-          placeholder: 'Select appointment time',
-          presentation: 'time' as const,
-        },
-      },
-      {
-        key: 'eventDateTime',
-        type: 'datepicker',
-        label: 'Event Date & Time',
-        props: {
-          placeholder: 'Select date and time',
-          presentation: 'date-time' as const,
         },
       },
     ],

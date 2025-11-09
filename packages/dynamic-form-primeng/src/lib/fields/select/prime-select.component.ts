@@ -1,22 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { Field, FieldTree } from '@angular/forms/signals';
 import {
+  createResolvedErrorsSignal,
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  ValidationMessages,
-  createResolvedErrorsSignal,
   shouldShowErrors,
+  ValidationMessages,
 } from '@ng-forge/dynamic-form';
 import { AsyncPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { MultiSelect } from 'primeng/multiselect';
 import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
 
 @Component({
   selector: 'df-prime-select',
-  imports: [FormsModule, Select, MultiSelect, DynamicTextPipe, AsyncPipe],
+  imports: [Field, Select, MultiSelect, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -26,7 +25,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
       <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       } @if (isMultiple()) {
       <p-multiSelect
-        [(ngModel)]="f().value"
+        [field]="f"
         [inputId]="key()"
         [options]="options()"
         optionLabel="label"
@@ -35,12 +34,10 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
       />
       } @else {
       <p-select
-        [(ngModel)]="f().value"
+        [field]="f"
         [inputId]="key()"
         [options]="options()"
         optionLabel="label"
@@ -49,12 +46,10 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
       />
-      } @if (showErrors()) { @for (error of resolvedErrors(); track error.kind) {
+      } @for (error of errorsToDisplay(); track error.kind) {
       <small class="p-error">{{ error.message }}</small>
-      } }
+      }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,6 +75,9 @@ export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponen
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly isMultiple = computed(() => this.props()?.multiple ?? false);
 }

@@ -1,15 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
-import {
-  DynamicText,
-  DynamicTextPipe,
-  ValidationMessages,
-  createResolvedErrorsSignal,
-  shouldShowErrors,
-} from '@ng-forge/dynamic-form';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
@@ -58,12 +52,8 @@ import { AsyncPipe } from '@angular/common';
 
       @if (props()?.hint; as hint) {
       <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
-      }
-
-      @if (showErrors()) {
-        @for (error of resolvedErrors(); track error.kind) {
-          <mat-error>{{ error.message }}</mat-error>
-        }
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <mat-error>{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,
@@ -88,4 +78,7 @@ export default class MatDatepickerFieldComponent implements MatDatepickerCompone
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
   readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

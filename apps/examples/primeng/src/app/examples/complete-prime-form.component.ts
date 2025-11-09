@@ -1,17 +1,17 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 import { submitButton } from '@ng-forge/dynamic-form-primeng';
 
 @Component({
   selector: 'app-complete-prime-form',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <h4>Complete PrimeNG Form</h4>
-    <p>Comprehensive form showcasing all PrimeNG field components with validation.</p>
-    <dynamic-form [config]="config" [(value)]="model" (submitted)="submitted($event)" />
-    <h4>Form Data:</h4>
-    <pre>{{ model() | json }}</pre>
+    <dynamic-form [config]="config" [(value)]="formValue" />
+    <div class="example-result">
+      <h4>Form Data:</h4>
+      <pre>{{ formValue() | json }}</pre>
+    </div>
   `,
   host: {
     class: 'example-container',
@@ -19,147 +19,99 @@ import { submitButton } from '@ng-forge/dynamic-form-primeng';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompletePrimeFormComponent {
-  model = signal({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    password: '',
-    bio: '',
-    country: '',
-    language: '',
-    plan: '',
-    skills: [],
-    gender: '',
-    birthDate: null,
-    preferences: [],
-    newsletter: false,
-    darkMode: false,
-    terms: false,
-    privacy: false,
-    experienceLevel: 0,
-  });
-
-  submitted(value: any): void {
-    console.log('Form Submitted!', value);
-    alert('Form submitted successfully! Check the console for details.');
-  }
+  formValue = signal({});
 
   config = {
     fields: [
-      // ============================================
-      // PERSONAL INFORMATION SECTION
-      // ============================================
+      {
+        key: 'title',
+        type: 'text',
+        label: 'User Registration Form',
+        props: {
+          elementType: 'h2',
+        },
+      },
+      {
+        key: 'subtitle',
+        type: 'text',
+        label: 'Raw ng-forge form without custom styling - showing PrimeNG integration',
+      },
+
+      // Personal Info
       {
         key: 'firstName',
         type: 'input',
         label: 'First Name',
+        required: true,
+        minLength: 2,
+        validationMessages: {
+          required: 'This field is required',
+          minLength: 'Must be at least {requiredLength} characters',
+        },
         props: {
           placeholder: 'Enter your first name',
           variant: 'outlined',
-          hint: 'Your legal first name',
         },
-        required: true,
-        minLength: 2,
       },
       {
         key: 'lastName',
         type: 'input',
         label: 'Last Name',
+        required: true,
+        minLength: 2,
+        validationMessages: {
+          required: 'This field is required',
+          minLength: 'Must be at least {requiredLength} characters',
+        },
         props: {
           placeholder: 'Enter your last name',
           variant: 'outlined',
         },
-        required: true,
-        minLength: 2,
       },
       {
         key: 'email',
         type: 'input',
         label: 'Email Address',
+        required: true,
+        email: true,
+        validationMessages: {
+          required: 'This field is required',
+          email: 'Please enter a valid email address',
+        },
         props: {
           type: 'email',
           placeholder: 'user@example.com',
           variant: 'outlined',
           hint: 'We will never share your email',
         },
-        required: true,
-        email: true,
-      },
-      {
-        key: 'phone',
-        type: 'input',
-        label: 'Phone Number',
-        props: {
-          type: 'tel',
-          placeholder: '+1 (555) 123-4567',
-          variant: 'outlined',
-          hint: 'Include country code',
-        },
-      },
-      {
-        key: 'password',
-        type: 'input',
-        label: 'Password',
-        props: {
-          type: 'password',
-          placeholder: 'Enter a secure password',
-          variant: 'outlined',
-          hint: 'At least 8 characters',
-        },
-        required: true,
-        minLength: 8,
-      },
-      {
-        key: 'birthDate',
-        type: 'datepicker',
-        label: 'Birth Date',
-        props: {
-          dateFormat: 'mm/dd/yy',
-          showIcon: true,
-          showButtonBar: true,
-          hint: 'Select your birth date',
-        },
-        required: true,
-      },
-      {
-        key: 'gender',
-        type: 'radio',
-        label: 'Gender',
-        options: [
-          { value: 'male', label: 'Male' },
-          { value: 'female', label: 'Female' },
-          { value: 'other', label: 'Other' },
-          { value: 'prefer-not-to-say', label: 'Prefer not to say' },
-        ],
-        props: {
-          name: 'gender',
-        },
       },
 
-      // ============================================
-      // PROFILE SECTION
-      // ============================================
+      // Demographics
       {
-        key: 'bio',
-        type: 'textarea',
-        label: 'Biography',
+        key: 'age',
+        type: 'input',
+        label: 'Age',
+        required: true,
+        min: 18,
+        max: 120,
+        validationMessages: {
+          required: 'This field is required',
+          min: 'Must be at least {min}',
+          max: 'Must not exceed {max}',
+        },
         props: {
-          placeholder: 'Tell us about yourself...',
-          rows: 4,
-          autoResize: true,
-          maxlength: 500,
-          hint: 'Brief personal bio (max 500 characters)',
+          type: 'number',
+          placeholder: '18',
         },
       },
-
-      // ============================================
-      // PREFERENCES SECTION
-      // ============================================
       {
         key: 'country',
         type: 'select',
         label: 'Country',
+        required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'us', label: 'United States' },
           { value: 'uk', label: 'United Kingdom' },
@@ -168,104 +120,41 @@ export class CompletePrimeFormComponent {
           { value: 'de', label: 'Germany' },
           { value: 'fr', label: 'France' },
           { value: 'jp', label: 'Japan' },
-          { value: 'in', label: 'India' },
         ],
         props: {
           placeholder: 'Select your country',
           filter: true,
           showClear: true,
         },
-        required: true,
       },
-      {
-        key: 'language',
-        type: 'select',
-        label: 'Preferred Language',
-        options: [
-          { value: 'en', label: 'English' },
-          { value: 'es', label: 'Spanish' },
-          { value: 'fr', label: 'French' },
-          { value: 'de', label: 'German' },
-          { value: 'ja', label: 'Japanese' },
-        ],
-        props: {
-          placeholder: 'Select your language',
-          showClear: true,
-        },
-      },
+
+      // Preferences
       {
         key: 'plan',
         type: 'select',
         label: 'Subscription Plan',
+        required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'free', label: 'Free - $0/month' },
           { value: 'pro', label: 'Pro - $10/month' },
           { value: 'enterprise', label: 'Enterprise - $50/month' },
         ],
         props: {
-          placeholder: 'Choose your plan',
-          hint: 'You can upgrade or downgrade anytime',
-        },
-        required: true,
-      },
-
-      // ============================================
-      // SKILLS & INTERESTS
-      // ============================================
-      {
-        key: 'skills',
-        type: 'multi-checkbox',
-        label: 'Technical Skills',
-        options: [
-          { value: 'typescript', label: 'TypeScript' },
-          { value: 'angular', label: 'Angular' },
-          { value: 'react', label: 'React' },
-          { value: 'vue', label: 'Vue.js' },
-          { value: 'node', label: 'Node.js' },
-        ],
-        props: {
-          hint: 'Select all that apply',
+          placeholder: 'Choose a plan',
         },
       },
       {
-        key: 'preferences',
-        type: 'select',
-        label: 'Notification Preferences',
-        options: [
-          { value: 'email', label: 'Email notifications' },
-          { value: 'sms', label: 'SMS notifications' },
-          { value: 'push', label: 'Push notifications' },
-          { value: 'newsletter', label: 'Newsletter' },
-        ],
+        key: 'bio',
+        type: 'textarea',
+        label: 'Bio',
         props: {
-          placeholder: 'Select notification types',
-          multiple: true,
-          filter: true,
-          showClear: true,
-          hint: 'How would you like to be notified?',
-        },
-      },
-
-      // ============================================
-      // SETTINGS
-      // ============================================
-      {
-        key: 'experienceLevel',
-        type: 'slider',
-        label: 'Experience Level (Years)',
-        minValue: 0,
-        maxValue: 20,
-        step: 1,
-        props: {
-          hint: 'Years of professional experience',
-        },
-      },
-      {
-        key: 'darkMode',
-        type: 'toggle',
-        label: 'Enable Dark Mode',
-        props: {
-          hint: 'Toggle dark mode theme',
+          placeholder: 'Tell us about yourself',
+          hint: 'Optional - share a bit about yourself',
+          rows: 4,
+          autoResize: true,
         },
       },
       {
@@ -274,45 +163,19 @@ export class CompletePrimeFormComponent {
         label: 'Subscribe to newsletter',
         props: {
           binary: true,
-          hint: 'Get updates about new features and tips',
+          hint: 'Get updates about new features and special offers',
         },
       },
 
-      // ============================================
-      // AGREEMENTS
-      // ============================================
-      {
-        key: 'terms',
-        type: 'checkbox',
-        label: 'I agree to the Terms and Conditions',
-        props: {
-          binary: true,
-        },
-        required: true,
-      },
-      {
-        key: 'privacy',
-        type: 'checkbox',
-        label: 'I agree to the Privacy Policy',
-        props: {
-          binary: true,
-        },
-        required: true,
-      },
-
-      // ============================================
-      // SUBMIT BUTTON
-      // ============================================
+      // Submit button
       submitButton({
         key: 'submit',
         label: 'Create Account',
         props: {
           severity: 'primary',
           raised: true,
-          icon: 'pi pi-user-plus',
-          iconPos: 'right',
         },
       }),
     ],
-  };
+  } as const satisfies FormConfig;
 }
