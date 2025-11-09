@@ -1,9 +1,11 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
   computed,
   DestroyRef,
+  effect,
   inject,
   Injector,
   input,
@@ -92,18 +94,15 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
       (submit)="onSubmit($event)"
     >
       @if (formModeDetection().mode === 'paged') {
-      <!-- Paged form: Use page orchestrator with page fields -->
+      <!-- Paged form: Use page orchestrator with page field definitions -->
       <page-orchestrator
-        [pageComponents]="fields()"
+        [pageFields]="pageFieldDefinitions()"
+        [form]="form()"
+        [fieldSignalContext]="fieldSignalContext()"
         [config]="{ initialPageIndex: 0 }"
         (pageChanged)="onPageChanged($event)"
         (navigationStateChanged)="onNavigationStateChanged($event)"
-      >
-        <!-- Page fields will be rendered here -->
-        <div [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-          <!-- Page field components will be automatically rendered by the fieldRenderer directive -->
-        </div>
-      </page-orchestrator>
+      />
       } @else {
       <!-- Non-paged form: Render fields directly with grid system -->
       <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
@@ -121,7 +120,7 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = InferGlobalFormValue>
-  implements OnDestroy
+  implements OnDestroy, AfterViewInit
 {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
@@ -159,7 +158,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   // Memoized field signal context to avoid recreation for every field
-  private readonly fieldSignalContext = computed(
+  readonly fieldSignalContext = computed(
     (): FieldSignalContext<TModel> => ({
       injector: this.injector,
       value: this.value,
@@ -265,8 +264,8 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       const fieldsById = this.memoizedKeyBy(flattenedFields);
       const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
 
-      // For rendering, paged forms keep original structure, non-paged use flattened
-      const fieldsToRender = modeDetection.mode === 'paged' ? config.fields : flattenedFields;
+      // For rendering, paged forms are now handled by orchestrator, non-paged use flattened
+      const fieldsToRender = modeDetection.mode === 'paged' ? [] : flattenedFields;
 
       return {
         fields: fieldsToRender,
@@ -288,6 +287,21 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       mode: 'non-paged' as const,
       registry, // Include registry even for empty forms
     };
+  });
+
+  /**
+   * Page field definitions for paged forms.
+   * Extracted directly from config for declarative rendering in the orchestrator.
+   */
+  readonly pageFieldDefinitions = computed(() => {
+    const config = this.config();
+    const mode = this.formModeDetection().mode;
+
+    if (mode === 'paged' && config.fields) {
+      return config.fields.filter((field) => field.type === 'page') as any[];
+    }
+
+    return [];
   });
 
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
@@ -325,7 +339,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     return { ...configOptions, ...inputOptions };
   });
 
-  private readonly form = computed<ReturnType<typeof form<TModel>>>(() => {
+  readonly form = computed<ReturnType<typeof form<TModel>>>(() => {
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
 
@@ -461,6 +475,23 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   constructor() {
     // Set up initialization tracking
     this.setupInitializationTracking();
+
+    // For paged forms, emit initialization event when pages are defined
+    effect(() => {
+      const mode = this.formModeDetection().mode;
+      const pages = this.pageFieldDefinitions();
+
+      if (mode === 'paged' && pages.length > 0) {
+        // Emit initialization for dynamic-form component in paged mode
+        // This happens after the page orchestrator is set up
+        this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // For non-paged forms, the initialization event is emitted via onFieldsInitialized
+    // For paged forms, it's handled in the constructor effect
   }
 
   /**

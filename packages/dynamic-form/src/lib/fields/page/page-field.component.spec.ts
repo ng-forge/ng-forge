@@ -10,7 +10,7 @@ describe('PageFieldComponent', () => {
       fields: [],
     };
 
-    const { component } = setupSimpleTest(PageFieldComponent, { field });
+    const { component } = setupSimpleTest(PageFieldComponent, { field, pageIndex: 0, isVisible: true });
     // ITERATION 6 FIX: Verify component is correct type
     // Previous: expect(component).toBeTruthy()
     expect(component).toBeDefined();
@@ -25,7 +25,7 @@ describe('PageFieldComponent', () => {
       fields: [],
     };
 
-    const { component } = setupSimpleTest(PageFieldComponent, { field });
+    const { component } = setupSimpleTest(PageFieldComponent, { field, pageIndex: 0, isVisible: true });
     expect(component.field()).toEqual(field);
   });
 
@@ -37,7 +37,7 @@ describe('PageFieldComponent', () => {
       fields: [],
     };
 
-    const { component } = setupSimpleTest(PageFieldComponent, { field });
+    const { component } = setupSimpleTest(PageFieldComponent, { field, pageIndex: 0, isVisible: true });
     expect(component.disabled()).toBe(true);
   });
 
@@ -48,7 +48,7 @@ describe('PageFieldComponent', () => {
       fields: [],
     };
 
-    const { component } = setupSimpleTest(PageFieldComponent, { field: validField });
+    const { component } = setupSimpleTest(PageFieldComponent, { field: validField, pageIndex: 0, isVisible: true });
     expect(component.isValid()).toBe(true);
 
     // Test validation logic directly since we can't set up multiple TestBed instances

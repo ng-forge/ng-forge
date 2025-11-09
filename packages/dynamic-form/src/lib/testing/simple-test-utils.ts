@@ -174,6 +174,9 @@ export class TestFieldComponent {
 export interface SimpleComponentTestConfig<T = any> {
   field: FieldDef<any>;
   value?: T;
+  pageIndex?: number;
+  isVisible?: boolean;
+  [key: string]: any; // Allow any additional inputs
 }
 
 /**
@@ -214,6 +217,19 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
   if (config.value !== undefined) {
     fixture.componentRef.setInput('value', config.value);
   }
+  if (config.pageIndex !== undefined) {
+    fixture.componentRef.setInput('pageIndex', config.pageIndex);
+  }
+  if (config.isVisible !== undefined) {
+    fixture.componentRef.setInput('isVisible', config.isVisible);
+  }
+
+  // Set any additional inputs provided in config
+  Object.keys(config).forEach((key) => {
+    if (!['field', 'value', 'pageIndex', 'isVisible'].includes(key) && config[key] !== undefined) {
+      fixture.componentRef.setInput(key, config[key]);
+    }
+  });
 
   fixture.detectChanges();
 
