@@ -10,8 +10,7 @@ npm install @ng-forge/dynamic-form-primeng primeng primeicons
 
 Configure providers:
 
-```typescript
-// app.config.ts
+```typescript name="app.config.ts"
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
 
@@ -22,15 +21,13 @@ export const appConfig: ApplicationConfig = {
 
 Import PrimeNG styles:
 
-```scss
-// styles.scss
-@import '../../../../../../node_modules/primeicons/primeicons.css';
+```scss name="styles.scss"
+@import 'primeicons/primeicons.css';
 ```
 
 Configure PrimeNG theme via provider:
 
-```typescript
-// app.config.ts
+```typescript name="app.config.ts"
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 

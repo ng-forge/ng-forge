@@ -10,8 +10,7 @@ npm install @ng-forge/dynamic-form-material @angular/material @angular/cdk
 
 Configure providers:
 
-```typescript
-// app.config.ts
+```typescript name="app.config.ts"
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
@@ -22,9 +21,8 @@ export const appConfig: ApplicationConfig = {
 
 Import Material theme:
 
-```scss
-// styles.scss
-@import '../../../../../../node_modules/.pnpm/@angular+material@21.0.0-rc.1_@angular+cdk@21.0.0-next.10_@angular+common@21.0.0-next.10_@ang_kkpzwd525j524cz5quyvbtz6rq/node_modules/@angular/material/prebuilt-themes/indigo-pink.css';
+```scss name="styles.scss"
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 ```
 
 ## Field Components

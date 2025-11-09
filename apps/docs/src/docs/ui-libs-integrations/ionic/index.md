@@ -10,8 +10,7 @@ npm install @ng-forge/dynamic-form-ionic @ionic/angular
 
 Configure providers:
 
-```typescript
-// app.config.ts
+```typescript name="app.config.ts"
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
 
@@ -22,12 +21,11 @@ export const appConfig: ApplicationConfig = {
 
 Import Ionic styles:
 
-```scss
-// styles.scss
-@import '../../../../../../node_modules/.pnpm/@ionic+angular@8.7.10-nightly.20251107_@angular+core@21.0.0-next.10_@angular+forms@21.0.0-nex_p245zkhux3vntezcrg5kzkydla/node_modules/@ionic/angular/css/core.css';
-@import 'normalize.css';
-@import 'structure.css';
-@import 'typography.css';
+```scss name="styles.scss"
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
 ```
 
 ## Field Components

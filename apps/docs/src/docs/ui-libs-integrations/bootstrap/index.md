@@ -32,9 +32,8 @@ export class MyFormComponent {}
 
 Import Bootstrap styles:
 
-```scss
-// styles.scss
-@import '../../../../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+```scss name="styles.scss"
+@import 'node_modules/bootstrap/scss/bootstrap.scss';
 ```
 
 ## Field Components

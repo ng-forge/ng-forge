@@ -126,8 +126,7 @@ export function withCustomFields(): FieldTypeDefinition[] {
 
 Add your fields to the app configuration:
 
-```typescript
-// app.config.ts
+```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withCustomFields } from './custom-fields';
