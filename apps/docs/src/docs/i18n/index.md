@@ -55,7 +55,7 @@ The form automatically updates when translations change.
 
 Here's a complete example using [@jsverse/transloco](https://jsverse.github.io/transloco/):
 
-```typescript name="app.config.ts
+```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTransloco } from '@jsverse/transloco';
