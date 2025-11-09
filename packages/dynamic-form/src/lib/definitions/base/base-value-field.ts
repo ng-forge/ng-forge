@@ -38,6 +38,17 @@ type ExcludedKeys =
   | 'minValue'
   | 'maxValue'
   | 'step'
-  | keyof FieldWithValidation;
+  // Exclude validation config, but keep validationMessages for component use
+  | 'required'
+  | 'email'
+  | 'min'
+  | 'max'
+  | 'minLength'
+  | 'maxLength'
+  | 'pattern'
+  | 'validators'
+  | 'logic'
+  | 'schemas'
+  | 'dynamicProperties';
 
 export type ValueFieldComponent<T extends BaseValueField<any, unknown>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

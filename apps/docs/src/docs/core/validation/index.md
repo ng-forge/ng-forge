@@ -1062,4 +1062,4 @@ const config = {
 - **[Conditional Logic](../conditional-logic)** - Dynamic field behavior beyond validation
 - **[Field Types](../field-types)** - Understanding which fields can be validated
 - **[Type Safety](../type-safety)** - How validation affects TypeScript types
-- **[Material Integration](../../ui-libs-integrations/reference/material)** - How validation errors are displayed
+- **[Material Integration](../../ui-libs-integrations/material)** - How validation errors are displayed

@@ -28,6 +28,9 @@ export class MultiCheckboxDemoComponent {
         type: 'multi-checkbox',
         label: 'Select Your Interests',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'sports', label: 'Sports' },
           { value: 'music', label: 'Music' },

@@ -33,6 +33,9 @@ export class CheckboxDemoComponent {
         type: 'checkbox',
         label: 'I agree to the terms and conditions',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
       },
       {
         key: 'marketing',

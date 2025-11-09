@@ -1,7 +1,14 @@
-import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-form';
-import { BsErrorsComponent } from '../../shared/bs-errors.component';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  shouldShowErrors,
+  ValidationMessages,
+  ValueType,
+} from '@ng-forge/dynamic-form';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { BsMultiCheckboxComponent, BsMultiCheckboxProps } from './bs-multi-checkbox.type';
@@ -9,51 +16,45 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-multi-checkbox',
-  imports: [BsErrorsComponent, DynamicTextPipe, AsyncPipe],
+  imports: [DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-
-    @if (label(); as label) {
-      <div class="form-label">{{ label | dynamicText | async }}</div>
+    @let f = field(); @if (label(); as label) {
+    <div class="form-label">{{ label | dynamicText | async }}</div>
     }
 
     <div class="checkbox-group">
       @for (option of options(); track option.value; let i = $index) {
-        <div
-          class="form-check"
-          [class.form-switch]="props()?.switch"
-          [class.form-check-inline]="props()?.inline"
-          [class.form-check-reverse]="props()?.reverse"
-        >
-          <input
-            type="checkbox"
-            [id]="key() + '_' + i"
-            [checked]="isChecked(option)"
-            [disabled]="f().disabled() || option.disabled"
-            (change)="onCheckboxChange(option, $any($event.target).checked)"
-            class="form-check-input"
-            [class.is-invalid]="f().invalid() && f().touched()"
-            [attr.tabindex]="tabIndex()"
-          />
-          <label [for]="key() + '_' + i" class="form-check-label">
-            {{ option.label | dynamicText | async }}
-          </label>
-        </div>
+      <div
+        class="form-check"
+        [class.form-switch]="props()?.switch"
+        [class.form-check-inline]="props()?.inline"
+        [class.form-check-reverse]="props()?.reverse"
+      >
+        <input
+          type="checkbox"
+          [id]="key() + '_' + i"
+          [checked]="isChecked(option)"
+          [disabled]="f().disabled() || option.disabled"
+          (change)="onCheckboxChange(option, $any($event.target).checked)"
+          class="form-check-input"
+          [class.is-invalid]="f().invalid() && f().touched()"
+          [attr.tabindex]="tabIndex()"
+        />
+        <label [for]="key() + '_' + i" class="form-check-label">
+          {{ option.label | dynamicText | async }}
+        </label>
+      </div>
       }
     </div>
 
     @if (props()?.helpText; as helpText) {
-      <div class="form-text">
-        {{ helpText | dynamicText | async }}
-      </div>
+    <div class="form-text">
+      {{ helpText | dynamicText | async }}
+    </div>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <div class="invalid-feedback d-block">{{ error.message }}</div>
     }
-
-    <df-bs-errors
-      [errors]="f().errors()"
-      [invalid]="f().invalid()"
-      [touched]="f().touched()"
-    />
   `,
   styles: [
     `
@@ -89,6 +90,13 @@ export default class BsMultiCheckboxFieldComponent<T extends ValueType> implemen
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<BsMultiCheckboxProps<T>>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   valueViewModel = linkedSignal<FieldOption<T>[]>(
     () => {

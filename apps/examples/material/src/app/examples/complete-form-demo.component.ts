@@ -37,6 +37,9 @@ export class CompleteFormDemoComponent {
         label: 'First Name',
         value: '',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         props: {
           placeholder: 'Your first name',
         },
@@ -47,6 +50,9 @@ export class CompleteFormDemoComponent {
         label: 'Last Name',
         value: '',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         props: {
           placeholder: 'Your last name',
         },
@@ -58,6 +64,10 @@ export class CompleteFormDemoComponent {
         value: '',
         required: true,
         email: true,
+        validationMessages: {
+          required: 'This field is required',
+          email: 'Please enter a valid email address',
+        },
         props: {
           type: 'email',
           placeholder: 'email@example.com',
@@ -87,6 +97,9 @@ export class CompleteFormDemoComponent {
         label: 'Biography',
         value: '',
         maxLength: 500,
+        validationMessages: {
+          maxLength: 'Must not exceed {maxLength} characters',
+        },
         props: {
           rows: 4,
           placeholder: 'Tell us about yourself',
@@ -150,6 +163,9 @@ export class CompleteFormDemoComponent {
         type: 'checkbox',
         label: 'I agree to the terms and conditions',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
       },
       {
         type: 'submit',

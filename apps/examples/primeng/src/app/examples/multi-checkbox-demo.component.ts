@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 import '@ng-forge/dynamic-form-primeng';
@@ -10,76 +10,34 @@ import '@ng-forge/dynamic-form-primeng';
     class: 'example-container',
   },
   template: `
-    <dynamic-form [config]="fields" [(value)]="formValue" />
+    <dynamic-form [config]="config" [(value)]="formValue" />
     <div class="example-result">
       <h4>Form Data:</h4>
       <pre>{{ formValue() | json }}</pre>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MultiCheckboxDemoComponent {
   formValue = signal({});
 
-  fields = {
+  config = {
     fields: [
       {
         key: 'interests',
         type: 'multi-checkbox',
-        label: 'Interests',
+        label: 'Select Your Interests',
+        required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'sports', label: 'Sports' },
           { value: 'music', label: 'Music' },
           { value: 'reading', label: 'Reading' },
           { value: 'travel', label: 'Travel' },
-          { value: 'gaming', label: 'Gaming' },
+          { value: 'cooking', label: 'Cooking' },
         ],
-        props: {
-          hint: 'Select all that apply',
-        },
-      },
-      {
-        key: 'skills',
-        type: 'multi-checkbox',
-        label: 'Technical Skills',
-        options: [
-          { value: 'typescript', label: 'TypeScript' },
-          { value: 'angular', label: 'Angular' },
-          { value: 'react', label: 'React' },
-          { value: 'vue', label: 'Vue.js' },
-          { value: 'node', label: 'Node.js' },
-        ],
-        props: {
-          hint: 'Select your technical skills',
-        },
-        required: true,
-      },
-      {
-        key: 'languages',
-        type: 'multi-checkbox',
-        label: 'Languages Spoken',
-        options: [
-          { value: 'en', label: 'English' },
-          { value: 'es', label: 'Spanish' },
-          { value: 'fr', label: 'French' },
-          { value: 'de', label: 'German' },
-          { value: 'ja', label: 'Japanese' },
-          { value: 'zh', label: 'Chinese' },
-        ],
-      },
-      {
-        key: 'permissions',
-        type: 'multi-checkbox',
-        label: 'User Permissions',
-        options: [
-          { value: 'read', label: 'Read' },
-          { value: 'write', label: 'Write' },
-          { value: 'delete', label: 'Delete' },
-          { value: 'admin', label: 'Admin' },
-        ],
-        props: {
-          styleClass: 'custom-multi-checkbox-class', // Custom CSS class
-          hint: 'Assign permissions to the user',
-        },
       },
     ],
   } as const satisfies FormConfig;

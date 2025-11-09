@@ -23,48 +23,18 @@ export class TextareaDemoComponent {
   config = {
     fields: [
       {
-        key: 'basicTextarea',
+        key: 'bio',
         type: 'textarea',
-        label: 'Basic Textarea',
-        props: {
-          placeholder: 'Enter your text here...',
-          rows: 3,
-          helpText: 'Default textarea with 3 rows',
+        label: 'Biography',
+        value: '',
+        maxLength: 500,
+        validationMessages: {
+          maxLength: 'Must not exceed {maxLength} characters',
         },
-      },
-      {
-        key: 'floatingTextarea',
-        type: 'textarea',
-        label: 'Floating Label Textarea',
         props: {
-          placeholder: 'Enter your comment...',
-          floatingLabel: true,
           rows: 4,
-          helpText: 'Textarea with floating label',
+          placeholder: 'Tell us about yourself',
         },
-      },
-      {
-        key: 'largeTextarea',
-        type: 'textarea',
-        label: 'Large Textarea',
-        props: {
-          placeholder: 'Write your essay...',
-          rows: 6,
-          size: 'lg',
-          helpText: 'Large textarea for longer content',
-        },
-      },
-      {
-        key: 'message',
-        type: 'textarea',
-        label: 'Message',
-        props: {
-          placeholder: 'Enter your message...',
-          rows: 5,
-          helpText: 'This field is required',
-        },
-        required: true,
-        minLength: 10,
       },
     ],
   } as const satisfies FormConfig;

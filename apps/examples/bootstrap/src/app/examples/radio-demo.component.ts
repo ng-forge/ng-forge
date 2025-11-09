@@ -23,60 +23,28 @@ export class RadioDemoComponent {
   config = {
     fields: [
       {
-        key: 'basicRadio',
+        key: 'gender',
         type: 'radio',
-        label: 'Basic Radio Buttons',
-        options: [
-          { value: 'option1', label: 'Option 1' },
-          { value: 'option2', label: 'Option 2' },
-          { value: 'option3', label: 'Option 3' },
-        ],
-        props: {
-          helpText: 'Default radio button styling',
-        },
-      },
-      {
-        key: 'inlineRadio',
-        type: 'radio',
-        label: 'Inline Radio Buttons',
-        options: [
-          { value: 'small', label: 'Small' },
-          { value: 'medium', label: 'Medium' },
-          { value: 'large', label: 'Large' },
-        ],
-        props: {
-          inline: true,
-          helpText: 'Radio buttons displayed inline',
-        },
-      },
-      {
-        key: 'buttonGroupRadio',
-        type: 'radio',
-        label: 'Button Group Radio',
-        options: [
-          { value: 'beginner', label: 'Beginner' },
-          { value: 'intermediate', label: 'Intermediate' },
-          { value: 'advanced', label: 'Advanced' },
-        ],
-        props: {
-          buttonGroup: true,
-          helpText: 'Radio buttons rendered as button group',
-        },
+        label: 'Gender',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
+        options: [
+          { value: 'male', label: 'Male' },
+          { value: 'female', label: 'Female' },
+          { value: 'other', label: 'Other' },
+        ],
       },
       {
-        key: 'buttonGroupOutline',
+        key: 'contactMethod',
         type: 'radio',
-        label: 'Outline Button Group',
+        label: 'Preferred Contact Method',
         options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-          { value: 'maybe', label: 'Maybe' },
+          { value: 'email', label: 'Email' },
+          { value: 'phone', label: 'Phone' },
+          { value: 'sms', label: 'SMS' },
         ],
-        props: {
-          buttonGroup: true,
-          helpText: 'Button group style',
-        },
       },
     ],
   } as const satisfies FormConfig;

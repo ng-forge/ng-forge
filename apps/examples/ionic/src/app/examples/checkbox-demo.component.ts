@@ -33,26 +33,20 @@ export class CheckboxDemoComponent {
         key: 'newsletter',
         type: 'checkbox',
         label: 'Subscribe to newsletter',
-        props: {
-          labelPlacement: 'end',
-        },
       },
       {
         key: 'terms',
         type: 'checkbox',
         label: 'I agree to the terms and conditions',
         required: true,
-        props: {
-          labelPlacement: 'end',
+        validationMessages: {
+          required: 'This field is required',
         },
       },
       {
         key: 'marketing',
         type: 'checkbox',
         label: 'Receive marketing communications',
-        props: {
-          labelPlacement: 'end',
-        },
       },
     ],
   } as const satisfies FormConfig;

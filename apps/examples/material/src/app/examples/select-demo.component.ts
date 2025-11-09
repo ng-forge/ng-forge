@@ -28,6 +28,9 @@ export class SelectDemoComponent {
         type: 'select',
         label: 'Country',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'us', label: 'United States' },
           { value: 'uk', label: 'United Kingdom' },

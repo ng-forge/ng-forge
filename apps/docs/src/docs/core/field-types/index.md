@@ -203,7 +203,7 @@ Fields integrate with Angular's signal forms validation system. ng-forge provide
 
 UI framework integrations extend field types with framework-specific styling and features while maintaining the same configuration API.
 
-- [Material Design](../../ui-libs-integrations/reference/material) - Material Design components
-- [Bootstrap](../../ui-libs-integrations/reference/bootstrap) - Bootstrap styling
-- [PrimeNG](../../ui-libs-integrations/reference/primeng) - PrimeNG components
-- [Ionic](../../ui-libs-integrations/reference/ionic) - Ionic mobile components
+- [Material Design](../../ui-libs-integrations/material) - Material Design components
+- [Bootstrap](../../ui-libs-integrations/bootstrap) - Bootstrap styling
+- [PrimeNG](../../ui-libs-integrations/primeng) - PrimeNG components
+- [Ionic](../../ui-libs-integrations/ionic) - Ionic mobile components

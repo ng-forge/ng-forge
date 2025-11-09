@@ -1,13 +1,19 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
-import { BsErrorsComponent } from '../../shared/bs-errors.component';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-form';
 import { BsSelectComponent, BsSelectProps } from './bs-select.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-select',
-  imports: [Field, BsErrorsComponent, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -38,9 +44,9 @@ import { AsyncPipe } from '@angular/common';
 
       @if (props()?.helpText; as helpText) {
       <div class="form-text" [id]="key() + '-help'">{{ helpText | dynamicText | async }}</div>
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
-
-      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,6 +68,13 @@ export default class BsSelectFieldComponent<T extends string> implements BsSelec
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<BsSelectProps<T>>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
 

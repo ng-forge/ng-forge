@@ -16,5 +16,9 @@
     "@analogjs/vite-plugin-angular": "^1.21.3",
     "@nx/vite": "21.6.5"
   },
-  "sideEffects": false
+  "sideEffects": [
+    "src/index.ts",
+    "src/lib/index.ts",
+    "src/lib/types/registry-augmentation.ts"
+  ]
 }

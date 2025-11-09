@@ -26,8 +26,7 @@ const formConfig = {
 
 UI integrations register their field types via `provideDynamicForm`. For example, with Material Design:
 
-```typescript
-// app.config.ts
+```typescript name="app.config.ts"
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
@@ -324,8 +323,7 @@ function processField(field: RegisteredFieldTypes) {
 
 Extend `FieldRegistryLeaves` for custom field types:
 
-```typescript
-// custom-fields.d.ts
+```typescript name="custom-fields.d.ts"
 import type { FieldDef } from '@ng-forge/dynamic-form';
 
 // Define custom field interfaces
@@ -357,8 +355,7 @@ declare module '@ng-forge/dynamic-form' {
 
 Register your custom field components:
 
-```typescript
-// custom-fields.provider.ts
+```typescript name="custom-fields.provider.ts"
 import { FieldTypeDefinition } from '@ng-forge/dynamic-form';
 import { ColorPickerComponent } from './color-picker.component';
 import { FileUploadComponent } from './file-upload.component';
@@ -551,8 +548,7 @@ const config = { fields: [...] };
 
 **Define configs as constants:**
 
-```typescript
-// form-configs.ts
+```typescript name="form-configs.ts"
 export const USER_FORM = {
   fields: [
     { key: 'name', type: 'input', value: '', required: true },
@@ -666,5 +662,5 @@ Type inference only works for **static**, **compile-time constant** configuratio
 
 - **[Validation](../validation)** - How validators affect inferred types
 - **[Field Types](../field-types)** - Understanding field types for better inference
-- **[Custom Integration Guide](../../ui-libs-integrations/guide)** - Creating type-safe custom fields
+- **[Custom Integration Guide](../../deep-dive/custom-integrations)** - Creating type-safe custom fields
 - **[Conditional Logic](../conditional-logic)** - Type-safe conditional expressions
