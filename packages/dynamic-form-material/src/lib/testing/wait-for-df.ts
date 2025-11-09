@@ -4,48 +4,47 @@ import { firstValueFrom } from 'rxjs';
 
 /**
  * Waits for all dynamic form definitions to be initialized and ready
- * Uses the form's internal initialized$ observable for deterministic waiting
  *
- * IMPORTANT: The initialized$ observable only tracks page/row/group components,
- * not regular field components. Field components are loaded asynchronously via
- * dynamic imports, so we poll until all field components are rendered.
+ * Hybrid approach:
+ * 1. Event-based: Wait for initialized$ (tracks container components + field loading cascade)
+ * 2. DOM verification: Short poll to ensure Material components fully rendered
  *
- * WHY POLLING: This app uses zoneless change detection, so fixture.whenStable()
- * cannot track async operations inside RxJS streams (forkJoin/switchMap/toSignal).
- * Polling waits for the actual DOM outcome - field components with [data-testid].
+ * The initialized$ observable tracks page/row/group containers. Each container waits
+ * for its children via forkJoin + afterNextRender before emitting its initialized event.
+ * This creates a cascade where parent containers only emit after all descendants are ready.
+ *
+ * The short poll handles edge cases where Material component templates need additional
+ * change detection cycles before DOM elements match test selectors.
  */
 export async function waitForDFInit(component: DynamicForm, fixture: ComponentFixture<any>): Promise<void> {
   fixture.detectChanges();
 
-  // Wait for the form to be initialized (all definitions created and bound)
+  // Step 1: Wait for event-based initialization (handles ~95% of waiting)
   await firstValueFrom(component.initialized$);
 
-  // Flush effects to ensure all reactive updates are processed (zoneless mode)
+  // Step 2: Ensure all effects processed (zoneless mode)
   TestBed.flushEffects();
   fixture.detectChanges();
+  await fixture.whenStable();
 
-  // Wait for all field components to actually render in the DOM
-  // The initialized$ only waits for page/row/group components, not regular fields
-  // Regular fields (checkbox, input, etc.) are loaded via loadComponent: () => import(...)
-  // We poll until all expected field components are present
+  // Step 3: Quick DOM verification poll (handles Material template rendering edge cases)
   await waitForFieldComponents(fixture);
 }
 
 /**
- * Polls until all field components have loaded and rendered
- * Checks every 10ms for up to 500ms to handle async component loading
+ * Quick DOM verification poll to ensure Material components are fully rendered
+ *
+ * Reduced to 5 iterations (50ms max) since initialized$ event handles most waiting.
+ * This only needs to verify Material component templates have completed rendering.
  */
-async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempts = 50): Promise<void> {
+async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempts = 5): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form');
-  if (!formElement) return; // No form element, nothing to wait for
+  if (!formElement) return;
 
   let previousComponentCount = 0;
   let stableCount = 0;
 
   for (let i = 0; i < maxAttempts; i++) {
-    TestBed.flushEffects();
-    fixture.detectChanges();
-    await fixture.whenStable();
     TestBed.flushEffects();
     fixture.detectChanges();
 
@@ -61,9 +60,8 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempt
     // Check if we've stabilized (component count hasn't changed)
     if (currentComponentCount > 0 && currentComponentCount === previousComponentCount) {
       stableCount++;
-      // Wait for 3 consecutive stable iterations before exiting
-      if (stableCount >= 3 && !hasLoadingComments) {
-        fixture.detectChanges();
+      // Wait for 2 consecutive stable iterations before exiting
+      if (stableCount >= 2 && !hasLoadingComments) {
         return;
       }
     } else {
@@ -75,8 +73,7 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempt
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
 
-  // Final detect changes even if timeout
-  fixture.detectChanges();
-  await fixture.whenStable();
+  // Final stabilization even if max attempts reached
+  TestBed.flushEffects();
   fixture.detectChanges();
 }
