@@ -5,46 +5,51 @@ import { firstValueFrom } from 'rxjs';
 /**
  * Waits for all dynamic form definitions to be initialized and ready
  *
- * Hybrid approach:
+ * Deterministic approach:
  * 1. Event-based: Wait for initialized$ (tracks container components + field loading cascade)
- * 2. DOM verification: Short poll to ensure Material components fully rendered
+ * 2. Stabilization: Ensure effects/change detection complete
+ * 3. DOM stability check: Wait until component count stops changing
  *
  * The initialized$ observable tracks page/row/group containers. Each container waits
  * for its children via forkJoin + afterNextRender before emitting its initialized event.
- * This creates a cascade where parent containers only emit after all descendants are ready.
  *
- * The short poll handles edge cases where Material component templates need additional
- * change detection cycles before DOM elements match test selectors.
+ * The page orchestration refactoring introduced reactive primitives that require additional
+ * stabilization cycles for UI component templates to fully hydrate.
  */
 export async function waitForDFInit(component: DynamicForm, fixture: ComponentFixture<any>): Promise<void> {
   fixture.detectChanges();
 
-  // Step 1: Wait for event-based initialization (handles ~95% of waiting)
+  // Step 1: Wait for event-based initialization
   await firstValueFrom(component.initialized$);
 
-  // Step 2: Ensure all effects processed (zoneless mode)
+  // Step 2: Ensure all effects processed and DOM updated
   TestBed.flushEffects();
   fixture.detectChanges();
   await fixture.whenStable();
+  TestBed.flushEffects();
+  fixture.detectChanges();
 
-  // Step 3: Quick DOM verification poll (handles Material template rendering edge cases)
+  // Step 3: Wait for DOM to stabilize (no more components loading)
   await waitForFieldComponents(fixture);
 }
 
 /**
- * Quick DOM verification poll to ensure Material components are fully rendered
+ * Deterministic DOM stability check
  *
- * Reduced to 5 iterations (50ms max) since initialized$ event handles most waiting.
- * This only needs to verify Material component templates have completed rendering.
+ * Waits until Material component count stabilizes for 3 consecutive checks
+ * and no loading placeholders remain. Uses timeout-based safety net instead
+ * of arbitrary iteration limits.
  */
-async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempts = 5): Promise<void> {
+async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs = 1000): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form');
   if (!formElement) return;
 
+  const startTime = Date.now();
   let previousComponentCount = 0;
   let stableCount = 0;
+  const REQUIRED_STABLE_CHECKS = 3;
 
-  for (let i = 0; i < maxAttempts; i++) {
+  while (Date.now() - startTime < timeoutMs) {
     TestBed.flushEffects();
     fixture.detectChanges();
 
@@ -57,11 +62,11 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempt
 
     const currentComponentCount = fieldComponents.length + materialComponents.length;
 
-    // Check if we've stabilized (component count hasn't changed)
-    if (currentComponentCount > 0 && currentComponentCount === previousComponentCount) {
+    // Check if DOM has stabilized
+    if (currentComponentCount > 0 && currentComponentCount === previousComponentCount && !hasLoadingComments) {
       stableCount++;
-      // Wait for 2 consecutive stable iterations before exiting
-      if (stableCount >= 2 && !hasLoadingComments) {
+      if (stableCount >= REQUIRED_STABLE_CHECKS) {
+        // DOM is truly stable - exit
         return;
       }
     } else {
@@ -69,11 +74,11 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, maxAttempt
       previousComponentCount = currentComponentCount;
     }
 
-    // Wait 10ms before next check
+    // Wait one tick before next check
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
 
-  // Final stabilization even if max attempts reached
+  // Final stabilization even if timeout reached
   TestBed.flushEffects();
   fixture.detectChanges();
 }
