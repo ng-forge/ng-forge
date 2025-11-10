@@ -177,13 +177,13 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 
 ### Build Advanced Forms
 
-- **[Multi-Step Forms](../../prebuilt/wizards/multi-step)** - Create wizard-style forms with page navigation
-- **[Repeatable Sections](../../prebuilt/arrays/repeatable-sections)** - Dynamic form arrays for adding/removing fields
+- **[Multi-Step Forms](../prebuilt/wizards/multi-step)** - Create wizard-style forms with page navigation
+- **[Repeatable Sections](../prebuilt/arrays/repeatable-sections)** - Dynamic form arrays for adding/removing fields
 - **[Conditional Validation](../core/validation#conditional-validators)** - Validators that activate based on conditions
 
 ### Customize and Extend
 
-- **[i18n Setup](../i18n/setup)** - Add multi-language support to your forms
+- **[i18n Setup](../i18n)** - Add multi-language support to your forms
 - **[Events](../core/events)** - Handle custom form events
 - **[Custom Fields](../ui-libs-integrations/guide)** - Create your own field types
 
@@ -230,11 +230,11 @@ If you see import errors for `@ng-forge/dynamic-form`, ensure:
 
 - 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions and get help
 - 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs
-- 📖 **[Documentation](../../)** - Browse full documentation
+- 📖 **[Documentation](../)** - Browse full documentation
 
 ## Related Topics
 
 - **[What is Dynamic Forms?](../what-is-dynamic-forms)** - Learn about features and benefits
-- **[Field Types](../../core/field-types)** - Explore all available field types
-- **[Validation](../../core/validation)** - Add validation to your forms
-- **[Material Integration](../../ui-libs-integrations/reference/material)** - Material Design field reference
+- **[Field Types](../core/field-types)** - Explore all available field types
+- **[Validation](../core/validation)** - Add validation to your forms
+- **[Material Integration](../ui-libs-integrations/reference/material)** - Material Design field reference

@@ -488,14 +488,14 @@ provideDynamicForm([
 
 ### Advanced Topics
 
-- **[i18n Setup](../i18n/setup)** - Multi-language support
+- **[i18n Setup](../i18n)** - Multi-language support
 - **[Events](../core/events)** - Form event bus and custom events
 
 ---
 
 ## Join the Community
 
-- 📖 **[Documentation](../../)** - Comprehensive guides and examples
+- 📖 **[Documentation](../)** - Comprehensive guides and examples
 - 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions, share tips
 - 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs, request features
 - ⭐ **[Star on GitHub](https://github.com/ng-forge/ng-forge)** - Support the project
