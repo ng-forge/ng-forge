@@ -1,237 +1,738 @@
-The `@ng-forge/dynamic-form-bootstrap` package provides Bootstrap 5 field components using native HTML elements with Bootstrap CSS styling.
+Modern Bootstrap 5 field components for ng-forge dynamic forms, built with native HTML elements and Bootstrap CSS.
+
+---
 
 ## Installation
 
-```bash
-npm install @ng-forge/dynamic-form-bootstrap bootstrap
+Install the package and its peer dependencies:
 
-# Optional: For advanced datepicker features
+```bash
+npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-bootstrap bootstrap
+```
+
+Optional: For advanced datepicker features with calendar UI:
+
+```bash
 npm install @ng-bootstrap/ng-bootstrap
 ```
 
-## Setup
+## Quick Start
 
-Configure component-level providers:
+### 1. Configure Providers
+
+Add Bootstrap field types to your application:
 
 ```typescript
-import { Component } from '@angular/core';
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
 
-@Component({
-  selector: 'app-my-form',
+export const appConfig: ApplicationConfig = {
   providers: [provideDynamicForm(...withBootstrapFields())],
-  template: `
-    <form [dynamicForm]="config">
-      <dynamic-form-fields />
-    </form>
-  `
-})
-export class MyFormComponent {}
+};
 ```
 
-Import Bootstrap styles:
+### 2. Import Bootstrap Styles
+
+Add Bootstrap CSS to your application:
 
 ```scss
 // styles.scss
 @import 'bootstrap/dist/css/bootstrap.min.css';
 ```
 
-## Field Components
+Or include via CDN in your `index.html`:
 
-### Input
+```html
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+```
 
-Text-based inputs with Bootstrap styling and optional floating labels.
+### 3. Create Your First Form
 
-{{ NgDocActions.demo("InputIframeDemoComponent") }}
+```typescript
+import { Component, signal } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 
-**Props:**
+@Component({
+  selector: 'app-contact-form',
+  imports: [DynamicForm, JsonPipe],
+  template: `
+    <dynamic-form [config]="config" [(value)]="formValue" />
+    @let value = formValue();
+    <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
+  `,
+})
+export class ContactFormComponent {
+  formValue = signal({});
 
-- `type`: `'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'`
-- `size`: `'sm' | 'lg'`
-- `floatingLabel`: Enable floating label design
-- `plaintext`: Render as plaintext
-- `helpText`: Helper text below input
-- `validFeedback`: Success message when valid
+  config = {
+    fields: [
+      {
+        key: 'name',
+        type: 'input',
+        label: 'Full Name',
+        required: true,
+        props: {
+          floatingLabel: true,
+        },
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: 'Email',
+        required: true,
+        email: true,
+        props: {
+          type: 'email',
+          floatingLabel: true,
+        },
+      },
+      {
+        key: 'message',
+        type: 'textarea',
+        label: 'Message',
+        required: true,
+        minLength: 10,
+        props: {
+          floatingLabel: true,
+          rows: 4,
+        },
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Send Message',
+        props: {
+          variant: 'primary',
+        },
+      },
+    ],
+  } as const satisfies FormConfig;
+}
+```
 
-### Select
+## Complete Form Example
 
-Dropdown selection (single or multiple) with Bootstrap form-select styling.
-
-{{ NgDocActions.demo("SelectIframeDemoComponent") }}
-
-**Props:**
-
-- `multiple`: Enable multi-select
-- `size`: `'sm' | 'lg'`
-- `floatingLabel`: Enable floating label design
-- `helpText`: Helper text below select
-
-### Checkbox
-
-Boolean checkbox control with optional switch styling.
-
-{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
-
-**Props:**
-
-- `switch`: Render as Bootstrap switch
-- `inline`: Inline layout
-- `reverse`: Reverse label position
-
-### Toggle
-
-Always renders as a Bootstrap switch control (alias for checkbox with switch=true).
-
-{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
-
-**Props:**
-
-- `inline`: Inline layout
-- `reverse`: Reverse label position
-
-### Button
-
-Action button with Bootstrap variants and styles.
-
-{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
-
-**Props:**
-
-- `variant`: `'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'link'`
-- `outline`: Use outline variant
-- `size`: `'sm' | 'lg'`
-- `block`: Full-width button (w-100)
-- `type`: `'button' | 'submit' | 'reset'`
-
-**Button Types:**
-- `button`: Custom action button (requires `event` prop)
-- `submit`: Form submission button
-- `next`: Multi-step form navigation
-- `previous`: Multi-step form navigation
-
-### Textarea
-
-Multi-line text input with Bootstrap form-control styling.
-
-{{ NgDocActions.demo("TextareaIframeDemoComponent") }}
-
-**Props:**
-
-- `rows`: Number of visible rows (default: 3)
-- `size`: `'sm' | 'lg'`
-- `floatingLabel`: Enable floating label design
-- `helpText`: Helper text below textarea
-
-### Radio
-
-Radio button group for single selection with optional button group styling.
-
-{{ NgDocActions.demo("RadioIframeDemoComponent") }}
-
-**Props:**
-
-- `inline`: Inline layout
-- `reverse`: Reverse label position
-- `buttonGroup`: Render as Bootstrap button group
-- `buttonSize`: `'sm' | 'lg'` (for button group mode)
-- `helpText`: Helper text below radio group
-
-### Multi-Checkbox
-
-Multiple checkbox selection for array values.
-
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
-
-**Props:**
-
-- `switch`: Render checkboxes as switches
-- `inline`: Inline layout
-- `reverse`: Reverse label position
-- `helpText`: Helper text below checkbox group
-
-### Datepicker
-
-Native HTML5 date input with Bootstrap styling.
-
-{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
-
-**Props:**
-
-- `min`: Minimum date (ISO string)
-- `max`: Maximum date (ISO string)
-- `size`: `'sm' | 'lg'`
-- `helpText`: Helper text below datepicker
-
-### Slider
-
-Range slider for numeric input with value display.
-
-{{ NgDocActions.demo("SliderIframeDemoComponent") }}
-
-**Props:**
-
-- `min`: Minimum value (default: 0)
-- `max`: Maximum value (default: 100)
-- `step`: Step increment (default: 1)
-- `showValue`: Display current value
-- `helpText`: Helper text below slider
-
-## Complete Example
-
-A comprehensive form demonstrating all Bootstrap field types together:
+Here's a full registration form showcasing multiple Bootstrap field types:
 
 {{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
 
-## Additional Examples
+This example demonstrates:
 
-### User Registration Form
+- Text inputs with validation
+- Select dropdowns
+- Checkboxes and switches
+- Radio buttons
+- Date inputs
+- Range sliders
+- Multi-checkbox selections
+- Form submission
 
-Complete user registration form with validation:
+---
 
-{{ NgDocActions.demo("UserRegistrationIframeDemoComponent") }}
+## Field Types Reference
+
+Complete reference for all Bootstrap field types with comprehensive validation, native HTML5 features, and Bootstrap styling.
+
+### Text Input Fields
+
+Text input fields provide user-friendly text entry with Bootstrap form styling.
+
+#### Input
+
+Text input field with HTML5 type support and optional floating labels.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("InputIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email Address',
+  value: '',
+  required: true,
+  email: true,
+  props: {
+    type: 'email',
+    floatingLabel: true,
+    placeholder: 'Enter your email',
+    helpText: 'We will never share your email',
+  },
+}
+```
+
+**Field Properties:**
+
+| Property      | Type               | Description                        |
+| ------------- | ------------------ | ---------------------------------- |
+| `key`         | `string`           | Unique field identifier (required) |
+| `type`        | `'input'`          | Field type (required)              |
+| `value`       | `string \| number` | Initial value                      |
+| `label`       | `string`           | Field label                        |
+| `placeholder` | `string`           | Placeholder text                   |
+| `required`    | `boolean`          | Mark field as required             |
+| `disabled`    | `boolean`          | Disable the field                  |
+| `readonly`    | `boolean`          | Make field read-only               |
+
+**Validation Properties:**
+
+| Property    | Type               | Description                       |
+| ----------- | ------------------ | --------------------------------- |
+| `email`     | `boolean`          | Email format validation           |
+| `minLength` | `number`           | Minimum character length          |
+| `maxLength` | `number`           | Maximum character length          |
+| `min`       | `number`           | Minimum value (for number inputs) |
+| `max`       | `number`           | Maximum value (for number inputs) |
+| `pattern`   | `string \| RegExp` | RegEx pattern validation          |
+
+**Props (Bootstrap-Specific):**
+
+| Prop              | Type                                                                        | Default  | Description                  |
+| ----------------- | --------------------------------------------------------------------------- | -------- | ---------------------------- |
+| `type`            | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url' \| 'search'` | `'text'` | HTML input type              |
+| `size`            | `'sm' \| 'lg'`                                                              | -        | Bootstrap size class         |
+| `floatingLabel`   | `boolean`                                                                   | `false`  | Enable floating label design |
+| `plaintext`       | `boolean`                                                                   | `false`  | Render as plaintext          |
+| `helpText`        | `string`                                                                    | -        | Helper text below input      |
+| `validFeedback`   | `string`                                                                    | -        | Success message when valid   |
+| `invalidFeedback` | `string`                                                                    | -        | Error message when invalid   |
+
+#### Textarea
+
+Multi-line text input field with Bootstrap form styling.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("TextareaIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'bio',
+  type: 'textarea',
+  value: '',
+  label: 'Biography',
+  placeholder: 'Tell us about yourself',
+  required: true,
+  props: {
+    rows: 4,
+    floatingLabel: true,
+  },
+}
+```
+
+**Props (Bootstrap-Specific):**
+
+| Prop            | Type           | Default | Description                  |
+| --------------- | -------------- | ------- | ---------------------------- |
+| `rows`          | `number`       | `3`     | Number of visible rows       |
+| `size`          | `'sm' \| 'lg'` | -       | Bootstrap size class         |
+| `floatingLabel` | `boolean`      | `false` | Enable floating label design |
+| `helpText`      | `string`       | -       | Helper text below textarea   |
+
+---
+
+### Selection Fields
+
+Selection fields enable users to choose from predefined options.
+
+#### Select
+
+Dropdown selection field with native HTML select element. Supports both single and multi-select modes.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("SelectIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'country',
+  type: 'select',
+  value: '',
+  label: 'Country',
+  required: true,
+  options: [
+    { value: 'us', label: 'United States' },
+    { value: 'uk', label: 'United Kingdom' },
+    { value: 'ca', label: 'Canada' },
+  ],
+  props: {
+    floatingLabel: true,
+  },
+}
+```
+
+**Props (Bootstrap-Specific):**
+
+| Prop            | Type           | Default | Description                  |
+| --------------- | -------------- | ------- | ---------------------------- |
+| `multiple`      | `boolean`      | `false` | Enable multi-select          |
+| `size`          | `'sm' \| 'lg'` | -       | Bootstrap size class         |
+| `floatingLabel` | `boolean`      | `false` | Enable floating label design |
+| `helpText`      | `string`       | -       | Helper text below select     |
+
+#### Radio
+
+Radio button group for selecting a single option with optional button group styling.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("RadioIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'size',
+  type: 'radio',
+  value: '',
+  label: 'Select Size',
+  required: true,
+  options: [
+    { value: 'small', label: 'Small' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'large', label: 'Large' },
+  ],
+}
+```
+
+**Props (Bootstrap-Specific):**
+
+| Prop          | Type           | Default | Description                               |
+| ------------- | -------------- | ------- | ----------------------------------------- |
+| `inline`      | `boolean`      | `false` | Display options inline                    |
+| `reverse`     | `boolean`      | `false` | Reverse label and input position          |
+| `buttonGroup` | `boolean`      | `false` | Render as Bootstrap button group          |
+| `buttonSize`  | `'sm' \| 'lg'` | -       | Button size (when buttonGroup is enabled) |
+| `helpText`    | `string`       | -       | Helper text below radio group             |
+
+#### Checkbox
+
+Boolean checkbox control for single true/false selections.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'terms',
+  type: 'checkbox',
+  checked: false,
+  label: 'I accept the terms and conditions',
+  required: true,
+}
+```
+
+**Props (Bootstrap-Specific):**
+
+| Prop      | Type      | Default | Description                      |
+| --------- | --------- | ------- | -------------------------------- |
+| `switch`  | `boolean` | `false` | Render as Bootstrap switch       |
+| `inline`  | `boolean` | `false` | Inline layout                    |
+| `reverse` | `boolean` | `false` | Reverse label and input position |
+
+#### Multi-Checkbox
+
+Multiple checkbox selection field for choosing multiple options.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'interests',
+  type: 'multi-checkbox',
+  value: [],
+  label: 'Select Your Interests',
+  required: true,
+  options: [
+    { value: 'sports', label: 'Sports' },
+    { value: 'music', label: 'Music' },
+    { value: 'reading', label: 'Reading' },
+    { value: 'travel', label: 'Travel' },
+  ],
+}
+```
+
+**Props (Bootstrap-Specific):**
+
+| Prop       | Type      | Default | Description                      |
+| ---------- | --------- | ------- | -------------------------------- |
+| `switch`   | `boolean` | `false` | Render checkboxes as switches    |
+| `inline`   | `boolean` | `false` | Display options inline           |
+| `reverse`  | `boolean` | `false` | Reverse label and input position |
+| `helpText` | `string`  | -       | Helper text below checkbox group |
+
+---
+
+### Interactive Fields
+
+Interactive fields provide advanced user input controls.
+
+#### Toggle
+
+Slide toggle switch for boolean on/off selections (renders as Bootstrap switch).
+
+**Live Demo:**
+
+{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'notifications',
+  type: 'toggle',
+  checked: false,
+  label: 'Enable notifications',
+}
+```
+
+**Props (Bootstrap-Specific):**
+
+| Prop      | Type      | Default | Description                      |
+| --------- | --------- | ------- | -------------------------------- |
+| `inline`  | `boolean` | `false` | Inline layout                    |
+| `reverse` | `boolean` | `false` | Reverse label and input position |
+
+#### Slider
+
+Native HTML5 range input for selecting values from a numeric range.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("SliderIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'volume',
+  type: 'slider',
+  value: 50,
+  label: 'Volume',
+  minValue: 0,
+  maxValue: 100,
+  step: 1,
+  props: {
+    showValue: true,
+  },
+}
+```
+
+**Props (Bootstrap-Specific):**
+
+| Prop        | Type      | Default | Description              |
+| ----------- | --------- | ------- | ------------------------ |
+| `showValue` | `boolean` | `false` | Display current value    |
+| `helpText`  | `string`  | -       | Helper text below slider |
+
+#### Datepicker
+
+Native HTML5 date input with Bootstrap styling.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'birthdate',
+  type: 'datepicker',
+  value: null,
+  label: 'Date of Birth',
+  required: true,
+  props: {
+    min: '1900-01-01',
+    max: '2025-12-31',
+  },
+}
+```
+
+**Props (Bootstrap-Specific):**
+
+| Prop       | Type           | Default | Description             |
+| ---------- | -------------- | ------- | ----------------------- |
+| `min`      | `string`       | -       | Minimum date (ISO)      |
+| `max`      | `string`       | -       | Maximum date (ISO)      |
+| `size`     | `'sm' \| 'lg'` | -       | Bootstrap size class    |
+| `helpText` | `string`       | -       | Helper text below field |
+
+---
+
+### Buttons & Actions
+
+Action buttons provide form submission and navigation controls.
+
+#### Submit Button
+
+Form submission button that's automatically disabled when the form is invalid.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  type: 'submit',
+  key: 'submit',
+  label: 'Create Account',
+  props: {
+    variant: 'primary',
+    size: 'lg',
+  },
+}
+```
+
+The submit button automatically:
+
+- Disables when the form is invalid
+- Emits a `SubmitEvent` when clicked
+- Validates all fields before submission
+
+**Props:**
+
+| Prop      | Type                                                                                                      | Default     | Description            |
+| --------- | --------------------------------------------------------------------------------------------------------- | ----------- | ---------------------- |
+| `variant` | `'primary' \| 'secondary' \| 'success' \| 'danger' \| 'warning' \| 'info' \| 'light' \| 'dark' \| 'link'` | `'primary'` | Bootstrap button color |
+| `outline` | `boolean`                                                                                                 | `false`     | Use outline variant    |
+| `size`    | `'sm' \| 'lg'`                                                                                            | -           | Button size            |
+| `block`   | `boolean`                                                                                                 | `false`     | Full-width button      |
+
+#### Navigation Buttons
+
+Navigation buttons for multi-step (paged) forms.
+
+**Basic Usage:**
+
+```typescript
+{
+  fields: [
+    {
+      key: 'step1',
+      type: 'page',
+      title: 'Step 1',
+      fields: [
+        { key: 'name', type: 'input', value: '', label: 'Name', required: true },
+        {
+          type: 'next',
+          key: 'next',
+          label: 'Continue',
+          props: { variant: 'primary' },
+        },
+      ],
+    },
+    {
+      key: 'step2',
+      type: 'page',
+      title: 'Step 2',
+      fields: [
+        { key: 'email', type: 'input', value: '', label: 'Email', required: true },
+        { type: 'previous', key: 'back', label: 'Back', props: { variant: 'secondary' } },
+        { type: 'submit', key: 'submit', label: 'Submit', props: { variant: 'primary' } },
+      ],
+    },
+  ],
+}
+```
+
+**Button Types:**
+
+- **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
+- **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
+
+---
+
+## Theming
+
+Bootstrap components use standard Bootstrap CSS classes. Customize appearance using Bootstrap's CSS variables or custom themes:
+
+```typescript
+// Field with custom variant
+{
+  key: 'submitBtn',
+  type: 'submit',
+  label: 'Save Changes',
+  props: {
+    variant: 'success', // Bootstrap color variant
+    size: 'lg',
+    outline: true,
+  },
+}
+```
+
+### Custom Bootstrap Theme
+
+Customize Bootstrap variables before importing:
+
+```scss
+// styles.scss
+// Override Bootstrap variables
+$primary: #007bff;
+$secondary: #6c757d;
+$success: #28a745;
+$danger: #dc3545;
+
+// Import Bootstrap
+@import 'bootstrap/dist/css/bootstrap.min.css';
+```
+
+### Component CSS Variables
+
+Customize field spacing and styling with CSS variables:
+
+```scss
+:root {
+  --df-bs-field-gap: 0.75rem;
+  --df-bs-label-font-weight: 600;
+  --df-bs-hint-color: #6c757d;
+  --df-bs-error-color: #dc3545;
+}
+```
+
+## Common Props
+
+All Bootstrap fields support these common properties:
+
+| Prop       | Type           | Default | Description                       |
+| ---------- | -------------- | ------- | --------------------------------- |
+| `size`     | `'sm' \| 'lg'` | -       | Bootstrap size class              |
+| `helpText` | `string`       | -       | Helper text displayed below field |
 
 ## Bootstrap-Specific Features
 
+### Floating Labels
+
+Enable modern floating label design for input, select, and textarea fields:
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  props: {
+    floatingLabel: true,
+  },
+}
+```
+
 ### Grid System Integration
 
-Use `className` prop to add Bootstrap grid classes:
+Use the `col` property for responsive grid layouts:
+
+```typescript
+{
+  key: 'nameRow',
+  type: 'row',
+  fields: [
+    {
+      key: 'firstName',
+      type: 'input',
+      label: 'First Name',
+      value: '',
+      col: 6, // 50% width
+    },
+    {
+      key: 'lastName',
+      type: 'input',
+      label: 'Last Name',
+      value: '',
+      col: 6, // 50% width
+    },
+  ],
+}
+```
+
+Or use `className` for custom Bootstrap grid classes:
 
 ```typescript
 {
   key: 'firstName',
   type: 'input',
   label: 'First Name',
-  className: 'col-md-6'
+  className: 'col-md-6 col-lg-4',
 }
 ```
 
 ### Validation States
 
-Bootstrap validation classes (`.is-invalid`, `.is-valid`) are automatically applied based on form state.
+Bootstrap validation classes (`.is-invalid`, `.is-valid`) are automatically applied based on form state:
 
-### Floating Labels
+- Fields show errors only after being touched
+- Valid fields can show success feedback with `validFeedback` prop
+- Error messages automatically display below invalid fields
 
-Enable modern floating label design with `floatingLabel: true` on input, select, and textarea fields.
+### Switch Styling
 
-### Size Variants
+Checkboxes and multi-checkboxes can render as Bootstrap switches:
 
-Most fields support Bootstrap sizing: `size: 'sm'` or `size: 'lg'`.
-
-### Button Variants
-
-Buttons support all Bootstrap color variants and outline styles.
-
-## Customization
-
-All components support CSS variable customization:
-
-```scss
-:root {
-  --df-bs-field-gap: 0.75rem;
-  --df-bs-label-font-weight: 600;
-  --df-bs-hint-color: #999;
+```typescript
+{
+  key: 'notifications',
+  type: 'checkbox',
+  label: 'Enable notifications',
+  props: {
+    switch: true,
+  },
 }
 ```
 
-See the [Bootstrap Integration README](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-form-bootstrap) for complete customization options.
+### Button Groups
+
+Radio buttons can render as Bootstrap button groups:
+
+```typescript
+{
+  key: 'size',
+  type: 'radio',
+  label: 'Size',
+  options: [
+    { value: 's', label: 'S' },
+    { value: 'm', label: 'M' },
+    { value: 'l', label: 'L' },
+  ],
+  props: {
+    buttonGroup: true,
+    buttonSize: 'lg',
+  },
+}
+```
+
+## Accessibility
+
+All Bootstrap components include:
+
+- Proper semantic HTML5 elements
+- ARIA attributes for screen readers
+- Keyboard navigation support
+- Focus management
+- Associated labels and descriptions
+- Error announcements via `aria-describedby`
+
+Bootstrap's native HTML elements provide excellent baseline accessibility that's enhanced by ng-forge's form integration.
+
+## Next Steps
+
+- Check out [Examples & Patterns](../../../examples/) for real-world use cases
+- Learn about [Validation](../../../core/validation/) for form validation
+- See [Type Safety](../../../core/type-safety/) for TypeScript integration
+- Explore [Conditional Logic](../../../core/conditional-logic/) for dynamic field behavior
