@@ -1,3 +1,9 @@
+---
+title: Examples
+route: examples
+keyword: ConditionalLogicExamplesPage
+---
+
 Real-world examples demonstrating conditional logic patterns for common form scenarios.
 
 ## Example Categories

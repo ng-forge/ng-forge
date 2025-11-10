@@ -1,3 +1,9 @@
+---
+title: Custom Types
+route: custom-types
+keyword: TypeSafetyCustomTypesPage
+---
+
 Extending the type system with custom field types, runtime validation, and type guards.
 
 ## Custom Field Types

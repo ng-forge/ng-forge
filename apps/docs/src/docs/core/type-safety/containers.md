@@ -1,3 +1,9 @@
+---
+title: Containers
+route: containers
+keyword: TypeSafetyContainersPage
+---
+
 Understanding how container fields affect type inference and form value structure.
 
 ## Container Fields Overview

@@ -1,3 +1,8 @@
+---
+title: Basics
+keyword: TypeSafetyBasicsPage
+---
+
 Complete type inference for form configurations using TypeScript's type system and Angular signal forms.
 
 ## Overview
