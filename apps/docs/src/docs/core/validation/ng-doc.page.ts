@@ -5,7 +5,7 @@ const ValidationPage: NgDocPage = {
   title: 'Validation',
   mdFile: ['./basics.md', './reference.md', './advanced.md'],
   category: CoreCategory,
-  order: 3,
+  order: 2,
 };
 
 export default ValidationPage;

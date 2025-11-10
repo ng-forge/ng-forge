@@ -85,6 +85,10 @@ export class RegistrationComponent {
 - ✅ Zero subscriptions or cleanup needed
 - ✅ Built-in accessibility
 
+## See It In Action
+
+{{ NgDocActions.playground("DemoFormPlayground") }}
+
 ## Full Type Safety with Zero Type Annotations
 
 The killer feature: **TypeScript infers your entire form's type from the config.** No manual type definitions. No type assertions. Just pure inference.
@@ -284,10 +288,6 @@ export class MyField {
 }
 ```
 
-## See It In Action
-
-{{ NgDocActions.playground("DemoFormPlayground") }}
-
 ## Real-World Example: E-Commerce Checkout
 
 Here's a production-ready, multi-step checkout flow - **fully typed, validated, and beautiful** - in under 60 lines:
@@ -457,12 +457,12 @@ provideDynamicForm([
 | Framework           | Package                            | Status              |
 | ------------------- | ---------------------------------- | ------------------- |
 | **Material Design** | `@ng-forge/dynamic-form-material`  | ✅ Production Ready |
-| **Bootstrap**       | `@ng-forge/dynamic-form-bootstrap` | 🚧 Coming Soon      |
-| **PrimeNG**         | `@ng-forge/dynamic-form-primeng`   | 🚧 Coming Soon      |
-| **Ionic**           | `@ng-forge/dynamic-form-ionic`     | 🚧 Coming Soon      |
+| **PrimeNG**         | `@ng-forge/dynamic-form-primeng`   | 🧪 Preview          |
+| **Bootstrap**       | `@ng-forge/dynamic-form-bootstrap` | 🧪 Preview          |
+| **Ionic**           | `@ng-forge/dynamic-form-ionic`     | 🧪 Preview          |
 | **Custom**          | Build your own                     | ✅ Full Support     |
 
-**Material Design** integration is production-ready with complete documentation. Other UI framework integrations are in development - see individual pages for details and alternatives.
+**Material Design** integration is production-ready with complete documentation. **PrimeNG, Bootstrap, and Ionic** integrations are in preview - functional but APIs may change. See individual pages for details.
 
 ## Performance Features
 
@@ -488,7 +488,7 @@ provideDynamicForm([
 
 ### Advanced Topics
 
-- **[i18n Setup](../i18n)** - Multi-language support
+- **[i18n Setup](../core/i18n)** - Multi-language support
 - **[Events](../core/events)** - Form event bus and custom events
 
 ---

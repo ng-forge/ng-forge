@@ -121,29 +121,53 @@ export const appConfig: ApplicationConfig = {
 
 See [Material Integration](../ui-libs-integrations/reference/material) for full documentation.
 
-### Bootstrap (Coming Soon)
-
-```bash
-npm install @ng-forge/dynamic-form-bootstrap
-```
-
-See [Bootstrap Integration](../ui-libs-integrations/reference/bootstrap) for status and alternatives.
-
-### PrimeNG (Coming Soon)
+### PrimeNG (Preview)
 
 ```bash
 npm install @ng-forge/dynamic-form-primeng
 ```
 
-See [PrimeNG Integration](../ui-libs-integrations/reference/primeng) for status and alternatives.
+```typescript
+import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
 
-### Ionic (Coming Soon)
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(...withPrimeNGFields())],
+};
+```
+
+See [PrimeNG Integration](../ui-libs-integrations/reference/primeng) for full documentation.
+
+### Bootstrap (Preview)
+
+```bash
+npm install @ng-forge/dynamic-form-bootstrap
+```
+
+```typescript
+import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(...withBootstrapFields())],
+};
+```
+
+See [Bootstrap Integration](../ui-libs-integrations/reference/bootstrap) for full documentation.
+
+### Ionic (Preview)
 
 ```bash
 npm install @ng-forge/dynamic-form-ionic
 ```
 
-See [Ionic Integration](../ui-libs-integrations/reference/ionic) for status and alternatives.
+```typescript
+import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(...withIonicFields())],
+};
+```
+
+See [Ionic Integration](../ui-libs-integrations/reference/ionic) for full documentation.
 
 ### Custom UI Components
 
@@ -183,7 +207,7 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 
 ### Customize and Extend
 
-- **[i18n Setup](../i18n)** - Add multi-language support to your forms
+- **[i18n Setup](../core/i18n)** - Add multi-language support to your forms
 - **[Events](../core/events)** - Handle custom form events
 - **[Custom Fields](../ui-libs-integrations/guide)** - Create your own field types
 

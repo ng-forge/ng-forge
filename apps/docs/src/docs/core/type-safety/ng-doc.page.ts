@@ -5,7 +5,7 @@ const TypeSafetyPage: NgDocPage = {
   title: 'Type Safety',
   mdFile: ['./basics.md', './containers.md', './custom-types.md'],
   category: CoreCategory,
-  order: 2,
+  order: 4,
 };
 
 export default TypeSafetyPage;
