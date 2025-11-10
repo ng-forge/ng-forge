@@ -51,6 +51,66 @@ export class MyFormComponent {
 
 The form automatically updates when translations change.
 
+## Default Validation Messages
+
+Define common validation messages once at the form level using `defaultValidationMessages`. These act as fallback messages when fields don't have their own custom `validationMessages`:
+
+```typescript
+import { Component, inject } from '@angular/core';
+
+@Component({...})
+export class MyFormComponent {
+  translationService = inject(YourTranslationService);
+
+  config = {
+    // Define default messages for all fields
+    defaultValidationMessages: {
+      required: this.translationService.translate('validation.required'),
+      email: this.translationService.translate('validation.email'),
+      minLength: this.translationService.translate('validation.minLength'),
+      maxLength: this.translationService.translate('validation.maxLength'),
+    },
+    fields: [
+      {
+        key: 'email',
+        type: 'input',
+        label: this.translationService.translate('form.email'),
+        email: true,
+        required: true,
+        // Uses defaultValidationMessages for required and email errors
+      },
+      {
+        key: 'password',
+        type: 'input',
+        label: this.translationService.translate('form.password'),
+        required: true,
+        minLength: 8,
+        // Override default for this field only
+        validationMessages: {
+          required: this.translationService.translate('validation.password.required'),
+          minLength: this.translationService.translate('validation.password.minLength'),
+        },
+      },
+      {
+        key: 'username',
+        type: 'input',
+        label: this.translationService.translate('form.username'),
+        required: true,
+        minLength: 3,
+        // Uses default for both required and minLength
+      },
+    ],
+  };
+}
+```
+
+The fallback priority is:
+1. **Field-level** `validationMessages` (highest priority)
+2. **Form-level** `defaultValidationMessages` (fallback)
+3. **Built-in** error messages (last resort)
+
+This approach is especially useful when you have many fields with the same validation rules - define the translations once instead of repeating them for each field.
+
 ## Example with Transloco
 
 Here's a complete example using [@jsverse/transloco](https://jsverse.github.io/transloco/):
