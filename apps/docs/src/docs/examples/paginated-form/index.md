@@ -41,9 +41,18 @@ export class PaginatedFormComponent {
       {
         key: 'step1',
         type: 'page',
-        title: 'Personal Information',
-        description: 'Please provide your basic information',
         fields: [
+          {
+            key: 'step1Title',
+            type: 'text',
+            label: 'Personal Information',
+            props: { elementType: 'h2' },
+          },
+          {
+            key: 'step1Description',
+            type: 'text',
+            label: 'Please provide your basic information',
+          },
           {
             key: 'firstName',
             type: 'input',
@@ -76,9 +85,18 @@ export class PaginatedFormComponent {
       {
         key: 'step2',
         type: 'page',
-        title: 'Contact Information',
-        description: 'How can we reach you?',
         fields: [
+          {
+            key: 'step2Title',
+            type: 'text',
+            label: 'Contact Information',
+            props: { elementType: 'h2' },
+          },
+          {
+            key: 'step2Description',
+            type: 'text',
+            label: 'How can we reach you?',
+          },
           {
             key: 'email',
             type: 'input',
@@ -120,9 +138,18 @@ export class PaginatedFormComponent {
       {
         key: 'step3',
         type: 'page',
-        title: 'Address',
-        description: 'Where do you live?',
         fields: [
+          {
+            key: 'step3Title',
+            type: 'text',
+            label: 'Address',
+            props: { elementType: 'h2' },
+          },
+          {
+            key: 'step3Description',
+            type: 'text',
+            label: 'Where do you live?',
+          },
           {
             key: 'street',
             type: 'input',
@@ -161,9 +188,18 @@ export class PaginatedFormComponent {
       {
         key: 'step4',
         type: 'page',
-        title: 'Preferences',
-        description: 'Tell us about your preferences',
         fields: [
+          {
+            key: 'step4Title',
+            type: 'text',
+            label: 'Preferences',
+            props: { elementType: 'h2' },
+          },
+          {
+            key: 'step4Description',
+            type: 'text',
+            label: 'Tell us about your preferences',
+          },
           {
             key: 'interests',
             type: 'multi-checkbox',
@@ -243,12 +279,13 @@ Each page validates independently. Users cannot proceed to the next page until a
 
 ```typescript
 {
-  key: 'step1',           // Required key
-  type: 'page',           // Page field type
-  title: 'Page Title',    // Optional page heading
-  description: '...',     // Optional page description
-  fields: [               // Child fields
-    // ... fields for this page
+  key: 'step1',    // Required key
+  type: 'page',    // Page field type
+  fields: [        // Child fields
+    // Add text fields for titles/descriptions if needed
+    { key: 'title', type: 'text', label: 'Page Title', props: { elementType: 'h2' } },
+    { key: 'desc', type: 'text', label: 'Page description...' },
+    // ... other fields for this page
   ],
 }
 ```

@@ -34,9 +34,20 @@ export class PaginatedFormDemoComponent {
       {
         key: 'step1',
         type: 'page',
-        title: 'Personal Information',
-        description: 'Please provide your basic information',
         fields: [
+          {
+            key: 'step1Title',
+            type: 'text',
+            label: 'Personal Information',
+            props: {
+              elementType: 'h2',
+            },
+          },
+          {
+            key: 'step1Description',
+            type: 'text',
+            label: 'Please provide your basic information',
+          },
           {
             key: 'firstName',
             type: 'input',
@@ -88,9 +99,20 @@ export class PaginatedFormDemoComponent {
       {
         key: 'step2',
         type: 'page',
-        title: 'Contact Information',
-        description: 'How can we reach you?',
         fields: [
+          {
+            key: 'step2Title',
+            type: 'text',
+            label: 'Contact Information',
+            props: {
+              elementType: 'h2',
+            },
+          },
+          {
+            key: 'step2Description',
+            type: 'text',
+            label: 'How can we reach you?',
+          },
           {
             key: 'email',
             type: 'input',
@@ -159,9 +181,20 @@ export class PaginatedFormDemoComponent {
       {
         key: 'step3',
         type: 'page',
-        title: 'Address',
-        description: 'Where do you live?',
         fields: [
+          {
+            key: 'step3Title',
+            type: 'text',
+            label: 'Address',
+            props: {
+              elementType: 'h2',
+            },
+          },
+          {
+            key: 'step3Description',
+            type: 'text',
+            label: 'Where do you live?',
+          },
           {
             key: 'street',
             type: 'input',
@@ -255,9 +288,20 @@ export class PaginatedFormDemoComponent {
       {
         key: 'step4',
         type: 'page',
-        title: 'Preferences',
-        description: 'Tell us about your preferences',
         fields: [
+          {
+            key: 'step4Title',
+            type: 'text',
+            label: 'Preferences',
+            props: {
+              elementType: 'h2',
+            },
+          },
+          {
+            key: 'step4Description',
+            type: 'text',
+            label: 'Tell us about your preferences',
+          },
           {
             key: 'interests',
             type: 'multi-checkbox',
