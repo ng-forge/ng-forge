@@ -290,49 +290,53 @@ Each page validates independently. Users cannot proceed to the next page until a
 
 ## Performance & Lazy Loading
 
-ng-forge uses Angular's `@defer` blocks to optimize page rendering for better performance and memory efficiency.
+ng-forge uses Angular's `@defer` blocks with smart preloading to optimize page rendering, balancing performance with flicker-free navigation.
 
 ### How It Works
 
-- **Current page renders immediately** - The active page loads instantly for seamless navigation
-- **Other pages defer until idle** - Non-visible pages defer loading until the browser is idle
+- **All pages load immediately** - Using `@defer (on immediate)` to prevent navigation flicker
+- **Only current page visible** - Non-visible pages are hidden with CSS `display: none`
+- **Instant navigation** - Pages switch instantly since they're already loaded
 - **Automatic optimization** - No configuration needed - ng-forge handles this automatically
 
 ### Benefits
 
 ```typescript
-// With 4 pages, only the current page is instantiated
-// Other 3 pages defer until browser is idle
+// With 4 pages, all load immediately but only current is visible
 fields: [
-  { key: 'step1', type: 'page', fields: [...] }, // ✓ Loads immediately if current
-  { key: 'step2', type: 'page', fields: [...] }, // ⏳ Deferred until idle
-  { key: 'step3', type: 'page', fields: [...] }, // ⏳ Deferred until idle
-  { key: 'step4', type: 'page', fields: [...] }, // ⏳ Deferred until idle
+  { key: 'step1', type: 'page', fields: [...] }, // ✓ Visible
+  { key: 'step2', type: 'page', fields: [...] }, // ✓ Loaded, hidden
+  { key: 'step3', type: 'page', fields: [...] }, // ✓ Loaded, hidden
+  { key: 'step4', type: 'page', fields: [...] }, // ✓ Loaded, hidden
 ]
 ```
 
 **Performance advantages:**
 
-- ⚡ **Faster initial render** - Only current page components are created
-- 💾 **Lower memory usage** - Deferred pages don't consume memory until accessed
-- 🚀 **Improved TTI** (Time to Interactive) - Main thread less blocked during initialization
-- 📱 **Better mobile performance** - Especially beneficial on lower-end devices
+- ⚡ **Zero flicker navigation** - All pages preloaded for instant switching
+- 🎯 **Optimized initial load** - `@defer (on immediate)` loads efficiently during idle time
+- 🚀 **Better UX** - Smooth page transitions without loading states
+- 📱 **Mobile-friendly** - Pages load during browser idle periods
 
 ### Technical Details
 
 Under the hood, the page orchestrator uses:
 
 ```typescript
-@defer (on idle) {
-  <page-field [field]="pageField" [isVisible]="false" />
+@defer (on immediate) {
+  <page-field
+    [field]="pageField"
+    [isVisible]="i === state().currentPageIndex"
+  />
 }
 ```
 
 This means:
 
-- Pages are **declaratively rendered** using Angular's template-driven approach
-- The browser's **idle callback** determines when to load deferred content
-- **No manual lifecycle management** needed - Angular handles component creation/destruction
+- **All pages load immediately** using Angular's `on immediate` trigger
+- **Visibility controlled via input** - Pages toggle with `isVisible` input and CSS
+- **No DOM destruction** - Pages stay mounted, preventing navigation flicker
+- **Declarative rendering** - Angular handles the component lifecycle
 
 ### Best Practices
 
