@@ -89,14 +89,14 @@ export interface ValidationMessages {
 **Pros:**
 
 - ✅ Leverages existing infrastructure
-- ✅ Single registry for all custom functions (validation + expressions)
-- ✅ Simpler DI - only one service to inject
-- ✅ Consistent API pattern across features
-- ✅ Better discoverability - everything in one place
+- ✅ Single unified developer API - all custom functions in `SignalFormsConfig`
+- ✅ Simpler internal architecture - one registry service instead of two
+- ✅ Consistent pattern across features
+- ✅ Better discoverability - developers see all custom functions in one config object
 
 **Cons:**
 
-- ⚠️ Mixes validation and expression logic (could be confusing)
+- ⚠️ Mixes validation and expression logic internally (could complicate maintenance)
 - ⚠️ Different function signatures (EvaluationContext vs FieldContext)
 - ⚠️ Service could become large if many features are added
 
@@ -153,9 +153,9 @@ export class FunctionRegistryService {
 
 **Cons:**
 
-- ⚠️ Additional service to inject
-- ⚠️ Developers need to know about two registries
-- ⚠️ More boilerplate in app initialization
+- ⚠️ Additional internal service (more complexity in library code)
+- ⚠️ Two separate config sections for developers (could be confusing)
+- ⚠️ Validators and expressions can't easily share logic
 
 **Implementation:**
 
@@ -169,6 +169,36 @@ export class ValidatorRegistryService {
   // Same methods as Option 1 validator methods
 }
 ```
+
+---
+
+## Developer-Facing vs Internal Architecture
+
+**Important Note:** Developers using dynamic-form will **not** directly inject or interact with `FunctionRegistryService`. Instead, they register validators through the `SignalFormsConfig` object in their form configuration. The registry service is an internal implementation detail.
+
+**Developer Experience:**
+
+```typescript
+// Developers do this - declarative config
+const formConfig: FormConfig = {
+  fields: [...],
+  signalFormsConfig: {
+    customValidators: { ... },
+    contextValidators: { ... },
+    treeValidators: { ... }
+  }
+};
+```
+
+**Internal Implementation:**
+
+```typescript
+// dynamic-form library does this internally
+this.functionRegistry.registerValidator('myValidator', validatorFn);
+this.functionRegistry.registerCustomFunction('myFunction', functionFn);
+```
+
+The decision between Option 1 (extend FunctionRegistryService) vs Option 2 (separate ValidatorRegistryService) is about **internal architecture**, not developer API. Developers see a unified `SignalFormsConfig` either way.
 
 ---
 
@@ -562,11 +592,11 @@ const formConfig: FormConfig = {
 
 **Rationale:**
 
-- Simpler mental model - one registry for custom functions (whether for expressions or validation)
-- Single service to inject - reduces boilerplate
-- Consistent API pattern across features
-- Validators and expressions often use similar logic (e.g., comparing field values)
-- Can be split later if needed without breaking JSON configs
+- **Developer-facing:** Unified `SignalFormsConfig` API - all custom functions in one place
+- **Internal:** Simpler architecture - one registry service instead of two
+- **Reusability:** Validators and expressions can share logic (e.g., "isAdult" function used in both)
+- **Flexibility:** Can be split later without changing the developer-facing API
+- **Consistency:** Same registration pattern across all custom functionality
 
 ### 3. Support Existing `CustomValidator` Type
 
