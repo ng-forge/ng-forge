@@ -1,4 +1,3 @@
-import { DynamicFormConfig } from '@ng-forge/dynamic-form';
 import { MaterialFormTestUtils } from './material-test-utils';
 
 /**
@@ -133,7 +132,7 @@ export class MinimalTestBuilder {
   static withMultipleFields(count: number, fieldType: 'input' | 'select' | 'checkbox' = 'input') {
     const builder = MaterialFormTestUtils.builder();
 
-    const fields: Array<{ key: string; value: any }> = [];
+    const fields: Array<{ key: string; value: string | number | boolean | null }> = [];
     for (let i = 0; i < count; i++) {
       const key = `field${i}`;
       builder.field({ key, type: fieldType });
@@ -141,7 +140,7 @@ export class MinimalTestBuilder {
     }
 
     const config = builder.build();
-    const initialValue = fields.reduce((acc, f) => ({ ...acc, [f.key]: f.value }), {});
+    const initialValue = fields.reduce((acc, f) => ({ ...acc, [f.key]: f.value }), {} as Record<string, string | number | boolean | null>);
 
     return { config, initialValue };
   }
@@ -149,7 +148,7 @@ export class MinimalTestBuilder {
   /**
    * Get default value for field type
    */
-  private static getDefaultValue(fieldType: string): any {
+  private static getDefaultValue(fieldType: string): string | number | boolean | null {
     switch (fieldType) {
       case 'checkbox':
         return false;
