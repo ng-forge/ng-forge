@@ -444,13 +444,15 @@ const config = {
       minValue: 0,
       maxValue: 20,
       step: 5,
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'custom',
-          validator: (_, formValue) => formValue.quantity < 10,
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'custom',
+            validator: (_, formValue) => formValue.quantity < 10,
+          },
         },
-      }],
+      ],
       props: {
         thumbLabel: true,
         color: 'accent',
@@ -470,23 +472,17 @@ const config = {
   selector: 'app-pricing-calculator',
   imports: [DynamicFormComponent],
   template: `
-    <df-dynamic-form
-      [config]="config"
-      [(value)]="formValue"
-      (formSubmit)="onSubmit($event)"
-    />
+    <df-dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
 
-    @let values = formValue();
-    @let price = totalPrice();
-    @if (price) {
-      <div class="price-summary">
-        <h3>Price Summary</h3>
-        <p>Quantity: {{ values.quantity }}</p>
-        <p>Quality Level: {{ values.quality }}/10</p>
-        <p>Base Price: ${{ basePrice() }}</p>
-        <p>Discount: {{ totalDiscount() }}%</p>
-        <p><strong>Total: ${{ price }}</strong></p>
-      </div>
+    @let values = formValue(); @let price = totalPrice(); @let base = basePrice(); @let discount = totalDiscount(); @if (price) {
+    <div class="price-summary">
+      <h3>Price Summary</h3>
+      <p>Quantity: {{ values.quantity }}</p>
+      <p>Quality Level: {{ values.quality }}/10</p>
+      <p>Base Price: ${{ base }}</p>
+      <p>Discount: {{ discount }}%</p>
+      <p><strong>Total: ${{ price }}</strong></p>
+    </div>
     }
   `,
 })
