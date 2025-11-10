@@ -23,11 +23,12 @@ describe('MatButtonFieldComponent', () => {
 
       const button = fixture.debugElement.query(By.css('button[mat-button], button[mat-raised-button], button[mat-flat-button]'));
       const buttonElement = fixture.debugElement.query(By.css('button'));
+      const hostElement = fixture.debugElement.query(By.css('df-mat-button'));
 
       expect(button).toBeTruthy();
       expect(buttonElement.nativeElement.textContent.trim()).toBe('Submit Form');
       expect(buttonElement.nativeElement.getAttribute('type')).toBe('button');
-      expect(buttonElement.nativeElement.className).toContain('submit-button');
+      expect(hostElement.nativeElement.className).toContain('submit-button');
       expect(buttonElement.nativeElement.className).toContain('mat-mdc-raised-button');
       expect(buttonElement.nativeElement.className).toContain('mat-primary');
     });
@@ -322,9 +323,9 @@ describe('MatButtonFieldComponent', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({ config });
 
-      const buttonElement = fixture.debugElement.query(By.css('button'));
-      expect(buttonElement.nativeElement.className).toContain('custom-class');
-      expect(buttonElement.nativeElement.className).toContain('another-class');
+      const hostElement = fixture.debugElement.query(By.css('df-mat-button'));
+      expect(hostElement.nativeElement.className).toContain('custom-class');
+      expect(hostElement.nativeElement.className).toContain('another-class');
     });
 
     it('should handle rapid consecutive clicks', async () => {
