@@ -32,6 +32,11 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
 
   // Step 3: Wait for DOM to stabilize (no more components loading)
   await waitForFieldComponents(fixture);
+
+  // Step 4: One final render cycle to ensure all attributes are set
+  TestBed.flushEffects();
+  untracked(() => fixture.detectChanges());
+  await fixture.whenStable();
 }
 
 /**
@@ -61,12 +66,13 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
         'input[pInputText], p-select, p-checkbox, p-radiobutton, p-inputswitch, textarea[pInputTextarea], ' +
         'p-calendar, p-slider, button[pButton], [data-testid]'
     );
-    const hasLoadingComments = formElement.innerHTML.includes('<!--container-->');
 
     const currentComponentCount = primeComponents.length;
 
     // Check if DOM has stabilized
-    if (currentComponentCount > 0 && currentComponentCount === previousComponentCount && !hasLoadingComments) {
+    // Note: We don't check for loading comments (<!--container-->) because Angular
+    // leaves these as permanent DOM markers even after components are fully rendered
+    if (currentComponentCount > 0 && currentComponentCount === previousComponentCount) {
       stableCount++;
       if (stableCount >= REQUIRED_STABLE_CHECKS) {
         // DOM is truly stable - exit
