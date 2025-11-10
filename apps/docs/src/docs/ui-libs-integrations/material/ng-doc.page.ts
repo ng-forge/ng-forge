@@ -1,5 +1,5 @@
 import { NgDocPage } from '@ng-doc/core';
-import UiLibsIntegrationCategory from '../../ng-doc.category';
+import UiLibsIntegrationCategory from '../ng-doc.category';
 import { CompleteFormIframeDemoComponent } from './examples/complete-form-iframe-demo.component';
 import { InputIframeDemoComponent } from './examples/input-iframe-demo.component';
 import { TextareaIframeDemoComponent } from './examples/textarea-iframe-demo.component';

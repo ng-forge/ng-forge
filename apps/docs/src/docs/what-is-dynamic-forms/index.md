@@ -1,4 +1,12 @@
-ng-forge dynamic forms gives you declarative, type-safe forms powered by Angular 21's signal forms. Define your structure once, get validation, conditional logic, and beautiful UI automatically.
+Declarative, lightweight forms for Angular 21+, powered by signal forms. Build complex forms from simple configuration - with full TypeScript inference when you want it, or JSON configs when you don't. Comes with validation, conditional logic, i18n, and UI adapters for Material, PrimeNG, Bootstrap, and Ionic.
+
+**Key Features:**
+
+- 📦 **Lightweight & Composable** - Small bundle size, tree-shakeable, modular architecture
+- 🎯 **Type-Safe or Dynamic** - Full TypeScript inference with `as const`, or load JSON configs at runtime
+- ⚡ **Zoneless Ready** - Built for Angular's zoneless future, works with or without Zone.js
+- 🔥 **Signal Forms Native** - Direct integration with `@angular/forms/signals`, not a wrapper
+- 🌍 **Production Ready** - Battle-tested with comprehensive validation, conditional logic, and i18n support
 
 ### Quick Example
 
@@ -275,18 +283,32 @@ provideDynamicForm([{ name: 'my-input', loadComponent: () => MyCustomInput }]);
 }
 ```
 
-### 🚀 Zero `ControlValueAccessor` Implementation
+### 🚀 Simple Custom Field Components
 
-Traditional Angular requires implementing `ControlValueAccessor` for every custom form control. ng-forge dynamic forms handles all of that automatically with signals:
+Creating custom field components is straightforward - no `ControlValueAccessor` boilerplate required. Just use Angular's signal forms primitives:
 
 ```typescript
-// Traditional: ~50 lines of ControlValueAccessor boilerplate
-// ng-forge dynamic forms: Just use input() and model()
-@Component({...})
-export class MyField {
-  value = model<string>(''); // That's it!
+// Create a custom field component with minimal code
+@Component({
+  selector: 'df-star-rating',
+  template: `
+    <label>{{ label() }}</label>
+    <div class="stars">
+      @for (star of [1,2,3,4,5]; track star) {
+      <button (click)="rating.set(star)" type="button">
+        {{ star <= rating() ? '⭐' : '☆' }}
+      </button>
+      }
+    </div>
+  `,
+})
+export class StarRatingComponent {
+  label = input<string>();
+  rating = model<number>(0); // Signal forms integration - that's it!
 }
 ```
+
+**No `writeValue()`, no `registerOnChange()`, no `registerOnTouched()`.** Just signals and Angular's `Field` directive.
 
 ## Real-World Example: E-Commerce Checkout
 

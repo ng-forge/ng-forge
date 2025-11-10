@@ -1,5 +1,5 @@
 import { NgDocPage } from '@ng-doc/core';
-import UiLibsIntegrationCategory from '../../ng-doc.category';
+import UiLibsIntegrationCategory from '../ng-doc.category';
 import { InputIframeDemoComponent } from './examples/input-iframe-demo.component';
 import { SelectIframeDemoComponent } from './examples/select-iframe-demo.component';
 import { CheckboxIframeDemoComponent } from './examples/checkbox-iframe-demo.component';
