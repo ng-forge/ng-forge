@@ -31,6 +31,11 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
 
   // Step 3: Wait for DOM to stabilize (no more components loading)
   await waitForFieldComponents(fixture, 1000, false); // Set to true to enable debug logging
+
+  // Step 4: One final render cycle to ensure all attributes are set
+  TestBed.flushEffects();
+  fixture.detectChanges();
+  await fixture.whenStable();
 }
 
 /**
@@ -62,20 +67,21 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
         'input.form-control, select.form-select, input[type="checkbox"].form-check-input, ' +
         'input[type="radio"].form-check-input, button.btn, [data-testid]'
     );
-    const hasLoadingComments = formElement.innerHTML.includes('<!--container-->');
 
     const currentComponentCount = bsComponents.length;
 
     if (debug) {
       console.log(
-        `[${iterations}] count=${currentComponentCount}, prev=${previousComponentCount}, stable=${stableCount}, loading=${hasLoadingComments}, elapsed=${
+        `[${iterations}] count=${currentComponentCount}, prev=${previousComponentCount}, stable=${stableCount}, elapsed=${
           Date.now() - startTime
         }ms`
       );
     }
 
     // Check if DOM has stabilized
-    if (currentComponentCount > 0 && currentComponentCount === previousComponentCount && !hasLoadingComments) {
+    // Note: We don't check for loading comments (<!--container-->) because Angular
+    // leaves these as permanent DOM markers even after components are fully rendered
+    if (currentComponentCount > 0 && currentComponentCount === previousComponentCount) {
       stableCount++;
       if (stableCount >= REQUIRED_STABLE_CHECKS) {
         if (debug) console.log(`✓ Stabilized after ${iterations} iterations, ${Date.now() - startTime}ms`);
