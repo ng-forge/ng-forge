@@ -42,11 +42,12 @@ import { FieldContext, ValidationError } from '@angular/forms/signals';
  * };
  * ```
  *
- * **Message Resolution Priority:**
+ * **Message Resolution Priority (STRICT):**
  * 1. Field-level `validationMessages[kind]` (highest - allows per-field customization)
  * 2. ValidatorConfig `errorMessage` (per-validator inline)
- * 3. Validator function's `error.message` (fallback)
- * 4. Generic: 'Validation error'
+ * 3. **No message configured = Warning logged + error NOT displayed**
+ *
+ * Note: Validator-returned messages are NOT used. All messages MUST be configured.
  */
 export type SimpleCustomValidator<TValue = unknown> = (value: TValue, formValue: unknown) => ValidationError | null;
 
@@ -91,11 +92,12 @@ export type SimpleCustomValidator<TValue = unknown> = (value: TValue, formValue:
  * }
  * ```
  *
- * **Message Resolution Priority:**
+ * **Message Resolution Priority (STRICT):**
  * 1. Field-level `validationMessages[kind]` (highest)
  * 2. ValidatorConfig `errorMessage`
- * 3. Validator function's `error.message` (fallback)
- * 4. Generic: 'Validation error'
+ * 3. **No message configured = Warning logged + error NOT displayed**
+ *
+ * Note: Validator-returned messages are NOT used. All messages MUST be configured.
  */
 export type ContextAwareValidator<TValue = unknown> = (
   ctx: FieldContext<TValue>,
@@ -157,11 +159,12 @@ export type ContextAwareValidator<TValue = unknown> = (
  * }
  * ```
  *
- * **Message Resolution Priority:**
+ * **Message Resolution Priority (STRICT):**
  * 1. Field-level `validationMessages[kind]` (highest)
  * 2. ValidatorConfig `errorMessage` (single message for validator)
- * 3. Validator function's `error.message` (fallback)
- * 4. Generic: 'Validation error'
+ * 3. **No message configured = Warning logged + error NOT displayed**
+ *
+ * Note: Validator-returned messages are NOT used. All messages MUST be configured.
  */
 export type TreeValidator<TModel = unknown> = (
   ctx: FieldContext<TModel>,

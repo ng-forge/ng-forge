@@ -60,7 +60,20 @@ export function createResolvedErrorsSignal<T>(
       }
 
       // Create observable for each error's resolved message
-      const errorResolvers = currentErrors.map((error: ValidationError) => resolveErrorMessage(error, msgs, injector));
+      // Filter out errors without configured messages and log warnings
+      const errorResolvers = currentErrors
+        .filter((error: ValidationError) => {
+          const hasMessage = !!msgs[error.kind];
+          if (!hasMessage) {
+            console.warn(
+              `[DynamicForm] No validation message configured for error kind "${error.kind}". ` +
+                `Please add a message to the field's validationMessages property. ` +
+                `This error will not be displayed to the user.`
+            );
+          }
+          return hasMessage;
+        })
+        .map((error: ValidationError) => resolveErrorMessage(error, msgs, injector));
 
       // Combine all error message observables into single array emission
       return errorResolvers.length > 0 ? combineLatest(errorResolvers) : of([]);
@@ -74,16 +87,20 @@ export function createResolvedErrorsSignal<T>(
 
 /**
  * Resolves a single error message from DynamicText sources
+ *
+ * IMPORTANT: This function assumes the error kind has a configured message.
+ * Errors without messages should be filtered out before calling this function.
+ *
  * @internal
  */
 function resolveErrorMessage(error: ValidationError, messages: ValidationMessages, injector: Injector): Observable<ResolvedError> {
-  // Get custom message for this error kind
+  // Get configured message for this error kind (guaranteed to exist by filter above)
   const customMessage = messages[error.kind];
 
-  // Convert DynamicText to Observable
-  const messageObservable = customMessage ? dynamicTextToObservable(customMessage, injector) : of(error.message || 'Validation error');
+  // Convert DynamicText to Observable (supports string, Observable, Signal)
+  const messageObservable = dynamicTextToObservable(customMessage, injector);
 
-  // Apply parameter interpolation
+  // Apply parameter interpolation to support {{param}} syntax
   return messageObservable.pipe(
     map((msg) => ({
       kind: error.kind,

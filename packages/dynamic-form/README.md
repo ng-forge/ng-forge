@@ -231,14 +231,15 @@ Customize validation messages:
 
 ng-forge supports three levels of custom validators to handle any validation scenario.
 
-**Best Practice:** Validators should focus on validation logic, not presentation. Return just the error `kind` and configure messages at field level for better i18n support and reusability.
+**Best Practice:** Validators should focus on validation logic, not presentation. Return ONLY the error `kind` and configure messages at field level for better i18n support and reusability.
 
-**Message Resolution Priority:**
+**Message Resolution Priority (STRICT):**
 
 1. Field-level `validationMessages[kind]` (highest - allows per-field customization)
 2. ValidatorConfig `errorMessage` (per-validator inline message)
-3. Validator function's `error.message` (fallback)
-4. Generic: 'Validation error'
+3. **No message configured = Warning logged + error NOT displayed to user**
+
+**Important:** Validator-returned messages are NOT used as fallbacks. All error messages MUST be explicitly configured at field/form level. This enforces proper i18n patterns and separation of concerns.
 
 #### 1. Simple Validators
 
@@ -277,28 +278,22 @@ const config = {
 };
 ```
 
-**Alternative patterns:**
+**Alternative: Inline message via ValidatorConfig**
 
 ```typescript
-// Option 2: Inline message via ValidatorConfig
+// Option 2: Inline message (useful for one-off validators)
 {
   validators: [
     {
       type: 'custom',
       functionName: 'noSpaces',
-      errorMessage: 'Username cannot contain spaces', // Inline message
+      errorMessage: 'Username cannot contain spaces', // Inline convenience
     },
   ];
 }
-
-// Option 3: Fallback message in validator (can be overridden at field level)
-const noSpacesWithFallback: SimpleCustomValidator<string> = (value) => {
-  if (typeof value === 'string' && value.includes(' ')) {
-    return { kind: 'noSpaces', message: 'Spaces not allowed' }; // Fallback
-  }
-  return null;
-};
 ```
+
+**Note:** While validators CAN return a `message` property, it is NOT used by the framework. All messages MUST be configured via `validationMessages` or `errorMessage`. This ensures proper i18n support and separation of concerns.
 
 #### 2. Context-Aware Validators
 
