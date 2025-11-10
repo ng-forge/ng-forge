@@ -33,7 +33,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
-        [styleClass]="props()?.styleClass ?? ''"
+        [styleClass]="selectClasses()"
       />
       } @else {
       <p-select
@@ -45,7 +45,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
-        [styleClass]="props()?.styleClass ?? ''"
+        [styleClass]="selectClasses()"
       />
       } @for (error of errorsToDisplay(); track error.kind) {
       <small class="p-error">{{ error.message }}</small>
@@ -80,4 +80,20 @@ export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponen
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly isMultiple = computed(() => this.props()?.multiple ?? false);
+
+  readonly selectClasses = computed(() => {
+    const classes: string[] = [];
+
+    const styleClass = this.props()?.styleClass;
+    if (styleClass) {
+      classes.push(styleClass);
+    }
+
+    // Add p-invalid class when there are errors to display
+    if (this.errorsToDisplay().length > 0) {
+      classes.push('p-invalid');
+    }
+
+    return classes.join(' ');
+  });
 }

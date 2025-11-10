@@ -32,6 +32,19 @@ export class CompleteFormDemoComponent {
   config = {
     fields: [
       {
+        key: 'title',
+        type: 'text',
+        label: 'Contact Us',
+        props: {
+          elementType: 'h2',
+        },
+      },
+      {
+        key: 'subtitle',
+        type: 'text',
+        label: "Fill out the form below and we'll get back to you as soon as possible",
+      },
+      {
         key: 'firstName',
         type: 'input',
         label: 'First Name',

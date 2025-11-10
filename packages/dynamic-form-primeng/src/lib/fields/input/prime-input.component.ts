@@ -79,6 +79,11 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
       classes.push('p-filled');
     }
 
+    // Add p-invalid class when there are errors to display
+    if (this.errorsToDisplay().length > 0) {
+      classes.push('p-invalid');
+    }
+
     return classes.join(' ');
   });
 

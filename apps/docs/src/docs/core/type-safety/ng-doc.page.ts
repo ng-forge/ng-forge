@@ -3,9 +3,9 @@ import CoreCategory from '../ng-doc.category';
 
 const TypeSafetyPage: NgDocPage = {
   title: 'Type Safety',
-  mdFile: './index.md',
+  mdFile: ['./basics.md', './containers.md', './custom-types.md'],
   category: CoreCategory,
-  order: 2,
+  order: 4,
 };
 
 export default TypeSafetyPage;

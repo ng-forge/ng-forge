@@ -14,7 +14,7 @@ import { CompleteFormIframeDemoComponent } from './examples/complete-form-iframe
 import { UserRegistrationIframeDemoComponent } from './examples/user-registration-iframe-demo.component';
 
 /**
- * @status:warning UNSTABLE
+ * @status:warning PREVIEW
  */
 const BootstrapPage: NgDocPage = {
   title: 'Bootstrap',

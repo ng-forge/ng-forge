@@ -1,4 +1,9 @@
-Control field behavior dynamically based on form state using Angular's signal forms logic functions. ng-forge provides a declarative API for conditional visibility, required state, and readonly state that maps directly to signal forms.
+---
+title: Basics
+keyword: ConditionalLogicBasicsPage
+---
+
+Control field behavior dynamically based on form state. ng-forge provides a declarative API for conditional visibility, required state, and readonly state that maps directly to Angular's signal forms.
 
 ## Signal Forms Integration
 
@@ -10,10 +15,10 @@ import { hidden, readonly, required } from '@angular/forms/signals';
 
 All conditional logic configuration is applied using these functions, providing:
 
-- Reactive updates when form state changes
-- Type-safe conditional expressions
-- Automatic re-evaluation on dependencies
-- Integration with form validation state
+- **Reactive updates** when form state changes
+- **Type-safe** conditional expressions
+- **Automatic re-evaluation** on dependencies
+- **Integration** with form validation state
 
 ## Static Properties
 
@@ -33,9 +38,11 @@ Hide a field from view (field still participates in form state):
 }
 ```
 
+The field is hidden from the UI but still included in the form value.
+
 ### disabled
 
-Disable user interaction (handled at component level, not form model level):
+Disable user interaction:
 
 ```typescript
 {
@@ -80,399 +87,133 @@ interface LogicConfig {
 }
 ```
 
-### Conditional Visibility
+### Conditional Visibility (hidden)
 
 Show or hide fields based on other field values.
 
-#### Basic Conditional Visibility
+#### Show Email When Contact Method is Email
 
 ```typescript
+{
+  key: 'contactMethod',
+  type: 'select',
+  value: '',
+  options: [
+    { value: 'email', label: 'Email' },
+    { value: 'phone', label: 'Phone' },
+  ],
+}
 {
   key: 'email',
   type: 'input',
   value: '',
   label: 'Email Address',
-  logic: [
-    {
-      type: 'hidden',
-      condition: {
-        type: 'fieldValue',
-        fieldPath: 'contactMethod',
-        operator: 'notEquals',
-        value: 'email',
-      },
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'contactMethod',
+      operator: 'notEquals',
+      value: 'email',
     },
-  ],
+  }],
 }
 ```
 
-**Signal forms mapping:**
-
-```typescript
-const logicFn = createLogicFunction(condition);
-hidden(fieldPath, logicFn);
-```
-
-**Behavior:** The email field is hidden unless `contactMethod` equals `'email'`.
-
-#### Multiple Conditions
-
-```typescript
-{
-  key: 'companyDetails',
-  type: 'group',
-  label: 'Company Details',
-  logic: [
-    {
-      type: 'hidden',
-      condition: {
-        type: 'fieldValue',
-        conditions: {
-          logic: 'or',
-          expressions: [
-            {
-              type: 'fieldValue',
-              fieldPath: 'accountType',
-              operator: 'notEquals',
-              value: 'business',
-            },
-            {
-              type: 'fieldValue',
-              fieldPath: 'skip',
-              operator: 'equals',
-              value: true,
-            },
-          ],
-        },
-      },
-    },
-  ],
-  fields: [
-    { key: 'companyName', type: 'input', value: '', label: 'Company Name' },
-    { key: 'taxId', type: 'input', value: '', label: 'Tax ID' },
-  ],
-}
-```
-
-**Behavior:** Company details are hidden if either accountType is not 'business' OR skip is true.
+When `contactMethod !== 'email'`, the email field is hidden.
 
 ### Conditional Required
 
-Make fields required based on form state.
+Make fields required based on conditions.
 
-#### Basic Conditional Required
+#### Tax ID Required for Business Accounts
 
 ```typescript
+{
+  key: 'accountType',
+  type: 'radio',
+  value: 'personal',
+  options: [
+    { value: 'personal', label: 'Personal' },
+    { value: 'business', label: 'Business' },
+  ],
+}
 {
   key: 'taxId',
   type: 'input',
   value: '',
   label: 'Tax ID',
-  logic: [
-    {
-      type: 'required',
-      condition: {
-        type: 'fieldValue',
-        fieldPath: 'accountType',
-        operator: 'equals',
-        value: 'business',
-      },
-      errorMessage: 'Tax ID is required for business accounts',
+  logic: [{
+    type: 'required',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'accountType',
+      operator: 'equals',
+      value: 'business',
     },
-  ],
-}
-```
-
-**Signal forms mapping:**
-
-```typescript
-const whenLogic = createLogicFunction(condition);
-required(fieldPath, { when: whenLogic });
-```
-
-**Behavior:** Tax ID is only required when accountType equals 'business'.
-
-#### Multiple Conditional Required Rules
-
-```typescript
-{
-  key: 'phone',
-  type: 'input',
-  value: '',
-  label: 'Phone Number',
-  logic: [
-    {
-      type: 'required',
-      condition: {
-        type: 'fieldValue',
-        fieldPath: 'contactMethod',
-        operator: 'equals',
-        value: 'phone',
-      },
-      errorMessage: 'Phone number is required when phone is selected as contact method',
-    },
-  ],
+    errorMessage: 'Tax ID is required for business accounts',
+  }],
 }
 ```
 
 ### Conditional Readonly
 
-Make fields readonly based on form state.
+Make fields read-only based on conditions.
+
+#### Lock Field After Submission
 
 ```typescript
 {
-  key: 'shippingAddress',
-  type: 'textarea',
-  value: '',
-  label: 'Shipping Address',
-  logic: [
-    {
-      type: 'readonly',
-      condition: {
-        type: 'fieldValue',
-        fieldPath: 'sameAsBilling',
-        operator: 'equals',
-        value: true,
-      },
-    },
+  key: 'status',
+  type: 'select',
+  value: 'draft',
+  options: [
+    { value: 'draft', label: 'Draft' },
+    { value: 'submitted', label: 'Submitted' },
   ],
 }
-```
-
-**Signal forms mapping:**
-
-```typescript
-const logicFn = createLogicFunction(condition);
-readonly(fieldPath, logicFn);
-```
-
-**Behavior:** Shipping address becomes readonly when sameAsBilling is true.
-
-### Complex Conditional Logic
-
-Use JavaScript expressions for complex conditions.
-
-```typescript
 {
-  key: 'driverLicense',
+  key: 'documentNumber',
   type: 'input',
   value: '',
-  label: 'Driver License',
-  logic: [
-    {
-      type: 'required',
-      condition: {
-        type: 'javascript',
-        expression: 'formValue.age >= 18 && formValue.needsTransport === true',
-      },
-      errorMessage: 'Driver license required for adults needing transport',
+  label: 'Document Number',
+  logic: [{
+    type: 'readonly',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'status',
+      operator: 'equals',
+      value: 'submitted',
     },
-  ],
+  }],
 }
 ```
 
-### Multiple Logic Rules
+Once status is "submitted", the document number becomes read-only.
 
-Apply multiple logic rules to a single field:
+## Basic Conditional Expression
 
-```typescript
-{
-  key: 'managerEmail',
-  type: 'input',
-  value: '',
-  label: 'Manager Email',
-  email: true,
-  logic: [
-    {
-      type: 'hidden',
-      condition: {
-        type: 'fieldValue',
-        fieldPath: 'role',
-        operator: 'equals',
-        value: 'owner',
-      },
-    },
-    {
-      type: 'required',
-      condition: {
-        type: 'fieldValue',
-        fieldPath: 'role',
-        operator: 'notEquals',
-        value: 'owner',
-      },
-      errorMessage: 'Manager email is required for non-owner roles',
-    },
-    {
-      type: 'readonly',
-      condition: {
-        type: 'fieldValue',
-        fieldPath: 'approved',
-        operator: 'equals',
-        value: true,
-      },
-    },
-  ],
-}
-```
-
-**Behavior:**
-
-- Hidden when role is 'owner'
-- Required when role is not 'owner'
-- Readonly when approved is true
-
-## Conditional Expression Types
-
-### fieldValue Expression
-
-Compare a specific field's value:
+The most common conditional expression checks a specific field's value:
 
 ```typescript
 {
   type: 'fieldValue',
-  fieldPath: 'accountType',
+  fieldPath: 'fieldKey',
   operator: 'equals',
-  value: 'business'
+  value: 'expectedValue',
 }
 ```
 
-**Available operators:**
+**Components:**
 
-- `equals`: Exact equality (`===`)
-- `notEquals`: Not equal (`!==`)
-- `greater`: Greater than (`>`)
-- `less`: Less than (`<`)
-- `greaterOrEqual`: Greater than or equal (`>=`)
-- `lessOrEqual`: Less than or equal (`<=`)
-- `contains`: String contains substring or array contains value
-- `startsWith`: String starts with substring
-- `endsWith`: String ends with substring
-- `matches`: String matches regex pattern
+- `type: 'fieldValue'` - Check a specific field
+- `fieldPath` - The field key to check
+- `operator` - Comparison operator (see [Expressions](../expressions/))
+- `value` - Value to compare against
 
-**Nested field paths:**
+## Quick Example
 
-```typescript
-{
-  type: 'fieldValue',
-  fieldPath: 'user.profile.role',
-  operator: 'equals',
-  value: 'admin'
-}
-```
-
-### formValue Expression
-
-Compare the entire form value:
-
-```typescript
-{
-  type: 'formValue',
-  operator: 'equals',
-  value: { status: 'active', verified: true }
-}
-```
-
-### javascript Expression
-
-Execute JavaScript expression with form context:
-
-```typescript
-{
-  type: 'javascript',
-  expression: 'formValue.age >= 18 && formValue.country === "US"'
-}
-```
-
-**Available context:**
-
-- `formValue`: The entire form value object
-- `fieldValue`: The current field's value
-- `fieldPath`: The current field's path
-
-### custom Expression
-
-Call a registered custom function:
-
-```typescript
-{
-  type: 'custom',
-  expression: 'checkEligibility'
-}
-```
-
-Register the custom function in your application:
-
-```typescript
-import { FunctionRegistryService } from '@ng-forge/dynamic-form';
-
-const functionRegistry = inject(FunctionRegistryService);
-
-functionRegistry.registerFunction('checkEligibility', (context) => {
-  return context.formValue.age >= 18 && context.formValue.income > 50000;
-});
-```
-
-### Multiple Conditions with and/or Logic
-
-Combine multiple conditions:
-
-```typescript
-{
-  type: 'hidden',
-  condition: {
-    type: 'fieldValue',
-    conditions: {
-      logic: 'and',
-      expressions: [
-        {
-          type: 'fieldValue',
-          fieldPath: 'age',
-          operator: 'less',
-          value: 18
-        },
-        {
-          type: 'fieldValue',
-          fieldPath: 'country',
-          operator: 'equals',
-          value: 'US'
-        }
-      ]
-    }
-  }
-}
-```
-
-Use `'or'` logic:
-
-```typescript
-{
-  type: 'hidden',
-  condition: {
-    type: 'fieldValue',
-    conditions: {
-      logic: 'or',
-      expressions: [
-        {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'equals',
-          value: 'guest'
-        },
-        {
-          type: 'fieldValue',
-          fieldPath: 'temporary',
-          operator: 'equals',
-          value: true
-        }
-      ]
-    }
-  }
-}
-```
-
-## Complete Examples
-
-### Contact Form with Dynamic Fields
+Contact form that shows different fields based on contact method:
 
 ```typescript
 const config = {
@@ -480,16 +221,14 @@ const config = {
     {
       key: 'contactMethod',
       type: 'select',
-      value: 'email',
+      value: '',
       label: 'Preferred Contact Method',
       required: true,
-      props: {
-        options: [
-          { label: 'Email', value: 'email' },
-          { label: 'Phone', value: 'phone' },
-          { label: 'Mail', value: 'mail' },
-        ],
-      },
+      options: [
+        { value: 'email', label: 'Email' },
+        { value: 'phone', label: 'Phone' },
+        { value: 'mail', label: 'Postal Mail' },
+      ],
     },
     {
       key: 'email',
@@ -515,7 +254,6 @@ const config = {
             operator: 'equals',
             value: 'email',
           },
-          errorMessage: 'Email is required when email is the contact method',
         },
       ],
     },
@@ -524,7 +262,6 @@ const config = {
       type: 'input',
       value: '',
       label: 'Phone Number',
-      props: { type: 'tel' },
       logic: [
         {
           type: 'hidden',
@@ -543,13 +280,13 @@ const config = {
             operator: 'equals',
             value: 'phone',
           },
-          errorMessage: 'Phone is required when phone is the contact method',
         },
       ],
+      props: { type: 'tel' },
     },
     {
-      key: 'mailingAddress',
-      type: 'textarea',
+      key: 'address',
+      type: 'input',
       value: '',
       label: 'Mailing Address',
       logic: [
@@ -570,7 +307,6 @@ const config = {
             operator: 'equals',
             value: 'mail',
           },
-          errorMessage: 'Mailing address is required when mail is the contact method',
         },
       ],
     },
@@ -578,533 +314,19 @@ const config = {
 } as const satisfies FormConfig;
 ```
 
-### Business Account Form
+This form shows only the relevant contact field based on the user's selection.
 
-```typescript
-const config = {
-  fields: [
-    {
-      key: 'accountType',
-      type: 'select',
-      value: 'personal',
-      label: 'Account Type',
-      required: true,
-      props: {
-        options: [
-          { label: 'Personal', value: 'personal' },
-          { label: 'Business', value: 'business' },
-        ],
-      },
-    },
-    {
-      key: 'companyName',
-      type: 'input',
-      value: '',
-      label: 'Company Name',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'accountType',
-            operator: 'notEquals',
-            value: 'business',
-          },
-        },
-        {
-          type: 'required',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'accountType',
-            operator: 'equals',
-            value: 'business',
-          },
-          errorMessage: 'Company name is required for business accounts',
-        },
-      ],
-    },
-    {
-      key: 'taxId',
-      type: 'input',
-      value: '',
-      label: 'Tax ID',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'accountType',
-            operator: 'notEquals',
-            value: 'business',
-          },
-        },
-        {
-          type: 'required',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'accountType',
-            operator: 'equals',
-            value: 'business',
-          },
-          errorMessage: 'Tax ID is required for business accounts',
-        },
-      ],
-    },
-    {
-      key: 'numberOfEmployees',
-      type: 'input',
-      value: null,
-      label: 'Number of Employees',
-      props: { type: 'number' },
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'accountType',
-            operator: 'notEquals',
-            value: 'business',
-          },
-        },
-      ],
-    },
-  ],
-} as const satisfies FormConfig;
-```
+## When Logic Runs
 
-### Shipping Form with Same as Billing
+Conditional logic is evaluated:
 
-```typescript
-const config = {
-  fields: [
-    {
-      key: 'billingAddress',
-      type: 'group',
-      label: 'Billing Address',
-      fields: [
-        { key: 'street', type: 'input', value: '', label: 'Street', required: true },
-        { key: 'city', type: 'input', value: '', label: 'City', required: true },
-        { key: 'zipCode', type: 'input', value: '', label: 'ZIP Code', required: true },
-      ],
-    },
-    {
-      key: 'sameAsBilling',
-      type: 'checkbox',
-      value: false,
-      label: 'Shipping address is same as billing address',
-    },
-    {
-      key: 'shippingAddress',
-      type: 'group',
-      label: 'Shipping Address',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'sameAsBilling',
-            operator: 'equals',
-            value: true,
-          },
-        },
-      ],
-      fields: [
-        { key: 'street', type: 'input', value: '', label: 'Street', required: true },
-        { key: 'city', type: 'input', value: '', label: 'City', required: true },
-        { key: 'zipCode', type: 'input', value: '', label: 'ZIP Code', required: true },
-      ],
-    },
-  ],
-} as const satisfies FormConfig;
-```
+- **On form value change** - Any time a dependent field changes
+- **On initialization** - When the form is created
+- **Reactively** - Uses Angular's signal forms for automatic updates
 
-### Age-Based Conditional Form
+## Next Steps
 
-```typescript
-const config = {
-  fields: [
-    {
-      key: 'age',
-      type: 'input',
-      value: null,
-      label: 'Age',
-      required: true,
-      min: 1,
-      max: 120,
-      props: { type: 'number' },
-    },
-    {
-      key: 'parentName',
-      type: 'input',
-      value: '',
-      label: 'Parent/Guardian Name',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'age',
-            operator: 'greaterOrEqual',
-            value: 18,
-          },
-        },
-        {
-          type: 'required',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'age',
-            operator: 'less',
-            value: 18,
-          },
-          errorMessage: 'Parent/guardian name is required for minors',
-        },
-      ],
-    },
-    {
-      key: 'parentPhone',
-      type: 'input',
-      value: '',
-      label: 'Parent/Guardian Phone',
-      props: { type: 'tel' },
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'age',
-            operator: 'greaterOrEqual',
-            value: 18,
-          },
-        },
-        {
-          type: 'required',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'age',
-            operator: 'less',
-            value: 18,
-          },
-          errorMessage: 'Parent/guardian phone is required for minors',
-        },
-      ],
-    },
-    {
-      key: 'driverLicense',
-      type: 'input',
-      value: '',
-      label: 'Driver License Number',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'age',
-            operator: 'less',
-            value: 16,
-          },
-        },
-      ],
-    },
-  ],
-} as const satisfies FormConfig;
-```
-
-### Complex Multi-Condition Form
-
-```typescript
-const config = {
-  fields: [
-    {
-      key: 'membershipLevel',
-      type: 'select',
-      value: 'standard',
-      label: 'Membership Level',
-      required: true,
-      props: {
-        options: [
-          { label: 'Standard', value: 'standard' },
-          { label: 'Premium', value: 'premium' },
-          { label: 'VIP', value: 'vip' },
-        ],
-      },
-    },
-    {
-      key: 'annualIncome',
-      type: 'input',
-      value: null,
-      label: 'Annual Income',
-      props: { type: 'number' },
-      required: true,
-    },
-    {
-      key: 'personalConcierge',
-      type: 'checkbox',
-      value: false,
-      label: 'Request Personal Concierge Service',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'javascript',
-            expression: 'formValue.membershipLevel !== "vip" || formValue.annualIncome < 100000',
-          },
-        },
-      ],
-    },
-    {
-      key: 'conciergePreferences',
-      type: 'textarea',
-      value: '',
-      label: 'Concierge Preferences',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            conditions: {
-              logic: 'or',
-              expressions: [
-                {
-                  type: 'fieldValue',
-                  fieldPath: 'membershipLevel',
-                  operator: 'notEquals',
-                  value: 'vip',
-                },
-                {
-                  type: 'fieldValue',
-                  fieldPath: 'personalConcierge',
-                  operator: 'equals',
-                  value: false,
-                },
-              ],
-            },
-          },
-        },
-        {
-          type: 'required',
-          condition: {
-            type: 'fieldValue',
-            conditions: {
-              logic: 'and',
-              expressions: [
-                {
-                  type: 'fieldValue',
-                  fieldPath: 'membershipLevel',
-                  operator: 'equals',
-                  value: 'vip',
-                },
-                {
-                  type: 'fieldValue',
-                  fieldPath: 'personalConcierge',
-                  operator: 'equals',
-                  value: true,
-                },
-              ],
-            },
-          },
-          errorMessage: 'Please describe your concierge preferences',
-        },
-      ],
-    },
-  ],
-} as const satisfies FormConfig;
-```
-
-## Best Practices
-
-### 1. Use Static Properties for Fixed States
-
-```typescript
-// ✓ Clear and simple
-{
-  key: 'internalId',
-  type: 'input',
-  value: 'AUTO',
-  hidden: true
-}
-
-// ✗ Unnecessarily complex
-{
-  key: 'internalId',
-  type: 'input',
-  value: 'AUTO',
-  logic: [
-    {
-      type: 'hidden',
-      condition: true
-    }
-  ]
-}
-```
-
-### 2. Keep Conditions Simple and Readable
-
-```typescript
-// ✓ Clear, single condition
-{
-  type: 'hidden',
-  condition: {
-    type: 'fieldValue',
-    fieldPath: 'accountType',
-    operator: 'notEquals',
-    value: 'business'
-  }
-}
-
-// ✗ Complex, hard to debug
-{
-  type: 'hidden',
-  condition: {
-    type: 'javascript',
-    expression: '!(formValue.accountType === "business" && formValue.verified === true && !formValue.suspended)'
-  }
-}
-```
-
-### 3. Combine Related Logic on Same Field
-
-```typescript
-// ✓ All logic together
-{
-  key: 'field',
-  type: 'input',
-  value: '',
-  logic: [
-    { type: 'hidden', condition: {...} },
-    { type: 'required', condition: {...} },
-    { type: 'readonly', condition: {...} }
-  ]
-}
-
-// ✗ Scattered configuration (not possible with current API)
-```
-
-### 4. Use Descriptive Error Messages
-
-```typescript
-// ✓ Specific and helpful
-{
-  type: 'required',
-  condition: {...},
-  errorMessage: 'Tax ID is required for business accounts'
-}
-
-// ✗ Generic and unhelpful
-{
-  type: 'required',
-  condition: {...},
-  errorMessage: 'This field is required'
-}
-```
-
-### 5. Avoid Circular Dependencies
-
-```typescript
-// ✗ Circular: A depends on B, B depends on A
-{
-  key: 'fieldA',
-  type: 'input',
-  value: '',
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'fieldValue',
-      fieldPath: 'fieldB',
-      operator: 'equals',
-      value: true
-    }
-  }]
-},
-{
-  key: 'fieldB',
-  type: 'checkbox',
-  value: false,
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'fieldValue',
-      fieldPath: 'fieldA',
-      operator: 'equals',
-      value: 'something'
-    }
-  }]
-}
-```
-
-### 6. Extract Complex Logic to Custom Functions
-
-```typescript
-// ✓ Reusable and testable
-const functionRegistry = inject(FunctionRegistryService);
-
-functionRegistry.registerFunction('isEligibleForPremium', (context) => {
-  const age = context.formValue.age;
-  const income = context.formValue.annualIncome;
-  const creditScore = context.formValue.creditScore;
-
-  return age >= 21 && income >= 50000 && creditScore >= 700;
-});
-
-{
-  key: 'premiumFeatures',
-  type: 'group',
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'custom',
-      expression: 'isEligibleForPremium'
-    }
-  }],
-  fields: [...]
-}
-
-// ✗ Complex inline expression
-{
-  key: 'premiumFeatures',
-  type: 'group',
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'javascript',
-      expression: '!(formValue.age >= 21 && formValue.annualIncome >= 50000 && formValue.creditScore >= 700)'
-    }
-  }],
-  fields: [...]
-}
-```
-
-### 7. Consider User Experience
-
-```typescript
-// ✓ Hides field when not relevant
-{
-  key: 'businessTaxId',
-  type: 'input',
-  value: '',
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'fieldValue',
-      fieldPath: 'accountType',
-      operator: 'notEquals',
-      value: 'business'
-    }
-  }]
-}
-
-// Consider: Does readonly make more sense than hidden?
-{
-  key: 'approvedAmount',
-  type: 'input',
-  value: 5000,
-  logic: [{
-    type: 'readonly',
-    condition: {
-      type: 'fieldValue',
-      fieldPath: 'approved',
-      operator: 'equals',
-      value: true
-    }
-  }]
-}
-```
+- **[Conditional Expressions](../expressions/)** - All operators and expression types
+- **[Examples](../examples/)** - Real-world patterns
+- **[Validation](../../validation/)** - Conditional validation
+- **[Type Safety](../../type-safety/)** - TypeScript integration
