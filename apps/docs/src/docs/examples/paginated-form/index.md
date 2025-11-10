@@ -315,10 +315,10 @@ fields: [
 **Performance advantages:**
 
 - ⚡ **Zero flicker navigation** - Adjacent pages prefetched for instant next/previous
-- 💾 **True lazy loading** - Distant pages don't load until needed
-- 🎯 **Memory efficient** - Only 3 pages in memory at most (current + 2 adjacent)
-- 🚀 **Better UX** - Smooth page transitions without loading states
-- 📱 **Mobile-friendly** - Reduced memory footprint on lower-end devices
+- 🚀 **Faster initial load** - Only 3 pages load immediately, distant pages defer until idle
+- ⏱️ **Better Time to Interactive (TTI)** - Reduced initial JavaScript parsing/compilation
+- 📱 **Mobile-friendly** - Lower startup cost on slower devices
+- 🎯 **Optimized user experience** - Smooth page transitions without loading states
 
 ### Technical Details
 
@@ -342,8 +342,11 @@ This means:
 
 - **Current + adjacent pages render immediately** - Using `@defer (on immediate)` to render during browser idle
 - **Visibility controlled via input and CSS** - Adjacent pages are fully rendered but hidden with `display: none`
-- **Memory savings** - Only 3 pages max in DOM (current + 2 adjacent), distant pages defer until idle
+- **Initial load optimization** - Only 3 pages render initially, distant pages defer until idle
 - **Zero flicker navigation** - Next/previous pages already rendered, just toggle visibility
+- **Once loaded, pages persist** - Pages remain in DOM (hidden with CSS) after initial load
+
+The primary benefit is **optimizing initial load performance**, not ongoing memory usage.
 
 ### Best Practices
 

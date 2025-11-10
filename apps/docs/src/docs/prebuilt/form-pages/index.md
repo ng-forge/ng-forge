@@ -70,15 +70,16 @@ The page orchestrator uses a **2-tier loading strategy**:
 **Tier 1: Current + Adjacent Pages (±1)**
 
 - Render immediately using `@defer (on immediate)`
-- Maximum 3 pages in DOM at once (current + 2 adjacent)
+- Initially, only 3 pages load (current + 2 adjacent)
 - Adjacent pages are fully rendered but hidden with `display: none`
 - Ensures zero flicker when navigating forward/backward
 
 **Tier 2: Distant Pages (2+ steps away)**
 
 - Defer loading until browser is idle using `@defer (on idle)`
-- True lazy loading for memory efficiency
+- Lazy loading optimizes initial page load
 - Load automatically during browser idle time
+- Once loaded, pages remain in DOM (hidden with CSS)
 
 ### Benefits
 
@@ -96,9 +97,11 @@ fields: [
 **Performance advantages:**
 
 - ⚡ **Zero navigation flicker** - Adjacent pages already rendered
-- 💾 **Memory efficient** - Only 3 pages max in DOM at once
-- 🚀 **Faster initial load** - Distant pages defer until idle
-- 📱 **Mobile-friendly** - Reduced memory footprint
+- 🚀 **Faster initial load** - Only 3 pages render immediately, distant pages defer until idle
+- ⏱️ **Better Time to Interactive (TTI)** - Reduced initial JavaScript parsing/compilation
+- 📱 **Mobile-friendly** - Lower startup cost on slower devices
+
+**Note:** Once loaded, pages remain in the DOM (hidden with CSS). The primary benefit is optimizing **initial load performance**, not ongoing memory usage.
 
 This optimization happens automatically - no configuration needed.
 
