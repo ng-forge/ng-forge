@@ -1,21 +1,23 @@
 import { TestBed } from '@angular/core/testing';
-import { computed, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { createResolvedErrorsSignal } from './create-resolved-errors-signal';
 import { ValidationMessages } from '../models/validation-types';
-import { FieldTree } from '@angular/forms/signals';
+import { form } from '@angular/forms/signals';
 
 describe('createResolvedErrorsSignal', () => {
   describe('default validation messages', () => {
     it('should use field-level validation message when available', () => {
       TestBed.runInInjectionContext(() => {
-        // Create a mock field signal
-        const mockField = signal({
-          value: signal(''),
-          touched: signal(true),
-          errors: signal([{ kind: 'required', message: 'Built-in required error' }]),
-          invalid: signal(true),
-          valid: signal(false),
-        } as any);
+        // Create a form with a field
+        const testForm = form<{ email: string }>({ email: '' });
+        const formInstance = testForm();
+        const childrenMap = formInstance.structure.childrenMap();
+        const formField = childrenMap.get('email');
+        const emailField = formField.fieldProxy;
+
+        // Set error on the field
+        emailField().errors.set([{ kind: 'required', message: 'Built-in required error' }]);
+        emailField().touched.set(true);
 
         const fieldMessages = signal<ValidationMessages>({
           required: 'Field-level: Email is required',
@@ -26,7 +28,7 @@ describe('createResolvedErrorsSignal', () => {
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
-          mockField as any,
+          emailField,
           fieldMessages,
           defaultMessages
         );
@@ -40,13 +42,11 @@ describe('createResolvedErrorsSignal', () => {
 
     it('should fall back to default validation message when field-level is not provided', () => {
       TestBed.runInInjectionContext(() => {
-        const mockField = signal({
-          value: signal(''),
-          touched: signal(true),
-          errors: signal([{ kind: 'required', message: 'Built-in required error' }]),
-          invalid: signal(true),
-          valid: signal(false),
-        } as any);
+        const testForm = form<{ email: string }>({ email: '' });
+        const emailField = testForm().structure.childrenMap().get('email').fieldProxy;
+
+        emailField().errors.set([{ kind: 'required', message: 'Built-in required error' }]);
+        emailField().touched.set(true);
 
         const fieldMessages = signal<ValidationMessages>({});
 
@@ -55,7 +55,7 @@ describe('createResolvedErrorsSignal', () => {
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
-          mockField as any,
+          emailField,
           fieldMessages,
           defaultMessages
         );
@@ -69,19 +69,17 @@ describe('createResolvedErrorsSignal', () => {
 
     it('should fall back to built-in message when neither field-level nor default is provided', () => {
       TestBed.runInInjectionContext(() => {
-        const mockField = signal({
-          value: signal(''),
-          touched: signal(true),
-          errors: signal([{ kind: 'required', message: 'Built-in required error' }]),
-          invalid: signal(true),
-          valid: signal(false),
-        } as any);
+        const testForm = form<{ email: string }>({ email: '' });
+        const emailField = testForm().structure.childrenMap().get('email').fieldProxy;
+
+        emailField().errors.set([{ kind: 'required', message: 'Built-in required error' }]);
+        emailField().touched.set(true);
 
         const fieldMessages = signal<ValidationMessages>({});
         const defaultMessages = signal<ValidationMessages>({});
 
         const resolvedErrors = createResolvedErrorsSignal(
-          mockField as any,
+          emailField,
           fieldMessages,
           defaultMessages
         );
@@ -95,17 +93,15 @@ describe('createResolvedErrorsSignal', () => {
 
     it('should handle multiple validation errors with mixed sources', () => {
       TestBed.runInInjectionContext(() => {
-        const mockField = signal({
-          value: signal('ab'),
-          touched: signal(true),
-          errors: signal([
-            { kind: 'required', message: 'Built-in required' },
-            { kind: 'minLength', message: 'Built-in minLength', requiredLength: 8, actualLength: 2 },
-            { kind: 'pattern', message: 'Built-in pattern' },
-          ]),
-          invalid: signal(true),
-          valid: signal(false),
-        } as any);
+        const testForm = form<{ password: string }>({ password: 'ab' });
+        const passwordField = testForm().structure.childrenMap().get('password').fieldProxy;
+
+        passwordField().errors.set([
+          { kind: 'required', message: 'Built-in required' },
+          { kind: 'minLength', message: 'Built-in minLength', requiredLength: 8, actualLength: 2 },
+          { kind: 'pattern', message: 'Built-in pattern' },
+        ]);
+        passwordField().touched.set(true);
 
         // Field-level only has 'minLength'
         const fieldMessages = signal<ValidationMessages>({
@@ -119,7 +115,7 @@ describe('createResolvedErrorsSignal', () => {
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
-          mockField as any,
+          passwordField,
           fieldMessages,
           defaultMessages
         );
@@ -134,15 +130,13 @@ describe('createResolvedErrorsSignal', () => {
 
     it('should interpolate parameters in default messages', () => {
       TestBed.runInInjectionContext(() => {
-        const mockField = signal({
-          value: signal(5),
-          touched: signal(true),
-          errors: signal([
-            { kind: 'min', message: 'Built-in min', min: 18, actual: 5 },
-          ]),
-          invalid: signal(true),
-          valid: signal(false),
-        } as any);
+        const testForm = form<{ age: number }>({ age: 5 });
+        const ageField = testForm().structure.childrenMap().get('age').fieldProxy;
+
+        ageField().errors.set([
+          { kind: 'min', message: 'Built-in min', min: 18, actual: 5 },
+        ]);
+        ageField().touched.set(true);
 
         const fieldMessages = signal<ValidationMessages>({});
 
@@ -151,7 +145,7 @@ describe('createResolvedErrorsSignal', () => {
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
-          mockField as any,
+          ageField,
           fieldMessages,
           defaultMessages
         );
