@@ -55,8 +55,9 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
 
   readonly props = input<PrimeSliderProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly formValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.formValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

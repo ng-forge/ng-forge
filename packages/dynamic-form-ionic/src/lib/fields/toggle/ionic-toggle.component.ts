@@ -59,8 +59,9 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   readonly tabIndex = input<number>();
   readonly props = input<IonicToggleProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly formValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.formValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

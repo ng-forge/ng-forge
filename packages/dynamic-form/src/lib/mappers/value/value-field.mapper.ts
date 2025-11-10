@@ -14,6 +14,12 @@ export function valueFieldMapper(fieldDef: BaseValueField<any, any>, options: Va
   // Always pass validationMessages (or empty object) - required for error display signals
   bindings.push(inputBinding('validationMessages', () => fieldDef.validationMessages ?? {}));
 
+  // Pass form-level validation messages for fallback error translations
+  const formValidationMessages = options.fieldSignalContext.formValidationMessages;
+  if (formValidationMessages !== undefined) {
+    bindings.push(inputBinding('formValidationMessages', () => formValidationMessages));
+  }
+
   const formRoot = options.fieldSignalContext.form();
   const childrenMap = (formRoot as any).structure?.childrenMap?.();
 

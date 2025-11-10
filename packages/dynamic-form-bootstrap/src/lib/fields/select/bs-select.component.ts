@@ -69,8 +69,9 @@ export default class BsSelectFieldComponent<T extends string> implements BsSelec
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<BsSelectProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly formValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.formValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

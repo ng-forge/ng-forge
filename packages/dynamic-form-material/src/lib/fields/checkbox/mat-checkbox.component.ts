@@ -60,8 +60,9 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly tabIndex = input<number>();
   readonly props = input<MatCheckboxProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly formValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.formValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

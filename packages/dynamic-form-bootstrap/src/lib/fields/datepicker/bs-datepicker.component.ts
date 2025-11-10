@@ -96,8 +96,9 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
   readonly startAt = input<Date | null>(null);
   readonly props = input<BsDatepickerProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly formValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.formValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

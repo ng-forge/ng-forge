@@ -54,8 +54,9 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly tabIndex = input<number>();
   readonly props = input<MatTextareaProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly formValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.formValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection
