@@ -105,6 +105,7 @@ export class MyFormComponent {
 ```
 
 The fallback priority is:
+
 1. **Field-level** `validationMessages` (highest priority)
 2. **Form-level** `defaultValidationMessages` (fallback)
 3. **Built-in** error messages (last resort)
@@ -152,6 +153,12 @@ export class MyFormComponent {
   transloco = inject(TranslocoService);
 
   formConfig = {
+    // Define default validation messages for all fields
+    defaultValidationMessages: {
+      required: this.transloco.selectTranslate('validation.required'),
+      email: this.transloco.selectTranslate('validation.email'),
+      minLength: this.transloco.selectTranslate('validation.minLength'),
+    },
     fields: [
       {
         key: 'username',
@@ -159,9 +166,17 @@ export class MyFormComponent {
         label: this.transloco.selectTranslate('form.username'),
         value: '',
         required: true,
-        validationMessages: {
-          required: this.transloco.selectTranslate('validation.required'),
-        },
+        minLength: 3,
+        // Uses defaultValidationMessages for required and minLength
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: this.transloco.selectTranslate('form.email'),
+        value: '',
+        required: true,
+        email: true,
+        // Uses defaultValidationMessages for required and email
       },
     ],
   };
@@ -188,25 +203,45 @@ export class MyFormComponent {
   translations = computed(() => ({
     en: {
       username: 'Username',
+      email: 'Email',
       required: 'This field is required',
+      email_format: 'Please enter a valid email address',
+      minLength: 'Must be at least {{requiredLength}} characters',
     },
     es: {
       username: 'Nombre de usuario',
+      email: 'Correo electrónico',
       required: 'Este campo es obligatorio',
+      email_format: 'Por favor ingrese una dirección de correo válida',
+      minLength: 'Debe tener al menos {{requiredLength}} caracteres',
     },
   }[this.currentLang()]));
 
   formConfig = computed(() => ({
+    // Define default validation messages for all fields
+    defaultValidationMessages: {
+      required: this.translations().required,  // Signal<string>
+      email: this.translations().email_format,
+      minLength: this.translations().minLength,
+    },
     fields: [
       {
         key: 'username',
         type: 'input',
-        label: this.translations().username,  // Signal<string>
+        label: this.translations().username,
         value: '',
         required: true,
-        validationMessages: {
-          required: this.translations().required,
-        },
+        minLength: 3,
+        // Uses defaultValidationMessages for required and minLength
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: this.translations().email,
+        value: '',
+        required: true,
+        email: true,
+        // Uses defaultValidationMessages for required and email
       },
     ],
   }));
