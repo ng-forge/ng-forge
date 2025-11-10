@@ -30,7 +30,7 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
   fixture.detectChanges();
 
   // Step 3: Wait for DOM to stabilize (no more components loading)
-  await waitForFieldComponents(fixture);
+  await waitForFieldComponents(fixture, 1000, false); // Set to true to enable debug logging
 }
 
 /**
@@ -40,7 +40,7 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
  * and no loading placeholders remain. Uses timeout-based safety net instead
  * of arbitrary iteration limits.
  */
-async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs = 1000): Promise<void> {
+async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs = 1000, debug = false): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form, form');
   if (!formElement) return;
 
@@ -48,8 +48,10 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
   let previousComponentCount = 0;
   let stableCount = 0;
   const REQUIRED_STABLE_CHECKS = 3;
+  let iterations = 0;
 
   while (Date.now() - startTime < timeoutMs) {
+    iterations++;
     TestBed.flushEffects();
     fixture.detectChanges();
 
@@ -64,10 +66,19 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
 
     const currentComponentCount = bsComponents.length;
 
+    if (debug) {
+      console.log(
+        `[${iterations}] count=${currentComponentCount}, prev=${previousComponentCount}, stable=${stableCount}, loading=${hasLoadingComments}, elapsed=${
+          Date.now() - startTime
+        }ms`
+      );
+    }
+
     // Check if DOM has stabilized
     if (currentComponentCount > 0 && currentComponentCount === previousComponentCount && !hasLoadingComments) {
       stableCount++;
       if (stableCount >= REQUIRED_STABLE_CHECKS) {
+        if (debug) console.log(`✓ Stabilized after ${iterations} iterations, ${Date.now() - startTime}ms`);
         // DOM is truly stable - exit
         return;
       }
@@ -79,6 +90,8 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
     // Wait one tick before next check
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
+
+  if (debug) console.log(`✗ Timeout reached after ${iterations} iterations, final count=${previousComponentCount}`);
 
   // Final stabilization even if timeout reached
   TestBed.flushEffects();
