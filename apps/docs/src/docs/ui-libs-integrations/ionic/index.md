@@ -6,8 +6,16 @@ Mobile-first Ionic field components for ng-forge dynamic forms, optimized for iO
 
 Install the package and its peer dependencies:
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
 ```
 
 ## Quick Start

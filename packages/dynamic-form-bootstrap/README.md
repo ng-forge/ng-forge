@@ -21,11 +21,30 @@ This library provides 13 field types that integrate Bootstrap 5 styling with the
 
 ## Installation
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-bootstrap bootstrap
+```
 
-# Optional: For advanced datepicker features
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-bootstrap bootstrap
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-bootstrap bootstrap
+```
+
+Optional: For advanced datepicker features
+
+```bash group="install" name="npm"
 npm install @ng-bootstrap/ng-bootstrap
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-bootstrap/ng-bootstrap
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-bootstrap/ng-bootstrap
 ```
 
 ## Setup
@@ -45,14 +64,12 @@ import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
 
 @Component({
   selector: 'app-my-form',
-  providers: [
-    provideDynamicForm(...withBootstrapFields())
-  ],
+  providers: [provideDynamicForm(...withBootstrapFields())],
   template: `
     <form [dynamicForm]="config">
       <dynamic-form-fields />
     </form>
-  `
+  `,
 })
 export class MyFormComponent {
   config = {
@@ -64,10 +81,10 @@ export class MyFormComponent {
         props: {
           type: 'email',
           size: 'lg',
-          floatingLabel: true
-        }
-      }
-    ]
+          floatingLabel: true,
+        },
+      },
+    ],
   };
 }
 ```
@@ -132,19 +149,19 @@ All field components use customizable CSS variables for consistent styling acros
 ```scss
 :root {
   // Spacing
-  --df-bs-field-gap: 0.5rem;              // Gap between label, input, and hint
+  --df-bs-field-gap: 0.5rem; // Gap between label, input, and hint
 
   // Label styling
-  --df-bs-label-font-weight: 500;          // Label font weight
-  --df-bs-label-color: inherit;            // Label text color
+  --df-bs-label-font-weight: 500; // Label font weight
+  --df-bs-label-color: inherit; // Label text color
 
   // Hint text styling
-  --df-bs-hint-color: #6c757d;             // Hint text color (default: Bootstrap secondary)
-  --df-bs-hint-font-size: 0.875rem;        // Hint text size
+  --df-bs-hint-color: #6c757d; // Hint text color (default: Bootstrap secondary)
+  --df-bs-hint-font-size: 0.875rem; // Hint text size
 
   // Error styling
-  --df-bs-error-color: #dc3545;            // Error text color (default: Bootstrap danger)
-  --df-bs-error-font-size: 0.875rem;       // Error text size
+  --df-bs-error-color: #dc3545; // Error text color (default: Bootstrap danger)
+  --df-bs-error-font-size: 0.875rem; // Error text size
 }
 ```
 
@@ -176,12 +193,7 @@ df-bs-input {
 Import testing utilities from the `/testing` entry point:
 
 ```typescript
-import {
-  FakeTranslationService,
-  createTestTranslationService,
-  waitForDFInit,
-  delay
-} from '@ng-forge/dynamic-form-bootstrap/testing';
+import { FakeTranslationService, createTestTranslationService, waitForDFInit, delay } from '@ng-forge/dynamic-form-bootstrap/testing';
 ```
 
 ## Running unit tests

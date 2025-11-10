@@ -6,8 +6,16 @@ Beautiful Material Design field components for ng-forge dynamic forms, built wit
 
 Install the package and its peer dependencies:
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
 ```
 
 ## Quick Start

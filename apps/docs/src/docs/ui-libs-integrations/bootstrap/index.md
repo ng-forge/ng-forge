@@ -6,14 +6,30 @@ Modern Bootstrap 5 field components for ng-forge dynamic forms, built with nativ
 
 Install the package and its peer dependencies:
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-bootstrap bootstrap
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-bootstrap bootstrap
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-bootstrap bootstrap
 ```
 
 Optional: For advanced datepicker features with calendar UI:
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-bootstrap/ng-bootstrap
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-bootstrap/ng-bootstrap
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-bootstrap/ng-bootstrap
 ```
 
 ## Quick Start

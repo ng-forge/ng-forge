@@ -107,8 +107,16 @@ ng-forge dynamic forms supports multiple UI frameworks. Install the integration 
 
 ### Material Design (Production Ready)
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-material
 ```
 
 ```typescript
@@ -123,8 +131,16 @@ See [Material Integration](../ui-libs-integrations/material) for full documentat
 
 ### PrimeNG (Preview)
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-primeng
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-primeng
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-primeng
 ```
 
 ```typescript
@@ -139,8 +155,16 @@ See [PrimeNG Integration](../ui-libs-integrations/primeng) for full documentatio
 
 ### Bootstrap (Preview)
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-bootstrap
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-bootstrap
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-bootstrap
 ```
 
 ```typescript
@@ -155,8 +179,16 @@ See [Bootstrap Integration](../ui-libs-integrations/bootstrap) for full document
 
 ### Ionic (Preview)
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-ionic
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-ionic
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-ionic
 ```
 
 ```typescript
