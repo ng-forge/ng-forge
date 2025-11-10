@@ -51,8 +51,8 @@ import PageFieldComponent from '../../fields/page/page-field.component';
         [isVisible]="true"
       />
       } @else {
-      <!-- Other pages: defer loading until idle, prefetch in background -->
-      @defer (on idle; prefetch on idle) {
+      <!-- Other pages: defer loading until browser is idle -->
+      @defer (on idle) {
       <page-field
         [field]="pageField"
         [key]="pageField.key"
