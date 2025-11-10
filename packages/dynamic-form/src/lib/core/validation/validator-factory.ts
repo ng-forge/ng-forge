@@ -1,7 +1,35 @@
-import { email, FieldPath, LogicFn, max, maxLength, min, minLength, pattern, required } from '@angular/forms/signals';
-import { ValidatorConfig } from '../../models';
+import {
+  email,
+  FieldContext,
+  FieldPath,
+  LogicFn,
+  max,
+  maxLength,
+  min,
+  minLength,
+  pattern,
+  required,
+  validate,
+} from '@angular/forms/signals';
+import { inject } from '@angular/core';
+import { CustomValidatorConfig, ValidatorConfig } from '../../models';
 import { createLogicFunction } from '../expressions';
 import { createDynamicValueFunction } from '../values';
+import { FunctionRegistryService } from '../registry/function-registry.service';
+
+/**
+ * Adapter that wraps simple validators to work with FieldContext
+ * Allows simple validators (value, formValue) => error to work with Angular's validate() API
+ */
+function adaptSimpleValidator<TValue>(
+  simpleValidator: (value: TValue, formValue: unknown) => unknown
+): (ctx: FieldContext<TValue>, params?: Record<string, unknown>) => unknown {
+  return (ctx: FieldContext<TValue>) => {
+    const value = ctx.value();
+    const formValue = ctx.root()().value();
+    return simpleValidator(value, formValue);
+  };
+}
 
 /**
  * Apply validator configuration to field path, following the logic pattern
@@ -76,6 +104,47 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
         }
       }
       break;
+
+    case 'custom':
+      applyCustomValidator(config, fieldPath);
+      break;
+  }
+}
+
+/**
+ * Apply custom validator to field path
+ * Supports both simple validators and context-aware validators with auto-detection
+ */
+function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: FieldPath<TValue>): void {
+  const registry = inject(FunctionRegistryService);
+
+  // Try context-aware validator first
+  let validatorFn = registry.getContextValidator(config.functionName);
+
+  // Fall back to simple validator with adapter
+  if (!validatorFn) {
+    const simpleValidator = registry.getSimpleValidator(config.functionName);
+    if (simpleValidator) {
+      validatorFn = adaptSimpleValidator(simpleValidator);
+    }
+  }
+
+  if (!validatorFn) {
+    console.warn(`[DynamicForm] Custom validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    return;
+  }
+
+  // Wrap validator to pass params if provided
+  const wrappedValidator = (ctx: FieldContext<TValue>) => {
+    return validatorFn(ctx, config.params);
+  };
+
+  // Apply with conditional logic if specified
+  if (config.when) {
+    const whenLogic = createLogicFunction(config.when);
+    validate(fieldPath, wrappedValidator, { when: whenLogic });
+  } else {
+    validate(fieldPath, wrappedValidator);
   }
 }
 
