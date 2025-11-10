@@ -288,6 +288,75 @@ Each page validates independently. Users cannot proceed to the next page until a
 }
 ```
 
+## Performance & Lazy Loading
+
+ng-forge uses Angular's `@defer` blocks to optimize page rendering for better performance and memory efficiency.
+
+### How It Works
+
+- **Current page renders immediately** - The active page loads instantly for seamless navigation
+- **Other pages defer until idle** - Non-visible pages defer loading until the browser is idle
+- **Automatic optimization** - No configuration needed - ng-forge handles this automatically
+
+### Benefits
+
+```typescript
+// With 4 pages, only the current page is instantiated
+// Other 3 pages defer until browser is idle
+fields: [
+  { key: 'step1', type: 'page', fields: [...] }, // ✓ Loads immediately if current
+  { key: 'step2', type: 'page', fields: [...] }, // ⏳ Deferred until idle
+  { key: 'step3', type: 'page', fields: [...] }, // ⏳ Deferred until idle
+  { key: 'step4', type: 'page', fields: [...] }, // ⏳ Deferred until idle
+]
+```
+
+**Performance advantages:**
+
+- ⚡ **Faster initial render** - Only current page components are created
+- 💾 **Lower memory usage** - Deferred pages don't consume memory until accessed
+- 🚀 **Improved TTI** (Time to Interactive) - Main thread less blocked during initialization
+- 📱 **Better mobile performance** - Especially beneficial on lower-end devices
+
+### Technical Details
+
+Under the hood, the page orchestrator uses:
+
+```typescript
+@defer (on idle) {
+  <page-field [field]="pageField" [isVisible]="false" />
+}
+```
+
+This means:
+
+- Pages are **declaratively rendered** using Angular's template-driven approach
+- The browser's **idle callback** determines when to load deferred content
+- **No manual lifecycle management** needed - Angular handles component creation/destruction
+
+### Best Practices
+
+For optimal performance with multi-step forms:
+
+1. **Keep pages focused** - Limit each page to 5-10 fields for best UX
+2. **Heavy computations** - Move expensive operations to deferred pages when possible
+3. **Large datasets** - If a page loads large dropdown data, that fetch can happen during idle time
+4. **Conditional pages** - Use `logic` to hide/show pages - they still benefit from deferred loading
+
+```typescript
+{
+  key: 'advancedOptions',
+  type: 'page',
+  logic: [{
+    type: 'hidden',
+    condition: { /* only show for power users */ }
+  }],
+  fields: [/* expensive fields with large datasets */]
+}
+```
+
+Even if a page is conditionally hidden, it still defers loading until needed, saving resources.
+
 ## Common Enhancements
 
 ### Dynamic Steps
