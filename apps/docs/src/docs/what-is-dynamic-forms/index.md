@@ -329,7 +329,15 @@ export class CheckoutComponent {
             key: 'region',
             type: 'row',
             fields: [
-              { key: 'state', type: 'select', value: '', label: 'State', required: true, options: STATES, props: { placeholder: 'Select state' } },
+              {
+                key: 'state',
+                type: 'select',
+                value: '',
+                label: 'State',
+                required: true,
+                options: STATES,
+                props: { placeholder: 'Select state' },
+              },
               { key: 'zip', type: 'input', value: '', label: 'ZIP', required: true, pattern: '^[0-9]{5}$' },
             ],
           },
@@ -468,20 +476,20 @@ provideDynamicForm([
 
 ### Core Concepts
 
-- **[Field Types](../../core/field-types)** - All available field types and their properties
-- **[Validation](../../core/validation)** - Validation strategies with decision matrix
-- **[Conditional Logic](../../core/conditional-logic)** - Show/hide fields dynamically
-- **[Type Safety](../../core/type-safety)** - Advanced TypeScript inference patterns
+- **[Field Types](../core/field-types)** - All available field types and their properties
+- **[Validation](../core/validation)** - Validation strategies with decision matrix
+- **[Conditional Logic](../core/conditional-logic)** - Show/hide fields dynamically
+- **[Type Safety](../core/type-safety)** - Advanced TypeScript inference patterns
 
 ### UI Implementations
 
-- **[Material Design](../../ui-libs-integrations/reference/material)** - Production-ready Material integration
-- **[Custom Integration Guide](../../ui-libs-integrations/guide)** - Build your own UI integration
+- **[Material Design](../ui-libs-integrations/reference/material)** - Production-ready Material integration
+- **[Custom Integration Guide](../ui-libs-integrations/guide)** - Build your own UI integration
 
 ### Advanced Topics
 
-- **[i18n Setup](../../i18n/setup)** - Multi-language support
-- **[Events](../../core/events)** - Form event bus and custom events
+- **[i18n Setup](../i18n/setup)** - Multi-language support
+- **[Events](../core/events)** - Form event bus and custom events
 
 ---
 

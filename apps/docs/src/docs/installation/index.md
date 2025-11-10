@@ -119,7 +119,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [Material Integration](../../ui-libs-integrations/reference/material) for full documentation.
+See [Material Integration](../ui-libs-integrations/reference/material) for full documentation.
 
 ### Bootstrap (Coming Soon)
 
@@ -127,7 +127,7 @@ See [Material Integration](../../ui-libs-integrations/reference/material) for fu
 npm install @ng-forge/dynamic-form-bootstrap
 ```
 
-See [Bootstrap Integration](../../ui-libs-integrations/reference/bootstrap) for status and alternatives.
+See [Bootstrap Integration](../ui-libs-integrations/reference/bootstrap) for status and alternatives.
 
 ### PrimeNG (Coming Soon)
 
@@ -135,7 +135,7 @@ See [Bootstrap Integration](../../ui-libs-integrations/reference/bootstrap) for 
 npm install @ng-forge/dynamic-form-primeng
 ```
 
-See [PrimeNG Integration](../../ui-libs-integrations/reference/primeng) for status and alternatives.
+See [PrimeNG Integration](../ui-libs-integrations/reference/primeng) for status and alternatives.
 
 ### Ionic (Coming Soon)
 
@@ -143,7 +143,7 @@ See [PrimeNG Integration](../../ui-libs-integrations/reference/primeng) for stat
 npm install @ng-forge/dynamic-form-ionic
 ```
 
-See [Ionic Integration](../../ui-libs-integrations/reference/ionic) for status and alternatives.
+See [Ionic Integration](../ui-libs-integrations/reference/ionic) for status and alternatives.
 
 ### Custom UI Components
 
@@ -162,7 +162,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [Custom Integration Guide](../../ui-libs-integrations/guide) for building custom field components.
+See [Custom Integration Guide](../ui-libs-integrations/guide) for building custom field components.
 
 ## Next Steps
 
@@ -170,22 +170,22 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 
 ### Learn Core Concepts
 
-- **[Field Types](../../core/field-types)** - Understand all available field types (input, select, checkbox, group, etc.)
-- **[Validation](../../core/validation)** - Add validation rules with shorthand syntax or conditional validators
-- **[Conditional Logic](../../core/conditional-logic)** - Show/hide fields based on other field values
-- **[Type Safety](../../core/type-safety)** - Master TypeScript type inference for forms
+- **[Field Types](../core/field-types)** - Understand all available field types (input, select, checkbox, group, etc.)
+- **[Validation](../core/validation)** - Add validation rules with shorthand syntax or conditional validators
+- **[Conditional Logic](../core/conditional-logic)** - Show/hide fields based on other field values
+- **[Type Safety](../core/type-safety)** - Master TypeScript type inference for forms
 
 ### Build Advanced Forms
 
 - **[Multi-Step Forms](../../prebuilt/wizards/multi-step)** - Create wizard-style forms with page navigation
 - **[Repeatable Sections](../../prebuilt/arrays/repeatable-sections)** - Dynamic form arrays for adding/removing fields
-- **[Conditional Validation](../../core/validation#conditional-validators)** - Validators that activate based on conditions
+- **[Conditional Validation](../core/validation#conditional-validators)** - Validators that activate based on conditions
 
 ### Customize and Extend
 
-- **[i18n Setup](../../i18n/setup)** - Add multi-language support to your forms
-- **[Events](../../core/events)** - Handle custom form events
-- **[Custom Fields](../../ui-libs-integrations/guide)** - Create your own field types
+- **[i18n Setup](../i18n/setup)** - Add multi-language support to your forms
+- **[Events](../core/events)** - Handle custom form events
+- **[Custom Fields](../ui-libs-integrations/guide)** - Create your own field types
 
 ## Troubleshooting
 
@@ -206,7 +206,8 @@ const config = { fields: [...] };
 If Material fields appear unstyled, ensure you've included a Material theme in your `styles.scss`:
 
 ```scss
-@use '@angular/material' as mat;
+@use 'index' as mat;
+
 @include mat.core();
 
 $theme: mat.define-theme();

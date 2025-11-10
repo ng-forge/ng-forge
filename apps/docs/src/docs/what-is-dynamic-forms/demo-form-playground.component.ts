@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ExampleIframeComponent } from '../../../app/components/example-iframe';
+import { ExampleIframeComponent } from '../../app/components/example-iframe';
 
 @Component({
   selector: 'demo-form-playground',

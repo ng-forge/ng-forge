@@ -2,7 +2,7 @@ import { NgDocCategory } from '@ng-doc/core';
 
 const CoreCategory: NgDocCategory = {
   title: 'Core Concepts',
-  order: 2,
+  order: 3,
   expandable: true,
 };
 
