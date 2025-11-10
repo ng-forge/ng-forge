@@ -32,8 +32,7 @@ export const appConfig: ApplicationConfig = {
 
 Add a Material Design theme to your styles:
 
-```scss
-// styles.scss
+```scss name="styles.scss"
 @use '@angular/material' as mat;
 
 @include mat.core();

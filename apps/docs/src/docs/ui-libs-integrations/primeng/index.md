@@ -40,8 +40,7 @@ export const appConfig: ApplicationConfig = {
 
 Add PrimeNG icons to your styles:
 
-```scss
-// styles.scss
+```scss name="styles.scss"
 @import 'primeicons/primeicons.css';
 ```
 

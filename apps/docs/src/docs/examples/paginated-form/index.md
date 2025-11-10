@@ -1,5 +1,3 @@
-# Paginated Form (Multi-Step)
-
 A comprehensive multi-step registration form demonstrating the `page` field type for creating wizards and stepped workflows.
 
 ## Live Demo

@@ -216,7 +216,7 @@ provideDynamicForm(...withMaterialFields());
 provideDynamicForm(...withBootstrapFields());
 
 // Or use your custom components
-provideDynamicForm([{ name: 'my-input', loadComponent: () => MyCustomInput }]);
+provideDynamicForm({ name: 'my-input', loadComponent: () => MyCustomInput });
 ```
 
 ### 🔥 Complex Features, Simple API
@@ -480,13 +480,13 @@ provideDynamicForm([
 
 ## Choose Your UI Framework
 
-| Framework           | Package                            | Status              |
-| ------------------- | ---------------------------------- | ------------------- |
-| **Material Design** | `@ng-forge/dynamic-form-material`  | ✅ Production Ready |
-| **PrimeNG**         | `@ng-forge/dynamic-form-primeng`   | 🧪 Preview          |
-| **Bootstrap**       | `@ng-forge/dynamic-form-bootstrap` | 🧪 Preview          |
-| **Ionic**           | `@ng-forge/dynamic-form-ionic`     | 🧪 Preview          |
-| **Custom**          | Build your own                     | ✅ Full Support     |
+| Framework           | Package                            | Status          |
+| ------------------- | ---------------------------------- | --------------- |
+| **Material Design** | `@ng-forge/dynamic-form-material`  | 🧪 Preview      |
+| **PrimeNG**         | `@ng-forge/dynamic-form-primeng`   | 🧪 Preview      |
+| **Bootstrap**       | `@ng-forge/dynamic-form-bootstrap` | 🧪 Preview      |
+| **Ionic**           | `@ng-forge/dynamic-form-ionic`     | 🧪 Preview      |
+| **Custom**          | Build your own                     | ✅ Full Support |
 
 **Material Design** integration is production-ready with complete documentation. **PrimeNG, Bootstrap, and Ionic** integrations are in preview - functional but APIs may change. See individual pages for details.
 
@@ -496,7 +496,6 @@ provideDynamicForm([
 - **⚡ Signal-Based** - Fine-grained reactivity, minimal re-renders
 - **📦 Tree-Shakeable** - Bundle only what you use
 - **🎯 OnPush Change Detection** - Optimized throughout
-- **💪 SSR Compatible** - Works with Angular Universal
 
 ## Related Topics
 

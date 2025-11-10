@@ -31,8 +31,7 @@ export const appConfig: ApplicationConfig = {
 
 Add Ionic core styles to your application:
 
-```scss
-// styles.scss
+```scss name="styles.scss"
 @import '@ionic/angular/css/core.css';
 @import '@ionic/angular/css/normalize.css';
 @import '@ionic/angular/css/structure.css';
@@ -676,8 +675,7 @@ Ionic provides a comprehensive color system:
 
 Override Ionic's default colors in your global styles:
 
-```scss
-// styles.scss
+```scss name="styles.scss"
 :root {
   --ion-color-primary: #3880ff;
   --ion-color-primary-rgb: 56, 128, 255;

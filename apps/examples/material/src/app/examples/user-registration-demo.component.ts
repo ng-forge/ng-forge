@@ -164,6 +164,7 @@ export class UserRegistrationDemoComponent {
         key: 'submit',
         label: 'Create Account',
         className: 'button-btn',
+        col: 3,
         props: {
           color: 'primary',
         },

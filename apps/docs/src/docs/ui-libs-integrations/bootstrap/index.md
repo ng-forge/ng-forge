@@ -37,8 +37,7 @@ export const appConfig: ApplicationConfig = {
 
 Add Bootstrap CSS to your application:
 
-```scss
-// styles.scss
+```scss name="styles.scss"
 @import 'bootstrap/dist/css/bootstrap.min.css';
 ```
 
@@ -586,8 +585,7 @@ Bootstrap components use standard Bootstrap CSS classes. Customize appearance us
 
 Customize Bootstrap variables before importing:
 
-```scss
-// styles.scss
+```scss name="styles.scss"
 // Override Bootstrap variables
 $primary: #007bff;
 $secondary: #6c757d;

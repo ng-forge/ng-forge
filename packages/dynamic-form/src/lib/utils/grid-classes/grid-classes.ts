@@ -13,11 +13,11 @@ import { FieldDef } from '../../definitions';
  * ```typescript
  * // Full width field
  * const fullWidth = getGridClassString({ type: 'input', key: 'name', col: 12 });
- * // Returns: 'col-12'
+ * // Returns: 'df-col-12'
  *
  * // Half width field
  * const halfWidth = getGridClassString({ type: 'input', key: 'email', col: 6 });
- * // Returns: 'col-6'
+ * // Returns: 'df-col-6'
  *
  * // Invalid column value
  * const invalid = getGridClassString({ type: 'input', key: 'phone', col: 15 });
@@ -46,7 +46,7 @@ export function getGridClassString(fieldDef: FieldDef<any>): string {
   const classes: string[] = [];
 
   if (typeof fieldDef.col === 'number' && fieldDef.col > 0 && fieldDef.col <= 12) {
-    classes.push(`col-${fieldDef.col}`);
+    classes.push(`df-col-${fieldDef.col}`);
   }
 
   return classes.join(' ');
