@@ -3,7 +3,7 @@ import CoreCategory from '../ng-doc.category';
 
 const ConditionalLogicPage: NgDocPage = {
   title: 'Conditional Logic',
-  mdFile: './index.md',
+  mdFile: ['./basics/index.md', './expressions/index.md', './examples/index.md'],
   category: CoreCategory,
   order: 4,
 };
