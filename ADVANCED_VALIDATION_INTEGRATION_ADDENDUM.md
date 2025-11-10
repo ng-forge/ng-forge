@@ -89,14 +89,16 @@ export interface ValidationMessages {
 **Pros:**
 
 - ✅ Leverages existing infrastructure
-- ✅ Single registry for all custom functions
-- ✅ Familiar API for users already using custom functions
-- ✅ Consistent with current pattern
+- ✅ Single registry for all custom functions (validation + expressions)
+- ✅ Simpler DI - only one service to inject
+- ✅ Consistent API pattern across features
+- ✅ Better discoverability - everything in one place
 
 **Cons:**
 
-- ⚠️ Mixes validation and expression logic
+- ⚠️ Mixes validation and expression logic (could be confusing)
 - ⚠️ Different function signatures (EvaluationContext vs FieldContext)
+- ⚠️ Service could become large if many features are added
 
 **Implementation:**
 
@@ -144,14 +146,16 @@ export class FunctionRegistryService {
 
 **Pros:**
 
-- ✅ Clear separation of concerns
-- ✅ Easier to maintain and test
-- ✅ More focused API
+- ✅ Clear separation of concerns (validation vs expressions)
+- ✅ Easier to maintain and test independently
+- ✅ More focused API surface
+- ✅ Better for tree-shaking if expressions aren't used
 
 **Cons:**
 
 - ⚠️ Additional service to inject
-- ⚠️ Users need to know about two registries
+- ⚠️ Developers need to know about two registries
+- ⚠️ More boilerplate in app initialization
 
 **Implementation:**
 
@@ -508,8 +512,8 @@ const formConfig: FormConfig = {
 ### Step 1: Extend FunctionRegistryService (Week 1)
 
 - Add validator registration methods to existing `FunctionRegistryService`
-- Implement simple validator adapter for backward compatibility
-- No breaking changes - purely additive
+- Implement simple validator adapter to support both signatures
+- Purely additive - doesn't change existing functionality
 
 ### Step 2: Implement `validate` API Integration (Week 2)
 
@@ -558,20 +562,22 @@ const formConfig: FormConfig = {
 
 **Rationale:**
 
-- Users already familiar with registering custom functions
-- Single service to inject
-- Consistent API across expressions and validation
-- Can rename to `CustomFunctionsService` if needed
+- Simpler mental model - one registry for custom functions (whether for expressions or validation)
+- Single service to inject - reduces boilerplate
+- Consistent API pattern across features
+- Validators and expressions often use similar logic (e.g., comparing field values)
+- Can be split later if needed without breaking JSON configs
 
-### 3. Backward Compatibility
+### 3. Support Existing `CustomValidator` Type
 
 **Decision:** Keep existing `CustomValidator` type, add adapter
 
 **Rationale:**
 
-- No breaking changes
-- Gradual migration path
-- Users can start simple and upgrade when needed
+- The simple signature `(value, formValue) => error` is already defined
+- Good progressive enhancement - start simple, upgrade to FieldContext when needed
+- Adapter pattern allows both styles to coexist
+- Zero impact on existing code (even though no users yet)
 
 ### 4. Error Message Customization
 
@@ -588,14 +594,14 @@ const formConfig: FormConfig = {
 ## Updated Success Criteria
 
 - [ ] Extend `FunctionRegistryService` with validator registration
-- [ ] Implement simple validator adapter for backward compatibility
+- [ ] Implement simple validator adapter to support both signatures
 - [ ] Add `custom` validator type with auto-detection
 - [ ] Add `treeValidator` validator type for cross-field validation
 - [ ] Add `async` and `http` validator types
 - [ ] Update `SignalFormsConfig` to accept validator registrations
-- [ ] Maintain 100% backward compatibility with existing code
+- [ ] Support both simple and context-aware validator signatures
 - [ ] Add comprehensive tests for all validator levels
-- [ ] Document migration path from simple to context-aware validators
+- [ ] Document progressive enhancement from simple to context-aware validators
 - [ ] Provide examples for all use cases
 
 ---
