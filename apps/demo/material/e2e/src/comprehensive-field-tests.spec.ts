@@ -178,19 +178,8 @@ test.describe('Comprehensive Material Field Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
-
-    // Wait a bit more for the DOM to be ready
-    await page.waitForTimeout(1000);
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Verify the form container is visible
     await expect(page.locator('#comprehensive-fields')).toBeVisible();
@@ -341,16 +330,8 @@ test.describe('Comprehensive Material Field Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Try submitting empty form (should fail validation)
     await page.click('#submitValidation button');
@@ -508,16 +489,8 @@ test.describe('Comprehensive Material Field Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Test desktop layout (default)
     await expect(page.locator('#fullWidth')).toBeVisible();
@@ -608,16 +581,8 @@ test.describe('Comprehensive Material Field Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Initially form should be empty
     await page.click('.form-state summary');

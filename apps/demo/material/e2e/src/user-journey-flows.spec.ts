@@ -295,16 +295,8 @@ test.describe('User Journey Flow Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Page 1: Welcome & Account Type
     await expect(page.locator('text=Welcome to Our Platform')).toBeVisible();
@@ -649,16 +641,8 @@ test.describe('User Journey Flow Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Page 1: Cart Review
     await expect(page.locator('text=Review Your Cart')).toBeVisible();
@@ -972,16 +956,8 @@ test.describe('User Journey Flow Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Page 1: Demographics
     await expect(page.locator('text=Customer Satisfaction Survey')).toBeVisible();

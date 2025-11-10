@@ -112,7 +112,7 @@ export const dependentValidationConfig = {
           type: 'hidden',
           condition: {
             type: 'javascript',
-            expression: '!formValue.age || Number(formValue.age) >= 18',
+            expression: '!formValue.age || formValue.age >= 18',
           },
         },
       ],
@@ -138,7 +138,7 @@ export const dependentValidationConfig = {
           type: 'hidden',
           condition: {
             type: 'javascript',
-            expression: 'formValue.age && Number(formValue.age) < 18',
+            expression: 'formValue.age && formValue.age < 18',
           },
         },
       ],

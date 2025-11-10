@@ -46,16 +46,16 @@ test.describe('Age-Based Logic Test', () => {
 
     // Test country/state dropdown logic using ID selectors
     await page.locator('#country mat-select').click();
+    await page.locator('mat-option[value="us"]').waitFor({ state: 'visible' });
     await page.locator('mat-option[value="us"]').click();
-    await page.waitForTimeout(500);
 
     // State should be enabled
     await expect(page.locator('#state mat-select')).toBeEnabled();
 
     // Select a state
     await page.locator('#state mat-select').click();
+    await page.locator('mat-option[value="ca"]').waitFor({ state: 'visible' });
     await page.locator('mat-option[value="ca"]').click();
-    await page.waitForTimeout(500);
 
     // City should be enabled
     await expect(page.locator('#city input')).toBeEnabled();

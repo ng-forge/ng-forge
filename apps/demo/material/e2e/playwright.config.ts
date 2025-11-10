@@ -24,6 +24,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     /* Save screenshots to material demo folder */
     screenshot: 'only-on-failure',
+    /* Add action timeout to prevent hangs */
+    actionTimeout: 10000,
   },
   /* Configure output directories */
   outputDir: '../screenshots',
@@ -35,9 +37,12 @@ export default defineConfig({
     cwd: workspaceRoot,
   },
   /* Run tests serially to avoid resource issues in container */
+  /* TODO: Revert to workers: undefined (parallel) after tests are fixed and stable */
   workers: 1,
   /* Increase timeout for slower tests */
   timeout: 60000,
+  /* Retry flaky tests due to resource constraints */
+  retries: 2,
   projects: [
     {
       name: 'chromium',

@@ -73,16 +73,8 @@ test.describe('Cross-Field Validation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Test mismatched passwords
     await page.fill('#password input', 'password123');
@@ -177,16 +169,8 @@ test.describe('Cross-Field Validation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Initially, address fields should be optional
     await page.click('#submitConditional button');
@@ -309,16 +293,8 @@ test.describe('Cross-Field Validation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Select electronics category
     await page.click('#category mat-select');
@@ -438,16 +414,8 @@ test.describe('Cross-Field Validation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Test standard shipping scenario
     await page.click('#shippingMethod mat-radio-button:has-text("Standard")');

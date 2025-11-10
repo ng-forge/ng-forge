@@ -174,16 +174,8 @@ test.describe('Cross-Page Validation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Page 1: Fill email information
     await expect(page.locator('text=Email Registration')).toBeVisible();
@@ -407,16 +399,8 @@ test.describe('Cross-Page Validation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Test Individual Account Flow
     await expect(page.locator('text=Account Type')).toBeVisible();
@@ -543,16 +527,8 @@ test.describe('Cross-Page Validation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Test Business Account Flow
     await page.click('#accountType mat-radio-button:has-text("Business Account")');
@@ -767,16 +743,8 @@ test.describe('Cross-Page Validation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Page 1: Set region preferences
     await page.click('#country mat-select');
@@ -953,16 +921,8 @@ test.describe('Cross-Page Validation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Page 1: Test minimum length validation
     await page.fill('#username input', 'ab'); // Too short

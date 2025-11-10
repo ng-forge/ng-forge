@@ -179,16 +179,8 @@ test.describe('Multi-Page Navigation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Verify we start on page 1 (Account Setup)
     await expect(page.locator('text=Account Setup')).toBeVisible();
@@ -335,16 +327,8 @@ test.describe('Multi-Page Navigation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Verify we start on page 1
     await expect(page.locator('text=Required Information')).toBeVisible();
@@ -457,16 +441,8 @@ test.describe('Multi-Page Navigation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Fill and navigate forward through all pages
     await page.fill('#field1 input', 'Data from step 1');
@@ -588,16 +564,8 @@ test.describe('Multi-Page Navigation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Check for page indicators or direct navigation elements
     const pageIndicators = await page.locator('.page-indicator, .step-indicator, .breadcrumb').count();
@@ -680,16 +648,8 @@ test.describe('Multi-Page Navigation Tests', () => {
       });
     });
 
-    // Wait for form initialization
-    await page.waitForFunction(() => {
-      return new Promise((resolve) => {
-        const handler = () => {
-          window.removeEventListener('formInitialized', handler);
-          resolve(true);
-        };
-        window.addEventListener('formInitialized', handler);
-      });
-    });
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Fill data and test smooth transitions
     const data1Field = page.locator('#data1 textarea');
