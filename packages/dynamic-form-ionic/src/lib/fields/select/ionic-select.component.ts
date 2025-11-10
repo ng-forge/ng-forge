@@ -1,8 +1,14 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonSelect, IonSelectOption } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
-import { IonicErrorsComponent } from '../../shared/ionic-errors.component';
+import { IonNote, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-form';
 import { IonicSelectComponent, IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -11,7 +17,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-select',
-  imports: [IonSelect, IonSelectOption, IonicErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonSelect, IonSelectOption, IonNote, Field, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -23,7 +29,7 @@ import { AsyncPipe } from '@angular/common';
       [multiple]="props()?.multiple ?? false"
       [compareWith]="props()?.compareWith ?? defaultCompare"
       [interface]="props()?.interface ?? 'alert'"
-      [interfaceOptions]="props()?.interfaceOptions"
+      [interfaceOptions]="props()?.interfaceOptions ?? {}"
       [cancelText]="props()?.cancelText ?? 'Cancel'"
       [okText]="props()?.okText ?? 'OK'"
       [color]="props()?.color"
@@ -35,11 +41,12 @@ import { AsyncPipe } from '@angular/common';
       <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
         {{ option.label | dynamicText | async }}
       </ion-select-option>
-      } @if (f().invalid() && f().touched()) {
-      <div slot="error">
-        <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
-      </div>
       }
+      <div slot="error">
+        @for (error of errorsToDisplay(); track error.kind) {
+        <ion-note color="danger">{{ error.message }}</ion-note>
+        }
+      </div>
     </ion-select>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,6 +68,13 @@ export default class IonicSelectFieldComponent<T> implements IonicSelectComponen
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<IonicSelectProps<T>>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
 }

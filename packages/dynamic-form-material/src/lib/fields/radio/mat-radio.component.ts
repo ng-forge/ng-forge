@@ -1,15 +1,21 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
-import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-form';
 import { MatRadioComponent, MatRadioProps } from './mat-radio.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-radio',
-  imports: [MatRadioGroup, MatRadioButton, MatErrorsComponent, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatRadioGroup, MatRadioButton, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field(); @if (label()) {
     <div class="radio-label">{{ label() | dynamicText | async }}</div>
@@ -30,8 +36,9 @@ import { AsyncPipe } from '@angular/common';
 
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint | dynamicText | async }}</div>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <mat-error>{{ error.message }}</mat-error>
     }
-    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `
@@ -59,4 +66,11 @@ export default class MatRadioFieldComponent<T> implements MatRadioComponent<T> {
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatRadioProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

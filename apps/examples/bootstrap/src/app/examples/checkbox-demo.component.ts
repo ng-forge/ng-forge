@@ -23,48 +23,23 @@ export class CheckboxDemoComponent {
   config = {
     fields: [
       {
-        key: 'basicCheckbox',
+        key: 'newsletter',
         type: 'checkbox',
-        label: 'Basic Checkbox',
-        props: {
-          helpText: 'Default checkbox styling',
-        },
-      },
-      {
-        key: 'switchCheckbox',
-        type: 'checkbox',
-        label: 'Switch Style Checkbox',
-        props: {
-          switch: true,
-          helpText: 'Checkbox rendered as a switch toggle',
-        },
-      },
-      {
-        key: 'inlineCheckbox',
-        type: 'checkbox',
-        label: 'Inline Checkbox',
-        props: {
-          inline: true,
-          helpText: 'Checkbox with inline layout',
-        },
-      },
-      {
-        key: 'reverseCheckbox',
-        type: 'checkbox',
-        label: 'Reverse Layout',
-        props: {
-          reverse: true,
-          helpText: 'Checkbox with label on the left',
-        },
+        label: 'Subscribe to newsletter',
       },
       {
         key: 'terms',
         type: 'checkbox',
-        label: 'I agree to the Terms and Conditions',
+        label: 'I agree to the terms and conditions',
         required: true,
-        props: {
-          helpText: 'This checkbox is required',
+        validationMessages: {
+          required: 'This field is required',
         },
+      },
+      {
+        key: 'marketing',
+        type: 'checkbox',
+        label: 'Receive marketing communications',
       },
     ],
   } as const satisfies FormConfig;

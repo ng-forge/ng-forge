@@ -1,16 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-form';
 import { AsyncPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { MultiSelect } from 'primeng/multiselect';
-import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
 import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
 
 @Component({
   selector: 'df-prime-select',
-  imports: [FormsModule, Select, MultiSelect, DynamicTextPipe, AsyncPipe, PrimeErrorsComponent, Field],
+  imports: [Field, Select, MultiSelect, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -29,7 +34,6 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
-        [disabled]="f().disabled()"
       />
       } @else {
       <p-select
@@ -42,11 +46,10 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="props()?.styleClass ?? ''"
-        [disabled]="f().disabled()"
       />
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <small class="p-error">{{ error.message }}</small>
       }
-
-      <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,6 +71,13 @@ export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponen
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<PrimeSelectProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly isMultiple = computed(() => this.props()?.multiple ?? false);
 }

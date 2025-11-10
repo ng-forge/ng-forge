@@ -247,9 +247,9 @@ Fixes #456
 
 ---
 
-docs(guides): add mapper creation guide
+docs(guides): add mapper creation custom-integrations
 
-Add comprehensive guide for creating custom mappers with examples.
+Add comprehensive custom-integrations for creating custom mappers with examples.
 ```
 
 ### Commit Message Rules

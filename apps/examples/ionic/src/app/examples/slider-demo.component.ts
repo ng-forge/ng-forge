@@ -31,26 +31,11 @@ export class SliderDemoComponent {
       {
         key: 'volume',
         type: 'slider',
-        label: 'Volume',
-        minValue: 0,
-        maxValue: 100,
-        step: 5,
-        props: {
-          pin: true,
-        },
-      },
-      {
-        key: 'brightness',
-        type: 'slider',
-        label: 'Brightness',
+        label: 'Notification Volume',
         minValue: 0,
         maxValue: 100,
         step: 10,
-        props: {
-          pin: true,
-          ticks: true,
-          snaps: true,
-        },
+        value: 50,
       },
     ],
   } as const satisfies FormConfig;

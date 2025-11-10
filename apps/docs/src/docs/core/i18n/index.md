@@ -55,8 +55,7 @@ The form automatically updates when translations change.
 
 Here's a complete example using [@jsverse/transloco](https://jsverse.github.io/transloco/):
 
-```typescript
-// app.config.ts
+```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTransloco } from '@jsverse/transloco';
@@ -79,8 +78,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-```typescript
-// my-form.component.ts
+```typescript name="my-form.component.ts"
 import { Component, inject } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { DynamicForm } from '@ng-forge/dynamic-form';

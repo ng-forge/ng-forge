@@ -23,79 +23,27 @@ export class ButtonDemoComponent {
   config = {
     fields: [
       {
-        key: 'name',
+        key: 'email',
         type: 'input',
-        label: 'Name',
+        value: '',
+        label: 'Email',
+        required: true,
+        email: true,
+        validationMessages: {
+          required: 'This field is required',
+          email: 'Please enter a valid email address',
+        },
         props: {
-          placeholder: 'Enter your name',
+          type: 'email',
+          placeholder: 'Enter your email',
         },
       },
       {
         type: 'submit',
-        key: 'submitPrimary',
-        label: 'Submit Primary',
+        key: 'submit',
+        label: 'Submit Form',
         props: {
           variant: 'primary',
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitSecondary',
-        label: 'Submit Secondary',
-        props: {
-          variant: 'secondary',
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitSuccess',
-        label: 'Submit Success',
-        props: {
-          variant: 'success',
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitDanger',
-        label: 'Submit Danger',
-        props: {
-          variant: 'danger',
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitOutline',
-        label: 'Submit Outline',
-        props: {
-          variant: 'primary',
-          outline: true,
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitSmall',
-        label: 'Small Button',
-        props: {
-          variant: 'primary',
-          size: 'sm',
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitLarge',
-        label: 'Large Button',
-        props: {
-          variant: 'primary',
-          size: 'lg',
-        },
-      },
-      {
-        type: 'submit',
-        key: 'submitBlock',
-        label: 'Block Button',
-        props: {
-          variant: 'primary',
-          block: true,
         },
       },
     ],

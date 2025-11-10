@@ -1,15 +1,14 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, MatErrorsComponent, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatCheckbox, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -27,10 +26,9 @@ import { AsyncPipe } from '@angular/common';
 
     @if (props()?.hint; as hint) {
     <div class="mat-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <mat-error [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
     }
-    <mat-error [attr.hidden]="f().hidden() || null"
-      ><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()"
-    /></mat-error>
   `,
   styles: [
     `
@@ -61,4 +59,11 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<MatCheckboxProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

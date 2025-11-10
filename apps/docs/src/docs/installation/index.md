@@ -119,7 +119,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [Material Integration](../ui-libs-integrations/reference/material) for full documentation.
+See [Material Integration](../ui-libs-integrations/material) for full documentation.
 
 ### PrimeNG (Preview)
 
@@ -135,7 +135,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [PrimeNG Integration](../ui-libs-integrations/reference/primeng) for full documentation.
+See [PrimeNG Integration](../ui-libs-integrations/primeng) for full documentation.
 
 ### Bootstrap (Preview)
 
@@ -151,7 +151,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [Bootstrap Integration](../ui-libs-integrations/reference/bootstrap) for full documentation.
+See [Bootstrap Integration](../ui-libs-integrations/bootstrap) for full documentation.
 
 ### Ionic (Preview)
 
@@ -167,7 +167,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [Ionic Integration](../ui-libs-integrations/reference/ionic) for full documentation.
+See [Ionic Integration](../ui-libs-integrations/ionic) for full documentation.
 
 ### Custom UI Components
 
@@ -186,7 +186,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-See [Custom Integration Guide](../ui-libs-integrations/guide) for building custom field components.
+See [Custom Integration Guide](../deep-dive/custom-integrations) for building custom field components.
 
 ## Next Steps
 
@@ -209,7 +209,7 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 
 - **[i18n Setup](../core/i18n)** - Add multi-language support to your forms
 - **[Events](../core/events)** - Handle custom form events
-- **[Custom Fields](../ui-libs-integrations/guide)** - Create your own field types
+- **[Custom Fields](../deep-dive/custom-integrations)** - Create your own field types
 
 ## Troubleshooting
 
@@ -261,4 +261,4 @@ If you see import errors for `@ng-forge/dynamic-form`, ensure:
 - **[What is Dynamic Forms?](../what-is-dynamic-forms)** - Learn about features and benefits
 - **[Field Types](../core/field-types)** - Explore all available field types
 - **[Validation](../core/validation)** - Add validation to your forms
-- **[Material Integration](../ui-libs-integrations/reference/material)** - Material Design field reference
+- **[Material Integration](../ui-libs-integrations/material)** - Material Design field reference

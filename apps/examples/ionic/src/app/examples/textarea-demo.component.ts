@@ -34,20 +34,12 @@ export class TextareaDemoComponent {
         label: 'Biography',
         value: '',
         maxLength: 500,
-        props: {
-          rows: 6,
-          placeholder: 'Tell us about yourself',
-          autoGrow: true,
+        validationMessages: {
+          maxLength: 'Must not exceed {maxLength} characters',
         },
-      },
-      {
-        key: 'comments',
-        type: 'textarea',
-        label: 'Comments',
-        value: '',
         props: {
           rows: 4,
-          placeholder: 'Additional comments',
+          placeholder: 'Tell us about yourself',
         },
       },
     ],

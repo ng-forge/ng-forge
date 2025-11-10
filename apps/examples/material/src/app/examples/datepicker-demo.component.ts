@@ -28,6 +28,9 @@ export class DatepickerDemoComponent {
         type: 'datepicker',
         label: 'Birth Date',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         props: {
           placeholder: 'Select your birth date',
         },

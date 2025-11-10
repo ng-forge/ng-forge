@@ -1,14 +1,20 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
-import { BsErrorsComponent } from '../../shared/bs-errors.component';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-form';
 import { BsRadioComponent, BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-bs-radio',
-  imports: [BsErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -52,9 +58,9 @@ import { FormsModule } from '@angular/forms';
       </div>
       } } @if (props()?.helpText; as helpText) {
       <div class="form-text">{{ helpText | dynamicText | async }}</div>
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
-
-      <df-bs-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
     </div>
   `,
   styles: [
@@ -83,4 +89,11 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<BsRadioProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

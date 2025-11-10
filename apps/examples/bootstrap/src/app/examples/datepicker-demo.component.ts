@@ -26,27 +26,12 @@ export class DatepickerDemoComponent {
         key: 'birthDate',
         type: 'datepicker',
         label: 'Birth Date',
-        props: {
-          helpText: 'Select your date of birth',
-        },
         required: true,
-      },
-      {
-        key: 'appointmentDate',
-        type: 'datepicker' as const,
-        label: 'Appointment Date',
-        props: {
-          floatingLabel: true,
-          helpText: 'Choose an appointment date',
+        validationMessages: {
+          required: 'This field is required',
         },
-      },
-      {
-        key: 'startDate',
-        type: 'datepicker',
-        label: 'Start Date',
         props: {
-          size: 'lg' as const,
-          helpText: 'Project start date',
+          placeholder: 'Select your birth date',
         },
       },
     ],

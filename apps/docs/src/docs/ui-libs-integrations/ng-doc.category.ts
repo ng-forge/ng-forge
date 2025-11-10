@@ -1,9 +1,10 @@
 import { NgDocCategory } from '@ng-doc/core';
 
 const UiLibsIntegrationCategory: NgDocCategory = {
-  title: 'UI Integrations',
-  order: 2,
-  expandable: false, // Always expanded to make UI integrations obvious
+  title: 'UI Libraries Integration',
+  order: 6,
+  expandable: false,
+  expanded: true,
 };
 
 export default UiLibsIntegrationCategory;

@@ -1,15 +1,13 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { PrimeCheckboxComponent, PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-prime-checkbox',
-  imports: [Checkbox, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule, Field],
+  imports: [Checkbox, DynamicTextPipe, AsyncPipe, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let checkboxId = key() + '-checkbox';
@@ -31,8 +29,9 @@ import { FormsModule } from '@angular/forms';
 
     @if (props()?.hint; as hint) {
     <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <small class="p-error">{{ error.message }}</small>
     }
-    <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" [attr.hidden]="f().hidden() || null" />
   `,
   styles: [
     `
@@ -63,4 +62,11 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeCheckboxProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

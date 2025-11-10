@@ -1,7 +1,7 @@
 import { NgDocCategory } from '@ng-doc/core';
 
 const PrebuiltCategory: NgDocCategory = {
-  title: 'Form Layout',
+  title: 'Prebuilt Components',
   order: 4,
   expandable: true,
 };

@@ -1,15 +1,20 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { RadioButton } from 'primeng/radiobutton';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
-import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-form';
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'df-prime-radio',
-  imports: [RadioButton, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [RadioButton, DynamicTextPipe, AsyncPipe, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @if (label()) {
@@ -20,9 +25,9 @@ import { FormsModule } from '@angular/forms';
       @for (option of options(); track option.value) {
       <div class="radio-option">
         <p-radioButton
-          [(ngModel)]="f().value"
+          [field]="f"
           [value]="option.value"
-          [disabled]="option.disabled || f().disabled()"
+          [disabled]="option.disabled"
           [styleClass]="props()?.styleClass"
           [inputId]="key() + '-' + option.value"
         />
@@ -35,8 +40,9 @@ import { FormsModule } from '@angular/forms';
 
     @if (props()?.hint; as hint) {
     <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <small class="p-error">{{ error.message }}</small>
     }
-    <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" [attr.hidden]="f().hidden() || null" />
   `,
   styles: [
     `
@@ -91,4 +97,11 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<PrimeRadioProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

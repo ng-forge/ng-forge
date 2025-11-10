@@ -29,10 +29,13 @@ export class InputDemoComponent {
         label: 'Email Address',
         required: true,
         email: true,
+        validationMessages: {
+          required: 'This field is required',
+          email: 'Please enter a valid email address',
+        },
         props: {
           type: 'email',
           placeholder: 'Enter your email',
-          helpText: 'We will never share your email with anyone',
         },
       },
       {
@@ -42,24 +45,12 @@ export class InputDemoComponent {
         label: 'Username',
         required: true,
         minLength: 3,
+        validationMessages: {
+          required: 'This field is required',
+          minLength: 'Must be at least {requiredLength} characters',
+        },
         props: {
           placeholder: 'Choose a username',
-          floatingLabel: true,
-          helpText: 'At least 3 characters',
-        },
-      },
-      {
-        key: 'password',
-        type: 'input',
-        value: '',
-        label: 'Password',
-        required: true,
-        minLength: 8,
-        props: {
-          type: 'password',
-          placeholder: 'Enter password',
-          size: 'lg',
-          helpText: 'Must be at least 8 characters',
         },
       },
     ],

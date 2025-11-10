@@ -29,13 +29,17 @@ export class RadioDemoComponent {
   config = {
     fields: [
       {
-        key: 'plan',
+        key: 'gender',
         type: 'radio',
-        label: 'Subscription Plan',
+        label: 'Gender',
+        required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
-          { value: 'free', label: 'Free' },
-          { value: 'pro', label: 'Pro' },
-          { value: 'enterprise', label: 'Enterprise' },
+          { value: 'male', label: 'Male' },
+          { value: 'female', label: 'Female' },
+          { value: 'other', label: 'Other' },
         ],
       },
       {
