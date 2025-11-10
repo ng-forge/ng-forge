@@ -39,7 +39,7 @@ describe('IonicRadioFieldComponent', () => {
       //       expect(ionRadios[0].nativeElement.getAttribute('ng-reflect-label-placement')).toBe('end');
     });
 
-    it.skip('should handle user radio selection and update form value', async () => {
+    it('should handle user radio selection and update form value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicRadioField({
           key: 'size',
@@ -98,7 +98,7 @@ describe('IonicRadioFieldComponent', () => {
   });
 
   describe('Radio Selection Tests', () => {
-    it.skip('should allow only one option to be selected at a time', async () => {
+    it('should allow only one option to be selected at a time', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicRadioField({
           key: 'priority',
@@ -229,7 +229,7 @@ describe('IonicRadioFieldComponent', () => {
       //       expect(ionRadios[2].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
     });
 
-    it.skip('should apply required validation', async () => {
+    it('should apply required validation', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'agreement',

@@ -64,7 +64,7 @@ describe('MatSliderFieldComponent', () => {
       expect(hint.nativeElement.textContent.trim()).toBe('Adjust the volume level');
     });
 
-    it.skip('should handle user input and update form value', async () => {
+    it('should handle user input and update form value', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({
           key: 'volume',
@@ -137,7 +137,7 @@ describe('MatSliderFieldComponent', () => {
   });
 
   describe('Different Slider Configurations Integration', () => {
-    it.skip('should render various slider configurations with correct attributes', async () => {
+    it('should render various slider configurations with correct attributes', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'volume', props: { min: 0, max: 100, step: 1 } })
         .matSliderField({ key: 'brightness', props: { min: 0, max: 255, step: 5, color: 'accent' } })
@@ -172,7 +172,7 @@ describe('MatSliderFieldComponent', () => {
       expect(sliders[3].componentInstance.color).toBe('warn');
     });
 
-    it.skip('should handle different step values correctly', async () => {
+    it('should handle different step values correctly', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'rating', props: { min: 0, max: 10, step: 0.5 } })
         .build();
@@ -230,7 +230,7 @@ describe('MatSliderFieldComponent', () => {
   });
 
   describe('Minimal Configuration Tests', () => {
-    it.skip('should render with default Material configuration', async () => {
+    it('should render with default Material configuration', async () => {
       const config = MaterialFormTestUtils.builder().matSliderField({ key: 'volume' }).build();
 
       const { fixture } = await MaterialFormTestUtils.createTest({
@@ -303,7 +303,7 @@ describe('MatSliderFieldComponent', () => {
       expect(sliders[2].componentInstance.color).toBe('warn');
     });
 
-    it.skip('should handle multiple sliders with independent value changes', async () => {
+    it('should handle multiple sliders with independent value changes', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'volume', props: { min: 0, max: 100 } })
         .matSliderField({ key: 'brightness', props: { min: 0, max: 255 } })
@@ -446,7 +446,7 @@ describe('MatSliderFieldComponent', () => {
       expect(MaterialFormTestUtils.getFormValue(component).volume).toBe(0);
     });
 
-    it.skip('should handle negative values correctly', async () => {
+    it('should handle negative values correctly', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'temperature', props: { min: -20, max: 40 } })
         .build();
@@ -469,7 +469,7 @@ describe('MatSliderFieldComponent', () => {
       expect(MaterialFormTestUtils.getFormValue(component).temperature).toBe(-5);
     });
 
-    it.skip('should handle decimal values correctly', async () => {
+    it('should handle decimal values correctly', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'rating', props: { min: 0, max: 5, step: 0.1 } })
         .build();
@@ -492,7 +492,7 @@ describe('MatSliderFieldComponent', () => {
       expect(MaterialFormTestUtils.getFormValue(component).rating).toBe(4.2);
     });
 
-    it.skip('should handle rapid value changes correctly', async () => {
+    it('should handle rapid value changes correctly', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'volume', props: { min: 0, max: 100 } })
         .build();

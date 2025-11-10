@@ -44,7 +44,7 @@ describe('IonicSelectFieldComponent', () => {
       expect(ionSelectOptions.length).toBe(3);
     });
 
-    it.skip('should handle user select and update form value', async () => {
+    it('should handle user select and update form value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSelectField({
           key: 'fruit',
@@ -254,7 +254,7 @@ describe('IonicSelectFieldComponent', () => {
       }
     });
 
-    it.skip('should apply required validation', async () => {
+    it('should apply required validation', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'country',
@@ -477,7 +477,7 @@ describe('IonicSelectFieldComponent', () => {
       //       expect(errorComponent).not.toBeNull();
     });
 
-    it.skip('should handle rapid selection changes', async () => {
+    it('should handle rapid selection changes', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicSelectField({
           key: 'option',

@@ -70,7 +70,7 @@ describe('IonicCheckboxFieldComponent', () => {
   });
 
   describe('Checkbox State Tests', () => {
-    it.skip('should toggle checkbox state correctly', async () => {
+    it('should toggle checkbox state correctly', async () => {
       const config = IonicFormTestUtils.builder().ionicCheckboxField({ key: 'subscribe', label: 'Subscribe to newsletter' }).build();
 
       const { component, fixture } = await IonicFormTestUtils.createTest({

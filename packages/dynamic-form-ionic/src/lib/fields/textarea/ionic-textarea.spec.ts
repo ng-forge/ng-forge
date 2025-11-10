@@ -158,7 +158,7 @@ describe('IonicTextareaFieldComponent', () => {
       //       expect(ionTextareas[1].nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
     });
 
-    it.skip('should handle multiple textareas with independent value changes', async () => {
+    it('should handle multiple textareas with independent value changes', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicTextareaField({ key: 'field1', label: 'Field 1' })
         .ionicTextareaField({ key: 'field2', label: 'Field 2' })
@@ -328,7 +328,7 @@ describe('IonicTextareaFieldComponent', () => {
       expect(IonicFormTestUtils.getFormValue(component).content).toBe('Final content');
     });
 
-    it.skip('should display error messages when validation fails', async () => {
+    it('should display error messages when validation fails', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'message',

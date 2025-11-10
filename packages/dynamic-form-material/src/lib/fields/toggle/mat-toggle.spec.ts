@@ -58,7 +58,7 @@ describe('MatToggleFieldComponent', () => {
       }
     });
 
-    it.skip('should handle user interactions and update form value', async () => {
+    it('should handle user interactions and update form value', async () => {
       const config = MaterialFormTestUtils.builder().matToggleField({ key: 'darkMode' }).build();
 
       const { component, fixture } = await MaterialFormTestUtils.createTest({

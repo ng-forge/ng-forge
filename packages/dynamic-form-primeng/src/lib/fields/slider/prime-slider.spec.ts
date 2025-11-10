@@ -7,7 +7,7 @@ import { PrimeNGFormTestUtils } from '../../testing/primeng-test-utils';
 
 describe('PrimeSliderFieldComponent', () => {
   describe('Basic PrimeNG Slider Integration', () => {
-    it.skip('should render volume slider with full configuration', async () => {
+    it('should render volume slider with full configuration', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .field({
           key: 'volume',
@@ -52,7 +52,7 @@ describe('PrimeSliderFieldComponent', () => {
       expect(hint.nativeElement.textContent.trim()).toBe('Adjust the volume level');
     });
 
-    it.skip('should handle user input and update form value', async () => {
+    it('should handle user input and update form value', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeSliderField({
           key: 'volume',
@@ -124,7 +124,7 @@ describe('PrimeSliderFieldComponent', () => {
   });
 
   describe('Different Slider Configurations Integration', () => {
-    it.skip('should render various slider configurations with correct attributes', async () => {
+    it('should render various slider configurations with correct attributes', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeSliderField({ key: 'volume', props: { min: 0, max: 100, step: 1 } })
         .primeSliderField({ key: 'brightness', props: { min: 0, max: 255, step: 5 } })
@@ -156,7 +156,7 @@ describe('PrimeSliderFieldComponent', () => {
       expect(sliders[3].componentInstance.max).toBe(40);
     });
 
-    it.skip('should handle different step values correctly', async () => {
+    it('should handle different step values correctly', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeSliderField({ key: 'rating', props: { min: 0, max: 10, step: 0.5 } })
         .build();
@@ -213,7 +213,7 @@ describe('PrimeSliderFieldComponent', () => {
   });
 
   describe('Minimal Configuration Tests', () => {
-    it.skip('should render with default PrimeNG configuration', async () => {
+    it('should render with default PrimeNG configuration', async () => {
       const config = PrimeNGFormTestUtils.builder().primeSliderField({ key: 'volume' }).build();
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({
@@ -243,7 +243,7 @@ describe('PrimeSliderFieldComponent', () => {
   });
 
   describe('Field State and Configuration Tests', () => {
-    it.skip('should handle disabled state correctly', async () => {
+    it('should handle disabled state correctly', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .field({
           key: 'volume',
@@ -280,7 +280,7 @@ describe('PrimeSliderFieldComponent', () => {
       expect(sliders[1].componentInstance.orientation).toBe('vertical');
     });
 
-    it.skip('should handle multiple sliders with independent value changes', async () => {
+    it('should handle multiple sliders with independent value changes', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeSliderField({ key: 'volume', props: { min: 0, max: 100 } })
         .primeSliderField({ key: 'brightness', props: { min: 0, max: 255 } })
@@ -356,7 +356,7 @@ describe('PrimeSliderFieldComponent', () => {
       expect(slider.componentInstance.styleClass).toContain('custom-slider-style');
     });
 
-    it.skip('should handle touched state on blur', async () => {
+    it('should handle touched state on blur', async () => {
       const config = PrimeNGFormTestUtils.builder().primeSliderField({ key: 'volume' }).build();
 
       const { fixture } = await PrimeNGFormTestUtils.createTest({
@@ -412,7 +412,7 @@ describe('PrimeSliderFieldComponent', () => {
       expect(PrimeNGFormTestUtils.getFormValue(component).volume).toBe(0);
     });
 
-    it.skip('should handle negative values correctly', async () => {
+    it('should handle negative values correctly', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeSliderField({ key: 'temperature', props: { min: -20, max: 40 } })
         .build();
@@ -435,7 +435,7 @@ describe('PrimeSliderFieldComponent', () => {
       expect(PrimeNGFormTestUtils.getFormValue(component).temperature).toBe(-5);
     });
 
-    it.skip('should handle decimal values correctly', async () => {
+    it('should handle decimal values correctly', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeSliderField({ key: 'rating', props: { min: 0, max: 5, step: 0.1 } })
         .build();
@@ -458,7 +458,7 @@ describe('PrimeSliderFieldComponent', () => {
       expect(PrimeNGFormTestUtils.getFormValue(component).rating).toBe(4.2);
     });
 
-    it.skip('should handle rapid value changes correctly', async () => {
+    it('should handle rapid value changes correctly', async () => {
       const config = PrimeNGFormTestUtils.builder()
         .primeSliderField({ key: 'volume', props: { min: 0, max: 100 } })
         .build();

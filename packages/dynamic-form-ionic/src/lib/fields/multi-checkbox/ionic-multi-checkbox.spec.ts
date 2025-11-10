@@ -39,7 +39,7 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       //       expect(ionCheckboxes[0].nativeElement.getAttribute('ng-reflect-label-placement')).toBe('end');
     });
 
-    it.skip('should handle user checkbox selection and update form value', async () => {
+    it('should handle user checkbox selection and update form value', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicMultiCheckboxField({
           key: 'hobbies',
@@ -105,7 +105,7 @@ describe('IonicMultiCheckboxFieldComponent', () => {
   });
 
   describe('Multiple Selection Tests', () => {
-    it.skip('should allow multiple checkboxes to be selected', async () => {
+    it('should allow multiple checkboxes to be selected', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicMultiCheckboxField({
           key: 'features',
@@ -138,7 +138,7 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       expect(formValue.features.length).toBe(4);
     });
 
-    it.skip('should handle unchecking checkboxes', async () => {
+    it('should handle unchecking checkboxes', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicMultiCheckboxField({
           key: 'options',
@@ -250,7 +250,7 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       //       expect(ionCheckboxes[2].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
     });
 
-    it.skip('should apply required validation', async () => {
+    it('should apply required validation', async () => {
       const config = IonicFormTestUtils.builder()
         .field({
           key: 'terms',
@@ -489,7 +489,7 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       expect(formValue.numbers).toContain(3);
     });
 
-    it.skip('should maintain selection order', async () => {
+    it('should maintain selection order', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicMultiCheckboxField({
           key: 'sequence',
