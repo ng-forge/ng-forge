@@ -577,17 +577,15 @@ submitButton({
 
 **Props:**
 
-| Prop         | Type                                                                                 | Default     | Description            |
-| ------------ | ------------------------------------------------------------------------------------ | ----------- | ---------------------- |
-| `severity`   | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warning' \| 'help' \| 'danger'` | `'primary'` | Button theme           |
-| `outlined`   | `boolean`                                                                            | `false`     | Outlined style         |
-| `text`       | `boolean`                                                                            | `false`     | Text-only style        |
-| `raised`     | `boolean`                                                                            | `false`     | Raised style           |
-| `rounded`    | `boolean`                                                                            | `false`     | Rounded style          |
-| `icon`       | `string`                                                                             | -           | Icon class             |
-| `iconPos`    | `'left' \| 'right' \| 'top' \| 'bottom'`                                             | `'left'`    | Icon position          |
-| `size`       | `'small' \| 'large'`                                                                 | -           | Button size            |
-| `styleClass` | `string`                                                                             | -           | Additional CSS classes |
+| Prop       | Type                                                                                            | Default     | Description     |
+| ---------- | ----------------------------------------------------------------------------------------------- | ----------- | --------------- |
+| `severity` | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warn' \| 'help' \| 'danger' \| 'contrast'` | `'primary'` | Button theme    |
+| `outlined` | `boolean`                                                                                       | `false`     | Outlined style  |
+| `text`     | `boolean`                                                                                       | `false`     | Text-only style |
+| `raised`   | `boolean`                                                                                       | `false`     | Raised style    |
+| `rounded`  | `boolean`                                                                                       | `false`     | Rounded style   |
+| `icon`     | `string`                                                                                        | -           | Icon class      |
+| `iconPos`  | `'left' \| 'right' \| 'top' \| 'bottom'`                                                        | `'left'`    | Icon position   |
 
 #### Navigation Buttons
 
@@ -759,7 +757,7 @@ Control button and component colors using the `severity` prop:
   key: 'submit',
   label: 'Submit',
   props: {
-    severity: 'primary', // 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'help' | 'danger'
+    severity: 'primary', // 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast'
   },
 }
 ```

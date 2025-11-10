@@ -16,38 +16,35 @@ Create type definitions for your custom fields:
 
 ```typescript
 // custom-fields.d.ts
-import type { FieldDef } from '@ng-forge/dynamic-form';
+import type { BaseValueField } from '@ng-forge/dynamic-form';
 
-// Color picker field
-export interface ColorPickerField extends FieldDef {
-  type: 'color-picker';
-  value: string;
-  props?: {
-    format?: 'hex' | 'rgb' | 'hsl';
-    alpha?: boolean;
-  };
+// Color picker props
+export interface ColorPickerProps {
+  format?: 'hex' | 'rgb' | 'hsl';
+  alpha?: boolean;
+}
+
+// Color picker field (extends BaseValueField)
+export type ColorPickerField = BaseValueField<ColorPickerProps, string>;
+
+// File upload props
+export interface FileUploadProps {
+  accept?: string;
+  multiple?: boolean;
+  maxSize?: number;
 }
 
 // File upload field
-export interface FileUploadField extends FieldDef {
-  type: 'file-upload';
-  value: File[];
-  props?: {
-    accept?: string;
-    multiple?: boolean;
-    maxSize?: number;
-  };
+export type FileUploadField = BaseValueField<FileUploadProps, File[]>;
+
+// Rating props
+export interface RatingProps {
+  max?: number;
+  allowHalf?: boolean;
 }
 
 // Rating field
-export interface RatingField extends FieldDef {
-  type: 'rating';
-  value: number;
-  props?: {
-    max?: number;
-    allowHalf?: boolean;
-  };
-}
+export type RatingField = BaseValueField<RatingProps, number>;
 ```
 
 ### Step 2: Augment Field Registry
@@ -77,27 +74,38 @@ Implement the component for each field type:
 
 ```typescript
 // color-picker.component.ts
-import { Component, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
-import { ColorPickerField } from './custom-fields';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Field, FieldTree } from '@angular/forms/signals';
+import { AsyncPipe } from '@angular/common';
+import { DynamicText, DynamicTextPipe, ValueFieldComponent } from '@ng-forge/dynamic-form';
+import { ColorPickerField, ColorPickerProps } from './custom-fields';
 
 @Component({
   selector: 'df-color-picker',
+  imports: [Field, DynamicTextPipe, AsyncPipe],
   template: `
+    @let f = field();
+
     <div class="color-picker-field">
-      @if (label(); as label) {
-      <label [for]="key()">{{ label }}</label>
+      @if (label()) {
+      <label [for]="key()">{% raw %}{{ label() | dynamicText | async }}{% endraw %}</label>
       }
-      <input type="color" [field]="field()" [id]="key()" [disabled]="field().disabled()" />
+      <input type="color" [field]="f" [id]="key()" [disabled]="f.disabled()" />
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[id]': '`${key()}`',
+    '[attr.data-testid]': 'key()',
+    '[class]': 'className()',
+  },
 })
-export default class ColorPickerComponent {
+export default class ColorPickerComponent implements ValueFieldComponent<ColorPickerField> {
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
-  readonly label = input<string>();
-  readonly props = input<ColorPickerField['props']>();
+  readonly label = input<DynamicText>();
+  readonly className = input<string>('');
+  readonly props = input<ColorPickerProps>();
 }
 ```
 
@@ -108,7 +116,7 @@ Create field type definitions and register them:
 ```typescript
 // custom-fields.provider.ts
 import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-form';
-import type { ColorPickerField, FileUploadField, RatingField } from './custom-fields';
+import type { ColorPickerField, ColorPickerProps, FileUploadField, FileUploadProps, RatingField, RatingProps } from './custom-fields';
 
 export const ColorPickerFieldType: FieldTypeDefinition<ColorPickerField> = {
   name: 'color-picker',
@@ -532,16 +540,15 @@ Create reusable field types with generics:
 
 ```typescript
 // autocomplete-field.d.ts
-import type { FieldDef } from '@ng-forge/dynamic-form';
+import type { BaseValueField, FieldOption } from '@ng-forge/dynamic-form';
 
-export interface AutocompleteField<T = string> extends FieldDef {
-  type: 'autocomplete';
-  value: T | null;
-  options: Array<{ value: T; label: string }>;
-  props?: {
-    filterFn?: (value: T, query: string) => boolean;
-    displayFn?: (value: T) => string;
-  };
+export interface AutocompleteProps<T = string> {
+  filterFn?: (value: T, query: string) => boolean;
+  displayFn?: (value: T) => string;
+}
+
+export interface AutocompleteField<T = string> extends BaseValueField<AutocompleteProps<T>, T | null> {
+  options: FieldOption<T>[];
 }
 
 declare module '@ng-forge/dynamic-form' {
@@ -582,13 +589,12 @@ Create custom container fields:
 
 ```typescript
 // accordion-field.d.ts
-import type { FieldDef, FieldTypes } from '@ng-forge/dynamic-form';
+import type { FieldDef, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
 
-export interface AccordionField extends FieldDef {
-  type: 'accordion';
+export interface AccordionField extends FieldDef<never> {
   sections: Array<{
     title: string;
-    fields: FieldTypes[];
+    fields: RegisteredFieldTypes[];
   }>;
 }
 
@@ -626,20 +632,18 @@ src/
 Provide JSDoc comments for custom field properties:
 
 ```typescript
-export interface ColorPickerField extends FieldDef {
-  type: 'color-picker';
-  value: string;
-  props?: {
-    /** Color format: 'hex', 'rgb', or 'hsl'. Default: 'hex' */
-    format?: 'hex' | 'rgb' | 'hsl';
+export interface ColorPickerProps {
+  /** Color format: 'hex', 'rgb', or 'hsl'. Default: 'hex' */
+  format?: 'hex' | 'rgb' | 'hsl';
 
-    /** Enable alpha channel (transparency). Default: false */
-    alpha?: boolean;
+  /** Enable alpha channel (transparency). Default: false */
+  alpha?: boolean;
 
-    /** Predefined color palette */
-    palette?: string[];
-  };
+  /** Predefined color palette */
+  palette?: string[];
 }
+
+export type ColorPickerField = BaseValueField<ColorPickerProps, string>;
 ```
 
 ### Export Helper Functions

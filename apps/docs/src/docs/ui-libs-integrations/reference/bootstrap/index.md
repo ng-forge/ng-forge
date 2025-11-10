@@ -517,6 +517,8 @@ The submit button automatically:
 | `outline` | `boolean`                                                                                                 | `false`     | Use outline variant    |
 | `size`    | `'sm' \| 'lg'`                                                                                            | -           | Button size            |
 | `block`   | `boolean`                                                                                                 | `false`     | Full-width button      |
+| `active`  | `boolean`                                                                                                 | `false`     | Active state styling   |
+| `type`    | `'button' \| 'submit' \| 'reset'`                                                                         | `'submit'`  | HTML button type       |
 
 #### Navigation Buttons
 

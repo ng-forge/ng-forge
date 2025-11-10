@@ -556,14 +556,14 @@ submitButton({
 
 **Props:**
 
-| Prop     | Type                                                                           | Default     | Description       |
-| -------- | ------------------------------------------------------------------------------ | ----------- | ----------------- |
-| `color`  | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | `'primary'` | Ionic theme color |
-| `fill`   | `'solid' \| 'outline' \| 'clear'`                                              | `'solid'`   | Button fill style |
-| `expand` | `'full' \| 'block'`                                                            | -           | Button width      |
-| `shape`  | `'round'`                                                                      | -           | Rounded button    |
-| `size`   | `'small' \| 'default' \| 'large'`                                              | -           | Button size       |
-| `strong` | `boolean`                                                                      | `false`     | Use strong font   |
+| Prop     | Type                                                                                                            | Default     | Description       |
+| -------- | --------------------------------------------------------------------------------------------------------------- | ----------- | ----------------- |
+| `expand` | `'full' \| 'block'`                                                                                             | -           | Button width      |
+| `fill`   | `'clear' \| 'outline' \| 'solid' \| 'default'`                                                                  | `'solid'`   | Button fill style |
+| `shape`  | `'round'`                                                                                                       | -           | Rounded button    |
+| `size`   | `'small' \| 'default' \| 'large'`                                                                               | -           | Button size       |
+| `color`  | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger' \| 'light' \| 'medium' \| 'dark'` | `'primary'` | Ionic theme color |
+| `strong` | `boolean`                                                                                                       | `false`     | Use strong font   |
 
 #### Navigation Buttons
 
