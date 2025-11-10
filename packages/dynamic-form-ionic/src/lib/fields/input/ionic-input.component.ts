@@ -52,9 +52,9 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
   readonly tabIndex = input<number>();
   readonly props = input<IonicInputProps>();
   readonly validationMessages = input<ValidationMessages>();
-  readonly formValidationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.formValidationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

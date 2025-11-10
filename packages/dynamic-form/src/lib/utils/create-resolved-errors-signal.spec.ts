@@ -5,7 +5,7 @@ import { ValidationMessages } from '../models/validation-types';
 import { FieldTree, form } from '@angular/forms/signals';
 
 describe('createResolvedErrorsSignal', () => {
-  describe('form-level validation messages', () => {
+  describe('default validation messages', () => {
     it('should use field-level validation message when available', () => {
       TestBed.runInInjectionContext(() => {
         // Create a form with a required field that has an error
@@ -14,20 +14,20 @@ describe('createResolvedErrorsSignal', () => {
 
         // Mark as touched and add error
         emailField().touched.set(true);
-        emailField().errors.set([{ kind: 'required', message: 'Default required error' }]);
+        emailField().errors.set([{ kind: 'required', message: 'Built-in required error' }]);
 
         const fieldMessages = signal<ValidationMessages>({
           required: 'Field-level: Email is required',
         });
 
-        const formMessages = signal<ValidationMessages>({
-          required: 'Form-level: This field is required',
+        const defaultMessages = signal<ValidationMessages>({
+          required: 'Default: This field is required',
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
           signal(emailField as FieldTree<string>),
           fieldMessages,
-          formMessages
+          defaultMessages
         );
 
         // Field-level message should take precedence
@@ -37,53 +37,53 @@ describe('createResolvedErrorsSignal', () => {
       });
     });
 
-    it('should fall back to form-level validation message when field-level is not provided', () => {
+    it('should fall back to default validation message when field-level is not provided', () => {
       TestBed.runInInjectionContext(() => {
         const testForm = form<{ email: string }>({ email: '' });
         const emailField = testForm.structure.childrenMap().get('email')!;
 
         emailField().touched.set(true);
-        emailField().errors.set([{ kind: 'required', message: 'Default required error' }]);
+        emailField().errors.set([{ kind: 'required', message: 'Built-in required error' }]);
 
         const fieldMessages = signal<ValidationMessages>({});
 
-        const formMessages = signal<ValidationMessages>({
-          required: 'Form-level: This field is required',
+        const defaultMessages = signal<ValidationMessages>({
+          required: 'Default: This field is required',
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
           signal(emailField as FieldTree<string>),
           fieldMessages,
-          formMessages
+          defaultMessages
         );
 
-        // Should use form-level message as fallback
+        // Should use default message as fallback
         expect(resolvedErrors()).toEqual([
-          { kind: 'required', message: 'Form-level: This field is required' },
+          { kind: 'required', message: 'Default: This field is required' },
         ]);
       });
     });
 
-    it('should fall back to default message when neither field-level nor form-level is provided', () => {
+    it('should fall back to built-in message when neither field-level nor default is provided', () => {
       TestBed.runInInjectionContext(() => {
         const testForm = form<{ email: string }>({ email: '' });
         const emailField = testForm.structure.childrenMap().get('email')!;
 
         emailField().touched.set(true);
-        emailField().errors.set([{ kind: 'required', message: 'Default required error' }]);
+        emailField().errors.set([{ kind: 'required', message: 'Built-in required error' }]);
 
         const fieldMessages = signal<ValidationMessages>({});
-        const formMessages = signal<ValidationMessages>({});
+        const defaultMessages = signal<ValidationMessages>({});
 
         const resolvedErrors = createResolvedErrorsSignal(
           signal(emailField as FieldTree<string>),
           fieldMessages,
-          formMessages
+          defaultMessages
         );
 
-        // Should use default error message
+        // Should use built-in error message
         expect(resolvedErrors()).toEqual([
-          { kind: 'required', message: 'Default required error' },
+          { kind: 'required', message: 'Built-in required error' },
         ]);
       });
     });
@@ -95,9 +95,9 @@ describe('createResolvedErrorsSignal', () => {
 
         passwordField().touched.set(true);
         passwordField().errors.set([
-          { kind: 'required', message: 'Default required' },
-          { kind: 'minLength', message: 'Default minLength', requiredLength: 8, actualLength: 2 },
-          { kind: 'pattern', message: 'Default pattern' },
+          { kind: 'required', message: 'Built-in required' },
+          { kind: 'minLength', message: 'Built-in minLength', requiredLength: 8, actualLength: 2 },
+          { kind: 'pattern', message: 'Built-in pattern' },
         ]);
 
         // Field-level only has 'minLength'
@@ -105,50 +105,50 @@ describe('createResolvedErrorsSignal', () => {
           minLength: 'Field-level: Password must be at least {{requiredLength}} characters',
         });
 
-        // Form-level has 'required' and 'pattern'
-        const formMessages = signal<ValidationMessages>({
-          required: 'Form-level: This field is required',
-          pattern: 'Form-level: Invalid format',
+        // Default has 'required' and 'pattern'
+        const defaultMessages = signal<ValidationMessages>({
+          required: 'Default: This field is required',
+          pattern: 'Default: Invalid format',
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
           signal(passwordField as FieldTree<string>),
           fieldMessages,
-          formMessages
+          defaultMessages
         );
 
         expect(resolvedErrors()).toEqual([
-          { kind: 'required', message: 'Form-level: This field is required' },
+          { kind: 'required', message: 'Default: This field is required' },
           { kind: 'minLength', message: 'Field-level: Password must be at least 8 characters' },
-          { kind: 'pattern', message: 'Form-level: Invalid format' },
+          { kind: 'pattern', message: 'Default: Invalid format' },
         ]);
       });
     });
 
-    it('should interpolate parameters in form-level messages', () => {
+    it('should interpolate parameters in default messages', () => {
       TestBed.runInInjectionContext(() => {
         const testForm = form<{ age: number }>({ age: 5 });
         const ageField = testForm.structure.childrenMap().get('age')!;
 
         ageField().touched.set(true);
         ageField().errors.set([
-          { kind: 'min', message: 'Default min', min: 18, actual: 5 },
+          { kind: 'min', message: 'Built-in min', min: 18, actual: 5 },
         ]);
 
         const fieldMessages = signal<ValidationMessages>({});
 
-        const formMessages = signal<ValidationMessages>({
-          min: 'Form-level: Minimum value is {{min}}',
+        const defaultMessages = signal<ValidationMessages>({
+          min: 'Default: Minimum value is {{min}}',
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
           signal(ageField as FieldTree<number>),
           fieldMessages,
-          formMessages
+          defaultMessages
         );
 
         expect(resolvedErrors()).toEqual([
-          { kind: 'min', message: 'Form-level: Minimum value is 18' },
+          { kind: 'min', message: 'Default: Minimum value is 18' },
         ]);
       });
     });

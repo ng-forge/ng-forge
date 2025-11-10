@@ -69,9 +69,9 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatSelectProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
-  readonly formValidationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.formValidationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection

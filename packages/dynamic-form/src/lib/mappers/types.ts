@@ -9,7 +9,7 @@ export interface FieldSignalContext<TModel = any> {
   value: WritableSignal<Partial<TModel> | undefined>;
   defaultValues: () => TModel;
   form: ReturnType<typeof form<TModel>>;
-  formValidationMessages?: ValidationMessages;
+  defaultValidationMessages?: ValidationMessages;
 }
 
 export interface FieldMapperOptions<TModel = any> {

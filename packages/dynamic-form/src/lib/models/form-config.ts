@@ -105,14 +105,14 @@ export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredF
    *
    * @example
    * ```typescript
-   * formValidationMessages: {
+   * defaultValidationMessages: {
    *   required: 'This field is required',
    *   email: 'Please enter a valid email address',
    *   minLength: 'Must be at least {{requiredLength}} characters'
    * }
    * ```
    */
-  formValidationMessages?: ValidationMessages;
+  defaultValidationMessages?: ValidationMessages;
 
   /**
    * Signal forms adapter configuration.

@@ -15,9 +15,9 @@ export function valueFieldMapper(fieldDef: BaseValueField<any, any>, options: Va
   bindings.push(inputBinding('validationMessages', () => fieldDef.validationMessages ?? {}));
 
   // Pass form-level validation messages for fallback error translations
-  const formValidationMessages = options.fieldSignalContext.formValidationMessages;
-  if (formValidationMessages !== undefined) {
-    bindings.push(inputBinding('formValidationMessages', () => formValidationMessages));
+  const defaultValidationMessages = options.fieldSignalContext.defaultValidationMessages;
+  if (defaultValidationMessages !== undefined) {
+    bindings.push(inputBinding('defaultValidationMessages', () => defaultValidationMessages));
   }
 
   const formRoot = options.fieldSignalContext.form();

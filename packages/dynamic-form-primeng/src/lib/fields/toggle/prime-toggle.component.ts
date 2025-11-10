@@ -53,9 +53,9 @@ export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
   readonly tabIndex = input<number>();
   readonly props = input<PrimeToggleProps>();
   readonly validationMessages = input<ValidationMessages>();
-  readonly formValidationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.formValidationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

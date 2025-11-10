@@ -21,7 +21,7 @@ export interface ResolvedError {
  *
  * @param field - Signal containing FieldTree
  * @param validationMessages - Signal containing custom field-level validation messages
- * @param formValidationMessages - Signal containing form-level validation messages (fallback)
+ * @param defaultValidationMessages - Signal containing default validation messages (fallback)
  * @param injector - Optional injector for DynamicText resolution
  * @returns Signal<ResolvedError[]> - Reactively resolved error messages
  *
@@ -30,19 +30,19 @@ export interface ResolvedError {
  * readonly resolvedErrors = createResolvedErrorsSignal(
  *   this.field,
  *   this.validationMessages,
- *   this.formValidationMessages
+ *   this.defaultValidationMessages
  * );
  * ```
  */
 export function createResolvedErrorsSignal<T>(
   field: Signal<FieldTree<T>>,
   validationMessages: Signal<ValidationMessages | undefined>,
-  formValidationMessages: Signal<ValidationMessages | undefined> = signal(undefined),
+  defaultValidationMessages: Signal<ValidationMessages | undefined> = signal(undefined),
   injector = inject(Injector)
 ): Signal<ResolvedError[]> {
   // Ensure validationMessages is never undefined (mappers pass {} if not defined)
   const messages = computed(() => validationMessages() ?? {});
-  const formMessages = computed(() => formValidationMessages() ?? {});
+  const defaultMessages = computed(() => defaultValidationMessages() ?? {});
 
   // Create a computed signal that reads the actual errors from the field
   // This ensures the signal tracks changes to field().errors(), not just the field reference
@@ -54,11 +54,11 @@ export function createResolvedErrorsSignal<T>(
   // Convert signals to observables using toObservable with injector
   const errors$ = toObservable(errors, { injector });
   const messages$ = toObservable(messages, { injector });
-  const formMessages$ = toObservable(formMessages, { injector });
+  const defaultMessages$ = toObservable(defaultMessages, { injector });
 
   // Combine observables and process errors
-  const resolvedErrors$ = combineLatest([errors$, messages$, formMessages$]).pipe(
-    switchMap(([currentErrors, msgs, formMsgs]) => {
+  const resolvedErrors$ = combineLatest([errors$, messages$, defaultMessages$]).pipe(
+    switchMap(([currentErrors, msgs, defaultMsgs]) => {
       // No errors - return empty array
       if (!currentErrors || currentErrors.length === 0) {
         return of([]);
@@ -66,7 +66,7 @@ export function createResolvedErrorsSignal<T>(
 
       // Create observable for each error's resolved message
       const errorResolvers = currentErrors.map((error: ValidationError) =>
-        resolveErrorMessage(error, msgs, formMsgs, injector)
+        resolveErrorMessage(error, msgs, defaultMsgs, injector)
       );
 
       // Combine all error message observables into single array emission
@@ -81,23 +81,23 @@ export function createResolvedErrorsSignal<T>(
 
 /**
  * Resolves a single error message from DynamicText sources with fallback logic
- * Priority: field-level message → form-level message → default error message
+ * Priority: field-level message → default message → built-in error message
  * @internal
  */
 function resolveErrorMessage(
   error: ValidationError,
   fieldMessages: ValidationMessages,
-  formMessages: ValidationMessages,
+  defaultMessages: ValidationMessages,
   injector: Injector
 ): Observable<ResolvedError> {
   // Check for field-level custom message first
   const fieldMessage = fieldMessages[error.kind];
 
-  // Fall back to form-level message if no field-level message exists
-  const formMessage = formMessages[error.kind];
+  // Fall back to default message if no field-level message exists
+  const defaultMessage = defaultMessages[error.kind];
 
-  // Determine which message to use: field-level → form-level → default
-  const messageToUse = fieldMessage ?? formMessage;
+  // Determine which message to use: field-level → default → built-in
+  const messageToUse = fieldMessage ?? defaultMessage;
 
   // Convert DynamicText to Observable
   const messageObservable = messageToUse ? dynamicTextToObservable(messageToUse, injector) : of(error.message || 'Validation error');
