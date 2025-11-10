@@ -1,22 +1,23 @@
-# Conditional Logic Examples
-
 Real-world examples demonstrating conditional logic patterns for common form scenarios.
 
 ## Example Categories
 
 ### Basic Examples
+
 Simple conditional patterns for everyday forms.
 
 - **Contact Form with Dynamic Fields** - Show email or phone fields based on contact method selection
 - **Business Account Form** - Display business-specific fields for business account types
 
 ### Intermediate Examples
+
 More complex conditional scenarios.
 
 - **Shipping Same-as-Billing** - Toggle shipping address fields based on checkbox
 - **Age-Based Conditional Form** - Show/hide fields based on age ranges
 
 ### Advanced Examples
+
 Complex multi-condition logic.
 
 - **Complex Multi-Condition Form** - Multiple intersecting conditions
@@ -157,6 +158,7 @@ export class ContactFormComponent {
 ```
 
 **Key patterns:**
+
 - Field hidden when contact method doesn't match
 - Field becomes required when contact method matches
 - Clean user experience - only relevant fields shown
@@ -185,15 +187,17 @@ const config = {
       value: '',
       label: 'Full Name',
       required: true,
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'equals',
-          value: 'business',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'business',
+          },
         },
-      }],
+      ],
     },
     {
       key: 'companyName',
@@ -255,21 +259,24 @@ const config = {
       value: null,
       label: 'Number of Employees',
       props: { type: 'number' },
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'notEquals',
-          value: 'business',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'notEquals',
+            value: 'business',
+          },
         },
-      }],
+      ],
     },
   ],
 } as const satisfies FormConfig;
 ```
 
 **Key patterns:**
+
 - Personal name field hidden for business accounts
 - Business fields (company name, tax ID) hidden for personal accounts
 - Required validation tied to visibility
@@ -301,15 +308,17 @@ const config = {
       key: 'shippingAddress',
       type: 'group',
       label: 'Shipping Address',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'sameAsBilling',
-          operator: 'equals',
-          value: true,
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'sameAsBilling',
+            operator: 'equals',
+            value: true,
+          },
         },
-      }],
+      ],
       fields: [
         { key: 'street', type: 'input', value: '', label: 'Street', required: true },
         { key: 'city', type: 'input', value: '', label: 'City', required: true },
@@ -321,6 +330,7 @@ const config = {
 ```
 
 **Key patterns:**
+
 - Entire group hidden/shown with single condition
 - Checkbox controls form complexity
 - Reduces user effort when addresses are the same
@@ -347,15 +357,17 @@ const config = {
       type: 'checkbox',
       value: false,
       label: 'I have parental consent',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'age',
-          operator: 'greaterOrEqual',
-          value: 18,
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'age',
+            operator: 'greaterOrEqual',
+            value: 18,
+          },
         },
-      }],
+      ],
     },
     {
       key: 'parentEmail',
@@ -390,21 +402,24 @@ const config = {
       type: 'checkbox',
       value: false,
       label: 'Apply senior discount (65+)',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'age',
-          operator: 'less',
-          value: 65,
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'age',
+            operator: 'less',
+            value: 65,
+          },
         },
-      }],
+      ],
     },
   ],
 } as const satisfies FormConfig;
 ```
 
 **Key patterns:**
+
 - Age-appropriate field display
 - Numeric comparisons (greater than, less than)
 - Multiple conditional sections based on same field
@@ -435,62 +450,69 @@ const config = {
       label: 'Team Size',
       min: 1,
       props: { type: 'number' },
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'equals',
-          value: 'free',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'free',
+          },
         },
-      }],
+      ],
     },
     {
       key: 'ssoEnabled',
       type: 'toggle',
       value: false,
       label: 'Enable SSO (Single Sign-On)',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          logic: 'or',
-          expressions: [
-            {
-              type: 'fieldValue',
-              fieldPath: 'accountType',
-              operator: 'notEquals',
-              value: 'enterprise',
-            },
-            {
-              type: 'fieldValue',
-              fieldPath: 'teamSize',
-              operator: 'less',
-              value: 10,
-            },
-          ],
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            logic: 'or',
+            expressions: [
+              {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'notEquals',
+                value: 'enterprise',
+              },
+              {
+                type: 'fieldValue',
+                fieldPath: 'teamSize',
+                operator: 'less',
+                value: 10,
+              },
+            ],
+          },
         },
-      }],
+      ],
     },
     {
       key: 'customBranding',
       type: 'toggle',
       value: false,
       label: 'Enable Custom Branding',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'in',
-          value: ['free', 'pro'],
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'in',
+            value: ['free', 'pro'],
+          },
         },
-      }],
+      ],
     },
   ],
 } as const satisfies FormConfig;
 ```
 
 **Key patterns:**
+
 - AND/OR logic for complex conditions
 - Multiple fields affecting each other
 - Enterprise feature gating
@@ -498,40 +520,57 @@ const config = {
 ## Common Patterns
 
 ### Show/Hide Field Pattern
-```typescript
-logic: [{
-  type: 'hidden',
-  condition: { /* when to hide */ },
-}]
-```
 
-### Conditional Required Pattern
 ```typescript
 logic: [
   {
     type: 'hidden',
-    condition: { /* when to hide */ },
+    condition: {
+      /* when to hide */
+    },
+  },
+];
+```
+
+### Conditional Required Pattern
+
+```typescript
+logic: [
+  {
+    type: 'hidden',
+    condition: {
+      /* when to hide */
+    },
   },
   {
     type: 'required',
-    condition: { /* when to require */ },
+    condition: {
+      /* when to require */
+    },
     errorMessage: 'Clear message why required',
   },
-]
+];
 ```
 
 ### Multiple Conditions Pattern
+
 ```typescript
-logic: [{
-  type: 'hidden',
-  condition: {
-    logic: 'and', // or 'or'
-    expressions: [
-      { /* condition 1 */ },
-      { /* condition 2 */ },
-    ],
+logic: [
+  {
+    type: 'hidden',
+    condition: {
+      logic: 'and', // or 'or'
+      expressions: [
+        {
+          /* condition 1 */
+        },
+        {
+          /* condition 2 */
+        },
+      ],
+    },
   },
-}]
+];
 ```
 
 ## Related

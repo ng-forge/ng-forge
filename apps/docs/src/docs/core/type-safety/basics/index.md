@@ -1,5 +1,3 @@
-# Type Safety Basics
-
 Complete type inference for form configurations using TypeScript's type system and Angular signal forms.
 
 ## Overview
@@ -39,8 +37,8 @@ The `value` property is critical for type inference - its type determines the in
 ```typescript
 const config = {
   fields: [
-    { key: 'name', type: 'input', value: '' },        // string
-    { key: 'age', type: 'input', value: 0 },          // number
+    { key: 'name', type: 'input', value: '' }, // string
+    { key: 'age', type: 'input', value: 0 }, // number
     { key: 'active', type: 'checkbox', value: false }, // boolean
     { key: 'tags', type: 'multi-checkbox', value: [] }, // string[]
   ],
@@ -87,6 +85,7 @@ declare module '@ng-forge/dynamic-form' {
 ```
 
 This determines:
+
 - What field `type` values are valid (e.g., `'input'`, `'select'`)
 - How each field type is structured
 - What props are available for each field
@@ -108,9 +107,9 @@ The `required` flag affects whether fields include `undefined` in their type:
 ```typescript
 const config = {
   fields: [
-    { key: 'email', type: 'input', value: '', required: true },  // string (required)
-    { key: 'name', type: 'input', value: '' },                   // string | undefined
-    { key: 'age', type: 'input', value: 0, required: false },    // number | undefined
+    { key: 'email', type: 'input', value: '', required: true }, // string (required)
+    { key: 'name', type: 'input', value: '' }, // string | undefined
+    { key: 'age', type: 'input', value: 0, required: false }, // number | undefined
   ],
 } as const satisfies FormConfig;
 
@@ -126,9 +125,9 @@ const config = {
 
 ```typescript
 function handleSubmit(value: InferFormValue<typeof config.fields>) {
-  console.log(value.email.toUpperCase());  // ✓ Safe - always defined
-  console.log(value.name?.toUpperCase());  // ✓ Must use optional chaining
-  console.log(value.age + 1);              // ✗ Error - might be undefined
+  console.log(value.email.toUpperCase()); // ✓ Safe - always defined
+  console.log(value.name?.toUpperCase()); // ✓ Must use optional chaining
+  console.log(value.age + 1); // ✗ Error - might be undefined
 }
 ```
 
@@ -179,10 +178,10 @@ type FormValue = InferFormValue<typeof config.fields>;
 
 function processForm(value: FormValue) {
   // IntelliSense suggests: firstName, lastName, email
-  value.firstName   // ✓ Autocomplete works
-  value.lastName    // ✓ Autocomplete works
-  value.email       // ✓ Autocomplete works
-  value.invalid     // ✗ TypeScript error - property doesn't exist
+  value.firstName; // ✓ Autocomplete works
+  value.lastName; // ✓ Autocomplete works
+  value.email; // ✓ Autocomplete works
+  value.invalid; // ✗ TypeScript error - property doesn't exist
 }
 ```
 
@@ -233,8 +232,8 @@ Type inference requires the `value` property to determine field types:
 // ✓ Good - type inferred from value
 const config = {
   fields: [
-    { key: 'age', type: 'input', value: 0 },        // number
-    { key: 'name', type: 'input', value: '' },      // string
+    { key: 'age', type: 'input', value: 0 }, // number
+    { key: 'name', type: 'input', value: '' }, // string
     { key: 'active', type: 'checkbox', value: false }, // boolean
   ],
 } as const satisfies FormConfig;
@@ -263,7 +262,7 @@ const REGISTRATION_FORM = {
 } as const satisfies FormConfig;
 
 // Export type for reuse
-export type RegistrationFormValue = InferFormValue<typeof REGISTRATION_FORM['fields']>;
+export type RegistrationFormValue = InferFormValue<(typeof REGISTRATION_FORM)['fields']>;
 
 // Use in functions
 function registerUser(data: RegistrationFormValue) {

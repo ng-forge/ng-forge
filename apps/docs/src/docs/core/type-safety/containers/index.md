@@ -1,5 +1,3 @@
-# Container Fields & Nesting
-
 Understanding how container fields affect type inference and form value structure.
 
 ## Container Fields Overview
@@ -43,6 +41,7 @@ const config = {
 ```
 
 **Use groups when:**
+
 - You want nested form values (e.g., `address.street`)
 - Grouping related fields logically
 - Creating reusable field sections
@@ -78,10 +77,10 @@ const config = {
 // }
 
 function onSubmit(value: InferFormValue<typeof config.fields>) {
-  console.log(value.name);              // string
-  console.log(value.address.street);    // string
-  console.log(value.address.city);      // string
-  console.log(value.address.zip);       // string | undefined
+  console.log(value.name); // string
+  console.log(value.address.street); // string
+  console.log(value.address.city); // string
+  console.log(value.address.zip); // string | undefined
 }
 ```
 
@@ -110,6 +109,7 @@ const config = {
 ```
 
 **Use rows when:**
+
 - You want horizontal layout (grid columns)
 - Fields should be at the parent level (not nested)
 - Creating responsive multi-column forms
@@ -206,6 +206,7 @@ const config = {
 ```
 
 **Use pages when:**
+
 - Creating multi-step forms (wizard-style)
 - Fields from all steps should be at root level
 - You want step-by-step validation
@@ -275,9 +276,7 @@ const validConfig = {
         {
           type: 'group',
           key: 'section',
-          fields: [
-            { key: 'field3', type: 'input', value: '' },
-          ],
+          fields: [{ key: 'field3', type: 'input', value: '' }],
         },
       ],
     },
@@ -384,9 +383,9 @@ Fields with a `value` property contribute to the form output:
 ```typescript
 const config = {
   fields: [
-    { key: 'name', type: 'input', value: '' },           // ✓ Included
+    { key: 'name', type: 'input', value: '' }, // ✓ Included
     { key: 'country', type: 'select', value: '', options: [] }, // ✓ Included
-    { key: 'accept', type: 'checkbox', value: false },   // ✓ Included
+    { key: 'accept', type: 'checkbox', value: false }, // ✓ Included
   ],
 } as const satisfies FormConfig;
 
@@ -405,13 +404,13 @@ Fields without values are excluded from form values:
 ```typescript
 const config = {
   fields: [
-    { type: 'text', label: 'Enter your details:' },      // ✗ Excluded
-    { key: 'name', type: 'input', value: '' },           // ✓ Included
-    { type: 'submit', label: 'Save' },                   // ✗ Excluded
+    { type: 'text', label: 'Enter your details:' }, // ✗ Excluded
+    { key: 'name', type: 'input', value: '' }, // ✓ Included
+    { type: 'submit', label: 'Save' }, // ✗ Excluded
     {
-      type: 'row',                                        // ✗ Excluded (container)
+      type: 'row', // ✗ Excluded (container)
       fields: [
-        { key: 'city', type: 'input', value: '' },       // ✓ Included
+        { key: 'city', type: 'input', value: '' }, // ✓ Included
       ],
     },
   ],
@@ -510,8 +509,8 @@ const config = {
 // }
 
 function onSubmit(value: InferFormValue<typeof config.fields>) {
-  console.log(value.skills.length);            // ✓ Safe - always defined
-  console.log(value.notifications?.length);    // ✓ Must use optional chaining
+  console.log(value.skills.length); // ✓ Safe - always defined
+  console.log(value.notifications?.length); // ✓ Must use optional chaining
 }
 ```
 

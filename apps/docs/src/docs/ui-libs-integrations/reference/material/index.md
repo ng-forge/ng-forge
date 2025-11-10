@@ -1,5 +1,3 @@
-# Material Design Integration
-
 Beautiful Material Design field components for ng-forge dynamic forms, built with Angular Material.
 
 ---

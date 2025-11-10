@@ -1,5 +1,3 @@
-# Conditional Expressions
-
 Complete guide to conditional expression types, operators, and combining conditions.
 
 ## Expression Types
@@ -20,6 +18,7 @@ Check a specific field's value - the most common expression type.
 **Use when:** Checking a single field's value
 
 **Example:**
+
 ```typescript
 {
   key: 'companyName',
@@ -51,6 +50,7 @@ Use JavaScript expressions to check the entire form state.
 **Use when:** Complex logic involving multiple fields
 
 **Example:**
+
 ```typescript
 {
   key: 'stateProvince',
@@ -80,6 +80,7 @@ Custom JavaScript validation on the field value.
 **Use when:** Custom logic on the current field
 
 **Example:**
+
 ```typescript
 {
   key: 'eventDate',
@@ -111,6 +112,7 @@ Advanced custom expressions with access to both field and form values.
 ### Equality Operators
 
 #### equals
+
 Exact match comparison.
 
 ```typescript
@@ -123,6 +125,7 @@ Exact match comparison.
 ```
 
 #### notEquals
+
 Not equal to comparison.
 
 ```typescript
@@ -137,6 +140,7 @@ Not equal to comparison.
 ### Comparison Operators
 
 #### greater
+
 Greater than comparison (numbers/dates).
 
 ```typescript
@@ -149,6 +153,7 @@ Greater than comparison (numbers/dates).
 ```
 
 #### less
+
 Less than comparison.
 
 ```typescript
@@ -161,6 +166,7 @@ Less than comparison.
 ```
 
 #### greaterOrEqual
+
 Greater than or equal to.
 
 ```typescript
@@ -173,6 +179,7 @@ Greater than or equal to.
 ```
 
 #### lessOrEqual
+
 Less than or equal to.
 
 ```typescript
@@ -187,6 +194,7 @@ Less than or equal to.
 ### String Operators
 
 #### contains
+
 Check if string/array contains value.
 
 ```typescript
@@ -199,6 +207,7 @@ Check if string/array contains value.
 ```
 
 #### notContains
+
 Check if string/array doesn't contain value.
 
 ```typescript
@@ -211,6 +220,7 @@ Check if string/array doesn't contain value.
 ```
 
 #### startsWith
+
 Check if string starts with value.
 
 ```typescript
@@ -223,6 +233,7 @@ Check if string starts with value.
 ```
 
 #### endsWith
+
 Check if string ends with value.
 
 ```typescript
@@ -235,6 +246,7 @@ Check if string ends with value.
 ```
 
 #### matches
+
 Regular expression match.
 
 ```typescript
@@ -249,6 +261,7 @@ Regular expression match.
 ### Array Operators
 
 #### in
+
 Value is in array.
 
 ```typescript
@@ -261,6 +274,7 @@ Value is in array.
 ```
 
 #### notIn
+
 Value is not in array.
 
 ```typescript
@@ -540,6 +554,7 @@ Order items become read-only once order is shipped, delivered, or cancelled.
 ## Best Practices
 
 **Use the simplest operator:**
+
 ```typescript
 // ✅ Good - Simple and clear
 {
@@ -560,6 +575,7 @@ Order items become read-only once order is shipped, delivered, or cancelled.
 ```
 
 **Keep conditions readable:**
+
 ```typescript
 // ✅ Good - Easy to understand
 {
@@ -577,12 +593,13 @@ Order items become read-only once order is shipped, delivered, or cancelled.
 ```
 
 **Use descriptive error messages:**
+
 ```typescript
 // ✅ Good - Clear why field is required
-errorMessage: 'Company name is required for business accounts'
+errorMessage: 'Company name is required for business accounts';
 
 // ❌ Avoid - Generic message
-errorMessage: 'This field is required'
+errorMessage: 'This field is required';
 ```
 
 ## ConditionalExpression Interface

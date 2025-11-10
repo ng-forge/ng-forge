@@ -1,5 +1,3 @@
-# User Registration Form
-
 Complete example of a user registration form with validation, conditional logic, and proper type safety.
 
 ## Live Demo

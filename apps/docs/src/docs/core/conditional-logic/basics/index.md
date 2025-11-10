@@ -1,5 +1,3 @@
-# Conditional Logic Basics
-
 Control field behavior dynamically based on form state. ng-forge provides a declarative API for conditional visibility, required state, and readonly state that maps directly to Angular's signal forms.
 
 ## Signal Forms Integration
@@ -202,6 +200,7 @@ The most common conditional expression checks a specific field's value:
 ```
 
 **Components:**
+
 - `type: 'fieldValue'` - Check a specific field
 - `fieldPath` - The field key to check
 - `operator` - Comparison operator (see [Expressions](../expressions/))
@@ -232,46 +231,52 @@ const config = {
       value: '',
       label: 'Email Address',
       email: true,
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'contactMethod',
-          operator: 'notEquals',
-          value: 'email',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'contactMethod',
+            operator: 'notEquals',
+            value: 'email',
+          },
         },
-      }, {
-        type: 'required',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'contactMethod',
-          operator: 'equals',
-          value: 'email',
+        {
+          type: 'required',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'contactMethod',
+            operator: 'equals',
+            value: 'email',
+          },
         },
-      }],
+      ],
     },
     {
       key: 'phone',
       type: 'input',
       value: '',
       label: 'Phone Number',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'contactMethod',
-          operator: 'notEquals',
-          value: 'phone',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'contactMethod',
+            operator: 'notEquals',
+            value: 'phone',
+          },
         },
-      }, {
-        type: 'required',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'contactMethod',
-          operator: 'equals',
-          value: 'phone',
+        {
+          type: 'required',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'contactMethod',
+            operator: 'equals',
+            value: 'phone',
+          },
         },
-      }],
+      ],
       props: { type: 'tel' },
     },
     {
@@ -279,23 +284,26 @@ const config = {
       type: 'input',
       value: '',
       label: 'Mailing Address',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'contactMethod',
-          operator: 'notEquals',
-          value: 'mail',
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'contactMethod',
+            operator: 'notEquals',
+            value: 'mail',
+          },
         },
-      }, {
-        type: 'required',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'contactMethod',
-          operator: 'equals',
-          value: 'mail',
+        {
+          type: 'required',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'contactMethod',
+            operator: 'equals',
+            value: 'mail',
+          },
         },
-      }],
+      ],
     },
   ],
 } as const satisfies FormConfig;
@@ -306,6 +314,7 @@ This form shows only the relevant contact field based on the user's selection.
 ## When Logic Runs
 
 Conditional logic is evaluated:
+
 - **On form value change** - Any time a dependent field changes
 - **On initialization** - When the form is created
 - **Reactively** - Uses Angular's signal forms for automatic updates

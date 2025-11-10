@@ -1,5 +1,3 @@
-# Validation Basics
-
 ng-forge provides powerful, type-safe validation that integrates directly with Angular's signal forms. Start with simple shorthand validators and progress to advanced conditional validation as your needs grow.
 
 ## Signal Forms Integration
@@ -17,6 +15,7 @@ email(fieldPath);
 ```
 
 This tight integration means:
+
 - **Zero overhead** - Direct signal forms API usage
 - **Familiar patterns** - Same validators you know
 - **Full type safety** - TypeScript inference throughout
@@ -41,6 +40,7 @@ Choose based on your validation complexity:
 ```
 
 **Benefits:**
+
 - Concise and readable
 - Perfect for common validations
 - Type-safe with full IntelliSense
@@ -69,6 +69,7 @@ Choose based on your validation complexity:
 ```
 
 **Benefits:**
+
 - Conditional validation
 - Custom error messages
 - Dynamic validator values
@@ -95,6 +96,7 @@ Choose based on your validation complexity:
 ```
 
 **Benefits:**
+
 - Dynamic field behavior
 - Conditional required fields
 - See [Conditional Logic](../../conditional-logic/) for details
@@ -196,9 +198,15 @@ All validators must pass for the field to be valid.
 Each validator has a built-in error message:
 
 ```typescript
-{ required: true } // → "This field is required"
-{ email: true } // → "Please enter a valid email address"
-{ minLength: 8 } // → "Minimum length is 8 characters"
+{
+  required: true;
+} // → "This field is required"
+{
+  email: true;
+} // → "Please enter a valid email address"
+{
+  minLength: 8;
+} // → "Minimum length is 8 characters"
 ```
 
 ### Custom Messages
@@ -290,6 +298,7 @@ const config = {
 ## When Validation Runs
 
 Validation occurs:
+
 - **On blur** - When user leaves a field
 - **On change** - As user types (after first blur)
 - **On submit** - When form is submitted

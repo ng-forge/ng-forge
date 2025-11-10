@@ -1,5 +1,3 @@
-# Validation Advanced
-
 Advanced validation techniques including conditional validators, dynamic values, and cross-field validation.
 
 ## Validators Array
@@ -245,51 +243,57 @@ const config = {
       key: 'companyName',
       type: 'input',
       value: '',
-      validators: [{
-        type: 'required',
-        when: {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'equals',
-          value: 'business',
+      validators: [
+        {
+          type: 'required',
+          when: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'business',
+          },
+          errorMessage: 'Company name is required for business accounts',
         },
-        errorMessage: 'Company name is required for business accounts',
-      }, {
-        type: 'minLength',
-        value: 2,
-        when: {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'equals',
-          value: 'business',
+        {
+          type: 'minLength',
+          value: 2,
+          when: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'business',
+          },
+          errorMessage: 'Company name must be at least 2 characters',
         },
-        errorMessage: 'Company name must be at least 2 characters',
-      }],
+      ],
     },
     {
       key: 'taxId',
       type: 'input',
       value: '',
-      validators: [{
-        type: 'required',
-        when: {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'equals',
-          value: 'business',
+      validators: [
+        {
+          type: 'required',
+          when: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'business',
+          },
+          errorMessage: 'Tax ID is required for business accounts',
         },
-        errorMessage: 'Tax ID is required for business accounts',
-      }, {
-        type: 'pattern',
-        value: '^[0-9]{2}-[0-9]{7}$',
-        when: {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'equals',
-          value: 'business',
+        {
+          type: 'pattern',
+          value: '^[0-9]{2}-[0-9]{7}$',
+          when: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'business',
+          },
+          errorMessage: 'Tax ID must be in format XX-XXXXXXX',
         },
-        errorMessage: 'Tax ID must be in format XX-XXXXXXX',
-      }],
+      ],
     },
   ],
 } as const satisfies FormConfig;
@@ -354,6 +358,7 @@ const config = {
 ## Best Practices
 
 **Use shorthand when possible:**
+
 ```typescript
 // ✅ Good - Simple and clear
 { required: true, email: true }
@@ -363,6 +368,7 @@ const config = {
 ```
 
 **Combine shorthand with validators array:**
+
 ```typescript
 // ✅ Good - Best of both
 {
@@ -377,15 +383,17 @@ const config = {
 ```
 
 **Provide clear error messages:**
+
 ```typescript
 // ✅ Good - Specific and actionable
-errorMessage: 'Tax ID is required for business accounts'
+errorMessage: 'Tax ID is required for business accounts';
 
 // ❌ Avoid - Generic and unhelpful
-errorMessage: 'Invalid value'
+errorMessage: 'Invalid value';
 ```
 
 **Keep conditions simple:**
+
 ```typescript
 // ✅ Good - Easy to understand
 when: {

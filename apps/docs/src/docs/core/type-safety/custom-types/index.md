@@ -1,5 +1,3 @@
-# Custom Types & Advanced Usage
-
 Extending the type system with custom field types, runtime validation, and type guards.
 
 ## Custom Field Types
@@ -56,12 +54,13 @@ declare module '@ng-forge/dynamic-form' {
   interface FieldRegistryLeaves {
     'color-picker': ColorPickerField;
     'file-upload': FileUploadField;
-    'rating': RatingField;
+    rating: RatingField;
   }
 }
 ```
 
 This enables:
+
 - TypeScript autocomplete for `type: 'color-picker'`
 - Type checking for field properties
 - Automatic type inference in `InferFormValue`
@@ -81,14 +80,9 @@ import { ColorPickerField } from './custom-fields';
   template: `
     <div class="color-picker-field">
       @if (label(); as label) {
-        <label [for]="key()">{{ label }}</label>
+      <label [for]="key()">{{ label }}</label>
       }
-      <input
-        type="color"
-        [field]="field()"
-        [id]="key()"
-        [disabled]="field().disabled()"
-      />
+      <input type="color" [field]="field()" [id]="key()" [disabled]="field().disabled()" />
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -143,14 +137,7 @@ import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 import { ColorPickerFieldType, FileUploadFieldType, RatingFieldType } from './custom-fields.provider';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(
-      ...withMaterialFields(),
-      ColorPickerFieldType,
-      FileUploadFieldType,
-      RatingFieldType
-    ),
-  ],
+  providers: [provideDynamicForm(...withMaterialFields(), ColorPickerFieldType, FileUploadFieldType, RatingFieldType)],
 };
 ```
 
@@ -280,11 +267,7 @@ function processContainers(field: RegisteredFieldTypes) {
 ### Complete Example
 
 ```typescript
-import {
-  isContainerField,
-  isValueBearingField,
-  isPageField,
-} from '@ng-forge/dynamic-form';
+import { isContainerField, isValueBearingField, isPageField } from '@ng-forge/dynamic-form';
 
 function collectFormKeys(fields: RegisteredFieldTypes[]): string[] {
   const keys: string[] = [];
@@ -330,15 +313,15 @@ const USER_FORM = {
   ],
 } as const satisfies FormConfig;
 
-type UserFormValue = InferFormValue<typeof USER_FORM['fields']>;
+type UserFormValue = InferFormValue<(typeof USER_FORM)['fields']>;
 
 function onSubmit(value: unknown) {
   // Cast to inferred type
   const data = value as UserFormValue;
 
   console.log(data.username); // string
-  console.log(data.email);    // string
-  console.log(data.age);      // number | undefined
+  console.log(data.email); // string
+  console.log(data.age); // number | undefined
 }
 ```
 
@@ -377,8 +360,8 @@ function onSubmit(value: unknown) {
   // Type-safe access
   const data = result.data;
   console.log(data.username); // string
-  console.log(data.email);    // string
-  console.log(data.age);      // number | undefined
+  console.log(data.email); // string
+  console.log(data.age); // number | undefined
 }
 ```
 
@@ -457,9 +440,9 @@ const config = {
       key: 'email',
       type: 'input',
       value: '',
-      required: true,    // Removes undefined from type
-      email: true,       // Email validation
-      minLength: 5,      // Min length validation
+      required: true, // Removes undefined from type
+      email: true, // Email validation
+      minLength: 5, // Min length validation
     },
   ],
 } as const satisfies FormConfig;
@@ -513,16 +496,18 @@ const config = {
       key: 'taxId',
       type: 'input',
       value: '',
-      logic: [{
-        type: 'required',
-        condition: {
-          type: 'fieldValue',
-          fieldPath: 'accountType',
-          operator: 'equals',
-          value: 'business',
+      logic: [
+        {
+          type: 'required',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'business',
+          },
+          errorMessage: 'Tax ID required for business accounts',
         },
-        errorMessage: 'Tax ID required for business accounts',
-      }],
+      ],
     },
   ],
 } as const satisfies FormConfig;
@@ -659,11 +644,7 @@ Create helper functions for common field configurations:
 // helpers.ts
 import type { ColorPickerField, RatingField } from './types';
 
-export function colorPicker(
-  key: string,
-  label: string,
-  options?: Partial<ColorPickerField>
-): ColorPickerField {
+export function colorPicker(key: string, label: string, options?: Partial<ColorPickerField>): ColorPickerField {
   return {
     type: 'color-picker',
     key,
@@ -673,11 +654,7 @@ export function colorPicker(
   };
 }
 
-export function rating(
-  key: string,
-  label: string,
-  options?: Partial<RatingField>
-): RatingField {
+export function rating(key: string, label: string, options?: Partial<RatingField>): RatingField {
   return {
     type: 'rating',
     key,
@@ -693,7 +670,7 @@ const config = {
   fields: [
     colorPicker('brandColor', 'Brand Color', { required: true }),
     rating('satisfaction', 'How satisfied are you?', {
-      props: { max: 10, allowHalf: true }
+      props: { max: 10, allowHalf: true },
     }),
   ],
 } as const satisfies FormConfig;
