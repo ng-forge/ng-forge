@@ -95,7 +95,7 @@ export class RegistrationComponent {
 
 ## See It In Action
 
-{{ NgDocActions.playground("DemoFormPlayground") }}
+{{ NgDocActions.demo("DemoFormPlayground") }}
 
 ## Full Type Safety with Zero Type Annotations
 

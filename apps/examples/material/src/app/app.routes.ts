@@ -61,6 +61,10 @@ export const appRoutes: Route[] = [
         path: 'user-registration',
         loadComponent: () => import('./examples/user-registration-demo.component').then((m) => m.UserRegistrationDemoComponent),
       },
+      {
+        path: 'login',
+        loadComponent: () => import('./examples/login-demo.component').then((m) => m.LoginDemoComponent),
+      },
     ],
   },
 ];
