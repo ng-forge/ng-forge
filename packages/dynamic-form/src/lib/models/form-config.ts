@@ -1,7 +1,8 @@
 import { Schema } from '@angular/forms/signals';
 import { InferFormValue, RegisteredFieldTypes } from './types';
 import { SchemaDefinition } from './schemas';
-import { EvaluationContext } from './expressions';
+import { ContextAwareValidator, SimpleCustomValidator, TreeValidator } from '../core/validation/validator-types';
+import { CustomFunction } from '../core/expressions/custom-function-types';
 
 /**
  * Configuration interface for defining dynamic form structure and behavior.
@@ -107,7 +108,7 @@ export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredF
  * Signal forms adapter configuration for advanced form behavior.
  *
  * Provides configuration options for signal forms integration including
- * legacy migration, custom functions, and validation behavior.
+ * legacy migration, custom functions, and custom validators.
  *
  * @example
  * ```typescript
@@ -120,6 +121,24 @@ export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredF
  *       style: 'currency',
  *       currency: 'USD'
  *     }).format(context.value)
+ *   },
+ *   simpleValidators: {
+ *     noSpaces: (value) => {
+ *       return typeof value === 'string' && value.includes(' ')
+ *         ? { kind: 'noSpaces', message: 'Spaces not allowed' }
+ *         : null;
+ *     }
+ *   },
+ *   contextValidators: {
+ *     lessThanField: (ctx, params) => {
+ *       const value = ctx.value();
+ *       const otherField = params?.field as string;
+ *       const otherValue = ctx.root()[otherField]?.value();
+ *       if (otherValue !== undefined && value >= otherValue) {
+ *         return { kind: 'notLessThan', message: `Must be less than ${otherField}` };
+ *       }
+ *       return null;
+ *     }
  *   }
  * }
  * ```
@@ -138,14 +157,15 @@ export interface SignalFormsConfig {
   migrateLegacyValidation?: boolean;
 
   /**
-   * Custom evaluation functions for expressions.
+   * Custom evaluation functions for conditional expressions.
    *
-   * Functions that can be called within field expressions for
-   * conditional logic, computed values, and custom validation.
+   * Used for: when/readonly/disabled logic
+   * Return type: any value (typically boolean)
    *
    * @example
    * ```typescript
    * customFunctions: {
+   *   isAdult: (context) => context.age >= 18,
    *   calculateAge: (context) => {
    *     const birthDate = new Date(context.birthDate);
    *     return new Date().getFullYear() - birthDate.getFullYear();
@@ -153,7 +173,80 @@ export interface SignalFormsConfig {
    * }
    * ```
    */
-  customFunctions?: Record<string, (context: EvaluationContext) => unknown>;
+  customFunctions?: Record<string, CustomFunction>;
+
+  /**
+   * Simple custom validators (value, formValue) => ValidationError | null
+   *
+   * Used for: basic validation that only needs field value and form value
+   * Return type: ValidationError | null
+   *
+   * @example
+   * ```typescript
+   * simpleValidators: {
+   *   noSpaces: (value) => {
+   *     return typeof value === 'string' && value.includes(' ')
+   *       ? { kind: 'noSpaces', message: 'Spaces not allowed' }
+   *       : null;
+   *   },
+   *   minLength3: (value) => {
+   *     return typeof value === 'string' && value.length < 3
+   *       ? { kind: 'minLength', message: 'Must be at least 3 characters' }
+   *       : null;
+   *   }
+   * }
+   * ```
+   */
+  simpleValidators?: Record<string, SimpleCustomValidator>;
+
+  /**
+   * Context-aware validators (ctx, params?) => ValidationError | null
+   *
+   * Used for: validation that needs access to field state or other fields
+   * Return type: ValidationError | null
+   *
+   * @example
+   * ```typescript
+   * contextValidators: {
+   *   lessThanField: (ctx, params) => {
+   *     const value = ctx.value();
+   *     const otherField = params?.field as string;
+   *     const otherValue = ctx.root()[otherField]?.value();
+   *     if (otherValue !== undefined && value >= otherValue) {
+   *       return { kind: 'notLessThan', message: `Must be less than ${otherField}` };
+   *     }
+   *     return null;
+   *   }
+   * }
+   * ```
+   */
+  contextValidators?: Record<string, ContextAwareValidator>;
+
+  /**
+   * Tree validators for cross-field validation (ctx, params?) => ValidationError | ValidationError[] | null
+   *
+   * Used for: validation relationships between multiple fields
+   * Can target errors to specific child fields
+   *
+   * @example
+   * ```typescript
+   * treeValidators: {
+   *   passwordsMatch: (ctx) => {
+   *     const password = ctx.password?.value();
+   *     const confirmPassword = ctx.confirmPassword?.value();
+   *     if (password && confirmPassword && password !== confirmPassword) {
+   *       return {
+   *         field: ctx.confirmPassword,
+   *         kind: 'passwordMismatch',
+   *         message: 'Passwords must match'
+   *       };
+   *     }
+   *     return null;
+   *   }
+   * }
+   * ```
+   */
+  treeValidators?: Record<string, TreeValidator>;
 
   /**
    * Strict mode for expression evaluation.

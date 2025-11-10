@@ -126,6 +126,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
+  private readonly functionRegistry = inject(FunctionRegistryService);
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
@@ -474,6 +475,9 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     // Set up initialization tracking
     this.setupInitializationTracking();
 
+    // Register custom functions and validators from signalFormsConfig
+    this.setupFunctionAndValidatorRegistration();
+
     // For paged forms, emit initialization event when pages are defined
     explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
       if (mode === 'paged' && pages.length > 0) {
@@ -609,6 +613,54 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
           this.initializedSubject.error(error);
         },
       });
+  }
+
+  /**
+   * Register custom functions and validators from signalFormsConfig
+   *
+   * This effect runs whenever the config changes and registers any custom functions
+   * or validators defined in signalFormsConfig. It clears existing registrations
+   * before adding new ones to ensure clean state on config changes.
+   */
+  private setupFunctionAndValidatorRegistration(): void {
+    explicitEffect([this.config], ([config]) => {
+      const signalFormsConfig = config.signalFormsConfig;
+
+      // Clear existing registrations to ensure clean state
+      this.functionRegistry.clearAll();
+
+      if (!signalFormsConfig) {
+        return;
+      }
+
+      // Register custom functions
+      if (signalFormsConfig.customFunctions) {
+        Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
+          this.functionRegistry.registerCustomFunction(name, fn);
+        });
+      }
+
+      // Register simple validators
+      if (signalFormsConfig.simpleValidators) {
+        Object.entries(signalFormsConfig.simpleValidators).forEach(([name, fn]) => {
+          this.functionRegistry.registerSimpleValidator(name, fn);
+        });
+      }
+
+      // Register context-aware validators
+      if (signalFormsConfig.contextValidators) {
+        Object.entries(signalFormsConfig.contextValidators).forEach(([name, fn]) => {
+          this.functionRegistry.registerContextValidator(name, fn);
+        });
+      }
+
+      // Register tree validators
+      if (signalFormsConfig.treeValidators) {
+        Object.entries(signalFormsConfig.treeValidators).forEach(([name, fn]) => {
+          this.functionRegistry.registerTreeValidator(name, fn);
+        });
+      }
+    });
   }
 
   ngOnDestroy(): void {

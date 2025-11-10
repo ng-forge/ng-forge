@@ -227,6 +227,190 @@ Customize validation messages:
 }
 ```
 
+### Custom Validators
+
+ng-forge supports three levels of custom validators to handle any validation scenario:
+
+#### 1. Simple Validators
+
+Simple validators receive the field value and entire form value. Perfect for basic validation logic:
+
+```typescript
+import { SimpleCustomValidator } from '@ng-forge/dynamic-form';
+
+const noSpaces: SimpleCustomValidator<string> = (value, formValue) => {
+  if (typeof value === 'string' && value.includes(' ')) {
+    return { kind: 'noSpaces', message: 'Spaces not allowed' };
+  }
+  return null;
+};
+
+// Register and use
+const config = {
+  fields: [
+    {
+      key: 'username',
+      type: 'input',
+      value: '',
+      label: 'Username',
+      validators: [{ type: 'custom', functionName: 'noSpaces' }],
+    },
+  ],
+  signalFormsConfig: {
+    simpleValidators: {
+      noSpaces,
+    },
+  },
+};
+```
+
+#### 2. Context-Aware Validators
+
+Context-aware validators receive the full FieldContext, giving access to field state and other fields:
+
+```typescript
+import { ContextAwareValidator } from '@ng-forge/dynamic-form';
+
+const lessThanField: ContextAwareValidator<number> = (ctx, params) => {
+  const value = ctx.value();
+  const otherFieldName = params?.field as string;
+  const rootValue = ctx.root()().value() as any;
+  const otherValue = rootValue[otherFieldName];
+
+  if (otherValue !== undefined && value >= otherValue) {
+    return {
+      kind: 'notLessThan',
+      message: `Must be less than ${otherFieldName}`,
+    };
+  }
+  return null;
+};
+
+// Use with parameters
+const config = {
+  fields: [
+    { key: 'minAge', type: 'input', value: 0, label: 'Min Age' },
+    {
+      key: 'maxAge',
+      type: 'input',
+      value: 0,
+      label: 'Max Age',
+      validators: [
+        {
+          type: 'custom',
+          functionName: 'lessThanField',
+          params: { field: 'minAge' },
+        },
+      ],
+    },
+  ],
+  signalFormsConfig: {
+    contextValidators: {
+      lessThanField,
+    },
+  },
+};
+```
+
+#### 3. Tree Validators
+
+Tree validators validate relationships between multiple fields and can target errors to specific fields:
+
+```typescript
+import { TreeValidator } from '@ng-forge/dynamic-form';
+
+const passwordsMatch: TreeValidator = (ctx) => {
+  const formValue = ctx.value() as any;
+  const password = formValue.password;
+  const confirmPassword = formValue.confirmPassword;
+
+  if (password && confirmPassword && password !== confirmPassword) {
+    return {
+      kind: 'passwordMismatch',
+      message: 'Passwords must match',
+    };
+  }
+  return null;
+};
+
+// Apply to a group or form level
+const config = {
+  fields: [
+    {
+      key: 'credentials',
+      type: 'group',
+      label: 'Create Password',
+      validators: [{ type: 'customTree', functionName: 'passwordsMatch' }],
+      fields: [
+        {
+          key: 'password',
+          type: 'input',
+          value: '',
+          label: 'Password',
+          props: { type: 'password' },
+        },
+        {
+          key: 'confirmPassword',
+          type: 'input',
+          value: '',
+          label: 'Confirm Password',
+          props: { type: 'password' },
+        },
+      ],
+    },
+  ],
+  signalFormsConfig: {
+    treeValidators: {
+      passwordsMatch,
+    },
+  },
+};
+```
+
+#### Conditional Custom Validators
+
+Custom validators support conditional logic just like built-in validators:
+
+```typescript
+const businessEmailValidator: SimpleCustomValidator<string> = (value) => {
+  if (typeof value === 'string' && !value.endsWith('@company.com')) {
+    return { kind: 'businessEmail', message: 'Must use company email' };
+  }
+  return null;
+};
+
+const config = {
+  fields: [
+    { key: 'accountType', type: 'select', value: 'personal' },
+    {
+      key: 'email',
+      type: 'input',
+      value: '',
+      label: 'Email',
+      validators: [
+        { type: 'required' },
+        { type: 'email' },
+        {
+          type: 'custom',
+          functionName: 'businessEmail',
+          when: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'business',
+          },
+        },
+      ],
+    },
+  ],
+  signalFormsConfig: {
+    simpleValidators: {
+      businessEmail: businessEmailValidator,
+    },
+  },
+};
+```
+
 ## Conditional Logic
 
 ### Conditional Visibility
@@ -508,16 +692,56 @@ provideDynamicForm(...withIonicFields());
 interface FormConfig {
   fields: FieldConfig[];
   schemas?: SchemaDefinition[];
+  signalFormsConfig?: SignalFormsConfig;
 }
 
-// Validator configuration
-interface ValidatorConfig {
+// Signal forms configuration
+interface SignalFormsConfig {
+  migrateLegacyValidation?: boolean;
+  customFunctions?: Record<string, CustomFunction>;
+  simpleValidators?: Record<string, SimpleCustomValidator>;
+  contextValidators?: Record<string, ContextAwareValidator>;
+  treeValidators?: Record<string, TreeValidator>;
+  strictMode?: boolean;
+}
+
+// Validator configuration (discriminated union)
+type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | TreeValidatorConfig;
+
+interface BuiltInValidatorConfig {
   type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern';
   value?: number | string | RegExp;
   expression?: string;
   errorMessage?: string;
   when?: ConditionalExpression;
 }
+
+interface CustomValidatorConfig {
+  type: 'custom';
+  functionName: string;
+  params?: Record<string, unknown>;
+  errorMessage?: string;
+  when?: ConditionalExpression;
+}
+
+interface TreeValidatorConfig {
+  type: 'customTree';
+  functionName: string;
+  params?: Record<string, unknown>;
+  targetFields?: string[];
+  errorMessage?: string;
+  when?: ConditionalExpression;
+}
+
+// Custom validator function signatures
+type SimpleCustomValidator<TValue = unknown> = (value: TValue, formValue: unknown) => ValidationError | null;
+
+type ContextAwareValidator<TValue = unknown> = (ctx: FieldContext<TValue>, params?: Record<string, unknown>) => ValidationError | null;
+
+type TreeValidator<TModel = unknown> = (
+  ctx: FieldContext<TModel>,
+  params?: Record<string, unknown>
+) => ValidationError | ValidationError[] | null;
 
 // Logic configuration
 interface LogicConfig {
