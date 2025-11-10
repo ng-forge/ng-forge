@@ -40,31 +40,20 @@ import PageFieldComponent from '../../fields/page/page-field.component';
   imports: [PageFieldComponent],
   template: `
     <div class="df-page-orchestrator-content">
-      @for (pageField of pageFields(); track pageField.key; let i = $index) { @if (i === state().currentPageIndex) {
-      <!-- Current page: render immediately for instant navigation -->
+      @for (pageField of pageFields(); track pageField.key; let i = $index) {
+      <!-- All pages load immediately to prevent flicker, but only current is visible -->
+      @defer (on immediate) {
       <page-field
         [field]="pageField"
         [key]="pageField.key"
         [form]="form()"
         [fieldSignalContext]="fieldSignalContext()"
         [pageIndex]="i"
-        [isVisible]="true"
-      />
-      } @else {
-      <!-- Other pages: defer loading until browser is idle -->
-      @defer (on idle) {
-      <page-field
-        [field]="pageField"
-        [key]="pageField.key"
-        [form]="form()"
-        [fieldSignalContext]="fieldSignalContext()"
-        [pageIndex]="i"
-        [isVisible]="false"
+        [isVisible]="i === state().currentPageIndex"
       />
       } @placeholder {
-      <!-- Minimal placeholder for non-visible pages -->
       <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
-      } } }
+      } }
     </div>
   `,
   styleUrl: './page-orchestrator.component.scss',

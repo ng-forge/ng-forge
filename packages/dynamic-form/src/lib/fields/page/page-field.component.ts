@@ -41,6 +41,8 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
     '[class.disabled]': 'disabled()',
     '[class.df-page-visible]': 'isVisible()',
     '[class.df-page-hidden]': '!isVisible()',
+    '[style.display]': 'isVisible() ? "block" : "none"',
+    '[attr.aria-hidden]': '!isVisible()',
     '[attr.data-page-index]': 'pageIndex()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
