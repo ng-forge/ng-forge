@@ -65,12 +65,12 @@ export function createResolvedErrorsSignal<T>(
       }
 
       // Create observable for each error's resolved message
-      const errorResolvers = currentErrors.map((error: ValidationError) =>
-        resolveErrorMessage(error, msgs, defaultMsgs, injector)
-      );
+      const errorResolvers = currentErrors.map((error: ValidationError) => resolveErrorMessage(error, msgs, defaultMsgs, injector));
 
-      // Combine all error message observables into single array emission
-      return errorResolvers.length > 0 ? combineLatest(errorResolvers) : of([]);
+      // Combine all error message observables into single array emission, filtering out nulls
+      return errorResolvers.length > 0
+        ? combineLatest(errorResolvers).pipe(map((errors) => errors.filter((e): e is ResolvedError => e !== null)))
+        : of([]);
     })
   );
 
@@ -81,7 +81,7 @@ export function createResolvedErrorsSignal<T>(
 
 /**
  * Resolves a single error message from DynamicText sources with fallback logic
- * Priority: field-level message → default message → built-in error message
+ * Priority: field-level message → default message → no message (logs warning)
  * @internal
  */
 function resolveErrorMessage(
@@ -89,18 +89,27 @@ function resolveErrorMessage(
   fieldMessages: ValidationMessages,
   defaultMessages: ValidationMessages,
   injector: Injector
-): Observable<ResolvedError> {
+): Observable<ResolvedError | null> {
   // Check for field-level custom message first
   const fieldMessage = fieldMessages[error.kind];
 
   // Fall back to default message if no field-level message exists
   const defaultMessage = defaultMessages[error.kind];
 
-  // Determine which message to use: field-level → default → built-in
+  // Determine which message to use: field-level → default
   const messageToUse = fieldMessage ?? defaultMessage;
 
+  // If no message found, log warning and return null (will be filtered out)
+  if (!messageToUse) {
+    console.warn(
+      `[ng-forge] No validation message found for error kind "${error.kind}". ` +
+        `Please provide a message via field-level validationMessages or form-level defaultValidationMessages.`
+    );
+    return of(null);
+  }
+
   // Convert DynamicText to Observable
-  const messageObservable = messageToUse ? dynamicTextToObservable(messageToUse, injector) : of(error.message || 'Validation error');
+  const messageObservable = dynamicTextToObservable(messageToUse, injector);
 
   // Apply parameter interpolation
   return messageObservable.pipe(

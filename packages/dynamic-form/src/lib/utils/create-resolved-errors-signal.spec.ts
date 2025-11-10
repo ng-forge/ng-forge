@@ -78,7 +78,7 @@ describe('createResolvedErrorsSignal', () => {
       });
     });
 
-    it('should fall back to built-in message when neither field-level nor default is provided', () => {
+    it('should not show error and log warning when neither field-level nor default is provided', () => {
       runInInjectionContext(injector, () => {
         const initialValue = signal({ email: '' });
         const testForm = form(
@@ -94,14 +94,20 @@ describe('createResolvedErrorsSignal', () => {
         const fieldMessages = signal<ValidationMessages>({});
         const defaultMessages = signal<ValidationMessages>({});
 
+        // Spy on console.warn to verify warning is logged
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
         const resolvedErrors = createResolvedErrorsSignal(emailField, fieldMessages, defaultMessages);
 
         TestBed.flushEffects();
 
-        // Should use built-in error message (fallback when no custom message)
-        expect(resolvedErrors().length).toBe(1);
-        expect(resolvedErrors()[0].kind).toBe('required');
-        expect(resolvedErrors()[0].message).toBe('Validation error');
+        // Should not show any errors (filtered out)
+        expect(resolvedErrors().length).toBe(0);
+
+        // Should log a warning
+        expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[ng-forge] No validation message found for error kind "required"'));
+
+        warnSpy.mockRestore();
       });
     });
 

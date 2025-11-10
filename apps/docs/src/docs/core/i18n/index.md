@@ -104,11 +104,11 @@ export class MyFormComponent {
 }
 ```
 
-The fallback priority is:
+The message resolution priority is:
 
 1. **Field-level** `validationMessages` (highest priority)
 2. **Form-level** `defaultValidationMessages` (fallback)
-3. **Built-in** error messages (last resort)
+3. **No message** - If neither is provided, the error is not displayed and a warning is logged to the console
 
 This approach is especially useful when you have many fields with the same validation rules - define the translations once instead of repeating them for each field.
 
