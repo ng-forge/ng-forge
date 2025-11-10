@@ -287,6 +287,8 @@ provideDynamicForm([{ name: 'my-input', loadComponent: () => MyCustomInput }]);
 
 Creating custom field components is straightforward - no `ControlValueAccessor` boilerplate required. Just use Angular's signal forms primitives:
 
+{% raw %}
+
 ```typescript
 // Create a custom field component with minimal code
 @Component({
@@ -307,6 +309,8 @@ export class StarRatingComponent {
   rating = model<number>(0); // Signal forms integration - that's it!
 }
 ```
+
+{% endraw %}
 
 **No `writeValue()`, no `registerOnChange()`, no `registerOnTouched()`.** Just signals and Angular's `Field` directive.
 

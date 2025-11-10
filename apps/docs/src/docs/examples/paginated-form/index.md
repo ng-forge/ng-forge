@@ -1,0 +1,339 @@
+# Paginated Form (Multi-Step)
+
+A comprehensive multi-step registration form demonstrating the `page` field type for creating wizards and stepped workflows.
+
+## Live Demo
+
+{{ NgDocActions.demo("PaginatedFormDemoComponent", { container: false }) }}
+
+## Overview
+
+This example showcases a 4-step registration form with:
+
+- **Page navigation** with Previous/Next/Submit buttons
+- **Per-page validation** that prevents moving forward with invalid data
+- **Progress tracking** through multiple steps
+- **Flattened form values** - page fields don't nest their children
+- **Mixed field types** across different steps
+
+## Implementation
+
+{% raw %}
+
+```typescript
+import { Component, signal } from '@angular/core';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import '@ng-forge/dynamic-form-material';
+
+@Component({
+  selector: 'app-paginated-form',
+  imports: [DynamicForm, JsonPipe],
+  template: `
+    <dynamic-form [config]="config" [(value)]="formValue" />
+  `,
+})
+export class PaginatedFormComponent {
+  formValue = signal({});
+
+  config = {
+    fields: [
+      // Step 1: Personal Information
+      {
+        key: 'step1',
+        type: 'page',
+        title: 'Personal Information',
+        description: 'Please provide your basic information',
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            value: '',
+            required: true,
+          },
+          {
+            key: 'lastName',
+            type: 'input',
+            label: 'Last Name',
+            value: '',
+            required: true,
+          },
+          {
+            key: 'birthDate',
+            type: 'datepicker',
+            label: 'Date of Birth',
+            required: true,
+          },
+          {
+            type: 'next',
+            key: 'step1Next',
+            label: 'Continue to Contact Info',
+          },
+        ],
+      },
+
+      // Step 2: Contact Information
+      {
+        key: 'step2',
+        type: 'page',
+        title: 'Contact Information',
+        description: 'How can we reach you?',
+        fields: [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email Address',
+            value: '',
+            required: true,
+            email: true,
+          },
+          {
+            key: 'phone',
+            type: 'input',
+            label: 'Phone Number',
+            value: '',
+            required: true,
+          },
+          {
+            key: 'contactPreference',
+            type: 'radio',
+            label: 'Preferred Contact Method',
+            value: 'email',
+            options: [
+              { value: 'email', label: 'Email' },
+              { value: 'phone', label: 'Phone' },
+              { value: 'both', label: 'Either' },
+            ],
+          },
+          {
+            type: 'row',
+            key: 'step2Buttons',
+            fields: [
+              { type: 'previous', key: 'step2Previous', label: 'Back', col: 6 },
+              { type: 'next', key: 'step2Next', label: 'Continue', col: 6 },
+            ],
+          },
+        ],
+      },
+
+      // Step 3: Address
+      {
+        key: 'step3',
+        type: 'page',
+        title: 'Address',
+        description: 'Where do you live?',
+        fields: [
+          {
+            key: 'street',
+            type: 'input',
+            label: 'Street Address',
+            value: '',
+            required: true,
+          },
+          {
+            type: 'row',
+            key: 'cityStateRow',
+            fields: [
+              { key: 'city', type: 'input', label: 'City', value: '', required: true, col: 6 },
+              { key: 'state', type: 'select', label: 'State', required: true, options: [...], col: 6 },
+            ],
+          },
+          {
+            key: 'zipCode',
+            type: 'input',
+            label: 'ZIP Code',
+            value: '',
+            required: true,
+            pattern: /^\d{5}$/,
+          },
+          {
+            type: 'row',
+            key: 'step3Buttons',
+            fields: [
+              { type: 'previous', key: 'step3Previous', label: 'Back', col: 6 },
+              { type: 'next', key: 'step3Next', label: 'Continue', col: 6 },
+            ],
+          },
+        ],
+      },
+
+      // Step 4: Preferences & Completion
+      {
+        key: 'step4',
+        type: 'page',
+        title: 'Preferences',
+        description: 'Tell us about your preferences',
+        fields: [
+          {
+            key: 'interests',
+            type: 'multi-checkbox',
+            label: 'Interests',
+            options: [
+              { value: 'technology', label: 'Technology' },
+              { value: 'sports', label: 'Sports' },
+              // ... more options
+            ],
+          },
+          {
+            key: 'newsletter',
+            type: 'checkbox',
+            label: 'Subscribe to newsletter',
+            checked: true,
+          },
+          {
+            key: 'terms',
+            type: 'checkbox',
+            label: 'I agree to the terms and conditions',
+            required: true,
+          },
+          {
+            type: 'row',
+            key: 'step4Buttons',
+            fields: [
+              { type: 'previous', key: 'step4Previous', label: 'Back', col: 6 },
+              { type: 'submit', key: 'submit', label: 'Complete Registration', col: 6 },
+            ],
+          },
+        ],
+      },
+    ],
+  } as const satisfies FormConfig;
+}
+```
+
+{% endraw %}
+
+## Form Value Structure
+
+Note that page fields use `valueHandling: 'flatten'`, meaning their children are flattened to the parent level:
+
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "birthDate": "1990-01-01",
+  "email": "john@example.com",
+  "phone": "+1-555-0000",
+  "contactPreference": "email",
+  "street": "123 Main St",
+  "city": "New York",
+  "state": "ny",
+  "zipCode": "10001",
+  "interests": ["technology", "sports"],
+  "newsletter": true,
+  "terms": true
+}
+```
+
+The page structure is **not reflected** in the form value - all fields are at the top level.
+
+## Key Features
+
+### Navigation Buttons
+
+- **`type: 'next'`** - Validates current page and moves to next step
+- **`type: 'previous'`** - Goes to previous step without validation
+- **`type: 'submit'`** - Validates entire form and submits
+
+### Per-Page Validation
+
+Each page validates independently. Users cannot proceed to the next page until all required fields on the current page are valid.
+
+### Page Configuration
+
+```typescript
+{
+  key: 'step1',           // Required key
+  type: 'page',           // Page field type
+  title: 'Page Title',    // Optional page heading
+  description: '...',     // Optional page description
+  fields: [               // Child fields
+    // ... fields for this page
+  ],
+}
+```
+
+## Common Enhancements
+
+### Dynamic Steps
+
+Show/hide pages based on user choices:
+
+```typescript
+{
+  key: 'businessInfo',
+  type: 'page',
+  title: 'Business Information',
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'accountType',
+      operator: 'notEquals',
+      value: 'business',
+    },
+  }],
+  fields: [/* ... */],
+}
+```
+
+### Progress Indicator
+
+Add a custom progress component:
+
+{% raw %}
+
+```typescript
+template: `
+  <div class="progress-bar">
+    Step {{ currentPage() + 1 }} of {{ totalPages }}
+  </div>
+  <dynamic-form [config]="config" [(value)]="formValue" />
+`;
+```
+
+{% endraw %}
+
+### Conditional Validation
+
+Apply different validation rules per step:
+
+```typescript
+{
+  key: 'taxId',
+  type: 'input',
+  label: 'Tax ID',
+  value: '',
+  validators: [{
+    type: 'required',
+    when: {
+      type: 'fieldValue',
+      fieldPath: 'accountType',
+      operator: 'equals',
+      value: 'business',
+    },
+    errorMessage: 'Tax ID is required for business accounts',
+  }],
+}
+```
+
+## Use Cases
+
+- **Multi-step registration** - Break long forms into digestible steps
+- **Onboarding flows** - Guide users through setup processes
+- **Checkout processes** - Separate shipping, payment, and review
+- **Survey forms** - Organize questions into logical sections
+- **Complex data entry** - Reduce cognitive load with progressive disclosure
+
+## Related Examples
+
+- [User Registration Form](../user-registration) - Single-page registration with validation
+- [Contact Form](../contact-form) - Simple contact form
+- [Login Form](../login-form) - Basic authentication
+
+## Related Documentation
+
+- [Page Field Type](../../ui-libs-integrations/material/page) - Page field documentation
+- [Navigation Buttons](../../ui-libs-integrations/material/button#navigation-buttons) - Next, Previous, Submit buttons
+- [Conditional Logic](../../core/conditional-logic) - Show/hide pages dynamically
+- [Validation](../../core/validation) - Per-page and cross-page validation

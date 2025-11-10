@@ -65,6 +65,10 @@ export const appRoutes: Route[] = [
         path: 'login',
         loadComponent: () => import('./examples/login-demo.component').then((m) => m.LoginDemoComponent),
       },
+      {
+        path: 'paginated-form',
+        loadComponent: () => import('./examples/paginated-form-demo.component').then((m) => m.PaginatedFormDemoComponent),
+      },
     ],
   },
 ];
