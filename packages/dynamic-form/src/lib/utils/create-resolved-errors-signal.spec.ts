@@ -25,7 +25,7 @@ describe('createResolvedErrorsSignal', () => {
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
-          signal(emailField as FieldTree<string>),
+          emailField,
           fieldMessages,
           defaultMessages
         );
@@ -52,7 +52,7 @@ describe('createResolvedErrorsSignal', () => {
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
-          signal(emailField as FieldTree<string>),
+          emailField,
           fieldMessages,
           defaultMessages
         );
@@ -76,7 +76,7 @@ describe('createResolvedErrorsSignal', () => {
         const defaultMessages = signal<ValidationMessages>({});
 
         const resolvedErrors = createResolvedErrorsSignal(
-          signal(emailField as FieldTree<string>),
+          emailField,
           fieldMessages,
           defaultMessages
         );
@@ -112,7 +112,7 @@ describe('createResolvedErrorsSignal', () => {
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
-          signal(passwordField as FieldTree<string>),
+          passwordField,
           fieldMessages,
           defaultMessages
         );
@@ -142,7 +142,7 @@ describe('createResolvedErrorsSignal', () => {
         });
 
         const resolvedErrors = createResolvedErrorsSignal(
-          signal(ageField as FieldTree<number>),
+          ageField,
           fieldMessages,
           defaultMessages
         );
