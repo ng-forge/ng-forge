@@ -43,26 +43,17 @@ import { RegisteredFieldTypes } from '../../models';
   imports: [PageFieldComponent],
   template: `
     <div class="df-page-orchestrator-content">
-      @for (pageField of pageFields(); track pageField.key; let i = $index) { @if (i === state().currentPageIndex) {
-      <!-- Current page: render immediately -->
+      @for (pageField of pageFields(); track pageField.key; let i = $index) { @if (i === state().currentPageIndex || i ===
+      state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
+      <!-- Current and adjacent pages (±1): render immediately for flicker-free navigation -->
+      @defer (on immediate) {
       <page-field
         [field]="pageField"
         [key]="pageField.key"
         [form]="form()"
         [fieldSignalContext]="fieldSignalContext()"
         [pageIndex]="i"
-        [isVisible]="true"
-      />
-      } @else if (i === state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
-      <!-- Adjacent pages (±1): prefetch immediately for flicker-free navigation -->
-      @defer (prefetch on immediate) {
-      <page-field
-        [field]="pageField"
-        [key]="pageField.key"
-        [form]="form()"
-        [fieldSignalContext]="fieldSignalContext()"
-        [pageIndex]="i"
-        [isVisible]="false"
+        [isVisible]="i === state().currentPageIndex"
       />
       } @placeholder {
       <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
