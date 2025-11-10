@@ -322,16 +322,13 @@ fields: [
 
 ### Technical Details
 
-Under the hood, the page orchestrator uses a **3-tier loading strategy**:
+Under the hood, the page orchestrator uses a **2-tier loading strategy**:
 
 ```typescript
-@if (i === state().currentPageIndex) {
-  <!-- Current page: immediate -->
-  <page-field [isVisible]="true" />
-} @else if (i === state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
-  <!-- Adjacent pages: prefetch immediately -->
-  @defer (prefetch on immediate) {
-    <page-field [isVisible]="false" />
+@if (i === currentPageIndex || i === currentPageIndex + 1 || i === currentPageIndex - 1) {
+  <!-- Current and adjacent pages: render immediately (but hide adjacent) -->
+  @defer (on immediate) {
+    <page-field [isVisible]="i === currentPageIndex" />
   }
 } @else {
   <!-- Distant pages: defer until idle -->
@@ -343,10 +340,10 @@ Under the hood, the page orchestrator uses a **3-tier loading strategy**:
 
 This means:
 
-- **Smart prefetching** - Only adjacent pages preload, not all pages
-- **Visibility controlled via input** - Pages toggle with `isVisible` and CSS
-- **Memory savings** - Distant pages defer until browser is idle
-- **Instant navigation** - Next/previous always ready since they're prefetched
+- **Current + adjacent pages render immediately** - Using `@defer (on immediate)` to render during browser idle
+- **Visibility controlled via input and CSS** - Adjacent pages are fully rendered but hidden with `display: none`
+- **Memory savings** - Only 3 pages max in DOM (current + 2 adjacent), distant pages defer until idle
+- **Zero flicker navigation** - Next/previous pages already rendered, just toggle visibility
 
 ### Best Practices
 
