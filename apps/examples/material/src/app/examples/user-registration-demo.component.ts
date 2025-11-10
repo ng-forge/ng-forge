@@ -44,6 +44,10 @@ export class UserRegistrationDemoComponent {
         label: 'First Name',
         required: true,
         minLength: 2,
+        validationMessages: {
+          required: 'This field is required',
+          minLength: 'Must be at least {requiredLength} characters',
+        },
         props: {
           placeholder: 'Enter your first name',
         },
@@ -54,6 +58,10 @@ export class UserRegistrationDemoComponent {
         label: 'Last Name',
         required: true,
         minLength: 2,
+        validationMessages: {
+          required: 'This field is required',
+          minLength: 'Must be at least {requiredLength} characters',
+        },
         props: {
           placeholder: 'Enter your last name',
         },
@@ -64,6 +72,10 @@ export class UserRegistrationDemoComponent {
         label: 'Email Address',
         required: true,
         email: true,
+        validationMessages: {
+          required: 'This field is required',
+          email: 'Please enter a valid email address',
+        },
         props: {
           type: 'email',
           placeholder: 'user@example.com',
@@ -79,6 +91,11 @@ export class UserRegistrationDemoComponent {
         required: true,
         min: 18,
         max: 120,
+        validationMessages: {
+          required: 'This field is required',
+          min: 'Must be at least {min}',
+          max: 'Must not exceed {max}',
+        },
         props: {
           type: 'number',
           placeholder: '18',
@@ -89,6 +106,9 @@ export class UserRegistrationDemoComponent {
         type: 'select',
         label: 'Country',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'us', label: 'United States' },
           { value: 'uk', label: 'United Kingdom' },
@@ -109,6 +129,9 @@ export class UserRegistrationDemoComponent {
         type: 'select',
         label: 'Subscription Plan',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'free', label: 'Free - $0/month' },
           { value: 'pro', label: 'Pro - $10/month' },
@@ -141,6 +164,7 @@ export class UserRegistrationDemoComponent {
         key: 'submit',
         label: 'Create Account',
         className: 'button-btn',
+        col: 3,
         props: {
           color: 'primary',
         },

@@ -32,25 +32,16 @@ export class ToggleDemoComponent {
         key: 'darkMode',
         type: 'toggle',
         label: 'Dark Mode',
-        props: {
-          labelPlacement: 'start',
-        },
       },
       {
         key: 'notifications',
         type: 'toggle',
         label: 'Enable Notifications',
-        props: {
-          labelPlacement: 'start',
-        },
       },
       {
-        key: 'twoFactor',
+        key: 'autoSave',
         type: 'toggle',
-        label: 'Two-Factor Authentication',
-        props: {
-          labelPlacement: 'start',
-        },
+        label: 'Auto-save Changes',
       },
     ],
   } as const satisfies FormConfig;

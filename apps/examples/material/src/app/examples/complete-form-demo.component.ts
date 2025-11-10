@@ -32,11 +32,27 @@ export class CompleteFormDemoComponent {
   config = {
     fields: [
       {
+        key: 'title',
+        type: 'text',
+        label: 'Contact Us',
+        props: {
+          elementType: 'h2',
+        },
+      },
+      {
+        key: 'subtitle',
+        type: 'text',
+        label: "Fill out the form below and we'll get back to you as soon as possible",
+      },
+      {
         key: 'firstName',
         type: 'input',
         label: 'First Name',
         value: '',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         props: {
           placeholder: 'Your first name',
         },
@@ -47,6 +63,9 @@ export class CompleteFormDemoComponent {
         label: 'Last Name',
         value: '',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         props: {
           placeholder: 'Your last name',
         },
@@ -58,6 +77,10 @@ export class CompleteFormDemoComponent {
         value: '',
         required: true,
         email: true,
+        validationMessages: {
+          required: 'This field is required',
+          email: 'Please enter a valid email address',
+        },
         props: {
           type: 'email',
           placeholder: 'email@example.com',
@@ -87,6 +110,9 @@ export class CompleteFormDemoComponent {
         label: 'Biography',
         value: '',
         maxLength: 500,
+        validationMessages: {
+          maxLength: 'Must not exceed {maxLength} characters',
+        },
         props: {
           rows: 4,
           placeholder: 'Tell us about yourself',
@@ -150,6 +176,9 @@ export class CompleteFormDemoComponent {
         type: 'checkbox',
         label: 'I agree to the terms and conditions',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
       },
       {
         type: 'submit',

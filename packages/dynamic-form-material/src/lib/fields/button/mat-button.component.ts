@@ -13,13 +13,13 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[class]': 'className()',
   },
   template: `
     <button
       mat-raised-button
       [type]="props()?.type || 'button'"
       [color]="props()?.color || 'primary'"
-      [class]="className() || ''"
       [disabled]="disabled() || false"
       [attr.data-testid]="buttonTestId()"
       (click)="triggerEvent()"
@@ -27,6 +27,17 @@ import { AsyncPipe } from '@angular/common';
       {{ label() | dynamicText | async }}
     </button>
   `,
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+
+      button {
+        min-width: fit-content;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatButtonFieldComponent<TEvent extends FormEvent> implements MatButtonComponent<TEvent> {

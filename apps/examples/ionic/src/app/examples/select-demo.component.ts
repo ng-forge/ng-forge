@@ -29,32 +29,21 @@ export class SelectDemoComponent {
   config = {
     fields: [
       {
-        key: 'framework',
+        key: 'country',
         type: 'select',
-        label: 'Framework',
-        options: [
-          { value: 'angular', label: 'Angular' },
-          { value: 'react', label: 'React' },
-          { value: 'vue', label: 'Vue.js' },
-          { value: 'svelte', label: 'Svelte' },
-        ],
-        props: {
-          placeholder: 'Choose a framework',
+        label: 'Country',
+        required: true,
+        validationMessages: {
+          required: 'This field is required',
         },
-      },
-      {
-        key: 'language',
-        type: 'select',
-        label: 'Language',
         options: [
-          { value: 'typescript', label: 'TypeScript' },
-          { value: 'javascript', label: 'JavaScript' },
-          { value: 'python', label: 'Python' },
-          { value: 'java', label: 'Java' },
+          { value: 'us', label: 'United States' },
+          { value: 'uk', label: 'United Kingdom' },
+          { value: 'ca', label: 'Canada' },
+          { value: 'au', label: 'Australia' },
         ],
         props: {
-          placeholder: 'Choose a language',
-          multiple: true,
+          placeholder: 'Select your country',
         },
       },
     ],

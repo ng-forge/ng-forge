@@ -28,6 +28,9 @@ export class RadioDemoComponent {
         type: 'radio',
         label: 'Gender',
         required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'male', label: 'Male' },
           { value: 'female', label: 'Female' },

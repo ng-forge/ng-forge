@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonToggle } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { IonicErrorsComponent } from '../../shared/ionic-errors.component';
+import { IonNote, IonToggle } from '@ionic/angular/standalone';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { IonicToggleComponent, IonicToggleProps } from './ionic-toggle.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -11,7 +10,7 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-ionic-toggle',
-  imports: [IonToggle, IonicErrorsComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonToggle, IonNote, Field, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -26,7 +25,9 @@ import { AsyncPipe } from '@angular/common';
       {{ label() | dynamicText | async }}
     </ion-toggle>
 
-    <df-ionic-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
+    @for (error of errorsToDisplay(); track error.kind) {
+    <ion-note color="danger">{{ error.message }}</ion-note>
+    }
   `,
   styles: [
     `
@@ -57,4 +58,11 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<IonicToggleProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

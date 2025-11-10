@@ -23,39 +23,19 @@ export class ToggleDemoComponent {
   config = {
     fields: [
       {
-        key: 'basicToggle',
+        key: 'darkMode',
         type: 'toggle',
-        label: 'Basic Toggle',
-        props: {
-          helpText: 'Default toggle switch',
-        },
-      },
-      {
-        key: 'largeToggle',
-        type: 'toggle',
-        label: 'Large Toggle',
-        props: {
-          size: 'lg',
-          helpText: 'Large size toggle',
-        },
-      },
-      {
-        key: 'reverseToggle',
-        type: 'toggle',
-        label: 'Reverse Toggle',
-        props: {
-          reverse: true,
-          helpText: 'Toggle with label on the left',
-        },
+        label: 'Dark Mode',
       },
       {
         key: 'notifications',
         type: 'toggle',
         label: 'Enable Notifications',
-        checked: true,
-        props: {
-          helpText: 'Pre-checked toggle',
-        },
+      },
+      {
+        key: 'autoSave',
+        type: 'toggle',
+        label: 'Auto-save Changes',
       },
     ],
   } as const satisfies FormConfig;

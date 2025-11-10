@@ -31,23 +31,17 @@ export class MultiCheckboxDemoComponent {
       {
         key: 'interests',
         type: 'multi-checkbox',
-        label: 'Interests',
+        label: 'Select Your Interests',
+        required: true,
+        validationMessages: {
+          required: 'This field is required',
+        },
         options: [
           { value: 'sports', label: 'Sports' },
           { value: 'music', label: 'Music' },
-          { value: 'technology', label: 'Technology' },
-          { value: 'art', label: 'Art' },
-        ],
-      },
-      {
-        key: 'skills',
-        type: 'multi-checkbox',
-        label: 'Technical Skills',
-        options: [
-          { value: 'angular', label: 'Angular' },
-          { value: 'react', label: 'React' },
-          { value: 'vue', label: 'Vue.js' },
-          { value: 'node', label: 'Node.js' },
+          { value: 'reading', label: 'Reading' },
+          { value: 'travel', label: 'Travel' },
+          { value: 'cooking', label: 'Cooking' },
         ],
       },
     ],

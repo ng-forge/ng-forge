@@ -11,8 +11,9 @@ export * from './providers';
 // Services
 export * from './core/registry';
 
-// Field injection utility
+// Utilities
 export { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
+export * from './utils';
 
 // Field fields
 export * from './fields';

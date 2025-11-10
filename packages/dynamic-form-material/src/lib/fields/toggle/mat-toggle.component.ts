@@ -1,15 +1,15 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
-import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
+
 import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-toggle',
-  imports: [MatSlideToggle, MatErrorsComponent, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatSlideToggle, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
@@ -27,8 +27,9 @@ import { AsyncPipe } from '@angular/common';
 
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint | dynamicText | async }}</div>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <mat-error>{{ error.message }}</mat-error>
     }
-    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `
@@ -55,4 +56,11 @@ export default class MatToggleFieldComponent implements MatToggleComponent {
   readonly tabIndex = input<number>();
 
   readonly props = input<MatToggleProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

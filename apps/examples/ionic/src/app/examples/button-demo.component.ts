@@ -13,9 +13,6 @@ import { IonContent } from '@ionic/angular/standalone';
   template: `
     <ion-content>
       <div>
-        <h4>Button Examples</h4>
-        <p>Showcasing all Ionic button types with various colors and styles.</p>
-
         <dynamic-form [config]="config" [(value)]="formValue" />
 
         <div class="example-result">
@@ -35,12 +32,25 @@ export class ButtonDemoComponent {
       {
         key: 'email',
         type: 'input',
-        label: 'Email',
         value: '',
+        label: 'Email',
         required: true,
+        email: true,
+        validationMessages: {
+          required: 'This field is required',
+          email: 'Please enter a valid email address',
+        },
         props: {
           type: 'email',
-          placeholder: 'Enter email',
+          placeholder: 'Enter your email',
+        },
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Submit Form',
+        props: {
+          color: 'primary',
         },
       },
     ],

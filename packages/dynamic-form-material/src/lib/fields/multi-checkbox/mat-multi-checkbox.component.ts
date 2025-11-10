@@ -1,8 +1,15 @@
-import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText, DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-form';
-import { MatErrorsComponent } from '../../shared/mat-errors.component';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  shouldShowErrors,
+  ValidationMessages,
+  ValueType,
+} from '@ng-forge/dynamic-form';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -12,7 +19,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [MatCheckbox, MatErrorsComponent, ValueInArrayPipe, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatCheckbox, ValueInArrayPipe, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field(); @if (label(); as label) {
     <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
@@ -34,9 +41,9 @@ import { AsyncPipe } from '@angular/common';
 
     @if (props()?.hint; as hint) {
     <div class="mat-hint">{{ hint | dynamicText | async }}</div>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <mat-error>{{ error.message }}</mat-error>
     }
-
-    <mat-error><df-mat-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" /></mat-error>
   `,
   styles: [
     `
@@ -103,4 +110,12 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
       }
     });
   }
+
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

@@ -1,9 +1,16 @@
-import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
 import { Checkbox } from 'primeng/checkbox';
-import { DynamicText, DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-form';
-import { PrimeErrorsComponent } from '../../shared/prime-errors.component';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  FieldOption,
+  shouldShowErrors,
+  ValidationMessages,
+  ValueType,
+} from '@ng-forge/dynamic-form';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -12,23 +19,22 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-prime-multi-checkbox',
-  imports: [Checkbox, PrimeErrorsComponent, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @if (label(); as label) {
     <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
-    <div class="checkbox-group" [class]="props()?.styleClass || ''">
+    <div class="checkbox-group" [class]="groupClasses()">
       @for (option of options(); track option.value) {
       <div class="checkbox-option">
         <p-checkbox
           [inputId]="key() + '-' + option.value"
           [binary]="false"
           [value]="option.value"
-          [ngModel]="valueViewModel()"
+          [(ngModel)]="valueViewModel"
           [disabled]="f().disabled() || option.disabled || false"
-          (ngModelChange)="onCheckboxChange($event)"
         />
         <label [for]="key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
       </div>
@@ -36,9 +42,9 @@ import { AsyncPipe } from '@angular/common';
     </div>
     @if (props()?.hint; as hint) {
     <small class="p-hint">{{ hint | dynamicText | async }}</small>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <small class="p-error">{{ error.message }}</small>
     }
-
-    <df-prime-errors [errors]="f().errors()" [invalid]="f().invalid()" [touched]="f().touched()" />
   `,
   styles: [
     `
@@ -73,6 +79,29 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<PrimeMultiCheckboxProps>();
+  readonly validationMessages = input<ValidationMessages>();
+
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly showErrors = shouldShowErrors(this.field);
+
+  // Combine showErrors and resolvedErrors to avoid @if wrapper
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  readonly groupClasses = computed(() => {
+    const classes: string[] = [];
+
+    const styleClass = this.props()?.styleClass;
+    if (styleClass) {
+      classes.push(styleClass);
+    }
+
+    // Add p-invalid class when there are errors to display
+    if (this.errorsToDisplay().length > 0) {
+      classes.push('p-invalid');
+    }
+
+    return classes.join(' ');
+  });
 
   valueViewModel = linkedSignal<T[]>(() => this.field()().value(), { equal: isEqual });
 
@@ -92,9 +121,5 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
         throw new Error(`Duplicate option values detected in prime-multi-checkbox: ${duplicates.join(', ')}`);
       }
     });
-  }
-
-  onCheckboxChange(newValues: T[]): void {
-    this.valueViewModel.set(newValues);
   }
 }
