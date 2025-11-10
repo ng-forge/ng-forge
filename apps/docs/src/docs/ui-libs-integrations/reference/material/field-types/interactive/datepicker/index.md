@@ -26,31 +26,31 @@ const config = {
 
 ## Field Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `key` | `string` | Unique field identifier |
-| `type` | `'datepicker'` | Field type |
-| `value` | `Date \| string \| null` | Initial date value |
-| `label` | `string` | Field label |
-| `placeholder` | `string` | Placeholder text |
-| `minDate` | `Date \| string \| null` | Minimum selectable date |
-| `maxDate` | `Date \| string \| null` | Maximum selectable date |
-| `startAt` | `Date \| null` | Initial calendar view date |
-| `required` | `boolean` | Makes field required |
-| `disabled` | `boolean` | Disables the field |
-| `readonly` | `boolean` | Makes field read-only |
-| `hidden` | `boolean` | Hides the field |
+| Property      | Type                     | Description                |
+| ------------- | ------------------------ | -------------------------- |
+| `key`         | `string`                 | Unique field identifier    |
+| `type`        | `'datepicker'`           | Field type                 |
+| `value`       | `Date \| string \| null` | Initial date value         |
+| `label`       | `string`                 | Field label                |
+| `placeholder` | `string`                 | Placeholder text           |
+| `minDate`     | `Date \| string \| null` | Minimum selectable date    |
+| `maxDate`     | `Date \| string \| null` | Maximum selectable date    |
+| `startAt`     | `Date \| null`           | Initial calendar view date |
+| `required`    | `boolean`                | Makes field required       |
+| `disabled`    | `boolean`                | Disables the field         |
+| `readonly`    | `boolean`                | Makes field read-only      |
+| `hidden`      | `boolean`                | Hides the field            |
 
 ## Props (Material-Specific)
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `appearance` | `'fill' \| 'outline'` | `'outline'` | Visual style |
-| `color` | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color |
-| `startView` | `'month' \| 'year' \| 'multi-year'` | `'month'` | Initial calendar view |
-| `touchUi` | `boolean` | `false` | Touch-optimized calendar UI |
-| `subscriptSizing` | `'fixed' \| 'dynamic'` | `'fixed'` | Error/hint sizing |
-| `hint` | `string` | - | Help text below field |
+| Prop              | Type                                | Default     | Description                 |
+| ----------------- | ----------------------------------- | ----------- | --------------------------- |
+| `appearance`      | `'fill' \| 'outline'`               | `'outline'` | Visual style                |
+| `color`           | `'primary' \| 'accent' \| 'warn'`   | `'primary'` | Material theme color        |
+| `startView`       | `'month' \| 'year' \| 'multi-year'` | `'month'`   | Initial calendar view       |
+| `touchUi`         | `boolean`                           | `false`     | Touch-optimized calendar UI |
+| `subscriptSizing` | `'fixed' \| 'dynamic'`              | `'fixed'`   | Error/hint sizing           |
+| `hint`            | `string`                            | -           | Help text below field       |
 
 ## Examples
 
@@ -290,24 +290,28 @@ const config = {
       value: null,
       label: 'End Date',
       required: true,
-      logic: [{
-        type: 'required',
-        condition: {
+      logic: [
+        {
+          type: 'required',
+          condition: {
+            type: 'custom',
+            validator: (_, formValue) => !!formValue.startDate,
+          },
+          errorMessage: 'End date is required',
+        },
+      ],
+      validators: [
+        {
           type: 'custom',
-          validator: (_, formValue) => !!formValue.startDate,
+          validator: (value, formValue) => {
+            if (!value || !formValue.startDate) return null;
+            const start = new Date(formValue.startDate);
+            const end = new Date(value);
+            return end > start ? null : { invalidDateRange: true };
+          },
+          errorMessage: 'End date must be after start date',
         },
-        errorMessage: 'End date is required',
-      }],
-      validators: [{
-        type: 'custom',
-        validator: (value, formValue) => {
-          if (!value || !formValue.startDate) return null;
-          const start = new Date(formValue.startDate);
-          const end = new Date(value);
-          return end > start ? null : { invalidDateRange: true };
-        },
-        errorMessage: 'End date must be after start date',
-      }],
+      ],
       props: {
         appearance: 'outline',
       },
@@ -336,19 +340,21 @@ const config = {
       type: 'checkbox',
       checked: false,
       label: 'Rush processing (+$50)',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'custom',
-          validator: (_, formValue) => {
-            if (!formValue.eventDate) return true;
-            const eventDate = new Date(formValue.eventDate);
-            const today = new Date();
-            const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-            return daysUntil > 30;
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'custom',
+            validator: (_, formValue) => {
+              if (!formValue.eventDate) return true;
+              const eventDate = new Date(formValue.eventDate);
+              const today = new Date();
+              const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              return daysUntil > 30;
+            },
           },
         },
-      }],
+      ],
     },
   ],
 } as const satisfies FormConfig;
@@ -392,28 +398,30 @@ const config = {
       value: null,
       label: 'Check-out Date',
       required: true,
-      validators: [{
-        type: 'custom',
-        validator: (value, formValue) => {
-          if (!value || !formValue.checkInDate) return null;
-          const checkIn = new Date(formValue.checkInDate);
-          const checkOut = new Date(value);
+      validators: [
+        {
+          type: 'custom',
+          validator: (value, formValue) => {
+            if (!value || !formValue.checkInDate) return null;
+            const checkIn = new Date(formValue.checkInDate);
+            const checkOut = new Date(value);
 
-          // Must be after check-in
-          if (checkOut <= checkIn) {
-            return { invalidCheckOut: true };
-          }
+            // Must be after check-in
+            if (checkOut <= checkIn) {
+              return { invalidCheckOut: true };
+            }
 
-          // Minimum 1 night stay
-          const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-          if (nights < 1) {
-            return { minimumStay: true };
-          }
+            // Minimum 1 night stay
+            const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+            if (nights < 1) {
+              return { minimumStay: true };
+            }
 
-          return null;
+            return null;
+          },
+          errorMessage: 'Check-out must be at least 1 day after check-in',
         },
-        errorMessage: 'Check-out must be at least 1 day after check-in',
-      }],
+      ],
       props: {
         appearance: 'outline',
         color: 'primary',
@@ -460,18 +468,14 @@ const config = {
   selector: 'app-hotel-booking',
   imports: [DynamicFormComponent],
   template: `
-    <df-dynamic-form
-      [config]="config"
-      [(value)]="formValue"
-      (formSubmit)="onSubmit($event)"
-    />
+    <df-dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
 
-    @if (nights() > 0) {
-      <div class="booking-summary">
-        <h3>Booking Summary</h3>
-        <p>Nights: {{ nights() }}</p>
-        <p>Total: ${{ totalCost() }}</p>
-      </div>
+    @let nightCount = nights(); @let cost = totalCost(); @if (nightCount > 0) {
+    <div class="booking-summary">
+      <h3>Booking Summary</h3>
+      <p>Nights: {{ nightCount }}</p>
+      <p>Total: ${{ cost }}</p>
+    </div>
     }
   `,
 })
@@ -525,9 +529,7 @@ Datepicker fields infer as `Date | string | null | undefined`:
 
 ```typescript
 const config = {
-  fields: [
-    { key: 'date', type: 'datepicker', value: null },
-  ],
+  fields: [{ key: 'date', type: 'datepicker', value: null }],
 } as const satisfies FormConfig;
 
 // Type: { date?: Date | string | null }
@@ -536,6 +538,7 @@ const config = {
 ## Working with Date Values
 
 Datepicker values can be:
+
 - `Date` objects
 - ISO date strings (e.g., `'2024-01-15'`)
 - `null` for no selection
@@ -553,6 +556,7 @@ onSubmit(value: any) {
 ## Accessibility
 
 Datepicker fields include:
+
 - Proper ARIA attributes
 - Keyboard navigation (Arrow keys, Page Up/Down, Home/End, Escape)
 - Screen reader announcements

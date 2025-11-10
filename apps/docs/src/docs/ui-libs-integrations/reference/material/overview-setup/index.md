@@ -24,10 +24,7 @@ import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideAnimations(),
-    provideDynamicForm(...withMaterialFields()),
-  ],
+  providers: [provideAnimations(), provideDynamicForm(...withMaterialFields())],
 };
 ```
 
@@ -45,13 +42,15 @@ $my-primary: mat.define-palette(mat.$indigo-palette);
 $my-accent: mat.define-palette(mat.$pink-palette);
 $my-warn: mat.define-palette(mat.$red-palette);
 
-$my-theme: mat.define-light-theme((
-  color: (
-    primary: $my-primary,
-    accent: $my-accent,
-    warn: $my-warn,
+$my-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $my-primary,
+      accent: $my-accent,
+      warn: $my-warn,
+    ),
   )
-));
+);
 
 @include mat.all-component-themes($my-theme);
 ```
@@ -60,14 +59,16 @@ $my-theme: mat.define-light-theme((
 
 ```typescript
 import { Component, signal } from '@angular/core';
+import { JsonPipe } from '@angular/common';
 import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-contact-form',
-  imports: [DynamicForm],
+  imports: [DynamicForm, JsonPipe],
   template: `
     <dynamic-form [config]="config" [(value)]="formValue" />
-    <pre>{{ formValue() | json }}</pre>
+    @let value = formValue();
+    <pre>{{ value | json }}</pre>
   `,
 })
 export class ContactFormComponent {
@@ -126,6 +127,7 @@ Here's a full registration form showcasing multiple Material Design field types:
 {{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
 
 This example demonstrates:
+
 - Text inputs with validation
 - Select dropdowns
 - Checkboxes and toggles
@@ -140,21 +142,25 @@ This example demonstrates:
 Material Design integration provides all common form field types:
 
 ### Text Input Fields
+
 - **[Input](./field-types/text-input/input)** - Text, email, password, number inputs
 - **[Textarea](./field-types/text-input/textarea)** - Multi-line text input
 
 ### Selection Fields
+
 - **[Select](./field-types/selection/select)** - Dropdown selection (single or multi)
 - **[Radio](./field-types/selection/radio)** - Radio button group
 - **[Checkbox](./field-types/selection/checkbox)** - Boolean checkbox
 - **[Multi-Checkbox](./field-types/selection/multi-checkbox)** - Multiple checkbox selection
 
 ### Interactive Fields
+
 - **[Toggle](./field-types/interactive/toggle)** - Slide toggle switch
 - **[Slider](./field-types/interactive/slider)** - Numeric slider
 - **[Datepicker](./field-types/interactive/datepicker)** - Date selection with calendar
 
 ### Buttons & Actions
+
 - **[Submit Button](./field-types/buttons/submit)** - Form submission
 - **[Navigation Buttons](./field-types/buttons/navigation)** - Next/Previous for multi-step forms
 - **[Custom Buttons](./field-types/buttons/custom)** - Custom action buttons with events
@@ -179,16 +185,17 @@ Material components automatically inherit your Angular Material theme. Customize
 
 All Material fields support these common properties:
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `appearance` | `'fill' \| 'outline'` | `'fill'` | Form field appearance style |
-| `color` | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Theme color |
-| `hint` | `string` | - | Helper text displayed below field |
-| `subscriptSizing` | `'fixed' \| 'dynamic'` | `'fixed'` | Error/hint spacing behavior |
+| Prop              | Type                              | Default     | Description                       |
+| ----------------- | --------------------------------- | ----------- | --------------------------------- |
+| `appearance`      | `'fill' \| 'outline'`             | `'fill'`    | Form field appearance style       |
+| `color`           | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Theme color                       |
+| `hint`            | `string`                          | -           | Helper text displayed below field |
+| `subscriptSizing` | `'fixed' \| 'dynamic'`            | `'fixed'`   | Error/hint spacing behavior       |
 
 ## Accessibility
 
 All Material Design components include:
+
 - Proper ARIA attributes
 - Keyboard navigation support
 - Screen reader compatibility

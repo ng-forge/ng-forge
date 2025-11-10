@@ -28,27 +28,27 @@ const config = {
 
 ## Field Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `key` | `string` | - | Unique field identifier |
-| `type` | `'slider'` | - | Field type |
-| `value` | `number` | - | Initial value |
-| `label` | `string` | - | Field label |
-| `minValue` | `number` | `0` | Minimum value |
-| `maxValue` | `number` | `100` | Maximum value |
-| `step` | `number` | `1` | Increment step |
-| `disabled` | `boolean` | - | Disables the slider |
-| `readonly` | `boolean` | - | Makes field read-only |
-| `hidden` | `boolean` | - | Hides the field |
+| Property   | Type       | Default | Description             |
+| ---------- | ---------- | ------- | ----------------------- |
+| `key`      | `string`   | -       | Unique field identifier |
+| `type`     | `'slider'` | -       | Field type              |
+| `value`    | `number`   | -       | Initial value           |
+| `label`    | `string`   | -       | Field label             |
+| `minValue` | `number`   | `0`     | Minimum value           |
+| `maxValue` | `number`   | `100`   | Maximum value           |
+| `step`     | `number`   | `1`     | Increment step          |
+| `disabled` | `boolean`  | -       | Disables the slider     |
+| `readonly` | `boolean`  | -       | Makes field read-only   |
+| `hidden`   | `boolean`  | -       | Hides the field         |
 
 ## Props (Material-Specific)
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `thumbLabel` / `showThumbLabel` | `boolean` | `false` | Show value tooltip on thumb |
-| `tickInterval` | `number \| 'auto'` | - | Show tick marks at intervals |
-| `color` | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color |
-| `hint` | `string` | - | Help text below slider |
+| Prop                            | Type                              | Default     | Description                  |
+| ------------------------------- | --------------------------------- | ----------- | ---------------------------- |
+| `thumbLabel` / `showThumbLabel` | `boolean`                         | `false`     | Show value tooltip on thumb  |
+| `tickInterval`                  | `number \| 'auto'`                | -           | Show tick marks at intervals |
+| `color`                         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color         |
+| `hint`                          | `string`                          | -           | Help text below slider       |
 
 ## Examples
 
@@ -299,20 +299,23 @@ const config = {
       type: 'input',
       value: '',
       label: 'Team Lead Name',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'custom',
-          validator: (_, formValue) => formValue.teamSize <= 1,
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'custom',
+            validator: (_, formValue) => formValue.teamSize <= 1,
+          },
         },
-      }, {
-        type: 'required',
-        condition: {
-          type: 'custom',
-          validator: (_, formValue) => formValue.teamSize > 1,
+        {
+          type: 'required',
+          condition: {
+            type: 'custom',
+            validator: (_, formValue) => formValue.teamSize > 1,
+          },
+          errorMessage: 'Team lead is required for teams larger than 1',
         },
-        errorMessage: 'Team lead is required for teams larger than 1',
-      }],
+      ],
       props: {
         appearance: 'outline',
       },
@@ -345,20 +348,23 @@ const config = {
       type: 'textarea',
       value: '',
       label: 'Risk Justification',
-      logic: [{
-        type: 'hidden',
-        condition: {
-          type: 'custom',
-          validator: (_, formValue) => formValue.risk < 7,
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'custom',
+            validator: (_, formValue) => formValue.risk < 7,
+          },
         },
-      }, {
-        type: 'required',
-        condition: {
-          type: 'custom',
-          validator: (_, formValue) => formValue.risk >= 7,
+        {
+          type: 'required',
+          condition: {
+            type: 'custom',
+            validator: (_, formValue) => formValue.risk >= 7,
+          },
+          errorMessage: 'Justification required for high-risk levels',
         },
-        errorMessage: 'Justification required for high-risk levels',
-      }],
+      ],
       props: {
         rows: 4,
         hint: 'Explain why this risk level is necessary',
@@ -470,14 +476,16 @@ const config = {
       (formSubmit)="onSubmit($event)"
     />
 
-    @if (totalPrice()) {
+    @let values = formValue();
+    @let price = totalPrice();
+    @if (price) {
       <div class="price-summary">
         <h3>Price Summary</h3>
-        <p>Quantity: {{ formValue().quantity }}</p>
-        <p>Quality Level: {{ formValue().quality }}/10</p>
+        <p>Quantity: {{ values.quantity }}</p>
+        <p>Quality Level: {{ values.quality }}/10</p>
         <p>Base Price: ${{ basePrice() }}</p>
         <p>Discount: {{ totalDiscount() }}%</p>
-        <p><strong>Total: ${{ totalPrice() }}</strong></p>
+        <p><strong>Total: ${{ price }}</strong></p>
       </div>
     }
   `,
@@ -526,9 +534,7 @@ Slider fields infer as `number`:
 
 ```typescript
 const config = {
-  fields: [
-    { key: 'volume', type: 'slider', value: 50, minValue: 0, maxValue: 100 },
-  ],
+  fields: [{ key: 'volume', type: 'slider', value: 50, minValue: 0, maxValue: 100 }],
 } as const satisfies FormConfig;
 
 // Type: { volume: number }
@@ -537,6 +543,7 @@ const config = {
 ## Accessibility
 
 Slider fields include:
+
 - Proper ARIA slider role
 - Keyboard navigation (Arrow keys, Page Up/Down, Home/End)
 - Screen reader value announcements

@@ -1,5 +1,5 @@
 import { NgDocPage } from '@ng-doc/core';
-import UiLibsIntegrationCategory from '../../../../../../ng-doc.category';
+import UiLibsIntegrationCategory from '../../../../../ng-doc.category';
 import { InputIframeDemoComponent } from '../../../examples/input-iframe-demo.component';
 
 const MaterialInputPage: NgDocPage = {

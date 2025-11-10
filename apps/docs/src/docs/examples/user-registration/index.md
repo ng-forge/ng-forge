@@ -9,6 +9,7 @@ Complete example of a user registration form with validation, conditional logic,
 ## Overview
 
 This example demonstrates:
+
 - Multi-step form with validation
 - Password strength validation
 - Conditional fields (business account)
@@ -70,7 +71,7 @@ const registrationConfig = {
           props: {
             type: 'email',
             appearance: 'outline',
-            hint: 'We\'ll send a verification email',
+            hint: "We'll send a verification email",
           },
         },
         {
@@ -98,11 +99,13 @@ const registrationConfig = {
           value: '',
           label: 'Confirm Password',
           required: true,
-          validators: [{
-            type: 'custom',
-            expression: 'fieldValue === formValue.password',
-            errorMessage: 'Passwords do not match',
-          }],
+          validators: [
+            {
+              type: 'custom',
+              expression: 'fieldValue === formValue.password',
+              errorMessage: 'Passwords do not match',
+            },
+          ],
           validationMessages: {
             required: 'Please confirm your password',
           },
@@ -183,24 +186,27 @@ const registrationConfig = {
           type: 'input',
           value: '',
           label: 'Company Name',
-          logic: [{
-            type: 'hidden',
-            condition: {
-              type: 'fieldValue',
-              fieldPath: 'accountType',
-              operator: 'notEquals',
-              value: 'business',
+          logic: [
+            {
+              type: 'hidden',
+              condition: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'notEquals',
+                value: 'business',
+              },
             },
-          }, {
-            type: 'required',
-            condition: {
-              type: 'fieldValue',
-              fieldPath: 'accountType',
-              operator: 'equals',
-              value: 'business',
+            {
+              type: 'required',
+              condition: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'business',
+              },
+              errorMessage: 'Company name is required for business accounts',
             },
-            errorMessage: 'Company name is required for business accounts',
-          }],
+          ],
           props: { appearance: 'outline' },
         },
         {
@@ -216,24 +222,27 @@ const registrationConfig = {
             { value: 'education', label: 'Education' },
             { value: 'other', label: 'Other' },
           ],
-          logic: [{
-            type: 'hidden',
-            condition: {
-              type: 'fieldValue',
-              fieldPath: 'accountType',
-              operator: 'notEquals',
-              value: 'business',
+          logic: [
+            {
+              type: 'hidden',
+              condition: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'notEquals',
+                value: 'business',
+              },
             },
-          }, {
-            type: 'required',
-            condition: {
-              type: 'fieldValue',
-              fieldPath: 'accountType',
-              operator: 'equals',
-              value: 'business',
+            {
+              type: 'required',
+              condition: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'business',
+              },
+              errorMessage: 'Industry is required for business accounts',
             },
-            errorMessage: 'Industry is required for business accounts',
-          }],
+          ],
           props: {
             appearance: 'outline',
             placeholder: 'Select your industry',
@@ -350,40 +359,38 @@ type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
     <div class="registration-container">
       <h1>Create Your Account</h1>
 
-      <df-dynamic-form
-        [config]="config"
-        [(value)]="formValue"
-        (formSubmit)="onSubmit($event)"
-      />
+      <df-dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
 
-      @if (submitMessage()) {
-        <div class="success-message">
-          {{ submitMessage() }}
-        </div>
+      @let message = submitMessage(); @if (message) {
+      <div class="success-message">
+        {{ message }}
+      </div>
       }
     </div>
   `,
-  styles: [`
-    .registration-container {
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 2rem;
-    }
+  styles: [
+    `
+      .registration-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+      }
 
-    h1 {
-      margin-bottom: 2rem;
-      text-align: center;
-    }
+      h1 {
+        margin-bottom: 2rem;
+        text-align: center;
+      }
 
-    .success-message {
-      margin-top: 2rem;
-      padding: 1rem;
-      background-color: #4caf50;
-      color: white;
-      border-radius: 4px;
-      text-align: center;
-    }
-  `],
+      .success-message {
+        margin-top: 2rem;
+        padding: 1rem;
+        background-color: #4caf50;
+        color: white;
+        border-radius: 4px;
+        text-align: center;
+      }
+    `,
+  ],
 })
 export class UserRegistrationComponent {
   config = registrationConfig;
@@ -414,9 +421,7 @@ export class UserRegistrationComponent {
     // 2. Handle errors
     // 3. Navigate to success page
 
-    this.submitMessage.set(
-      `Welcome, ${value.firstName}! Your account has been created successfully.`
-    );
+    this.submitMessage.set(`Welcome, ${value.firstName}! Your account has been created successfully.`);
   }
 }
 ```
