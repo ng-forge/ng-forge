@@ -2,7 +2,7 @@ import { NgDocCategory } from '@ng-doc/core';
 
 const ExamplesCategory: NgDocCategory = {
   title: 'Examples & Patterns',
-  order: 6,
+  order: 3,
   expandable: true,
 };
 
