@@ -1,11 +1,9 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
   computed,
   DestroyRef,
-  effect,
   inject,
   Injector,
   input,
@@ -40,6 +38,8 @@ import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryS
 import { detectFormMode, FormModeDetectionResult } from './models/types/form-mode';
 import { FormModeValidator } from './utils/form-validation/form-mode-validator';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
+import { PageChangeEvent } from './events';
+import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
 
 /**
  * Dynamic form component that renders a complete form based on configuration.
@@ -100,8 +100,6 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
         [form]="form()"
         [fieldSignalContext]="fieldSignalContext()"
         [config]="{ initialPageIndex: 0 }"
-        (pageChanged)="onPageChanged($event)"
-        (navigationStateChanged)="onNavigationStateChanged($event)"
       />
       } @else {
       <!-- Non-paged form: Render fields directly with grid system -->
@@ -120,7 +118,7 @@ import { PageOrchestratorComponent } from './core/page-orchestrator';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = InferGlobalFormValue>
-  implements OnDestroy, AfterViewInit
+  implements OnDestroy
 {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
@@ -131,7 +129,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: FieldDef<any>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
+    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
   );
@@ -477,21 +475,13 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     this.setupInitializationTracking();
 
     // For paged forms, emit initialization event when pages are defined
-    effect(() => {
-      const mode = this.formModeDetection().mode;
-      const pages = this.pageFieldDefinitions();
-
+    explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
       if (mode === 'paged' && pages.length > 0) {
         // Emit initialization for dynamic-form component in paged mode
         // This happens after the page orchestrator is set up
         this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
       }
     });
-  }
-
-  ngAfterViewInit(): void {
-    // For non-paged forms, the initialization event is emitted via onFieldsInitialized
-    // For paged forms, it's handled in the constructor effect
   }
 
   /**
@@ -508,11 +498,17 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * }
    * ```
    */
-  readonly initialized = outputFromObservable(this.initialized$);
+  public initialized = outputFromObservable(this.initialized$);
 
-  fields$ = toObservable(computed(() => this.formSetup().fields));
+  public onPageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
 
-  fields = toSignal(
+  public onPageNavigationStateChange = outputFromObservable(
+    this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change')
+  );
+
+  private fields$ = toObservable(computed(() => this.formSetup().fields));
+
+  protected fields = toSignal(
     this.fields$.pipe(
       switchMap((fields) => {
         if (!fields || fields.length === 0) {
@@ -557,7 +553,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       });
   }
 
-  onFieldsInitialized(): void {
+  protected onFieldsInitialized(): void {
     this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
   }
 
@@ -565,7 +561,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * Handles form submission. Prevents default form submission behavior
    * and emits the submit event through the event bus.
    */
-  onSubmit(event: Event): void {
+  protected onSubmit(event: Event): void {
     event.preventDefault();
     this.eventBus.dispatch(SubmitEvent, this.value());
   }
@@ -613,26 +609,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
           this.initializedSubject.error(error);
         },
       });
-  }
-
-  /**
-   * Handle page change events from the page orchestrator
-   * @param _event The page change event
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onPageChanged(_event: unknown): void {
-    // Re-emit the page change event for external consumers
-    // This allows users to listen to page changes at the form level
-  }
-
-  /**
-   * Handle navigation state changes from the page orchestrator
-   * @param _state The new navigation state
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onNavigationStateChanged(_state: unknown): void {
-    // Could be used for additional state management or logging
-    // Currently just provides a hook for future functionality
   }
 
   ngOnDestroy(): void {

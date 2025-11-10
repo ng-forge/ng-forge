@@ -1,12 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
-import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { NavigationResult, PageOrchestratorConfig, PageOrchestratorState } from './page-orchestrator.interfaces';
 import { PageField } from '../../definitions/default/page-field';
 import { FieldSignalContext } from '../../mappers/types';
 import PageFieldComponent from '../../fields/page/page-field.component';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
+import { FieldTree } from '@angular/forms/signals';
+import { RegisteredFieldTypes } from '../../models';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -81,17 +84,17 @@ export class PageOrchestratorComponent {
   /**
    * Array of page field definitions to render
    */
-  pageFields = input.required<PageField<any>[]>();
+  pageFields = input.required<PageField<RegisteredFieldTypes[]>[]>();
 
   /**
    * Root form instance from parent DynamicForm
    */
-  form = input.required<any>();
+  form = input.required<FieldTree<unknown>>();
 
   /**
    * Field signal context for child fields
    */
-  fieldSignalContext = input.required<FieldSignalContext<any>>();
+  fieldSignalContext = input.required<FieldSignalContext>();
 
   /**
    * Configuration for the orchestrator
@@ -122,16 +125,6 @@ export class PageOrchestratorComponent {
       navigationDisabled: this.config().initialNavigationDisabled || false,
     };
   });
-
-  /**
-   * Emitted when page changes
-   */
-  readonly pageChanged = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change').pipe(map((event) => event)));
-
-  /**
-   * Emitted when navigation state changes
-   */
-  readonly navigationStateChanged = outputFromObservable(toObservable(this.state));
 
   constructor() {
     // Setup event listeners for navigation
@@ -250,5 +243,7 @@ export class PageOrchestratorComponent {
       .subscribe(() => {
         this.navigateToPreviousPage();
       });
+
+    explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PageNavigationStateChangeEvent, state));
   }
 }
