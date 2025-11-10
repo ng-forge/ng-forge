@@ -59,6 +59,49 @@ When your form contains page fields:
 - **Validation**: Users must complete required fields before advancing to the next page
 - **Single Page View**: Only one page is visible at a time
 
+## Performance & Lazy Loading
+
+ng-forge uses Angular's `@defer` blocks with smart prefetching to optimize page rendering while maintaining flicker-free navigation.
+
+### How It Works
+
+The page orchestrator uses a **2-tier loading strategy**:
+
+**Tier 1: Current + Adjacent Pages (±1)**
+
+- Render immediately using `@defer (on immediate)`
+- Maximum 3 pages in DOM at once (current + 2 adjacent)
+- Adjacent pages are fully rendered but hidden with `display: none`
+- Ensures zero flicker when navigating forward/backward
+
+**Tier 2: Distant Pages (2+ steps away)**
+
+- Defer loading until browser is idle using `@defer (on idle)`
+- True lazy loading for memory efficiency
+- Load automatically during browser idle time
+
+### Benefits
+
+```typescript
+// Example: User is on step 2 of 5
+fields: [
+  { key: 'step1', type: 'page', ... }, // ✓ Rendered (adjacent)
+  { key: 'step2', type: 'page', ... }, // ✓ Visible (current)
+  { key: 'step3', type: 'page', ... }, // ✓ Rendered (adjacent)
+  { key: 'step4', type: 'page', ... }, // ⏳ Deferred (distant)
+  { key: 'step5', type: 'page', ... }, // ⏳ Deferred (distant)
+]
+```
+
+**Performance advantages:**
+
+- ⚡ **Zero navigation flicker** - Adjacent pages already rendered
+- 💾 **Memory efficient** - Only 3 pages max in DOM at once
+- 🚀 **Faster initial load** - Distant pages defer until idle
+- 📱 **Mobile-friendly** - Reduced memory footprint
+
+This optimization happens automatically - no configuration needed.
+
 ## Value Structure
 
 Pages are container fields - they don't add nesting to your form values. Fields flatten to the root level:
