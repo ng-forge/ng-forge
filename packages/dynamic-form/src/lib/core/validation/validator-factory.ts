@@ -114,6 +114,7 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
 /**
  * Apply custom validator to field path
  * Supports both simple validators and context-aware validators with auto-detection
+ * Handles errorMessage injection if specified in config
  */
 function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: FieldPath<TValue>): void {
   const registry = inject(FunctionRegistryService);
@@ -134,9 +135,26 @@ function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: 
     return;
   }
 
-  // Wrap validator to pass params if provided
+  // Wrap validator to:
+  // 1. Pass params if provided
+  // 2. Inject errorMessage if specified (overrides validator's message but can be overridden by field validationMessages)
   const wrappedValidator = (ctx: FieldContext<TValue>) => {
-    return validatorFn(ctx, config.params);
+    const error = validatorFn(ctx, config.params);
+
+    // If validator returned an error and config has errorMessage, inject it
+    // This allows inline error messages: { type: 'custom', functionName: 'foo', errorMessage: 'Custom message' }
+    // Field-level validationMessages still take precedence during error resolution
+    if (error && config.errorMessage) {
+      if (Array.isArray(error)) {
+        // For tree validators returning multiple errors, apply message to all
+        return error.map((e) => ({ ...e, message: config.errorMessage }));
+      } else {
+        // For single error, inject message
+        return { ...error, message: config.errorMessage };
+      }
+    }
+
+    return error;
   };
 
   // Apply with conditional logic if specified

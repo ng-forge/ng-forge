@@ -229,7 +229,16 @@ Customize validation messages:
 
 ### Custom Validators
 
-ng-forge supports three levels of custom validators to handle any validation scenario:
+ng-forge supports three levels of custom validators to handle any validation scenario.
+
+**Best Practice:** Validators should focus on validation logic, not presentation. Return just the error `kind` and configure messages at field level for better i18n support and reusability.
+
+**Message Resolution Priority:**
+
+1. Field-level `validationMessages[kind]` (highest - allows per-field customization)
+2. ValidatorConfig `errorMessage` (per-validator inline message)
+3. Validator function's `error.message` (fallback)
+4. Generic: 'Validation error'
 
 #### 1. Simple Validators
 
@@ -238,14 +247,15 @@ Simple validators receive the field value and entire form value. Perfect for bas
 ```typescript
 import { SimpleCustomValidator } from '@ng-forge/dynamic-form';
 
-const noSpaces: SimpleCustomValidator<string> = (value, formValue) => {
+// ✅ RECOMMENDED: Return only kind, configure message at field level
+const noSpaces: SimpleCustomValidator<string> = (value) => {
   if (typeof value === 'string' && value.includes(' ')) {
-    return { kind: 'noSpaces', message: 'Spaces not allowed' };
+    return { kind: 'noSpaces' }; // No hardcoded message
   }
   return null;
 };
 
-// Register and use
+// Register and configure message at field level
 const config = {
   fields: [
     {
@@ -254,6 +264,9 @@ const config = {
       value: '',
       label: 'Username',
       validators: [{ type: 'custom', functionName: 'noSpaces' }],
+      validationMessages: {
+        noSpaces: 'Spaces are not allowed', // Or Observable/Signal for i18n
+      },
     },
   ],
   signalFormsConfig: {
@@ -264,6 +277,29 @@ const config = {
 };
 ```
 
+**Alternative patterns:**
+
+```typescript
+// Option 2: Inline message via ValidatorConfig
+{
+  validators: [
+    {
+      type: 'custom',
+      functionName: 'noSpaces',
+      errorMessage: 'Username cannot contain spaces', // Inline message
+    },
+  ];
+}
+
+// Option 3: Fallback message in validator (can be overridden at field level)
+const noSpacesWithFallback: SimpleCustomValidator<string> = (value) => {
+  if (typeof value === 'string' && value.includes(' ')) {
+    return { kind: 'noSpaces', message: 'Spaces not allowed' }; // Fallback
+  }
+  return null;
+};
+```
+
 #### 2. Context-Aware Validators
 
 Context-aware validators receive the full FieldContext, giving access to field state and other fields:
@@ -271,22 +307,20 @@ Context-aware validators receive the full FieldContext, giving access to field s
 ```typescript
 import { ContextAwareValidator } from '@ng-forge/dynamic-form';
 
+// ✅ RECOMMENDED: Return only kind, configure message at field level
 const lessThanField: ContextAwareValidator<number> = (ctx, params) => {
   const value = ctx.value();
   const otherFieldName = params?.field as string;
-  const rootValue = ctx.root()().value() as any;
+  const rootValue = ctx.root()().value() as Record<string, unknown>;
   const otherValue = rootValue[otherFieldName];
 
   if (otherValue !== undefined && value >= otherValue) {
-    return {
-      kind: 'notLessThan',
-      message: `Must be less than ${otherFieldName}`,
-    };
+    return { kind: 'notLessThan' }; // No hardcoded message
   }
   return null;
 };
 
-// Use with parameters
+// Use with parameters and parameterized message
 const config = {
   fields: [
     { key: 'minAge', type: 'input', value: 0, label: 'Min Age' },
@@ -302,6 +336,9 @@ const config = {
           params: { field: 'minAge' },
         },
       ],
+      validationMessages: {
+        notLessThan: 'Must be less than {{field}}', // Interpolates params
+      },
     },
   ],
   signalFormsConfig: {
@@ -319,21 +356,19 @@ Tree validators validate relationships between multiple fields and can target er
 ```typescript
 import { TreeValidator } from '@ng-forge/dynamic-form';
 
+// ✅ RECOMMENDED: Return only kind, configure message at field level
 const passwordsMatch: TreeValidator = (ctx) => {
-  const formValue = ctx.value() as any;
+  const formValue = ctx.value() as Record<string, unknown>;
   const password = formValue.password;
   const confirmPassword = formValue.confirmPassword;
 
   if (password && confirmPassword && password !== confirmPassword) {
-    return {
-      kind: 'passwordMismatch',
-      message: 'Passwords must match',
-    };
+    return { kind: 'passwordMismatch' }; // No hardcoded message
   }
   return null;
 };
 
-// Apply to a group or form level
+// Apply to a group or form level with message configuration
 const config = {
   fields: [
     {
@@ -341,6 +376,9 @@ const config = {
       type: 'group',
       label: 'Create Password',
       validators: [{ type: 'customTree', functionName: 'passwordsMatch' }],
+      validationMessages: {
+        passwordMismatch: 'Passwords must match', // Message at group level
+      },
       fields: [
         {
           key: 'password',
@@ -372,9 +410,10 @@ const config = {
 Custom validators support conditional logic just like built-in validators:
 
 ```typescript
+// ✅ RECOMMENDED: Return only kind
 const businessEmailValidator: SimpleCustomValidator<string> = (value) => {
   if (typeof value === 'string' && !value.endsWith('@company.com')) {
-    return { kind: 'businessEmail', message: 'Must use company email' };
+    return { kind: 'businessEmail' }; // No hardcoded message
   }
   return null;
 };
@@ -401,6 +440,9 @@ const config = {
           },
         },
       ],
+      validationMessages: {
+        businessEmail: 'Must use company email', // Message at field level
+      },
     },
   ],
   signalFormsConfig: {
