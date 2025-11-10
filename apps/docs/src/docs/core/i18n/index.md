@@ -157,7 +157,6 @@ export class MyFormComponent {
     defaultValidationMessages: {
       required: this.transloco.selectTranslate('validation.required'),
       email: this.transloco.selectTranslate('validation.email'),
-      minLength: this.transloco.selectTranslate('validation.minLength'),
     },
     fields: [
       {
@@ -166,8 +165,7 @@ export class MyFormComponent {
         label: this.transloco.selectTranslate('form.username'),
         value: '',
         required: true,
-        minLength: 3,
-        // Uses defaultValidationMessages for required and minLength
+        // Uses defaultValidationMessages for required
       },
       {
         key: 'email',
@@ -206,14 +204,12 @@ export class MyFormComponent {
       email: 'Email',
       required: 'This field is required',
       email_format: 'Please enter a valid email address',
-      minLength: 'Must be at least {{requiredLength}} characters',
     },
     es: {
       username: 'Nombre de usuario',
       email: 'Correo electrónico',
       required: 'Este campo es obligatorio',
       email_format: 'Por favor ingrese una dirección de correo válida',
-      minLength: 'Debe tener al menos {{requiredLength}} caracteres',
     },
   }[this.currentLang()]));
 
@@ -222,7 +218,6 @@ export class MyFormComponent {
     defaultValidationMessages: {
       required: this.translations().required,  // Signal<string>
       email: this.translations().email_format,
-      minLength: this.translations().minLength,
     },
     fields: [
       {
@@ -231,8 +226,7 @@ export class MyFormComponent {
         label: this.translations().username,
         value: '',
         required: true,
-        minLength: 3,
-        // Uses defaultValidationMessages for required and minLength
+        // Uses defaultValidationMessages for required
       },
       {
         key: 'email',
