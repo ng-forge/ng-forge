@@ -1,22 +1,163 @@
-# Field Types Reference
+# Material Design Integration
 
-Complete reference for all Material Design field types in ng-forge. Each field type provides comprehensive validation, accessibility features, and Material Design styling.
+Beautiful Material Design field components for ng-forge dynamic forms, built with Angular Material.
 
 ---
 
-## Text Input Fields
+## Installation
 
-Text input fields provide user-friendly text entry with Material Design styling. These fields support both single-line and multi-line text input with comprehensive validation and HTML5 type support.
+Install the package and its peer dependencies:
 
-### Input
+```bash
+npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
+```
 
-Text input field with Material Design styling and HTML5 type support.
+## Quick Start
 
-#### Live Demo
+### 1. Configure Providers
+
+Add Material Design field types to your application:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { provideAnimations } from '@angular/platform-browser/animations';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideAnimations(), provideDynamicForm(...withMaterialFields())],
+};
+```
+
+### 2. Import Material Theme
+
+Add a Material Design theme to your styles:
+
+```scss
+// styles.scss
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$my-primary: mat.define-palette(mat.$indigo-palette);
+$my-accent: mat.define-palette(mat.$pink-palette);
+$my-warn: mat.define-palette(mat.$red-palette);
+
+$my-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $my-primary,
+      accent: $my-accent,
+      warn: $my-warn,
+    ),
+  )
+);
+
+@include mat.all-component-themes($my-theme);
+```
+
+### 3. Create Your First Form
+
+```typescript
+import { Component, signal } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+
+@Component({
+  selector: 'app-contact-form',
+  imports: [DynamicForm, JsonPipe],
+  template: `
+    <dynamic-form [config]="config" [(value)]="formValue" />
+    @let value = formValue();
+    <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
+  `,
+})
+export class ContactFormComponent {
+  formValue = signal({});
+
+  config = {
+    fields: [
+      {
+        key: 'name',
+        type: 'input',
+        label: 'Full Name',
+        required: true,
+        props: {
+          appearance: 'outline',
+        },
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: 'Email',
+        required: true,
+        email: true,
+        props: {
+          type: 'email',
+          appearance: 'outline',
+        },
+      },
+      {
+        key: 'message',
+        type: 'textarea',
+        label: 'Message',
+        required: true,
+        minLength: 10,
+        props: {
+          appearance: 'outline',
+          rows: 4,
+        },
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Send Message',
+        props: {
+          color: 'primary',
+        },
+      },
+    ],
+  } as const satisfies FormConfig;
+}
+```
+
+## Complete Form Example
+
+Here's a full registration form showcasing multiple Material Design field types:
+
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
+
+This example demonstrates:
+
+- Text inputs with validation
+- Select dropdowns
+- Checkboxes and toggles
+- Radio buttons
+- Date pickers
+- Sliders
+- Multi-checkbox selections
+- Form submission
+
+---
+
+## Field Types Reference
+
+Complete reference for all Material Design field types with comprehensive validation, accessibility features, and Material Design styling.
+
+### Text Input Fields
+
+Text input fields provide user-friendly text entry with Material Design styling.
+
+#### Input
+
+Text input field with HTML5 type support.
+
+**Live Demo:**
 
 {{ NgDocActions.demo("InputIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -34,9 +175,7 @@ Text input field with Material Design styling and HTML5 type support.
 }
 ```
 
-#### Field Properties
-
-These properties are set at the field level (not in `props`):
+**Field Properties:**
 
 | Property      | Type               | Description                        |
 | ------------- | ------------------ | ---------------------------------- |
@@ -60,9 +199,7 @@ These properties are set at the field level (not in `props`):
 | `max`       | `number`           | Maximum value (for number inputs) |
 | `pattern`   | `string \| RegExp` | RegEx pattern validation          |
 
-#### Props (UI-Specific)
-
-These properties go inside the `props` object:
+**Props (Material-Specific):**
 
 | Prop              | Type                                                            | Default   | Description               |
 | ----------------- | --------------------------------------------------------------- | --------- | ------------------------- |
@@ -71,55 +208,15 @@ These properties go inside the `props` object:
 | `hint`            | `string`                                                        | -         | Helper text below input   |
 | `subscriptSizing` | `'fixed' \| 'dynamic'`                                          | `'fixed'` | Error/hint spacing        |
 
-#### Examples
-
-**Email Input with Validation:**
-
-```typescript
-{
-  key: 'email',
-  type: 'input',
-  label: 'Email Address',
-  value: '',
-  required: true,
-  email: true,
-  props: {
-    type: 'email',
-    appearance: 'outline',
-    placeholder: 'user@example.com',
-    hint: 'We will never share your email',
-  },
-}
-```
-
-**Password Input:**
-
-```typescript
-{
-  key: 'password',
-  type: 'input',
-  label: 'Password',
-  value: '',
-  required: true,
-  minLength: 8,
-  pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)',
-  props: {
-    type: 'password',
-    appearance: 'outline',
-    hint: 'At least 8 characters with uppercase, lowercase, and number',
-  },
-}
-```
-
-### Textarea
+#### Textarea
 
 Multi-line text input field with Material Design styling.
 
-#### Live Demo
+**Live Demo:**
 
 {{ NgDocActions.demo("TextareaIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -132,7 +229,7 @@ Multi-line text input field with Material Design styling.
 }
 ```
 
-#### Props (Material-Specific)
+**Props (Material-Specific):**
 
 | Prop              | Type                                             | Default      | Description               |
 | ----------------- | ------------------------------------------------ | ------------ | ------------------------- |
@@ -145,19 +242,19 @@ Multi-line text input field with Material Design styling.
 
 ---
 
-## Selection Fields
+### Selection Fields
 
-Selection fields enable users to choose from predefined options using various Material Design controls.
+Selection fields enable users to choose from predefined options.
 
-### Select
+#### Select
 
-Dropdown selection field with Material Design styling. Supports both single and multi-select modes.
+Dropdown selection field. Supports both single and multi-select modes.
 
-#### Live Demo
+**Live Demo:**
 
 {{ NgDocActions.demo("SelectIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -174,7 +271,7 @@ Dropdown selection field with Material Design styling. Supports both single and 
 }
 ```
 
-#### Props (Material-Specific)
+**Props (Material-Specific):**
 
 | Prop              | Type                   | Default     | Description           |
 | ----------------- | ---------------------- | ----------- | --------------------- |
@@ -183,15 +280,15 @@ Dropdown selection field with Material Design styling. Supports both single and 
 | `hint`            | `string`               | -           | Help text below field |
 | `subscriptSizing` | `'fixed' \| 'dynamic'` | `'fixed'`   | Error/hint sizing     |
 
-### Radio
+#### Radio
 
-Radio button group for selecting a single option from multiple choices.
+Radio button group for selecting a single option.
 
-#### Live Demo
+**Live Demo:**
 
 {{ NgDocActions.demo("RadioIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -208,22 +305,22 @@ Radio button group for selecting a single option from multiple choices.
 }
 ```
 
-#### Props (Material-Specific)
+**Props (Material-Specific):**
 
 | Prop            | Type                              | Default     | Description               |
 | --------------- | --------------------------------- | ----------- | ------------------------- |
 | `color`         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color      |
 | `labelPosition` | `'before' \| 'after'`             | `'after'`   | Position of option labels |
 
-### Checkbox
+#### Checkbox
 
-Boolean checkbox control with Material Design styling for single true/false selections.
+Boolean checkbox control for single true/false selections.
 
-#### Live Demo
+**Live Demo:**
 
 {{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -235,22 +332,22 @@ Boolean checkbox control with Material Design styling for single true/false sele
 }
 ```
 
-#### Props (Material-Specific)
+**Props (Material-Specific):**
 
 | Prop            | Type                              | Default     | Description            |
 | --------------- | --------------------------------- | ----------- | ---------------------- |
 | `color`         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color   |
 | `labelPosition` | `'before' \| 'after'`             | `'after'`   | Position of label text |
 
-### Multi-Checkbox
+#### Multi-Checkbox
 
 Multiple checkbox selection field for choosing multiple options.
 
-#### Live Demo
+**Live Demo:**
 
 {{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -270,19 +367,19 @@ Multiple checkbox selection field for choosing multiple options.
 
 ---
 
-## Interactive Fields
+### Interactive Fields
 
-Interactive fields provide advanced user input controls with Material Design styling.
+Interactive fields provide advanced user input controls.
 
-### Toggle
+#### Toggle
 
-Slide toggle switch with Material Design styling for boolean on/off selections.
+Slide toggle switch for boolean on/off selections.
 
-#### Live Demo
+**Live Demo:**
 
 {{ NgDocActions.demo("ToggleIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -293,22 +390,22 @@ Slide toggle switch with Material Design styling for boolean on/off selections.
 }
 ```
 
-#### Props (Material-Specific)
+**Props (Material-Specific):**
 
 | Prop            | Type                              | Default     | Description            |
 | --------------- | --------------------------------- | ----------- | ---------------------- |
 | `color`         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color   |
 | `labelPosition` | `'before' \| 'after'`             | `'after'`   | Position of label text |
 
-### Slider
+#### Slider
 
-Numeric slider control with Material Design styling for selecting values from a range.
+Numeric slider control for selecting values from a range.
 
-#### Live Demo
+**Live Demo:**
 
 {{ NgDocActions.demo("SliderIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -322,7 +419,7 @@ Numeric slider control with Material Design styling for selecting values from a 
 }
 ```
 
-#### Props (Material-Specific)
+**Props (Material-Specific):**
 
 | Prop                            | Type                              | Default     | Description                  |
 | ------------------------------- | --------------------------------- | ----------- | ---------------------------- |
@@ -331,15 +428,15 @@ Numeric slider control with Material Design styling for selecting values from a 
 | `color`                         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color         |
 | `hint`                          | `string`                          | -           | Help text below slider       |
 
-### Datepicker
+#### Datepicker
 
-Date selection field with Material Design calendar popup for choosing dates.
+Date selection field with Material Design calendar popup.
 
-#### Live Demo
+**Live Demo:**
 
 {{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -351,7 +448,7 @@ Date selection field with Material Design calendar popup for choosing dates.
 }
 ```
 
-#### Props (Material-Specific)
+**Props (Material-Specific):**
 
 | Prop              | Type                                | Default     | Description                 |
 | ----------------- | ----------------------------------- | ----------- | --------------------------- |
@@ -364,19 +461,19 @@ Date selection field with Material Design calendar popup for choosing dates.
 
 ---
 
-## Buttons & Actions
+### Buttons & Actions
 
-Action buttons provide form submission and navigation controls with Material Design styling.
+Action buttons provide form submission and navigation controls.
 
-### Submit Button
+#### Submit Button
 
 Form submission button that's automatically disabled when the form is invalid.
 
-#### Live Demo
+**Live Demo:**
 
 {{ NgDocActions.demo("ButtonIframeDemoComponent") }}
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -395,17 +492,17 @@ The submit button automatically:
 - Emits a `SubmitEvent` when clicked
 - Validates all fields before submission
 
-#### Props
+**Props:**
 
 | Prop    | Type                              | Default     | Description          |
 | ------- | --------------------------------- | ----------- | -------------------- |
 | `color` | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color |
 
-### Navigation Buttons
+#### Navigation Buttons
 
-Navigation buttons for multi-step (paged) forms with Material Design styling.
+Navigation buttons for multi-step (paged) forms.
 
-#### Basic Usage
+**Basic Usage:**
 
 ```typescript
 {
@@ -430,51 +527,61 @@ Navigation buttons for multi-step (paged) forms with Material Design styling.
       title: 'Step 2',
       fields: [
         { key: 'email', type: 'input', value: '', label: 'Email', required: true },
-        {
-          type: 'previous',
-          key: 'back',
-          label: 'Back',
-        },
-        {
-          type: 'submit',
-          key: 'submit',
-          label: 'Submit',
-          props: { color: 'primary' },
-        },
+        { type: 'previous', key: 'back', label: 'Back' },
+        { type: 'submit', key: 'submit', label: 'Submit', props: { color: 'primary' } },
       ],
     },
   ],
 }
 ```
 
-#### Button Types
+**Button Types:**
 
-**Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
-
-```typescript
-{
-  type: 'next',
-  key: 'nextButton',
-  label: 'Continue',
-  props: { color: 'primary' },
-}
-```
-
-**Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
-
-```typescript
-{
-  type: 'previous',
-  key: 'backButton',
-  label: 'Back',
-}
-```
+- **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
+- **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
 
 ---
 
-## Related
+## Theming
 
-- [Overview & Setup](../overview-setup) - Getting started with Material Design integration
-- [Validation](../../../../../core/validation/) - Form validation guide
-- [Type Safety](../../../../../core/type-safety/) - TypeScript integration
-- [Conditional Logic](../../../../../core/conditional-logic/) - Dynamic field behavior
+Material components automatically inherit your Angular Material theme. Customize colors using Material's theming system:
+
+```typescript
+// Field with custom color
+{
+  key: 'agreeToTerms',
+  type: 'checkbox',
+  label: 'I agree to the terms and conditions',
+  props: {
+    color: 'accent', // 'primary' | 'accent' | 'warn'
+  },
+}
+```
+
+## Common Props
+
+All Material fields support these common properties:
+
+| Prop              | Type                              | Default     | Description                       |
+| ----------------- | --------------------------------- | ----------- | --------------------------------- |
+| `appearance`      | `'fill' \| 'outline'`             | `'fill'`    | Form field appearance style       |
+| `color`           | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Theme color                       |
+| `hint`            | `string`                          | -           | Helper text displayed below field |
+| `subscriptSizing` | `'fixed' \| 'dynamic'`            | `'fixed'`   | Error/hint spacing behavior       |
+
+## Accessibility
+
+All Material Design components include:
+
+- Proper ARIA attributes
+- Keyboard navigation support
+- Screen reader compatibility
+- Focus management
+- Error announcements
+
+## Next Steps
+
+- Check out [Examples & Patterns](../../../examples/) for real-world use cases
+- Learn about [Validation](../../../core/validation/) for form validation
+- See [Type Safety](../../../core/type-safety/) for TypeScript integration
+- Explore [Conditional Logic](../../../core/conditional-logic/) for dynamic field behavior
