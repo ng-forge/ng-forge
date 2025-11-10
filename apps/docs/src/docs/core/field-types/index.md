@@ -136,9 +136,10 @@ Date selection control (requires UI integration).
   type: 'datepicker',
   label: 'Birth Date',
   required: true,
+  minDate: new Date(1900, 0, 1),
+  maxDate: new Date(),
   props: {
-    minDate: new Date(1900, 0, 1),
-    maxDate: new Date(),
+    placeholder: 'Select your birth date',
   }
 }
 ```
@@ -152,11 +153,9 @@ Numeric range selection (requires UI integration).
   key: 'volume',
   type: 'slider',
   label: 'Volume',
-  props: {
-    min: 0,
-    max: 100,
-    step: 5,
-  }
+  minValue: 0,
+  maxValue: 100,
+  step: 5,
 }
 ```
 

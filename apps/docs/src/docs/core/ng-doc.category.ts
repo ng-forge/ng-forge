@@ -1,8 +1,8 @@
 import { NgDocCategory } from '@ng-doc/core';
 
 const CoreCategory: NgDocCategory = {
-  title: 'Logic & Validation',
-  order: 1,
+  title: 'Core Concepts',
+  order: 2,
   expandable: true,
 };
 

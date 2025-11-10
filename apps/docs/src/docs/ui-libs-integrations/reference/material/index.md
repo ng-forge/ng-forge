@@ -16,7 +16,7 @@ import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(withMaterialFields())],
+  providers: [provideDynamicForm(...withMaterialFields())],
 };
 ```
 

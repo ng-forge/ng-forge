@@ -1,8 +1,8 @@
 import { NgDocCategory } from '@ng-doc/core';
 
 const I18nCategory: NgDocCategory = {
-  title: 'Internationalization',
-  order: 2,
+  title: 'Internationalization (i18n)',
+  order: 4,
   expandable: true,
 };
 

@@ -329,7 +329,7 @@ export class CheckoutComponent {
             key: 'region',
             type: 'row',
             fields: [
-              { key: 'state', type: 'select', value: '', label: 'State', required: true, props: { options: STATES } },
+              { key: 'state', type: 'select', value: '', label: 'State', required: true, options: STATES, props: { placeholder: 'Select state' } },
               { key: 'zip', type: 'input', value: '', label: 'ZIP', required: true, pattern: '^[0-9]{5}$' },
             ],
           },
