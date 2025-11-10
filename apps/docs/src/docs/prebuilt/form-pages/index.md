@@ -59,6 +59,52 @@ When your form contains page fields:
 - **Validation**: Users must complete required fields before advancing to the next page
 - **Single Page View**: Only one page is visible at a time
 
+## Performance & Lazy Loading
+
+ng-forge uses Angular's `@defer` blocks with smart prefetching to optimize page rendering while maintaining flicker-free navigation.
+
+### How It Works
+
+The page orchestrator uses a **2-tier loading strategy**:
+
+**Tier 1: Current + Adjacent Pages (±1)**
+
+- Render immediately using `@defer (on immediate)`
+- Initially, only 3 pages load (current + 2 adjacent)
+- Adjacent pages are fully rendered but hidden with `display: none`
+- Ensures zero flicker when navigating forward/backward
+
+**Tier 2: Distant Pages (2+ steps away)**
+
+- Defer loading until browser is idle using `@defer (on idle)`
+- Lazy loading optimizes initial page load
+- Load automatically during browser idle time
+- Once loaded, pages remain in DOM (hidden with CSS)
+
+### Benefits
+
+```typescript
+// Example: User is on step 2 of 5
+fields: [
+  { key: 'step1', type: 'page', ... }, // ✓ Rendered (adjacent)
+  { key: 'step2', type: 'page', ... }, // ✓ Visible (current)
+  { key: 'step3', type: 'page', ... }, // ✓ Rendered (adjacent)
+  { key: 'step4', type: 'page', ... }, // ⏳ Deferred (distant)
+  { key: 'step5', type: 'page', ... }, // ⏳ Deferred (distant)
+]
+```
+
+**Performance advantages:**
+
+- ⚡ **Zero navigation flicker** - Adjacent pages already rendered
+- 🚀 **Faster initial load** - Only 3 pages render immediately, distant pages defer until idle
+- ⏱️ **Better Time to Interactive (TTI)** - Reduced initial JavaScript parsing/compilation
+- 📱 **Mobile-friendly** - Lower startup cost on slower devices
+
+**Note:** Once loaded, pages remain in the DOM (hidden with CSS). The primary benefit is optimizing **initial load performance**, not ongoing memory usage.
+
+This optimization happens automatically - no configuration needed.
+
 ## Value Structure
 
 Pages are container fields - they don't add nesting to your form values. Fields flatten to the root level:

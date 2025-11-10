@@ -7,7 +7,6 @@ import {
   inject,
   Injector,
   input,
-  signal,
   ViewContainerRef,
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -42,6 +41,8 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
     '[class.disabled]': 'disabled()',
     '[class.df-page-visible]': 'isVisible()',
     '[class.df-page-hidden]': '!isVisible()',
+    '[style.display]': 'isVisible() ? "block" : "none"',
+    '[attr.aria-hidden]': '!isVisible()',
     '[attr.data-page-index]': 'pageIndex()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
@@ -64,27 +65,17 @@ export default class PageFieldComponent {
 
   fieldSignalContext = input.required<FieldSignalContext>();
 
+  /**
+   * Page index passed from orchestrator
+   */
+  pageIndex = input.required<number>();
+
+  /**
+   * Page visibility state passed from orchestrator
+   */
+  isVisible = input.required<boolean>();
+
   readonly disabled = computed(() => this.field().disabled || false);
-
-  /**
-   * Page index signal managed by orchestrator
-   */
-  private readonly _pageIndex = signal(0);
-
-  /**
-   * Page index for orchestrator coordination
-   */
-  readonly pageIndex = computed(() => this._pageIndex());
-
-  /**
-   * Page visibility signal managed by orchestrator
-   */
-  private readonly _isVisible = signal(true);
-
-  /**
-   * Page visibility state controlled by the orchestrator
-   */
-  readonly isVisible = computed(() => this._isVisible());
 
   // EventBus outputs for page navigation
   readonly nextPage = outputFromObservable(this.eventBus.on<NextPageEvent>('next-page'));
@@ -167,19 +158,5 @@ export default class PageFieldComponent {
 
   onFieldsInitialized(): void {
     this.eventBus.dispatch(ComponentInitializedEvent, 'page', this.field().key);
-  }
-
-  /**
-   * Method called by orchestrator to set page index
-   */
-  setPageIndex(index: number): void {
-    this._pageIndex.set(index);
-  }
-
-  /**
-   * Method called by orchestrator to set visibility
-   */
-  setVisibility(visible: boolean): void {
-    this._isVisible.set(visible);
   }
 }
