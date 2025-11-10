@@ -288,6 +288,124 @@ Each page validates independently. Users cannot proceed to the next page until a
 }
 ```
 
+## Performance & Lazy Loading
+
+ng-forge uses Angular's `@defer` blocks with **smart prefetching** to achieve true lazy loading while maintaining flicker-free navigation.
+
+### How It Works
+
+- **Current page loads immediately** - The active page renders instantly
+- **Adjacent pages (±1) prefetch** - Next/previous pages load in background for instant navigation
+- **Distant pages defer until idle** - Pages 2+ steps away load when browser is idle
+- **Automatic optimization** - No configuration needed - ng-forge handles this automatically
+
+### Benefits
+
+```typescript
+// Example: Currently on step 2 of 5
+fields: [
+  { key: 'step1', type: 'page', fields: [...] }, // ✓ Prefetched (adjacent)
+  { key: 'step2', type: 'page', fields: [...] }, // ✓ Visible (current)
+  { key: 'step3', type: 'page', fields: [...] }, // ✓ Prefetched (adjacent)
+  { key: 'step4', type: 'page', fields: [...] }, // ⏳ Deferred (distant)
+  { key: 'step5', type: 'page', fields: [...] }, // ⏳ Deferred (distant)
+]
+```
+
+**Performance advantages:**
+
+- ⚡ **Zero flicker navigation** - Adjacent pages prefetched for instant next/previous
+- 🚀 **Faster initial load** - Only 3 pages load immediately, distant pages defer until idle
+- ⏱️ **Better Time to Interactive (TTI)** - Reduced initial JavaScript parsing/compilation
+- 📱 **Mobile-friendly** - Lower startup cost on slower devices
+- 🎯 **Optimized user experience** - Smooth page transitions without loading states
+
+### Technical Details
+
+Under the hood, the page orchestrator uses a **2-tier loading strategy**:
+
+```typescript
+@if (i === currentPageIndex || i === currentPageIndex + 1 || i === currentPageIndex - 1) {
+  <!-- Current and adjacent pages: render immediately (but hide adjacent) -->
+  @defer (on immediate) {
+    <page-field [isVisible]="i === currentPageIndex" />
+  }
+} @else {
+  <!-- Distant pages: defer until idle -->
+  @defer (on idle) {
+    <page-field [isVisible]="false" />
+  }
+}
+```
+
+This means:
+
+- **Current + adjacent pages render immediately** - Using `@defer (on immediate)` to render during browser idle
+- **Visibility controlled via input and CSS** - Adjacent pages are fully rendered but hidden with `display: none`
+- **Initial load optimization** - Only 3 pages render initially, distant pages defer until idle
+- **Zero flicker navigation** - Next/previous pages already rendered, just toggle visibility
+- **Once loaded, pages persist** - Pages remain in DOM (hidden with CSS) after initial load
+
+The primary benefit is **optimizing initial load performance**, not ongoing memory usage.
+
+### Best Practices
+
+For optimal performance with multi-step forms:
+
+1. **Keep pages focused** - Limit each page to 5-10 fields for best UX
+2. **Put heavy pages later** - Place pages with expensive operations or large datasets later in the flow so they defer until idle
+3. **Front-load critical data** - Place important fields in early pages (they prefetch immediately)
+4. **Leverage the 3-page window** - Only current + adjacent pages load immediately, so structure your flow accordingly
+
+**Example optimization:**
+
+```typescript
+fields: [
+  {
+    key: 'basicInfo',
+    type: 'page',
+    fields: [
+      /* lightweight fields */
+    ],
+  },
+  {
+    key: 'contact',
+    type: 'page',
+    fields: [
+      /* lightweight fields */
+    ],
+  },
+  {
+    key: 'address',
+    type: 'page',
+    fields: [
+      /* lightweight fields */
+    ],
+  },
+  // These won't load until user reaches page 2-4 (when idle)
+  {
+    key: 'preferences',
+    type: 'page',
+    fields: [
+      /* heavy multi-checkbox with 100 options */
+    ],
+  },
+  {
+    key: 'advanced',
+    type: 'page',
+    fields: [
+      /* complex conditional logic */
+    ],
+  },
+];
+```
+
+With this structure:
+
+- **Pages 1-2** load immediately (current + adjacent)
+- **Page 3** prefetches when you reach page 2
+- **Pages 4-5** defer until browser is idle, saving initial load time
+
 ## Common Enhancements
 
 ### Dynamic Steps

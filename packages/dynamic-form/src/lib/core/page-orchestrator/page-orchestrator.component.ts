@@ -1,28 +1,37 @@
-import { ChangeDetectionStrategy, Component, ComponentRef, computed, inject, input, linkedSignal } from '@angular/core';
-import { explicitEffect } from 'ngxtension/explicit-effect';
-import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { FormUiControl } from '@angular/forms/signals';
-import { map } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { NavigationResult, PageOrchestratorConfig, PageOrchestratorState } from './page-orchestrator.interfaces';
+import { PageField } from '../../definitions/default/page-field';
+import { FieldSignalContext } from '../../mappers/types';
+import PageFieldComponent from '../../fields/page/page-field.component';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
+import { FieldTree } from '@angular/forms/signals';
+import { RegisteredFieldTypes } from '../../models';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
  * It acts as an intermediary between the DynamicForm component and PageField components,
  * handling page state management and navigation events without interfering with form data.
  *
+ * This component uses declarative rendering with @defer blocks for optimal performance,
+ * ensuring that non-visible pages are lazily loaded only when needed.
+ *
  * Key responsibilities:
  * - Manage current page index state
  * - Handle navigation events (next/previous)
- * - Control page visibility
+ * - Declaratively render pages with deferred loading
  * - Emit page change events
  * - Validate navigation boundaries
  *
  * @example
  * ```html
  * <page-orchestrator
- *   [pageComponents]="pageComponents"
+ *   [pageFields]="pageFields"
+ *   [form]="form"
+ *   [fieldSignalContext]="fieldSignalContext"
  *   [config]="orchestratorConfig"
  *   (pageChanged)="onPageChanged($event)"
  *   (navigationStateChanged)="onNavigationStateChanged($event)">
@@ -31,11 +40,37 @@ import { NavigationResult, PageOrchestratorConfig, PageOrchestratorState } from 
  */
 @Component({
   selector: 'page-orchestrator',
+  imports: [PageFieldComponent],
   template: `
-    <!-- Page orchestrator manages visibility but doesn't render content directly -->
-    <!-- Content is provided by the parent through field renderer -->
     <div class="df-page-orchestrator-content">
-      <ng-content></ng-content>
+      @for (pageField of pageFields(); track pageField.key; let i = $index) { @if (i === state().currentPageIndex || i ===
+      state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
+      <!-- Current and adjacent pages (±1): render immediately for flicker-free navigation -->
+      @defer (on immediate) {
+      <page-field
+        [field]="pageField"
+        [key]="pageField.key"
+        [form]="form()"
+        [fieldSignalContext]="fieldSignalContext()"
+        [pageIndex]="i"
+        [isVisible]="i === state().currentPageIndex"
+      />
+      } @placeholder {
+      <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
+      } } @else {
+      <!-- Distant pages: defer until browser is idle for memory savings -->
+      @defer (on idle) {
+      <page-field
+        [field]="pageField"
+        [key]="pageField.key"
+        [form]="form()"
+        [fieldSignalContext]="fieldSignalContext()"
+        [pageIndex]="i"
+        [isVisible]="false"
+      />
+      } @placeholder {
+      <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
+      } } }
     </div>
   `,
   styleUrl: './page-orchestrator.component.scss',
@@ -50,9 +85,19 @@ export class PageOrchestratorComponent {
   private readonly eventBus = inject(EventBus);
 
   /**
-   * Array of page component references to manage
+   * Array of page field definitions to render
    */
-  pageComponents = input<ComponentRef<FormUiControl>[]>([]);
+  pageFields = input.required<PageField<RegisteredFieldTypes[]>[]>();
+
+  /**
+   * Root form instance from parent DynamicForm
+   */
+  form = input.required<FieldTree<unknown>>();
+
+  /**
+   * Field signal context for child fields
+   */
+  fieldSignalContext = input.required<FieldSignalContext>();
 
   /**
    * Configuration for the orchestrator
@@ -60,10 +105,10 @@ export class PageOrchestratorComponent {
   config = input<PageOrchestratorConfig>({});
 
   /**
-   * Internal signal for current page index that tracks with page components
+   * Internal signal for current page index that tracks with page fields
    */
   private readonly currentPageIndex = linkedSignal(() => {
-    const totalPages = this.pageComponents().length;
+    const totalPages = this.pageFields().length;
     const initialIndex = this.config().initialPageIndex ?? 0;
     return totalPages > 0 ? Math.max(0, Math.min(initialIndex, totalPages - 1)) : 0;
   });
@@ -73,7 +118,7 @@ export class PageOrchestratorComponent {
    */
   readonly state = computed<PageOrchestratorState>(() => {
     const currentIndex = this.currentPageIndex();
-    const totalPages = this.pageComponents().length;
+    const totalPages = this.pageFields().length;
 
     return {
       currentPageIndex: currentIndex,
@@ -84,22 +129,8 @@ export class PageOrchestratorComponent {
     };
   });
 
-  /**
-   * Emitted when page changes
-   */
-  readonly pageChanged = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change').pipe(map((event) => event)));
-
-  /**
-   * Emitted when navigation state changes
-   */
-  readonly navigationStateChanged = outputFromObservable(toObservable(this.state));
-
   constructor() {
-    // Setup visibility management for page components
-    explicitEffect([this.pageComponents, this.currentPageIndex], ([components, currentIndex]) => {
-      this.updatePageVisibility(components, currentIndex);
-    });
-
+    // Setup event listeners for navigation
     this.setupEventListeners();
   }
 
@@ -197,41 +228,6 @@ export class PageOrchestratorComponent {
   }
 
   /**
-   * Update page visibility based on current page index
-   */
-  private updatePageVisibility(components: ComponentRef<FormUiControl>[], currentIndex: number): void {
-    components.forEach((componentRef, index) => {
-      const instance = componentRef.instance as any;
-
-      // Set page index and visibility if the component supports it
-      if (instance && typeof instance.setPageIndex === 'function') {
-        instance.setPageIndex(index);
-      }
-
-      if (instance && typeof instance.setVisibility === 'function') {
-        instance.setVisibility(index === currentIndex);
-      }
-
-      // For components that don't have visibility methods,
-      // we can use host element styling
-      const hostElement = componentRef.location?.nativeElement;
-      if (hostElement) {
-        hostElement.style.display = index === currentIndex ? 'block' : 'none';
-        hostElement.setAttribute('aria-hidden', String(index !== currentIndex));
-        hostElement.setAttribute('data-page-index', String(index));
-
-        if (index === currentIndex) {
-          hostElement.classList.add('df-page-visible');
-          hostElement.classList.remove('df-page-hidden');
-        } else {
-          hostElement.classList.add('df-page-hidden');
-          hostElement.classList.remove('df-page-visible');
-        }
-      }
-    });
-  }
-
-  /**
    * Set up event listeners for navigation events
    */
   private setupEventListeners(): void {
@@ -250,5 +246,7 @@ export class PageOrchestratorComponent {
       .subscribe(() => {
         this.navigateToPreviousPage();
       });
+
+    explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PageNavigationStateChangeEvent, state));
   }
 }
