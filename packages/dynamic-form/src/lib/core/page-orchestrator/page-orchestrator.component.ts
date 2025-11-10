@@ -43,20 +43,43 @@ import { RegisteredFieldTypes } from '../../models';
   imports: [PageFieldComponent],
   template: `
     <div class="df-page-orchestrator-content">
-      @for (pageField of pageFields(); track pageField.key; let i = $index) {
-      <!-- All pages load immediately to prevent flicker, but only current is visible -->
-      @defer (on immediate) {
+      @for (pageField of pageFields(); track pageField.key; let i = $index) { @if (i === state().currentPageIndex) {
+      <!-- Current page: render immediately -->
       <page-field
         [field]="pageField"
         [key]="pageField.key"
         [form]="form()"
         [fieldSignalContext]="fieldSignalContext()"
         [pageIndex]="i"
-        [isVisible]="i === state().currentPageIndex"
+        [isVisible]="true"
+      />
+      } @else if (i === state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
+      <!-- Adjacent pages (±1): prefetch immediately for flicker-free navigation -->
+      @defer (prefetch on immediate) {
+      <page-field
+        [field]="pageField"
+        [key]="pageField.key"
+        [form]="form()"
+        [fieldSignalContext]="fieldSignalContext()"
+        [pageIndex]="i"
+        [isVisible]="false"
       />
       } @placeholder {
       <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
-      } }
+      } } @else {
+      <!-- Distant pages: defer until browser is idle for memory savings -->
+      @defer (on idle) {
+      <page-field
+        [field]="pageField"
+        [key]="pageField.key"
+        [form]="form()"
+        [fieldSignalContext]="fieldSignalContext()"
+        [pageIndex]="i"
+        [isVisible]="false"
+      />
+      } @placeholder {
+      <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
+      } } }
     </div>
   `,
   styleUrl: './page-orchestrator.component.scss',
