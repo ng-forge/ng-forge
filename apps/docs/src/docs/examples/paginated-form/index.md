@@ -290,76 +290,121 @@ Each page validates independently. Users cannot proceed to the next page until a
 
 ## Performance & Lazy Loading
 
-ng-forge uses Angular's `@defer` blocks with smart preloading to optimize page rendering, balancing performance with flicker-free navigation.
+ng-forge uses Angular's `@defer` blocks with **smart prefetching** to achieve true lazy loading while maintaining flicker-free navigation.
 
 ### How It Works
 
-- **All pages load immediately** - Using `@defer (on immediate)` to prevent navigation flicker
-- **Only current page visible** - Non-visible pages are hidden with CSS `display: none`
-- **Instant navigation** - Pages switch instantly since they're already loaded
+- **Current page loads immediately** - The active page renders instantly
+- **Adjacent pages (±1) prefetch** - Next/previous pages load in background for instant navigation
+- **Distant pages defer until idle** - Pages 2+ steps away load when browser is idle
 - **Automatic optimization** - No configuration needed - ng-forge handles this automatically
 
 ### Benefits
 
 ```typescript
-// With 4 pages, all load immediately but only current is visible
+// Example: Currently on step 2 of 5
 fields: [
-  { key: 'step1', type: 'page', fields: [...] }, // ✓ Visible
-  { key: 'step2', type: 'page', fields: [...] }, // ✓ Loaded, hidden
-  { key: 'step3', type: 'page', fields: [...] }, // ✓ Loaded, hidden
-  { key: 'step4', type: 'page', fields: [...] }, // ✓ Loaded, hidden
+  { key: 'step1', type: 'page', fields: [...] }, // ✓ Prefetched (adjacent)
+  { key: 'step2', type: 'page', fields: [...] }, // ✓ Visible (current)
+  { key: 'step3', type: 'page', fields: [...] }, // ✓ Prefetched (adjacent)
+  { key: 'step4', type: 'page', fields: [...] }, // ⏳ Deferred (distant)
+  { key: 'step5', type: 'page', fields: [...] }, // ⏳ Deferred (distant)
 ]
 ```
 
 **Performance advantages:**
 
-- ⚡ **Zero flicker navigation** - All pages preloaded for instant switching
-- 🎯 **Optimized initial load** - `@defer (on immediate)` loads efficiently during idle time
+- ⚡ **Zero flicker navigation** - Adjacent pages prefetched for instant next/previous
+- 💾 **True lazy loading** - Distant pages don't load until needed
+- 🎯 **Memory efficient** - Only 3 pages in memory at most (current + 2 adjacent)
 - 🚀 **Better UX** - Smooth page transitions without loading states
-- 📱 **Mobile-friendly** - Pages load during browser idle periods
+- 📱 **Mobile-friendly** - Reduced memory footprint on lower-end devices
 
 ### Technical Details
 
-Under the hood, the page orchestrator uses:
+Under the hood, the page orchestrator uses a **3-tier loading strategy**:
 
 ```typescript
-@defer (on immediate) {
-  <page-field
-    [field]="pageField"
-    [isVisible]="i === state().currentPageIndex"
-  />
+@if (i === state().currentPageIndex) {
+  <!-- Current page: immediate -->
+  <page-field [isVisible]="true" />
+} @else if (i === state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
+  <!-- Adjacent pages: prefetch immediately -->
+  @defer (prefetch on immediate) {
+    <page-field [isVisible]="false" />
+  }
+} @else {
+  <!-- Distant pages: defer until idle -->
+  @defer (on idle) {
+    <page-field [isVisible]="false" />
+  }
 }
 ```
 
 This means:
 
-- **All pages load immediately** using Angular's `on immediate` trigger
-- **Visibility controlled via input** - Pages toggle with `isVisible` input and CSS
-- **No DOM destruction** - Pages stay mounted, preventing navigation flicker
-- **Declarative rendering** - Angular handles the component lifecycle
+- **Smart prefetching** - Only adjacent pages preload, not all pages
+- **Visibility controlled via input** - Pages toggle with `isVisible` and CSS
+- **Memory savings** - Distant pages defer until browser is idle
+- **Instant navigation** - Next/previous always ready since they're prefetched
 
 ### Best Practices
 
 For optimal performance with multi-step forms:
 
 1. **Keep pages focused** - Limit each page to 5-10 fields for best UX
-2. **Heavy computations** - Move expensive operations to deferred pages when possible
-3. **Large datasets** - If a page loads large dropdown data, that fetch can happen during idle time
-4. **Conditional pages** - Use `logic` to hide/show pages - they still benefit from deferred loading
+2. **Put heavy pages later** - Place pages with expensive operations or large datasets later in the flow so they defer until idle
+3. **Front-load critical data** - Place important fields in early pages (they prefetch immediately)
+4. **Leverage the 3-page window** - Only current + adjacent pages load immediately, so structure your flow accordingly
+
+**Example optimization:**
 
 ```typescript
-{
-  key: 'advancedOptions',
-  type: 'page',
-  logic: [{
-    type: 'hidden',
-    condition: { /* only show for power users */ }
-  }],
-  fields: [/* expensive fields with large datasets */]
-}
+fields: [
+  {
+    key: 'basicInfo',
+    type: 'page',
+    fields: [
+      /* lightweight fields */
+    ],
+  },
+  {
+    key: 'contact',
+    type: 'page',
+    fields: [
+      /* lightweight fields */
+    ],
+  },
+  {
+    key: 'address',
+    type: 'page',
+    fields: [
+      /* lightweight fields */
+    ],
+  },
+  // These won't load until user reaches page 2-4 (when idle)
+  {
+    key: 'preferences',
+    type: 'page',
+    fields: [
+      /* heavy multi-checkbox with 100 options */
+    ],
+  },
+  {
+    key: 'advanced',
+    type: 'page',
+    fields: [
+      /* complex conditional logic */
+    ],
+  },
+];
 ```
 
-Even if a page is conditionally hidden, it still defers loading until needed, saving resources.
+With this structure:
+
+- **Pages 1-2** load immediately (current + adjacent)
+- **Page 3** prefetches when you reach page 2
+- **Pages 4-5** defer until browser is idle, saving initial load time
 
 ## Common Enhancements
 
