@@ -48,6 +48,12 @@ Thumbs.db
 # Documentation files (auto-generated)
 /internal/
 
+# E2E test artifacts
+**/screenshots/
+test-results/
+playwright-report/
+playwright/.cache/
+
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 /example/
