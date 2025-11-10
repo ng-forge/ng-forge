@@ -107,8 +107,16 @@ ng-forge dynamic forms supports multiple UI frameworks. Install the integration 
 
 ### Material Design (Production Ready)
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-material
 ```
 
 ```typescript
@@ -121,29 +129,77 @@ export const appConfig: ApplicationConfig = {
 
 See [Material Integration](../ui-libs-integrations/material) for full documentation.
 
-### Bootstrap (Coming Soon)
+### PrimeNG (Preview)
 
-```bash
-npm install @ng-forge/dynamic-form-bootstrap
-```
-
-See [Bootstrap Integration](../ui-libs-integrations/bootstrap) for status and alternatives.
-
-### PrimeNG (Coming Soon)
-
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-primeng
 ```
 
-See [PrimeNG Integration](../ui-libs-integrations/primeng) for status and alternatives.
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-primeng
+```
 
-### Ionic (Coming Soon)
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-primeng
+```
 
-```bash
+```typescript
+import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(...withPrimeNGFields())],
+};
+```
+
+See [PrimeNG Integration](../ui-libs-integrations/primeng) for full documentation.
+
+### Bootstrap (Preview)
+
+```bash group="install" name="npm"
+npm install @ng-forge/dynamic-form-bootstrap
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-bootstrap
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-bootstrap
+```
+
+```typescript
+import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(...withBootstrapFields())],
+};
+```
+
+See [Bootstrap Integration](../ui-libs-integrations/bootstrap) for full documentation.
+
+### Ionic (Preview)
+
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-ionic
 ```
 
-See [Ionic Integration](../ui-libs-integrations/ionic) for status and alternatives.
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-ionic
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-ionic
+```
+
+```typescript
+import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(...withIonicFields())],
+};
+```
+
+See [Ionic Integration](../ui-libs-integrations/ionic) for full documentation.
 
 ### Custom UI Components
 
@@ -177,13 +233,13 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 
 ### Build Advanced Forms
 
-- **[Multi-Step Forms](../../prebuilt/wizards/multi-step)** - Create wizard-style forms with page navigation
-- **[Repeatable Sections](../../prebuilt/arrays/repeatable-sections)** - Dynamic form arrays for adding/removing fields
+- **[Multi-Step Forms](../prebuilt/wizards/multi-step)** - Create wizard-style forms with page navigation
+- **[Repeatable Sections](../prebuilt/arrays/repeatable-sections)** - Dynamic form arrays for adding/removing fields
 - **[Conditional Validation](../core/validation#conditional-validators)** - Validators that activate based on conditions
 
 ### Customize and Extend
 
-- **[i18n Setup](../i18n/setup)** - Add multi-language support to your forms
+- **[i18n Setup](../core/i18n)** - Add multi-language support to your forms
 - **[Events](../core/events)** - Handle custom form events
 - **[Custom Fields](../deep-dive/custom-integrations)** - Create your own field types
 
@@ -230,11 +286,11 @@ If you see import errors for `@ng-forge/dynamic-form`, ensure:
 
 - 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions and get help
 - 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs
-- 📖 **[Documentation](../../)** - Browse full documentation
+- 📖 **[Documentation](../)** - Browse full documentation
 
 ## Related Topics
 
 - **[What is Dynamic Forms?](../what-is-dynamic-forms)** - Learn about features and benefits
-- **[Field Types](../../core/field-types)** - Explore all available field types
-- **[Validation](../../core/validation)** - Add validation to your forms
-- **[Material Integration](../../ui-libs-integrations/reference/material)** - Material Design field reference
+- **[Field Types](../core/field-types)** - Explore all available field types
+- **[Validation](../core/validation)** - Add validation to your forms
+- **[Material Integration](../ui-libs-integrations/material)** - Material Design field reference

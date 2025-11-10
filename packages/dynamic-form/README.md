@@ -23,14 +23,30 @@ The core library for building type-safe, dynamic Angular forms with signal forms
 
 ## Installation
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form
 ```
 
 For a complete working setup, install with a UI integration:
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
 ```
 
 ## Quick Start
@@ -409,8 +425,16 @@ The core library is UI-agnostic. Use with official integrations:
 
 ### Material Design
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-material
 ```
 
 ```typescript
@@ -420,8 +444,16 @@ provideDynamicForm(...withMaterialFields());
 
 ### Bootstrap
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-bootstrap
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-bootstrap
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-bootstrap
 ```
 
 ```typescript
@@ -431,8 +463,16 @@ provideDynamicForm(...withBootstrapFields());
 
 ### PrimeNG
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-primeng
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-primeng
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-primeng
 ```
 
 ```typescript
@@ -442,8 +482,16 @@ provideDynamicForm(...withPrimeNGFields());
 
 ### Ionic
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form-ionic
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form-ionic
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form-ionic
 ```
 
 ```typescript

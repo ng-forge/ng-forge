@@ -26,7 +26,7 @@ import { AsyncPipe } from '@angular/common';
     <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
-    <div class="checkbox-group" [class]="props()?.styleClass || ''">
+    <div class="checkbox-group" [class]="groupClasses()">
       @for (option of options(); track option.value) {
       <div class="checkbox-option">
         <p-checkbox
@@ -87,6 +87,22 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  readonly groupClasses = computed(() => {
+    const classes: string[] = [];
+
+    const styleClass = this.props()?.styleClass;
+    if (styleClass) {
+      classes.push(styleClass);
+    }
+
+    // Add p-invalid class when there are errors to display
+    if (this.errorsToDisplay().length > 0) {
+      classes.push('p-invalid');
+    }
+
+    return classes.join(' ');
+  });
 
   valueViewModel = linkedSignal<T[]>(() => this.field()().value(), { equal: isEqual });
 

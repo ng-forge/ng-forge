@@ -52,15 +52,17 @@
 /* Row Grid Container */
 .df-row {
   display: grid;
-  grid-template-columns: repeat(var(--df-grid-columns), 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
   gap: var(--df-grid-gap);
   align-items: start;
+  justify-content: start;
   width: 100%;
 
-  /* Fields in row should auto-size by default */
-  > * {
-    grid-column: span 1;
-    min-width: 0; /* Prevent grid overflow */
+  /* Fields in row that don't have explicit col classes */
+  > *:not([class*='df-col-']) {
+    width: 100%;
+    grid-column: 1 / -1;
   }
 }
 

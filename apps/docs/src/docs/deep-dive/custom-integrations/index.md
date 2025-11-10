@@ -1,4 +1,4 @@
-> Prerequisites: [Getting Started](../../getting-started), [Field Types](../../core/field-types), [Type Safety](../../core/type-safety)
+> Prerequisites: [Installation](../../installation), [Field Types](../../core/field-types), [Type Safety](../../core/type-safety)
 
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
 

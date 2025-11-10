@@ -13,13 +13,13 @@ import { ButtonIframeDemoComponent } from './examples/button-iframe-demo.compone
 import { CompleteFormIframeDemoComponent } from './examples/complete-form-iframe-demo.component';
 
 /**
- * @status:warning UNSTABLE
+ * @status:warning PREVIEW
  */
 const PrimeNGPage: NgDocPage = {
   title: 'PrimeNG',
   mdFile: './index.md',
   category: UiLibsIntegrationCategory,
-  order: 1,
+  order: 2,
   demos: {
     InputIframeDemoComponent,
     SelectIframeDemoComponent,

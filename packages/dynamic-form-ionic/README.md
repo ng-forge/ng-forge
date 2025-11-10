@@ -21,8 +21,16 @@ Beautiful Ionic implementation for ng-forge dynamic forms.
 
 ## Installation
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
 ```
 
 ## Quick Start

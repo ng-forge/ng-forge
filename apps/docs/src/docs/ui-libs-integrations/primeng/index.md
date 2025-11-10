@@ -1,38 +1,40 @@
-The `@ng-forge/dynamic-form-primeng` package provides PrimeNG field components with a beautiful, modern design system.
+Beautiful PrimeNG field components for ng-forge dynamic forms, built with the PrimeNG design system.
+
+---
 
 ## Installation
 
-```bash
-npm install @ng-forge/dynamic-form-primeng primeng primeicons
+Install the package and its peer dependencies:
+
+```bash group="install" name="npm"
+npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-primeng primeng primeicons
 ```
 
-## Setup
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-primeng primeng primeicons
+```
 
-Configure providers:
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-primeng primeng primeicons
+```
 
-```typescript name="app.config.ts"
+## Quick Start
+
+### 1. Configure Providers
+
+Add PrimeNG field types to your application:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withPrimeNGFields())],
-};
-```
-
-Import PrimeNG styles:
-
-```scss name="styles.scss"
-@import 'primeicons/primeicons.css';
-```
-
-Configure PrimeNG theme via provider:
-
-```typescript name="app.config.ts"
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideDynamicForm(...withPrimeNGFields()),
     providePrimeNG({
       theme: {
         preset: Aura,
@@ -42,176 +44,533 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-## Field Components
+### 2. Import Theme & Styles
 
-### Input
+Add PrimeNG icons to your styles:
 
-Text input with PrimeNG styling.
+```scss name="styles.scss"
+@import 'primeicons/primeicons.css';
+```
+
+PrimeNG theming is now configured via the provider (see step 1). You can customize the theme preset:
+
+```typescript
+import Aura from '@primeuix/themes/aura';
+import Lara from '@primeuix/themes/lara';
+import Nora from '@primeuix/themes/nora';
+
+providePrimeNG({
+  theme: {
+    preset: Aura, // or Lara, Nora, etc.
+  },
+});
+```
+
+### 3. Create Your First Form
+
+```typescript
+import { Component, signal } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+
+@Component({
+  selector: 'app-contact-form',
+  imports: [DynamicForm, JsonPipe],
+  template: `
+    <dynamic-form [config]="config" [(value)]="formValue" />
+    @let value = formValue();
+    <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
+  `,
+})
+export class ContactFormComponent {
+  formValue = signal({});
+
+  config = {
+    fields: [
+      {
+        key: 'name',
+        type: 'input',
+        value: '',
+        label: 'Full Name',
+        required: true,
+        props: {
+          variant: 'outlined',
+        },
+      },
+      {
+        key: 'email',
+        type: 'input',
+        value: '',
+        label: 'Email',
+        required: true,
+        email: true,
+        props: {
+          type: 'email',
+          variant: 'outlined',
+        },
+      },
+      {
+        key: 'message',
+        type: 'textarea',
+        value: '',
+        label: 'Message',
+        required: true,
+        minLength: 10,
+        props: {
+          rows: 4,
+        },
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Send Message',
+        props: {
+          severity: 'primary',
+        },
+      },
+    ],
+  } as const satisfies FormConfig;
+}
+```
+
+## Complete Form Example
+
+Here's a full registration form showcasing multiple PrimeNG field types:
+
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
+
+This example demonstrates:
+
+- Text inputs with validation
+- Select dropdowns with search
+- Checkboxes and toggles
+- Radio buttons
+- Date pickers
+- Sliders
+- Multi-checkbox selections
+- Form submission
+
+---
+
+## Field Types Reference
+
+Complete reference for all PrimeNG field types with comprehensive validation, accessibility features, and PrimeNG styling.
+
+### Text Input Fields
+
+Text input fields provide user-friendly text entry with PrimeNG styling.
+
+#### Input
+
+Text input field with HTML5 type support and PrimeNG styling.
+
+**Live Demo:**
 
 {{ NgDocActions.demo("InputIframeDemoComponent") }}
 
-**Props:**
+**Basic Usage:**
 
-- `type`: `'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'`
-- `styleClass`: CSS class for the input element
-- `hint`: Help text displayed below the input
-- `size`: `'small' | 'large'`
-- `variant`: `'outlined' | 'filled'`
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  value: '',
+  label: 'Email Address',
+  required: true,
+  email: true,
+  props: {
+    type: 'email',
+    variant: 'outlined',
+    placeholder: 'Enter your email',
+    hint: 'We will never share your email',
+  },
+}
+```
 
-### Select
+**Field Properties:**
 
-Dropdown selection with search capability.
+| Property      | Type               | Description                        |
+| ------------- | ------------------ | ---------------------------------- |
+| `key`         | `string`           | Unique field identifier (required) |
+| `type`        | `'input'`          | Field type (required)              |
+| `value`       | `string \| number` | Initial value                      |
+| `label`       | `string`           | Field label                        |
+| `placeholder` | `string`           | Placeholder text                   |
+| `required`    | `boolean`          | Mark field as required             |
+| `disabled`    | `boolean`          | Disable the field                  |
+| `readonly`    | `boolean`          | Make field read-only               |
 
-{{ NgDocActions.demo("SelectIframeDemoComponent") }}
+**Validation Properties:**
 
-**Props:**
+| Property    | Type               | Description                       |
+| ----------- | ------------------ | --------------------------------- |
+| `email`     | `boolean`          | Email format validation           |
+| `minLength` | `number`           | Minimum character length          |
+| `maxLength` | `number`           | Maximum character length          |
+| `min`       | `number`           | Minimum value (for number inputs) |
+| `max`       | `number`           | Maximum value (for number inputs) |
+| `pattern`   | `string \| RegExp` | RegEx pattern validation          |
 
-- `styleClass`: CSS class for the dropdown
-- `placeholder`: Dropdown placeholder text
-- `filter`: Enable search/filter functionality (boolean)
-- `showClear`: Show clear button (boolean)
-- `virtualScroll`: Enable virtual scrolling for large lists (boolean)
-- `virtualScrollItemSize`: Height of each item for virtual scroll
+**Props (PrimeNG-Specific):**
 
-### Checkbox
+| Prop         | Type                                                                        | Default      | Description             |
+| ------------ | --------------------------------------------------------------------------- | ------------ | ----------------------- |
+| `type`       | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url' \| 'search'` | `'text'`     | HTML input type         |
+| `variant`    | `'outlined' \| 'filled'`                                                    | `'outlined'` | Visual style            |
+| `size`       | `'small' \| 'large'`                                                        | -            | Input size              |
+| `hint`       | `string`                                                                    | -            | Helper text below input |
+| `styleClass` | `string`                                                                    | -            | CSS class for input     |
 
-Boolean checkbox control.
+#### Textarea
 
-{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
+Multi-line text input field with PrimeNG styling and auto-resize support.
 
-**Props:**
-
-- `styleClass`: CSS class for the checkbox
-- `binary`: Treat as boolean (true/false) instead of checked/unchecked
-- `trueValue`: Value when checked (default: true)
-- `falseValue`: Value when unchecked (default: false)
-
-### Radio
-
-Radio button group.
-
-{{ NgDocActions.demo("RadioIframeDemoComponent") }}
-
-**Props:**
-
-- `styleClass`: CSS class for the radio group
-- `hint`: Help text displayed below the group
-
-### Multi-Checkbox
-
-Multiple checkbox selection.
-
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
-
-**Props:**
-
-- `styleClass`: CSS class for the checkbox group
-- `hint`: Help text displayed below the group
-
-### Toggle
-
-Slide toggle switch (InputSwitch).
-
-{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
-
-**Props:**
-
-- `styleClass`: CSS class for the toggle
-- `trueValue`: Value when toggled on (default: true)
-- `falseValue`: Value when toggled off (default: false)
-- `hint`: Help text displayed below the toggle
-
-### Textarea
-
-Multi-line text input.
+**Live Demo:**
 
 {{ NgDocActions.demo("TextareaIframeDemoComponent") }}
 
-**Field properties:**
+**Basic Usage:**
 
-- `maxLength`: Maximum character limit
+```typescript
+{
+  key: 'bio',
+  type: 'textarea',
+  value: '',
+  label: 'Biography',
+  placeholder: 'Tell us about yourself',
+  required: true,
+  minLength: 50,
+  maxLength: 500,
+  props: {
+    rows: 6,
+    autoResize: true,
+    hint: 'Maximum 500 characters',
+  },
+}
+```
 
-**Props:**
+**Props (PrimeNG-Specific):**
 
-- `rows`: Number of visible rows (default: 4)
-- `cols`: Number of visible columns
-- `autoResize`: Auto-resize based on content (boolean)
-- `styleClass`: CSS class for the textarea
-- `hint`: Help text
+| Prop         | Type      | Default | Description                  |
+| ------------ | --------- | ------- | ---------------------------- |
+| `rows`       | `number`  | `4`     | Number of visible rows       |
+| `cols`       | `number`  | -       | Number of visible columns    |
+| `autoResize` | `boolean` | `false` | Auto-resize based on content |
+| `hint`       | `string`  | -       | Help text below field        |
+| `styleClass` | `string`  | -       | CSS class for textarea       |
 
-### Datepicker
+---
 
-Date selection with calendar popup (p-calendar).
+### Selection Fields
 
-{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
+Selection fields enable users to choose from predefined options.
 
-**Field properties:**
+#### Select
 
-- `minDate`: Minimum selectable date (Date | string | null)
-- `maxDate`: Maximum selectable date (Date | string | null)
+Dropdown selection field with search capability and virtual scrolling support.
 
-**Props:**
+**Live Demo:**
 
-- `styleClass`: CSS class for the datepicker
-- `dateFormat`: Date format string (default: 'mm/dd/yy')
-- `showIcon`: Show calendar icon (boolean)
-- `showButtonBar`: Show today/clear buttons (boolean)
-- `inline`: Display calendar inline (boolean)
-- `hint`: Help text
+{{ NgDocActions.demo("SelectIframeDemoComponent") }}
 
-### Slider
+**Basic Usage:**
 
-Numeric slider control.
+```typescript
+{
+  key: 'country',
+  type: 'select',
+  value: '',
+  label: 'Country',
+  required: true,
+  options: [
+    { value: 'us', label: 'United States' },
+    { value: 'uk', label: 'United Kingdom' },
+    { value: 'ca', label: 'Canada' },
+    { value: 'au', label: 'Australia' },
+  ],
+  props: {
+    filter: true,
+    showClear: true,
+    placeholder: 'Select a country',
+  },
+}
+```
+
+**Props (PrimeNG-Specific):**
+
+| Prop                    | Type      | Default | Description                            |
+| ----------------------- | --------- | ------- | -------------------------------------- |
+| `filter`                | `boolean` | `false` | Enable search/filter                   |
+| `showClear`             | `boolean` | `false` | Show clear button                      |
+| `virtualScroll`         | `boolean` | `false` | Enable virtual scrolling               |
+| `virtualScrollItemSize` | `number`  | -       | Height of each item for virtual scroll |
+| `placeholder`           | `string`  | -       | Dropdown placeholder text              |
+| `styleClass`            | `string`  | -       | CSS class for dropdown                 |
+
+#### Radio
+
+Radio button group for selecting a single option.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("RadioIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'size',
+  type: 'radio',
+  value: '',
+  label: 'Select Size',
+  required: true,
+  options: [
+    { value: 'small', label: 'Small' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'large', label: 'Large' },
+  ],
+  props: {
+    hint: 'Choose your preferred size',
+  },
+}
+```
+
+**Props (PrimeNG-Specific):**
+
+| Prop         | Type     | Default | Description                     |
+| ------------ | -------- | ------- | ------------------------------- |
+| `hint`       | `string` | -       | Help text displayed below group |
+| `styleClass` | `string` | -       | CSS class for radio group       |
+
+#### Checkbox
+
+Boolean checkbox control for single true/false selections.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'terms',
+  type: 'checkbox',
+  checked: false,
+  label: 'I accept the terms and conditions',
+  required: true,
+  props: {
+    binary: true,
+  },
+}
+```
+
+**Props (PrimeNG-Specific):**
+
+| Prop         | Type      | Default | Description                   |
+| ------------ | --------- | ------- | ----------------------------- |
+| `binary`     | `boolean` | `true`  | Treat as boolean (true/false) |
+| `trueValue`  | `any`     | `true`  | Value when checked            |
+| `falseValue` | `any`     | `false` | Value when unchecked          |
+| `styleClass` | `string`  | -       | CSS class for checkbox        |
+
+#### Multi-Checkbox
+
+Multiple checkbox selection field for choosing multiple options.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'interests',
+  type: 'multi-checkbox',
+  value: [],
+  label: 'Select Your Interests',
+  required: true,
+  options: [
+    { value: 'sports', label: 'Sports' },
+    { value: 'music', label: 'Music' },
+    { value: 'reading', label: 'Reading' },
+    { value: 'travel', label: 'Travel' },
+    { value: 'cooking', label: 'Cooking' },
+  ],
+  props: {
+    hint: 'Select all that apply',
+  },
+}
+```
+
+**Props (PrimeNG-Specific):**
+
+| Prop         | Type     | Default | Description                     |
+| ------------ | -------- | ------- | ------------------------------- |
+| `hint`       | `string` | -       | Help text displayed below group |
+| `styleClass` | `string` | -       | CSS class for checkbox group    |
+
+---
+
+### Interactive Fields
+
+Interactive fields provide advanced user input controls.
+
+#### Toggle
+
+Slide toggle switch (InputSwitch) for boolean on/off selections.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'notifications',
+  type: 'toggle',
+  checked: false,
+  label: 'Enable email notifications',
+  props: {
+    hint: 'Receive updates via email',
+  },
+}
+```
+
+**Props (PrimeNG-Specific):**
+
+| Prop         | Type     | Default | Description            |
+| ------------ | -------- | ------- | ---------------------- |
+| `trueValue`  | `any`    | `true`  | Value when toggled on  |
+| `falseValue` | `any`    | `false` | Value when toggled off |
+| `hint`       | `string` | -       | Help text below toggle |
+| `styleClass` | `string` | -       | CSS class for toggle   |
+
+#### Slider
+
+Numeric slider control for selecting values from a range.
+
+**Live Demo:**
 
 {{ NgDocActions.demo("SliderIframeDemoComponent") }}
 
-**Field properties:**
+**Basic Usage:**
 
-- `minValue`: Minimum value (default: 0)
-- `maxValue`: Maximum value (default: 100)
-- `step`: Increment step (default: 1)
+```typescript
+{
+  key: 'volume',
+  type: 'slider',
+  value: 50,
+  label: 'Volume',
+  minValue: 0,
+  maxValue: 100,
+  step: 5,
+  props: {
+    hint: 'Adjust audio volume',
+  },
+}
+```
 
-**Props:**
+**Field Properties:**
 
-- `styleClass`: CSS class for the slider
-- `orientation`: `'horizontal' | 'vertical'` (default: 'horizontal')
-- `hint`: Help text
+| Property   | Type     | Default | Description    |
+| ---------- | -------- | ------- | -------------- |
+| `minValue` | `number` | `0`     | Minimum value  |
+| `maxValue` | `number` | `100`   | Maximum value  |
+| `step`     | `number` | `1`     | Increment step |
 
-### Buttons
+**Props (PrimeNG-Specific):**
 
-PrimeNG provides multiple prebuilt button types for common form actions.
+| Prop          | Type                         | Default        | Description            |
+| ------------- | ---------------------------- | -------------- | ---------------------- |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Slider orientation     |
+| `hint`        | `string`                     | -              | Help text below slider |
+| `styleClass`  | `string`                     | -              | CSS class for slider   |
 
-{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
+#### Datepicker
+
+Date selection field with calendar popup (p-calendar).
+
+**Live Demo:**
+
+{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'birthdate',
+  type: 'datepicker',
+  value: null,
+  label: 'Date of Birth',
+  required: true,
+  minDate: new Date('1900-01-01'),
+  maxDate: new Date(),
+  props: {
+    dateFormat: 'mm/dd/yy',
+    showIcon: true,
+    showButtonBar: true,
+    hint: 'Select your birth date',
+  },
+}
+```
+
+**Field Properties:**
+
+| Property  | Type                     | Description             |
+| --------- | ------------------------ | ----------------------- |
+| `minDate` | `Date \| string \| null` | Minimum selectable date |
+| `maxDate` | `Date \| string \| null` | Maximum selectable date |
+
+**Props (PrimeNG-Specific):**
+
+| Prop            | Type      | Default      | Description              |
+| --------------- | --------- | ------------ | ------------------------ |
+| `dateFormat`    | `string`  | `'mm/dd/yy'` | Date format string       |
+| `showIcon`      | `boolean` | `false`      | Show calendar icon       |
+| `showButtonBar` | `boolean` | `false`      | Show today/clear buttons |
+| `inline`        | `boolean` | `false`      | Display calendar inline  |
+| `hint`          | `string`  | -            | Help text below field    |
+| `styleClass`    | `string`  | -            | CSS class for datepicker |
+
+---
+
+### Buttons & Actions
+
+Action buttons provide form submission and navigation controls.
 
 #### Submit Button
 
-Form submission button - automatically disabled when the form is invalid.
+Form submission button that's automatically disabled when the form is invalid.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
+
+**Basic Usage:**
 
 ```typescript
-const config = {
-  fields: [
-    { key: 'name', type: 'input', value: '', label: 'Name', required: true },
-    { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
-    {
-      key: 'terms',
-      type: 'checkbox',
-      value: false,
-      label: 'I accept the terms and conditions',
-      required: true,
-    },
-    {
-      type: 'submit',
-      key: 'submit',
-      label: 'Create Account',
-      props: { severity: 'primary' },
-    },
-  ],
-} as const satisfies FormConfig;
-
-// The submit button will be disabled until all required fields are valid
+{
+  type: 'submit',
+  key: 'submit',
+  label: 'Create Account',
+  props: {
+    severity: 'primary',
+    icon: 'pi pi-check',
+    iconPos: 'right',
+  },
+}
 ```
 
-Alternative using helper function:
+The submit button automatically:
+
+- Disables when the form is invalid
+- Emits a `SubmitEvent` when clicked
+- Validates all fields before submission
+
+You can also use the helper function:
 
 ```typescript
 import { submitButton } from '@ng-forge/dynamic-form-primeng';
@@ -223,15 +582,29 @@ submitButton({
 });
 ```
 
-#### Next/Previous Buttons
+**Props:**
+
+| Prop       | Type                                                                                            | Default     | Description     |
+| ---------- | ----------------------------------------------------------------------------------------------- | ----------- | --------------- |
+| `severity` | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warn' \| 'help' \| 'danger' \| 'contrast'` | `'primary'` | Button theme    |
+| `outlined` | `boolean`                                                                                       | `false`     | Outlined style  |
+| `text`     | `boolean`                                                                                       | `false`     | Text-only style |
+| `raised`   | `boolean`                                                                                       | `false`     | Raised style    |
+| `rounded`  | `boolean`                                                                                       | `false`     | Rounded style   |
+| `icon`     | `string`                                                                                        | -           | Icon class      |
+| `iconPos`  | `'left' \| 'right' \| 'top' \| 'bottom'`                                                        | `'left'`    | Icon position   |
+
+#### Navigation Buttons
 
 Navigation buttons for multi-step (paged) forms.
 
+**Basic Usage:**
+
 ```typescript
-const config = {
+{
   fields: [
     {
-      key: 'personalInfo',
+      key: 'step1',
       type: 'page',
       title: 'Personal Information',
       description: 'Tell us about yourself',
@@ -239,52 +612,54 @@ const config = {
         { key: 'firstName', type: 'input', value: '', label: 'First Name', required: true },
         { key: 'lastName', type: 'input', value: '', label: 'Last Name', required: true },
         {
-          key: 'navigation',
-          type: 'row',
-          fields: [
-            {
-              type: 'next',
-              key: 'nextToContact',
-              label: 'Continue',
-              props: { severity: 'primary' },
-            },
-          ],
+          type: 'next',
+          key: 'next',
+          label: 'Continue',
+          props: { severity: 'primary', icon: 'pi pi-arrow-right', iconPos: 'right' },
         },
       ],
     },
     {
-      key: 'contactInfo',
+      key: 'step2',
       type: 'page',
       title: 'Contact Information',
       fields: [
         { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
+        { key: 'phone', type: 'input', value: '', label: 'Phone', props: { type: 'tel' } },
         {
           key: 'navigation',
           type: 'row',
           fields: [
-            { type: 'previous', key: 'back', label: 'Back' },
+            { type: 'previous', key: 'back', label: 'Back', props: { icon: 'pi pi-arrow-left' } },
             { type: 'submit', key: 'submit', label: 'Complete', props: { severity: 'primary' } },
           ],
         },
       ],
     },
   ],
-} as const satisfies FormConfig;
+}
 ```
 
-Alternative using helper functions:
+You can also use helper functions:
 
 ```typescript
 import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dynamic-form-primeng';
 
 nextPageButton({ key: 'next', label: 'Continue', props: { severity: 'primary' } });
 previousPageButton({ key: 'back', label: 'Back' });
-submitButton({ key: 'submit', label: 'Complete' });
+submitButton({ key: 'submit', label: 'Complete', props: { severity: 'primary' } });
 ```
+
+**Button Types:**
+
+- **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
+- **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
 
 #### Custom Action Button
 
 Generic button for custom events. Use this for application-specific actions.
+
+**Basic Usage:**
 
 ```typescript
 import { FormEvent } from '@ng-forge/dynamic-form';
@@ -307,13 +682,19 @@ const config = {
           key: 'saveDraft',
           label: 'Save as Draft',
           event: SaveDraftEvent,
-          props: { severity: 'secondary' },
+          props: {
+            severity: 'secondary',
+            icon: 'pi pi-save',
+          },
         },
         {
           type: 'submit',
           key: 'publish',
           label: 'Publish',
-          props: { severity: 'primary' },
+          props: {
+            severity: 'primary',
+            icon: 'pi pi-upload',
+          },
         },
       ],
     },
@@ -338,7 +719,7 @@ class MyComponent {
 }
 ```
 
-Alternative using helper function:
+You can also use the helper function:
 
 ```typescript
 import { actionButton } from '@ng-forge/dynamic-form-primeng';
@@ -351,81 +732,90 @@ actionButton({
 });
 ```
 
-**Button Props:**
-
-- `severity`: `'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'help' | 'danger'` - Button theme
-- `outlined`: Outlined button style (boolean)
-- `text`: Text-only button style (boolean)
-- `raised`: Raised button style (boolean)
-- `rounded`: Rounded button style (boolean)
-- `icon`: Icon class (e.g., 'pi pi-check')
-- `iconPos`: `'left' | 'right' | 'top' | 'bottom'` - Icon position
-- `size`: `'small' | 'large'`
-- `styleClass`: Additional CSS classes
-
-**Button Types:**
-
-- `type: 'submit'` - Preconfigured with SubmitEvent, auto-disables when form invalid
-- `type: 'next'` - Preconfigured with NextPageEvent for page navigation
-- `type: 'previous'` - Preconfigured with PreviousPageEvent for page navigation
-- `type: 'button'` - Generic button requiring custom `event` property
-
-## Complete Example
-
-### Full Form
-
-{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
-
-## Type Safety
-
-PrimeNG fields use specialized control types:
-
-- **ValueControlFieldType**: Single-value fields (input, select, textarea, datepicker, radio, slider, toggle)
-- **CheckboxControlFieldType**: Checkbox fields (checkbox, multi-checkbox)
-
-Benefits:
-
-- Full TypeScript type inference
-- Angular signal forms integration
-- No `ControlValueAccessor` boilerplate
-- Automatic property handling
+---
 
 ## Theming
 
-PrimeNG supports extensive theming through CSS variables. See [PrimeNG Theming Guide](https://primeng.org/theming) for customization options.
+PrimeNG supports extensive theming through CSS variables and theme presets. Customize your theme using the provider:
 
-**severity**: Button/component theme
+```typescript
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeuix/themes/aura';
+import Lara from '@primeuix/themes/lara';
+import Nora from '@primeuix/themes/nora';
 
-- `'primary'` (default)
-- `'secondary'`
-- `'success'`
-- `'info'`
-- `'warning'`
-- `'help'`
-- `'danger'`
+providePrimeNG({
+  theme: {
+    preset: Aura, // or Lara, Nora, etc.
+    options: {
+      darkModeSelector: '.dark-mode',
+    },
+  },
+});
+```
 
-**size**: Component size variants
+### Severity Colors
 
-- `'small'`
-- `'large'`
-- Default (medium)
+Control button and component colors using the `severity` prop:
 
-**styleClass**: Custom CSS classes for all components
+```typescript
+{
+  type: 'submit',
+  key: 'submit',
+  label: 'Submit',
+  props: {
+    severity: 'primary', // 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast'
+  },
+}
+```
+
+### Size Variants
+
+Adjust component sizes using the `size` prop:
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  props: {
+    size: 'small', // 'small' | 'large' | undefined (default/medium)
+  },
+}
+```
+
+### Custom Styling
+
+Add custom CSS classes to any component:
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  props: {
+    styleClass: 'my-custom-input',
+  },
+}
+```
+
+For more information, see the [PrimeNG Theming Guide](https://primeng.org/theming).
 
 ## Accessibility
 
-All components include:
+All PrimeNG components include:
 
 - Proper ARIA attributes
-- Keyboard navigation
-- Screen reader support
+- Keyboard navigation support
+- Screen reader compatibility
 - Focus management
 - Error announcements
 
-## Angular 21 Compatibility
+PrimeNG components are designed with accessibility in mind and follow WAI-ARIA standards.
 
-**Current Status:** Experimental with Angular 21.0.0-next.9 and PrimeNG 20.3.0
+## Next Steps
 
-Some PrimeNG components may encounter signal-related issues in Angular 21 during testing. These are PrimeNG framework limitations and should be resolved in future PrimeNG releases.
-
-For production-ready implementations with Angular 21, consider using `@ng-forge/dynamic-form-material`.
+- Check out [Examples & Patterns](../../../examples/) for real-world use cases
+- Learn about [Validation](../../../core/validation/) for form validation
+- See [Type Safety](../../../core/type-safety/) for TypeScript integration
+- Explore [Conditional Logic](../../../core/conditional-logic/) for dynamic field behavior

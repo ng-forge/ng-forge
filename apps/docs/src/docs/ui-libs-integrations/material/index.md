@@ -1,410 +1,592 @@
-The `@ng-forge/dynamic-form-material` package provides Material Design field components.
+Beautiful Material Design field components for ng-forge dynamic forms, built with Angular Material.
+
+---
 
 ## Installation
 
-```bash
-npm install @ng-forge/dynamic-form-material @angular/material @angular/cdk
+Install the package and its peer dependencies:
+
+```bash group="install" name="npm"
+npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
 ```
 
-## Setup
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
+```
 
-Configure providers:
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
+```
 
-```typescript name="app.config.ts"
+## Quick Start
+
+### 1. Configure Providers
+
+Add Material Design field types to your application:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(withMaterialFields())],
+  providers: [provideAnimations(), provideDynamicForm(...withMaterialFields())],
 };
 ```
 
-Import Material theme:
+### 2. Import Material Theme
+
+Add a Material Design theme to your styles:
 
 ```scss name="styles.scss"
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$my-primary: mat.define-palette(mat.$indigo-palette);
+$my-accent: mat.define-palette(mat.$pink-palette);
+$my-warn: mat.define-palette(mat.$red-palette);
+
+$my-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $my-primary,
+      accent: $my-accent,
+      warn: $my-warn,
+    ),
+  )
+);
+
+@include mat.all-component-themes($my-theme);
 ```
 
-## Field Components
+### 3. Create Your First Form
 
-### Input
+```typescript
+import { Component, signal } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 
-Text input with Material styling.
+@Component({
+  selector: 'app-contact-form',
+  imports: [DynamicForm, JsonPipe],
+  template: `
+    <dynamic-form [config]="config" [(value)]="formValue" />
+    @let value = formValue();
+    <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
+  `,
+})
+export class ContactFormComponent {
+  formValue = signal({});
+
+  config = {
+    fields: [
+      {
+        key: 'name',
+        type: 'input',
+        label: 'Full Name',
+        required: true,
+        props: {
+          appearance: 'outline',
+        },
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: 'Email',
+        required: true,
+        email: true,
+        props: {
+          type: 'email',
+          appearance: 'outline',
+        },
+      },
+      {
+        key: 'message',
+        type: 'textarea',
+        label: 'Message',
+        required: true,
+        minLength: 10,
+        props: {
+          appearance: 'outline',
+          rows: 4,
+        },
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Send Message',
+        props: {
+          color: 'primary',
+        },
+      },
+    ],
+  } as const satisfies FormConfig;
+}
+```
+
+## Complete Form Example
+
+Here's a full registration form showcasing multiple Material Design field types:
+
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
+
+This example demonstrates:
+
+- Text inputs with validation
+- Select dropdowns
+- Checkboxes and toggles
+- Radio buttons
+- Date pickers
+- Sliders
+- Multi-checkbox selections
+- Form submission
+
+---
+
+## Field Types Reference
+
+Complete reference for all Material Design field types with comprehensive validation, accessibility features, and Material Design styling.
+
+### Text Input Fields
+
+Text input fields provide user-friendly text entry with Material Design styling.
+
+#### Input
+
+Text input field with HTML5 type support.
+
+**Live Demo:**
 
 {{ NgDocActions.demo("InputIframeDemoComponent") }}
 
-**Props:**
+**Basic Usage:**
 
-- `type`: `'text' | 'email' | 'password' | 'number' | 'tel' | 'url'`
-- `appearance`: `'fill' | 'outline'`
-- `hint`: Help text
-- `placeholder`: Input placeholder
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email Address',
+  value: '',
+  required: true,
+  email: true,
+  props: {
+    type: 'email',
+    appearance: 'outline',
+    placeholder: 'Enter your email',
+  },
+}
+```
 
-### Select
+**Field Properties:**
 
-Dropdown selection (single or multi-select).
+| Property      | Type               | Description                        |
+| ------------- | ------------------ | ---------------------------------- |
+| `key`         | `string`           | Unique field identifier (required) |
+| `type`        | `'input'`          | Field type (required)              |
+| `value`       | `string \| number` | Initial value                      |
+| `label`       | `string`           | Field label                        |
+| `placeholder` | `string`           | Placeholder text                   |
+| `required`    | `boolean`          | Mark field as required             |
+| `disabled`    | `boolean`          | Disable the field                  |
+| `readonly`    | `boolean`          | Make field read-only               |
 
-{{ NgDocActions.demo("SelectIframeDemoComponent") }}
+**Validation Properties:**
 
-**Props:**
+| Property    | Type               | Description                       |
+| ----------- | ------------------ | --------------------------------- |
+| `email`     | `boolean`          | Email format validation           |
+| `minLength` | `number`           | Minimum character length          |
+| `maxLength` | `number`           | Maximum character length          |
+| `min`       | `number`           | Minimum value (for number inputs) |
+| `max`       | `number`           | Maximum value (for number inputs) |
+| `pattern`   | `string \| RegExp` | RegEx pattern validation          |
 
-- `multiple`: Enable multi-select
-- `appearance`: `'fill' | 'outline'`
-- `placeholder`: Dropdown placeholder
+**Props (Material-Specific):**
 
-### Checkbox
+| Prop              | Type                                                            | Default   | Description               |
+| ----------------- | --------------------------------------------------------------- | --------- | ------------------------- |
+| `type`            | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'` | `'text'`  | HTML input type           |
+| `appearance`      | `'fill' \| 'outline'`                                           | `'fill'`  | Material form field style |
+| `hint`            | `string`                                                        | -         | Helper text below input   |
+| `subscriptSizing` | `'fixed' \| 'dynamic'`                                          | `'fixed'` | Error/hint spacing        |
 
-Boolean checkbox control.
+#### Textarea
 
-{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
+Multi-line text input field with Material Design styling.
 
-**Props:**
-
-- `color`: `'primary' | 'accent' | 'warn'`
-- `labelPosition`: `'before' | 'after'`
-
-### Radio
-
-Radio button group.
-
-{{ NgDocActions.demo("RadioIframeDemoComponent") }}
-
-**Props:**
-
-- `color`: `'primary' | 'accent' | 'warn'`
-- `labelPosition`: `'before' | 'after'`
-
-### Multi-Checkbox
-
-Multiple checkbox selection.
-
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
-
-**Props:**
-
-- `color`: `'primary' | 'accent' | 'warn'`
-- `labelPosition`: `'before' | 'after'`
-
-### Toggle
-
-Slide toggle switch.
-
-{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
-
-**Props:**
-
-- `color`: `'primary' | 'accent' | 'warn'`
-- `labelPosition`: `'before' | 'after'`
-
-### Textarea
-
-Multi-line text input.
+**Live Demo:**
 
 {{ NgDocActions.demo("TextareaIframeDemoComponent") }}
 
-**Field properties:**
+**Basic Usage:**
 
-- `maxLength`: Maximum character limit
+```typescript
+{
+  key: 'bio',
+  type: 'textarea',
+  value: '',
+  label: 'Biography',
+  placeholder: 'Tell us about yourself',
+  required: true,
+}
+```
 
-**Props:**
+**Props (Material-Specific):**
 
-- `rows`: Number of visible rows (default: 4)
-- `cols`: Number of visible columns
-- `resize`: `'none' | 'both' | 'horizontal' | 'vertical'` (default: 'vertical')
-- `appearance`: `'fill' | 'outline'`
-- `subscriptSizing`: `'fixed' | 'dynamic'`
-- `hint`: Help text
+| Prop              | Type                                             | Default      | Description               |
+| ----------------- | ------------------------------------------------ | ------------ | ------------------------- |
+| `appearance`      | `'fill' \| 'outline'`                            | `'outline'`  | Visual style              |
+| `rows`            | `number`                                         | `4`          | Number of visible rows    |
+| `cols`            | `number`                                         | -            | Number of visible columns |
+| `resize`          | `'none' \| 'both' \| 'horizontal' \| 'vertical'` | `'vertical'` | Resize behavior           |
+| `subscriptSizing` | `'fixed' \| 'dynamic'`                           | `'fixed'`    | Error/hint sizing         |
+| `hint`            | `string`                                         | -            | Help text below field     |
 
-### Datepicker
+---
 
-Date selection with calendar popup.
+### Selection Fields
 
-{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
+Selection fields enable users to choose from predefined options.
 
-**Field properties:**
+#### Select
 
-- `minDate`: Minimum selectable date (Date | string | null)
-- `maxDate`: Maximum selectable date (Date | string | null)
-- `startAt`: Initial calendar date (Date | null)
+Dropdown selection field. Supports both single and multi-select modes.
 
-**Props:**
+**Live Demo:**
 
-- `appearance`: `'fill' | 'outline'`
-- `color`: `'primary' | 'accent' | 'warn'`
-- `startView`: `'month' | 'year' | 'multi-year'` (default: 'month')
-- `touchUi`: Enable touch-optimized UI (boolean)
-- `subscriptSizing`: `'fixed' | 'dynamic'`
-- `hint`: Help text
+{{ NgDocActions.demo("SelectIframeDemoComponent") }}
 
-### Slider
+**Basic Usage:**
 
-Numeric slider control.
+```typescript
+{
+  key: 'country',
+  type: 'select',
+  value: '',
+  label: 'Country',
+  required: true,
+  options: [
+    { value: 'us', label: 'United States' },
+    { value: 'uk', label: 'United Kingdom' },
+    { value: 'ca', label: 'Canada' },
+  ],
+}
+```
+
+**Props (Material-Specific):**
+
+| Prop              | Type                   | Default     | Description           |
+| ----------------- | ---------------------- | ----------- | --------------------- |
+| `appearance`      | `'fill' \| 'outline'`  | `'outline'` | Visual style          |
+| `multiple`        | `boolean`              | `false`     | Enable multi-select   |
+| `hint`            | `string`               | -           | Help text below field |
+| `subscriptSizing` | `'fixed' \| 'dynamic'` | `'fixed'`   | Error/hint sizing     |
+
+#### Radio
+
+Radio button group for selecting a single option.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("RadioIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'size',
+  type: 'radio',
+  value: '',
+  label: 'Select Size',
+  required: true,
+  options: [
+    { value: 'small', label: 'Small' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'large', label: 'Large' },
+  ],
+}
+```
+
+**Props (Material-Specific):**
+
+| Prop            | Type                              | Default     | Description               |
+| --------------- | --------------------------------- | ----------- | ------------------------- |
+| `color`         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color      |
+| `labelPosition` | `'before' \| 'after'`             | `'after'`   | Position of option labels |
+
+#### Checkbox
+
+Boolean checkbox control for single true/false selections.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'terms',
+  type: 'checkbox',
+  checked: false,
+  label: 'I accept the terms and conditions',
+  required: true,
+}
+```
+
+**Props (Material-Specific):**
+
+| Prop            | Type                              | Default     | Description            |
+| --------------- | --------------------------------- | ----------- | ---------------------- |
+| `color`         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color   |
+| `labelPosition` | `'before' \| 'after'`             | `'after'`   | Position of label text |
+
+#### Multi-Checkbox
+
+Multiple checkbox selection field for choosing multiple options.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'interests',
+  type: 'multi-checkbox',
+  value: [],
+  label: 'Select Your Interests',
+  required: true,
+  options: [
+    { value: 'sports', label: 'Sports' },
+    { value: 'music', label: 'Music' },
+    { value: 'reading', label: 'Reading' },
+    { value: 'travel', label: 'Travel' },
+  ],
+}
+```
+
+---
+
+### Interactive Fields
+
+Interactive fields provide advanced user input controls.
+
+#### Toggle
+
+Slide toggle switch for boolean on/off selections.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'notifications',
+  type: 'toggle',
+  checked: false,
+  label: 'Enable notifications',
+}
+```
+
+**Props (Material-Specific):**
+
+| Prop            | Type                              | Default     | Description            |
+| --------------- | --------------------------------- | ----------- | ---------------------- |
+| `color`         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color   |
+| `labelPosition` | `'before' \| 'after'`             | `'after'`   | Position of label text |
+
+#### Slider
+
+Numeric slider control for selecting values from a range.
+
+**Live Demo:**
 
 {{ NgDocActions.demo("SliderIframeDemoComponent") }}
 
-**Field properties:**
+**Basic Usage:**
 
-- `minValue`: Minimum value (default: 0)
-- `maxValue`: Maximum value (default: 100)
-- `step`: Increment step (default: 1)
+```typescript
+{
+  key: 'volume',
+  type: 'slider',
+  value: 50,
+  label: 'Volume',
+  minValue: 0,
+  maxValue: 100,
+  step: 1,
+}
+```
 
-**Props:**
+**Props (Material-Specific):**
 
-- `thumbLabel` or `showThumbLabel`: Show value tooltip (boolean)
-- `tickInterval`: Show tick marks (number | undefined)
-- `color`: `'primary' | 'accent' | 'warn'` (default: 'primary')
-- `hint`: Help text
+| Prop                            | Type                              | Default     | Description                  |
+| ------------------------------- | --------------------------------- | ----------- | ---------------------------- |
+| `thumbLabel` / `showThumbLabel` | `boolean`                         | `false`     | Show value tooltip on thumb  |
+| `tickInterval`                  | `number \| 'auto'`                | -           | Show tick marks at intervals |
+| `color`                         | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color         |
+| `hint`                          | `string`                          | -           | Help text below slider       |
 
-### Buttons
+#### Datepicker
 
-Material provides multiple prebuilt button types for common form actions.
+Date selection field with Material Design calendar popup.
 
-{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
+**Live Demo:**
+
+{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'birthdate',
+  type: 'datepicker',
+  value: null,
+  label: 'Date of Birth',
+  required: true,
+}
+```
+
+**Props (Material-Specific):**
+
+| Prop              | Type                                | Default     | Description                 |
+| ----------------- | ----------------------------------- | ----------- | --------------------------- |
+| `appearance`      | `'fill' \| 'outline'`               | `'outline'` | Visual style                |
+| `color`           | `'primary' \| 'accent' \| 'warn'`   | `'primary'` | Material theme color        |
+| `startView`       | `'month' \| 'year' \| 'multi-year'` | `'month'`   | Initial calendar view       |
+| `touchUi`         | `boolean`                           | `false`     | Touch-optimized calendar UI |
+| `subscriptSizing` | `'fixed' \| 'dynamic'`              | `'fixed'`   | Error/hint sizing           |
+| `hint`            | `string`                            | -           | Help text below field       |
+
+---
+
+### Buttons & Actions
+
+Action buttons provide form submission and navigation controls.
 
 #### Submit Button
 
-Form submission button - automatically disabled when the form is invalid.
+Form submission button that's automatically disabled when the form is invalid.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
+
+**Basic Usage:**
 
 ```typescript
-const config = {
-  fields: [
-    { key: 'name', type: 'input', value: '', label: 'Name', required: true },
-    { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
-    {
-      key: 'terms',
-      type: 'checkbox',
-      value: false,
-      label: 'I accept the terms and conditions',
-      required: true,
-    },
-    {
-      type: 'submit',
-      key: 'submit',
-      label: 'Create Account',
-      props: { color: 'primary' },
-    },
-  ],
-} as const satisfies FormConfig;
-
-// The submit button will be disabled until all required fields are valid
-```
-
-Alternative using helper function:
-
-```typescript
-import { submitButton } from '@ng-forge/dynamic-form-material';
-
-submitButton({
+{
+  type: 'submit',
   key: 'submit',
   label: 'Create Account',
-  props: { color: 'primary' },
-});
+  props: {
+    color: 'primary',
+  },
+}
 ```
 
-#### Next/Previous Buttons
+The submit button automatically:
+
+- Disables when the form is invalid
+- Emits a `SubmitEvent` when clicked
+- Validates all fields before submission
+
+**Props:**
+
+| Prop    | Type                              | Default     | Description          |
+| ------- | --------------------------------- | ----------- | -------------------- |
+| `color` | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Material theme color |
+
+#### Navigation Buttons
 
 Navigation buttons for multi-step (paged) forms.
 
+**Basic Usage:**
+
 ```typescript
-const config = {
+{
   fields: [
     {
-      key: 'personalInfo',
+      key: 'step1',
       type: 'page',
-      title: 'Personal Information',
-      description: 'Tell us about yourself',
+      title: 'Step 1',
       fields: [
-        { key: 'firstName', type: 'input', value: '', label: 'First Name', required: true },
-        { key: 'lastName', type: 'input', value: '', label: 'Last Name', required: true },
-        { key: 'birthdate', type: 'date', value: null, label: 'Date of Birth' },
+        { key: 'name', type: 'input', value: '', label: 'Name', required: true },
         {
-          key: 'navigation',
-          type: 'row',
-          fields: [
-            {
-              type: 'next',
-              key: 'nextToContact',
-              label: 'Continue to Contact Info',
-              props: { color: 'primary' },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      key: 'contactInfo',
-      type: 'page',
-      title: 'Contact Information',
-      description: 'How can we reach you?',
-      fields: [
-        { key: 'email', type: 'input', value: '', label: 'Email Address', required: true, email: true },
-        { key: 'phone', type: 'input', value: '', label: 'Phone Number', props: { type: 'tel' } },
-        {
-          key: 'subscribe',
-          type: 'checkbox',
-          value: false,
-          label: 'Subscribe to newsletter',
-        },
-        {
-          key: 'navigation',
-          type: 'row',
-          fields: [
-            { type: 'previous', key: 'backToPersonal', label: 'Back' },
-            {
-              type: 'submit',
-              key: 'submit',
-              label: 'Complete Registration',
-              props: { color: 'primary' },
-            },
-          ],
-        },
-      ],
-    },
-  ],
-} as const satisfies FormConfig;
-```
-
-Alternative using helper functions:
-
-```typescript
-import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dynamic-form-material';
-
-nextPageButton({ key: 'next', label: 'Continue', props: { color: 'primary' } });
-previousPageButton({ key: 'back', label: 'Back' });
-submitButton({ key: 'submit', label: 'Complete' });
-```
-
-#### Custom Action Button
-
-Generic button for custom events. Use this for application-specific actions.
-
-```typescript
-import { FormEvent } from '@ng-forge/dynamic-form';
-
-// Define your custom event
-class SaveDraftEvent extends FormEvent {
-  static override readonly eventName = 'SaveDraft';
-}
-
-const config = {
-  fields: [
-    { key: 'title', type: 'input', value: '', label: 'Document Title', required: true },
-    { key: 'content', type: 'textarea', value: '', label: 'Content' },
-    {
-      key: 'actions',
-      type: 'row',
-      fields: [
-        {
-          type: 'button',
-          key: 'saveDraft',
-          label: 'Save as Draft',
-          event: SaveDraftEvent,
-          props: { color: 'accent' },
-        },
-        {
-          type: 'submit',
-          key: 'publish',
-          label: 'Publish',
+          type: 'next',
+          key: 'next',
+          label: 'Continue',
           props: { color: 'primary' },
         },
       ],
     },
+    {
+      key: 'step2',
+      type: 'page',
+      title: 'Step 2',
+      fields: [
+        { key: 'email', type: 'input', value: '', label: 'Email', required: true },
+        { type: 'previous', key: 'back', label: 'Back' },
+        { type: 'submit', key: 'submit', label: 'Submit', props: { color: 'primary' } },
+      ],
+    },
   ],
-} as const satisfies FormConfig;
-```
-
-Then listen for the event in your component:
-
-```typescript
-import { EventBus } from '@ng-forge/dynamic-form';
-
-class MyComponent {
-  private eventBus = inject(EventBus);
-
-  ngOnInit() {
-    this.eventBus.on(SaveDraftEvent).subscribe(() => {
-      console.log('Save draft clicked', this.form.value);
-      // Handle draft saving logic
-    });
-  }
 }
 ```
 
-Alternative using helper function:
-
-```typescript
-import { actionButton } from '@ng-forge/dynamic-form-material';
-
-actionButton({
-  key: 'saveDraft',
-  label: 'Save as Draft',
-  event: SaveDraftEvent,
-  props: { color: 'accent' },
-});
-```
-
-**Button Props:**
-
-- `color`: `'primary' | 'accent' | 'warn'` - Material theme color
-- `type`: `'button' | 'submit' | 'reset'` - HTML button type (default: 'button')
-
 **Button Types:**
 
-- `type: 'submit'` - Preconfigured with SubmitEvent, auto-disables when form invalid
-- `type: 'next'` - Preconfigured with NextPageEvent for page navigation
-- `type: 'previous'` - Preconfigured with PreviousPageEvent for page navigation
-- `type: 'button'` - Generic button requiring custom `event` property
+- **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
+- **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
 
-## Comprehensive Examples
+---
 
-### Complete Form
+## Theming
 
-{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
+Material components automatically inherit your Angular Material theme. Customize colors using Material's theming system:
 
-## Type Safety
+```typescript
+// Field with custom color
+{
+  key: 'agreeToTerms',
+  type: 'checkbox',
+  label: 'I agree to the terms and conditions',
+  props: {
+    color: 'accent', // 'primary' | 'accent' | 'warn'
+  },
+}
+```
 
-Material fields use specialized control types:
+## Common Props
 
-- **ValueControlFieldType**: Single-value fields (input, select, textarea, datepicker, radio, slider, toggle)
-- **CheckboxControlFieldType**: Checkbox fields (checkbox, multi-checkbox)
+All Material fields support these common properties:
 
-Benefits:
-
-- Full TypeScript type inference
-- Angular signal forms integration
-- No `ControlValueAccessor` boilerplate
-- Automatic property handling
-
-## Theming Props
-
-**color**: Theme color for interactive elements
-
-- `'primary'` (default)
-- `'accent'`
-- `'warn'`
-
-**appearance**: Form field style
-
-- `'fill'` (default)
-- `'outline'`
-
-**labelPosition**: Label placement for toggles/checkboxes
-
-- `'before'`
-- `'after'` (default)
-
-**type**: Button type
-
-- `'button'` (default)
-- `'submit'`
-- `'reset'`
+| Prop              | Type                              | Default     | Description                       |
+| ----------------- | --------------------------------- | ----------- | --------------------------------- |
+| `appearance`      | `'fill' \| 'outline'`             | `'fill'`    | Form field appearance style       |
+| `color`           | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Theme color                       |
+| `hint`            | `string`                          | -           | Helper text displayed below field |
+| `subscriptSizing` | `'fixed' \| 'dynamic'`            | `'fixed'`   | Error/hint spacing behavior       |
 
 ## Accessibility
 
-All components include:
+All Material Design components include:
 
 - Proper ARIA attributes
-- Keyboard navigation
-- Screen reader support
+- Keyboard navigation support
+- Screen reader compatibility
 - Focus management
 - Error announcements
+
+## Next Steps
+
+- Check out [Examples & Patterns](../../../examples/) for real-world use cases
+- Learn about [Validation](../../../core/validation/) for form validation
+- See [Type Safety](../../../core/type-safety/) for TypeScript integration
+- Explore [Conditional Logic](../../../core/conditional-logic/) for dynamic field behavior

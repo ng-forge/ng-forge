@@ -1,4 +1,12 @@
-ng-forge dynamic forms gives you declarative, type-safe forms powered by Angular 21's signal forms. Define your structure once, get validation, conditional logic, and beautiful UI automatically.
+Declarative, lightweight forms for Angular 21+, powered by signal forms. Build complex forms from simple configuration - with full TypeScript inference when you want it, or JSON configs when you don't. Comes with validation, conditional logic, i18n, and UI adapters for Material, PrimeNG, Bootstrap, and Ionic.
+
+**Key Features:**
+
+- 📦 **Lightweight & Composable** - Small bundle size, tree-shakeable, modular architecture
+- 🎯 **Type-Safe or Dynamic** - Full TypeScript inference with `as const`, or load JSON configs at runtime
+- ⚡ **Zoneless Ready** - Built for Angular's zoneless future, works with or without Zone.js
+- 🔥 **Signal Forms Native** - Direct integration with `@angular/forms/signals`, not a wrapper
+- 🌍 **Production Ready** - Battle-tested with comprehensive validation, conditional logic, and i18n support
 
 ### Quick Example
 
@@ -84,6 +92,10 @@ export class RegistrationComponent {
 - ✅ Beautiful Material Design UI
 - ✅ Zero subscriptions or cleanup needed
 - ✅ Built-in accessibility
+
+## See It In Action
+
+{{ NgDocActions.demo("DemoFormPlayground") }}
 
 ## Full Type Safety with Zero Type Annotations
 
@@ -204,7 +216,7 @@ provideDynamicForm(...withMaterialFields());
 provideDynamicForm(...withBootstrapFields());
 
 // Or use your custom components
-provideDynamicForm([{ name: 'my-input', loadComponent: () => MyCustomInput }]);
+provideDynamicForm({ name: 'my-input', loadComponent: () => MyCustomInput });
 ```
 
 ### 🔥 Complex Features, Simple API
@@ -271,22 +283,36 @@ provideDynamicForm([{ name: 'my-input', loadComponent: () => MyCustomInput }]);
 }
 ```
 
-### 🚀 Zero `ControlValueAccessor` Implementation
+### 🚀 Simple Custom Field Components
 
-Traditional Angular requires implementing `ControlValueAccessor` for every custom form control. ng-forge dynamic forms handles all of that automatically with signals:
+Creating custom field components is straightforward - no `ControlValueAccessor` boilerplate required. Just use Angular's signal forms primitives:
+
+{% raw %}
 
 ```typescript
-// Traditional: ~50 lines of ControlValueAccessor boilerplate
-// ng-forge dynamic forms: Just use input() and model()
-@Component({...})
-export class MyField {
-  value = model<string>(''); // That's it!
+// Create a custom field component with minimal code
+@Component({
+  selector: 'df-star-rating',
+  template: `
+    <label>{{ label() }}</label>
+    <div class="stars">
+      @for (star of [1,2,3,4,5]; track star) {
+      <button (click)="rating.set(star)" type="button">
+        {{ star <= rating() ? '⭐' : '☆' }}
+      </button>
+      }
+    </div>
+  `,
+})
+export class StarRatingComponent {
+  label = input<string>();
+  rating = model<number>(0); // Signal forms integration - that's it!
 }
 ```
 
-## See It In Action
+{% endraw %}
 
-{{ NgDocActions.playground("DemoFormPlayground") }}
+**No `writeValue()`, no `registerOnChange()`, no `registerOnTouched()`.** Just signals and Angular's `Field` directive.
 
 ## Real-World Example: E-Commerce Checkout
 
@@ -329,7 +355,15 @@ export class CheckoutComponent {
             key: 'region',
             type: 'row',
             fields: [
-              { key: 'state', type: 'select', value: '', label: 'State', required: true, props: { options: STATES } },
+              {
+                key: 'state',
+                type: 'select',
+                value: '',
+                label: 'State',
+                required: true,
+                options: STATES,
+                props: { placeholder: 'Select state' },
+              },
               { key: 'zip', type: 'input', value: '', label: 'ZIP', required: true, pattern: '^[0-9]{5}$' },
             ],
           },
@@ -446,15 +480,15 @@ provideDynamicForm([
 
 ## Choose Your UI Framework
 
-| Framework           | Package                            | Status              |
-| ------------------- | ---------------------------------- | ------------------- |
-| **Material Design** | `@ng-forge/dynamic-form-material`  | ✅ Production Ready |
-| **Bootstrap**       | `@ng-forge/dynamic-form-bootstrap` | 🚧 Coming Soon      |
-| **PrimeNG**         | `@ng-forge/dynamic-form-primeng`   | 🚧 Coming Soon      |
-| **Ionic**           | `@ng-forge/dynamic-form-ionic`     | 🚧 Coming Soon      |
-| **Custom**          | Build your own                     | ✅ Full Support     |
+| Framework           | Package                            | Status          |
+| ------------------- | ---------------------------------- | --------------- |
+| **Material Design** | `@ng-forge/dynamic-form-material`  | 🧪 Preview      |
+| **PrimeNG**         | `@ng-forge/dynamic-form-primeng`   | 🧪 Preview      |
+| **Bootstrap**       | `@ng-forge/dynamic-form-bootstrap` | 🧪 Preview      |
+| **Ionic**           | `@ng-forge/dynamic-form-ionic`     | 🧪 Preview      |
+| **Custom**          | Build your own                     | ✅ Full Support |
 
-**Material Design** integration is production-ready with complete documentation. Other UI framework integrations are in development - see individual pages for details and alternatives.
+**Material Design** integration is production-ready with complete documentation. **PrimeNG, Bootstrap, and Ionic** integrations are in preview - functional but APIs may change. See individual pages for details.
 
 ## Performance Features
 
@@ -462,7 +496,6 @@ provideDynamicForm([
 - **⚡ Signal-Based** - Fine-grained reactivity, minimal re-renders
 - **📦 Tree-Shakeable** - Bundle only what you use
 - **🎯 OnPush Change Detection** - Optimized throughout
-- **💪 SSR Compatible** - Works with Angular Universal
 
 ## Related Topics
 
@@ -480,14 +513,14 @@ provideDynamicForm([
 
 ### Advanced Topics
 
-- **[i18n Setup](../i18n/setup)** - Multi-language support
+- **[i18n Setup](../core/i18n)** - Multi-language support
 - **[Events](../core/events)** - Form event bus and custom events
 
 ---
 
 ## Join the Community
 
-- 📖 **[Documentation](../../)** - Comprehensive guides and examples
+- 📖 **[Documentation](../)** - Comprehensive guides and examples
 - 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions, share tips
 - 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs, request features
 - ⭐ **[Star on GitHub](https://github.com/ng-forge/ng-forge)** - Support the project

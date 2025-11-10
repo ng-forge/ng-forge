@@ -49,6 +49,18 @@ import { AsyncPipe } from '@angular/common';
       }
     </mat-form-field>
   `,
+  styles: [
+    `
+      :host {
+        display: block;
+        width: 100%;
+      }
+
+      mat-form-field {
+        width: 100%;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',

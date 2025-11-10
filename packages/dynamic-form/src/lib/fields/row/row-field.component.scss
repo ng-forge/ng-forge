@@ -1,7 +1,13 @@
-@use '../../styles/grid-system.scss';
-
 // Row-specific styling overrides and customizations
-// The core grid system is handled by df-row class in grid-system.scss
+// Using ::ng-deep to ensure grid classes work on child components
+
+// Import grid system styles at the top level
+@import '../../styles/grid-system.scss';
+
+// Apply grid system globally using ::ng-deep to bypass view encapsulation
+:host ::ng-deep {
+  // Grid classes are now available on child components
+}
 
 :host {
   // Allow customization of gap for individual rows

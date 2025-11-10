@@ -13,7 +13,7 @@ import { ButtonIframeDemoComponent } from './examples/button-iframe-demo.compone
 import { CompleteFormIframeDemoComponent } from './examples/complete-form-iframe-demo.component';
 
 /**
- * @status:warning UNSTABLE
+ * @status:warning PREVIEW
  */
 const IonicPage: NgDocPage = {
   title: 'Ionic',

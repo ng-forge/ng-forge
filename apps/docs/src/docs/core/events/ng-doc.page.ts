@@ -5,7 +5,7 @@ const EventsPage: NgDocPage = {
   title: 'Event Bus',
   mdFile: './index.md',
   category: CoreCategory,
-  order: 5,
+  order: 6,
 };
 
 export default EventsPage;

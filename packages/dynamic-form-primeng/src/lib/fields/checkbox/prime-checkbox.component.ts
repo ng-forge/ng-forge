@@ -19,7 +19,7 @@ import { AsyncPipe } from '@angular/common';
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
-        [styleClass]="props()?.styleClass"
+        [styleClass]="checkboxClasses()"
         [attr.tabindex]="tabIndex()"
       />
       @if (label(); as labelText) {
@@ -70,4 +70,20 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  readonly checkboxClasses = computed(() => {
+    const classes: string[] = [];
+
+    const styleClass = this.props()?.styleClass;
+    if (styleClass) {
+      classes.push(styleClass);
+    }
+
+    // Add p-invalid class when there are errors to display
+    if (this.errorsToDisplay().length > 0) {
+      classes.push('p-invalid');
+    }
+
+    return classes.join(' ');
+  });
 }

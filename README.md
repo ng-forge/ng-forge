@@ -7,10 +7,6 @@
 
 **📖 [View Documentation](https://ng-forge.github.io/ng-forge/)**
 
-Get started quickly with our comprehensive guides:
-• [Getting Started](https://ng-forge.github.io/ng-forge/getting-started/installation)
-• [API Reference](https://ng-forge.github.io/ng-forge/api)
-
 ng-forge dynamic forms is a modern forms library for Angular 21+ that eliminates boilerplate while providing full type safety, validation, and conditional logic - all powered by Angular's signal forms.
 
 ## ✨ How It Works
@@ -96,8 +92,16 @@ This monorepo contains:
 
 ### Installation
 
-```bash
+```bash group="install" name="npm"
 npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+```
+
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
 ```
 
 ### Configure Your App

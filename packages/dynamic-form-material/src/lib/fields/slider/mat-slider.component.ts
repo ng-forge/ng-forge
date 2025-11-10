@@ -36,6 +36,11 @@ import { AsyncPipe } from '@angular/common';
     `
       :host {
         display: block;
+        width: 100%;
+      }
+
+      .slider-container {
+        width: 100%;
       }
     `,
   ],

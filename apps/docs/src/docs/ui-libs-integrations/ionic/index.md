@@ -1,16 +1,32 @@
-The `@ng-forge/dynamic-form-ionic` package provides Ionic field components with a mobile-first design optimized for iOS and Android.
+Mobile-first Ionic field components for ng-forge dynamic forms, optimized for iOS and Android with native platform styling.
+
+---
 
 ## Installation
 
-```bash
-npm install @ng-forge/dynamic-form-ionic @ionic/angular
+Install the package and its peer dependencies:
+
+```bash group="install" name="npm"
+npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
 ```
 
-## Setup
+```bash group="install" name="yarn"
+yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
+```
 
-Configure providers:
+```bash group="install" name="pnpm"
+pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
+```
 
-```typescript name="app.config.ts"
+## Quick Start
+
+### 1. Configure Providers
+
+Add Ionic field types to your application:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
 
@@ -19,173 +35,521 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-Import Ionic styles:
+### 2. Import Ionic Styles
+
+Add Ionic core styles to your application:
 
 ```scss name="styles.scss"
 @import '@ionic/angular/css/core.css';
 @import '@ionic/angular/css/normalize.css';
 @import '@ionic/angular/css/structure.css';
 @import '@ionic/angular/css/typography.css';
+
+// Optional: Additional Ionic utility styles
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/float-elements.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/text-transformation.css';
+@import '@ionic/angular/css/flex-utils.css';
 ```
 
-## Field Components
+### 3. Create Your First Form
 
-### Input
+```typescript
+import { Component, signal } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 
-Text input with Ionic styling and mobile keyboard optimization.
+@Component({
+  selector: 'app-contact-form',
+  imports: [DynamicForm, JsonPipe],
+  template: `
+    <dynamic-form [config]="config" [(value)]="formValue" />
+    @let value = formValue();
+    <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
+  `,
+})
+export class ContactFormComponent {
+  formValue = signal({});
+
+  config = {
+    fields: [
+      {
+        key: 'name',
+        type: 'input',
+        label: 'Full Name',
+        value: '',
+        required: true,
+        props: {
+          placeholder: 'Enter your name',
+        },
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: 'Email',
+        value: '',
+        required: true,
+        email: true,
+        props: {
+          type: 'email',
+          placeholder: 'your@email.com',
+        },
+      },
+      {
+        key: 'message',
+        type: 'textarea',
+        label: 'Message',
+        value: '',
+        required: true,
+        minLength: 10,
+        props: {
+          placeholder: 'Your message here...',
+          rows: 4,
+          autoGrow: true,
+        },
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Send Message',
+        props: {
+          color: 'primary',
+          expand: 'block',
+        },
+      },
+    ],
+  } as const satisfies FormConfig;
+}
+```
+
+## Complete Form Example
+
+Here's a full registration form showcasing multiple Ionic field types optimized for mobile:
+
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
+
+This example demonstrates:
+
+- Text inputs with mobile keyboard optimization
+- Select dropdowns with native action sheets
+- Checkboxes and toggles with Ionic styling
+- Radio buttons
+- Date/time pickers with native selectors
+- Range sliders with pin display
+- Multi-checkbox selections
+- Form submission
+
+---
+
+## Field Types Reference
+
+Complete reference for all Ionic field types with mobile-first design, native platform styling, and comprehensive validation.
+
+### Text Input Fields
+
+Text input fields provide mobile-optimized text entry with platform-specific keyboards.
+
+#### Input
+
+Text input field with mobile keyboard optimization and platform-adaptive styling.
+
+**Live Demo:**
 
 {{ NgDocActions.demo("InputIframeDemoComponent") }}
 
-**Props:**
+**Basic Usage:**
 
-- `type`: `'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'`
-- `placeholder`: Placeholder text
-- `clearInput`: Show clear button (boolean)
-- `inputmode`: Mobile keyboard type
-- `autocomplete`: Autocomplete attribute
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email Address',
+  value: '',
+  required: true,
+  email: true,
+  props: {
+    type: 'email',
+    placeholder: 'your@email.com',
+    clearInput: true,
+  },
+}
+```
 
-### Select
+**Field Properties:**
 
-Dropdown selection with Ionic action sheet on mobile.
+| Property      | Type               | Description                        |
+| ------------- | ------------------ | ---------------------------------- |
+| `key`         | `string`           | Unique field identifier (required) |
+| `type`        | `'input'`          | Field type (required)              |
+| `value`       | `string \| number` | Initial value                      |
+| `label`       | `string`           | Field label                        |
+| `placeholder` | `string`           | Placeholder text                   |
+| `required`    | `boolean`          | Mark field as required             |
+| `disabled`    | `boolean`          | Disable the field                  |
+| `readonly`    | `boolean`          | Make field read-only               |
 
-{{ NgDocActions.demo("SelectIframeDemoComponent") }}
+**Validation Properties:**
 
-**Props:**
+| Property    | Type               | Description                       |
+| ----------- | ------------------ | --------------------------------- |
+| `email`     | `boolean`          | Email format validation           |
+| `minLength` | `number`           | Minimum character length          |
+| `maxLength` | `number`           | Maximum character length          |
+| `min`       | `number`           | Minimum value (for number inputs) |
+| `max`       | `number`           | Maximum value (for number inputs) |
+| `pattern`   | `string \| RegExp` | RegEx pattern validation          |
 
-- `placeholder`: Placeholder text
-- `multiple`: Allow multiple selections (boolean)
-- `interface`: `'action-sheet' | 'alert' | 'popover'`
-- `cancelText`: Cancel button text
-- `okText`: OK button text
+**Props (Ionic-Specific):**
 
-### Checkbox
+| Prop           | Type                                                                           | Default  | Description                     |
+| -------------- | ------------------------------------------------------------------------------ | -------- | ------------------------------- |
+| `type`         | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url' \| 'search'`    | `'text'` | HTML input type                 |
+| `placeholder`  | `string`                                                                       | -        | Placeholder text                |
+| `clearInput`   | `boolean`                                                                      | `false`  | Show clear button               |
+| `inputmode`    | `'text' \| 'decimal' \| 'numeric' \| 'tel' \| 'search' \| 'email' \| 'url'`    | -        | Mobile keyboard type            |
+| `autocomplete` | `string`                                                                       | -        | Autocomplete attribute          |
+| `mode`         | `'ios' \| 'md'`                                                                | -        | Force platform-specific styling |
+| `color`        | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -        | Ionic theme color               |
 
-Boolean checkbox control with Ionic styling.
+#### Textarea
 
-{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
+Multi-line text input field with auto-grow support for mobile devices.
 
-**Props:**
-
-- `labelPlacement`: `'start' | 'end'` - Label position
-- `justify`: `'start' | 'end' | 'space-between'`
-- `alignment`: `'start' | 'center'`
-
-### Toggle
-
-Slide toggle switch (ion-toggle).
-
-{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
-
-**Props:**
-
-- `labelPlacement`: `'start' | 'end' | 'fixed'`
-- `justify`: `'start' | 'end' | 'space-between'`
-- `enableOnOffLabels`: Show on/off labels (boolean)
-
-### Radio
-
-Radio button group.
-
-{{ NgDocActions.demo("RadioIframeDemoComponent") }}
-
-**Props:**
-
-- `labelPlacement`: `'start' | 'end' | 'fixed'`
-- `justify`: `'start' | 'end' | 'space-between'`
-- `alignment`: `'start' | 'center'`
-
-### Multi-Checkbox
-
-Multiple checkbox selection.
-
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
-
-**Props:**
-
-- `labelPlacement`: `'start' | 'end' | 'fixed'`
-- `justify`: `'start' | 'end' | 'space-between'`
-- `alignment`: `'start' | 'center'`
-
-### Textarea
-
-Multi-line text input with auto-grow support.
+**Live Demo:**
 
 {{ NgDocActions.demo("TextareaIframeDemoComponent") }}
 
-**Field properties:**
+**Basic Usage:**
 
-- `maxLength`: Maximum character limit
+```typescript
+{
+  key: 'bio',
+  type: 'textarea',
+  value: '',
+  label: 'Biography',
+  placeholder: 'Tell us about yourself',
+  required: true,
+  maxLength: 500,
+  props: {
+    rows: 4,
+    autoGrow: true,
+  },
+}
+```
 
-**Props:**
+**Props (Ionic-Specific):**
 
-- `rows`: Number of visible rows (default: 4)
-- `autoGrow`: Auto-resize based on content (boolean)
-- `placeholder`: Placeholder text
+| Prop          | Type                                                                           | Default | Description                   |
+| ------------- | ------------------------------------------------------------------------------ | ------- | ----------------------------- |
+| `rows`        | `number`                                                                       | `4`     | Number of visible rows        |
+| `autoGrow`    | `boolean`                                                                      | `false` | Auto-resize based on content  |
+| `placeholder` | `string`                                                                       | -       | Placeholder text              |
+| `mode`        | `'ios' \| 'md'`                                                                | -       | Force platform-specific style |
+| `color`       | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color             |
 
-### Datepicker
+---
 
-Date and time selection with native mobile pickers.
+### Selection Fields
 
-{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
+Selection fields enable users to choose from predefined options with mobile-optimized interfaces.
 
-**Field properties:**
+#### Select
 
-- `minDate`: Minimum selectable date (Date | string | null)
-- `maxDate`: Maximum selectable date (Date | string | null)
+Dropdown selection field with native action sheets on mobile devices.
 
-**Props:**
+**Live Demo:**
 
-- `presentation`: `'date' | 'time' | 'date-time' | 'month' | 'year'`
-- `placeholder`: Placeholder text
-- `showDefaultButtons`: Show cancel/done buttons (boolean)
-- `cancelText`: Cancel button text
-- `doneText`: Done button text
+{{ NgDocActions.demo("SelectIframeDemoComponent") }}
 
-### Slider
+**Basic Usage:**
 
-Range slider control with pin display.
+```typescript
+{
+  key: 'country',
+  type: 'select',
+  value: '',
+  label: 'Country',
+  required: true,
+  options: [
+    { value: 'us', label: 'United States' },
+    { value: 'uk', label: 'United Kingdom' },
+    { value: 'ca', label: 'Canada' },
+  ],
+  props: {
+    interface: 'action-sheet',
+  },
+}
+```
+
+**Props (Ionic-Specific):**
+
+| Prop          | Type                                     | Default          | Description                   |
+| ------------- | ---------------------------------------- | ---------------- | ----------------------------- |
+| `interface`   | `'action-sheet' \| 'alert' \| 'popover'` | `'action-sheet'` | Mobile selection UI           |
+| `multiple`    | `boolean`                                | `false`          | Enable multi-select           |
+| `placeholder` | `string`                                 | -                | Placeholder text              |
+| `cancelText`  | `string`                                 | `'Cancel'`       | Cancel button text            |
+| `okText`      | `string`                                 | `'OK'`           | OK button text                |
+| `mode`        | `'ios' \| 'md'`                          | -                | Force platform-specific style |
+
+#### Radio
+
+Radio button group for selecting a single option with mobile-friendly spacing.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("RadioIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'size',
+  type: 'radio',
+  value: '',
+  label: 'Select Size',
+  required: true,
+  options: [
+    { value: 'small', label: 'Small' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'large', label: 'Large' },
+  ],
+}
+```
+
+**Props (Ionic-Specific):**
+
+| Prop             | Type                                                                           | Default | Description               |
+| ---------------- | ------------------------------------------------------------------------------ | ------- | ------------------------- |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed'`                                                  | `'end'` | Position of option labels |
+| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification      |
+| `alignment`      | `'start' \| 'center'`                                                          | -       | Vertical alignment        |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color         |
+| `mode`           | `'ios' \| 'md'`                                                                | -       | Platform-specific style   |
+
+#### Checkbox
+
+Boolean checkbox control optimized for touch interaction.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'terms',
+  type: 'checkbox',
+  checked: false,
+  label: 'I accept the terms and conditions',
+  required: true,
+}
+```
+
+**Props (Ionic-Specific):**
+
+| Prop             | Type                                                                           | Default | Description             |
+| ---------------- | ------------------------------------------------------------------------------ | ------- | ----------------------- |
+| `labelPlacement` | `'start' \| 'end'`                                                             | `'end'` | Position of label text  |
+| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification    |
+| `alignment`      | `'start' \| 'center'`                                                          | -       | Vertical alignment      |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color       |
+| `mode`           | `'ios' \| 'md'`                                                                | -       | Platform-specific style |
+
+#### Multi-Checkbox
+
+Multiple checkbox selection field for choosing multiple options.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'interests',
+  type: 'multi-checkbox',
+  value: [],
+  label: 'Select Your Interests',
+  required: true,
+  options: [
+    { value: 'sports', label: 'Sports' },
+    { value: 'music', label: 'Music' },
+    { value: 'reading', label: 'Reading' },
+    { value: 'travel', label: 'Travel' },
+  ],
+}
+```
+
+**Props (Ionic-Specific):**
+
+| Prop             | Type                                                                           | Default | Description             |
+| ---------------- | ------------------------------------------------------------------------------ | ------- | ----------------------- |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed'`                                                  | `'end'` | Position of labels      |
+| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification    |
+| `alignment`      | `'start' \| 'center'`                                                          | -       | Vertical alignment      |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color       |
+| `mode`           | `'ios' \| 'md'`                                                                | -       | Platform-specific style |
+
+---
+
+### Interactive Fields
+
+Interactive fields provide advanced user input controls optimized for mobile interaction.
+
+#### Toggle
+
+Slide toggle switch for boolean on/off selections with smooth animations.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'notifications',
+  type: 'toggle',
+  checked: false,
+  label: 'Enable notifications',
+}
+```
+
+**Props (Ionic-Specific):**
+
+| Prop                | Type                                                                           | Default | Description             |
+| ------------------- | ------------------------------------------------------------------------------ | ------- | ----------------------- |
+| `labelPlacement`    | `'start' \| 'end' \| 'fixed'`                                                  | `'end'` | Position of label text  |
+| `justify`           | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification    |
+| `enableOnOffLabels` | `boolean`                                                                      | `false` | Show on/off labels      |
+| `color`             | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color       |
+| `mode`              | `'ios' \| 'md'`                                                                | -       | Platform-specific style |
+
+#### Slider
+
+Range slider control with pin display and snap-to-tick support.
+
+**Live Demo:**
 
 {{ NgDocActions.demo("SliderIframeDemoComponent") }}
 
-**Field properties:**
+**Basic Usage:**
 
-- `minValue`: Minimum value (default: 0)
-- `maxValue`: Maximum value (default: 100)
-- `step`: Increment step (default: 1)
+```typescript
+{
+  key: 'volume',
+  type: 'slider',
+  value: 50,
+  label: 'Volume',
+  minValue: 0,
+  maxValue: 100,
+  step: 1,
+  props: {
+    pin: true,
+    ticks: true,
+  },
+}
+```
 
-**Props:**
+**Field Properties:**
 
-- `pin`: Show value pin above knob (boolean)
-- `ticks`: Show tick marks (boolean)
-- `snaps`: Snap to tick marks (boolean)
-- `activeBarStart`: Start position of active bar
+| Property   | Type     | Default | Description          |
+| ---------- | -------- | ------- | -------------------- |
+| `minValue` | `number` | `0`     | Minimum slider value |
+| `maxValue` | `number` | `100`   | Maximum slider value |
+| `step`     | `number` | `1`     | Value increment step |
 
-### Buttons
+**Props (Ionic-Specific):**
 
-Ionic provides multiple prebuilt button types for common form actions.
+| Prop             | Type                                                                           | Default | Description                  |
+| ---------------- | ------------------------------------------------------------------------------ | ------- | ---------------------------- |
+| `pin`            | `boolean`                                                                      | `false` | Show value pin above knob    |
+| `ticks`          | `boolean`                                                                      | `false` | Show tick marks              |
+| `snaps`          | `boolean`                                                                      | `false` | Snap to tick marks           |
+| `activeBarStart` | `number`                                                                       | -       | Start position of active bar |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color            |
+| `mode`           | `'ios' \| 'md'`                                                                | -       | Platform-specific style      |
 
-{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
+#### Datepicker
+
+Date and time selection with native mobile pickers for iOS and Android.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
+
+**Basic Usage:**
+
+```typescript
+{
+  key: 'birthdate',
+  type: 'datepicker',
+  value: null,
+  label: 'Date of Birth',
+  required: true,
+  props: {
+    presentation: 'date',
+  },
+}
+```
+
+**Field Properties:**
+
+| Property  | Type                     | Description             |
+| --------- | ------------------------ | ----------------------- |
+| `minDate` | `Date \| string \| null` | Minimum selectable date |
+| `maxDate` | `Date \| string \| null` | Maximum selectable date |
+
+**Props (Ionic-Specific):**
+
+| Prop                 | Type                                                   | Default    | Description              |
+| -------------------- | ------------------------------------------------------ | ---------- | ------------------------ |
+| `presentation`       | `'date' \| 'time' \| 'date-time' \| 'month' \| 'year'` | `'date'`   | Picker type              |
+| `placeholder`        | `string`                                               | -          | Placeholder text         |
+| `showDefaultButtons` | `boolean`                                              | `true`     | Show cancel/done buttons |
+| `cancelText`         | `string`                                               | `'Cancel'` | Cancel button text       |
+| `doneText`           | `string`                                               | `'Done'`   | Done button text         |
+| `mode`               | `'ios' \| 'md'`                                        | -          | Platform-specific style  |
+
+---
+
+### Buttons & Actions
+
+Action buttons provide form submission and navigation controls with Ionic styling.
 
 #### Submit Button
 
-Form submission button - automatically disabled when the form is invalid.
+Form submission button that's automatically disabled when the form is invalid.
+
+**Live Demo:**
+
+{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
+
+**Basic Usage:**
 
 ```typescript
-const config = {
-  fields: [
-    { key: 'name', type: 'input', value: '', label: 'Name', required: true },
-    { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
-    {
-      type: 'submit',
-      key: 'submit',
-      label: 'Create Account',
-      props: { color: 'primary' },
-    },
-  ],
-} as const satisfies FormConfig;
+{
+  type: 'submit',
+  key: 'submit',
+  label: 'Create Account',
+  props: {
+    color: 'primary',
+    expand: 'block',
+  },
+}
 ```
 
-Alternative using helper function:
+The submit button automatically:
+
+- Disables when the form is invalid
+- Emits a `SubmitEvent` when clicked
+- Validates all fields before submission
+
+**Helper Function:**
 
 ```typescript
 import { submitButton } from '@ng-forge/dynamic-form-ionic';
@@ -193,25 +557,77 @@ import { submitButton } from '@ng-forge/dynamic-form-ionic';
 submitButton({
   key: 'submit',
   label: 'Create Account',
-  props: { color: 'primary' },
+  props: { color: 'primary', expand: 'block' },
 });
 ```
 
-#### Next/Previous Buttons
+**Props:**
 
-Navigation buttons for multi-step (paged) forms.
+| Prop     | Type                                                                                                            | Default     | Description       |
+| -------- | --------------------------------------------------------------------------------------------------------------- | ----------- | ----------------- |
+| `expand` | `'full' \| 'block'`                                                                                             | -           | Button width      |
+| `fill`   | `'clear' \| 'outline' \| 'solid' \| 'default'`                                                                  | `'solid'`   | Button fill style |
+| `shape`  | `'round'`                                                                                                       | -           | Rounded button    |
+| `size`   | `'small' \| 'default' \| 'large'`                                                                               | -           | Button size       |
+| `color`  | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger' \| 'light' \| 'medium' \| 'dark'` | `'primary'` | Ionic theme color |
+| `strong` | `boolean`                                                                                                       | `false`     | Use strong font   |
+
+#### Navigation Buttons
+
+Navigation buttons for multi-step (paged) forms with platform-adaptive styling.
+
+**Basic Usage:**
 
 ```typescript
-import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dynamic-form-ionic';
+{
+  fields: [
+    {
+      key: 'step1',
+      type: 'page',
+      title: 'Step 1',
+      fields: [
+        { key: 'name', type: 'input', value: '', label: 'Name', required: true },
+        {
+          type: 'next',
+          key: 'next',
+          label: 'Continue',
+          props: { color: 'primary', expand: 'block' },
+        },
+      ],
+    },
+    {
+      key: 'step2',
+      type: 'page',
+      title: 'Step 2',
+      fields: [
+        { key: 'email', type: 'input', value: '', label: 'Email', required: true },
+        { type: 'previous', key: 'back', label: 'Back' },
+        { type: 'submit', key: 'submit', label: 'Submit', props: { color: 'primary' } },
+      ],
+    },
+  ],
+}
+```
+
+**Helper Functions:**
+
+```typescript
+import { nextPageButton, previousPageButton } from '@ng-forge/dynamic-form-ionic';
 
 nextPageButton({ key: 'next', label: 'Continue', props: { color: 'primary' } });
 previousPageButton({ key: 'back', label: 'Back' });
-submitButton({ key: 'submit', label: 'Complete' });
 ```
+
+**Button Types:**
+
+- **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
+- **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
 
 #### Custom Action Button
 
-Generic button for custom events.
+Generic button for custom events with full Ionic styling support.
+
+**Basic Usage:**
 
 ```typescript
 import { actionButton } from '@ng-forge/dynamic-form-ionic';
@@ -225,104 +641,176 @@ actionButton({
   key: 'saveDraft',
   label: 'Save as Draft',
   event: SaveDraftEvent,
-  props: { color: 'secondary' },
+  props: { color: 'secondary', fill: 'outline' },
 });
 ```
 
-**Button Props:**
-
-- `color`: `'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark'`
-- `fill`: `'solid' | 'outline' | 'clear'` (default: 'solid')
-- `expand`: `'full' | 'block'` - Button width
-- `shape`: `'round'` - Rounded button
-- `size`: `'small' | 'default' | 'large'`
-- `strong`: Use strong font weight (boolean)
-
-**Button Types:**
-
-- `type: 'submit'` - Preconfigured with SubmitEvent, auto-disables when form invalid
-- `type: 'next'` - Preconfigured with NextPageEvent for page navigation
-- `type: 'previous'` - Preconfigured with PreviousPageEvent for page navigation
-- `type: 'button'` - Generic button requiring custom `event` property
-
-## Complete Example
-
-### Full Form
-
-{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
-
-## Type Safety
-
-Ionic fields use specialized control types:
-
-- **ValueControlFieldType**: Single-value fields (input, select, textarea, datepicker, radio, slider, toggle)
-- **CheckboxControlFieldType**: Checkbox fields (checkbox, multi-checkbox)
-
-Benefits:
-
-- Full TypeScript type inference
-- Angular signal forms integration
-- No `ControlValueAccessor` boilerplate
-- Automatic property handling
+---
 
 ## Theming
 
-Ionic uses CSS variables for theming. See [Ionic Theming Guide](https://ionicframework.com/docs/theming/basics) for customization options.
+Ionic components use CSS variables for theming. Customize colors and styles globally or per-component.
 
-**color**: Component color theme
+### Color Palette
 
-- `'primary'` (default)
-- `'secondary'`
-- `'tertiary'`
-- `'success'`
-- `'warning'`
-- `'danger'`
-- `'light'`
-- `'medium'`
-- `'dark'`
-
-**size**: Component size variants
-
-- `'small'`
-- `'default'`
-- `'large'`
-
-## Mobile Optimization
-
-All Ionic components are optimized for mobile:
-
-- **Touch targets**: Minimum 44x44px touch areas
-- **Native keyboards**: Proper inputmode attributes
-- **Platform styling**: iOS/Android adaptive styling
-- **Gesture support**: Swipe, pull-to-refresh ready
-- **Performance**: Hardware-accelerated animations
-
-## Accessibility
-
-All components include:
-
-- Proper ARIA attributes
-- Keyboard navigation
-- Screen reader support
-- Focus management
-- Error announcements
-- High contrast support
-
-## Platform-Specific Styling
-
-Ionic automatically adapts to the platform:
-
-- **iOS**: Native iOS styling with SF Pro font
-- **Android**: Material Design with Roboto font
-- **Mode override**: Force specific platform style with `mode` prop
+Ionic provides a comprehensive color system:
 
 ```typescript
+// Field with custom color
 {
-  key: 'input',
+  key: 'email',
   type: 'input',
-  label: 'Name',
+  label: 'Email',
   props: {
-    mode: 'ios', // Force iOS styling
+    color: 'success', // Uses your theme's success color
   },
 }
 ```
+
+**Available Colors:**
+
+- `'primary'` - Primary brand color
+- `'secondary'` - Secondary brand color
+- `'tertiary'` - Tertiary brand color
+- `'success'` - Success/positive actions
+- `'warning'` - Warning states
+- `'danger'` - Error/destructive actions
+- `'light'` - Light variant
+- `'medium'` - Medium gray
+- `'dark'` - Dark variant
+
+### Custom Theme Variables
+
+Override Ionic's default colors in your global styles:
+
+```scss name="styles.scss"
+:root {
+  --ion-color-primary: #3880ff;
+  --ion-color-primary-rgb: 56, 128, 255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #3171e0;
+  --ion-color-primary-tint: #4c8dff;
+
+  // Customize other colors...
+}
+```
+
+See [Ionic Theming Guide](https://ionicframework.com/docs/theming/basics) for complete customization options.
+
+## Common Props
+
+All Ionic fields support these common properties:
+
+| Prop    | Type                                                                           | Default     | Description                     |
+| ------- | ------------------------------------------------------------------------------ | ----------- | ------------------------------- |
+| `color` | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | `'primary'` | Ionic theme color               |
+| `mode`  | `'ios' \| 'md'`                                                                | -           | Force platform-specific styling |
+
+## Mobile Optimization
+
+All Ionic components are designed for mobile devices:
+
+### Touch Targets
+
+- **Minimum size**: 44x44px touch areas for accessibility
+- **Spacing**: Adequate padding for comfortable tapping
+- **Visual feedback**: Ripple effects and state changes
+
+### Native Keyboards
+
+Input fields automatically show the appropriate keyboard:
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  props: {
+    type: 'email',      // Shows email keyboard
+    inputmode: 'email', // Forces email input mode
+  },
+}
+```
+
+**Inputmode Options:**
+
+- `'text'` - Standard keyboard
+- `'decimal'` - Numeric with decimal
+- `'numeric'` - Numeric only
+- `'tel'` - Telephone keypad
+- `'search'` - Search keyboard
+- `'email'` - Email keyboard
+- `'url'` - URL keyboard
+
+### Platform Styling
+
+Ionic automatically adapts to the platform:
+
+- **iOS**: Native iOS styling with SF Pro font and iOS design patterns
+- **Android**: Material Design with Roboto font and MD patterns
+- **Automatic detection**: Based on device platform
+- **Manual override**: Use `mode` prop to force specific styling
+
+```typescript
+{
+  key: 'name',
+  type: 'input',
+  label: 'Name',
+  props: {
+    mode: 'ios', // Force iOS styling on all platforms
+  },
+}
+```
+
+### Performance
+
+- **Hardware acceleration**: GPU-accelerated animations
+- **Virtual scrolling**: Efficient rendering for long lists
+- **Lazy loading**: Components load on demand
+- **Gesture support**: Native swipe and touch gestures
+
+## Accessibility
+
+All Ionic components include comprehensive accessibility features:
+
+### ARIA Support
+
+- Proper ARIA roles and attributes
+- ARIA labels for screen readers
+- ARIA-describedby for error messages
+- ARIA-invalid for validation states
+
+### Keyboard Navigation
+
+- Full keyboard support for all interactive elements
+- Tab navigation with proper focus order
+- Enter/Space for button activation
+- Arrow keys for option selection
+
+### Screen Readers
+
+- Descriptive labels for all form controls
+- Error message announcements
+- State change notifications
+- Context-aware instructions
+
+### Focus Management
+
+- Visible focus indicators
+- Logical focus order
+- Focus trap for modals
+- Auto-focus on error fields
+
+### High Contrast
+
+- Compatible with high contrast modes
+- Sufficient color contrast ratios (WCAG AA)
+- Clear visual distinctions
+- Icon and text alternatives
+
+## Next Steps
+
+- Check out [Examples & Patterns](../../../examples/) for real-world use cases
+- Learn about [Validation](../../../core/validation/) for form validation
+- See [Type Safety](../../../core/type-safety/) for TypeScript integration
+- Explore [Conditional Logic](../../../core/conditional-logic/) for dynamic field behavior

@@ -28,7 +28,7 @@ import { FormsModule } from '@angular/forms';
         [attr.maxlength]="props()?.maxlength ?? null"
         [autoResize]="props()?.autoResize ?? false"
         [attr.tabindex]="tabIndex()"
-        [class]="props()?.styleClass || ''"
+        [class]="textareaClasses()"
         [disabled]="f().disabled()"
         [readonly]="f().readonly()"
       ></textarea>
@@ -63,6 +63,22 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  readonly textareaClasses = computed(() => {
+    const classes: string[] = [];
+
+    const styleClass = this.props()?.styleClass;
+    if (styleClass) {
+      classes.push(styleClass);
+    }
+
+    // Add p-invalid class when there are errors to display
+    if (this.errorsToDisplay().length > 0) {
+      classes.push('p-invalid');
+    }
+
+    return classes.join(' ');
+  });
 
   readonly inputId = computed(() => `${this.key()}-textarea`);
 }
