@@ -13,6 +13,9 @@ import { SliderIframeDemoComponent } from './examples/slider-iframe-demo.compone
 import { CompleteFormIframeDemoComponent } from './examples/complete-form-iframe-demo.component';
 import { UserRegistrationIframeDemoComponent } from './examples/user-registration-iframe-demo.component';
 
+/**
+ * @status:warning PREVIEW
+ */
 const BootstrapPage: NgDocPage = {
   title: 'Bootstrap',
   mdFile: './index.md',

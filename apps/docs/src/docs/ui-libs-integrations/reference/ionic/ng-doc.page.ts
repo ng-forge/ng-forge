@@ -12,6 +12,9 @@ import { SliderIframeDemoComponent } from './examples/slider-iframe-demo.compone
 import { ButtonIframeDemoComponent } from './examples/button-iframe-demo.component';
 import { CompleteFormIframeDemoComponent } from './examples/complete-form-iframe-demo.component';
 
+/**
+ * @status:warning PREVIEW
+ */
 const IonicPage: NgDocPage = {
   title: 'Ionic',
   mdFile: './index.md',

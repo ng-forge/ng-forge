@@ -12,6 +12,9 @@ import { SliderIframeDemoComponent } from './examples/slider-iframe-demo.compone
 import { DatepickerIframeDemoComponent } from './examples/datepicker-iframe-demo.component';
 import { ButtonIframeDemoComponent } from './examples/button-iframe-demo.component';
 
+/**
+ * @status:warning PREVIEW
+ */
 const MaterialPage: NgDocPage = {
   title: 'Material Design',
   mdFile: './index.md',
