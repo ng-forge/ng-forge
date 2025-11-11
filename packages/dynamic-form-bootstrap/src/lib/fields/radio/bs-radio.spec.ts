@@ -111,7 +111,11 @@ describe('BsRadioFieldComponent', () => {
         priority: '',
       });
       fixture.detectChanges();
+      await fixture.whenStable();
+      TestBed.flushEffects();
+      fixture.detectChanges();
 
+      // Re-query after value change
       const radioInputs = fixture.debugElement.queryAll(By.css('.form-check-input[type="radio"]'));
       expect((radioInputs[2].nativeElement as HTMLInputElement).checked).toBe(true);
       expect(BootstrapFormTestUtils.getFormValue(component)['preference']).toBe('option3');
