@@ -1,8 +1,7 @@
 import { By } from '@angular/platform-browser';
+import { TestBed } from '@angular/core/testing';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
-
-// TODO: un-skip tests when maximum callstack on disabled error is fixed
 
 describe('MatSliderFieldComponent', () => {
   describe('Basic Material Slider Integration', () => {
@@ -64,7 +63,7 @@ describe('MatSliderFieldComponent', () => {
       expect(hint.nativeElement.textContent.trim()).toBe('Adjust the volume level');
     });
 
-    it.skip('should handle user input and update form value', async () => {
+    it('should handle programmatic value updates', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({
           key: 'volume',
@@ -80,19 +79,17 @@ describe('MatSliderFieldComponent', () => {
         config,
         initialValue: {
           volume: 25,
-          brightness: 0,
-          rating: 0,
-          temperature: 0,
-          speed: 0,
         },
       });
 
       // Initial value check
       expect(MaterialFormTestUtils.getFormValue(component).volume).toBe(25);
 
-      // Update slider value via field signal
-      component.config.fields['volume'].value.set(75);
+      // Update slider value programmatically by setting form value
+      component.value.set({ volume: 75 });
       fixture.detectChanges();
+      await fixture.whenStable();
+      TestBed.flushEffects();
 
       // Verify form value updated
       expect(MaterialFormTestUtils.getFormValue(component).volume).toBe(75);
@@ -170,7 +167,7 @@ describe('MatSliderFieldComponent', () => {
       expect(sliders[3].componentInstance.color).toBe('warn');
     });
 
-    it.skip('should handle different step values correctly', async () => {
+    it('should handle different step values correctly', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'rating', props: { min: 0, max: 10, step: 0.5 } })
         .build();
@@ -183,9 +180,11 @@ describe('MatSliderFieldComponent', () => {
       // Initial value
       expect(MaterialFormTestUtils.getFormValue(component).rating).toBe(5);
 
-      // Update slider value via field signal
-      component.config.fields['rating'].value.set(7.5);
+      // Update slider value programmatically by setting form value
+      component.value.set({ rating: 7.5 });
       fixture.detectChanges();
+      await fixture.whenStable();
+      TestBed.flushEffects();
 
       expect(MaterialFormTestUtils.getFormValue(component).rating).toBe(7.5);
     });
@@ -226,7 +225,7 @@ describe('MatSliderFieldComponent', () => {
   });
 
   describe('Minimal Configuration Tests', () => {
-    it.skip('should render with default Material configuration', async () => {
+    it('should render with default Material configuration', async () => {
       const config = MaterialFormTestUtils.builder().matSliderField({ key: 'volume' }).build();
 
       const { fixture } = await MaterialFormTestUtils.createTest({
@@ -238,7 +237,7 @@ describe('MatSliderFieldComponent', () => {
       const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
 
       expect(slider.componentInstance.color).toBe('primary');
-      expect(slider.componentInstance.discrete).toBe(true); // Material slider defaults to discrete mode
+      expect(slider.componentInstance.discrete).toBe(false); // Discrete mode only when thumbLabel is set
       expect(slider.componentInstance.showTickMarks).toBe(false);
       // ITERATION 5 FIX: Verify slider input element exists and is correct type
       // Previous: expect(sliderInput).toBeTruthy()
@@ -299,7 +298,7 @@ describe('MatSliderFieldComponent', () => {
       expect(sliders[2].componentInstance.color).toBe('warn');
     });
 
-    it.skip('should handle multiple sliders with independent value changes', async () => {
+    it('should handle multiple sliders with independent value changes', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'volume', props: { min: 0, max: 100 } })
         .matSliderField({ key: 'brightness', props: { min: 0, max: 255 } })
@@ -317,17 +316,21 @@ describe('MatSliderFieldComponent', () => {
       expect(MaterialFormTestUtils.getFormValue(component).volume).toBe(30);
       expect(MaterialFormTestUtils.getFormValue(component).brightness).toBe(100);
 
-      // Change first slider via field signal
-      component.config.fields['volume'].value.set(70);
+      // Change first slider programmatically
+      component.value.set({ volume: 70, brightness: 100 });
       fixture.detectChanges();
+      await fixture.whenStable();
+      TestBed.flushEffects();
 
       let formValue = MaterialFormTestUtils.getFormValue(component);
       expect(formValue.volume).toBe(70);
       expect(formValue.brightness).toBe(100);
 
-      // Change second slider via field signal
-      component.config.fields['brightness'].value.set(200);
+      // Change second slider programmatically
+      component.value.set({ volume: 70, brightness: 200 });
       fixture.detectChanges();
+      await fixture.whenStable();
+      TestBed.flushEffects();
 
       formValue = MaterialFormTestUtils.getFormValue(component);
       expect(formValue.volume).toBe(70);
@@ -438,7 +441,7 @@ describe('MatSliderFieldComponent', () => {
       expect(MaterialFormTestUtils.getFormValue(component).volume).toBe(0);
     });
 
-    it.skip('should handle negative values correctly', async () => {
+    it('should handle negative values correctly', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'temperature', props: { min: -20, max: 40 } })
         .build();
@@ -450,15 +453,16 @@ describe('MatSliderFieldComponent', () => {
 
       expect(MaterialFormTestUtils.getFormValue(component).temperature).toBe(-10);
 
-      // Test changing to another negative value via field signal
-      component.config.fields['temperature'].value.set(-5);
+      // Test changing to another negative value programmatically
+      component.value.set({ temperature: -5 });
       fixture.detectChanges();
       await fixture.whenStable();
+      TestBed.flushEffects();
 
       expect(MaterialFormTestUtils.getFormValue(component).temperature).toBe(-5);
     });
 
-    it.skip('should handle decimal values correctly', async () => {
+    it('should handle decimal values correctly', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'rating', props: { min: 0, max: 5, step: 0.1 } })
         .build();
@@ -470,15 +474,16 @@ describe('MatSliderFieldComponent', () => {
 
       expect(MaterialFormTestUtils.getFormValue(component).rating).toBe(3.7);
 
-      // Test changing to another decimal value via field signal
-      component.config.fields['rating'].value.set(4.2);
+      // Test changing to another decimal value programmatically
+      component.value.set({ rating: 4.2 });
       fixture.detectChanges();
       await fixture.whenStable();
+      TestBed.flushEffects();
 
       expect(MaterialFormTestUtils.getFormValue(component).rating).toBe(4.2);
     });
 
-    it.skip('should handle rapid value changes correctly', async () => {
+    it('should handle rapid value changes correctly', async () => {
       const config = MaterialFormTestUtils.builder()
         .matSliderField({ key: 'volume', props: { min: 0, max: 100 } })
         .build();
@@ -490,13 +495,14 @@ describe('MatSliderFieldComponent', () => {
 
       const testValues = [10, 25, 50, 75, 90];
 
-      // Simulate rapid value changes via field signal
+      // Simulate rapid value changes programmatically
       for (const value of testValues) {
-        component.config.fields['volume'].value.set(value);
+        component.value.set({ volume: value });
         fixture.detectChanges();
       }
 
       await fixture.whenStable();
+      TestBed.flushEffects();
 
       // Should have the final value
       expect(MaterialFormTestUtils.getFormValue(component).volume).toBe(90);
