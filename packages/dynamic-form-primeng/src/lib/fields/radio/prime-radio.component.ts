@@ -27,7 +27,7 @@ import { AsyncPipe } from '@angular/common';
         <p-radioButton
           [field]="f"
           [value]="option.value"
-          [disabled]="option.disabled"
+          [disabled]="f().disabled() || option.disabled"
           [styleClass]="radioClasses()"
           [inputId]="key() + '-' + option.value"
         />

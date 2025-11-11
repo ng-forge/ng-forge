@@ -23,6 +23,7 @@ import { Slider } from 'primeng/slider';
       <p-slider
         [id]="key()"
         [field]="f"
+        [disabled]="f().disabled()"
         [step]="props()?.step ?? 1"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
@@ -42,7 +43,15 @@ import { Slider } from 'primeng/slider';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
   readonly field = input.required<FieldTree<number>>();

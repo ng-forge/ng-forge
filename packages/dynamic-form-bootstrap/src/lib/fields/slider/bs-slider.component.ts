@@ -21,7 +21,7 @@ import { AsyncPipe } from '@angular/common';
       </label>
       }
 
-      <input type="range" [field]="f" [id]="key()" [attr.tabindex]="tabIndex()" class="form-range" />
+      <input type="range" [field]="f" [id]="key()" [attr.tabindex]="tabIndex()" [disabled]="f().disabled()" class="form-range" />
 
       @if (props()?.helpText; as helpText) {
       <div class="form-text">
@@ -47,6 +47,7 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

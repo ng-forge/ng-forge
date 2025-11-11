@@ -1,4 +1,4 @@
-import { FieldPath, hidden, readonly, required } from '@angular/forms/signals';
+import { disabled, FieldPath, hidden, readonly, required } from '@angular/forms/signals';
 import { LogicConfig } from '../../models/logic';
 import { ConditionalExpression } from '../../models';
 import { createLogicFunction } from '../expressions';
@@ -22,7 +22,7 @@ export function applyLogic<TValue>(config: LogicConfig, fieldPath: FieldPath<TVa
       break;
 
     case 'disabled':
-      console.warn('Disabled logic must be handled at component level');
+      disabled(fieldPath, logicFn);
       break;
 
     case 'required':

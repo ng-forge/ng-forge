@@ -20,7 +20,14 @@ import { AsyncPipe } from '@angular/common';
       <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }
 
-      <input matInput [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
+      <input
+        matInput
+        [field]="f"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
+      />
 
       @if (props()?.hint; as hint) {
       <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
@@ -36,6 +43,10 @@ import { AsyncPipe } from '@angular/common';
         width: 100%;
       }
 
+      :host([hidden]) {
+        display: none !important;
+      }
+
       mat-form-field {
         width: 100%;
       }
@@ -46,6 +57,7 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class MatInputFieldComponent implements MatInputComponent {
