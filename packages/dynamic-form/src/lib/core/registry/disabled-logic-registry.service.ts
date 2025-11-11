@@ -1,4 +1,5 @@
 import { Injectable, Signal, computed, signal } from '@angular/core';
+import { FieldContext, LogicFn } from '@angular/forms/signals';
 
 /**
  * Registry service for tracking disabled logic on form fields.
@@ -9,15 +10,14 @@ import { Injectable, Signal, computed, signal } from '@angular/core';
  */
 @Injectable()
 export class DisabledLogicRegistryService {
-  private readonly disabledLogic = signal<Map<string, Signal<boolean>>>(new Map());
+  private readonly disabledLogic = signal<Map<string, { logicFn: LogicFn<unknown, boolean>; ctx?: FieldContext<unknown> }>>(new Map());
 
   /**
    * Register a disabled logic function for a specific field path
    */
-  registerDisabledLogic(fieldPath: string, logicFn: () => boolean): void {
-    const disabledSignal = computed(logicFn);
+  registerDisabledLogic(fieldPath: string, logicFn: LogicFn<unknown, boolean>, ctx?: FieldContext<unknown>): void {
     const currentMap = new Map(this.disabledLogic());
-    currentMap.set(fieldPath, disabledSignal);
+    currentMap.set(fieldPath, { logicFn, ctx });
     this.disabledLogic.set(currentMap);
   }
 
@@ -25,11 +25,20 @@ export class DisabledLogicRegistryService {
    * Get the disabled signal for a specific field path
    * Returns a signal that evaluates to true if the field should be disabled
    */
-  getDisabledSignal(fieldPath: string): Signal<boolean> {
+  getDisabledSignal(fieldPath: string, ctx?: FieldContext<unknown>): Signal<boolean> {
     return computed(() => {
       const map = this.disabledLogic();
-      const disabledSignal = map.get(fieldPath);
-      return disabledSignal ? disabledSignal() : false;
+      const entry = map.get(fieldPath);
+      if (!entry) {
+        return false;
+      }
+      // Use the provided context or the registered context
+      const context = ctx ?? entry.ctx;
+      if (!context) {
+        console.warn(`No FieldContext available for disabled logic on field: ${fieldPath}`);
+        return false;
+      }
+      return entry.logicFn(context);
     });
   }
 

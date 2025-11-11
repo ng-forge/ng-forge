@@ -1,7 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  getDisabledSignal,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-form';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -20,6 +27,7 @@ import { AsyncPipe } from '@angular/common';
       [disableRipple]="props()?.disableRipple || false"
       [attr.tabindex]="tabIndex()"
       [attr.hidden]="f().hidden() || null"
+      [disabled]="isDisabled()"
     >
       {{ label() | dynamicText | async }}
     </mat-checkbox>
@@ -67,4 +75,7 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // Get disabled state from logic registry
+  readonly isDisabled = computed(() => getDisabledSignal(this.key(), this.field)());
 }

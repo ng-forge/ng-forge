@@ -2,7 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
-import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  getDisabledSignal,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-form';
 import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -29,6 +36,7 @@ import { AsyncPipe } from '@angular/common';
         [cols]="props()?.cols"
         [attr.tabindex]="tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
+        [disabled]="isDisabled()"
       ></textarea>
 
       @if (props()?.hint; as hint) {
@@ -73,4 +81,7 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // Get disabled state from logic registry
+  readonly isDisabled = computed(() => getDisabledSignal(this.key(), this.field)());
 }

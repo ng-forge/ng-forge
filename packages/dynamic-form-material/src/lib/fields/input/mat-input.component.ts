@@ -80,5 +80,5 @@ export default class MatInputFieldComponent implements MatInputComponent {
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   // Get disabled state from logic registry
-  readonly isDisabled = getDisabledSignal(this.key());
+  readonly isDisabled = computed(() => getDisabledSignal(this.key(), this.field)());
 }
