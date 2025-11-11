@@ -2,6 +2,7 @@ import {
   email,
   FieldContext,
   FieldPath,
+  FieldTree,
   LogicFn,
   max,
   maxLength,
@@ -25,7 +26,7 @@ import { ContextAwareValidator, SimpleCustomValidator } from './validator-types'
  * It returns a FieldTree (which is callable) that gives access to the root form
  */
 interface FieldContextWithRoot<TValue> extends FieldContext<TValue> {
-  root: () => () => any;
+  root: () => FieldTree<unknown>;
 }
 
 /**
