@@ -172,11 +172,10 @@ describe('logic-applicator', () => {
       });
     });
 
-    describe('disabled logic warning', () => {
-      it('should log warning for disabled logic', () => {
+    describe('disabled logic', () => {
+      it('should apply disabled logic to field', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: 'test@example.com' });
-          const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
           const config: LogicConfig = {
             type: 'disabled',
@@ -191,8 +190,8 @@ describe('logic-applicator', () => {
           );
           rootFormRegistry.registerRootForm(formInstance);
 
-          expect(consoleWarnSpy).toHaveBeenCalledWith('Disabled logic must be handled at component level');
-          consoleWarnSpy.mockRestore();
+          // Verify that disabled logic is applied
+          expect(formInstance.email().disabled()).toBe(true);
         });
       });
     });
@@ -327,7 +326,6 @@ describe('logic-applicator', () => {
     it('should handle disabled logic in sequence', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ email: 'test@example.com' });
-        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
         const configs: LogicConfig[] = [
           { type: 'disabled', condition: true },
@@ -342,8 +340,9 @@ describe('logic-applicator', () => {
         );
         rootFormRegistry.registerRootForm(formInstance);
 
-        expect(consoleWarnSpy).toHaveBeenCalledWith('Disabled logic must be handled at component level');
-        consoleWarnSpy.mockRestore();
+        // Verify that both disabled and readonly logic are applied
+        expect(formInstance.email().disabled()).toBe(true);
+        expect(formInstance.email().readonly()).toBe(true);
       });
     });
   });
