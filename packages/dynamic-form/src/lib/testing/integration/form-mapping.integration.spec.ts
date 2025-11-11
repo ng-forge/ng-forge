@@ -367,6 +367,63 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         expect(formInstance().valid()).toBe(true);
       });
     });
+
+    it('should nest array field children correctly', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({
+          phoneNumbers: [
+            { number: '', type: '' },
+            { number: '', type: '' },
+          ],
+        });
+
+        const formSchema = schema<typeof formValue>((path) => {
+          const arrayField: FieldDef<any> = {
+            key: 'phoneNumbers',
+            type: 'array',
+            fields: [
+              {
+                key: 'number',
+                type: 'input',
+                required: true,
+                pattern: /^\d{10}$/,
+              } as FieldDef<any> & FieldWithValidation,
+              {
+                key: 'type',
+                type: 'input',
+                required: true,
+              } as FieldDef<any> & FieldWithValidation,
+            ],
+          };
+
+          mapFieldToForm(arrayField, path.phoneNumbers as any);
+        });
+
+        const formInstance = form(formValue, formSchema);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        // Array fields should be validated
+        expect(formInstance().valid()).toBe(false);
+
+        // Partial valid - first element has valid number but missing type
+        formValue.set({
+          phoneNumbers: [
+            { number: '1234567890', type: '' },
+            { number: '', type: '' },
+          ],
+        });
+        expect(formInstance().valid()).toBe(false);
+
+        // All valid
+        formValue.set({
+          phoneNumbers: [
+            { number: '1234567890', type: 'mobile' },
+            { number: '9876543210', type: 'home' },
+          ],
+        });
+        expect(formInstance().valid()).toBe(true);
+      });
+    });
   });
 
   describe('Backward Compatibility', () => {
