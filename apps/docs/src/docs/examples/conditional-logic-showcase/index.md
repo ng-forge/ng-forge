@@ -82,7 +82,6 @@ const certificationConfig = {
     {
       type: 'page',
       key: 'personalInfoPage',
-      title: 'Personal Information',
       fields: [
         {
           type: 'text',
@@ -283,7 +282,6 @@ const certificationConfig = {
     {
       type: 'page',
       key: 'educationPage',
-      title: 'Education & Experience',
       fields: [
         {
           type: 'text',
@@ -633,7 +631,6 @@ const certificationConfig = {
     {
       type: 'page',
       key: 'requirementsPage',
-      title: 'Professional Requirements',
       fields: [
         {
           type: 'text',
@@ -1188,7 +1185,6 @@ const certificationConfig = {
     {
       type: 'page',
       key: 'reviewPage',
-      title: 'Review & Submit',
       fields: [
         {
           type: 'text',
