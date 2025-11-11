@@ -10,6 +10,7 @@ export * from './providers';
 
 // Services
 export * from './core/registry';
+export * from './core/validation';
 
 // Utilities
 export { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';

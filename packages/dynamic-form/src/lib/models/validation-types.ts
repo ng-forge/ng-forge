@@ -8,11 +8,6 @@ import { DynamicText } from '../pipes';
 export type ValidationError = AngularValidationError;
 
 /**
- * Custom validator function following Angular signal forms pattern
- */
-export type CustomValidator<TValue = unknown> = (value: TValue, formValue: unknown) => ValidationError | null;
-
-/**
  * Custom error messages for validation rules.
  * Supports static strings, Observables, and Signals for dynamic content.
  */
