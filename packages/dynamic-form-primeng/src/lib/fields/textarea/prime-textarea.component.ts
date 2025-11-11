@@ -44,7 +44,16 @@ import { FormsModule } from '@angular/forms';
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class PrimeTextareaFieldComponent implements PrimeTextareaComponent {
   readonly field = input.required<FieldTree<string>>();

@@ -39,6 +39,10 @@ import { AsyncPipe } from '@angular/common';
         width: 100%;
       }
 
+      :host([hidden]) {
+        display: none !important;
+      }
+
       .slider-container {
         width: 100%;
       }
@@ -48,6 +52,7 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

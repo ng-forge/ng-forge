@@ -23,6 +23,7 @@ import { AsyncPipe } from '@angular/common';
         type="checkbox"
         [field]="f"
         [id]="key()"
+        [disabled]="f().disabled()"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
         [attr.tabindex]="tabIndex()"
@@ -56,6 +57,7 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

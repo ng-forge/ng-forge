@@ -25,6 +25,7 @@ import { AsyncPipe } from '@angular/common';
       <select
         [field]="f"
         [id]="key()"
+        [disabled]="f().disabled()"
         class="form-select"
         [class.form-select-sm]="props()?.size === 'sm'"
         [class.form-select-lg]="props()?.size === 'lg'"
@@ -54,7 +55,15 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class BsSelectFieldComponent<T extends string> implements BsSelectComponent<T> {
   readonly field = input.required<FieldTree<T>>();

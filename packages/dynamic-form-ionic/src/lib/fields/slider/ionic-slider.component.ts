@@ -18,6 +18,7 @@ import { AsyncPipe } from '@angular/common';
       [field]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
+      [disabled]="f().disabled()"
       [step]="props()?.step ?? 1"
       [dualKnobs]="props()?.dualKnobs ?? false"
       [pin]="props()?.pin ?? false"

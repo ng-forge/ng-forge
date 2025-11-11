@@ -26,6 +26,8 @@ import { InputText } from 'primeng/inputtext';
         [field]="f"
         [attr.type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
         [attr.tabindex]="tabIndex()"
         [class]="inputClasses()"
       />
@@ -42,7 +44,15 @@ import { InputText } from 'primeng/inputtext';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly field = input.required<FieldTree<string>>();

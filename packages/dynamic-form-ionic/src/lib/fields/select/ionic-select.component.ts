@@ -26,6 +26,7 @@ import { AsyncPipe } from '@angular/common';
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() ?? props()?.placeholder | dynamicText | async) ?? ''"
+      [disabled]="f().disabled()"
       [multiple]="props()?.multiple ?? false"
       [compareWith]="props()?.compareWith ?? defaultCompare"
       [interface]="props()?.interface ?? 'alert'"
@@ -54,7 +55,15 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class IonicSelectFieldComponent<T> implements IonicSelectComponent<T> {
   readonly field = input.required<FieldTree<T>>();

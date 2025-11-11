@@ -47,6 +47,7 @@ import { DynamicText } from '../../models';
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'hidden() || null',
   },
 })
 export default class TextFieldComponent {

@@ -1,3 +1,8 @@
+// Hide the host element when hidden attribute is present
+:host([hidden]) {
+  display: none !important;
+}
+
 // Text field base styles with CSS custom properties for customization
 .df-text {
   // Default styling that can be overridden via CSS variables

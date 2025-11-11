@@ -29,6 +29,8 @@ import { AsyncPipe } from '@angular/common';
         [cols]="props()?.cols"
         [attr.tabindex]="tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
       ></textarea>
 
       @if (props()?.hint; as hint) {
@@ -45,6 +47,10 @@ import { AsyncPipe } from '@angular/common';
         width: 100%;
       }
 
+      :host([hidden]) {
+        display: none !important;
+      }
+
       mat-form-field {
         width: 100%;
       }
@@ -54,6 +60,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class MatTextareaFieldComponent implements MatTextareaComponent {
