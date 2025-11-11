@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DynamicForm, type FormConfig, EventBus } from '@ng-forge/dynamic-form';
-import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form/events';
+import { DynamicForm, type FormConfig, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
 import { JsonPipe } from '@angular/common';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 import { MatButtonModule } from '@angular/material/button';
@@ -111,6 +110,7 @@ export class ArrayDemoComponent {
         label: 'Emergency Contacts',
         fields: [
           {
+            key: 'contact',
             type: 'group',
             fields: [
               {

@@ -32,6 +32,7 @@ export class RowDemoComponent {
         },
       },
       {
+        key: 'nameRow',
         type: 'row',
         fields: [
           {
@@ -71,6 +72,7 @@ export class RowDemoComponent {
         },
       },
       {
+        key: 'addressRow',
         type: 'row',
         fields: [
           {
