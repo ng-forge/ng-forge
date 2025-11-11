@@ -11,11 +11,13 @@ import { JsonPipe } from '@angular/common';
   template: `
     <dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
 
-    @let message = submitMessage();
-    @if (message) {
-      <div class="success-message" style="margin-top: 2rem; padding: 1.5rem; background-color: #4caf50; color: white; border-radius: 4px; text-align: center;">
-        {{ message }}
-      </div>
+    @let message = submitMessage(); @if (message) {
+    <div
+      class="success-message"
+      style="margin-top: 2rem; padding: 1.5rem; background-color: #4caf50; color: white; border-radius: 4px; text-align: center;"
+    >
+      {{ message }}
+    </div>
     }
 
     <div class="example-result" style="margin-top: 2rem;">
@@ -51,7 +53,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'pageTitle',
             label: 'Professional Certification Application',
-            props: { class: 'text-2xl font-bold mb-4' },
           },
           {
             type: 'text',
@@ -251,7 +252,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'educationTitle',
             label: 'Education & Professional Experience',
-            props: { class: 'text-xl font-semibold mb-4' },
           },
           {
             key: 'educationLevel',
@@ -283,8 +283,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             props: {
               type: 'number',
               appearance: 'outline',
-              min: 1950,
-              max: new Date().getFullYear(),
             },
           },
           {
@@ -293,47 +291,13 @@ export class ConditionalLogicShowcaseDemoComponent {
             value: '',
             label: 'Years of Professional Experience',
             required: true,
-            // DEMO: Conditional validation based on certification type
-            validators: [
-              {
-                type: 'custom',
-                expression: 'formValue.certificationType === "associate" || Number(fieldValue) >= 2',
-                errorMessage: 'Professional and Expert certifications require at least 2 years of experience',
-                when: {
-                  type: 'or',
-                  conditions: [
-                    {
-                      type: 'fieldValue',
-                      fieldPath: 'certificationType',
-                      operator: 'equals',
-                      value: 'professional',
-                    },
-                    {
-                      type: 'fieldValue',
-                      fieldPath: 'certificationType',
-                      operator: 'equals',
-                      value: 'expert',
-                    },
-                  ],
-                },
-              },
-              {
-                type: 'custom',
-                expression: 'Number(fieldValue) >= 5',
-                errorMessage: 'Expert certification requires at least 5 years of experience',
-                when: {
-                  type: 'fieldValue',
-                  fieldPath: 'certificationType',
-                  operator: 'equals',
-                  value: 'expert',
-                },
-              },
-            ],
+            validationMessages: {
+              required: 'Years of experience is required',
+            },
             props: {
               type: 'number',
               appearance: 'outline',
-              min: 0,
-              hint: 'Enter total years of relevant professional experience',
+              hint: 'Minimum experience varies by certification level',
             },
           },
           {
@@ -600,7 +564,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'requirementsTitle',
             label: 'Professional Requirements',
-            props: { class: 'text-xl font-semibold mb-4' },
           },
           {
             type: 'text',
@@ -611,20 +574,17 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'referencesInfo',
             label: 'Professional References',
-            props: { class: 'text-lg font-medium mt-4 mb-2' },
           },
           {
             type: 'text',
             key: 'referencesNote',
             label: 'Based on your certification type, you need to provide professional references.',
-            props: { class: 'text-sm text-gray-600 mb-4' },
           },
           // Reference 1 (Always Required)
           {
             type: 'text',
             key: 'reference1Header',
             label: 'Reference #1',
-            props: { class: 'font-medium mt-4' },
           },
           {
             type: 'row',
@@ -667,7 +627,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'reference2Header',
             label: 'Reference #2',
-            props: { class: 'font-medium mt-4' },
             // DEMO: Hidden for Associate level
             logic: [
               {
@@ -783,7 +742,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'reference3Header',
             label: 'Reference #3',
-            props: { class: 'font-medium mt-4' },
             // DEMO: Only for Expert
             logic: [
               {
@@ -898,7 +856,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'membershipsHeader',
             label: 'Professional Memberships',
-            props: { class: 'text-lg font-medium mt-6 mb-2' },
             // DEMO: Hidden for Associate level
             logic: [
               {
@@ -993,7 +950,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'complianceHeader',
             label: 'Background Check & Compliance',
-            props: { class: 'text-lg font-medium mt-6 mb-2' },
           },
           {
             key: 'backgroundCheck',
@@ -1022,7 +978,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'documentsHeader',
             label: 'Additional Documentation',
-            props: { class: 'text-lg font-medium mt-6 mb-2' },
             // DEMO: Only for Professional, Expert, Specialist
             logic: [
               {
@@ -1064,17 +1019,6 @@ export class ConditionalLogicShowcaseDemoComponent {
               appearance: 'outline',
               hint: 'Link to your online portfolio or GitHub profile',
             },
-            validators: [
-              {
-                type: 'pattern',
-                value: '^https?://.*',
-                errorMessage: 'Please enter a valid URL starting with http:// or https://',
-                when: {
-                  type: 'javascript',
-                  expression: 'fieldValue && fieldValue.length > 0',
-                },
-              },
-            ],
             // DEMO: Complex multi-condition logic
             logic: [
               {
@@ -1153,7 +1097,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'reviewTitle',
             label: 'Review Your Application',
-            props: { class: 'text-xl font-semibold mb-4' },
           },
           {
             type: 'text',
@@ -1164,7 +1107,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             type: 'text',
             key: 'reviewNote',
             label: 'Note: Once submitted, you will receive a confirmation email and can track your application status.',
-            props: { class: 'text-sm text-gray-600 mb-6 p-4 bg-blue-50 rounded' },
           },
           {
             key: 'acknowledgement',
@@ -1215,10 +1157,10 @@ export class ConditionalLogicShowcaseDemoComponent {
       value.certificationType === 'associate'
         ? 'Associate'
         : value.certificationType === 'professional'
-          ? 'Professional'
-          : value.certificationType === 'expert'
-            ? 'Expert'
-            : 'Specialist';
+        ? 'Professional'
+        : value.certificationType === 'expert'
+        ? 'Expert'
+        : 'Specialist';
 
     this.submitMessage.set(
       `Thank you, ${value.firstName}! Your ${certType} certification application has been submitted successfully. ` +

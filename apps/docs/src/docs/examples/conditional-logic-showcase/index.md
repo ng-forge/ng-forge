@@ -47,23 +47,27 @@ This example showcases the full power of ng-forge's conditional logic system thr
 The form consists of 4 pages with increasingly complex conditional logic:
 
 ### Page 1: Personal Information
+
 - Basic contact information
 - **Certification type selection** - Drives conditionals throughout the form
 - Country/state selection with dependent dropdowns
 
 ### Page 2: Education & Experience
+
 - Education level
 - Years of experience (conditionally required)
 - Employment information (conditional on status)
 - Certification-specific requirements
 
 ### Page 3: Professional Requirements
+
 - Reference count varies by certification type
 - Professional memberships (conditional)
 - Background check consent
 - Additional documentation requirements
 
 ### Page 4: Review & Submit
+
 - Summary of selections
 - Terms acceptance
 - Final submission
@@ -87,7 +91,7 @@ const certificationConfig = {
           type: 'text',
           key: 'pageTitle',
           label: 'Professional Certification Application',
-          props: { class: 'text-2xl font-bold mb-4' },
+          ,
         },
         {
           type: 'text',
@@ -287,7 +291,7 @@ const certificationConfig = {
           type: 'text',
           key: 'educationTitle',
           label: 'Education & Professional Experience',
-          props: { class: 'text-xl font-semibold mb-4' },
+          ,
         },
         {
           key: 'educationLevel',
@@ -319,8 +323,6 @@ const certificationConfig = {
           props: {
             type: 'number',
             appearance: 'outline',
-            min: 1950,
-            max: new Date().getFullYear(),
           },
         },
         {
@@ -329,47 +331,13 @@ const certificationConfig = {
           value: '',
           label: 'Years of Professional Experience',
           required: true,
-          // DEMO: Conditional validation based on certification type
-          validators: [
-            {
-              type: 'custom',
-              expression: 'formValue.certificationType === "associate" || Number(fieldValue) >= 2',
-              errorMessage: 'Professional and Expert certifications require at least 2 years of experience',
-              when: {
-                type: 'or',
-                conditions: [
-                  {
-                    type: 'fieldValue',
-                    fieldPath: 'certificationType',
-                    operator: 'equals',
-                    value: 'professional',
-                  },
-                  {
-                    type: 'fieldValue',
-                    fieldPath: 'certificationType',
-                    operator: 'equals',
-                    value: 'expert',
-                  },
-                ],
-              },
-            },
-            {
-              type: 'custom',
-              expression: 'Number(fieldValue) >= 5',
-              errorMessage: 'Expert certification requires at least 5 years of experience',
-              when: {
-                type: 'fieldValue',
-                fieldPath: 'certificationType',
-                operator: 'equals',
-                value: 'expert',
-              },
-            },
-          ],
+          validationMessages: {
+            required: 'Years of experience is required',
+          },
           props: {
             type: 'number',
             appearance: 'outline',
-            min: 0,
-            hint: 'Enter total years of relevant professional experience',
+            hint: 'Minimum experience varies by certification level',
           },
         },
         {
@@ -636,7 +604,7 @@ const certificationConfig = {
           type: 'text',
           key: 'requirementsTitle',
           label: 'Professional Requirements',
-          props: { class: 'text-xl font-semibold mb-4' },
+          ,
         },
         {
           type: 'text',
@@ -647,21 +615,21 @@ const certificationConfig = {
           type: 'text',
           key: 'referencesInfo',
           label: 'Professional References',
-          props: { class: 'text-lg font-medium mt-4 mb-2' },
+          ,
         },
         {
           type: 'text',
           key: 'referencesNote',
           // DEMO: Dynamic text using JavaScript expression
           label: 'Based on your certification type, you need to provide professional references.',
-          props: { class: 'text-sm text-gray-600 mb-4' },
+          ,
         },
         // Reference 1 (Always Required)
         {
           type: 'text',
           key: 'reference1Header',
           label: 'Reference #1',
-          props: { class: 'font-medium mt-4' },
+          ,
         },
         {
           type: 'row',
@@ -704,7 +672,7 @@ const certificationConfig = {
           type: 'text',
           key: 'reference2Header',
           label: 'Reference #2',
-          props: { class: 'font-medium mt-4' },
+          ,
           // DEMO: Hidden for Associate level
           logic: [
             {
@@ -820,7 +788,7 @@ const certificationConfig = {
           type: 'text',
           key: 'reference3Header',
           label: 'Reference #3',
-          props: { class: 'font-medium mt-4' },
+          ,
           // DEMO: Only for Expert
           logic: [
             {
@@ -935,7 +903,7 @@ const certificationConfig = {
           type: 'text',
           key: 'membershipsHeader',
           label: 'Professional Memberships',
-          props: { class: 'text-lg font-medium mt-6 mb-2' },
+          ,
           // DEMO: Hidden for Associate level
           logic: [
             {
@@ -1030,7 +998,7 @@ const certificationConfig = {
           type: 'text',
           key: 'complianceHeader',
           label: 'Background Check & Compliance',
-          props: { class: 'text-lg font-medium mt-6 mb-2' },
+          ,
         },
         {
           key: 'backgroundCheck',
@@ -1059,7 +1027,7 @@ const certificationConfig = {
           type: 'text',
           key: 'documentsHeader',
           label: 'Additional Documentation',
-          props: { class: 'text-lg font-medium mt-6 mb-2' },
+          ,
           // DEMO: Only for Professional, Expert, Specialist
           logic: [
             {
@@ -1101,17 +1069,6 @@ const certificationConfig = {
             appearance: 'outline',
             hint: 'Link to your online portfolio or GitHub profile',
           },
-          validators: [
-            {
-              type: 'pattern',
-              value: '^https?://.*',
-              errorMessage: 'Please enter a valid URL starting with http:// or https://',
-              when: {
-                type: 'javascript',
-                expression: 'fieldValue && fieldValue.length > 0',
-              },
-            },
-          ],
           // DEMO: Complex multi-condition logic
           logic: [
             {
@@ -1190,7 +1147,7 @@ const certificationConfig = {
           type: 'text',
           key: 'reviewTitle',
           label: 'Review Your Application',
-          props: { class: 'text-xl font-semibold mb-4' },
+          ,
         },
         {
           type: 'text',
@@ -1201,7 +1158,7 @@ const certificationConfig = {
           type: 'text',
           key: 'reviewNote',
           label: 'Note: Once submitted, you will receive a confirmation email and can track your application status.',
-          props: { class: 'text-sm text-gray-600 mb-6 p-4 bg-blue-50 rounded' },
+          ,
         },
         {
           key: 'acknowledgement',
@@ -1226,7 +1183,7 @@ const certificationConfig = {
           type: 'text',
           // DEMO: Dynamic value using JavaScript - different fees per cert type
           label: 'Application Fee: Calculate based on certification type',
-          props: { class: 'text-sm mb-4 p-3 bg-gray-100 rounded' },
+          ,
         },
         {
           type: 'row',
@@ -1531,7 +1488,7 @@ template: `
     Step {{ currentPage() + 1 }} of 4
   </div>
   <df-dynamic-form [config]="config" [(value)]="formValue" />
-`
+`;
 ```
 
 ### Save Draft Functionality
@@ -1560,7 +1517,7 @@ computed(() => {
     specialist: 350,
   };
   return fees[formValue().certificationType] || 0;
-})
+});
 ```
 
 ## Related Documentation
