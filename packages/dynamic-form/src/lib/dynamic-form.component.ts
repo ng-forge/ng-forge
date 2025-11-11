@@ -34,7 +34,13 @@ import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './core/registry';
+import {
+  DisabledLogicRegistryService,
+  FieldContextRegistryService,
+  FunctionRegistryService,
+  RootFormRegistryService,
+  SchemaRegistryService,
+} from './core/registry';
 import { detectFormMode, FormModeDetectionResult } from './models/types/form-mode';
 import { FormModeValidator } from './utils/form-validation/form-mode-validator';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
@@ -110,7 +116,14 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
     </form>
   `,
   styleUrl: './dynamic-form.component.scss',
-  providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
+  providers: [
+    EventBus,
+    SchemaRegistryService,
+    FunctionRegistryService,
+    RootFormRegistryService,
+    FieldContextRegistryService,
+    DisabledLogicRegistryService,
+  ],
   host: {
     '[class.disabled]': 'disabled()',
     '[attr.data-form-mode]': 'formModeDetection().mode',
