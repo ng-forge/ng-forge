@@ -15,12 +15,28 @@ export class DeterministicWaitHelpers {
    * This waits for:
    * 1. No pending network requests
    * 2. DOM to be fully loaded
+   *
+   * Note: Works without zone.js by relying on network idle state
    */
   async waitForAngularStability(): Promise<void> {
+    // Wait for DOM to be loaded
     await this.page.waitForLoadState('domcontentloaded');
-    // Wait for any Angular zone tasks to complete by checking network idle
+
+    // Wait for network to be idle (no pending requests)
+    // This is the key wait for zoneless Angular apps
     await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
       // If network doesn't go idle in 10s, that's ok - continue anyway
+    });
+
+    // Give a moment for any final DOM updates to complete
+    // This replaces zone.js change detection waits
+    await this.page.evaluate(() => {
+      return new Promise((resolve) => {
+        // Use requestAnimationFrame to wait for next paint
+        requestAnimationFrame(() => {
+          requestAnimationFrame(resolve);
+        });
+      });
     });
   }
 
@@ -206,27 +222,21 @@ export async function waitForElementStable(locator: Locator, timeout = 3000): Pr
 }
 
 /**
- * Wait for Angular zone to stabilize
- * Checks window.getAllAngularTestabilities if available
+ * Wait for Angular to stabilize (zoneless compatible)
+ * Uses network idle and animation frames instead of zone.js testability
  */
 export async function waitForAngularZone(page: Page): Promise<void> {
-  await page
-    .waitForFunction(
-      () => {
-        // Check if Angular testability is available
-        const testabilities = (window as any).getAllAngularTestabilities?.();
-        if (!testabilities || testabilities.length === 0) {
-          return true; // No Angular or already stable
-        }
+  // Wait for network idle first
+  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+    // Continue if network doesn't go idle
+  });
 
-        // Check if all Angular apps are stable
-        return testabilities.every((testability: any) => {
-          return testability.isStable();
-        });
-      },
-      { timeout: 10000 }
-    )
-    .catch(() => {
-      // If Angular testability not available or times out, continue anyway
+  // Wait for DOM to be stable using requestAnimationFrame
+  await page.evaluate(() => {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
     });
+  });
 }

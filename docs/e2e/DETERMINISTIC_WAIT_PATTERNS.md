@@ -15,7 +15,7 @@ Arbitrary delays like `await page.waitForTimeout(1000)` are:
 
 ## Deterministic Alternatives
 
-### 1. Wait for Angular Stability
+### 1. Wait for Angular Stability (Zoneless Compatible)
 
 **Use when**: After clicks, form interactions, or any action that triggers Angular change detection
 
@@ -27,8 +27,9 @@ await waitHelpers.waitForAngularStability();
 **What it does**:
 
 - Waits for DOM to be fully loaded
-- Waits for network requests to complete
-- Ensures Angular zone has stabilized
+- Waits for network requests to complete (networkidle state)
+- Uses requestAnimationFrame to wait for DOM updates
+- **Works with zoneless Angular** - doesn't rely on zone.js testability API
 
 ### 2. Wait for Page Transitions
 
