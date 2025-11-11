@@ -327,6 +327,68 @@ export class MinimalTestBuilder {
 
     return { config, initialValue: { field: [] } };
   }
+
+  // ========================================
+  // SLIDER-SPECIFIC BUILDERS
+  // ========================================
+
+  /**
+   * Single slider with min/max
+   * Use when testing slider range
+   */
+  static withSliderRange(min: number, max: number) {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'slider', props: { min, max } }).build();
+
+    return { config, initialValue: { field: min } };
+  }
+
+  /**
+   * Slider with step value
+   * Use when testing slider steps
+   */
+  static withSliderStep(step: number) {
+    const config = MaterialFormTestUtils.builder()
+      .field({ key: 'field', type: 'slider', props: { min: 0, max: 100, step } })
+      .build();
+
+    return { config, initialValue: { field: 0 } };
+  }
+
+  /**
+   * Slider with color
+   * Use when testing Material color theme
+   */
+  static withSliderColor(color: 'primary' | 'accent' | 'warn') {
+    const config = MaterialFormTestUtils.builder()
+      .field({ key: 'field', type: 'slider', props: { min: 0, max: 100, color } })
+      .build();
+
+    return { config, initialValue: { field: 0 } };
+  }
+
+  /**
+   * Slider with thumb label
+   * Use when testing thumb label display
+   */
+  static withSliderThumbLabel() {
+    const config = MaterialFormTestUtils.builder()
+      .field({ key: 'field', type: 'slider', props: { min: 0, max: 100, thumbLabel: true, showThumbLabel: true } })
+      .build();
+
+    return { config, initialValue: { field: 0 } };
+  }
+
+  /**
+   * Slider with tick marks
+   * Use when testing tick mark display
+   */
+  static withSliderTickMarks(tickInterval: number) {
+    const config = MaterialFormTestUtils.builder()
+      .field({ key: 'field', type: 'slider', props: { min: 0, max: 100, tickInterval } })
+      .build();
+
+    return { config, initialValue: { field: 0 } };
+  }
 }
 
 /**
