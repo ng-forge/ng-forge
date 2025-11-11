@@ -29,6 +29,7 @@ import { AsyncPipe } from '@angular/common';
         [cols]="props()?.cols"
         [attr.tabindex]="tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
+        [disabled]="f().disabled()"
       ></textarea>
 
       @if (props()?.hint; as hint) {

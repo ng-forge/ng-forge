@@ -20,6 +20,7 @@ import { AsyncPipe } from '@angular/common';
       [disableRipple]="props()?.disableRipple || false"
       [attr.tabindex]="tabIndex()"
       [attr.hidden]="f().hidden() || null"
+      [disabled]="f().disabled()"
     >
       {{ label() | dynamicText | async }}
     </mat-checkbox>
