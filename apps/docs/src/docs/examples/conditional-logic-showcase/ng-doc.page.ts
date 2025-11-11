@@ -7,7 +7,6 @@ const ConditionalLogicShowcasePage: NgDocPage = {
   mdFile: './index.md',
   category: ExamplesCategory,
   order: 5,
-  keyword: 'ConditionalLogicShowcaseExample',
   demos: {
     ConditionalLogicShowcaseDemoComponent: ConditionalLogicShowcaseIframeDemoComponent,
   },
