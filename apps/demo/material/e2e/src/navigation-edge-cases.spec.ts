@@ -562,7 +562,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       // Fill required field and try again
       await page.fill('#requiredField input', 'Valid data');
       await nextButton.click();
-      const waitHelpers = new DeterministicWaitHelpers(page);
       await waitHelpers.waitForPageTransition();
 
       const nowOnPage2 = await page.locator('text=Valid Page 2').isVisible();
@@ -651,7 +650,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    const waitHelpers = new DeterministicWaitHelpers(page);
     await waitHelpers.waitForAngularStability();
 
     // Verify form is cleared
@@ -693,7 +691,6 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    const waitHelpers = new DeterministicWaitHelpers(page);
     await waitHelpers.waitForAngularStability();
 
     // Test reconstructed form

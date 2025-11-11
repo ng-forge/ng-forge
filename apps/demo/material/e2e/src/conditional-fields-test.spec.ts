@@ -22,7 +22,6 @@ test.describe('Conditional Fields Test', () => {
     await page.getByText('Conditional Fields').click();
 
     // Wait for tab content to load
-    const waitHelpers = new DeterministicWaitHelpers(page);
     await waitHelpers.waitForAngularStability();
 
     // Check if radio buttons are visible (this would trigger the injection error if present)
@@ -32,7 +31,6 @@ test.describe('Conditional Fields Test', () => {
 
     // Try to interact with radio buttons to trigger logic
     await page.getByLabel('Yes, I have an account').check();
-    const waitHelpers = new DeterministicWaitHelpers(page);
     await waitHelpers.waitForAngularStability();
 
     // Check if conditional fields appear
@@ -41,7 +39,6 @@ test.describe('Conditional Fields Test', () => {
 
     // Switch to other option
     await page.getByLabel('No, I need to create one').check();
-    const waitHelpers = new DeterministicWaitHelpers(page);
     await waitHelpers.waitForAngularStability();
 
     // Check if different fields appear

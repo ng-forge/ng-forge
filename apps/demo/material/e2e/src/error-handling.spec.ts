@@ -140,7 +140,6 @@ test.describe('Error Handling and Edge Cases', () => {
 
         // Reload the scenario
         await page.click('.load-basic-btn');
-        const waitHelpers = new DeterministicWaitHelpers(page);
         await waitHelpers.waitForAngularStability();
 
         // Form should be fresh (not persisted in this case)
@@ -262,7 +261,6 @@ test.describe('Error Handling and Edge Cases', () => {
         });
 
         // Wait for clear to complete
-        const waitHelpers = new DeterministicWaitHelpers(page);
         await waitHelpers.waitForAngularStability();
 
         // Verify form is cleared
@@ -271,7 +269,6 @@ test.describe('Error Handling and Edge Cases', () => {
 
         // Reload and verify fresh state
         await page.click('.load-basic-btn');
-        const waitHelpers = new DeterministicWaitHelpers(page);
         await waitHelpers.waitForAngularStability();
 
         const newFirstNameValue = await page.inputValue('#firstName input').catch(() => '');
@@ -347,7 +344,6 @@ test.describe('Error Handling and Edge Cases', () => {
       await page.evaluate(() => {
         (window as any).clearTestScenario();
       });
-      const waitHelpers = new DeterministicWaitHelpers(page);
       await waitHelpers.waitForAngularStability();
 
       // Verify clean state
