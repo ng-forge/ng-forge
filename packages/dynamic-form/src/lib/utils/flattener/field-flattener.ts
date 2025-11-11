@@ -1,5 +1,6 @@
 import { FieldDef } from '../../definitions';
 import { isGroupField } from '../../definitions/default/group-field';
+import { isArrayField } from '../../definitions/default/array-field';
 import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
 
 /**
@@ -22,6 +23,7 @@ export interface FlattenedField extends FieldDef<any> {
  * - **Page fields**: Children are flattened and merged into the result (no wrapper)
  * - **Row fields**: Children are flattened and merged into the result (no wrapper)
  * - **Group fields**: Maintains group structure with flattened children nested under the group key
+ * - **Array fields**: Maintains array structure with flattened children nested under the array key
  * - **Other fields**: Pass through unchanged with guaranteed key generation
  *
  * Auto-generates keys for fields missing the key property to ensure form binding works correctly.
@@ -101,6 +103,18 @@ export function flattenFields(fields: FieldDef<any>[], registry: Map<string, Fie
         ...field,
         fields: flattenedChildren,
         key: field.key || `auto_group_${autoKeyCounter++}`,
+      } as FlattenedField);
+    } else if (isArrayField(field)) {
+      // Arrays always maintain their structure (even if they have 'include' handling)
+      // Type assertion: After isArrayField guard, we know fields contains FieldDef instances
+      const childFieldsArray = Object.values(field.fields) as FieldDef<any>[];
+      const flattenedChildren = flattenFields(childFieldsArray, registry);
+
+      // Add only the array field with its flattened children, not the children separately
+      result.push({
+        ...field,
+        fields: flattenedChildren,
+        key: field.key || `auto_array_${autoKeyCounter++}`,
       } as FlattenedField);
     } else {
       // All other fields (include/exclude) maintain their structure

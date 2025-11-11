@@ -4,6 +4,7 @@ import { applyValidator } from './validation';
 import { applyLogic } from './logic';
 import { applySchema } from './schema-application';
 import { isGroupField } from '../definitions/default/group-field';
+import { isArrayField } from '../definitions/default/array-field';
 import { isPageField } from '../definitions/default/page-field';
 import { isRowField } from '../definitions/default/row-field';
 
@@ -30,6 +31,12 @@ export function mapFieldToForm<TValue>(fieldDef: FieldDef<any>, fieldPath: Field
   // Special handling for group fields - apply child field validations to the parent form schema
   if (isGroupField(fieldDef)) {
     mapGroupFieldToForm(fieldDef, fieldPath);
+    return;
+  }
+
+  // Special handling for array fields - apply child field validations to the parent form schema
+  if (isArrayField(fieldDef)) {
+    mapArrayFieldToForm(fieldDef, fieldPath);
     return;
   }
 
@@ -196,6 +203,33 @@ function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: Field
     if (nestedPath) {
       // Recursively apply field mapping to the child field
       mapFieldToForm(childField, nestedPath);
+    }
+  }
+}
+
+/**
+ * Maps array field children to the parent form schema
+ * This ensures that validation from child fields is applied to the parent form
+ */
+function mapArrayFieldToForm<TValue>(arrayField: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+  if (!isArrayField(arrayField) || !arrayField.fields) {
+    return;
+  }
+
+  // Apply validation for each child field to the appropriate indexed path in the parent form
+  // Type assertion: After isArrayField guard, we know fields contains FieldDef instances
+  const fields = arrayField.fields as FieldDef<any>[];
+  for (let i = 0; i < fields.length; i++) {
+    const childField = fields[i];
+    if (!childField.key) {
+      continue;
+    }
+
+    // Get the indexed path for this child field within the array
+    const indexedPath = (fieldPath as any)[i];
+    if (indexedPath) {
+      // Recursively apply field mapping to the child field
+      mapFieldToForm(childField, indexedPath);
     }
   }
 }
