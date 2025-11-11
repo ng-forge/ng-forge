@@ -38,6 +38,7 @@ describe('MatTextareaFieldComponent', () => {
 
       const textarea = fixture.debugElement.query(By.css('textarea[matInput]'));
       const formField = fixture.debugElement.query(By.css('mat-form-field'));
+      const hostElement = fixture.debugElement.query(By.css('df-mat-textarea'));
       const label = fixture.debugElement.query(By.css('mat-label'));
       const hint = fixture.debugElement.query(By.css('mat-hint'));
 
@@ -51,7 +52,7 @@ describe('MatTextareaFieldComponent', () => {
       expect(textarea.nativeElement.getAttribute('maxlength')).toBe('500');
       expect(textarea.nativeElement.getAttribute('tabindex')).toBe('1');
       expect(textarea.nativeElement.style.resize).toBe('both');
-      expect(formField.nativeElement.className).toContain('comments-textarea');
+      expect(hostElement.nativeElement.className).toContain('comments-textarea');
       expect(formField.nativeElement.className).toContain('mat-form-field-appearance-outline');
       expect(label.nativeElement.textContent.trim()).toBe('Comments');
       expect(hint.nativeElement.textContent.trim()).toBe('Please provide detailed feedback');

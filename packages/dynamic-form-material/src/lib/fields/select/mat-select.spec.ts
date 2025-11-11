@@ -38,6 +38,7 @@ describe('MatSelectFieldComponent', () => {
 
       const select = fixture.debugElement.query(By.css('mat-select'));
       const formField = fixture.debugElement.query(By.css('mat-form-field'));
+      const hostElement = fixture.debugElement.query(By.css('df-mat-select'));
       const label = fixture.debugElement.query(By.css('mat-label'));
       const hint = fixture.debugElement.query(By.css('mat-hint'));
 
@@ -47,7 +48,7 @@ describe('MatSelectFieldComponent', () => {
       expect(select.nativeElement).toBeInstanceOf(HTMLElement);
       // Check that placeholder property is properly set via the mat-select's placeholder attribute
       expect(select.componentInstance.placeholder).toBe('Select your country');
-      expect(formField.nativeElement.className).toContain('country-select');
+      expect(hostElement.nativeElement.className).toContain('country-select');
       expect(formField.nativeElement.className).toContain('mat-form-field-appearance-outline');
       expect(label.nativeElement.textContent.trim()).toBe('Country');
       expect(hint.nativeElement.textContent.trim()).toBe('Choose the country you live in');
