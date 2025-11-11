@@ -13,7 +13,7 @@ A comprehensive example demonstrating all conditional logic capabilities in ng-f
 
 This example showcases the full power of ng-forge's conditional logic system through a realistic certification application form. It demonstrates:
 
-- **All Logic Types**: Hidden, disabled, readonly, and required conditionals
+- **All Logic Types**: Hidden, readonly, and required conditionals
 - **Multiple Operators**: equals, notEquals, greater, less, greaterOrEqual, contains
 - **Complex Conditions**: AND/OR combinations
 - **JavaScript Expressions**: Dynamic calculations and validations
@@ -26,9 +26,8 @@ This example showcases the full power of ng-forge's conditional logic system thr
 ### Logic Types
 
 1. **Hidden Logic** - Show/hide entire sections based on certification type
-2. **Disabled Logic** - Disable fields until prerequisites are met
-3. **Readonly Logic** - Lock fields after certain conditions
-4. **Required Logic** - Make fields conditionally required
+2. **Readonly Logic** - Lock fields based on conditions
+3. **Required Logic** - Make fields conditionally required
 
 ### Expression Types
 
@@ -210,22 +209,12 @@ const certificationConfig = {
             { value: 'fl', label: 'Florida' },
             { value: 'wa', label: 'Washington' },
           ],
-          // DEMO: Disabled until country is selected
+          // DEMO: Hidden for non-US/CA countries
           logic: [
-            {
-              type: 'disabled',
-              condition: {
-                type: 'fieldValue',
-                fieldPath: 'country',
-                operator: 'equals',
-                value: '',
-              },
-            },
-            // DEMO: Hidden for non-US/CA countries
             {
               type: 'hidden',
               condition: {
-                type: 'or',
+                type: 'and',
                 conditions: [
                   {
                     type: 'fieldValue',
@@ -268,7 +257,7 @@ const certificationConfig = {
           props: {
             appearance: 'outline',
             placeholder: 'Select state/province',
-            hint: 'Select your country first',
+            hint: 'Only shown for US/Canada',
           },
         },
         {
@@ -1291,27 +1280,7 @@ export class ConditionalLogicShowcaseComponent {
 
 ## Key Conditional Logic Patterns
 
-### 1. Disabled Until Prerequisite
-
-```typescript
-{
-  key: 'state',
-  type: 'select',
-  logic: [{
-    type: 'disabled',
-    condition: {
-      type: 'fieldValue',
-      fieldPath: 'country',
-      operator: 'equals',
-      value: '',
-    },
-  }],
-}
-```
-
-State dropdown is disabled until a country is selected.
-
-### 2. Cross-Page Conditional Required
+### 1. Cross-Page Conditional Required
 
 ```typescript
 {
@@ -1342,7 +1311,7 @@ State dropdown is disabled until a country is selected.
 
 Field on Page 2 depends on selection from Page 1.
 
-### 3. Complex OR Conditions
+### 2. Complex OR Conditions
 
 ```typescript
 {
@@ -1372,7 +1341,7 @@ Field on Page 2 depends on selection from Page 1.
 
 Hide company field if unemployed OR student.
 
-### 4. Complex AND Conditions
+### 3. Complex AND Conditions
 
 ```typescript
 {
@@ -1402,7 +1371,7 @@ Hide company field if unemployed OR student.
 
 Required if portfolio selected AND not Associate level.
 
-### 5. JavaScript Expression for Array Checking
+### 4. JavaScript Expression for Array Checking
 
 ```typescript
 {
@@ -1419,7 +1388,7 @@ Required if portfolio selected AND not Associate level.
 
 Show field only if "other" is in the multi-checkbox array.
 
-### 6. Conditional Validation
+### 5. Conditional Validation
 
 ```typescript
 {
@@ -1442,7 +1411,7 @@ Show field only if "other" is in the multi-checkbox array.
 
 Validator only applies when certification type is "expert".
 
-### 7. Cascading Conditionals
+### 6. Cascading Conditionals
 
 ```typescript
 // Reference 2 fields cascade from certificationType
