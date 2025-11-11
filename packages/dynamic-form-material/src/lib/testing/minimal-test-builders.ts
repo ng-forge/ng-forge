@@ -1,3 +1,4 @@
+import { FieldOption } from '@ng-forge/dynamic-form';
 import { MaterialFormTestUtils } from './material-test-utils';
 
 /**
@@ -213,7 +214,7 @@ export class MinimalTestBuilder {
    * Single select with simple options
    * Use when testing basic select rendering
    */
-  static withSelectOptions(options: Array<{ label: string; value: string | number }>) {
+  static withSelectOptions(options: FieldOption[]) {
     const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'select', options }).build();
 
     return { config, initialValue: { field: null } };
@@ -253,6 +254,74 @@ export class MinimalTestBuilder {
           { label: 'Option 2', value: '2' },
         ],
         props: { multiple: true },
+      })
+      .build();
+
+    return { config, initialValue: { field: [] } };
+  }
+
+  // ========================================
+  // MULTI-CHECKBOX-SPECIFIC BUILDERS
+  // ========================================
+
+  /**
+   * Single multi-checkbox with options
+   * Use when testing checkbox group rendering
+   */
+  static withCheckboxOptions(options: FieldOption[]) {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'multi-checkbox', options }).build();
+
+    return { config, initialValue: { field: [] } };
+  }
+
+  /**
+   * Multi-checkbox with disabled option
+   * Use when testing disabled option state
+   */
+  static withDisabledCheckboxOption() {
+    const config = MaterialFormTestUtils.builder()
+      .field({
+        key: 'field',
+        type: 'multi-checkbox',
+        options: [
+          { label: 'Option 1', value: '1' },
+          { label: 'Option 2', value: '2', disabled: true },
+          { label: 'Option 3', value: '3' },
+        ],
+      })
+      .build();
+
+    return { config, initialValue: { field: [] } };
+  }
+
+  /**
+   * Multi-checkbox with color
+   * Use when testing Material color theme
+   */
+  static withCheckboxColor(color: 'primary' | 'accent' | 'warn') {
+    const config = MaterialFormTestUtils.builder()
+      .field({
+        key: 'field',
+        type: 'multi-checkbox',
+        options: [{ label: 'Option 1', value: '1' }],
+        props: { color },
+      })
+      .build();
+
+    return { config, initialValue: { field: [] } };
+  }
+
+  /**
+   * Multi-checkbox with label position
+   * Use when testing checkbox label positioning
+   */
+  static withCheckboxLabelPosition(labelPosition: 'before' | 'after') {
+    const config = MaterialFormTestUtils.builder()
+      .field({
+        key: 'field',
+        type: 'multi-checkbox',
+        options: [{ label: 'Option 1', value: '1' }],
+        props: { labelPosition },
       })
       .build();
 
