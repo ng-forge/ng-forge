@@ -171,18 +171,8 @@ export class ConditionalLogicShowcaseDemoComponent {
               { value: 'fl', label: 'Florida' },
               { value: 'wa', label: 'Washington' },
             ],
-            // DEMO: Disabled until country is selected
+            // DEMO: Hidden for non-US/CA countries
             logic: [
-              {
-                type: 'disabled',
-                condition: {
-                  type: 'fieldValue',
-                  fieldPath: 'country',
-                  operator: 'equals',
-                  value: '',
-                },
-              },
-              // DEMO: Hidden for non-US/CA countries
               {
                 type: 'hidden',
                 condition: {
@@ -229,7 +219,7 @@ export class ConditionalLogicShowcaseDemoComponent {
             props: {
               appearance: 'outline',
               placeholder: 'Select state/province',
-              hint: 'Select your country first',
+              hint: 'Only shown for US/Canada',
             },
           },
           {
