@@ -3,6 +3,8 @@ import { InferFormValue, RegisteredFieldTypes } from './types';
 import { SchemaDefinition } from './schemas';
 import { ContextAwareValidator, SimpleCustomValidator, TreeValidator } from '../core/validation/validator-types';
 import { CustomFunction } from '../core/expressions/custom-function-types';
+import { EvaluationContext } from './expressions';
+import { ValidationMessages } from './validation-types';
 
 /**
  * Configuration interface for defining dynamic form structure and behavior.
@@ -94,6 +96,25 @@ export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredF
    * ```
    */
   schemas?: SchemaDefinition[];
+
+  /**
+   * Form-level validation messages that act as fallback for field-level messages.
+   *
+   * These messages are used when a field has validation errors but no
+   * field-level `validationMessages` are defined for that specific error.
+   * This allows you to define common validation messages once at the form level
+   * instead of repeating them for each field.
+   *
+   * @example
+   * ```typescript
+   * defaultValidationMessages: {
+   *   required: 'This field is required',
+   *   email: 'Please enter a valid email address',
+   *   minLength: 'Must be at least {{requiredLength}} characters'
+   * }
+   * ```
+   */
+  defaultValidationMessages?: ValidationMessages;
 
   /**
    * Signal forms adapter configuration.

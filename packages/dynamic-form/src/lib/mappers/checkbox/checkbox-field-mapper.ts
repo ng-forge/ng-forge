@@ -14,6 +14,12 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<any>, options: Ch
   // Always pass validationMessages (or empty object) - required for error display signals
   bindings.push(inputBinding('validationMessages', () => fieldDef.validationMessages ?? {}));
 
+  // Pass default validation messages for fallback error translations
+  const defaultValidationMessages = options.fieldSignalContext.defaultValidationMessages;
+  if (defaultValidationMessages !== undefined) {
+    bindings.push(inputBinding('defaultValidationMessages', () => defaultValidationMessages));
+  }
+
   const formRoot = options.fieldSignalContext.form();
   const childrenMap = (formRoot as any).structure?.childrenMap?.();
 
