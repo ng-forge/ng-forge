@@ -34,6 +34,7 @@ import { AsyncPipe } from '@angular/common';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
         [compareWith]="props()?.compareWith || defaultCompare"
+        [disabled]="f().disabled()"
       >
         @for (option of options(); track option.value) {
         <mat-option [value]="option.value" [disabled]="option.disabled || false">
