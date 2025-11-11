@@ -78,6 +78,9 @@ import { Component, signal } from '@angular/core';
 import { DynamicFormComponent, FormConfig, InferFormValue } from '@ng-forge/dynamic-form';
 
 const certificationConfig = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+  },
   fields: [
     // ============================================================
     // PAGE 1: PERSONAL INFORMATION
@@ -90,7 +93,6 @@ const certificationConfig = {
           type: 'text',
           key: 'pageTitle',
           label: 'Professional Certification Application',
-          ,
         },
         {
           type: 'text',
@@ -152,6 +154,18 @@ const certificationConfig = {
           label: 'Date of Birth',
           required: true,
           maxDate: new Date(new Date().getFullYear() - 18, 0, 1),
+          // DEMO: Readonly once certification type is selected
+          logic: [
+            {
+              type: 'readonly',
+              condition: {
+                type: 'fieldValue',
+                fieldPath: 'certificationType',
+                operator: 'notEquals',
+                value: '',
+              },
+            },
+          ],
           validationMessages: {
             required: 'Date of birth is required',
             maxDate: 'You must be at least 18 years old to apply',
@@ -280,7 +294,6 @@ const certificationConfig = {
           type: 'text',
           key: 'educationTitle',
           label: 'Education & Professional Experience',
-          ,
         },
         {
           key: 'educationLevel',
@@ -593,7 +606,6 @@ const certificationConfig = {
           type: 'text',
           key: 'requirementsTitle',
           label: 'Professional Requirements',
-          ,
         },
         {
           type: 'text',
@@ -604,21 +616,17 @@ const certificationConfig = {
           type: 'text',
           key: 'referencesInfo',
           label: 'Professional References',
-          ,
         },
         {
           type: 'text',
           key: 'referencesNote',
-          // DEMO: Dynamic text using JavaScript expression
           label: 'Based on your certification type, you need to provide professional references.',
-          ,
         },
         // Reference 1 (Always Required)
         {
           type: 'text',
           key: 'reference1Header',
           label: 'Reference #1',
-          ,
         },
         {
           type: 'row',
@@ -661,7 +669,6 @@ const certificationConfig = {
           type: 'text',
           key: 'reference2Header',
           label: 'Reference #2',
-          ,
           // DEMO: Hidden for Associate level
           logic: [
             {
@@ -777,7 +784,6 @@ const certificationConfig = {
           type: 'text',
           key: 'reference3Header',
           label: 'Reference #3',
-          ,
           // DEMO: Only for Expert
           logic: [
             {
@@ -892,7 +898,6 @@ const certificationConfig = {
           type: 'text',
           key: 'membershipsHeader',
           label: 'Professional Memberships',
-          ,
           // DEMO: Hidden for Associate level
           logic: [
             {
@@ -987,12 +992,11 @@ const certificationConfig = {
           type: 'text',
           key: 'complianceHeader',
           label: 'Background Check & Compliance',
-          ,
         },
         {
           key: 'backgroundCheck',
           type: 'checkbox',
-          value: false,
+          checked: false,
           label: 'I consent to a background check as part of the certification process',
           required: true,
           validationMessages: {
@@ -1003,7 +1007,7 @@ const certificationConfig = {
         {
           key: 'ethicsAgreement',
           type: 'checkbox',
-          value: false,
+          checked: false,
           label: 'I agree to abide by the professional code of ethics',
           required: true,
           validationMessages: {
@@ -1016,7 +1020,6 @@ const certificationConfig = {
           type: 'text',
           key: 'documentsHeader',
           label: 'Additional Documentation',
-          ,
           // DEMO: Only for Professional, Expert, Specialist
           logic: [
             {
@@ -1033,7 +1036,7 @@ const certificationConfig = {
         {
           key: 'hasPortfolio',
           type: 'toggle',
-          value: false,
+          checked: false,
           label: 'I will submit a professional portfolio',
           props: { color: 'primary' },
           logic: [
@@ -1136,7 +1139,6 @@ const certificationConfig = {
           type: 'text',
           key: 'reviewTitle',
           label: 'Review Your Application',
-          ,
         },
         {
           type: 'text',
@@ -1147,12 +1149,11 @@ const certificationConfig = {
           type: 'text',
           key: 'reviewNote',
           label: 'Note: Once submitted, you will receive a confirmation email and can track your application status.',
-          ,
         },
         {
           key: 'acknowledgement',
           type: 'checkbox',
-          value: false,
+          checked: false,
           label: 'I certify that all information provided in this application is true and accurate',
           required: true,
           validationMessages: {
@@ -1163,16 +1164,9 @@ const certificationConfig = {
         {
           key: 'marketingConsent',
           type: 'checkbox',
-          value: false,
+          checked: false,
           label: 'I would like to receive updates about certification programs and professional development opportunities',
           props: { color: 'primary' },
-        },
-        {
-          key: 'applicationFee',
-          type: 'text',
-          // DEMO: Dynamic value using JavaScript - different fees per cert type
-          label: 'Application Fee: Calculate based on certification type',
-          ,
         },
         {
           type: 'row',
@@ -1207,33 +1201,14 @@ type CertificationFormValue = InferFormValue<typeof certificationConfig.fields>;
     <div class="certification-container">
       <df-dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
 
-      @let message = submitMessage();
-      @if (message) {
-        <div class="success-message">
-          {{ message }}
-        </div>
+      @let message = submitMessage(); @if (message) {
+      <div class="success-message">
+        {{ message }}
+      </div>
       }
     </div>
   `,
-  styles: [
-    `
-      .certification-container {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 2rem;
-      }
-
-      .success-message {
-        margin-top: 2rem;
-        padding: 1.5rem;
-        background-color: #4caf50;
-        color: white;
-        border-radius: 4px;
-        text-align: center;
-        font-size: 1.1rem;
-      }
-    `,
-  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConditionalLogicShowcaseComponent {
   config = certificationConfig;
@@ -1266,13 +1241,18 @@ export class ConditionalLogicShowcaseComponent {
   onSubmit(value: CertificationFormValue) {
     console.log('Certification application submitted:', value);
 
-    const certType = value.certificationType === 'associate' ? 'Associate' :
-                     value.certificationType === 'professional' ? 'Professional' :
-                     value.certificationType === 'expert' ? 'Expert' : 'Specialist';
+    const certType =
+      value.certificationType === 'associate'
+        ? 'Associate'
+        : value.certificationType === 'professional'
+        ? 'Professional'
+        : value.certificationType === 'expert'
+        ? 'Expert'
+        : 'Specialist';
 
     this.submitMessage.set(
       `Thank you, ${value.firstName}! Your ${certType} certification application has been submitted successfully. ` +
-      `You will receive a confirmation email at ${value.email} within 24 hours.`
+        `You will receive a confirmation email at ${value.email} within 24 hours.`
     );
   }
 }
@@ -1316,26 +1296,28 @@ Field on Page 2 depends on selection from Page 1.
 ```typescript
 {
   key: 'currentCompany',
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'or',
-      conditions: [
-        {
-          type: 'fieldValue',
-          fieldPath: 'employmentStatus',
-          operator: 'equals',
-          value: 'unemployed',
-        },
-        {
-          type: 'fieldValue',
-          fieldPath: 'employmentStatus',
-          operator: 'equals',
-          value: 'student',
-        },
-      ],
+  logic: [
+    {
+      type: 'hidden',
+      condition: {
+        type: 'or',
+        conditions: [
+          {
+            type: 'fieldValue',
+            fieldPath: 'employmentStatus',
+            operator: 'equals',
+            value: 'unemployed',
+          },
+          {
+            type: 'fieldValue',
+            fieldPath: 'employmentStatus',
+            operator: 'equals',
+            value: 'student',
+          },
+        ],
+      },
     },
-  }],
+  ],
 }
 ```
 
@@ -1346,26 +1328,28 @@ Hide company field if unemployed OR student.
 ```typescript
 {
   key: 'portfolioUrl',
-  logic: [{
-    type: 'required',
-    condition: {
-      type: 'and',
-      conditions: [
-        {
-          type: 'fieldValue',
-          fieldPath: 'hasPortfolio',
-          operator: 'equals',
-          value: true,
-        },
-        {
-          type: 'fieldValue',
-          fieldPath: 'certificationType',
-          operator: 'notEquals',
-          value: 'associate',
-        },
-      ],
+  logic: [
+    {
+      type: 'required',
+      condition: {
+        type: 'and',
+        conditions: [
+          {
+            type: 'fieldValue',
+            fieldPath: 'hasPortfolio',
+            operator: 'equals',
+            value: true,
+          },
+          {
+            type: 'fieldValue',
+            fieldPath: 'certificationType',
+            operator: 'notEquals',
+            value: 'associate',
+          },
+        ],
+      },
     },
-  }],
+  ],
 }
 ```
 
@@ -1376,13 +1360,15 @@ Required if portfolio selected AND not Associate level.
 ```typescript
 {
   key: 'otherMembership',
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'javascript',
-      expression: '!formValue.professionalMemberships || !formValue.professionalMemberships.includes("other")',
+  logic: [
+    {
+      type: 'hidden',
+      condition: {
+        type: 'javascript',
+        expression: '!formValue.professionalMemberships || !formValue.professionalMemberships.includes("other")',
+      },
     },
-  }],
+  ],
 }
 ```
 
@@ -1420,11 +1406,15 @@ Validator only applies when certification type is "expert".
   logic: [
     {
       type: 'hidden',
-      condition: { /* hide for Associate */ },
+      condition: {
+        /* hide for Associate */
+      },
     },
     {
       type: 'required',
-      condition: { /* required for others */ },
+      condition: {
+        /* required for others */
+      },
     },
   ],
 }
@@ -1469,11 +1459,32 @@ template: `
 Allow users to save and resume:
 
 ```typescript
+// Define a custom event
+export class SaveDraftEvent implements FormEvent {
+  readonly type = 'save-draft';
+}
+
+// In your form config
 {
   type: 'button',
   key: 'saveDraft',
   label: 'Save Draft',
-  onClick: () => this.saveDraft(),
+  event: SaveDraftEvent,
+}
+
+// In your component
+template: `
+  <df-dynamic-form
+    [config]="config"
+    [(value)]="formValue"
+    (events)="onEvent($event)"
+  />
+`
+
+onEvent(event: FormEvent) {
+  if (event.type instanceof SaveDraftEvent) {
+    this.saveDraft();
+  }
 }
 ```
 

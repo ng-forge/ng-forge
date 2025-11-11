@@ -57,6 +57,10 @@ import { AsyncPipe } from '@angular/common';
         width: 100%;
       }
 
+      :host([hidden]) {
+        display: none !important;
+      }
+
       mat-form-field {
         width: 100%;
       }
@@ -67,6 +71,7 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class MatSelectFieldComponent<T> implements MatSelectComponent<T> {

@@ -19,6 +19,8 @@ import { AsyncPipe } from '@angular/common';
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+      [disabled]="f().disabled()"
+      [readonly]="f().readonly()"
       [clearInput]="props()?.clearInput ?? false"
       [counter]="props()?.counter ?? false"
       [color]="props()?.color"
@@ -40,7 +42,15 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class IonicInputFieldComponent implements IonicInputComponent {
   readonly field = input.required<FieldTree<string>>();

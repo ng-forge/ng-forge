@@ -50,12 +50,17 @@ import { AsyncPipe } from '@angular/common';
       :host {
         display: block;
       }
+
+      :host([hidden]) {
+        display: none !important;
+      }
     `,
   ],
   host: {
     '[class]': 'className() || ""',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,

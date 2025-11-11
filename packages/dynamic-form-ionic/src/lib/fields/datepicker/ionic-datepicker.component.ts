@@ -86,16 +86,23 @@ import { format } from 'date-fns';
       </ng-template>
     </ion-modal>
   `,
-  styles: `
-    ion-input {
-      cursor: pointer;
-    }
-  `,
+  styles: [
+    `
+      ion-input {
+        cursor: pointer;
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class IonicDatepickerFieldComponent implements IonicDatepickerComponent {

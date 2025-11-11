@@ -21,6 +21,8 @@ import { AsyncPipe } from '@angular/common';
         [id]="key()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -50,6 +52,8 @@ import { AsyncPipe } from '@angular/common';
         [id]="key()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -77,7 +81,15 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class BsInputFieldComponent implements BsInputComponent {
   readonly field = input.required<FieldTree<string>>();

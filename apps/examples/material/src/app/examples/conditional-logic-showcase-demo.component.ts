@@ -3,7 +3,7 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 import { JsonPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-conditional-logic-showcase-demo',
+  selector: 'example-conditional-logic-showcase-demo',
   imports: [DynamicForm, JsonPipe],
   host: {
     class: 'example-container',
@@ -41,6 +41,9 @@ export class ConditionalLogicShowcaseDemoComponent {
   submitMessage = signal<string>('');
 
   config = {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       // ============================================================
       // PAGE 1: PERSONAL INFORMATION
@@ -114,6 +117,18 @@ export class ConditionalLogicShowcaseDemoComponent {
             label: 'Date of Birth',
             required: true,
             maxDate: new Date(new Date().getFullYear() - 18, 0, 1),
+            // DEMO: Readonly once certification type is selected
+            logic: [
+              {
+                type: 'readonly',
+                condition: {
+                  type: 'fieldValue',
+                  fieldPath: 'certificationType',
+                  operator: 'notEquals',
+                  value: '',
+                },
+              },
+            ],
             validationMessages: {
               required: 'Date of birth is required',
               maxDate: 'You must be at least 18 years old to apply',
