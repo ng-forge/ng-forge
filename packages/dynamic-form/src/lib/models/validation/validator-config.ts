@@ -26,8 +26,8 @@ export interface BuiltInValidatorConfig extends BaseValidatorConfig {
 }
 
 /**
- * Custom validator configuration
- * Supports both simple validators (value, formValue) and context-aware validators (FieldContext)
+ * Custom validator configuration using Angular's public FieldContext API
+ * Returns ValidationError | ValidationError[] | null synchronously
  */
 export interface CustomValidatorConfig extends BaseValidatorConfig {
   /** Validator type identifier */
@@ -41,24 +41,37 @@ export interface CustomValidatorConfig extends BaseValidatorConfig {
 }
 
 /**
- * Tree validator configuration for cross-field validation
+ * Async custom validator configuration using Angular's validateAsync API
+ * Returns Observable<ValidationError | ValidationError[] | null>
  */
-export interface TreeValidatorConfig extends BaseValidatorConfig {
+export interface AsyncValidatorConfig extends BaseValidatorConfig {
   /** Validator type identifier */
-  type: 'customTree';
+  type: 'customAsync';
 
-  /** Name of registered tree validator function */
+  /** Name of registered async validator function */
   functionName: string;
 
   /** Optional parameters to pass to validator function */
   params?: Record<string, unknown>;
+}
 
-  /** Fields that should receive errors from this validator (for documentation) */
-  targetFields?: string[];
+/**
+ * HTTP validator configuration using Angular's validateHttp API
+ * Provides optimized HTTP validation with automatic request cancellation
+ */
+export interface HttpValidatorConfig extends BaseValidatorConfig {
+  /** Validator type identifier */
+  type: 'customHttp';
+
+  /** Name of registered HTTP validator configuration */
+  functionName: string;
+
+  /** Optional parameters to pass to HTTP validator */
+  params?: Record<string, unknown>;
 }
 
 /**
  * Configuration for signal forms validator functions that can be serialized from API
  * Discriminated union type for type-safe validator configuration
  */
-export type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | TreeValidatorConfig;
+export type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | HttpValidatorConfig;

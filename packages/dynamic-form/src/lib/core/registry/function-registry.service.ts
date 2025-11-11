@@ -1,21 +1,31 @@
 import { Injectable } from '@angular/core';
 import { CustomFunction } from '../expressions/custom-function-types';
-import { CustomValidator } from '../validation/validator-types';
+import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../validation/validator-types';
 
 /**
  * Registry service for custom functions and validators
  *
- * This service maintains two separate registries:
+ * This service maintains four separate registries:
  *
  * 1. **Custom Functions** - For conditional expressions (when/readonly/disabled)
  *    - Used in: when conditions, readonly logic, disabled logic
  *    - Return type: any value (typically boolean)
  *    - Example: `isAdult: (ctx) => ctx.age >= 18`
  *
- * 2. **Custom Validators** - For validation rules using Angular's public FieldContext API
+ * 2. **Custom Validators** - For synchronous validation using Angular's public FieldContext API
  *    - Used in: validators array on fields
  *    - Return type: ValidationError | ValidationError[] | null
  *    - Example: `noSpaces: (ctx) => ctx.value().includes(' ') ? { kind: 'noSpaces' } : null`
+ *
+ * 3. **Async Validators** - For asynchronous validation (debouncing, database lookups, etc.)
+ *    - Used in: validators array on fields with type 'customAsync'
+ *    - Return type: Observable<ValidationError | ValidationError[] | null>
+ *    - Example: `checkUsername: (ctx) => userService.checkAvailability(ctx.value())`
+ *
+ * 4. **HTTP Validators** - For HTTP-based validation with automatic request cancellation
+ *    - Used in: validators array on fields with type 'customHttp'
+ *    - Configuration object with url, method, mapResponse, etc.
+ *    - Example: `{ url: '/api/check', method: 'GET', mapResponse: ... }`
  *
  * @example
  * ```typescript
@@ -50,6 +60,8 @@ import { CustomValidator } from '../validation/validator-types';
 export class FunctionRegistryService {
   private readonly customFunctions = new Map<string, CustomFunction>();
   private readonly validators = new Map<string, CustomValidator>();
+  private readonly asyncValidators = new Map<string, AsyncCustomValidator>();
+  private readonly httpValidators = new Map<string, HttpCustomValidator>();
 
   /**
    * Register a custom function for conditional expressions
@@ -160,10 +172,117 @@ export class FunctionRegistryService {
   }
 
   /**
-   * Clear everything (functions and validators)
+   * Register an async validator using Angular's public validateAsync() API
+   *
+   * Async validators return Observables for asynchronous validation logic.
+   * Use for debouncing, database lookups, or complex async business logic.
+   *
+   * @param name - Unique identifier for the async validator
+   * @param fn - Async validator function (ctx, params?) => Observable<ValidationError | ValidationError[] | null>
+   *
+   * @example Debounced Username Check
+   * ```typescript
+   * registry.registerAsyncValidator('checkUsernameAvailable', (ctx) => {
+   *   const username = ctx.value();
+   *   return of(username).pipe(
+   *     debounceTime(300),
+   *     switchMap(name => userService.checkAvailability(name)),
+   *     map(available => available ? null : { kind: 'usernameTaken' })
+   *   );
+   * });
+   * ```
+   *
+   * @example Async Cross-Field Validation
+   * ```typescript
+   * registry.registerAsyncValidator('validatePasswordStrength', (ctx) => {
+   *   const password = ctx.value();
+   *   const email = ctx.valueOf('email' as any);
+   *   return passwordService.checkStrength(password, email).pipe(
+   *     map(result => result.strong ? null : { kind: 'weakPassword' })
+   *   );
+   * });
+   * ```
+   */
+  registerAsyncValidator(name: string, fn: AsyncCustomValidator): void {
+    this.asyncValidators.set(name, fn);
+  }
+
+  /**
+   * Get an async validator by name
+   */
+  getAsyncValidator(name: string): AsyncCustomValidator | undefined {
+    return this.asyncValidators.get(name);
+  }
+
+  /**
+   * Clear all async validators
+   */
+  clearAsyncValidators(): void {
+    this.asyncValidators.clear();
+  }
+
+  /**
+   * Register an HTTP validator configuration using Angular's public validateHttp() API
+   *
+   * HTTP validators provide optimized HTTP validation with automatic request cancellation,
+   * caching, and debouncing. Preferred over AsyncCustomValidator for HTTP requests.
+   *
+   * @param name - Unique identifier for the HTTP validator
+   * @param config - HTTP validator configuration object
+   *
+   * @example Username Availability Check
+   * ```typescript
+   * registry.registerHttpValidator('checkUsername', {
+   *   url: (ctx) => `/api/users/check-username?username=${encodeURIComponent(ctx.value())}`,
+   *   method: 'GET',
+   *   mapResponse: (response, ctx) => {
+   *     return response.available ? null : { kind: 'usernameTaken' };
+   *   }
+   * });
+   * ```
+   *
+   * @example POST Request with Body
+   * ```typescript
+   * registry.registerHttpValidator('validateAddress', {
+   *   url: '/api/validate-address',
+   *   method: 'POST',
+   *   body: (ctx) => ({
+   *     street: ctx.valueOf('street' as any),
+   *     city: ctx.valueOf('city' as any),
+   *     zipCode: ctx.value()
+   *   }),
+   *   mapResponse: (response) => {
+   *     return response.valid ? null : { kind: 'invalidAddress' };
+   *   },
+   *   debounceTime: 500
+   * });
+   * ```
+   */
+  registerHttpValidator(name: string, config: HttpCustomValidator): void {
+    this.httpValidators.set(name, config);
+  }
+
+  /**
+   * Get an HTTP validator by name
+   */
+  getHttpValidator(name: string): HttpCustomValidator | undefined {
+    return this.httpValidators.get(name);
+  }
+
+  /**
+   * Clear all HTTP validators
+   */
+  clearHttpValidators(): void {
+    this.httpValidators.clear();
+  }
+
+  /**
+   * Clear everything (functions and all validators)
    */
   clearAll(): void {
     this.clearCustomFunctions();
     this.clearValidators();
+    this.clearAsyncValidators();
+    this.clearHttpValidators();
   }
 }

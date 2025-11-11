@@ -1,7 +1,7 @@
 import { Schema } from '@angular/forms/signals';
 import { InferFormValue, RegisteredFieldTypes } from './types';
 import { SchemaDefinition } from './schemas';
-import { CustomValidator } from '../core/validation/validator-types';
+import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../core/validation/validator-types';
 import { CustomFunction } from '../core/expressions/custom-function-types';
 import { ValidationMessages } from './validation-types';
 
@@ -263,6 +263,124 @@ export interface SignalFormsConfig {
    * ```
    */
   validators?: Record<string, CustomValidator>;
+
+  /**
+   * Async custom validators using Angular's resource-based validateAsync() API
+   *
+   * Angular's validateAsync uses the resource API for async validation.
+   * Validators must provide params, factory, onSuccess, and optional onError callbacks.
+   *
+   * **Structure:**
+   * - `params`: Function that computes params from field context
+   * - `factory`: Function that creates ResourceRef from params signal
+   * - `onSuccess`: Maps resource result to validation errors
+   * - `onError`: Optional handler for resource errors
+   *
+   * **Use Cases:**
+   * - Database lookups via services with resource API
+   * - Complex async business logic with Angular resources
+   *
+   * **Note:** For HTTP validation, prefer `httpValidators` which provides
+   * a simpler API specifically designed for HTTP requests.
+   *
+   * @example Database Lookup with Resource
+   * ```typescript
+   * asyncValidators: {
+   *   checkUsernameAvailable: {
+   *     params: (ctx) => ({ username: ctx.value() }),
+   *     factory: (params) => {
+   *       const injector = inject(Injector);
+   *       return resource({
+   *         request: () => params(),
+   *         loader: ({ request }) => {
+   *           if (!request?.username) return null;
+   *           const service = injector.get(UserService);
+   *           return firstValueFrom(service.checkAvailability(request.username));
+   *         }
+   *       });
+   *     },
+   *     onSuccess: (result, ctx) => {
+   *       if (!result) return null;
+   *       return result.available ? null : { kind: 'usernameTaken' };
+   *     },
+   *     onError: (error, ctx) => {
+   *       console.error('Availability check failed:', error);
+   *       return null; // Don't block form on network errors
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  asyncValidators?: Record<string, AsyncCustomValidator>;
+
+  /**
+   * HTTP validators using Angular's validateHttp() API
+   *
+   * Angular's validateHttp provides HTTP validation with automatic request
+   * cancellation and integration with the resource API.
+   *
+   * **Structure:**
+   * - `request`: Function that returns URL string or HttpResourceRequest
+   * - `onSuccess`: REQUIRED - Maps HTTP response to validation errors (inverted logic!)
+   * - `onError`: Optional handler for HTTP errors
+   *
+   * **Benefits:**
+   * - Automatic request cancellation when field value changes
+   * - Built-in integration with Angular's resource management
+   * - Simpler than asyncValidators for HTTP use cases
+   *
+   * **Important:** `onSuccess` uses inverted logic - it maps SUCCESSFUL HTTP responses
+   * to validation errors. For example, if the API returns `{ available: false }`,
+   * your `onSuccess` should return `{ kind: 'usernameTaken' }`.
+   *
+   * @example Username Availability Check (GET)
+   * ```typescript
+   * httpValidators: {
+   *   checkUsername: {
+   *     request: (ctx) => {
+   *       const username = ctx.value();
+   *       if (!username) return undefined; // Skip validation if empty
+   *       return `/api/users/check-username?username=${encodeURIComponent(username)}`;
+   *     },
+   *     onSuccess: (response, ctx) => {
+   *       // Inverted logic: successful response may indicate validation failure
+   *       return response.available ? null : { kind: 'usernameTaken' };
+   *     },
+   *     onError: (error, ctx) => {
+   *       console.error('Availability check failed:', error);
+   *       return null; // Don't block form on network errors
+   *     }
+   *   }
+   * }
+   * ```
+   *
+   * @example Address Validation (POST with Body)
+   * ```typescript
+   * httpValidators: {
+   *   validateAddress: {
+   *     request: (ctx) => {
+   *       const zipCode = ctx.value();
+   *       if (!zipCode) return undefined;
+   *
+   *       return {
+   *         url: '/api/validate-address',
+   *         method: 'POST',
+   *         body: {
+   *           street: ctx.valueOf('street' as any),
+   *           city: ctx.valueOf('city' as any),
+   *           zipCode: zipCode
+   *         },
+   *         headers: { 'Content-Type': 'application/json' }
+   *       };
+   *     },
+   *     onSuccess: (response) => {
+   *       return response.valid ? null : { kind: 'invalidAddress' };
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  httpValidators?: Record<string, HttpCustomValidator>;
 
   /**
    * Strict mode for expression evaluation.

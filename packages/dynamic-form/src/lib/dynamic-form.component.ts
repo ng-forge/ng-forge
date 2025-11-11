@@ -647,6 +647,20 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
           this.functionRegistry.registerValidator(name, fn);
         });
       }
+
+      // Register async validators
+      if (signalFormsConfig.asyncValidators) {
+        Object.entries(signalFormsConfig.asyncValidators).forEach(([name, fn]) => {
+          this.functionRegistry.registerAsyncValidator(name, fn);
+        });
+      }
+
+      // Register HTTP validators
+      if (signalFormsConfig.httpValidators) {
+        Object.entries(signalFormsConfig.httpValidators).forEach(([name, config]) => {
+          this.functionRegistry.registerHttpValidator(name, config);
+        });
+      }
     });
   }
 
