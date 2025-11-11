@@ -3,7 +3,7 @@ import { DynamicForm, type FormConfig, type CustomValidator } from '@ng-forge/dy
 import { JsonPipe } from '@angular/common';
 
 @Component({
-  selector: 'example-async-validators-demo',
+  selector: 'example-custom-validators-demo',
   imports: [DynamicForm, JsonPipe],
   host: {
     class: 'example-container',
@@ -14,10 +14,9 @@ import { JsonPipe } from '@angular/common';
       <p>This example demonstrates custom validators with Angular Signal Forms:</p>
       <ul>
         <li><strong>Sync Validator:</strong> Username format validation (no spaces, min 3 chars)</li>
-        <li><strong>Cross-Field Validator:</strong> Password confirmation must match</li>
-        <li><strong>Email Validation:</strong> Built-in email format validation</li>
+        <li><strong>Cross-Field Validator:</strong> Password confirmation must match using ctx.valueOf()</li>
+        <li><strong>Built-in Validator:</strong> Email format validation</li>
       </ul>
-      <p><em>Note: Async and HTTP validator examples are coming soon!</em></p>
     </div>
 
     <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
@@ -38,7 +37,7 @@ import { JsonPipe } from '@angular/common';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsyncValidatorsDemoComponent {
+export class CustomValidatorsDemoComponent {
   formValue = signal({
     username: '',
     email: '',
