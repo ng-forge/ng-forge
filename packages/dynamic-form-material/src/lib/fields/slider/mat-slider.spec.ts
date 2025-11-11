@@ -238,7 +238,7 @@ describe('MatSliderFieldComponent', () => {
 
       expect(slider.componentInstance.color).toBe('primary');
       expect(slider.componentInstance.discrete).toBe(false); // Discrete mode only when thumbLabel is set
-      expect(slider.componentInstance.showTickMarks).toBe(false);
+      expect(slider.componentInstance.showTickMarks).toBe(true); // Material defaults to true when no tickInterval is set
       // ITERATION 5 FIX: Verify slider input element exists and is correct type
       // Previous: expect(sliderInput).toBeTruthy()
       expect(sliderInput).not.toBeNull();
