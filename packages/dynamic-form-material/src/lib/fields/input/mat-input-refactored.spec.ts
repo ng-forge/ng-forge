@@ -166,9 +166,9 @@ describe('MatInputFieldComponent (Refactored)', () => {
         initialValue: { field: '' },
       });
 
-      // className applies to the field wrapper, not the input itself
-      const wrapper = fixture.debugElement.query(By.css('.df-field'));
-      expect(wrapper.nativeElement.className).toContain('email-input');
+      // className applies to the host element (df-mat-input component)
+      const hostElement = fixture.debugElement.query(By.css('df-mat-input'));
+      expect(hostElement.nativeElement.className).toContain('email-input');
     });
   });
 
@@ -274,7 +274,7 @@ describe('MatInputFieldComponent (Refactored)', () => {
       const formField = fixture.debugElement.query(By.css('mat-form-field'));
       const label = fixture.debugElement.query(By.css('mat-label'));
       const hint = fixture.debugElement.query(By.css('mat-hint'));
-      const wrapper = fixture.debugElement.query(By.css('.df-field'));
+      const hostElement = fixture.debugElement.query(By.css('df-mat-input'));
 
       expect(input.nativeElement.getAttribute('type')).toBe('email');
       expect(input.nativeElement.getAttribute('tabindex')).toBe('1');
@@ -282,7 +282,7 @@ describe('MatInputFieldComponent (Refactored)', () => {
       expect(formField.nativeElement.className).toContain('mat-form-field-appearance-outline');
       expect(label.nativeElement.textContent.trim()).toBe('Email Address');
       expect(hint.nativeElement.textContent.trim()).toBe('We will never share your email');
-      expect(wrapper.nativeElement.className).toContain('email-input');
+      expect(hostElement.nativeElement.className).toContain('email-input');
     });
   });
 });

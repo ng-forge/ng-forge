@@ -98,17 +98,17 @@ describe('MatInputFieldComponent (With Builders)', () => {
       const { config, initialValue } = MinimalTestBuilder.withClassName('email-input');
       const { fixture } = await MaterialFormTestUtils.createTest({ config, initialValue });
 
-      const wrapper = fixture.debugElement.query(By.css('.df-field'));
-      expect(wrapper.nativeElement.className).toContain('email-input');
+      const hostElement = fixture.debugElement.query(By.css('df-mat-input'));
+      expect(hostElement.nativeElement.className).toContain('email-input');
     });
 
     it('should apply custom className with multiple classes', async () => {
       const { config, initialValue } = MinimalTestBuilder.withClassName('email-input custom-field');
       const { fixture } = await MaterialFormTestUtils.createTest({ config, initialValue });
 
-      const wrapper = fixture.debugElement.query(By.css('.df-field'));
-      expect(wrapper.nativeElement.className).toContain('email-input');
-      expect(wrapper.nativeElement.className).toContain('custom-field');
+      const hostElement = fixture.debugElement.query(By.css('df-mat-input'));
+      expect(hostElement.nativeElement.className).toContain('email-input');
+      expect(hostElement.nativeElement.className).toContain('custom-field');
     });
   });
 
