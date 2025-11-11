@@ -209,7 +209,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     newArray.splice(insertIndex, 0, defaultValue);
 
     // Update parent form value
-    this.parentForm()()[arrayKey].set(newArray);
+    (this.parentForm()() as any)[arrayKey].set(newArray);
 
     // Update count
     this.arrayItemCount.set(newArray.length);
@@ -234,7 +234,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     newArray.splice(removeIndex, 1);
 
     // Update parent form value
-    this.parentForm()()[arrayKey].set(newArray);
+    (this.parentForm()() as any)[arrayKey].set(newArray);
 
     // Update count
     this.arrayItemCount.set(newArray.length);
@@ -284,7 +284,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     // Validate all array items
     const arrayKey = this.field().key;
     const parentForm = this.parentForm()();
-    const arrayField = parentForm[arrayKey];
+    const arrayField = (parentForm as any)[arrayKey];
     return arrayField ? arrayField.valid() : true;
   });
 
@@ -292,28 +292,28 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   readonly dirty = computed(() => {
     const arrayKey = this.field().key;
     const parentForm = this.parentForm()();
-    const arrayField = parentForm[arrayKey];
+    const arrayField = (parentForm as any)[arrayKey];
     return arrayField ? arrayField.dirty() : false;
   });
 
   readonly touched = computed(() => {
     const arrayKey = this.field().key;
     const parentForm = this.parentForm()();
-    const arrayField = parentForm[arrayKey];
+    const arrayField = (parentForm as any)[arrayKey];
     return arrayField ? arrayField.touched() : false;
   });
 
   readonly errors = computed(() => {
     const arrayKey = this.field().key;
     const parentForm = this.parentForm()();
-    const arrayField = parentForm[arrayKey];
+    const arrayField = (parentForm as any)[arrayKey];
     return arrayField ? arrayField.errors() : null;
   });
 
   readonly disabled = computed(() => {
     const arrayKey = this.field().key;
     const parentForm = this.parentForm()();
-    const arrayField = parentForm[arrayKey];
+    const arrayField = (parentForm as any)[arrayKey];
     return arrayField ? arrayField.disabled() : false;
   });
 
