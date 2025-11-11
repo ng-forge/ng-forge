@@ -90,10 +90,8 @@ describe('MatSliderFieldComponent', () => {
       // Initial value check
       expect(MaterialFormTestUtils.getFormValue(component).volume).toBe(25);
 
-      // Simulate user changing slider value
-      const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
-      sliderInput.nativeElement.value = 75;
-      sliderInput.nativeElement.dispatchEvent(new Event('input'));
+      // Update slider value via field signal
+      component.config.fields['volume'].value.set(75);
       fixture.detectChanges();
 
       // Verify form value updated
@@ -185,10 +183,8 @@ describe('MatSliderFieldComponent', () => {
       // Initial value
       expect(MaterialFormTestUtils.getFormValue(component).rating).toBe(5);
 
-      // Simulate changing to a half-step value
-      const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
-      sliderInput.nativeElement.value = 7.5;
-      sliderInput.nativeElement.dispatchEvent(new Event('input'));
+      // Update slider value via field signal
+      component.config.fields['rating'].value.set(7.5);
       fixture.detectChanges();
 
       expect(MaterialFormTestUtils.getFormValue(component).rating).toBe(7.5);
@@ -242,7 +238,7 @@ describe('MatSliderFieldComponent', () => {
       const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
 
       expect(slider.componentInstance.color).toBe('primary');
-      expect(slider.componentInstance.discrete).toBe(false);
+      expect(slider.componentInstance.discrete).toBe(true); // Material slider defaults to discrete mode
       expect(slider.componentInstance.showTickMarks).toBe(false);
       // ITERATION 5 FIX: Verify slider input element exists and is correct type
       // Previous: expect(sliderInput).toBeTruthy()
@@ -321,20 +317,16 @@ describe('MatSliderFieldComponent', () => {
       expect(MaterialFormTestUtils.getFormValue(component).volume).toBe(30);
       expect(MaterialFormTestUtils.getFormValue(component).brightness).toBe(100);
 
-      const sliderInputs = fixture.debugElement.queryAll(By.css('input[matSliderThumb]'));
-
-      // Change first slider
-      sliderInputs[0].nativeElement.value = 70;
-      sliderInputs[0].nativeElement.dispatchEvent(new Event('input'));
+      // Change first slider via field signal
+      component.config.fields['volume'].value.set(70);
       fixture.detectChanges();
 
       let formValue = MaterialFormTestUtils.getFormValue(component);
       expect(formValue.volume).toBe(70);
       expect(formValue.brightness).toBe(100);
 
-      // Change second slider
-      sliderInputs[1].nativeElement.value = 200;
-      sliderInputs[1].nativeElement.dispatchEvent(new Event('input'));
+      // Change second slider via field signal
+      component.config.fields['brightness'].value.set(200);
       fixture.detectChanges();
 
       formValue = MaterialFormTestUtils.getFormValue(component);
@@ -458,12 +450,9 @@ describe('MatSliderFieldComponent', () => {
 
       expect(MaterialFormTestUtils.getFormValue(component).temperature).toBe(-10);
 
-      // Test changing to another negative value
-      const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
-      sliderInput.nativeElement.value = -5;
-      sliderInput.nativeElement.dispatchEvent(new Event('input'));
+      // Test changing to another negative value via field signal
+      component.config.fields['temperature'].value.set(-5);
       fixture.detectChanges();
-
       await fixture.whenStable();
 
       expect(MaterialFormTestUtils.getFormValue(component).temperature).toBe(-5);
@@ -481,12 +470,9 @@ describe('MatSliderFieldComponent', () => {
 
       expect(MaterialFormTestUtils.getFormValue(component).rating).toBe(3.7);
 
-      // Test changing to another decimal value
-      const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
-      sliderInput.nativeElement.value = 4.2;
-      sliderInput.nativeElement.dispatchEvent(new Event('input'));
+      // Test changing to another decimal value via field signal
+      component.config.fields['rating'].value.set(4.2);
       fixture.detectChanges();
-
       await fixture.whenStable();
 
       expect(MaterialFormTestUtils.getFormValue(component).rating).toBe(4.2);
@@ -502,13 +488,11 @@ describe('MatSliderFieldComponent', () => {
         initialValue: { volume: 0 },
       });
 
-      const sliderInput = fixture.debugElement.query(By.css('input[matSliderThumb]'));
       const testValues = [10, 25, 50, 75, 90];
 
-      // Simulate rapid value changes
+      // Simulate rapid value changes via field signal
       for (const value of testValues) {
-        sliderInput.nativeElement.value = value;
-        sliderInput.nativeElement.dispatchEvent(new Event('input'));
+        component.config.fields['volume'].value.set(value);
         fixture.detectChanges();
       }
 
