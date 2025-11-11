@@ -69,6 +69,10 @@ export const appRoutes: Route[] = [
         path: 'paginated-form',
         loadComponent: () => import('./examples/paginated-form-demo.component').then((m) => m.PaginatedFormDemoComponent),
       },
+      {
+        path: 'conditional-logic-showcase',
+        loadComponent: () => import('./examples/conditional-logic-showcase-demo.component').then((m) => m.ConditionalLogicShowcaseDemoComponent),
+      },
     ],
   },
 ];
