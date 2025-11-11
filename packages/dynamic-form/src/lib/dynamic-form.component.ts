@@ -641,24 +641,10 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         });
       }
 
-      // Register simple validators
-      if (signalFormsConfig.simpleValidators) {
-        Object.entries(signalFormsConfig.simpleValidators).forEach(([name, fn]) => {
-          this.functionRegistry.registerSimpleValidator(name, fn);
-        });
-      }
-
-      // Register context-aware validators
-      if (signalFormsConfig.contextValidators) {
-        Object.entries(signalFormsConfig.contextValidators).forEach(([name, fn]) => {
-          this.functionRegistry.registerContextValidator(name, fn);
-        });
-      }
-
-      // Register tree validators
-      if (signalFormsConfig.treeValidators) {
-        Object.entries(signalFormsConfig.treeValidators).forEach(([name, fn]) => {
-          this.functionRegistry.registerTreeValidator(name, fn);
+      // Register custom validators
+      if (signalFormsConfig.validators) {
+        Object.entries(signalFormsConfig.validators).forEach(([name, fn]) => {
+          this.functionRegistry.registerValidator(name, fn);
         });
       }
     });

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CustomFunction } from '../expressions/custom-function-types';
-import { ContextAwareValidator, SimpleCustomValidator, TreeValidator } from '../validation/validator-types';
+import { CustomValidator } from '../validation/validator-types';
 
 /**
  * Registry service for custom functions and validators
@@ -12,10 +12,10 @@ import { ContextAwareValidator, SimpleCustomValidator, TreeValidator } from '../
  *    - Return type: any value (typically boolean)
  *    - Example: `isAdult: (ctx) => ctx.age >= 18`
  *
- * 2. **Custom Validators** - For validation rules
+ * 2. **Custom Validators** - For validation rules using Angular's public FieldContext API
  *    - Used in: validators array on fields
- *    - Return type: ValidationError | null
- *    - Example: `noSpaces: (value) => value.includes(' ') ? { kind: 'noSpaces' } : null`
+ *    - Return type: ValidationError | ValidationError[] | null
+ *    - Example: `noSpaces: (ctx) => ctx.value().includes(' ') ? { kind: 'noSpaces' } : null`
  *
  * @example
  * ```typescript
@@ -29,25 +29,27 @@ import { ContextAwareValidator, SimpleCustomValidator, TreeValidator } from '../
  * }
  *
  * // Register a custom validator
- * registry.registerSimpleValidator('noSpaces', (value) => {
+ * registry.registerValidator('noSpaces', (ctx) => {
+ *   const value = ctx.value();
  *   return typeof value === 'string' && value.includes(' ')
- *     ? { kind: 'noSpaces', message: 'Spaces not allowed' }
+ *     ? { kind: 'noSpaces' }
  *     : null;
  * });
  *
  * // Use in field configuration
  * {
  *   key: 'username',
- *   validators: [{ type: 'custom', functionName: 'noSpaces' }]
+ *   validators: [{ type: 'custom', functionName: 'noSpaces' }],
+ *   validationMessages: {
+ *     noSpaces: 'Spaces are not allowed'
+ *   }
  * }
  * ```
  */
 @Injectable()
 export class FunctionRegistryService {
   private readonly customFunctions = new Map<string, CustomFunction>();
-  private readonly simpleValidators = new Map<string, SimpleCustomValidator>();
-  private readonly contextValidators = new Map<string, ContextAwareValidator>();
-  private readonly treeValidators = new Map<string, TreeValidator>();
+  private readonly validators = new Map<string, CustomValidator>();
 
   /**
    * Register a custom function for conditional expressions
@@ -83,116 +85,78 @@ export class FunctionRegistryService {
   }
 
   /**
-   * Register a simple custom validator
+   * Register a custom validator using Angular's public FieldContext API
    *
-   * Simple validators are for validation logic that only needs the field value
-   * and form value. They return ValidationError | null.
-   *
-   * @param name - Unique identifier for the validator
-   * @param fn - Validator function (value, formValue) => ValidationError | null
-   *
-   * @example
-   * ```typescript
-   * registry.registerSimpleValidator('noSpaces', (value, formValue) => {
-   *   if (typeof value === 'string' && value.includes(' ')) {
-   *     return { kind: 'noSpaces', message: 'Spaces not allowed' };
-   *   }
-   *   return null;
-   * });
-   * ```
-   */
-  registerSimpleValidator(name: string, fn: SimpleCustomValidator): void {
-    this.simpleValidators.set(name, fn);
-  }
-
-  /**
-   * Register a context-aware validator
-   *
-   * Context-aware validators receive the full FieldContext, allowing access to:
-   * - Field state (errors, touched, dirty, etc.)
-   * - Other fields in the form (via ctx.root() or ctx.parent())
-   * - Field metadata
-   * - Parameters from JSON configuration
-   *
-   * @param name - Unique identifier for the validator
-   * @param fn - Validator function (ctx, params?) => ValidationError | null
-   *
-   * @example
-   * ```typescript
-   * registry.registerContextValidator('lessThanField', (ctx, params) => {
-   *   const value = ctx.value();
-   *   const otherField = params?.field as string;
-   *   const otherValue = ctx.root()[otherField]?.value();
-   *
-   *   if (otherValue !== undefined && value >= otherValue) {
-   *     return { kind: 'notLessThan', message: `Must be less than ${otherField}` };
-   *   }
-   *   return null;
-   * });
-   * ```
-   */
-  registerContextValidator(name: string, fn: ContextAwareValidator): void {
-    this.contextValidators.set(name, fn);
-  }
-
-  /**
-   * Register a tree validator for cross-field validation
-   *
-   * Tree validators validate relationships between multiple fields and can
-   * target errors to specific child fields.
+   * Validators receive the full FieldContext, allowing access to:
+   * - Current field value: `ctx.value()`
+   * - Field state: `ctx.state` (errors, touched, dirty, etc.)
+   * - Other field values: `ctx.valueOf(path)` (public API!)
+   * - Other field states: `ctx.stateOf(path)`
+   * - Parameters from JSON configuration via second argument
    *
    * @param name - Unique identifier for the validator
    * @param fn - Validator function (ctx, params?) => ValidationError | ValidationError[] | null
    *
-   * @example
+   * @example Single Field Validation
    * ```typescript
-   * registry.registerTreeValidator('passwordsMatch', (ctx, params) => {
-   *   const password = ctx.password?.value();
-   *   const confirmPassword = ctx.confirmPassword?.value();
-   *
-   *   if (password && confirmPassword && password !== confirmPassword) {
-   *     return {
-   *       field: ctx.confirmPassword,
-   *       kind: 'passwordMismatch',
-   *       message: 'Passwords must match'
-   *     };
+   * registry.registerValidator('noSpaces', (ctx) => {
+   *   const value = ctx.value();
+   *   if (typeof value === 'string' && value.includes(' ')) {
+   *     return { kind: 'noSpaces' };
    *   }
    *   return null;
    * });
    * ```
+   *
+   * @example Cross-Field Validation (Public API)
+   * ```typescript
+   * registry.registerValidator('lessThan', (ctx, params) => {
+   *   const value = ctx.value();
+   *   const compareToPath = params?.field as string;
+   *
+   *   // Use valueOf() to access other fields - public API!
+   *   const otherValue = ctx.valueOf(compareToPath as any);
+   *
+   *   if (otherValue !== undefined && value >= otherValue) {
+   *     return { kind: 'notLessThan' };
+   *   }
+   *   return null;
+   * });
+   * ```
+   *
+   * @example Multiple Errors (Cross-Field Validation)
+   * ```typescript
+   * registry.registerValidator('validateDateRange', (ctx) => {
+   *   const errors: ValidationError[] = [];
+   *   const startDate = ctx.valueOf('startDate' as any);
+   *   const endDate = ctx.valueOf('endDate' as any);
+   *
+   *   if (!startDate) errors.push({ kind: 'startDateRequired' });
+   *   if (!endDate) errors.push({ kind: 'endDateRequired' });
+   *   if (startDate && endDate && startDate > endDate) {
+   *     errors.push({ kind: 'invalidDateRange' });
+   *   }
+   *
+   *   return errors.length > 0 ? errors : null;
+   * });
+   * ```
    */
-  registerTreeValidator(name: string, fn: TreeValidator): void {
-    this.treeValidators.set(name, fn);
+  registerValidator(name: string, fn: CustomValidator): void {
+    this.validators.set(name, fn);
   }
 
   /**
-   * Get a simple validator by name
+   * Get a validator by name
    */
-  getSimpleValidator(name: string): SimpleCustomValidator | undefined {
-    return this.simpleValidators.get(name);
-  }
-
-  /**
-   * Get a context-aware validator by name
-   */
-  getContextValidator(name: string): ContextAwareValidator | undefined {
-    return this.contextValidators.get(name);
-  }
-
-  /**
-   * Get a tree validator by name
-   */
-  getTreeValidator(name: string): TreeValidator | undefined {
-    return this.treeValidators.get(name);
+  getValidator(name: string): CustomValidator | undefined {
+    return this.validators.get(name);
   }
 
   /**
    * Clear all validators
    */
   clearValidators(): void {
-    this.simpleValidators.clear();
-    this.contextValidators.clear();
-    this.treeValidators.clear();
+    this.validators.clear();
   }
 
   /**

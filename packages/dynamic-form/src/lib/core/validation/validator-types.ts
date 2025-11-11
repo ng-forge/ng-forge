@@ -1,172 +1,93 @@
 import { FieldContext, ValidationError } from '@angular/forms/signals';
 
 /**
- * Simple custom validator function signature
+ * Custom validator function signature using Angular's public FieldContext API
  *
- * Takes field value and entire form value, returns validation error or null.
- * This is the simplest form of custom validation - use when you only need
- * access to the current field value and the entire form value.
+ * Takes FieldContext (full Angular context) and optional params, returns validation error(s) or null.
+ * Provides access to field state, form hierarchy, and other fields for validation logic.
+ *
+ * **Use FieldContext public APIs to access:**
+ * - Current field value: `ctx.value()`
+ * - Field state: `ctx.state` (errors, touched, dirty, etc.)
+ * - Other field values: `ctx.valueOf(path)` where path is a FieldPath
+ * - Other field states: `ctx.stateOf(path)`
+ * - Other fields: `ctx.fieldOf(path)`
+ * - Current field tree: `ctx.field`
+ *
+ * **Return Types:**
+ * - Single error: `{ kind: 'errorKind' }` for field-level validation
+ * - Multiple errors: `[{ kind: 'error1' }, { kind: 'error2' }]` for cross-field validation
+ * - No error: `null` when validation passes
  *
  * **Best Practice - Return Only Error Kind:**
  * Validators should focus on validation logic, not presentation.
  * Return just the error `kind` and configure messages at field level for i18n support.
  *
- * @example
+ * @example Single Field Validation
  * ```typescript
- * // ✅ RECOMMENDED: Return only kind, configure message at field level
- * const noSpaces: SimpleCustomValidator<string> = (value) => {
+ * const noSpaces: CustomValidator<string> = (ctx) => {
+ *   const value = ctx.value();
  *   if (typeof value === 'string' && value.includes(' ')) {
- *     return { kind: 'noSpaces' };  // No hardcoded message
+ *     return { kind: 'noSpaces' };
  *   }
  *   return null;
  * };
  *
- * // Field configuration with message
+ * // Field configuration
  * {
  *   key: 'username',
  *   validators: [{ type: 'custom', functionName: 'noSpaces' }],
  *   validationMessages: {
- *     noSpaces: 'Spaces are not allowed'  // Or Observable/Signal for i18n
+ *     noSpaces: 'Spaces are not allowed'
  *   }
  * }
  * ```
  *
- * @example
+ * @example Cross-Field Validation with valueOf()
  * ```typescript
- * // ⚠️ ACCEPTABLE: Include fallback message (can be overridden at field level)
- * const noSpaces: SimpleCustomValidator<string> = (value) => {
- *   if (typeof value === 'string' && value.includes(' ')) {
- *     return { kind: 'noSpaces', message: 'Spaces not allowed' };  // Fallback
- *   }
- *   return null;
- * };
- * ```
- *
- * **Message Resolution Priority (STRICT):**
- * 1. Field-level `validationMessages[kind]` (highest - allows per-field customization)
- * 2. ValidatorConfig `errorMessage` (per-validator inline)
- * 3. **No message configured = Warning logged + error NOT displayed**
- *
- * Note: Validator-returned messages are NOT used. All messages MUST be configured.
- */
-export type SimpleCustomValidator<TValue = unknown> = (value: TValue, formValue: unknown) => ValidationError | null;
-
-/**
- * Context-aware validator function signature
- *
- * Takes FieldContext (full Angular context) and optional params, returns validation error or null.
- * Provides access to field state, form hierarchy, and other fields for complex validation logic.
- *
- * **Use this when you need access to:**
- * - Field state (errors, touched, dirty, etc.)
- * - Other fields in the form (via ctx.root() or ctx.parent())
- * - Field metadata
- * - Parameters from JSON configuration
- *
- * **Best Practice - Return Only Error Kind:**
- * @example
- * ```typescript
- * // ✅ RECOMMENDED: Return only kind, use field config for messages
- * const lessThanField: ContextAwareValidator<number> = (ctx, params) => {
+ * // Compare two fields using public API
+ * const lessThan: CustomValidator<number> = (ctx, params) => {
  *   const value = ctx.value();
- *   const otherFieldName = params?.field as string;
- *   const rootValue = ctx.root()().value() as Record<string, unknown>;
- *   const otherValue = rootValue[otherFieldName];
+ *   const compareToPath = params?.field as string;
+ *
+ *   // Use valueOf() to access other field - public API!
+ *   const otherValue = ctx.valueOf(compareToPath as any);
  *
  *   if (otherValue !== undefined && value >= otherValue) {
- *     return { kind: 'notLessThan' };  // No hardcoded message
+ *     return { kind: 'notLessThan' };
  *   }
  *   return null;
  * };
- *
- * // Field configuration with parameterized message
- * {
- *   validators: [{
- *     type: 'custom',
- *     functionName: 'lessThanField',
- *     params: { field: 'maxAge' }
- *   }],
- *   validationMessages: {
- *     notLessThan: 'Must be less than {{field}}'  // Interpolates params
- *   }
- * }
  * ```
  *
- * **Message Resolution Priority (STRICT):**
- * 1. Field-level `validationMessages[kind]` (highest)
- * 2. ValidatorConfig `errorMessage`
- * 3. **No message configured = Warning logged + error NOT displayed**
- *
- * Note: Validator-returned messages are NOT used. All messages MUST be configured.
- */
-export type ContextAwareValidator<TValue = unknown> = (
-  ctx: FieldContext<TValue>,
-  params?: Record<string, unknown>
-) => ValidationError | null;
-
-/**
- * Tree validator function signature for cross-field validation
- *
- * Validates relationships between multiple fields and can return single or multiple errors.
- * Use this when you need to validate relationships between multiple fields in a form or group.
- * Tree validators can return errors targeting specific child fields.
- *
- * **Best Practice - Return Only Error Kind:**
- * @example
+ * @example Multiple Errors (Cross-Field Validation)
  * ```typescript
- * // ✅ RECOMMENDED: Return only kind for single error
- * const passwordsMatch: TreeValidator = (ctx) => {
- *   const form = ctx.value() as Record<string, unknown>;
- *   const password = form.password;
- *   const confirmPassword = form.confirmPassword;
- *
- *   if (password && confirmPassword && password !== confirmPassword) {
- *     return { kind: 'passwordMismatch' };  // No hardcoded message
- *   }
- *   return null;
- * };
- *
- * // Configure message at group/field level
- * {
- *   key: 'credentials',
- *   type: 'group',
- *   validators: [{ type: 'customTree', functionName: 'passwordsMatch' }],
- *   validationMessages: {
- *     passwordMismatch: 'Passwords must match'
- *   }
- * }
- * ```
- *
- * @example
- * ```typescript
- * // ✅ RECOMMENDED: Return multiple error kinds
- * const validateAddress: TreeValidator = (ctx) => {
- *   const form = ctx.value() as Record<string, unknown>;
+ * const validateDateRange: CustomValidator = (ctx) => {
  *   const errors: ValidationError[] = [];
  *
- *   if (!form.street) errors.push({ kind: 'streetRequired' });
- *   if (!form.city) errors.push({ kind: 'cityRequired' });
+ *   const startDate = ctx.valueOf('startDate' as any);
+ *   const endDate = ctx.valueOf('endDate' as any);
+ *
+ *   if (!startDate) errors.push({ kind: 'startDateRequired' });
+ *   if (!endDate) errors.push({ kind: 'endDateRequired' });
+ *   if (startDate && endDate && startDate > endDate) {
+ *     errors.push({ kind: 'invalidDateRange' });
+ *   }
  *
  *   return errors.length > 0 ? errors : null;
  * };
- *
- * // Configure messages at group level
- * {
- *   validationMessages: {
- *     streetRequired: 'Street address is required',
- *     cityRequired: 'City is required'
- *   }
- * }
  * ```
  *
- * **Message Resolution Priority (STRICT):**
- * 1. Field-level `validationMessages[kind]` (highest)
- * 2. ValidatorConfig `errorMessage` (single message for validator)
+ * **Message Resolution Priority:**
+ * 1. Field-level `validationMessages[kind]` (highest priority - per-field customization)
+ * 2. Form-level `defaultValidationMessages[kind]` (fallback for common messages)
  * 3. **No message configured = Warning logged + error NOT displayed**
  *
- * Note: Validator-returned messages are NOT used. All messages MUST be configured.
+ * **Important:** Validator-returned messages are NOT used. All messages MUST be explicitly configured.
+ *
+ * @template TValue The type of value stored in the field being validated
  */
-export type TreeValidator<TModel = unknown> = (
-  ctx: FieldContext<TModel>,
+export type CustomValidator<TValue = unknown> = (
+  ctx: FieldContext<TValue>,
   params?: Record<string, unknown>
 ) => ValidationError | ValidationError[] | null;

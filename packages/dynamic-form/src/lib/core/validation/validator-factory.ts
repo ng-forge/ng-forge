@@ -2,7 +2,6 @@ import {
   email,
   FieldContext,
   FieldPath,
-  FieldTree,
   LogicFn,
   max,
   maxLength,
@@ -18,49 +17,7 @@ import { CustomValidatorConfig, ValidatorConfig } from '../../models';
 import { createLogicFunction } from '../expressions';
 import { createDynamicValueFunction } from '../values';
 import { FunctionRegistryService } from '../registry/function-registry.service';
-import { ContextAwareValidator, SimpleCustomValidator } from './validator-types';
-
-/**
- * Extended FieldContext with runtime root property
- * The root() method exists at runtime but is not in the public type definitions
- * It returns a FieldTree (which is callable) that gives access to the root form
- */
-interface FieldContextWithRoot<TValue> extends FieldContext<TValue> {
-  root: () => FieldTree<unknown>;
-}
-
-/**
- * Type guard to check if a FieldContext has the root() method
- * The root() method exists at runtime but is not in public type definitions
- */
-function hasRootMethod<TValue>(ctx: FieldContext<TValue>): ctx is FieldContextWithRoot<TValue> {
-  return typeof (ctx as any).root === 'function';
-}
-
-/**
- * Adapter that wraps simple validators to work with FieldContext
- * Allows simple validators (value, formValue) => error to work with Angular's validate() API
- */
-function adaptSimpleValidator<TValue>(simpleValidator: SimpleCustomValidator<TValue>): ContextAwareValidator<TValue> {
-  return (ctx: FieldContext<TValue>) => {
-    const value = ctx.value();
-
-    // Access root form value using type guard
-    let formValue: unknown;
-    if (hasRootMethod(ctx)) {
-      formValue = ctx.root()().value();
-    } else {
-      // Fallback: if root() doesn't exist, use current field value
-      // This shouldn't happen in practice, but provides safety
-      console.warn('[DynamicForm] FieldContext missing root() method - using current field value as fallback');
-      formValue = value;
-    }
-
-    const result = simpleValidator(value, formValue);
-    // Simple validators should return ValidationError | null
-    return result as ValidationError | null;
-  };
-}
+import { CustomValidator } from './validator-types';
 
 /**
  * Apply validator configuration to field path, following the logic pattern
@@ -143,55 +100,27 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
 }
 
 /**
- * Apply custom validator to field path
- * Supports both simple validators and context-aware validators with auto-detection
- * Handles errorMessage injection if specified in config
+ * Apply custom validator to field path using Angular's public validate() API
  */
 function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: FieldPath<TValue>): void {
   const registry = inject(FunctionRegistryService);
 
-  // Try context-aware validator first
-  let validatorFn = registry.getContextValidator(config.functionName);
-
-  // Fall back to simple validator with adapter
-  if (!validatorFn) {
-    const simpleValidator = registry.getSimpleValidator(config.functionName);
-    if (simpleValidator) {
-      validatorFn = adaptSimpleValidator(simpleValidator);
-    }
-  }
+  // Get validator from registry
+  const validatorFn = registry.getValidator(config.functionName);
 
   if (!validatorFn) {
     console.warn(`[DynamicForm] Custom validator "${config.functionName}" not found in registry. Did you forget to register it?`);
     return;
   }
 
-  // Wrap validator to:
-  // 1. Pass params if provided
-  // 2. Inject errorMessage if specified (overrides validator's message but can be overridden by field validationMessages)
-  const wrappedValidator = (ctx: FieldContext<TValue>) => {
-    const error = validatorFn(ctx, config.params);
-
-    // If validator returned an error and config has errorMessage, inject it
-    // This allows inline error messages: { type: 'custom', functionName: 'foo', errorMessage: 'Custom message' }
-    // Field-level validationMessages still take precedence during error resolution
-    if (error && config.errorMessage) {
-      if (Array.isArray(error)) {
-        // For tree validators returning multiple errors, apply message to all
-        return error.map((e) => ({ ...e, message: config.errorMessage }));
-      } else {
-        // For single error, inject message
-        return { ...error, message: config.errorMessage };
-      }
-    }
-
-    return error;
+  // Wrap validator to pass params if provided
+  const wrappedValidator = (ctx: FieldContext<TValue>): ValidationError | ValidationError[] | null => {
+    return validatorFn(ctx, config.params);
   };
 
   // Apply with conditional logic if specified
   if (config.when) {
     const whenLogic = createLogicFunction(config.when);
-    // Wrap validator with conditional logic
     const conditionalValidator = (ctx: FieldContext<TValue>) => {
       if (!whenLogic(ctx)) {
         return null; // Condition not met, skip validation

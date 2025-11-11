@@ -1,7 +1,7 @@
 import { Schema } from '@angular/forms/signals';
 import { InferFormValue, RegisteredFieldTypes } from './types';
 import { SchemaDefinition } from './schemas';
-import { ContextAwareValidator, SimpleCustomValidator, TreeValidator } from '../core/validation/validator-types';
+import { CustomValidator } from '../core/validation/validator-types';
 import { CustomFunction } from '../core/expressions/custom-function-types';
 import { ValidationMessages } from './validation-types';
 
@@ -196,77 +196,73 @@ export interface SignalFormsConfig {
   customFunctions?: Record<string, CustomFunction>;
 
   /**
-   * Simple custom validators (value, formValue) => ValidationError | null
+   * Custom validators using Angular's public FieldContext API
    *
-   * Used for: basic validation that only needs field value and form value
-   * Return type: ValidationError | null
+   * (ctx, params?) => ValidationError | ValidationError[] | null
    *
-   * @example
+   * Validators receive FieldContext which provides access to:
+   * - Current field value: `ctx.value()`
+   * - Field state: `ctx.state` (errors, touched, dirty, etc.)
+   * - Other field values: `ctx.valueOf(path)` - public API!
+   * - Other field states: `ctx.stateOf(path)`
+   * - Parameters from JSON configuration
+   *
+   * **Return Types:**
+   * - Single error: `{ kind: 'errorKind' }` for field-level validation
+   * - Multiple errors: `[{ kind: 'error1' }, { kind: 'error2' }]` for cross-field validation
+   * - No error: `null` when validation passes
+   *
+   * @example Single Field Validation
    * ```typescript
-   * simpleValidators: {
-   *   noSpaces: (value) => {
-   *     return typeof value === 'string' && value.includes(' ')
-   *       ? { kind: 'noSpaces', message: 'Spaces not allowed' }
-   *       : null;
-   *   },
-   *   minLength3: (value) => {
-   *     return typeof value === 'string' && value.length < 3
-   *       ? { kind: 'minLength', message: 'Must be at least 3 characters' }
-   *       : null;
-   *   }
-   * }
-   * ```
-   */
-  simpleValidators?: Record<string, SimpleCustomValidator>;
-
-  /**
-   * Context-aware validators (ctx, params?) => ValidationError | null
-   *
-   * Used for: validation that needs access to field state or other fields
-   * Return type: ValidationError | null
-   *
-   * @example
-   * ```typescript
-   * contextValidators: {
-   *   lessThanField: (ctx, params) => {
+   * validators: {
+   *   noSpaces: (ctx) => {
    *     const value = ctx.value();
-   *     const otherField = params?.field as string;
-   *     const otherValue = ctx.root()[otherField]?.value();
-   *     if (otherValue !== undefined && value >= otherValue) {
-   *       return { kind: 'notLessThan', message: `Must be less than ${otherField}` };
+   *     if (typeof value === 'string' && value.includes(' ')) {
+   *       return { kind: 'noSpaces' };
    *     }
    *     return null;
    *   }
    * }
    * ```
-   */
-  contextValidators?: Record<string, ContextAwareValidator>;
-
-  /**
-   * Tree validators for cross-field validation (ctx, params?) => ValidationError | ValidationError[] | null
    *
-   * Used for: validation relationships between multiple fields
-   * Can target errors to specific child fields
-   *
-   * @example
+   * @example Cross-Field Validation (Public API)
    * ```typescript
-   * treeValidators: {
-   *   passwordsMatch: (ctx) => {
-   *     const password = ctx.password?.value();
-   *     const confirmPassword = ctx.confirmPassword?.value();
-   *     if (password && confirmPassword && password !== confirmPassword) {
-   *       return {
-   *         field: ctx.confirmPassword,
-   *         kind: 'passwordMismatch',
-   *         message: 'Passwords must match'
-   *       };
+   * validators: {
+   *   lessThan: (ctx, params) => {
+   *     const value = ctx.value();
+   *     const compareToPath = params?.field as string;
+   *
+   *     // Use valueOf() to access other field - public API!
+   *     const otherValue = ctx.valueOf(compareToPath as any);
+   *
+   *     if (otherValue !== undefined && value >= otherValue) {
+   *       return { kind: 'notLessThan' };
    *     }
    *     return null;
    *   }
    * }
    * ```
+   *
+   * @example Multiple Errors
+   * ```typescript
+   * validators: {
+   *   validateDateRange: (ctx) => {
+   *     const errors: ValidationError[] = [];
+   *     const startDate = ctx.valueOf('startDate' as any);
+   *     const endDate = ctx.valueOf('endDate' as any);
+   *
+   *     if (!startDate) errors.push({ kind: 'startDateRequired' });
+   *     if (!endDate) errors.push({ kind: 'endDateRequired' });
+   *     if (startDate && endDate && startDate > endDate) {
+   *       errors.push({ kind: 'invalidDateRange' });
+   *     }
+   *
+   *     return errors.length > 0 ? errors : null;
+   *   }
+   * }
+   * ```
    */
-  treeValidators?: Record<string, TreeValidator>;
+  validators?: Record<string, CustomValidator>;
 
   /**
    * Strict mode for expression evaluation.
