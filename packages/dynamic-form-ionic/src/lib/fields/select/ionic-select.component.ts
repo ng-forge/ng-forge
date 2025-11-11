@@ -69,8 +69,9 @@ export default class IonicSelectFieldComponent<T> implements IonicSelectComponen
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<IonicSelectProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

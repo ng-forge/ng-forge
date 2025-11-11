@@ -22,6 +22,11 @@ export class LoginDemoComponent {
   formValue = signal({});
 
   config = {
+    // Define common validation messages at the form level
+    defaultValidationMessages: {
+      required: 'This field is required',
+      minLength: 'Must be at least {{requiredLength}} characters',
+    },
     fields: [
       {
         key: 'title',
@@ -37,8 +42,8 @@ export class LoginDemoComponent {
         label: 'Email Address',
         required: true,
         email: true,
+        // Only specify custom message for 'email' - 'required' uses default
         validationMessages: {
-          required: 'Email is required',
           email: 'Please enter a valid email address',
         },
         props: {
@@ -53,10 +58,11 @@ export class LoginDemoComponent {
         label: 'Password',
         required: true,
         minLength: 8,
+        // Override default 'required' message with custom one
         validationMessages: {
           required: 'Password is required',
-          minLength: 'Password must be at least 8 characters',
         },
+        // 'minLength' will use default with interpolated {{requiredLength}}
         props: {
           type: 'password',
           placeholder: 'Enter your password',
