@@ -10,24 +10,26 @@ import {
   pattern,
   required,
   validate,
+  ValidationError,
 } from '@angular/forms/signals';
 import { inject } from '@angular/core';
 import { CustomValidatorConfig, ValidatorConfig } from '../../models';
 import { createLogicFunction } from '../expressions';
 import { createDynamicValueFunction } from '../values';
 import { FunctionRegistryService } from '../registry/function-registry.service';
+import { ContextAwareValidator, SimpleCustomValidator } from './validator-types';
 
 /**
  * Adapter that wraps simple validators to work with FieldContext
  * Allows simple validators (value, formValue) => error to work with Angular's validate() API
  */
-function adaptSimpleValidator<TValue>(
-  simpleValidator: (value: TValue, formValue: unknown) => unknown
-): (ctx: FieldContext<TValue>, params?: Record<string, unknown>) => unknown {
+function adaptSimpleValidator<TValue>(simpleValidator: SimpleCustomValidator<TValue>): ContextAwareValidator<TValue> {
   return (ctx: FieldContext<TValue>) => {
     const value = ctx.value();
     const formValue = ctx.root()().value();
-    return simpleValidator(value, formValue);
+    const result = simpleValidator(value, formValue);
+    // Simple validators should return ValidationError | null, but type as unknown for flexibility
+    return result as ValidationError | null;
   };
 }
 
@@ -160,7 +162,14 @@ function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: 
   // Apply with conditional logic if specified
   if (config.when) {
     const whenLogic = createLogicFunction(config.when);
-    validate(fieldPath, wrappedValidator, { when: whenLogic });
+    // Wrap validator with conditional logic
+    const conditionalValidator = (ctx: FieldContext<TValue>) => {
+      if (!whenLogic(ctx)) {
+        return null; // Condition not met, skip validation
+      }
+      return wrappedValidator(ctx);
+    };
+    validate(fieldPath, conditionalValidator);
   } else {
     validate(fieldPath, wrappedValidator);
   }
