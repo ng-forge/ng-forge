@@ -68,6 +68,10 @@ import { FormsModule } from '@angular/forms';
       :host {
         display: block;
       }
+
+      :host([hidden]) {
+        display: none !important;
+      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,6 +79,7 @@ import { FormsModule } from '@angular/forms';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class BsRadioFieldComponent<T extends string> implements BsRadioComponent<T> {

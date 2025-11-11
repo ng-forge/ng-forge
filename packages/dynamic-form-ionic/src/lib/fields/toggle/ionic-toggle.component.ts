@@ -16,6 +16,7 @@ import { AsyncPipe } from '@angular/common';
 
     <ion-toggle
       [field]="f"
+      [disabled]="f().disabled()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"

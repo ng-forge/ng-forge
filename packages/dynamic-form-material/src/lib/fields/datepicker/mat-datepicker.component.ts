@@ -26,6 +26,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   template: `
     @let f = field();
@@ -45,6 +46,8 @@ import { AsyncPipe } from '@angular/common';
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
       />
 
       <mat-datepicker-toggle matIconSuffix [for]="$any(picker)" />
@@ -62,6 +65,10 @@ import { AsyncPipe } from '@angular/common';
       :host {
         display: block;
         width: 100%;
+      }
+
+      :host([hidden]) {
+        display: none !important;
       }
 
       mat-form-field {

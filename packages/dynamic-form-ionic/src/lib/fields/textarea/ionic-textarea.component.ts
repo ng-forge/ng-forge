@@ -19,6 +19,8 @@ import { AsyncPipe } from '@angular/common';
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+      [disabled]="f().disabled()"
+      [readonly]="f().readonly()"
       [rows]="props()?.rows ?? 4"
       [autoGrow]="props()?.autoGrow ?? false"
       [counter]="props()?.counter ?? false"
@@ -41,7 +43,15 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class IonicTextareaFieldComponent implements IonicTextareaComponent {
   readonly field = input.required<FieldTree<string>>();

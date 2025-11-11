@@ -24,6 +24,8 @@ import { DatePicker } from 'primeng/datepicker';
         [inputId]="key()"
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [disabled]="f().disabled()"
+        [readonlyInput]="f().readonly()"
         [attr.tabindex]="tabIndex()"
         [dateFormat]="props()?.dateFormat || 'mm/dd/yy'"
         [inline]="props()?.inline ?? false"
@@ -47,7 +49,15 @@ import { DatePicker } from 'primeng/datepicker';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class PrimeDatepickerFieldComponent implements PrimeDatepickerComponent {
   readonly field = input.required<FieldTree<Date | null>>();

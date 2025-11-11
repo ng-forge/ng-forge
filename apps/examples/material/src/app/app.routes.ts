@@ -81,6 +81,11 @@ export const appRoutes: Route[] = [
         path: 'row',
         loadComponent: () => import('./examples/row-demo.component').then((m) => m.RowDemoComponent),
       },
+      {
+        path: 'conditional-logic-showcase',
+        loadComponent: () =>
+          import('./examples/conditional-logic-showcase-demo.component').then((m) => m.ConditionalLogicShowcaseDemoComponent),
+      },
     ],
   },
 ];
