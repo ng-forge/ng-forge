@@ -1,7 +1,6 @@
 import { FieldTypeDefinition } from '../models/field-type';
-import { groupFieldMapper, rowFieldMapper } from '../mappers';
+import { baseFieldMapper, groupFieldMapper, rowFieldMapper } from '../mappers';
 import { pageFieldMapper } from '../mappers/page/page-field-mapper';
-import { textFieldMapper } from '../mappers/text/text-field-mapper';
 
 /**
  * Built-in field types provided by the dynamic form library.
@@ -50,7 +49,7 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
   {
     name: 'text',
     loadComponent: () => import('../fields/text/text-field.component'),
-    mapper: textFieldMapper,
+    mapper: baseFieldMapper,
     valueHandling: 'exclude',
   },
 ];
