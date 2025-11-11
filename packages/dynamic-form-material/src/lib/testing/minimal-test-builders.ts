@@ -49,8 +49,8 @@ export class MinimalTestBuilder {
    * Single field with placeholder
    * Use when testing placeholder attribute
    */
-  static withPlaceholder(placeholder: string) {
-    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'input', placeholder }).build();
+  static withPlaceholder(placeholder: string, fieldType: 'input' | 'textarea' = 'input') {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: fieldType, placeholder }).build();
 
     return { config, initialValue: { field: '' } };
   }
@@ -79,8 +79,8 @@ export class MinimalTestBuilder {
    * Single field with tabIndex
    * Use when testing tab order
    */
-  static withTabIndex(tabIndex: number) {
-    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'input', tabIndex }).build();
+  static withTabIndex(tabIndex: number, fieldType: 'input' | 'textarea' = 'input') {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: fieldType, tabIndex }).build();
 
     return { config, initialValue: { field: '' } };
   }
@@ -89,8 +89,8 @@ export class MinimalTestBuilder {
    * Single field with custom CSS class
    * Use when testing custom styling
    */
-  static withClassName(className: string) {
-    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'input', className }).build();
+  static withClassName(className: string, fieldType: 'input' | 'textarea' = 'input') {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: fieldType, className }).build();
 
     return { config, initialValue: { field: '' } };
   }
@@ -99,8 +99,8 @@ export class MinimalTestBuilder {
    * Single field marked as required
    * Use when testing required validation
    */
-  static withRequired(required = true) {
-    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'input', required }).build();
+  static withRequired(required = true, fieldType: 'input' | 'textarea' = 'input') {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: fieldType, required }).build();
 
     return { config, initialValue: { field: '' } };
   }
@@ -159,6 +159,50 @@ export class MinimalTestBuilder {
       default:
         return '';
     }
+  }
+
+  // ========================================
+  // TEXTAREA-SPECIFIC BUILDERS
+  // ========================================
+
+  /**
+   * Single textarea with rows attribute
+   * Use when testing textarea rows configuration
+   */
+  static withRows(rows: number) {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'textarea', props: { rows } }).build();
+
+    return { config, initialValue: { field: '' } };
+  }
+
+  /**
+   * Single textarea with cols attribute
+   * Use when testing textarea columns configuration
+   */
+  static withCols(cols: number) {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'textarea', props: { cols } }).build();
+
+    return { config, initialValue: { field: '' } };
+  }
+
+  /**
+   * Single textarea with maxLength attribute
+   * Use when testing maxlength validation
+   */
+  static withMaxLength(maxLength: number) {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'textarea', props: { maxLength } }).build();
+
+    return { config, initialValue: { field: '' } };
+  }
+
+  /**
+   * Single textarea with resize style
+   * Use when testing textarea resize behavior
+   */
+  static withResize(resize: 'none' | 'both' | 'horizontal' | 'vertical') {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'textarea', props: { resize } }).build();
+
+    return { config, initialValue: { field: '' } };
   }
 }
 
