@@ -130,7 +130,8 @@ export class E2EFormHelpers {
   async testResponsiveLayout(breakpoints: Array<{ width: number; height: number; name: string }>): Promise<void> {
     for (const breakpoint of breakpoints) {
       await this.page.setViewportSize({ width: breakpoint.width, height: breakpoint.height });
-      await this.page.waitForTimeout(500); // Allow layout to settle
+      // Wait for CSS transitions to complete by waiting for network idle and animations
+      await this.page.waitForLoadState('domcontentloaded');
 
       // Take screenshot for visual validation if needed
       await this.page.screenshot({
@@ -174,13 +175,19 @@ export class E2EPaginationHelpers {
   async clickNext(): Promise<void> {
     const nextButton = this.page.locator('[data-testid="next-button"]');
     await nextButton.click();
-    await this.page.waitForTimeout(500); // Allow page transition
+    // Wait for page transition by waiting for Angular to stabilize
+    await this.page.waitForLoadState('domcontentloaded');
+    // Wait for any page title/heading to be stable (no more DOM mutations)
+    await this.page.locator('h1, h2, .page-title').first().waitFor({ state: 'visible' });
   }
 
   async clickPrevious(): Promise<void> {
     const prevButton = this.page.locator('[data-testid="previous-button"]');
     await prevButton.click();
-    await this.page.waitForTimeout(500); // Allow page transition
+    // Wait for page transition by waiting for Angular to stabilize
+    await this.page.waitForLoadState('domcontentloaded');
+    // Wait for any page title/heading to be stable (no more DOM mutations)
+    await this.page.locator('h1, h2, .page-title').first().waitFor({ state: 'visible' });
   }
 
   async navigateToPage(pageNumber: number): Promise<void> {
@@ -231,10 +238,15 @@ export class E2EPaginationHelpers {
 
   async validatePageValidation(requiredFields: string[]): Promise<void> {
     // Attempt to navigate to next page without filling required fields
-    await this.clickNext();
+    const nextButton = this.page.locator('[data-testid="next-button"]');
+    await nextButton.click();
 
-    // Should remain on current page
-    await this.page.waitForTimeout(500);
+    // Wait for validation to trigger - check first error message appears
+    if (requiredFields.length > 0) {
+      const firstFieldContainer = this.page.locator(`[data-testid="${requiredFields[0]}"]`).locator('..');
+      const firstErrorElement = firstFieldContainer.locator('mat-error, .error-message');
+      await firstErrorElement.waitFor({ state: 'visible', timeout: 5000 });
+    }
 
     // Check that validation errors are displayed for required fields
     for (const fieldTestId of requiredFields) {
@@ -318,7 +330,10 @@ export class E2ETranslationHelpers {
       }
     }
 
-    await this.page.waitForTimeout(500); // Allow translations to load
+    // Wait for translations to load by checking DOM is stable
+    await this.page.waitForLoadState('domcontentloaded');
+    // Wait for any visible text to be present (indicating translation loaded)
+    await this.page.locator('body').waitFor({ state: 'visible' });
   }
 
   async validateTranslatedContent(testId: string, expectedTranslations: Record<string, string>): Promise<void> {

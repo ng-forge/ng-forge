@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 
 test.describe('Essential Tests - Quick Validation', () => {
   test('basic form functionality works', async ({ page }) => {
+    const waitHelpers = new DeterministicWaitHelpers(page);
     await page.goto('/cross-field-validation');
 
     // Wait for page to load
@@ -12,23 +14,28 @@ test.describe('Essential Tests - Quick Validation', () => {
 
     // Test basic form interaction - use more specific selector
     await page.getByRole('button', { name: 'Password Matching' }).click();
+    await waitHelpers.waitForAngularStability();
     await expect(page.getByLabel('Password').first()).toBeVisible();
 
     console.log('✅ Basic form functionality test passed');
   });
 
   test('age-based logic works correctly', async ({ page }) => {
+    const waitHelpers = new DeterministicWaitHelpers(page);
     await page.goto('/cross-field-validation');
     await page.waitForLoadState('networkidle');
 
     // Go to dependent validation
     await page.getByText('Dependent Validation').click();
-    await page.waitForTimeout(1000);
+    await waitHelpers.waitForAngularStability();
 
     // Test age under 18 - guardian consent should be visible
     await page.getByLabel('Age').fill('16');
     await page.getByLabel('Age').blur();
-    await page.waitForTimeout(500);
+    // Wait for conditional field to appear
+    await waitHelpers.waitForConditionalFieldChange('guardian-consent', true).catch(() => {
+      // Field might have different test ID
+    });
 
     await expect(page.getByLabel('Guardian Consent Required')).toBeVisible();
 
@@ -36,7 +43,7 @@ test.describe('Essential Tests - Quick Validation', () => {
     await page.getByLabel('Age').clear();
     await page.getByLabel('Age').fill('25');
     await page.getByLabel('Age').blur();
-    await page.waitForTimeout(1000);
+    await waitHelpers.waitForAngularStability();
 
     // For now, just check it doesn't throw errors - we know this logic needs fixing
     const isVisible = await page
@@ -50,6 +57,7 @@ test.describe('Essential Tests - Quick Validation', () => {
   });
 
   test('multi-page navigation works', async ({ page }) => {
+    const waitHelpers = new DeterministicWaitHelpers(page);
     await page.goto('/multi-page');
     await page.waitForLoadState('networkidle');
 
@@ -58,7 +66,7 @@ test.describe('Essential Tests - Quick Validation', () => {
 
     // Test one scenario
     await page.getByText('E-Commerce Checkout').click();
-    await page.waitForTimeout(1000);
+    await waitHelpers.waitForScenarioLoad();
 
     // Just verify it loads without throwing errors
     await expect(page.locator('form')).toBeVisible();

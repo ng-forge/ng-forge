@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 import { expect, test } from '@playwright/test';
 
 test.describe('Form Orchestration and State Management Tests', () => {
@@ -7,7 +8,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
 
     // Wait for the page to be fully loaded before proceeding
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
   });
 
   test('should test form state persistence across page navigation', async ({ page }) => {
@@ -153,7 +155,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
     });
 
     // Wait for form to be available
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Check if form loaded successfully
     const formExists = await page.locator('dynamic-form').isVisible();
@@ -182,7 +185,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
       const nextButton = page.locator('[data-testid="next-button"]');
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition();
 
         // Verify we're on page 2 and previous data is still there
         const professionalVisible = await page.locator('text=Professional Details').isVisible();
@@ -204,7 +208,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
           // Navigate to page 3
           if (await nextButton.isVisible()) {
             await nextButton.click();
-            await page.waitForTimeout(1000);
+            const waitHelpers = new DeterministicWaitHelpers(page);
+            await waitHelpers.waitForPageTransition();
 
             const preferencesVisible = await page.locator('text=Preferences').isVisible();
             if (preferencesVisible) {
@@ -217,7 +222,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
               const backButton = page.locator('[data-testid="previous-button"]');
               if (await backButton.isVisible()) {
                 await backButton.click();
-                await page.waitForTimeout(1000);
+                const waitHelpers = new DeterministicWaitHelpers(page);
+                await waitHelpers.waitForAngularStability();
 
                 // Verify we're back on page 2 and data is preserved
                 const jobTitleValue = await page.inputValue('#jobTitle input').catch(() => '');
@@ -226,7 +232,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
                 // Go back to page 1
                 if (await backButton.isVisible()) {
                   await backButton.click();
-                  await page.waitForTimeout(1000);
+                  const waitHelpers = new DeterministicWaitHelpers(page);
+                  await waitHelpers.waitForAngularStability();
 
                   // Verify page 1 data is preserved
                   const firstNameValue = await page.inputValue('#firstName input').catch(() => '');
@@ -235,10 +242,12 @@ test.describe('Form Orchestration and State Management Tests', () => {
                   // Navigate forward again to complete the test
                   if (await nextButton.isVisible()) {
                     await nextButton.click();
-                    await page.waitForTimeout(1000);
+                    const waitHelpers = new DeterministicWaitHelpers(page);
+                    await waitHelpers.waitForPageTransition();
                     if (await nextButton.isVisible()) {
                       await nextButton.click();
-                      await page.waitForTimeout(1000);
+                      const waitHelpers = new DeterministicWaitHelpers(page);
+                      await waitHelpers.waitForPageTransition();
 
                       // Submit final form with all data preserved
                       await page.click('#submitPersistence button');
@@ -340,7 +349,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -352,7 +362,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
     const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
 
       // Should still be on page 1 due to validation
       const stillOnPage1 = await page.locator('text=Required Information').isVisible();
@@ -366,7 +377,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
     // Now navigation should work
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
 
       const page2Visible = await page.locator('text=Additional Validation').isVisible();
       if (page2Visible) {
@@ -375,7 +387,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
 
         // Try to submit (should fail)
         await page.click('#submitValidation button');
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Fix with valid number
         await page.fill('#numberField input', '50');
@@ -450,7 +463,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -481,7 +495,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
     const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
 
       const page2Visible = await page.locator('text=Page 2').isVisible();
       if (page2Visible) {
@@ -587,7 +602,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -601,7 +617,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
     const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
 
       const conditionalVisible = await page.locator('text=User Details').isVisible();
       if (conditionalVisible) {
@@ -612,7 +629,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
 
         if (await nextButton.isVisible()) {
           await nextButton.click();
-          await page.waitForTimeout(1000);
+          const waitHelpers = new DeterministicWaitHelpers(page);
+          await waitHelpers.waitForPageTransition();
 
           const finalVisible = await page.locator('text=Final Configuration').isVisible();
           if (finalVisible) {
@@ -674,7 +692,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -686,7 +705,8 @@ test.describe('Form Orchestration and State Management Tests', () => {
     for (let i = 1; i <= 3; i++) {
       await page.fill('#quickData input', `Submission ${i} data`);
       await page.click('#submitQuick button');
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
 
       // Verify each submission is recorded
       const submissionExists = await page.locator(`[data-testid="submission-${i - 1}"]`).isVisible();

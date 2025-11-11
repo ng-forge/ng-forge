@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 import { expect, test } from '@playwright/test';
 
 test.describe('User Journey Flow Tests', () => {
@@ -308,7 +309,8 @@ test.describe('User Journey Flow Tests', () => {
     const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
     }
 
     // Page 2: Personal Information
@@ -323,7 +325,8 @@ test.describe('User Journey Flow Tests', () => {
       // Navigate to page 3
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition();
       }
     }
 
@@ -341,7 +344,8 @@ test.describe('User Journey Flow Tests', () => {
       // Navigate to page 4
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition();
       }
     }
 
@@ -359,7 +363,8 @@ test.describe('User Journey Flow Tests', () => {
       // Navigate to page 5
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition();
       }
     }
 
@@ -654,7 +659,8 @@ test.describe('User Journey Flow Tests', () => {
     const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
     }
 
     // Page 2: Shipping Information
@@ -669,7 +675,8 @@ test.describe('User Journey Flow Tests', () => {
       // Navigate to billing
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition();
       }
     }
 
@@ -687,7 +694,8 @@ test.describe('User Journey Flow Tests', () => {
       // Navigate to confirmation
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition();
       }
     }
 
@@ -971,7 +979,8 @@ test.describe('User Journey Flow Tests', () => {
     const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
     }
 
     // Page 2: Experience (shown for customers)
@@ -986,7 +995,8 @@ test.describe('User Journey Flow Tests', () => {
       // Navigate to feedback
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition();
       }
     }
 
@@ -1004,7 +1014,8 @@ test.describe('User Journey Flow Tests', () => {
       // Navigate to completion
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition();
       }
     }
 

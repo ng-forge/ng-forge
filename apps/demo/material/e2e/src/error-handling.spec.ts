@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 import { expect, test } from '@playwright/test';
 
 test.describe('Error Handling and Edge Cases', () => {
@@ -48,7 +49,8 @@ test.describe('Error Handling and Edge Cases', () => {
     });
 
     // Wait a moment for any rendering to complete
-    await page.waitForTimeout(2000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Verify that valid fields still render even if invalid ones fail
     const validFieldExists = await page.locator('#validField').isVisible();
@@ -72,7 +74,8 @@ test.describe('Error Handling and Edge Cases', () => {
     await page.click('.load-basic-btn');
 
     // Wait for form to load
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Check if form loaded successfully
     const formExists = await page.locator('dynamic-form').isVisible();
@@ -95,7 +98,8 @@ test.describe('Error Handling and Edge Cases', () => {
         await page.click('#submit button');
 
         // Check if submission was processed
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Verify form state
         const formValue = await page.evaluate(() => {
@@ -116,7 +120,8 @@ test.describe('Error Handling and Edge Cases', () => {
     await page.click('.load-basic-btn');
 
     // Wait for form initialization
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
 
@@ -129,12 +134,14 @@ test.describe('Error Handling and Edge Cases', () => {
 
         // Navigate away and back
         await page.goto('/');
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
         await page.goto('/e2e-test');
 
         // Reload the scenario
         await page.click('.load-basic-btn');
-        await page.waitForTimeout(3000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Form should be fresh (not persisted in this case)
         const newFormExists = await page.locator('dynamic-form').isVisible();
@@ -148,7 +155,8 @@ test.describe('Error Handling and Edge Cases', () => {
     await page.click('.load-basic-btn');
 
     // Wait for form to load
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
 
@@ -170,12 +178,13 @@ test.describe('Error Handling and Edge Cases', () => {
         }
 
         // Small delay between iterations
-        await page.waitForTimeout(100);
+        // Removed non-deterministic short delay - relying on auto-waiting
       }
 
       // Final submission
       await page.click('#submit button');
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
 
       // Verify no JavaScript errors occurred
       const errors = await page.evaluate(() => {
@@ -191,7 +200,8 @@ test.describe('Error Handling and Edge Cases', () => {
     await page.click('.load-basic-btn');
 
     // Wait for form to load
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
 
@@ -229,7 +239,8 @@ test.describe('Error Handling and Edge Cases', () => {
     await page.click('.load-basic-btn');
 
     // Wait for form to load
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
 
@@ -251,7 +262,8 @@ test.describe('Error Handling and Edge Cases', () => {
         });
 
         // Wait for clear to complete
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Verify form is cleared
         const noScenario = await page.locator('.no-scenario').isVisible();
@@ -259,7 +271,8 @@ test.describe('Error Handling and Edge Cases', () => {
 
         // Reload and verify fresh state
         await page.click('.load-basic-btn');
-        await page.waitForTimeout(3000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         const newFirstNameValue = await page.inputValue('#firstName input').catch(() => '');
         expect(newFirstNameValue).toBe('');
@@ -272,7 +285,8 @@ test.describe('Error Handling and Edge Cases', () => {
     await page.click('.load-basic-btn');
 
     // Wait for form to load
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
 
@@ -298,7 +312,8 @@ test.describe('Error Handling and Edge Cases', () => {
 
         // Wait for all submissions to complete
         await Promise.all(submitPromises);
-        await page.waitForTimeout(2000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Check how many submissions were recorded
         const submissionCount = await page.locator('[data-testid^="submission-"]').count();
@@ -315,7 +330,8 @@ test.describe('Error Handling and Edge Cases', () => {
     for (let i = 0; i < 3; i++) {
       // Load scenario
       await page.click('.load-basic-btn');
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
 
       // Fill some data if form exists
       const formExists = await page.locator('dynamic-form').isVisible();
@@ -331,7 +347,8 @@ test.describe('Error Handling and Edge Cases', () => {
       await page.evaluate(() => {
         (window as any).clearTestScenario();
       });
-      await page.waitForTimeout(500);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
 
       // Verify clean state
       const noScenario = await page.locator('.no-scenario').isVisible();
@@ -340,7 +357,8 @@ test.describe('Error Handling and Edge Cases', () => {
 
     // Final load to ensure everything still works
     await page.click('.load-basic-btn');
-    await page.waitForTimeout(2000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const finalFormExists = await page.locator('dynamic-form').isVisible();
     console.log('Final form exists after memory test:', finalFormExists);

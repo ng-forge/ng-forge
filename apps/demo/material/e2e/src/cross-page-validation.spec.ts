@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 import { expect, test } from '@playwright/test';
 
 test.describe('Cross-Page Validation Tests', () => {
@@ -186,7 +187,8 @@ test.describe('Cross-Page Validation Tests', () => {
     const nextButton1 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton1.isVisible()) {
       await nextButton1.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
     }
 
     // Page 2: Fill personal information (business context)
@@ -200,7 +202,8 @@ test.describe('Cross-Page Validation Tests', () => {
       const nextButton2 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
       }
     }
 
@@ -215,7 +218,8 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.click('#submitEmailVerification button');
 
       // Form should not submit or should show validation error
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
 
       // Now correct the email confirmation
       await page.fill('#confirmEmail input', 'user@businesscorp.com');
@@ -412,7 +416,8 @@ test.describe('Cross-Page Validation Tests', () => {
     const nextButton1 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton1.isVisible()) {
       await nextButton1.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
     }
 
     // Should go to Individual Information page (page 2)
@@ -428,7 +433,8 @@ test.describe('Cross-Page Validation Tests', () => {
       const nextButton2 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
       }
 
       // Should arrive at final confirmation page
@@ -537,7 +543,8 @@ test.describe('Cross-Page Validation Tests', () => {
     const nextButton1 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton1.isVisible()) {
       await nextButton1.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
     }
 
     // Should go to Business Information page
@@ -553,7 +560,8 @@ test.describe('Cross-Page Validation Tests', () => {
       const nextButton2 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Should still be on business page due to validation
         const stillOnBusinessPage = await page.locator('text=Business Information').isVisible();
@@ -566,7 +574,8 @@ test.describe('Cross-Page Validation Tests', () => {
       // Navigate to final page
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
       }
 
       // Should arrive at final page
@@ -760,7 +769,8 @@ test.describe('Cross-Page Validation Tests', () => {
     const nextButton1 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton1.isVisible()) {
       await nextButton1.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
     }
 
     // Page 2: Fill address (should reflect Canadian format)
@@ -778,7 +788,8 @@ test.describe('Cross-Page Validation Tests', () => {
       const nextButton2 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
       }
     }
 
@@ -931,7 +942,8 @@ test.describe('Cross-Page Validation Tests', () => {
     const nextButton1 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton1.isVisible()) {
       await nextButton1.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
 
       // Should still be on page 1
       const stillOnPage1 = await page.locator('text=Basic Information').isVisible();
@@ -944,7 +956,8 @@ test.describe('Cross-Page Validation Tests', () => {
     // Navigate to page 2
     if (await nextButton1.isVisible()) {
       await nextButton1.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
     }
 
     // Page 2: Test enhanced validation
@@ -960,7 +973,8 @@ test.describe('Cross-Page Validation Tests', () => {
       const nextButton2 = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Should still be on page 2
         const stillOnPage2 = await page.locator('text=Enhanced Security').isVisible();
@@ -973,7 +987,8 @@ test.describe('Cross-Page Validation Tests', () => {
       // Navigate to page 3
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
       }
     }
 
@@ -986,7 +1001,8 @@ test.describe('Cross-Page Validation Tests', () => {
 
       // Try to submit (should fail due to username mismatch)
       await page.click('#submitProgressive button');
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
 
       // Fix username confirmation
       await page.fill('#confirmUsername input', 'validuser123'); // Matches page 1

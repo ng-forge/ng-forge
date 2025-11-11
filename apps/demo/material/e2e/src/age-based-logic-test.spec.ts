@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 
 test.describe('Age-Based Logic Test', () => {
   test('should show/hide guardian consent based on age', async ({ page }) => {
+    const waitHelpers = new DeterministicWaitHelpers(page);
     const consoleErrors: string[] = [];
 
     page.on('console', (msg) => {
@@ -17,11 +19,11 @@ test.describe('Age-Based Logic Test', () => {
     await page.getByText('Dependent Validation').click();
 
     // Wait for tab content to load
-    await page.waitForTimeout(1000);
+    await waitHelpers.waitForAngularStability();
 
     // Test with age under 18 (should show guardian consent) - using ID selectors
     await page.locator('#age input').fill('16');
-    await page.waitForTimeout(500);
+    await waitHelpers.waitForAngularStability();
 
     // Guardian consent should be visible
     await expect(page.locator('#guardianConsent')).toBeVisible();
@@ -30,7 +32,7 @@ test.describe('Age-Based Logic Test', () => {
     await page.locator('#age input').clear();
     await page.locator('#age input').fill('25');
     await page.locator('#age input').blur(); // Trigger change event
-    await page.waitForTimeout(1000);
+    await waitHelpers.waitForAngularStability();
 
     // Guardian consent should not be visible
     await expect(page.locator('#guardianConsent')).not.toBeVisible();
@@ -39,7 +41,7 @@ test.describe('Age-Based Logic Test', () => {
     await page.locator('#age input').clear();
     await page.locator('#age input').fill('18');
     await page.locator('#age input').blur(); // Trigger change event
-    await page.waitForTimeout(1000);
+    await waitHelpers.waitForAngularStability();
 
     // Guardian consent should not be visible for 18
     await expect(page.locator('#guardianConsent')).not.toBeVisible();

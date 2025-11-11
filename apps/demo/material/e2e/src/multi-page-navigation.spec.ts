@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 import { expect, test } from '@playwright/test';
 
 test.describe('Multi-Page Navigation Tests', () => {
@@ -202,7 +203,8 @@ test.describe('Multi-Page Navigation Tests', () => {
     }
 
     // Wait a moment for page transition
-    await page.waitForTimeout(1000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Verify we're on page 2 (Personal Information) - check if page 2 content is visible
     const personalPageVisible = await page.locator('text=Personal Information').isVisible();
@@ -221,7 +223,8 @@ test.describe('Multi-Page Navigation Tests', () => {
       const nextButton2 = page.locator('[data-testid="next-button"]');
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
       }
 
       // Verify we're on page 3 (Preferences)
@@ -337,7 +340,8 @@ test.describe('Multi-Page Navigation Tests', () => {
     const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(500);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
 
       // Should still be on page 1 due to validation (or show validation errors)
       const stillOnPage1 = await page.locator('text=Required Information').isVisible();
@@ -351,7 +355,8 @@ test.describe('Multi-Page Navigation Tests', () => {
     // Now try navigation again
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
     }
 
     // Check if we can access page 2 fields
@@ -451,7 +456,8 @@ test.describe('Multi-Page Navigation Tests', () => {
     const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
     }
 
     const field2Visible = await page.locator('#field2 input').isVisible();
@@ -461,7 +467,8 @@ test.describe('Multi-Page Navigation Tests', () => {
       // Navigate to page 3
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition();
       }
     }
 
@@ -473,7 +480,8 @@ test.describe('Multi-Page Navigation Tests', () => {
       const backButton = page.locator('[data-testid="previous-button"]');
       if (await backButton.isVisible()) {
         await backButton.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Verify we're back on page 2 and data is preserved
         const field2Value = await page.inputValue('#field2 input').catch(() => '');
@@ -482,7 +490,8 @@ test.describe('Multi-Page Navigation Tests', () => {
         // Go back one more time
         if (await backButton.isVisible()) {
           await backButton.click();
-          await page.waitForTimeout(1000);
+          const waitHelpers = new DeterministicWaitHelpers(page);
+          await waitHelpers.waitForAngularStability();
 
           // Verify we're back on page 1 and data is preserved
           const field1Value = await page.inputValue('#field1 input').catch(() => '');
@@ -577,7 +586,8 @@ test.describe('Multi-Page Navigation Tests', () => {
       const page3Indicator = page.locator('.page-indicator').nth(2).or(page.locator('[data-page="2"]'));
       if (await page3Indicator.isVisible()) {
         await page3Indicator.click();
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Verify we jumped to page 3
         const summaryVisible = await page.locator('text=Summary').isVisible();
@@ -668,7 +678,8 @@ test.describe('Multi-Page Navigation Tests', () => {
           await loadingIndicator.waitFor({ state: 'hidden', timeout: 5000 });
         }
 
-        await page.waitForTimeout(1000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // Verify page 2 is accessible
         const data2Field = page.locator('#data2 textarea');

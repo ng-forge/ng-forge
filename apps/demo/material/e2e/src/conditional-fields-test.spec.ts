@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 
 test.describe('Conditional Fields Test', () => {
   test('should load conditional fields without injection errors', async ({ page }) => {
@@ -14,13 +15,15 @@ test.describe('Conditional Fields Test', () => {
     await page.goto('http://localhost:4200/cross-field-validation');
 
     // Wait for page to load
-    await page.waitForTimeout(2000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Click on Conditional Fields tab
     await page.getByText('Conditional Fields').click();
 
     // Wait for tab content to load
-    await page.waitForTimeout(1000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Check if radio buttons are visible (this would trigger the injection error if present)
     await expect(page.getByText('Do you have an existing account?')).toBeVisible();
@@ -29,7 +32,8 @@ test.describe('Conditional Fields Test', () => {
 
     // Try to interact with radio buttons to trigger logic
     await page.getByLabel('Yes, I have an account').check();
-    await page.waitForTimeout(500);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Check if conditional fields appear
     await expect(page.getByLabel('Login Email')).toBeVisible();
@@ -37,7 +41,8 @@ test.describe('Conditional Fields Test', () => {
 
     // Switch to other option
     await page.getByLabel('No, I need to create one').check();
-    await page.waitForTimeout(500);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Check if different fields appear
     await expect(page.getByLabel('First Name')).toBeVisible();

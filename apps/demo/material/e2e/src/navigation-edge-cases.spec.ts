@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@playwright/test';
+import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 
 test.describe('Navigation Edge Cases and Error Handling Tests', () => {
   test.beforeEach(async ({ page }) => {
+    const waitHelpers = new DeterministicWaitHelpers(page);
     await page.goto('/e2e-test');
 
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await waitHelpers.waitForAngularStability();
   });
 
   test('should handle browser back/forward button navigation in multi-page forms', async ({ page }) => {
@@ -84,7 +86,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -98,7 +101,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
     const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
 
       const page2Visible = await page.locator('text=Step 2').isVisible();
       if (page2Visible) {
@@ -107,7 +111,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
         // Navigate to page 3
         if (await nextButton.isVisible()) {
           await nextButton.click();
-          await page.waitForTimeout(1000);
+          const waitHelpers = new DeterministicWaitHelpers(page);
+          await waitHelpers.waitForPageTransition();
 
           const page3Visible = await page.locator('text=Step 3').isVisible();
           if (page3Visible) {
@@ -115,7 +120,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
 
             // Test browser back button
             await page.goBack();
-            await page.waitForTimeout(1000);
+            const waitHelpers = new DeterministicWaitHelpers(page);
+            await waitHelpers.waitForAngularStability();
 
             // Check if we're back on page 2 and data is preserved
             const backOnPage2 = await page.locator('text=Step 2').isVisible();
@@ -125,7 +131,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
 
               // Test browser forward button
               await page.goForward();
-              await page.waitForTimeout(1000);
+              const waitHelpers = new DeterministicWaitHelpers(page);
+              await waitHelpers.waitForAngularStability();
 
               // Check if we're back on page 3 and data is preserved
               const forwardOnPage3 = await page.locator('text=Step 3').isVisible();
@@ -209,7 +216,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -224,7 +232,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
     const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
 
       const page2Visible = await page.locator('text=Refresh Test Page 2').isVisible();
       if (page2Visible) {
@@ -233,7 +242,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
 
         // Perform page refresh
         await page.reload();
-        await page.waitForTimeout(3000);
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
 
         // After refresh, form should be reset to initial state
         const formExistsAfterRefresh = await page.locator('dynamic-form').isVisible();
@@ -322,7 +332,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -337,11 +348,13 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       // Rapid clicks (should not cause race conditions)
       for (let i = 0; i < 5; i++) {
         await nextButton.click();
-        await page.waitForTimeout(100); // Very short delay
+        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForPageTransition(); // Very short delay
       }
 
       // Wait for any transitions to complete
-      await page.waitForTimeout(2000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
 
       // Check what page we ended up on
       const currentPageTitle = await page
@@ -426,7 +439,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -451,7 +465,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       await nextButton.click();
 
       // Wait longer due to simulated network delay
-      await page.waitForTimeout(3000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
 
       const page2Visible = await page.locator('text=Network Test Page 2').isVisible();
       if (page2Visible) {
@@ -524,7 +539,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -536,7 +552,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
     const nextButton = page.locator('button:has-text("Next")').or(page.locator('button[aria-label*="next"]'));
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
 
       // Should still be on page 1 due to validation
       const stillOnPage1 = await page.locator('text=Valid Page 1').isVisible();
@@ -545,7 +562,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       // Fill required field and try again
       await page.fill('#requiredField input', 'Valid data');
       await nextButton.click();
-      await page.waitForTimeout(1000);
+      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForPageTransition();
 
       const nowOnPage2 = await page.locator('text=Valid Page 2').isVisible();
       if (nowOnPage2) {
@@ -614,7 +632,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     const formExists = await page.locator('dynamic-form').isVisible();
     if (!formExists) {
@@ -632,7 +651,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Verify form is cleared
     const noScenario = await page.locator('.no-scenario').isVisible();
@@ -673,7 +693,8 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       }
     });
 
-    await page.waitForTimeout(3000);
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Test reconstructed form
     const reconstructedFormExists = await page.locator('dynamic-form').isVisible();
