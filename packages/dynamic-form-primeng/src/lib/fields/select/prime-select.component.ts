@@ -31,6 +31,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         optionLabel="label"
         optionValue="value"
         [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
+        [disabled]="f().disabled()"
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="selectClasses()"
@@ -43,6 +44,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         optionLabel="label"
         optionValue="value"
         [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
+        [disabled]="f().disabled()"
         [filter]="props()?.filter ?? false"
         [showClear]="props()?.showClear ?? false"
         [styleClass]="selectClasses()"
@@ -57,7 +59,15 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponent<T> {
   readonly field = input.required<FieldTree<T>>();
@@ -72,8 +82,9 @@ export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponen
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<PrimeSelectProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

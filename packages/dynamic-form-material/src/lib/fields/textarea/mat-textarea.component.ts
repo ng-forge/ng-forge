@@ -26,6 +26,8 @@ import { AsyncPipe } from '@angular/common';
         [attr.maxlength]="props()?.maxLength"
         [attr.tabindex]="tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
       ></textarea>
 
       @if (props()?.hint; as hint) {
@@ -42,6 +44,10 @@ import { AsyncPipe } from '@angular/common';
         width: 100%;
       }
 
+      :host([hidden]) {
+        display: none !important;
+      }
+
       mat-form-field {
         width: 100%;
       }
@@ -52,6 +58,7 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class MatTextareaFieldComponent implements MatTextareaComponent {
@@ -64,8 +71,9 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly tabIndex = input<number>();
   readonly props = input<MatTextareaProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection

@@ -27,7 +27,7 @@ import { AsyncPipe } from '@angular/common';
         <p-radioButton
           [field]="f"
           [value]="option.value"
-          [disabled]="option.disabled"
+          [disabled]="f().disabled() || option.disabled"
           [styleClass]="radioClasses()"
           [inputId]="key() + '-' + option.value"
         />
@@ -98,8 +98,9 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<PrimeRadioProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

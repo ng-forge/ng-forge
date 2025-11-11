@@ -20,6 +20,7 @@ import { AsyncPipe } from '@angular/common';
       [disableRipple]="props()?.disableRipple || false"
       [attr.tabindex]="tabIndex()"
       [attr.hidden]="f().hidden() || null"
+      [disabled]="f().disabled()"
     >
       {{ label() | dynamicText | async }}
     </mat-checkbox>
@@ -60,8 +61,9 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly tabIndex = input<number>();
   readonly props = input<MatCheckboxProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

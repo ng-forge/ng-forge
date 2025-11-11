@@ -51,6 +51,67 @@ export class MyFormComponent {
 
 The form automatically updates when translations change.
 
+## Default Validation Messages
+
+Define common validation messages once at the form level using `defaultValidationMessages`. These act as fallback messages when fields don't have their own custom `validationMessages`:
+
+```typescript
+import { Component, inject } from '@angular/core';
+
+@Component({...})
+export class MyFormComponent {
+  translationService = inject(YourTranslationService);
+
+  config = {
+    // Define default messages for all fields
+    defaultValidationMessages: {
+      required: this.translationService.translate('validation.required'),
+      email: this.translationService.translate('validation.email'),
+      minLength: this.translationService.translate('validation.minLength'),
+      maxLength: this.translationService.translate('validation.maxLength'),
+    },
+    fields: [
+      {
+        key: 'email',
+        type: 'input',
+        label: this.translationService.translate('form.email'),
+        email: true,
+        required: true,
+        // Uses defaultValidationMessages for required and email errors
+      },
+      {
+        key: 'password',
+        type: 'input',
+        label: this.translationService.translate('form.password'),
+        required: true,
+        minLength: 8,
+        // Override default for this field only
+        validationMessages: {
+          required: this.translationService.translate('validation.password.required'),
+          minLength: this.translationService.translate('validation.password.minLength'),
+        },
+      },
+      {
+        key: 'username',
+        type: 'input',
+        label: this.translationService.translate('form.username'),
+        required: true,
+        minLength: 3,
+        // Uses default for both required and minLength
+      },
+    ],
+  };
+}
+```
+
+The message resolution priority is:
+
+1. **Field-level** `validationMessages` (highest priority)
+2. **Form-level** `defaultValidationMessages` (fallback)
+3. **No message** - If neither is provided, the error is not displayed and a warning is logged to the console
+
+This approach is especially useful when you have many fields with the same validation rules - define the translations once instead of repeating them for each field.
+
 ## Example with Transloco
 
 Here's a complete example using [@jsverse/transloco](https://jsverse.github.io/transloco/):
@@ -92,6 +153,11 @@ export class MyFormComponent {
   transloco = inject(TranslocoService);
 
   formConfig = {
+    // Define default validation messages for all fields
+    defaultValidationMessages: {
+      required: this.transloco.selectTranslate('validation.required'),
+      email: this.transloco.selectTranslate('validation.email'),
+    },
     fields: [
       {
         key: 'username',
@@ -99,9 +165,16 @@ export class MyFormComponent {
         label: this.transloco.selectTranslate('form.username'),
         value: '',
         required: true,
-        validationMessages: {
-          required: this.transloco.selectTranslate('validation.required'),
-        },
+        // Uses defaultValidationMessages for required
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: this.transloco.selectTranslate('form.email'),
+        value: '',
+        required: true,
+        email: true,
+        // Uses defaultValidationMessages for required and email
       },
     ],
   };
@@ -128,25 +201,41 @@ export class MyFormComponent {
   translations = computed(() => ({
     en: {
       username: 'Username',
+      email: 'Email',
       required: 'This field is required',
+      email_format: 'Please enter a valid email address',
     },
     es: {
       username: 'Nombre de usuario',
+      email: 'Correo electrónico',
       required: 'Este campo es obligatorio',
+      email_format: 'Por favor ingrese una dirección de correo válida',
     },
   }[this.currentLang()]));
 
   formConfig = computed(() => ({
+    // Define default validation messages for all fields
+    defaultValidationMessages: {
+      required: this.translations().required,  // Signal<string>
+      email: this.translations().email_format,
+    },
     fields: [
       {
         key: 'username',
         type: 'input',
-        label: this.translations().username,  // Signal<string>
+        label: this.translations().username,
         value: '',
         required: true,
-        validationMessages: {
-          required: this.translations().required,
-        },
+        // Uses defaultValidationMessages for required
+      },
+      {
+        key: 'email',
+        type: 'input',
+        label: this.translations().email,
+        value: '',
+        required: true,
+        email: true,
+        // Uses defaultValidationMessages for required and email
       },
     ],
   }));

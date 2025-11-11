@@ -34,53 +34,64 @@ export class LoginFormComponent {
   formValue = signal({});
 
   config = {
+    // Define common validation messages at the form level
+    defaultValidationMessages: {
+      required: 'This field is required',
+      minLength: 'Must be at least {{requiredLength}} characters',
+    },
     fields: [
+      {
+        key: 'title',
+        type: 'text',
+        label: 'Sign In',
+        props: {
+          elementType: 'h2',
+        },
+      },
       {
         key: 'email',
         type: 'input',
-        label: 'Email',
-        value: '',
+        label: 'Email Address',
         required: true,
         email: true,
+        // Only specify custom message for 'email' - 'required' uses default
         validationMessages: {
-          required: 'Email is required',
-          email: 'Please enter a valid email',
+          email: 'Please enter a valid email address',
         },
         props: {
           type: 'email',
-          placeholder: 'Enter your email',
-          autocomplete: 'email',
+          placeholder: 'your@email.com',
+          hint: 'Enter the email associated with your account',
         },
       },
       {
         key: 'password',
         type: 'input',
         label: 'Password',
-        value: '',
         required: true,
         minLength: 8,
+        // Override default 'required' message with custom one
         validationMessages: {
           required: 'Password is required',
-          minLength: 'Password must be at least 8 characters',
         },
+        // 'minLength' will use default with interpolated {{requiredLength}}
         props: {
           type: 'password',
           placeholder: 'Enter your password',
-          autocomplete: 'current-password',
         },
       },
       {
         key: 'remember',
         type: 'checkbox',
-        label: 'Remember me',
-        value: false,
+        label: 'Remember me for 30 days',
       },
-      {
-        type: 'submit',
+      submitButton({
         key: 'submit',
         label: 'Sign In',
-        props: { color: 'primary' },
-      },
+        props: {
+          color: 'primary',
+        },
+      }),
     ],
   } as const satisfies FormConfig;
 

@@ -19,6 +19,8 @@ import { AsyncPipe } from '@angular/common';
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+      [disabled]="f().disabled()"
+      [readonly]="f().readonly()"
       [rows]="props()?.rows ?? 4"
       [autoGrow]="props()?.autoGrow ?? false"
       [counter]="props()?.counter ?? false"
@@ -41,7 +43,15 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class IonicTextareaFieldComponent implements IonicTextareaComponent {
   readonly field = input.required<FieldTree<string>>();
@@ -53,8 +63,9 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
   readonly tabIndex = input<number>();
   readonly props = input<IonicTextareaProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

@@ -72,6 +72,10 @@ import { FormsModule } from '@angular/forms';
       :host {
         display: block;
       }
+
+      :host([hidden]) {
+        display: none !important;
+      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,6 +83,7 @@ import { FormsModule } from '@angular/forms';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class BsRadioFieldComponent<T extends string> implements BsRadioComponent<T> {
@@ -94,8 +99,9 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<BsRadioProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

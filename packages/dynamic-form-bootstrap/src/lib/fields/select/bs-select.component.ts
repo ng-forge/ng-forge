@@ -25,6 +25,7 @@ import { AsyncPipe } from '@angular/common';
       <select
         [field]="f"
         [id]="key()"
+        [disabled]="f().disabled()"
         class="form-select"
         [class.form-select-sm]="props()?.size === 'sm'"
         [class.form-select-lg]="props()?.size === 'lg'"
@@ -54,7 +55,15 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class BsSelectFieldComponent<T extends string> implements BsSelectComponent<T> {
   readonly field = input.required<FieldTree<T>>();
@@ -69,8 +78,9 @@ export default class BsSelectFieldComponent<T extends string> implements BsSelec
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<BsSelectProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

@@ -26,6 +26,8 @@ import { InputText } from 'primeng/inputtext';
         [field]="f"
         [attr.type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
         [attr.tabindex]="tabIndex()"
         [class]="inputClasses()"
       />
@@ -42,7 +44,15 @@ import { InputText } from 'primeng/inputtext';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly field = input.required<FieldTree<string>>();
@@ -54,8 +64,9 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly tabIndex = input<number>();
   readonly props = input<PrimeInputProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

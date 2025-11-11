@@ -28,7 +28,7 @@ import { AsyncPipe } from '@angular/common';
       <ion-item [lines]="'none'">
         <ion-radio
           [value]="option.value"
-          [disabled]="option.disabled || false"
+          [disabled]="f().disabled() || option.disabled || false"
           [labelPlacement]="props()?.labelPlacement ?? 'end'"
           [justify]="props()?.justify"
           [color]="props()?.color ?? 'primary'"
@@ -81,8 +81,9 @@ export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<IonicRadioProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

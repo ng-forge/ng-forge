@@ -86,16 +86,23 @@ import { format } from 'date-fns';
       </ng-template>
     </ion-modal>
   `,
-  styles: `
-    ion-input {
-      cursor: pointer;
-    }
-  `,
+  styles: [
+    `
+      ion-input {
+        cursor: pointer;
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class IonicDatepickerFieldComponent implements IonicDatepickerComponent {
@@ -113,8 +120,9 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
   readonly startAt = input<Date | null>(null);
   readonly props = input<IonicDatepickerProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

@@ -162,6 +162,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       value: this.value,
       defaultValues: this.defaultValues,
       form: this.form(),
+      defaultValidationMessages: this.config().defaultValidationMessages,
     })
   );
 

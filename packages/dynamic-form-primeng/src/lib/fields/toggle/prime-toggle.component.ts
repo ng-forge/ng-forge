@@ -23,6 +23,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
       <p-toggleSwitch
         [id]="key()"
         [field]="f"
+        [disabled]="f().disabled()"
         [attr.tabindex]="tabIndex()"
         [trueValue]="true"
         [falseValue]="false"
@@ -41,7 +42,15 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
   readonly field = input.required<FieldTree<boolean>>();
@@ -53,8 +62,9 @@ export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
   readonly tabIndex = input<number>();
   readonly props = input<PrimeToggleProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

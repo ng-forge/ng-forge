@@ -25,6 +25,7 @@ import { Slider } from 'primeng/slider';
         [field]="f"
         [min]="props()?.min ?? f().min?.() ?? 0"
         [max]="props()?.max ?? f().max?.() ?? 100"
+        [disabled]="f().disabled()"
         [step]="props()?.step ?? 1"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
@@ -44,7 +45,15 @@ import { Slider } from 'primeng/slider';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
   readonly field = input.required<FieldTree<number>>();
@@ -57,8 +66,9 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
 
   readonly props = input<PrimeSliderProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

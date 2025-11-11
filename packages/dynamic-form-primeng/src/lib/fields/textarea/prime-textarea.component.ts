@@ -44,7 +44,16 @@ import { FormsModule } from '@angular/forms';
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class PrimeTextareaFieldComponent implements PrimeTextareaComponent {
   readonly field = input.required<FieldTree<string>>();
@@ -56,8 +65,9 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
   readonly tabIndex = input<number>();
   readonly props = input<PrimeTextareaProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

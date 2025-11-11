@@ -30,6 +30,7 @@ import { AsyncPipe } from '@angular/common';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
         [compareWith]="props()?.compareWith || defaultCompare"
+        [disabled]="f().disabled()"
       >
         @for (option of options(); track option.value) {
         <mat-option [value]="option.value" [disabled]="option.disabled || false">
@@ -52,6 +53,10 @@ import { AsyncPipe } from '@angular/common';
         width: 100%;
       }
 
+      :host([hidden]) {
+        display: none !important;
+      }
+
       mat-form-field {
         width: 100%;
       }
@@ -62,6 +67,7 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class MatSelectFieldComponent<T> implements MatSelectComponent<T> {
@@ -77,8 +83,9 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatSelectProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection
