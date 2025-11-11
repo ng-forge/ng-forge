@@ -389,6 +389,112 @@ export class MinimalTestBuilder {
 
     return { config, initialValue: { field: 0 } };
   }
+
+  // ========================================
+  // RADIO-SPECIFIC BUILDERS
+  // ========================================
+
+  /**
+   * Single radio group with options
+   * Use when testing radio group rendering
+   */
+  static withRadioOptions(options: FieldOption[]) {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'radio', options }).build();
+
+    return { config, initialValue: { field: null } };
+  }
+
+  /**
+   * Radio group with color
+   * Use when testing Material color theme
+   */
+  static withRadioColor(color: 'primary' | 'accent' | 'warn') {
+    const config = MaterialFormTestUtils.builder()
+      .field({ key: 'field', type: 'radio', options: [{ label: 'Option 1', value: '1' }], props: { color } })
+      .build();
+
+    return { config, initialValue: { field: null } };
+  }
+
+  /**
+   * Radio group with label position
+   * Use when testing radio label positioning
+   */
+  static withRadioLabelPosition(labelPosition: 'before' | 'after') {
+    const config = MaterialFormTestUtils.builder()
+      .field({ key: 'field', type: 'radio', options: [{ label: 'Option 1', value: '1' }], props: { labelPosition } })
+      .build();
+
+    return { config, initialValue: { field: null } };
+  }
+
+  // ========================================
+  // CHECKBOX-SPECIFIC BUILDERS
+  // ========================================
+
+  /**
+   * Single checkbox
+   * Use when testing checkbox rendering
+   */
+  static withCheckbox() {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'checkbox' }).build();
+
+    return { config, initialValue: { field: false } };
+  }
+
+  /**
+   * Checkbox with color
+   * Use when testing Material color theme
+   */
+  static withCheckboxColorSingle(color: 'primary' | 'accent' | 'warn') {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'checkbox', props: { color } }).build();
+
+    return { config, initialValue: { field: false } };
+  }
+
+  /**
+   * Checkbox with label position
+   * Use when testing checkbox label positioning
+   */
+  static withCheckboxLabelPositionSingle(labelPosition: 'before' | 'after') {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'checkbox', props: { labelPosition } }).build();
+
+    return { config, initialValue: { field: false } };
+  }
+
+  // ========================================
+  // TOGGLE-SPECIFIC BUILDERS
+  // ========================================
+
+  /**
+   * Single toggle
+   * Use when testing toggle rendering
+   */
+  static withToggle() {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'toggle' }).build();
+
+    return { config, initialValue: { field: false } };
+  }
+
+  /**
+   * Toggle with color
+   * Use when testing Material color theme
+   */
+  static withToggleColor(color: 'primary' | 'accent' | 'warn') {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'toggle', props: { color } }).build();
+
+    return { config, initialValue: { field: false } };
+  }
+
+  /**
+   * Toggle with label position
+   * Use when testing toggle label positioning
+   */
+  static withToggleLabelPosition(labelPosition: 'before' | 'after') {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'toggle', props: { labelPosition } }).build();
+
+    return { config, initialValue: { field: false } };
+  }
 }
 
 /**
