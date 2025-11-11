@@ -65,4 +65,89 @@ Result:
 
 Arrays are for organizing form **data** in sequential order, not UI. The visual presentation depends on your UI integration (Material, Bootstrap, etc.).
 
+## Complete Example
+
+Here's a complete working example of an array field with validation:
+
+```typescript
+import { Component } from '@angular/core';
+import { DynamicFormComponent } from '@ng-forge/dynamic-form';
+
+@Component({
+  selector: 'app-contacts-form',
+  imports: [DynamicFormComponent],
+  template: ` <dynamic-form [config]="formConfig" (formSubmit)="onSubmit($event)" /> `,
+})
+export class ContactsFormComponent {
+  formConfig = {
+    fields: [
+      {
+        key: 'contacts',
+        type: 'array',
+        label: 'Emergency Contacts',
+        fields: [
+          {
+            key: 'name',
+            type: 'input',
+            label: 'Contact Name',
+            value: '',
+            required: true,
+            minLength: 2,
+          },
+          {
+            key: 'phone',
+            type: 'input',
+            label: 'Phone Number',
+            value: '',
+            required: true,
+            pattern: /^\d{10}$/,
+          },
+          {
+            key: 'relationship',
+            type: 'select',
+            label: 'Relationship',
+            value: 'friend',
+            options: [
+              { label: 'Family', value: 'family' },
+              { label: 'Friend', value: 'friend' },
+              { label: 'Colleague', value: 'colleague' },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  onSubmit(formValue: any) {
+    console.log('Form submitted:', formValue);
+    // Output:
+    // {
+    //   contacts: [
+    //     { name: 'John Doe', phone: '5551234567', relationship: 'family' },
+    //     { name: 'Jane Smith', phone: '5559876543', relationship: 'friend' },
+    //   ]
+    // }
+  }
+}
+```
+
+## Nesting Restrictions
+
+Array fields can be used within:
+
+- Pages (top-level container)
+- Rows (for horizontal layouts)
+
+Arrays **cannot** be nested inside:
+
+- Other array fields
+- Group fields
+
+## Allowed Children
+
+Arrays can contain:
+
+- Leaf fields (input, select, checkbox, etc.)
+- Row fields (for horizontal layouts within each array item)
+
 See [Type Safety & Inference](../core/type-safety) for details on how arrays affect type inference.
