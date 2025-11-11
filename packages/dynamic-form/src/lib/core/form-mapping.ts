@@ -208,28 +208,33 @@ function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: Field
 }
 
 /**
- * Maps array field children to the parent form schema
- * This ensures that validation from child fields is applied to the parent form
+ * Maps array field to the parent form schema
+ *
+ * Array fields are fundamentally different from groups:
+ * - The fields array is a TEMPLATE (single field definition), not instances
+ * - Array items are created/removed dynamically at runtime
+ * - Child field instances handle their own validation when created
+ *
+ * The array field itself is registered in the parent form via normal
+ * field processing (valueHandling: 'include'). Array items are managed
+ * by the ArrayFieldComponent which creates dynamic field instances
+ * with indexed keys (e.g., 'items[0]', 'items[1]').
  */
 function mapArrayFieldToForm<TValue>(arrayField: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
   if (!isArrayField(arrayField) || !arrayField.fields) {
     return;
   }
 
-  // Apply validation for each child field to the appropriate indexed path in the parent form
-  // Type assertion: After isArrayField guard, we know fields contains FieldDef instances
-  const fields = arrayField.fields as FieldDef<any>[];
-  for (let i = 0; i < fields.length; i++) {
-    const childField = fields[i];
-    if (!childField.key) {
-      continue;
-    }
-
-    // Get the indexed path for this child field within the array
-    const indexedPath = (fieldPath as any)[i];
-    if (indexedPath) {
-      // Recursively apply field mapping to the child field
-      mapFieldToForm(childField, indexedPath);
-    }
-  }
+  // Array fields use a template-based approach where validation is defined
+  // in the template and applied to dynamic instances at runtime.
+  //
+  // Unlike groups or pages (which have static children known at schema creation),
+  // array items are dynamic and may not exist yet. The ArrayFieldComponent
+  // manages the lifecycle of array items and ensures validation from the
+  // template is applied to each dynamically created item.
+  //
+  // TODO: Support array-level validation (min/max length, unique items, etc.)
+  // This would be applied to the array field itself, not individual items:
+  //   if (arrayField.minLength) minLength(fieldPath, arrayField.minLength);
+  //   if (arrayField.maxLength) maxLength(fieldPath, arrayField.maxLength);
 }
