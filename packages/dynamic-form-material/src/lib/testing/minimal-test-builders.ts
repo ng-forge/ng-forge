@@ -204,6 +204,60 @@ export class MinimalTestBuilder {
 
     return { config, initialValue: { field: '' } };
   }
+
+  // ========================================
+  // SELECT-SPECIFIC BUILDERS
+  // ========================================
+
+  /**
+   * Single select with simple options
+   * Use when testing basic select rendering
+   */
+  static withSelectOptions(options: Array<{ label: string; value: string | number }>) {
+    const config = MaterialFormTestUtils.builder().field({ key: 'field', type: 'select', options }).build();
+
+    return { config, initialValue: { field: null } };
+  }
+
+  /**
+   * Single select with disabled option
+   * Use when testing option disabled state
+   */
+  static withDisabledOption() {
+    const config = MaterialFormTestUtils.builder()
+      .field({
+        key: 'field',
+        type: 'select',
+        options: [
+          { label: 'Option 1', value: '1' },
+          { label: 'Option 2', value: '2', disabled: true },
+          { label: 'Option 3', value: '3' },
+        ],
+      })
+      .build();
+
+    return { config, initialValue: { field: null } };
+  }
+
+  /**
+   * Single multi-select
+   * Use when testing multiple selection
+   */
+  static withMultiSelect() {
+    const config = MaterialFormTestUtils.builder()
+      .field({
+        key: 'field',
+        type: 'select',
+        options: [
+          { label: 'Option 1', value: '1' },
+          { label: 'Option 2', value: '2' },
+        ],
+        props: { multiple: true },
+      })
+      .build();
+
+    return { config, initialValue: { field: [] } };
+  }
 }
 
 /**

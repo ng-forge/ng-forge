@@ -20,11 +20,7 @@ import { AsyncPipe } from '@angular/common';
   template: `
     @let f = field();
 
-    <mat-form-field
-      [appearance]="props()?.appearance || 'fill'"
-      [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'"
-      [class]="className() || ''"
-    >
+    <mat-form-field [appearance]="props()?.appearance || 'fill'" [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'">
       @if (label(); as label) {
       <mat-label>{{ label | dynamicText | async }}</mat-label>
       }
