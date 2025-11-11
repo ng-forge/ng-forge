@@ -24,7 +24,7 @@ import { form, FormUiControl } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions';
 import { FieldSignalContext } from '../../mappers';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
-import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
+import { arrayItemFieldMapper } from '../../mappers/array-item/array-item-field-mapper';
 import { createSchemaFromFields } from '../../core';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent, SubmitEvent } from '../../events';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
@@ -263,7 +263,9 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
           form: this.parentForm(),
         };
 
-        const bindings = mapFieldToBindings(fieldDef, {
+        // Use custom array item mapper that handles array notation parsing
+        // This enables keys like 'tags[0]' to correctly access parentForm().tags[0]
+        const bindings = arrayItemFieldMapper(fieldDef, {
           fieldSignalContext: arrayFieldSignalContext,
           fieldRegistry: this.fieldRegistry.raw,
         });
