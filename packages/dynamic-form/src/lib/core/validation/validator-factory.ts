@@ -20,15 +20,26 @@ import { FunctionRegistryService } from '../registry/function-registry.service';
 import { ContextAwareValidator, SimpleCustomValidator } from './validator-types';
 
 /**
+ * Extended FieldContext with runtime root property
+ * The root() method exists at runtime but is not in the public type definitions
+ * It returns a FieldTree (which is callable) that gives access to the root form
+ */
+interface FieldContextWithRoot<TValue> extends FieldContext<TValue> {
+  root: () => () => any;
+}
+
+/**
  * Adapter that wraps simple validators to work with FieldContext
  * Allows simple validators (value, formValue) => error to work with Angular's validate() API
  */
 function adaptSimpleValidator<TValue>(simpleValidator: SimpleCustomValidator<TValue>): ContextAwareValidator<TValue> {
   return (ctx: FieldContext<TValue>) => {
     const value = ctx.value();
-    const formValue = ctx.root()().value();
+    // Access root form value - root() exists at runtime but not in type definitions
+    const ctxWithRoot = ctx as unknown as FieldContextWithRoot<TValue>;
+    const formValue = ctxWithRoot.root()().value();
     const result = simpleValidator(value, formValue);
-    // Simple validators should return ValidationError | null, but type as unknown for flexibility
+    // Simple validators should return ValidationError | null
     return result as ValidationError | null;
   };
 }
