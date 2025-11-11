@@ -21,10 +21,22 @@ ng-forge supports three levels of custom validators, each designed for specific 
 All error messages MUST be explicitly configured. The framework enforces this strictly:
 
 1. **Field-level `validationMessages[kind]`** (highest priority - per-field customization)
-2. **ValidatorConfig `errorMessage`** (per-validator inline message)
+2. **Form-level `defaultValidationMessages[kind]`** (fallback for common messages)
 3. **No message configured = Console warning + error NOT displayed**
 
 **Important:** Validator-returned messages are NOT used as fallbacks. This enforces proper separation of concerns and i18n patterns.
+
+You can define messages at the form level for common validation errors:
+
+```typescript
+{
+  defaultValidationMessages: {
+    noSpaces: 'Spaces are not allowed',
+    passwordMismatch: 'Passwords must match'
+  },
+  fields: [/* ... */]
+}
+```
 
 ## Simple Validators
 
@@ -88,22 +100,6 @@ const passwordMatch: SimpleCustomValidator<string> = (value, formValue) => {
     passwordMismatch: 'Passwords must match'
   },
   props: { type: 'password' }
-}
-```
-
-### Inline Error Messages
-
-For quick, one-off validators, use `errorMessage` in ValidatorConfig:
-
-```typescript
-{
-  validators: [
-    {
-      type: 'custom',
-      functionName: 'noSpaces',
-      errorMessage: 'Username cannot contain spaces', // Inline message
-    },
-  ];
 }
 ```
 

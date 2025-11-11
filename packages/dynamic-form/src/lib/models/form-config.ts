@@ -3,7 +3,6 @@ import { InferFormValue, RegisteredFieldTypes } from './types';
 import { SchemaDefinition } from './schemas';
 import { ContextAwareValidator, SimpleCustomValidator, TreeValidator } from '../core/validation/validator-types';
 import { CustomFunction } from '../core/expressions/custom-function-types';
-import { EvaluationContext } from './expressions';
 import { ValidationMessages } from './validation-types';
 
 /**

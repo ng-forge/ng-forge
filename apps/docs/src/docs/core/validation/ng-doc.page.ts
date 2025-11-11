@@ -3,7 +3,7 @@ import CoreCategory from '../ng-doc.category';
 
 const ValidationPage: NgDocPage = {
   title: 'Validation',
-  mdFile: ['./basics.md', './reference.md', './advanced.md'],
+  mdFile: ['./basics.md', './reference.md', './advanced.md', './custom-validators.md'],
   category: CoreCategory,
   order: 2,
 };
