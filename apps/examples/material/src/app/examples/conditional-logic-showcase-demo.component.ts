@@ -9,7 +9,7 @@ import { JsonPipe } from '@angular/common';
     class: 'example-container',
   },
   template: `
-    <dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
+    <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
 
     @let message = submitMessage(); @if (message) {
     <div
