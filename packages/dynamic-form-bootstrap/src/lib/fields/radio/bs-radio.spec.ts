@@ -1,4 +1,5 @@
 import { By } from '@angular/platform-browser';
+import { TestBed } from '@angular/core/testing';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { BootstrapFormTestUtils } from '../../testing/bootstrap-test-utils';
 
@@ -564,7 +565,7 @@ describe('BsRadioFieldComponent', () => {
         initialValue: { preference: '' },
       });
 
-      const radioInputs = fixture.debugElement.queryAll(By.css('.form-check-input[type="radio"]'));
+      let radioInputs = fixture.debugElement.queryAll(By.css('.form-check-input[type="radio"]'));
 
       // Initial state
       expect((radioInputs[0].nativeElement as HTMLInputElement).checked).toBe(false);
@@ -573,7 +574,12 @@ describe('BsRadioFieldComponent', () => {
       // Update via programmatic value change
       fixture.componentRef.setInput('value', { preference: 'option2' });
       fixture.detectChanges();
+      await fixture.whenStable();
+      TestBed.flushEffects();
+      fixture.detectChanges();
 
+      // Re-query after value change
+      radioInputs = fixture.debugElement.queryAll(By.css('.form-check-input[type="radio"]'));
       expect((radioInputs[1].nativeElement as HTMLInputElement).checked).toBe(true);
       expect(BootstrapFormTestUtils.getFormValue(component)['preference']).toBe('option2');
     });
