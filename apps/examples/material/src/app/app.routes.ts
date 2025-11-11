@@ -69,6 +69,18 @@ export const appRoutes: Route[] = [
         path: 'paginated-form',
         loadComponent: () => import('./examples/paginated-form-demo.component').then((m) => m.PaginatedFormDemoComponent),
       },
+      {
+        path: 'array',
+        loadComponent: () => import('./examples/array-demo.component').then((m) => m.ArrayDemoComponent),
+      },
+      {
+        path: 'group',
+        loadComponent: () => import('./examples/group-demo.component').then((m) => m.GroupDemoComponent),
+      },
+      {
+        path: 'row',
+        loadComponent: () => import('./examples/row-demo.component').then((m) => m.RowDemoComponent),
+      },
     ],
   },
 ];
