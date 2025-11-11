@@ -29,15 +29,32 @@ interface FieldContextWithRoot<TValue> extends FieldContext<TValue> {
 }
 
 /**
+ * Type guard to check if a FieldContext has the root() method
+ * The root() method exists at runtime but is not in public type definitions
+ */
+function hasRootMethod<TValue>(ctx: FieldContext<TValue>): ctx is FieldContextWithRoot<TValue> {
+  return typeof (ctx as any).root === 'function';
+}
+
+/**
  * Adapter that wraps simple validators to work with FieldContext
  * Allows simple validators (value, formValue) => error to work with Angular's validate() API
  */
 function adaptSimpleValidator<TValue>(simpleValidator: SimpleCustomValidator<TValue>): ContextAwareValidator<TValue> {
   return (ctx: FieldContext<TValue>) => {
     const value = ctx.value();
-    // Access root form value - root() exists at runtime but not in type definitions
-    const ctxWithRoot = ctx as unknown as FieldContextWithRoot<TValue>;
-    const formValue = ctxWithRoot.root()().value();
+
+    // Access root form value using type guard
+    let formValue: unknown;
+    if (hasRootMethod(ctx)) {
+      formValue = ctx.root()().value();
+    } else {
+      // Fallback: if root() doesn't exist, use current field value
+      // This shouldn't happen in practice, but provides safety
+      console.warn('[DynamicForm] FieldContext missing root() method - using current field value as fallback');
+      formValue = value;
+    }
+
     const result = simpleValidator(value, formValue);
     // Simple validators should return ValidationError | null
     return result as ValidationError | null;
