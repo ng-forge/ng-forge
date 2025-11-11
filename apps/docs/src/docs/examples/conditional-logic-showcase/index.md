@@ -1482,6 +1482,8 @@ This example demonstrates:
 
 Track completion and display progress:
 
+{% raw %}
+
 ```typescript
 template: `
   <div class="progress">
@@ -1490,6 +1492,8 @@ template: `
   <df-dynamic-form [config]="config" [(value)]="formValue" />
 `;
 ```
+
+{% endraw %}
 
 ### Save Draft Functionality
 
