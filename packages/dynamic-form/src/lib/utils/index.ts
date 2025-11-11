@@ -7,4 +7,3 @@ export { interpolateParams } from './interpolate-params';
 export { shouldShowErrors } from './should-show-errors';
 export { createResolvedErrorsSignal } from './create-resolved-errors-signal';
 export type { ResolvedError } from './create-resolved-errors-signal';
-export { getDisabledSignal } from './get-disabled-signal';

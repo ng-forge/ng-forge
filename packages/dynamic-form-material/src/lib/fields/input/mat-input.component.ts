@@ -2,14 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
-import {
-  createResolvedErrorsSignal,
-  DynamicText,
-  DynamicTextPipe,
-  getDisabledSignal,
-  shouldShowErrors,
-  ValidationMessages,
-} from '@ng-forge/dynamic-form';
+import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { MatInputComponent, MatInputProps } from './mat-input.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -27,13 +20,7 @@ import { AsyncPipe } from '@angular/common';
       <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }
 
-      <input
-        matInput
-        [field]="f"
-        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="tabIndex()"
-        [disabled]="isDisabled()"
-      />
+      <input matInput [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
 
       @if (props()?.hint; as hint) {
       <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
@@ -78,7 +65,4 @@ export default class MatInputFieldComponent implements MatInputComponent {
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  // Get disabled state from logic registry
-  readonly isDisabled = computed(() => getDisabledSignal(this.key(), this.field)());
 }

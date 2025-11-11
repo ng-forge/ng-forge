@@ -8,7 +8,6 @@ import {
   DynamicText,
   DynamicTextPipe,
   FieldOption,
-  getDisabledSignal,
   shouldShowErrors,
   ValidationMessages,
 } from '@ng-forge/dynamic-form';
@@ -35,7 +34,6 @@ import { AsyncPipe } from '@angular/common';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
         [compareWith]="props()?.compareWith || defaultCompare"
-        [disabled]="isDisabled()"
       >
         @for (option of options(); track option.value) {
         <mat-option [value]="option.value" [disabled]="option.disabled || false">
@@ -90,9 +88,6 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  // Get disabled state from logic registry
-  readonly isDisabled = computed(() => getDisabledSignal(this.key(), this.field)());
 
   defaultCompare = Object.is;
 }
