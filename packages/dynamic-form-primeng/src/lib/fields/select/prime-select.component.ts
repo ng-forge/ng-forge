@@ -49,6 +49,8 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         [showClear]="props()?.showClear ?? false"
         [styleClass]="selectClasses()"
       />
+      } @if (props()?.hint; as hint) {
+      <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
       } @for (error of errorsToDisplay(); track error.kind) {
       <small class="p-error">{{ error.message }}</small>
       }

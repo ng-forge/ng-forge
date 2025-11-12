@@ -1,6 +1,7 @@
 import { By } from '@angular/platform-browser';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { BootstrapFormTestUtils } from '../../testing/bootstrap-test-utils';
+import { delay } from '../../testing/delay';
 
 describe('BsSelectFieldComponent', () => {
   describe('Basic Bootstrap Select Integration', () => {
@@ -444,7 +445,7 @@ describe('BsSelectFieldComponent', () => {
       countrySelect.dispatchEvent(new Event('input', { bubbles: true }));
       countrySelect.dispatchEvent(new Event('change', { bubbles: true }));
       fixture.detectChanges();
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await delay();
 
       let formValue = BootstrapFormTestUtils.getFormValue(component);
       expect(formValue.country).toBe('CA');

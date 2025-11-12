@@ -5,7 +5,7 @@ import { BootstrapFormTestUtils } from '../../testing/bootstrap-test-utils';
 
 describe('BsInputFieldComponent', () => {
   describe('Basic Bootstrap Input Integration', () => {
-    it.skip('should render email input with full configuration', async () => {
+    it('should render email input with full configuration', async () => {
       const config = BootstrapFormTestUtils.builder()
         .field({
           key: 'email',
@@ -43,7 +43,7 @@ describe('BsInputFieldComponent', () => {
       expect(helpText.nativeElement.textContent.trim()).toBe('We will never share your email');
     });
 
-    it.skip('should handle user input and update form value', async () => {
+    it('should handle user input and update form value', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsInputField({ key: 'email', props: { type: 'email' } })
         .build();
@@ -82,7 +82,7 @@ describe('BsInputFieldComponent', () => {
   });
 
   describe('Different Input Types Integration', () => {
-    it.skip('should render various input types with correct attributes', async () => {
+    it('should render various input types with correct attributes', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsInputField({ key: 'firstName', props: { type: 'text' } })
         .bsInputField({ key: 'password', props: { type: 'password' } })
@@ -106,7 +106,7 @@ describe('BsInputFieldComponent', () => {
       expect(inputs[4].nativeElement.getAttribute('type')).toBe('tel');
     });
 
-    it.skip('should handle number input value changes', async () => {
+    it('should handle number input value changes', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsInputField({ key: 'age', props: { type: 'number' } })
         .build();
@@ -160,7 +160,7 @@ describe('BsInputFieldComponent', () => {
   });
 
   describe('Minimal Configuration Tests', () => {
-    it.skip('should render with default Bootstrap configuration', async () => {
+    it('should render with default Bootstrap configuration', async () => {
       const config = BootstrapFormTestUtils.builder().bsInputField({ key: 'firstName' }).build();
 
       const { fixture } = await BootstrapFormTestUtils.createTest({
@@ -224,7 +224,7 @@ describe('BsInputFieldComponent', () => {
       expect(inputs[1].nativeElement.classList.contains('form-control-lg')).toBe(true);
     });
 
-    it.skip('should handle multiple inputs with independent value changes', async () => {
+    it('should handle multiple inputs with independent value changes', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsInputField({ key: 'firstName' })
         .bsInputField({ key: 'email', props: { type: 'email' } })
@@ -290,7 +290,7 @@ describe('BsInputFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component).firstName).toBe('');
     });
 
-    it.skip('should apply default Bootstrap configuration', async () => {
+    it('should apply default Bootstrap configuration', async () => {
       const config = BootstrapFormTestUtils.builder().bsInputField({ key: 'firstName' }).build();
 
       const { fixture } = await BootstrapFormTestUtils.createTest({
@@ -306,7 +306,7 @@ describe('BsInputFieldComponent', () => {
       expect(container).toBeTruthy();
     });
 
-    it.skip('should handle special characters and unicode input', async () => {
+    it('should handle special characters and unicode input', async () => {
       const config = BootstrapFormTestUtils.builder().bsInputField({ key: 'firstName' }).build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
@@ -322,7 +322,7 @@ describe('BsInputFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component).firstName).toBe(specialText);
     });
 
-    it.skip('should handle rapid value changes correctly', async () => {
+    it('should handle rapid value changes correctly', async () => {
       const config = BootstrapFormTestUtils.builder().bsInputField({ key: 'firstName' }).build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
@@ -361,7 +361,7 @@ describe('BsInputFieldComponent', () => {
       expect(label.nativeElement.textContent.trim()).toBe('Email Address');
     });
 
-    it.skip('should render plaintext input variant', async () => {
+    it('should render plaintext input variant', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsInputField({
           key: 'email',

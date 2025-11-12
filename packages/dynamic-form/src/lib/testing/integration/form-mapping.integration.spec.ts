@@ -367,6 +367,90 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         expect(formInstance().valid()).toBe(true);
       });
     });
+
+    it('should handle flat array field with primitive values', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({
+          tags: ['', '', ''],
+        });
+
+        const formSchema = schema<typeof formValue>((path) => {
+          const arrayField: FieldDef<any> = {
+            key: 'tags',
+            type: 'array',
+            fields: [
+              {
+                key: 'tag',
+                type: 'input',
+                required: true,
+                minLength: 2,
+              } as FieldDef<any> & FieldWithValidation,
+            ],
+          };
+
+          mapFieldToForm(arrayField, path.tags as any);
+        });
+
+        const formInstance = form(formValue, formSchema);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        // Array itself is registered (no validation on empty array for now)
+        // TODO: Add array-level validation (minLength, maxLength) once implemented
+        expect(formInstance.tags).toBeDefined();
+
+        // Note: Array item validation is handled dynamically by ArrayFieldComponent
+        // at runtime, not during static schema creation. This test verifies that
+        // the array field itself is properly registered in the form.
+      });
+    });
+
+    it('should handle object array field with nested group', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({
+          contacts: [
+            { name: '', email: '' },
+            { name: '', email: '' },
+          ],
+        });
+
+        const formSchema = schema<typeof formValue>((path) => {
+          const arrayField: FieldDef<any> = {
+            key: 'contacts',
+            type: 'array',
+            fields: [
+              {
+                type: 'group',
+                fields: [
+                  {
+                    key: 'name',
+                    type: 'input',
+                    required: true,
+                  } as FieldDef<any> & FieldWithValidation,
+                  {
+                    key: 'email',
+                    type: 'input',
+                    required: true,
+                    email: true,
+                  } as FieldDef<any> & FieldWithValidation,
+                ],
+              },
+            ],
+          };
+
+          mapFieldToForm(arrayField, path.contacts as any);
+        });
+
+        const formInstance = form(formValue, formSchema);
+        rootFormRegistry.registerRootForm(formInstance);
+
+        // Array itself is registered
+        expect(formInstance.contacts).toBeDefined();
+
+        // Note: Object array validation (for nested group fields) is handled
+        // dynamically by ArrayFieldComponent at runtime. This test verifies
+        // that the array field with a group template is properly registered.
+      });
+    });
   });
 
   describe('Backward Compatibility', () => {

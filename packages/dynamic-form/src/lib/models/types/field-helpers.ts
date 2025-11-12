@@ -2,9 +2,9 @@
  * Helper types for creating type-safe field configurations with proper nesting constraints
  */
 
-import { PageField, RowField, GroupField } from '../../definitions';
+import { PageField, RowField, GroupField, ArrayField } from '../../definitions';
 import { RegisteredFieldTypes, LeafFieldTypes } from '../registry/field-registry';
-import { PageAllowedChildren, RowAllowedChildren, GroupAllowedChildren } from './nesting-constraints';
+import { PageAllowedChildren, RowAllowedChildren, GroupAllowedChildren, ArrayAllowedChildren } from './nesting-constraints';
 
 /**
  * Create a type-safe page field with nesting validation
@@ -64,6 +64,26 @@ export type TypeSafeRowField<TFields extends RowAllowedChildren[] = RowAllowedCh
  * ```
  */
 export type TypeSafeGroupField<TFields extends GroupAllowedChildren[] = GroupAllowedChildren[]> = Omit<GroupField<TFields>, 'fields'> & {
+  fields: TFields;
+};
+
+/**
+ * Create a type-safe array field with nesting validation
+ * Arrays can contain rows and leaf fields (but not pages or other arrays)
+ *
+ * @example
+ * ```typescript
+ * const array: TypeSafeArrayField = {
+ *   type: 'array',
+ *   key: 'array1',
+ *   fields: [
+ *     { type: 'row', key: 'row1', fields: [...] },
+ *     { type: 'input', key: 'field1', value: '' }
+ *   ]
+ * };
+ * ```
+ */
+export type TypeSafeArrayField<TFields extends ArrayAllowedChildren[] = ArrayAllowedChildren[]> = Omit<ArrayField<TFields>, 'fields'> & {
   fields: TFields;
 };
 

@@ -5,6 +5,9 @@ export interface BsSliderProps {
   valuePrefix?: string;
   valueSuffix?: string;
   helpText?: DynamicText;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 export type BsSliderField = SliderField<BsSliderProps>;

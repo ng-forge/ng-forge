@@ -47,6 +47,7 @@ import { format } from 'date-fns';
       [value]="formatDisplayDate(dateValue)"
       [readonly]="true"
       [fill]="'outline'"
+      [attr.tabindex]="tabIndex()"
       (click)="!f().disabled() && openModal()"
     >
       <div slot="error">

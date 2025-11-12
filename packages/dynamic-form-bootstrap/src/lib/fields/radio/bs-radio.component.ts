@@ -27,7 +27,9 @@ import { FormsModule } from '@angular/forms';
         @for (option of options(); track option.value; let i = $index) {
         <input
           type="radio"
-          [(ngModel)]="option.value"
+          [name]="key()"
+          [value]="option.value"
+          [(ngModel)]="f().value"
           [disabled]="option.disabled || f().disabled()"
           class="btn-check"
           [id]="key() + '_' + i"
@@ -47,7 +49,9 @@ import { FormsModule } from '@angular/forms';
       <div class="form-check" [class.form-check-inline]="props()?.inline" [class.form-check-reverse]="props()?.reverse">
         <input
           type="radio"
-          [(ngModel)]="option.value"
+          [name]="key()"
+          [value]="option.value"
+          [(ngModel)]="f().value"
           [disabled]="option.disabled || f().disabled()"
           class="form-check-input"
           [id]="key() + '_' + i"

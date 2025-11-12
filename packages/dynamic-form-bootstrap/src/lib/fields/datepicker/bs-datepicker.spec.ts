@@ -4,7 +4,7 @@ import { BootstrapFormTestUtils } from '../../testing/bootstrap-test-utils';
 
 describe('BsDatepickerFieldComponent', () => {
   describe('Basic Bootstrap Datepicker Integration', () => {
-    it.skip('should render datepicker with full configuration', async () => {
+    it('should render datepicker with full configuration', async () => {
       const config = BootstrapFormTestUtils.builder()
         .field({
           key: 'birthDate',
@@ -100,7 +100,7 @@ describe('BsDatepickerFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component).birthDate).toEqual(testDate);
     });
 
-    it.skip('should handle datepicker-specific properties', async () => {
+    it('should handle datepicker-specific properties', async () => {
       const config = BootstrapFormTestUtils.builder()
         .field({
           key: 'birthDate',
@@ -434,7 +434,7 @@ describe('BsDatepickerFieldComponent', () => {
   });
 
   describe('Datepicker-Specific Features', () => {
-    it.skip('should apply date range constraints', async () => {
+    it('should apply date range constraints', async () => {
       const minDate = '2020-01-01';
       const maxDate = '2025-12-31';
 

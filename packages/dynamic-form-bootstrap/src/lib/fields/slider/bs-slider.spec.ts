@@ -4,7 +4,7 @@ import { BootstrapFormTestUtils } from '../../testing/bootstrap-test-utils';
 
 describe('BsSliderFieldComponent', () => {
   describe('Basic Bootstrap Slider Integration', () => {
-    it.skip('should render volume slider with full configuration', async () => {
+    it('should render volume slider with full configuration', async () => {
       const config = BootstrapFormTestUtils.builder()
         .field({
           key: 'volume',
@@ -12,10 +12,10 @@ describe('BsSliderFieldComponent', () => {
           label: 'Volume Level',
           tabIndex: 1,
           className: 'volume-slider',
-          minValue: 0,
-          maxValue: 100,
-          step: 5,
           props: {
+            min: 0,
+            max: 100,
+            step: 5,
             showValue: true,
             helpText: 'Adjust the volume level',
           },
@@ -53,9 +53,11 @@ describe('BsSliderFieldComponent', () => {
       const config = BootstrapFormTestUtils.builder()
         .bsSliderField({
           key: 'volume',
-          minValue: 0,
-          maxValue: 100,
-          step: 1,
+          props: {
+            min: 0,
+            max: 100,
+            step: 1,
+          },
         })
         .build();
 
@@ -84,8 +86,10 @@ describe('BsSliderFieldComponent', () => {
       const config = BootstrapFormTestUtils.builder()
         .bsSliderField({
           key: 'volume',
-          minValue: 0,
-          maxValue: 100,
+          props: {
+            min: 0,
+            max: 100,
+          },
         })
         .build();
 
@@ -115,12 +119,12 @@ describe('BsSliderFieldComponent', () => {
   });
 
   describe('Different Slider Configurations Integration', () => {
-    it.skip('should render various slider configurations with correct attributes', async () => {
+    it('should render various slider configurations with correct attributes', async () => {
       const config = BootstrapFormTestUtils.builder()
-        .bsSliderField({ key: 'volume', minValue: 0, maxValue: 100, step: 1 })
-        .bsSliderField({ key: 'brightness', minValue: 0, maxValue: 255, step: 5 })
-        .bsSliderField({ key: 'rating', minValue: 1, maxValue: 5, step: 0.5 })
-        .bsSliderField({ key: 'temperature', minValue: -10, maxValue: 40, step: 1 })
+        .bsSliderField({ key: 'volume', props: { min: 0, max: 100, step: 1 } })
+        .bsSliderField({ key: 'brightness', props: { min: 0, max: 255, step: 5 } })
+        .bsSliderField({ key: 'rating', props: { min: 1, max: 5, step: 0.5 } })
+        .bsSliderField({ key: 'temperature', props: { min: -10, max: 40, step: 1 } })
         .build();
 
       const { fixture } = await BootstrapFormTestUtils.createTest({
@@ -148,7 +152,9 @@ describe('BsSliderFieldComponent', () => {
     });
 
     it('should handle different step values correctly', async () => {
-      const config = BootstrapFormTestUtils.builder().bsSliderField({ key: 'rating', minValue: 0, maxValue: 10, step: 0.5 }).build();
+      const config = BootstrapFormTestUtils.builder()
+        .bsSliderField({ key: 'rating', props: { min: 0, max: 10, step: 0.5 } })
+        .build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -166,9 +172,9 @@ describe('BsSliderFieldComponent', () => {
 
     it('should reflect external value changes for all slider types', async () => {
       const config = BootstrapFormTestUtils.builder()
-        .bsSliderField({ key: 'volume', minValue: 0, maxValue: 100 })
-        .bsSliderField({ key: 'brightness', minValue: 0, maxValue: 255 })
-        .bsSliderField({ key: 'rating', minValue: 1, maxValue: 5, step: 0.1 })
+        .bsSliderField({ key: 'volume', props: { min: 0, max: 100 } })
+        .bsSliderField({ key: 'brightness', props: { min: 0, max: 255 } })
+        .bsSliderField({ key: 'rating', props: { min: 1, max: 5, step: 0.1 } })
         .build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
@@ -334,7 +340,7 @@ describe('BsSliderFieldComponent', () => {
   });
 
   describe('Minimal Configuration Tests', () => {
-    it.skip('should render with default Bootstrap configuration', async () => {
+    it('should render with default Bootstrap configuration', async () => {
       const config = BootstrapFormTestUtils.builder().bsSliderField({ key: 'volume' }).build();
 
       const { fixture } = await BootstrapFormTestUtils.createTest({
@@ -385,10 +391,10 @@ describe('BsSliderFieldComponent', () => {
       expect(sliderInput.nativeElement.disabled).toBe(true);
     });
 
-    it.skip('should handle multiple sliders with independent value changes', async () => {
+    it('should handle multiple sliders with independent value changes', async () => {
       const config = BootstrapFormTestUtils.builder()
-        .bsSliderField({ key: 'volume', minValue: 0, maxValue: 100 })
-        .bsSliderField({ key: 'brightness', minValue: 0, maxValue: 255 })
+        .bsSliderField({ key: 'volume', props: { min: 0, max: 100 } })
+        .bsSliderField({ key: 'brightness', props: { min: 0, max: 255 } })
         .build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
@@ -447,7 +453,9 @@ describe('BsSliderFieldComponent', () => {
     });
 
     it('should handle zero values correctly', async () => {
-      const config = BootstrapFormTestUtils.builder().bsSliderField({ key: 'volume', minValue: 0, maxValue: 100 }).build();
+      const config = BootstrapFormTestUtils.builder()
+        .bsSliderField({ key: 'volume', props: { min: 0, max: 100 } })
+        .build();
 
       const { component } = await BootstrapFormTestUtils.createTest({
         config,
@@ -457,8 +465,10 @@ describe('BsSliderFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component).volume).toBe(0);
     });
 
-    it.skip('should handle negative values correctly', async () => {
-      const config = BootstrapFormTestUtils.builder().bsSliderField({ key: 'temperature', minValue: -20, maxValue: 40 }).build();
+    it('should handle negative values correctly', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .bsSliderField({ key: 'temperature', props: { min: -20, max: 40 } })
+        .build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -474,7 +484,9 @@ describe('BsSliderFieldComponent', () => {
     });
 
     it('should handle decimal values correctly', async () => {
-      const config = BootstrapFormTestUtils.builder().bsSliderField({ key: 'rating', minValue: 0, maxValue: 5, step: 0.1 }).build();
+      const config = BootstrapFormTestUtils.builder()
+        .bsSliderField({ key: 'rating', props: { min: 0, max: 5, step: 0.1 } })
+        .build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -490,7 +502,9 @@ describe('BsSliderFieldComponent', () => {
     });
 
     it('should handle rapid value changes correctly', async () => {
-      const config = BootstrapFormTestUtils.builder().bsSliderField({ key: 'volume', minValue: 0, maxValue: 100 }).build();
+      const config = BootstrapFormTestUtils.builder()
+        .bsSliderField({ key: 'volume', props: { min: 0, max: 100 } })
+        .build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -522,10 +536,10 @@ describe('BsSliderFieldComponent', () => {
             key: 'volume',
             type: 'slider',
             label: translationService.translate('form.volume.label'),
-            minValue: 0,
-            maxValue: 100,
-            step: 5,
             props: {
+              min: 0,
+              max: 100,
+              step: 5,
               helpText: translationService.translate('form.volume.helpText'),
             },
           })
@@ -589,9 +603,9 @@ describe('BsSliderFieldComponent', () => {
         .bsSliderField({
           key: 'volume',
           label: 'Volume',
-          minValue: 0,
-          maxValue: 100,
           props: {
+            min: 0,
+            max: 100,
             showValue: true,
           },
         })

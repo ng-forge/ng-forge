@@ -41,7 +41,6 @@ import { flattenFields } from '../../utils';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
-  providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
