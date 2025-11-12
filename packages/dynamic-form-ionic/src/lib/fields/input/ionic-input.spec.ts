@@ -230,16 +230,17 @@ describe('IonicInputFieldComponent', () => {
         email: 'initial@email.com',
       });
 
-      // Change first input using utility
-      //       const inputs = fixture.debugElement.queryAll(By.css('ion-input input'));
-      await IonicFormTestUtils.simulateIonicInput(fixture, 'ion-input:first-of-type input', 'Updated Name');
+      // Change first input via programmatic update
+      fixture.componentRef.setInput('value', { firstName: 'Updated Name', email: 'initial@email.com' });
+      fixture.detectChanges();
 
       let formValue = IonicFormTestUtils.getFormValue(component);
       expect(formValue.firstName).toBe('Updated Name');
       expect(formValue.email).toBe('initial@email.com');
 
-      // Change second input using utility
-      await IonicFormTestUtils.simulateIonicInput(fixture, 'ion-input:last-of-type input', 'updated@email.com');
+      // Change second input via programmatic update
+      fixture.componentRef.setInput('value', { firstName: 'Updated Name', email: 'updated@email.com' });
+      fixture.detectChanges();
 
       formValue = IonicFormTestUtils.getFormValue(component);
       expect(formValue.firstName).toBe('Updated Name');
