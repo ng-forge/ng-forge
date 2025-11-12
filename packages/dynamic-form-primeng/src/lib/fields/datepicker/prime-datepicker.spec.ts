@@ -224,8 +224,12 @@ describe('PrimeDatepickerFieldComponent', () => {
 
       const newDate = new Date(2024, 6, 15);
 
-      // Change third datepicker via programmatic update
-      await PrimeNGFormTestUtils.updateFormValue(fixture, { appointmentDate: newDate });
+      // Change third datepicker via programmatic update (must include all fields)
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
+        startDate: new Date(2024, 0, 1),
+        endDate: new Date(2024, 11, 31),
+        appointmentDate: newDate,
+      });
 
       const formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.startDate).toEqual(new Date(2024, 0, 1));
@@ -306,16 +310,22 @@ describe('PrimeDatepickerFieldComponent', () => {
 
       const newDate = new Date(2024, 5, 15);
 
-      // Change first datepicker via programmatic update
-      await PrimeNGFormTestUtils.updateFormValue(fixture, { startDate: newDate });
+      // Change first datepicker via programmatic update (must include all fields)
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
+        startDate: newDate,
+        endDate: new Date(2024, 11, 31),
+      });
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.startDate).toEqual(newDate);
       expect(formValue.endDate).toEqual(new Date(2024, 11, 31));
 
-      // Change second datepicker
+      // Change second datepicker (must include all fields)
       const anotherDate = new Date(2024, 8, 20);
-      await PrimeNGFormTestUtils.updateFormValue(fixture, { endDate: anotherDate });
+      await PrimeNGFormTestUtils.updateFormValue(fixture, {
+        startDate: newDate,
+        endDate: anotherDate,
+      });
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.startDate).toEqual(newDate);
