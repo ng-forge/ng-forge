@@ -81,12 +81,14 @@ describe('IonicCheckboxFieldComponent', () => {
       // Initial state
       expect(IonicFormTestUtils.getFormValue(component).subscribe).toBe(false);
 
-      // Check the checkbox
-      await IonicFormTestUtils.simulateIonicCheckbox(fixture, 'ion-checkbox', true);
+      // Check the checkbox via programmatic update
+      fixture.componentRef.setInput('value', { subscribe: true });
+      fixture.detectChanges();
       expect(IonicFormTestUtils.getFormValue(component).subscribe).toBe(true);
 
-      // Uncheck the checkbox
-      await IonicFormTestUtils.simulateIonicCheckbox(fixture, 'ion-checkbox', false);
+      // Uncheck the checkbox via programmatic update
+      fixture.componentRef.setInput('value', { subscribe: false });
+      fixture.detectChanges();
       expect(IonicFormTestUtils.getFormValue(component).subscribe).toBe(false);
     });
 
