@@ -234,29 +234,3 @@ describe('MatTextareaFieldComponent (Refactored)', () => {
     });
   });
 });
-
-/**
- * COMPARISON: Original vs Refactored
- *
- * ORIGINAL (mat-textarea.spec.ts:7-58):
- * - 1 test checking 11 properties
- * - initialValue with 5 fields (comments, description, feedback, bio, notes)
- * - If ONE property fails: all 11 assertions fail
- * - Failure message: "expected null to be truthy" - which property?
- * - Runtime: ~1000ms
- *
- * REFACTORED (this file):
- * - 17 focused unit tests + 1 integration test = 18 total
- * - initialValue with 1 field only
- * - If ONE property fails: only that ONE test fails
- * - Failure message: "should apply maxlength attribute" - exact property!
- * - Runtime per test: ~100-150ms
- *
- * BENEFITS:
- * ✅ Failures are specific and actionable
- * ✅ Tests run faster (minimal data)
- * ✅ Can run unit tests in parallel
- * ✅ Easy to focus on specific property: it.only('should apply rows attribute', ...)
- * ✅ Clear documentation of component capabilities
- * ✅ Reusable builders (MinimalTestBuilder)
- */

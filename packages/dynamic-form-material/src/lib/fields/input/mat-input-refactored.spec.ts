@@ -273,31 +273,3 @@ describe('MatInputFieldComponent (Refactored)', () => {
     });
   });
 });
-
-/**
- * PERFORMANCE COMPARISON:
- *
- * Old approach (mat-input.spec.ts:8-47):
- * - 1 test checking 8 properties
- * - initialValue: { email: '', password: '', firstName: '', age: 0, website: '', phone: '' }
- * - Estimated time: ~150-200ms per run
- * - Failure: "expected null to be truthy" - which property failed? Unknown!
- *
- * New approach (this file):
- * - 17 focused unit tests + 1 integration test = 18 tests total
- * - Each test: initialValue: { field: '' } (minimal!)
- * - Estimated time: ~30-50ms per test = ~900ms total for all 18
- * - Failure: "should render hint text" - exactly what failed!
- *
- * BENEFITS:
- * ✅ Failures are specific and actionable
- * ✅ Tests run faster (minimal data = less setup)
- * ✅ Can run unit tests in parallel
- * ✅ Can skip integration tests during development
- * ✅ Easy to focus on specific property: it.only('should render hint text', ...)
- * ✅ Clear documentation of what each property does
- *
- * WHEN TO USE WHICH:
- * - Unit tests (17 tests): Fast, focused, run always
- * - Integration test (1 test): Verifies features work together, can be slower
- */

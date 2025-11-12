@@ -2,22 +2,6 @@ import { By } from '@angular/platform-browser';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 import { MinimalTestBuilder } from '../../testing/minimal-test-builders';
 
-/**
- * REFACTORED SELECT TESTS - Demonstrating Pattern for Complex Components
- *
- * Original test (mat-select.spec.ts:7-54):
- * - 1 test checking 9 properties
- * - initialValue with 4 fields (country, languages, priority, categories)
- * - Runtime: 1145ms (SLOWEST TEST!)
- * - Failure: "expected null to be truthy" - which property?
- *
- * Refactored approach:
- * - 12 focused tests (one concern each)
- * - initialValue with 1 field only
- * - Runtime per test: ~100ms
- * - Failure: "should render options correctly" - exact!
- */
-
 describe('MatSelectFieldComponent (Refactored)', () => {
   describe('Basic Rendering (Unit)', () => {
     it('should render mat-select element', async () => {
@@ -254,31 +238,3 @@ describe('MatSelectFieldComponent (Refactored)', () => {
     });
   });
 });
-
-/**
- * IMPACT ANALYSIS:
- *
- * Original (mat-select.spec.ts:7-54):
- * - 1 test checking 9 properties
- * - initialValue: { country: 'US', languages: [], priority: 0, categories: [] }
- * - Runtime: 1145ms (SLOWEST!)
- * - Failure: Generic error messages
- *
- * Refactored (this file):
- * - 11 focused tests (9 unit + 1 CSS + 1 integration)
- * - initialValue: { field: null } for each test
- * - Actual runtime: ~1860ms total (814ms first + 9 tests @ ~110ms avg)
- * - Failure: Specific error messages
- * - Bug discovered: Duplicate className binding (same as textarea!)
- *
- * NET CHANGE:
- * - Slightly slower overall (~713ms more = +62%)
- * - BUT: 11x more granular, 100% clearer failures
- * - Bug discovery: 1 production bug found (className duplication)
- * - Parallelizable: YES (can run 4 tests concurrently)
- *
- * WITH PARALLELIZATION (4 cores):
- * - Sequential: 1860ms
- * - Parallel: ~1144ms (814 + ceiling(10/4) * 110)
- * - Net: Similar to original, but with 11 focused tests!
- */

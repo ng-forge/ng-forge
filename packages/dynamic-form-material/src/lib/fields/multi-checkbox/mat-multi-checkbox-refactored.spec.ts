@@ -2,22 +2,6 @@ import { By } from '@angular/platform-browser';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 import { MinimalTestBuilder } from '../../testing/minimal-test-builders';
 
-/**
- * REFACTORED MULTI-CHECKBOX TESTS - Demonstrating Pattern for Option-Based Components
- *
- * Original test (mat-multi-checkbox.spec.ts:7-53):
- * - 1 test checking 9 properties
- * - initialValue with 3 fields (hobbies, skills, preferences)
- * - Runtime: 915ms (2ND SLOWEST!)
- * - Failure: "expected null to be truthy" - which property?
- *
- * Refactored approach:
- * - 12 focused tests (one concern each)
- * - initialValue with 1 field only
- * - Runtime per test: ~100ms
- * - Failure: "should render checkboxes correctly" - exact!
- */
-
 describe('MatMultiCheckboxFieldComponent (Refactored)', () => {
   describe('Basic Rendering (Unit)', () => {
     it('should render checkbox group', async () => {
@@ -231,30 +215,3 @@ describe('MatMultiCheckboxFieldComponent (Refactored)', () => {
     });
   });
 });
-
-/**
- * IMPACT ANALYSIS:
- *
- * Original (mat-multi-checkbox.spec.ts:7-53):
- * - 1 test checking 9 properties
- * - initialValue: { hobbies: [], skills: [], preferences: [] }
- * - Runtime: 915ms (2ND SLOWEST!)
- * - Failure: Generic error messages
- *
- * Refactored (this file):
- * - 12 focused tests (10 unit + 2 integration)
- * - initialValue: { field: [] } for each test
- * - Estimated runtime: ~1700ms total (800ms first + 11 tests @ ~100ms avg)
- * - Failure: Specific error messages
- *
- * NET CHANGE:
- * - Slightly slower overall (~785ms more = +86%)
- * - BUT: 12x more granular, 100% clearer failures
- * - Bug discovery: TBD (component looks clean, no obvious bugs)
- * - Parallelizable: YES (can run 4 tests concurrently)
- *
- * WITH PARALLELIZATION (4 cores):
- * - Sequential: 1700ms
- * - Parallel: ~1000ms (800 + ceiling(11/4) * 100)
- * - Net: 9% faster than original!
- */

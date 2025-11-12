@@ -2,22 +2,6 @@ import { By } from '@angular/platform-browser';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 import { MinimalTestBuilder } from '../../testing/minimal-test-builders';
 
-/**
- * REFACTORED SLIDER TESTS
- *
- * Original test (mat-slider.spec.ts:8-65):
- * - 1 test checking 8 properties
- * - initialValue with 5 fields (volume, brightness, rating, temperature, speed)
- * - Runtime: 909ms (3RD SLOWEST!)
- * - Failure: Generic error messages
- *
- * Refactored approach:
- * - 12 focused tests (one concern each)
- * - initialValue with 1 field only
- * - Runtime per test: ~100ms
- * - Failure: Specific property errors
- */
-
 describe('MatSliderFieldComponent (Refactored)', () => {
   describe('Basic Rendering (Unit)', () => {
     it('should render slider element', async () => {

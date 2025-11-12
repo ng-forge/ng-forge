@@ -197,30 +197,3 @@ describe('MatInputFieldComponent (With Builders)', () => {
     });
   });
 });
-
-/**
- * COMPARISON: Lines of Code per Test
- *
- * Old approach (mat-input.spec.ts):
- * - Setup: 17 lines (config + initialValue with 6 fields)
- * - Assertions: 8 lines
- * - Total: 25 lines for 1 test with 8 assertions
- *
- * New approach with builders (this file):
- * - Setup: 1 line (MinimalTestBuilder.withX())
- * - Assertions: 3 lines
- * - Total: 4 lines per test, 17 tests = 68 lines
- *
- * DEVELOPER EXPERIENCE:
- * ✅ 4x less code per test
- * ✅ Zero mental overhead (builder name = test intent)
- * ✅ Copy-paste friendly (change builder method, done!)
- * ✅ Consistent patterns (all tests look similar)
- * ✅ Easy to add new properties (add one builder method, reuse everywhere)
- *
- * PERFORMANCE:
- * ✅ Faster: minimal initialValue = less setup time
- * ✅ Focused: one property = specific test timing
- * ✅ Parallelizable: independent tests can run concurrently
- * ✅ Predictable: each test ~30-50ms instead of 150-200ms
- */
