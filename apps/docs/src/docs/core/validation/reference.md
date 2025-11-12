@@ -150,21 +150,18 @@ Custom JavaScript expression.
 
 Use in `when` conditions:
 
-| Operator         | Description                  | Example                          |
-| ---------------- | ---------------------------- | -------------------------------- |
-| `equals`         | Exact match                  | `value: 'business'`              |
-| `notEquals`      | Not equal to                 | `value: 'pending'`               |
-| `greater`        | Greater than                 | `value: 100`                     |
-| `less`           | Less than                    | `value: 0`                       |
-| `greaterOrEqual` | Greater than or equal        | `value: 18`                      |
-| `lessOrEqual`    | Less than or equal           | `value: 120`                     |
-| `contains`       | String/array contains        | `value: '@gmail.com'`            |
-| `notContains`    | String/array doesn't contain | `value: 'test'`                  |
-| `startsWith`     | String starts with           | `value: 'https://'`              |
-| `endsWith`       | String ends with             | `value: '.com'`                  |
-| `matches`        | RegEx match                  | `value: '^[A-Z]'`                |
-| `in`             | Value in array               | `value: ['admin', 'moderator']`  |
-| `notIn`          | Value not in array           | `value: ['banned', 'suspended']` |
+| Operator         | Description           | Example               |
+| ---------------- | --------------------- | --------------------- |
+| `equals`         | Exact match           | `value: 'business'`   |
+| `notEquals`      | Not equal to          | `value: 'pending'`    |
+| `greater`        | Greater than          | `value: 100`          |
+| `less`           | Less than             | `value: 0`            |
+| `greaterOrEqual` | Greater than or equal | `value: 18`           |
+| `lessOrEqual`    | Less than or equal    | `value: 120`          |
+| `contains`       | String/array contains | `value: '@gmail.com'` |
+| `startsWith`     | String starts with    | `value: 'https://'`   |
+| `endsWith`       | String ends with      | `value: '.com'`       |
+| `matches`        | RegEx match           | `value: '^[A-Z]'`     |
 
 ### Operator Examples
 
