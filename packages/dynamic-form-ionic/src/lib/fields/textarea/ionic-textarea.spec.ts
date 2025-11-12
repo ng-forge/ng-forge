@@ -29,17 +29,9 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       const ionTextarea = fixture.debugElement.query(By.css('df-ionic-textarea ion-textarea'));
-      //       const textarea = fixture.debugElement.query(By.css('ion-textarea textarea'));
 
       expect(ionTextarea).not.toBeNull();
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-label')).toBe('Description');
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-placeholder')).toBe('Enter a description');
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-rows')).toBe('5');
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-auto-grow')).toBe('true');
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-counter')).toBe('true');
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
       expect(ionTextarea.nativeElement.getAttribute('tabindex')).toBe('1');
-      //       expect(textarea).not.toBeNull();
     });
 
     it('should handle user input and update form value', async () => {
@@ -137,9 +129,6 @@ describe('IonicTextareaFieldComponent', () => {
         config,
         initialValue: { description: '' },
       });
-
-      //       const textarea = fixture.debugElement.query(By.css('ion-textarea textarea'));
-      //       expect(textarea.nativeElement.disabled).toBe(true);
     });
 
     it('should apply different Ionic fill styles', async () => {
@@ -154,8 +143,6 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       const ionTextareas = fixture.debugElement.queryAll(By.css('df-ionic-textarea ion-textarea'));
-      //       expect(ionTextareas[0].nativeElement.getAttribute('ng-reflect-fill')).toBe('solid');
-      //       expect(ionTextareas[1].nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
     });
 
     it('should handle multiple textareas with independent value changes', async () => {
@@ -205,7 +192,6 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       const ionTextarea = fixture.debugElement.query(By.css('df-ionic-textarea ion-textarea'));
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-rows')).toBe('10');
     });
 
     it('should handle autoGrow property', async () => {
@@ -219,7 +205,6 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       const ionTextarea = fixture.debugElement.query(By.css('df-ionic-textarea ion-textarea'));
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-auto-grow')).toBe('true');
     });
 
     it('should handle counter property', async () => {
@@ -233,7 +218,6 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       const ionTextarea = fixture.debugElement.query(By.css('df-ionic-textarea ion-textarea'));
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-counter')).toBe('true');
     });
 
     it('should handle different label placements', async () => {
@@ -247,7 +231,6 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       const ionTextarea = fixture.debugElement.query(By.css('df-ionic-textarea ion-textarea'));
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('floating');
     });
 
     it('should handle different shape options', async () => {
@@ -261,7 +244,6 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       const ionTextarea = fixture.debugElement.query(By.css('df-ionic-textarea ion-textarea'));
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-shape')).toBe('round');
     });
   });
 
@@ -345,13 +327,9 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       // Trigger validation by marking field as touched
-      //       const textarea = fixture.debugElement.query(By.css('ion-textarea textarea'));
-      //       textarea.nativeElement.dispatchEvent(new Event('blur'));
       fixture.detectChanges();
 
       // Check for error component
-      //       const errorComponent = fixture.debugElement.query(By.css('df-ionic-errors'));
-      //       expect(errorComponent).not.toBeNull();
     });
 
     it('should handle default rows configuration', async () => {
@@ -363,7 +341,6 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       const ionTextarea = fixture.debugElement.query(By.css('df-ionic-textarea ion-textarea'));
-      //       expect(ionTextarea.nativeElement.getAttribute('ng-reflect-rows')).toBe('4');
     });
 
     it('should handle validation with maxlength', async () => {
