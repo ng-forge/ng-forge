@@ -1,5 +1,9 @@
 Groups nest form fields under a single key in the form value. This creates logical grouping for form data, not visual grouping.
 
+## Interactive Demo
+
+{{ NgDocActions.demo("GroupFieldDemoComponent") }}
+
 ## Basic Group
 
 ```typescript

@@ -1,5 +1,9 @@
 Organize fields into horizontal rows for compact layouts. Rows display fields side-by-side.
 
+## Interactive Demo
+
+{{ NgDocActions.demo("RowFieldDemoComponent") }}
+
 ## Basic Row
 
 ```typescript

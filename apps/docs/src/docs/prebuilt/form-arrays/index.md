@@ -1,5 +1,9 @@
 Arrays create dynamic collections of field values. The fields array defines a **template** that is cloned for each array item.
 
+## Interactive Demo
+
+{{ NgDocActions.demo("ArrayFieldDemoComponent") }}
+
 ## Flat Arrays (Primitive Values)
 
 For simple arrays of primitive values, use a leaf field as the template:
