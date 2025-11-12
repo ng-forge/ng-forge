@@ -80,6 +80,10 @@ describe('MatSelectFieldComponent', () => {
         },
       });
 
+      // Extra stabilization for Material select component rendering
+      fixture.detectChanges();
+      await fixture.whenStable();
+
       // Initial value check
       expect(MaterialFormTestUtils.getFormValue(component).country).toBe('');
 
