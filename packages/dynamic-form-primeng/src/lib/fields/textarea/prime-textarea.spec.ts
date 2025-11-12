@@ -36,7 +36,7 @@ describe('PrimeTextareaFieldComponent', () => {
       });
 
       const textarea = fixture.debugElement.query(By.css('textarea[pInputTextarea]'));
-      const fieldWrapper = fixture.debugElement.query(By.css('.df-prime-field'));
+      const hostElement = fixture.debugElement.query(By.css('[data-testid="comments"]'));
       const label = fixture.debugElement.query(By.css('label'));
       const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
@@ -45,7 +45,7 @@ describe('PrimeTextareaFieldComponent', () => {
       expect(textarea.nativeElement.getAttribute('rows')).toBe('6');
       expect(textarea.nativeElement.getAttribute('maxlength')).toBe('500');
       expect(textarea.nativeElement.getAttribute('tabindex')).toBe('1');
-      expect(fieldWrapper.nativeElement.className).toContain('comments-textarea');
+      expect(hostElement.nativeElement.className).toContain('comments-textarea');
       expect(label.nativeElement.textContent.trim()).toBe('Comments');
       expect(hint.nativeElement.textContent.trim()).toBe('Please provide detailed feedback');
     });
