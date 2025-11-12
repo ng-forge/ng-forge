@@ -1,4 +1,5 @@
 import { By } from '@angular/platform-browser';
+import { delay } from '../../testing/delay';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
@@ -83,6 +84,7 @@ describe('MatSelectFieldComponent', () => {
       // Extra stabilization for Material select component rendering
       fixture.detectChanges();
       await fixture.whenStable();
+      await delay(100); // Additional delay for CI environments
 
       // Initial value check
       expect(MaterialFormTestUtils.getFormValue(component).country).toBe('');
