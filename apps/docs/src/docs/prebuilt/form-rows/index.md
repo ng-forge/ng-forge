@@ -10,13 +10,13 @@ Organize fields into horizontal rows for compact layouts. Rows display fields si
 {
   type: 'row',
   fields: [
-    { key: 'firstName', type: 'input', label: 'First Name', value: '' },
-    { key: 'lastName', type: 'input', label: 'Last Name', value: '' },
+    { key: 'firstName', type: 'input', label: 'First Name', value: '', col: 6 },
+    { key: 'lastName', type: 'input', label: 'Last Name', value: '', col: 6 },
   ],
 }
 ```
 
-Rows flatten their children - they don't add nesting to form values.
+Rows flatten their children - they don't add nesting to form values. Use the `col` property to control field widths (see Column Sizing below).
 
 ## Column Sizing
 
@@ -148,8 +148,8 @@ Rows are layout containers - they don't add nesting to your form values. Fields 
     {
       type: 'row',
       fields: [
-        { key: 'firstName', type: 'input', value: '' },
-        { key: 'lastName', type: 'input', value: '' },
+        { key: 'firstName', type: 'input', value: '', col: 6 },
+        { key: 'lastName', type: 'input', value: '', col: 6 },
       ],
     },
   ];
