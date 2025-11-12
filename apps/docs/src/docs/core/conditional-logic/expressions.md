@@ -300,8 +300,8 @@ All conditions must be true.
 
 ```typescript
 {
-  logic: 'and',
-  expressions: [
+  type: 'and',
+  conditions: [
     {
       type: 'fieldValue',
       fieldPath: 'accountType',
@@ -334,8 +334,8 @@ All conditions must be true.
   logic: [{
     type: 'hidden',
     condition: {
-      logic: 'and',
-      expressions: [
+      type: 'and',
+      conditions: [
         {
           type: 'fieldValue',
           fieldPath: 'accountType',
@@ -360,8 +360,8 @@ At least one condition must be true.
 
 ```typescript
 {
-  logic: 'or',
-  expressions: [
+  type: 'or',
+  conditions: [
     {
       type: 'fieldValue',
       fieldPath: 'role',
@@ -388,8 +388,8 @@ At least one condition must be true.
   logic: [{
     type: 'hidden',
     condition: {
-      logic: 'or',
-      expressions: [
+      type: 'or',
+      conditions: [
         {
           type: 'fieldValue',
           fieldPath: 'role',
@@ -433,8 +433,8 @@ Combine AND/OR logic for complex conditions.
 
 ```typescript
 {
-  logic: 'and',
-  expressions: [
+  type: 'and',
+  conditions: [
     {
       type: 'fieldValue',
       fieldPath: 'country',
@@ -442,8 +442,8 @@ Combine AND/OR logic for complex conditions.
       value: 'US',
     },
     {
-      logic: 'or',
-      expressions: [
+      type: 'or',
+      conditions: [
         {
           type: 'fieldValue',
           fieldPath: 'age',
@@ -476,8 +476,8 @@ This means: "Country must be US AND (age >= 21 OR has parental consent)"
   logic: [{
     type: 'hidden',
     condition: {
-      logic: 'or',
-      expressions: [
+      type: 'or',
+      conditions: [
         {
           type: 'fieldValue',
           fieldPath: 'accountType',
@@ -509,8 +509,8 @@ Hidden for free accounts OR unverified accounts.
   logic: [{
     type: 'required',
     condition: {
-      logic: 'and',
-      expressions: [
+      type: 'and',
+      conditions: [
         {
           type: 'fieldValue',
           fieldPath: 'accountType',
@@ -572,8 +572,8 @@ Order items become read-only once order is shipped, delivered, or cancelled.
 
 // ❌ Avoid - Unnecessarily complex
 {
-  logic: 'or',
-  expressions: [
+  type: 'or',
+  conditions: [
     { type: 'fieldValue', fieldPath: 'role', operator: 'equals', value: 'admin' },
     { type: 'fieldValue', fieldPath: 'role', operator: 'equals', value: 'owner' },
   ],
@@ -631,7 +631,7 @@ interface ConditionalExpression {
   value?: unknown;
   expression?: string;
   conditions?: {
-    logic: 'and' | 'or';
+    type: 'and' | 'or';
     expressions: ConditionalExpression[];
   };
 }

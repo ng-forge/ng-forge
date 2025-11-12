@@ -38,11 +38,11 @@ Here's a complete working example of a group field with validation:
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicFormComponent } from '@ng-forge/dynamic-form';
+import { DynamicForm } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-user-profile-form',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: ` <dynamic-form [config]="formConfig" (formSubmit)="onSubmit($event)" /> `,
 })
 export class UserProfileFormComponent {

@@ -49,11 +49,11 @@ Here's a complete working example of a row field with multiple fields:
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicFormComponent } from '@ng-forge/dynamic-form';
+import { DynamicForm } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-address-form',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: ` <dynamic-form [config]="formConfig" (formSubmit)="onSubmit($event)" /> `,
 })
 export class AddressFormComponent {

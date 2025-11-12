@@ -258,8 +258,8 @@ All conditions must be true:
 
 ```typescript
 {
-  logic: 'and',
-  expressions: [
+  type: 'and',
+  conditions: [
     {
       type: 'fieldValue',
       fieldPath: 'accountType',
@@ -282,8 +282,8 @@ At least one condition must be true:
 
 ```typescript
 {
-  logic: 'or',
-  expressions: [
+  type: 'or',
+  conditions: [
     {
       type: 'fieldValue',
       fieldPath: 'role',
@@ -335,7 +335,7 @@ interface ConditionalExpression {
   value?: unknown;
   expression?: string;
   conditions?: {
-    logic: 'and' | 'or';
+    type: 'and' | 'or';
     expressions: ConditionalExpression[];
   };
 }

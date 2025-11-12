@@ -208,8 +208,8 @@ Combine multiple conditions with AND/OR logic:
   validators: [{
     type: 'required',
     when: {
-      logic: 'and',
-      expressions: [
+      type: 'and',
+      conditions: [
         {
           type: 'fieldValue',
           fieldPath: 'accountType',
@@ -411,8 +411,8 @@ when: {
 
 // ❌ Avoid - Overly complex
 when: {
-  logic: 'and',
-  expressions: [/* 5 nested conditions */],
+  type: 'and',
+  conditions: [/* 5 nested conditions */],
 }
 ```
 
