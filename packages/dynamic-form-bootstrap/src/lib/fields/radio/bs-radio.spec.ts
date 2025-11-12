@@ -1,4 +1,5 @@
 import { By } from '@angular/platform-browser';
+import { TestBed } from '@angular/core/testing';
 import { createTestTranslationService } from '../../testing/fake-translation.service';
 import { BootstrapFormTestUtils } from '../../testing/bootstrap-test-utils';
 
@@ -49,7 +50,7 @@ describe('BsRadioFieldComponent', () => {
       expect(radioLabels[2].nativeElement.textContent.trim()).toBe('Other');
     });
 
-    it.skip('should handle user interactions and update form value', async () => {
+    it('should handle user interactions and update form value', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsRadioField({
           key: 'preference',
@@ -82,7 +83,7 @@ describe('BsRadioFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component)['preference']).toBe('option2');
     });
 
-    it.skip('should reflect external value changes in radio selection', async () => {
+    it('should reflect external value changes in radio selection', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsRadioField({
           key: 'preference',
@@ -110,7 +111,11 @@ describe('BsRadioFieldComponent', () => {
         priority: '',
       });
       fixture.detectChanges();
+      await fixture.whenStable();
+      TestBed.flushEffects();
+      fixture.detectChanges();
 
+      // Re-query after value change
       const radioInputs = fixture.debugElement.queryAll(By.css('.form-check-input[type="radio"]'));
       expect((radioInputs[2].nativeElement as HTMLInputElement).checked).toBe(true);
       expect(BootstrapFormTestUtils.getFormValue(component)['preference']).toBe('option3');
@@ -270,7 +275,7 @@ describe('BsRadioFieldComponent', () => {
       expect(allBtnLabels[3].nativeElement.classList.contains('btn-lg')).toBe(true);
     });
 
-    it.skip('should handle button group interactions correctly', async () => {
+    it('should handle button group interactions correctly', async () => {
       const config = BootstrapFormTestUtils.builder()
         .field({
           key: 'preference',
@@ -421,7 +426,7 @@ describe('BsRadioFieldComponent', () => {
     // Note: Initial value reflection is tested through external value changes test
     // which properly handles the signal-based forms initialization sequence
 
-    it.skip('should handle independent radio group interactions', async () => {
+    it('should handle independent radio group interactions', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsRadioField({
           key: 'gender',
@@ -548,7 +553,7 @@ describe('BsRadioFieldComponent', () => {
       expect(radioInputs.length).toBe(1);
     });
 
-    it.skip('should handle programmatic value updates correctly', async () => {
+    it('should handle programmatic value updates correctly', async () => {
       const config = BootstrapFormTestUtils.builder()
         .bsRadioField({
           key: 'preference',
@@ -564,7 +569,7 @@ describe('BsRadioFieldComponent', () => {
         initialValue: { preference: '' },
       });
 
-      const radioInputs = fixture.debugElement.queryAll(By.css('.form-check-input[type="radio"]'));
+      let radioInputs = fixture.debugElement.queryAll(By.css('.form-check-input[type="radio"]'));
 
       // Initial state
       expect((radioInputs[0].nativeElement as HTMLInputElement).checked).toBe(false);
@@ -573,7 +578,12 @@ describe('BsRadioFieldComponent', () => {
       // Update via programmatic value change
       fixture.componentRef.setInput('value', { preference: 'option2' });
       fixture.detectChanges();
+      await fixture.whenStable();
+      TestBed.flushEffects();
+      fixture.detectChanges();
 
+      // Re-query after value change
+      radioInputs = fixture.debugElement.queryAll(By.css('.form-check-input[type="radio"]'));
       expect((radioInputs[1].nativeElement as HTMLInputElement).checked).toBe(true);
       expect(BootstrapFormTestUtils.getFormValue(component)['preference']).toBe('option2');
     });

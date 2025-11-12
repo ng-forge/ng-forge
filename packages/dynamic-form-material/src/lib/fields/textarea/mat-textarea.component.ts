@@ -12,11 +12,7 @@ import { AsyncPipe } from '@angular/common';
   template: `
     @let f = field();
 
-    <mat-form-field
-      [appearance]="props()?.appearance || 'fill'"
-      [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'"
-      [class]="className() || ''"
-    >
+    <mat-form-field [appearance]="props()?.appearance || 'fill'" [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'">
       @if (label()) {
       <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }
@@ -27,6 +23,7 @@ import { AsyncPipe } from '@angular/common';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
+        [attr.maxlength]="props()?.maxLength"
         [attr.tabindex]="tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
         [disabled]="f().disabled()"
@@ -60,6 +57,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[class]': 'className()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
 })

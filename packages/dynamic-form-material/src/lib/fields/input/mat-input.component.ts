@@ -24,6 +24,7 @@ import { AsyncPipe } from '@angular/common';
         matInput
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.type]="props()?.type ?? 'text'"
         [attr.tabindex]="tabIndex()"
         [disabled]="f().disabled()"
         [readonly]="f().readonly()"

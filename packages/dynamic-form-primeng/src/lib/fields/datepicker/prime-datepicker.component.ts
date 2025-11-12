@@ -38,7 +38,7 @@ import { DatePicker } from 'primeng/datepicker';
       />
 
       @if (props()?.hint; as hint) {
-      <small class="p-hint">{{ hint | dynamicText | async }}</small>
+      <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
       } @for (error of errorsToDisplay(); track error.kind) {
       <small class="p-error">{{ error.message }}</small>
       }
