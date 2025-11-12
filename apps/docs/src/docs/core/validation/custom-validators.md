@@ -4,15 +4,23 @@ route: custom-validators
 keyword: ValidationCustomValidatorsPage
 ---
 
+> **⚠️ DOCUMENTATION UPDATE IN PROGRESS**
+> This page references an older API. For the current unified validator API, see:
+>
+> - [Custom Validators Example](/examples/custom-validators) - Live demo with updated API
+> - Package README - Updated validator documentation
+
 Custom validation functions for complex validation logic that goes beyond built-in validators.
 
 ## Overview
 
+> **Note:** The API shown below is being updated. The current API uses a unified `CustomValidator` type with `AsyncCustomValidator` and `HttpCustomValidator` for async operations.
+
 ng-forge supports three levels of custom validators, each designed for specific validation scenarios:
 
-1. **Simple Validators** - Basic validation using field value and form value
-2. **Context-Aware Validators** - Advanced validation with full Angular FieldContext
-3. **Tree Validators** - Cross-field validation with error targeting
+1. **Simple Validators** - Basic validation using field value and form value (⚠️ API Updated - now uses `CustomValidator`)
+2. **Context-Aware Validators** - Advanced validation with full Angular FieldContext (⚠️ API Updated - now uses `CustomValidator`)
+3. **Tree Validators** - Cross-field validation with error targeting (⚠️ API Updated - now uses `CustomValidator`)
 
 **Key Principle:** Validators should focus on validation logic, NOT presentation. Return only the error `kind` and configure messages at field level for proper i18n support.
 

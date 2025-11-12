@@ -229,27 +229,32 @@ Customize validation messages:
 
 ### Custom Validators
 
-ng-forge supports three levels of custom validators to handle any validation scenario.
+ng-forge supports three types of custom validators using Angular's Signal Forms API:
+
+1. **CustomValidator** - Synchronous validators with access to FieldContext
+2. **AsyncCustomValidator** - Async validators using Angular's resource API
+3. **HttpCustomValidator** - HTTP-specific validators with automatic request cancellation
 
 **Best Practice:** Validators should focus on validation logic, not presentation. Return ONLY the error `kind` and configure messages at field level for better i18n support and reusability.
 
 **Message Resolution Priority (STRICT):**
 
 1. Field-level `validationMessages[kind]` (highest - allows per-field customization)
-2. ValidatorConfig `errorMessage` (per-validator inline message)
+2. Form-level `defaultValidationMessages[kind]` (fallback for common messages)
 3. **No message configured = Warning logged + error NOT displayed to user**
 
 **Important:** Validator-returned messages are NOT used as fallbacks. All error messages MUST be explicitly configured at field/form level. This enforces proper i18n patterns and separation of concerns.
 
-#### 1. Simple Validators
+#### 1. Synchronous Custom Validators
 
-Simple validators receive the field value and entire form value. Perfect for basic validation logic:
+Custom validators receive the full `FieldContext` API from Angular Signal Forms, providing access to field state and other field values:
 
 ```typescript
-import { SimpleCustomValidator } from '@ng-forge/dynamic-form';
+import { CustomValidator } from '@ng-forge/dynamic-form';
 
 // ✅ RECOMMENDED: Return only kind, configure message at field level
-const noSpaces: SimpleCustomValidator<string> = (value) => {
+const noSpaces: CustomValidator<string> = (ctx) => {
+  const value = ctx.value();
   if (typeof value === 'string' && value.includes(' ')) {
     return { kind: 'noSpaces' }; // No hardcoded message
   }
@@ -271,43 +276,35 @@ const config = {
     },
   ],
   signalFormsConfig: {
-    simpleValidators: {
+    validators: {
       noSpaces,
     },
   },
 };
 ```
 
-**Alternative: Inline message via ValidatorConfig**
+**FieldContext API** provides access to:
+
+- `ctx.value()` - Current field value (signal)
+- `ctx.state` - Field state (errors, touched, dirty, etc.)
+- `ctx.valueOf(path)` - Access other field values (PUBLIC API for cross-field validation)
+- `ctx.stateOf(path)` - Access other field states
+- `ctx.field` - Current field tree
+
+#### 2. Cross-Field Validation
+
+Use `ctx.valueOf()` to access other field values for comparison validators:
 
 ```typescript
-// Option 2: Inline message (useful for one-off validators)
-{
-  validators: [
-    {
-      type: 'custom',
-      functionName: 'noSpaces',
-      errorMessage: 'Username cannot contain spaces', // Inline convenience
-    },
-  ];
-}
-```
-
-**Note:** While validators CAN return a `message` property, it is NOT used by the framework. All messages MUST be configured via `validationMessages` or `errorMessage`. This ensures proper i18n support and separation of concerns.
-
-#### 2. Context-Aware Validators
-
-Context-aware validators receive the full FieldContext, giving access to field state and other fields:
-
-```typescript
-import { ContextAwareValidator } from '@ng-forge/dynamic-form';
+import { CustomValidator } from '@ng-forge/dynamic-form';
 
 // ✅ RECOMMENDED: Return only kind, configure message at field level
-const lessThanField: ContextAwareValidator<number> = (ctx, params) => {
+const lessThanField: CustomValidator<number> = (ctx, params) => {
   const value = ctx.value();
-  const otherFieldName = params?.field as string;
-  const rootValue = ctx.root()().value() as Record<string, unknown>;
-  const otherValue = rootValue[otherFieldName];
+  const otherFieldPath = params?.field as string;
+
+  // Use valueOf() to access other field - PUBLIC API!
+  const otherValue = ctx.valueOf(otherFieldPath as any);
 
   if (otherValue !== undefined && value >= otherValue) {
     return { kind: 'notLessThan' }; // No hardcoded message
@@ -337,116 +334,202 @@ const config = {
     },
   ],
   signalFormsConfig: {
-    contextValidators: {
+    validators: {
       lessThanField,
     },
   },
 };
 ```
 
-#### 3. Tree Validators
+**Common Cross-Field Patterns:**
 
-Tree validators validate relationships between multiple fields and can target errors to specific fields:
+- Password confirmation matching
+- Date range validation (start < end)
+- Numeric range validation (min < max)
+- Conditional required fields
+
+#### 3. Async Validators (Resource-based)
+
+Async validators use Angular's resource API for database lookups or complex async operations:
 
 ```typescript
-import { TreeValidator } from '@ng-forge/dynamic-form';
+import { AsyncCustomValidator } from '@ng-forge/dynamic-form';
+import { resource } from '@angular/core';
+import { inject } from '@angular/core';
+import { UserService } from './user.service';
 
-// ✅ RECOMMENDED: Return only kind, configure message at field level
-const passwordsMatch: TreeValidator = (ctx) => {
-  const formValue = ctx.value() as Record<string, unknown>;
-  const password = formValue.password;
-  const confirmPassword = formValue.confirmPassword;
+const checkUsernameAvailable: AsyncCustomValidator<string> = {
+  // Extract params from field context
+  params: (ctx) => ({ username: ctx.value() }),
 
-  if (password && confirmPassword && password !== confirmPassword) {
-    return { kind: 'passwordMismatch' }; // No hardcoded message
-  }
-  return null;
+  // Create resource with params signal
+  factory: (params) => {
+    const userService = inject(UserService);
+    return resource({
+      request: () => params(),
+      loader: ({ request }) => {
+        if (!request?.username) return Promise.resolve(null);
+        return userService.checkAvailability(request.username);
+      },
+    });
+  },
+
+  // Map result to validation error
+  onSuccess: (result, ctx) => {
+    if (!result) return null;
+    return result.available ? null : { kind: 'usernameTaken' };
+  },
+
+  // Handle errors gracefully
+  onError: (error, ctx) => {
+    console.error('Availability check failed:', error);
+    return null; // Don't block form on network errors
+  },
 };
 
-// Apply to a group or form level with message configuration
 const config = {
   fields: [
     {
-      key: 'credentials',
-      type: 'group',
-      label: 'Create Password',
-      validators: [{ type: 'customTree', functionName: 'passwordsMatch' }],
+      key: 'username',
+      type: 'input',
+      validators: [{ type: 'customAsync', functionName: 'checkUsernameAvailable' }],
       validationMessages: {
-        passwordMismatch: 'Passwords must match', // Message at group level
+        usernameTaken: 'This username is already taken',
       },
-      fields: [
-        {
-          key: 'password',
-          type: 'input',
-          value: '',
-          label: 'Password',
-          props: { type: 'password' },
-        },
-        {
-          key: 'confirmPassword',
-          type: 'input',
-          value: '',
-          label: 'Confirm Password',
-          props: { type: 'password' },
-        },
-      ],
     },
   ],
   signalFormsConfig: {
-    treeValidators: {
-      passwordsMatch,
+    asyncValidators: {
+      checkUsernameAvailable,
     },
   },
 };
 ```
 
-#### Conditional Custom Validators
+**Key Benefits:**
 
-Custom validators support conditional logic just like built-in validators:
+- Automatic loading states via resource API
+- Angular manages resource lifecycle
+- Reactive - refetches when params change
+
+#### 4. HTTP Validators
+
+HTTP validators provide optimized HTTP validation with automatic request cancellation:
 
 ```typescript
-// ✅ RECOMMENDED: Return only kind
-const businessEmailValidator: SimpleCustomValidator<string> = (value) => {
-  if (typeof value === 'string' && !value.endsWith('@company.com')) {
-    return { kind: 'businessEmail' }; // No hardcoded message
+import { HttpCustomValidator } from '@ng-forge/dynamic-form';
+
+const checkEmailDomain: HttpCustomValidator<string> = {
+  // Build HTTP request from context
+  request: (ctx) => {
+    const email = ctx.value();
+    if (!email?.includes('@')) return undefined; // Skip if invalid
+
+    const domain = email.split('@')[1];
+    return {
+      url: `/api/validate-domain`,
+      method: 'POST',
+      body: { domain },
+      headers: { 'Content-Type': 'application/json' },
+    };
+  },
+
+  // NOTE: Inverted logic - onSuccess checks if response indicates INVALID
+  // We're validating, not fetching data!
+  onSuccess: (response, ctx) => {
+    // Assuming API returns { valid: boolean }
+    return response.valid ? null : { kind: 'invalidDomain' };
+  },
+
+  onError: (error, ctx) => {
+    console.error('Domain validation failed:', error);
+    return null; // Don't block form on network errors
+  },
+};
+
+const config = {
+  fields: [
+    {
+      key: 'email',
+      type: 'input',
+      validators: [{ type: 'customHttp', functionName: 'checkEmailDomain' }],
+      validationMessages: {
+        invalidDomain: 'This email domain is not allowed',
+      },
+    },
+  ],
+  signalFormsConfig: {
+    httpValidators: {
+      checkEmailDomain,
+    },
+  },
+};
+```
+
+**Key Benefits:**
+
+- Automatic request cancellation when field changes
+- Built-in debouncing via resource API
+- Prevents race conditions
+
+**Important:** HTTP validators use "inverted logic" - `onSuccess` should return an error if validation fails, not if the HTTP request succeeds. You're checking validation status, not fetching data.
+
+#### Conditional Custom Validators
+
+Apply validators conditionally using the `condition` function:
+
+```typescript
+const businessEmailValidator: CustomValidator<string> = (ctx) => {
+  const value = ctx.value();
+  const domain = value?.split('@')[1];
+
+  // Common free email domains to reject for business use
+  const freeEmailDomains = ['gmail.com', 'yahoo.com', 'hotmail.com'];
+
+  if (domain && freeEmailDomains.includes(domain.toLowerCase())) {
+    return { kind: 'requireBusinessEmail' };
   }
   return null;
 };
 
 const config = {
   fields: [
-    { key: 'accountType', type: 'select', value: 'personal' },
+    {
+      key: 'accountType',
+      type: 'select',
+      value: 'personal',
+      options: [
+        { value: 'personal', label: 'Personal' },
+        { value: 'business', label: 'Business' },
+      ],
+    },
     {
       key: 'email',
       type: 'input',
       value: '',
       label: 'Email',
       validators: [
-        { type: 'required' },
-        { type: 'email' },
         {
           type: 'custom',
-          functionName: 'businessEmail',
-          when: {
-            type: 'fieldValue',
-            fieldPath: 'accountType',
-            operator: 'equals',
-            value: 'business',
-          },
+          functionName: 'businessEmailValidator',
+          // Only apply when account type is "business"
+          condition: (config, formValue) => formValue?.accountType === 'business',
         },
       ],
       validationMessages: {
-        businessEmail: 'Must use company email', // Message at field level
+        requireBusinessEmail: 'Please use a business email address',
       },
     },
   ],
   signalFormsConfig: {
-    simpleValidators: {
-      businessEmail: businessEmailValidator,
+    validators: {
+      businessEmailValidator,
     },
   },
 };
 ```
+
+The validator is only active when the condition returns `true`, allowing dynamic validation based on form state.
 
 ## Conditional Logic
 
@@ -736,14 +819,14 @@ interface FormConfig {
 interface SignalFormsConfig {
   migrateLegacyValidation?: boolean;
   customFunctions?: Record<string, CustomFunction>;
-  simpleValidators?: Record<string, SimpleCustomValidator>;
-  contextValidators?: Record<string, ContextAwareValidator>;
-  treeValidators?: Record<string, TreeValidator>;
+  validators?: Record<string, CustomValidator>;
+  asyncValidators?: Record<string, AsyncCustomValidator>;
+  httpValidators?: Record<string, HttpCustomValidator>;
   strictMode?: boolean;
 }
 
 // Validator configuration (discriminated union)
-type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | TreeValidatorConfig;
+type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | HttpValidatorConfig;
 
 interface BuiltInValidatorConfig {
   type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern';
@@ -761,24 +844,40 @@ interface CustomValidatorConfig {
   when?: ConditionalExpression;
 }
 
-interface TreeValidatorConfig {
-  type: 'customTree';
+interface AsyncValidatorConfig {
+  type: 'customAsync';
   functionName: string;
   params?: Record<string, unknown>;
-  targetFields?: string[];
+  errorMessage?: string;
+  when?: ConditionalExpression;
+}
+
+interface HttpValidatorConfig {
+  type: 'customHttp';
+  functionName: string;
+  params?: Record<string, unknown>;
   errorMessage?: string;
   when?: ConditionalExpression;
 }
 
 // Custom validator function signatures
-type SimpleCustomValidator<TValue = unknown> = (value: TValue, formValue: unknown) => ValidationError | null;
-
-type ContextAwareValidator<TValue = unknown> = (ctx: FieldContext<TValue>, params?: Record<string, unknown>) => ValidationError | null;
-
-type TreeValidator<TModel = unknown> = (
-  ctx: FieldContext<TModel>,
+type CustomValidator<TValue = unknown> = (
+  ctx: FieldContext<TValue>,
   params?: Record<string, unknown>
 ) => ValidationError | ValidationError[] | null;
+
+interface AsyncCustomValidator<TValue = unknown, TParams = unknown, TResult = unknown> {
+  readonly params: (ctx: FieldContext<TValue>, config?: Record<string, unknown>) => TParams;
+  readonly factory: (params: Signal<TParams | undefined>) => ResourceRef<TResult | undefined>;
+  readonly onSuccess?: (result: TResult, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
+  readonly onError?: (error: unknown, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
+}
+
+interface HttpCustomValidator<TValue = unknown, TResult = unknown> {
+  readonly request: (ctx: FieldContext<TValue>) => HttpResourceRequest | string | undefined;
+  readonly onSuccess?: (result: TResult, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
+  readonly onError?: (error: unknown, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
+}
 
 // Logic configuration
 interface LogicConfig {
