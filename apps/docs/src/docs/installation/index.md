@@ -107,15 +107,15 @@ ng-forge dynamic forms supports multiple UI frameworks. Install the integration 
 
 ### Material Design (Production Ready)
 
-```bash group="install" name="npm"
+```bash group="install-material" name="npm"
 npm install @ng-forge/dynamic-form-material
 ```
 
-```bash group="install" name="yarn"
+```bash group="install-material" name="yarn"
 yarn add @ng-forge/dynamic-form-material
 ```
 
-```bash group="install" name="pnpm"
+```bash group="install-material" name="pnpm"
 pnpm add @ng-forge/dynamic-form-material
 ```
 
@@ -131,15 +131,15 @@ See [Material Integration](../ui-libs-integrations/material) for full documentat
 
 ### PrimeNG (Preview)
 
-```bash group="install" name="npm"
+```bash group="install-primeng" name="npm"
 npm install @ng-forge/dynamic-form-primeng
 ```
 
-```bash group="install" name="yarn"
+```bash group="install-primeng" name="yarn"
 yarn add @ng-forge/dynamic-form-primeng
 ```
 
-```bash group="install" name="pnpm"
+```bash group="install-primeng" name="pnpm"
 pnpm add @ng-forge/dynamic-form-primeng
 ```
 
@@ -155,15 +155,15 @@ See [PrimeNG Integration](../ui-libs-integrations/primeng) for full documentatio
 
 ### Bootstrap (Preview)
 
-```bash group="install" name="npm"
+```bash group="install-bootstrap" name="npm"
 npm install @ng-forge/dynamic-form-bootstrap
 ```
 
-```bash group="install" name="yarn"
+```bash group="install-bootstrap" name="yarn"
 yarn add @ng-forge/dynamic-form-bootstrap
 ```
 
-```bash group="install" name="pnpm"
+```bash group="install-bootstrap" name="pnpm"
 pnpm add @ng-forge/dynamic-form-bootstrap
 ```
 
@@ -179,15 +179,15 @@ See [Bootstrap Integration](../ui-libs-integrations/bootstrap) for full document
 
 ### Ionic (Preview)
 
-```bash group="install" name="npm"
+```bash group="install-ionic" name="npm"
 npm install @ng-forge/dynamic-form-ionic
 ```
 
-```bash group="install" name="yarn"
+```bash group="install-ionic" name="yarn"
 yarn add @ng-forge/dynamic-form-ionic
 ```
 
-```bash group="install" name="pnpm"
+```bash group="install-ionic" name="pnpm"
 pnpm add @ng-forge/dynamic-form-ionic
 ```
 
