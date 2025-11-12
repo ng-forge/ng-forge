@@ -36,6 +36,10 @@ describe('MatSelectFieldComponent', () => {
         },
       });
 
+      // Extra stabilization for Material select component rendering
+      fixture.detectChanges();
+      await fixture.whenStable();
+
       const select = fixture.debugElement.query(By.css('mat-select'));
       const formField = fixture.debugElement.query(By.css('mat-form-field'));
       const hostElement = fixture.debugElement.query(By.css('df-mat-select'));
