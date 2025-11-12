@@ -2,16 +2,6 @@ import { By } from '@angular/platform-browser';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 import { MinimalTestBuilder } from '../../testing/minimal-test-builders';
 
-/**
- * PILOT IMPLEMENTATION: Using MinimalTestBuilder Pattern
- *
- * This demonstrates the ultimate simplified approach:
- * - Minimal test data via builders
- * - One line test data creation
- * - Clear intent from builder method names
- * - Maximum reusability
- */
-
 describe('MatInputFieldComponent (With Builders)', () => {
   describe('Input Type Attribute (Unit)', () => {
     it('should render email input type', async () => {

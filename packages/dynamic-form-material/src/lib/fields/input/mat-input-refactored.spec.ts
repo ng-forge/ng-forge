@@ -1,19 +1,6 @@
 import { By } from '@angular/platform-browser';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 
-/**
- * PILOT IMPLEMENTATION: Refactored Material Input Tests
- *
- * This file demonstrates the improved test methodology:
- * - One test = one concern (focused, fast, clear failures)
- * - Minimal test data (only what's being tested)
- * - Clear categorization (unit vs integration)
- * - Better naming and organization
- *
- * Compare with mat-input.spec.ts:8-47 "should render email input with full configuration"
- * which tests 8 different things with unnecessary complexity.
- */
-
 describe('MatInputFieldComponent (Refactored)', () => {
   describe('Input Type Attribute (Unit)', () => {
     it('should render email input type', async () => {
@@ -23,7 +10,7 @@ describe('MatInputFieldComponent (Refactored)', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({
         config,
-        initialValue: { field: '' }, // Minimal!
+        initialValue: { field: '' },
       });
 
       const input = fixture.debugElement.query(By.css('input[matInput]'));
@@ -266,7 +253,7 @@ describe('MatInputFieldComponent (Refactored)', () => {
 
       const { fixture } = await MaterialFormTestUtils.createTest({
         config,
-        initialValue: { email: '' }, // Minimal! Only one field needed
+        initialValue: { email: '' },
       });
 
       // Verify all features work together

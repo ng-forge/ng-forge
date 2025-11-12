@@ -2,14 +2,6 @@ import { By } from '@angular/platform-browser';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 import { MinimalTestBuilder } from '../../testing/minimal-test-builders';
 
-/**
- * REFACTORED TEXTAREA TESTS
- *
- * Demonstrates the same test simplification methodology applied to textarea component.
- * Compare with mat-textarea.spec.ts:7-58 "should render textarea with full configuration"
- * which tests 11 different properties in one test.
- */
-
 describe('MatTextareaFieldComponent (Refactored)', () => {
   describe('Basic Rendering (Unit)', () => {
     it('should render textarea element', async () => {
