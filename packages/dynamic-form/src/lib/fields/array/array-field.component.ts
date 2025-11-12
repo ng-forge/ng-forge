@@ -9,9 +9,6 @@ import {
   Injector,
   input,
   linkedSignal,
-  runInInjectionContext,
-  signal,
-  untracked,
   ViewContainerRef,
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -25,7 +22,6 @@ import { FieldDef } from '../../definitions';
 import { FieldSignalContext } from '../../mappers';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { arrayItemFieldMapper } from '../../mappers/array-item/array-item-field-mapper';
-import { createSchemaFromFields } from '../../core';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent, SubmitEvent } from '../../events';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 
@@ -65,7 +61,6 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
-  providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
