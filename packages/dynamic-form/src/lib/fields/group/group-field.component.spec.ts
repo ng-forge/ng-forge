@@ -7,6 +7,7 @@ import { form } from '@angular/forms/signals';
 import { baseFieldMapper, FieldSignalContext } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models';
+import { EventBus } from '../../events';
 
 describe('GroupFieldComponent', () => {
   function setupGroupTest(field: GroupField<any>, value?: Record<string, unknown>) {
@@ -20,6 +21,7 @@ describe('GroupFieldComponent', () => {
       imports: [GroupFieldComponent],
       providers: [
         provideDynamicForm(),
+        EventBus,
         {
           provide: FIELD_REGISTRY,
           useValue: new Map([['test', mockFieldType]]),

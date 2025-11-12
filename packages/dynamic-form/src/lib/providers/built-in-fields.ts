@@ -1,5 +1,5 @@
 import { FieldTypeDefinition } from '../models/field-type';
-import { baseFieldMapper, groupFieldMapper, rowFieldMapper } from '../mappers';
+import { arrayFieldMapper, baseFieldMapper, groupFieldMapper, rowFieldMapper } from '../mappers';
 import { pageFieldMapper } from '../mappers/page/page-field-mapper';
 
 /**
@@ -23,6 +23,12 @@ import { pageFieldMapper } from '../mappers/page/page-field-mapper';
  *   { type: 'input', key: 'city' }
  * ]}
  *
+ * // Array field for array-based form sections
+ * { type: 'array', key: 'items', fields: [
+ *   { type: 'input', key: 'name' },
+ *   { type: 'input', key: 'quantity' }
+ * ]}
+ *
  * // Page field for multi-step forms
  * { type: 'page', key: 'step1', fields: [...] }
  * ```
@@ -38,6 +44,12 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
     name: 'group',
     loadComponent: () => import('../fields/group/group-field.component'),
     mapper: groupFieldMapper,
+    valueHandling: 'include',
+  },
+  {
+    name: 'array',
+    loadComponent: () => import('../fields/array/array-field.component'),
+    mapper: arrayFieldMapper,
     valueHandling: 'include',
   },
   {

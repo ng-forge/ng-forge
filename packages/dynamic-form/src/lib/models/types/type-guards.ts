@@ -2,14 +2,15 @@ import { FieldDef } from '../../definitions';
 import { isPageField } from '../../definitions/default/page-field';
 import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
+import { isArrayField } from '../../definitions/default/array-field';
 import { ContainerFieldTypes, LeafFieldTypes, RegisteredFieldTypes } from '../registry/field-registry';
 
 /**
- * Type guard to check if a field is a container field (page, row, or group)
+ * Type guard to check if a field is a container field (page, row, group, or array)
  * Container fields have a 'fields' property and don't contribute values directly
  */
 export function isContainerField(field: RegisteredFieldTypes): field is ContainerFieldTypes {
-  return isPageField(field) || isRowField(field) || isGroupField(field);
+  return isPageField(field) || isRowField(field) || isGroupField(field) || isArrayField(field);
 }
 
 /**
@@ -38,4 +39,4 @@ export function isDisplayOnlyField(field: RegisteredFieldTypes): boolean {
 }
 
 // Re-export the specific type guards for convenience
-export { isPageField, isRowField, isGroupField };
+export { isPageField, isRowField, isGroupField, isArrayField };

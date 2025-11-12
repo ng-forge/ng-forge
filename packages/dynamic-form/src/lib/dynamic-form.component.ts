@@ -29,7 +29,7 @@ import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
 import { InferGlobalFormValue } from './models/types';
-import { flattenFields } from './utils';
+import { flattenFields, flattenFieldsForRendering } from './utils';
 import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
@@ -132,6 +132,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
+  );
+
+  private readonly memoizedFlattenFieldsForRendering = memoize(
+    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFieldsForRendering(fields, registry),
+    (fields, registry) =>
+      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_rendering_' + Array.from(registry.keys()).sort().join(',')
   );
 
   private readonly memoizedKeyBy = memoize(
@@ -260,15 +266,17 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     if (config.fields && config.fields.length > 0) {
       // Use memoized functions for expensive operations with registry
       const flattenedFields = this.memoizedFlattenFields(config.fields, registry);
+      const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(config.fields, registry);
       const fieldsById = this.memoizedKeyBy(flattenedFields);
       const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
 
-      // For rendering, paged forms are now handled by orchestrator, non-paged use flattened
-      const fieldsToRender = modeDetection.mode === 'paged' ? [] : flattenedFields;
+      // For rendering: use flattenedFieldsForRendering which preserves row containers
+      // For paged forms, orchestrator handles rendering separately
+      const fieldsToRender = modeDetection.mode === 'paged' ? [] : flattenedFieldsForRendering;
 
       return {
         fields: fieldsToRender,
-        schemaFields: flattenedFields, // Fields for form schema (always flattened)
+        schemaFields: flattenedFields, // Fields for form schema (always flattened for form values)
         originalFields: config.fields,
         defaultValues,
         schema: undefined,

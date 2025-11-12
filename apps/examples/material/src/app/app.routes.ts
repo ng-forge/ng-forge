@@ -70,8 +70,21 @@ export const appRoutes: Route[] = [
         loadComponent: () => import('./examples/paginated-form-demo.component').then((m) => m.PaginatedFormDemoComponent),
       },
       {
+        path: 'array',
+        loadComponent: () => import('./examples/array-demo.component').then((m) => m.ArrayDemoComponent),
+      },
+      {
+        path: 'group',
+        loadComponent: () => import('./examples/group-demo.component').then((m) => m.GroupDemoComponent),
+      },
+      {
+        path: 'row',
+        loadComponent: () => import('./examples/row-demo.component').then((m) => m.RowDemoComponent),
+      },
+      {
         path: 'conditional-logic-showcase',
-        loadComponent: () => import('./examples/conditional-logic-showcase-demo.component').then((m) => m.ConditionalLogicShowcaseDemoComponent),
+        loadComponent: () =>
+          import('./examples/conditional-logic-showcase-demo.component').then((m) => m.ConditionalLogicShowcaseDemoComponent),
       },
     ],
   },
