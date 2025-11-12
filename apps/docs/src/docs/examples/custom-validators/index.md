@@ -35,6 +35,8 @@ This example showcases ng-forge's custom validation capabilities:
 
 ## Complete Implementation
 
+{% raw %}
+
 ```typescript
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { DynamicForm, FormConfig, CustomValidator } from '@ng-forge/dynamic-form';
@@ -206,6 +208,8 @@ export class CustomValidatorsDemoComponent {
   }
 }
 ```
+
+{% endraw %}
 
 ## Key Validation Patterns
 
