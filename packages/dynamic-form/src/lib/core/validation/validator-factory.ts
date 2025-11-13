@@ -1,7 +1,6 @@
 import {
   email,
   FieldContext,
-  FieldPath,
   LogicFn,
   max,
   maxLength,
@@ -14,6 +13,7 @@ import {
   validateHttp,
   ValidationError,
 } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { inject } from '@angular/core';
 import { AsyncValidatorConfig, CustomValidatorConfig, HttpValidatorConfig, ValidatorConfig } from '../../models';
 import { createLogicFunction } from '../expressions';
@@ -24,7 +24,7 @@ import { CustomValidator } from './validator-types';
 /**
  * Apply validator configuration to field path, following the logic pattern
  */
-export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: FieldPath<TValue>): void {
+export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: SchemaPath<TValue>): void {
   switch (config.type) {
     case 'required':
       if (config.when) {
@@ -36,16 +36,16 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
       break;
 
     case 'email':
-      email(fieldPath as FieldPath<string>);
+      email(fieldPath as SchemaPath<string>);
       break;
 
     case 'min':
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMin = createDynamicValueFunction<number, number>(config.expression);
-          min(fieldPath as FieldPath<number>, dynamicMin);
+          min(fieldPath as SchemaPath<number>, dynamicMin);
         } else {
-          min(fieldPath as FieldPath<number>, config.value);
+          min(fieldPath as SchemaPath<number>, config.value);
         }
       }
       break;
@@ -54,9 +54,9 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMax = createDynamicValueFunction<number, number>(config.expression);
-          max(fieldPath as FieldPath<number>, dynamicMax);
+          max(fieldPath as SchemaPath<number>, dynamicMax);
         } else {
-          max(fieldPath as FieldPath<number>, config.value);
+          max(fieldPath as SchemaPath<number>, config.value);
         }
       }
       break;
@@ -65,9 +65,9 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMinLength = createDynamicValueFunction<string, number>(config.expression);
-          minLength(fieldPath as FieldPath<string>, dynamicMinLength);
+          minLength(fieldPath as SchemaPath<string>, dynamicMinLength);
         } else {
-          minLength(fieldPath as FieldPath<string>, config.value);
+          minLength(fieldPath as SchemaPath<string>, config.value);
         }
       }
       break;
@@ -76,9 +76,9 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMaxLength = createDynamicValueFunction<string, number>(config.expression);
-          maxLength(fieldPath as FieldPath<string>, dynamicMaxLength);
+          maxLength(fieldPath as SchemaPath<string>, dynamicMaxLength);
         } else {
-          maxLength(fieldPath as FieldPath<string>, config.value);
+          maxLength(fieldPath as SchemaPath<string>, config.value);
         }
       }
       break;
@@ -88,9 +88,9 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
         const regexPattern = typeof config.value === 'string' ? new RegExp(config.value) : config.value;
         if (config.expression) {
           const dynamicPattern = createDynamicValueFunction<string | undefined, RegExp | undefined>(config.expression);
-          pattern(fieldPath as FieldPath<string>, dynamicPattern as LogicFn<string | undefined, RegExp | undefined>);
+          pattern(fieldPath as SchemaPath<string>, dynamicPattern as LogicFn<string | undefined, RegExp | undefined>);
         } else {
-          pattern(fieldPath as FieldPath<string>, regexPattern);
+          pattern(fieldPath as SchemaPath<string>, regexPattern);
         }
       }
       break;
@@ -112,7 +112,7 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
 /**
  * Apply custom validator to field path using Angular's public validate() API
  */
-function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: FieldPath<TValue>): void {
+function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: SchemaPath<TValue>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get validator from registry
@@ -152,7 +152,7 @@ function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: 
  * - onSuccess: Maps resource result to validation errors
  * - onError: Optional handler for resource errors
  */
-function applyAsyncValidator<TValue>(config: AsyncValidatorConfig, fieldPath: FieldPath<TValue>): void {
+function applyAsyncValidator<TValue>(config: AsyncValidatorConfig, fieldPath: SchemaPath<TValue>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get async validator config from registry
@@ -200,7 +200,7 @@ function applyAsyncValidator<TValue>(config: AsyncValidatorConfig, fieldPath: Fi
  * - onSuccess: Maps HTTP response to validation errors (inverted logic!)
  * - onError: Optional handler for HTTP errors
  */
-function applyHttpValidator<TValue>(config: HttpValidatorConfig, fieldPath: FieldPath<TValue>): void {
+function applyHttpValidator<TValue>(config: HttpValidatorConfig, fieldPath: SchemaPath<TValue>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get HTTP validator config from registry
@@ -242,6 +242,6 @@ function applyHttpValidator<TValue>(config: HttpValidatorConfig, fieldPath: Fiel
 /**
  * Apply multiple validators to a field path
  */
-export function applyValidators<TValue>(configs: ValidatorConfig[], fieldPath: FieldPath<TValue>): void {
+export function applyValidators<TValue>(configs: ValidatorConfig[], fieldPath: SchemaPath<TValue>): void {
   configs.forEach((config) => applyValidator(config, fieldPath));
 }

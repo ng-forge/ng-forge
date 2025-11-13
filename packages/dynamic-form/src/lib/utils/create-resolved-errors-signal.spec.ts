@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { form, schema, FieldPath } from '@angular/forms/signals';
+import { form, schema } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { createResolvedErrorsSignal } from './create-resolved-errors-signal';
 import { ValidationMessages } from '../models/validation-types';
 import { applyValidator } from '../core/validation/validator-factory';
@@ -24,7 +25,7 @@ describe('createResolvedErrorsSignal', () => {
         const testForm = form(
           initialValue,
           schema<{ email: string }>((path) => {
-            applyValidator({ type: 'required' }, path.email as FieldPath<string>);
+            applyValidator({ type: 'required' }, path.email as SchemaPath<string>);
           })
         );
 
@@ -56,7 +57,7 @@ describe('createResolvedErrorsSignal', () => {
         const testForm = form(
           initialValue,
           schema<{ email: string }>((path) => {
-            applyValidator({ type: 'required' }, path.email as FieldPath<string>);
+            applyValidator({ type: 'required' }, path.email as SchemaPath<string>);
           })
         );
 
@@ -84,7 +85,7 @@ describe('createResolvedErrorsSignal', () => {
         const testForm = form(
           initialValue,
           schema<{ email: string }>((path) => {
-            applyValidator({ type: 'required' }, path.email as FieldPath<string>);
+            applyValidator({ type: 'required' }, path.email as SchemaPath<string>);
           })
         );
 
@@ -117,9 +118,9 @@ describe('createResolvedErrorsSignal', () => {
         const testForm = form(
           initialValue,
           schema<{ password: string }>((path) => {
-            applyValidator({ type: 'required' }, path.password as FieldPath<string>);
-            applyValidator({ type: 'minLength', value: 8 }, path.password as FieldPath<string>);
-            applyValidator({ type: 'pattern', value: '^[a-zA-Z0-9]+$' }, path.password as FieldPath<string>);
+            applyValidator({ type: 'required' }, path.password as SchemaPath<string>);
+            applyValidator({ type: 'minLength', value: 8 }, path.password as SchemaPath<string>);
+            applyValidator({ type: 'pattern', value: '^[a-zA-Z0-9]+$' }, path.password as SchemaPath<string>);
           })
         );
 
@@ -158,7 +159,7 @@ describe('createResolvedErrorsSignal', () => {
         const testForm = form(
           initialValue,
           schema<{ age: number }>((path) => {
-            applyValidator({ type: 'min', value: 18 }, path.age as FieldPath<number>);
+            applyValidator({ type: 'min', value: 18 }, path.age as SchemaPath<number>);
           })
         );
 

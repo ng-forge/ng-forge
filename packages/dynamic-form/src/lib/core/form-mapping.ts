@@ -1,4 +1,5 @@
-import { disabled, email, FieldPath, max, maxLength, min, minLength, pattern, required } from '@angular/forms/signals';
+import { disabled, email, max, maxLength, min, minLength, pattern, required } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { FieldDef, FieldWithValidation } from '../definitions';
 import { applyValidator } from './validation';
 import { applyLogic } from './logic';
@@ -12,7 +13,7 @@ import { isRowField } from '../definitions/default/row-field';
  * Single entry point to map field data into form
  * This is the main function that should be called from the dynamic form component
  */
-export function mapFieldToForm<TValue>(fieldDef: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+export function mapFieldToForm<TValue>(fieldDef: FieldDef<any>, fieldPath: SchemaPath<TValue>): void {
   // Cast to FieldWithValidation to access validation properties
   const validationField = fieldDef as FieldDef<any> & FieldWithValidation;
 
@@ -71,45 +72,45 @@ export function mapFieldToForm<TValue>(fieldDef: FieldDef<any>, fieldPath: Field
 /**
  * Apply simple validation rules from field properties for backward compatibility
  */
-function applySimpleValidationRules<TValue>(fieldDef: FieldDef<any> & FieldWithValidation, fieldPath: FieldPath<TValue>): void {
+function applySimpleValidationRules<TValue>(fieldDef: FieldDef<any> & FieldWithValidation, fieldPath: SchemaPath<TValue>): void {
   if (fieldDef.required) {
     required(fieldPath);
   }
 
   if (fieldDef.email) {
-    email(fieldPath as FieldPath<string>);
+    email(fieldPath as SchemaPath<string>);
   }
 
   // Check for min in top-level field or props (for components like slider)
   const minValue = fieldDef.min !== undefined ? fieldDef.min : (fieldDef.props as any)?.min;
   if (minValue !== undefined) {
-    min(fieldPath as FieldPath<number>, minValue);
+    min(fieldPath as SchemaPath<number>, minValue);
   }
 
   // Check for max in top-level field or props (for components like slider)
   const maxValue = fieldDef.max !== undefined ? fieldDef.max : (fieldDef.props as any)?.max;
   if (maxValue !== undefined) {
-    max(fieldPath as FieldPath<number>, maxValue);
+    max(fieldPath as SchemaPath<number>, maxValue);
   }
 
   if (fieldDef.minLength !== undefined) {
-    minLength(fieldPath as FieldPath<string>, fieldDef.minLength);
+    minLength(fieldPath as SchemaPath<string>, fieldDef.minLength);
   }
 
   if (fieldDef.maxLength !== undefined) {
-    maxLength(fieldPath as FieldPath<string>, fieldDef.maxLength);
+    maxLength(fieldPath as SchemaPath<string>, fieldDef.maxLength);
   }
 
   if (fieldDef.pattern) {
     const regexPattern = typeof fieldDef.pattern === 'string' ? new RegExp(fieldDef.pattern) : fieldDef.pattern;
-    pattern(fieldPath as FieldPath<string>, regexPattern);
+    pattern(fieldPath as SchemaPath<string>, regexPattern);
   }
 }
 
 /**
  * Handle field-specific configuration that doesn't fit into validators/logic/schemas
  */
-function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<any>, fieldPath: SchemaPath<TValue>): void {
   // Handle disabled state
   if (fieldDef.disabled) {
     disabled(fieldPath);
@@ -130,7 +131,7 @@ function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<any>, fieldPat
  * Page fields are layout containers that don't create their own form controls
  * Their children are flattened to the root level of the form
  */
-function mapPageFieldToForm<TValue>(pageField: FieldDef<any>, rootPath: FieldPath<TValue>): void {
+function mapPageFieldToForm<TValue>(pageField: FieldDef<any>, rootPath: SchemaPath<TValue>): void {
   if (!isPageField(pageField) || !pageField.fields) {
     return;
   }
@@ -158,7 +159,7 @@ function mapPageFieldToForm<TValue>(pageField: FieldDef<any>, rootPath: FieldPat
  * Row fields are layout containers (horizontal) that don't create their own form controls
  * Their children are flattened to the root level of the form, similar to page fields
  */
-function mapRowFieldToForm<TValue>(rowField: FieldDef<any>, rootPath: FieldPath<TValue>): void {
+function mapRowFieldToForm<TValue>(rowField: FieldDef<any>, rootPath: SchemaPath<TValue>): void {
   if (!isRowField(rowField) || !rowField.fields) {
     return;
   }
@@ -185,7 +186,7 @@ function mapRowFieldToForm<TValue>(rowField: FieldDef<any>, rootPath: FieldPath<
  * Maps group field children to the parent form schema
  * This ensures that validation from child fields is applied to the parent form
  */
-function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: SchemaPath<TValue>): void {
   if (!isGroupField(groupField) || !groupField.fields) {
     return;
   }
@@ -220,7 +221,7 @@ function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: Field
  * by the ArrayFieldComponent which creates dynamic field instances
  * with indexed keys (e.g., 'items[0]', 'items[1]').
  */
-function mapArrayFieldToForm<TValue>(arrayField: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+function mapArrayFieldToForm<TValue>(arrayField: FieldDef<any>, fieldPath: SchemaPath<TValue>): void {
   if (!isArrayField(arrayField) || !arrayField.fields) {
     return;
   }

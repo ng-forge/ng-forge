@@ -1,4 +1,5 @@
-import { FieldPath, Schema, schema } from '@angular/forms/signals';
+import { Schema, schema } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { FieldDef } from '../definitions';
 import { mapFieldToForm } from './form-mapping';
 import { FieldTypeDefinition, getFieldValueHandling } from '../models/field-type';
@@ -31,7 +32,7 @@ export function createSchemaFromFields<TModel = unknown>(
           for (const childField of fieldsArray) {
             if (!childField.key) continue;
 
-            const childPath = path[childField.key as keyof typeof path] as FieldPath<unknown>;
+            const childPath = path[childField.key as keyof typeof path] as SchemaPath<unknown>;
             if (childPath) {
               mapFieldToForm(childField, childPath);
             }
@@ -41,7 +42,7 @@ export function createSchemaFromFields<TModel = unknown>(
       }
 
       // Regular field processing for 'include' fields
-      const fieldPath = path[fieldDef.key as keyof typeof path] as FieldPath<unknown>;
+      const fieldPath = path[fieldDef.key as keyof typeof path] as SchemaPath<unknown>;
 
       if (!fieldPath) {
         continue;

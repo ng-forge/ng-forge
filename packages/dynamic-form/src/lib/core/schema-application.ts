@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
-import { apply, applyEach, applyWhen, applyWhenValue, FieldPath, SchemaOrSchemaFn } from '@angular/forms/signals';
+import { apply, applyEach, applyWhen, applyWhenValue, SchemaOrSchemaFn } from '@angular/forms/signals';
+import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
 import { SchemaRegistryService } from './registry';
 import { createLogicFunction } from './expressions';
@@ -10,7 +11,7 @@ import { applyLogic } from './logic';
 /**
  * Apply schema configuration
  */
-export function applySchema<TValue>(config: SchemaApplicationConfig, fieldPath: FieldPath<TValue>): void {
+export function applySchema<TValue>(config: SchemaApplicationConfig, fieldPath: SchemaPath<TValue>): void {
   const schemaRegistry = inject(SchemaRegistryService);
   const schema = schemaRegistry.resolveSchema(config.schema);
 
@@ -41,7 +42,7 @@ export function applySchema<TValue>(config: SchemaApplicationConfig, fieldPath: 
       break;
 
     case 'applyEach':
-      applyEach(fieldPath as FieldPath<TValue[]>, schemaFn);
+      applyEach(fieldPath as SchemaPath<TValue[]>, schemaFn);
       break;
   }
 }
@@ -50,20 +51,20 @@ export function applySchema<TValue>(config: SchemaApplicationConfig, fieldPath: 
  * Create a schema function from schema definition
  */
 export function createSchemaFunction<T = unknown>(schema: SchemaDefinition): SchemaOrSchemaFn<T> {
-  return (path: FieldPath<T>) => {
+  return (path: SchemaPathTree<T>) => {
     // Apply validators
     schema.validators?.forEach((validatorConfig) => {
-      applyValidator(validatorConfig, path);
+      applyValidator(validatorConfig, path as any);
     });
 
     // Apply logic
     schema.logic?.forEach((logicConfig) => {
-      applyLogic(logicConfig, path);
+      applyLogic(logicConfig, path as any);
     });
 
     // Apply sub-schemas
     schema.subSchemas?.forEach((subSchemaConfig) => {
-      applySchema(subSchemaConfig, path);
+      applySchema(subSchemaConfig, path as any);
     });
   };
 }
