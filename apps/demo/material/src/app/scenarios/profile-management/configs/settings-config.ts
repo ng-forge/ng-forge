@@ -189,7 +189,6 @@ export const settingsConfig = {
           key: 'saveSettings',
           type: 'submit',
           label: 'Save Settings',
-          event: SubmitEvent,
           col: 4,
         },
       ],

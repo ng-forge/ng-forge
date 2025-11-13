@@ -25,9 +25,6 @@ export const conditionalFieldsConfig = {
         { value: 'yes', label: 'Yes, I have an account' },
         { value: 'no', label: 'No, I need to create one' },
       ],
-      props: {
-        appearance: 'outline',
-      },
       required: true,
       col: 12,
     },
@@ -159,17 +156,6 @@ export const conditionalFieldsConfig = {
       key: 'shippingAddress',
       type: 'group',
       label: 'Shipping Address',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'shippingAddressDifferent',
-            operator: 'notEquals',
-            value: true,
-          },
-        },
-      ],
       fields: [
         {
           key: 'shippingStreet',

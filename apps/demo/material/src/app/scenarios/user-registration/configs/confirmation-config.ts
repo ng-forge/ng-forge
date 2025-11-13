@@ -1,4 +1,4 @@
-import { FormConfig, FormEvent } from '@ng-forge/dynamic-form';
+import { FormConfig } from '@ng-forge/dynamic-form';
 
 export const confirmationConfig = {
   fields: [
@@ -119,7 +119,9 @@ export const confirmationConfig = {
           key: 'goBack',
           type: 'button',
           label: 'Go Back',
-          event: FormEvent,
+          event: class GoBackEvent {
+            readonly type = 'go-back' as const;
+          },
           props: {
             color: 'accent',
           },

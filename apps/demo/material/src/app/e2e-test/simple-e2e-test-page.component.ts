@@ -279,7 +279,6 @@ export class SimpleE2ETestPageComponent {
           key: 'submit',
           type: 'submit',
           label: 'Submit',
-          event: SubmitEvent,
         },
       ],
     };

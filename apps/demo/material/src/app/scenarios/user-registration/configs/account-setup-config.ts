@@ -158,9 +158,6 @@ export const accountSetupConfig = {
             { value: 'personal', label: 'Personal Account' },
             { value: 'business', label: 'Business Account' },
           ],
-          props: {
-            appearance: 'outline',
-          },
           required: true,
           col: 12,
         },

@@ -1,4 +1,4 @@
-import { FormConfig, FormEvent } from '@ng-forge/dynamic-form';
+import { FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * E-commerce Checkout - Multi-page checkout flow
@@ -61,7 +61,9 @@ export const ecommerceCheckoutConfig = {
           key: 'applyPromo',
           type: 'button',
           label: 'Apply',
-          event: FormEvent,
+          event: class ApplyPromoEvent {
+            readonly type = 'apply-promo' as const;
+          },
           props: {
             color: 'accent',
           },

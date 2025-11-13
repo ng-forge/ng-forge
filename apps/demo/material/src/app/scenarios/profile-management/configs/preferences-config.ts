@@ -191,7 +191,6 @@ export const preferencesConfig = {
           key: 'savePreferences',
           type: 'submit',
           label: 'Save Preferences',
-          event: SubmitEvent,
           col: 6,
         },
       ],

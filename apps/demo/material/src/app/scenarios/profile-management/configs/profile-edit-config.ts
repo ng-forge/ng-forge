@@ -180,7 +180,6 @@ export const profileEditConfig = {
           key: 'saveProfile',
           type: 'submit',
           label: 'Save Profile',
-          event: SubmitEvent,
           col: 6,
         },
       ],

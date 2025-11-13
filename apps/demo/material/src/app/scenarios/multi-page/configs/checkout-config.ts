@@ -1,4 +1,4 @@
-import { FormConfig, FormEvent } from '@ng-forge/dynamic-form';
+import { FormConfig } from '@ng-forge/dynamic-form';
 
 export const checkoutConfig = {
   fields: [
@@ -31,7 +31,9 @@ export const checkoutConfig = {
           key: 'applyPromo',
           type: 'button',
           label: 'Apply',
-          event: FormEvent,
+          event: class ApplyPromoEvent {
+            readonly type = 'apply-promo' as const;
+          },
           col: 4,
         },
         {
