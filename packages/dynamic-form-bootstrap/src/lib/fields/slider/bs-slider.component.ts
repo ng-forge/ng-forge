@@ -21,7 +21,17 @@ import { AsyncPipe } from '@angular/common';
       </label>
       }
 
-      <input type="range" [field]="f" [id]="key()" [attr.tabindex]="tabIndex()" class="form-range" />
+      <input
+        type="range"
+        [field]="f"
+        [id]="key()"
+        [attr.min]="props()?.min ?? f().min?.() ?? 0"
+        [attr.max]="props()?.max ?? f().max?.() ?? 100"
+        [attr.step]="props()?.step ?? 1"
+        [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        class="form-range"
+      />
 
       @if (props()?.helpText; as helpText) {
       <div class="form-text">
@@ -47,6 +57,7 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -62,8 +73,9 @@ export default class BsSliderFieldComponent implements BsSliderComponent {
 
   readonly props = input<BsSliderProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

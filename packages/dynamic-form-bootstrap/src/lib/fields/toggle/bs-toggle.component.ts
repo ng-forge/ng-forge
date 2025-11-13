@@ -23,6 +23,7 @@ import { AsyncPipe } from '@angular/common';
         type="checkbox"
         [field]="f"
         [id]="key()"
+        [disabled]="f().disabled()"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
         [attr.tabindex]="tabIndex()"
@@ -69,6 +70,7 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -82,8 +84,9 @@ export default class BsToggleFieldComponent implements BsToggleComponent {
   readonly tabIndex = input<number>();
   readonly props = input<BsToggleProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

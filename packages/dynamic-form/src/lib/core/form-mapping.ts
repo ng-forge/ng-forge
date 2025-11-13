@@ -4,6 +4,7 @@ import { applyValidator } from './validation';
 import { applyLogic } from './logic';
 import { applySchema } from './schema-application';
 import { isGroupField } from '../definitions/default/group-field';
+import { isArrayField } from '../definitions/default/array-field';
 import { isPageField } from '../definitions/default/page-field';
 import { isRowField } from '../definitions/default/row-field';
 
@@ -30,6 +31,12 @@ export function mapFieldToForm<TValue>(fieldDef: FieldDef<any>, fieldPath: Field
   // Special handling for group fields - apply child field validations to the parent form schema
   if (isGroupField(fieldDef)) {
     mapGroupFieldToForm(fieldDef, fieldPath);
+    return;
+  }
+
+  // Special handling for array fields - apply child field validations to the parent form schema
+  if (isArrayField(fieldDef)) {
+    mapArrayFieldToForm(fieldDef, fieldPath);
     return;
   }
 
@@ -198,4 +205,36 @@ function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: Field
       mapFieldToForm(childField, nestedPath);
     }
   }
+}
+
+/**
+ * Maps array field to the parent form schema
+ *
+ * Array fields are fundamentally different from groups:
+ * - The fields array is a TEMPLATE (single field definition), not instances
+ * - Array items are created/removed dynamically at runtime
+ * - Child field instances handle their own validation when created
+ *
+ * The array field itself is registered in the parent form via normal
+ * field processing (valueHandling: 'include'). Array items are managed
+ * by the ArrayFieldComponent which creates dynamic field instances
+ * with indexed keys (e.g., 'items[0]', 'items[1]').
+ */
+function mapArrayFieldToForm<TValue>(arrayField: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+  if (!isArrayField(arrayField) || !arrayField.fields) {
+    return;
+  }
+
+  // Array fields use a template-based approach where validation is defined
+  // in the template and applied to dynamic instances at runtime.
+  //
+  // Unlike groups or pages (which have static children known at schema creation),
+  // array items are dynamic and may not exist yet. The ArrayFieldComponent
+  // manages the lifecycle of array items and ensures validation from the
+  // template is applied to each dynamically created item.
+  //
+  // TODO: Support array-level validation (min/max length, unique items, etc.)
+  // This would be applied to the array field itself, not individual items:
+  //   if (arrayField.minLength) minLength(fieldPath, arrayField.minLength);
+  //   if (arrayField.maxLength) maxLength(fieldPath, arrayField.maxLength);
 }

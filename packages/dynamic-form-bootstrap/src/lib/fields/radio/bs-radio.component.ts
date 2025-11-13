@@ -27,7 +27,9 @@ import { FormsModule } from '@angular/forms';
         @for (option of options(); track option.value; let i = $index) {
         <input
           type="radio"
-          [(ngModel)]="option.value"
+          [name]="key()"
+          [value]="option.value"
+          [(ngModel)]="f().value"
           [disabled]="option.disabled || f().disabled()"
           class="btn-check"
           [id]="key() + '_' + i"
@@ -47,7 +49,9 @@ import { FormsModule } from '@angular/forms';
       <div class="form-check" [class.form-check-inline]="props()?.inline" [class.form-check-reverse]="props()?.reverse">
         <input
           type="radio"
-          [(ngModel)]="option.value"
+          [name]="key()"
+          [value]="option.value"
+          [(ngModel)]="f().value"
           [disabled]="option.disabled || f().disabled()"
           class="form-check-input"
           [id]="key() + '_' + i"
@@ -68,6 +72,10 @@ import { FormsModule } from '@angular/forms';
       :host {
         display: block;
       }
+
+      :host([hidden]) {
+        display: none !important;
+      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,6 +83,7 @@ import { FormsModule } from '@angular/forms';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
 })
 export default class BsRadioFieldComponent<T extends string> implements BsRadioComponent<T> {
@@ -90,8 +99,9 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<BsRadioProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

@@ -44,45 +44,13 @@ This document outlines the code review process and guidelines for the ng-forge d
 - [ ] PR description is complete
 - [ ] Commits follow convention
 
-### 2. Requesting Review
-
-```markdown
-## Summary
-
-Brief description of what this PR does.
-
-## Motivation
-
-Why is this change needed?
-
-## Changes
-
-- Added X feature
-- Fixed Y bug
-- Refactored Z component
-
-## Testing
-
-How was this tested?
-
-## Screenshots (if applicable)
-
-Include screenshots for UI changes.
-
-## Checklist
-
-- [x] Tests added/updated
-- [x] Documentation updated
-- [x] No breaking changes
-```
-
-### 3. Review Timeline
+### 2. Review Timeline
 
 - **Initial response**: Within 24 hours
 - **Complete review**: Within 2-3 business days
 - **Follow-up**: Within 1 business day after changes
 
-### 4. Review States
+### 3. Review States
 
 - **Approved** ✅ - Ready to merge
 - **Changes Requested** 🔴 - Issues must be addressed
@@ -170,53 +138,6 @@ for better readability. Not blocking merge.
 ```
 👍 Great test coverage! Love the use of edge cases.
 ```
-
-#### Comment Examples
-
-✅ **Good Comments:**
-
-````markdown
-🔴 **Required**: Missing null check
-This will throw if `user` is null. Add a guard:
-
-```typescript
-if (!user) return;
-```
-````
-
----
-
-🟡 **Suggestion**: Extract complex logic
-This function is doing a lot. Consider extracting the validation logic
-into a separate `validateInput()` function for better testability.
-
----
-
-💭 **Question**: Performance consideration
-Have you considered the performance impact of calling this in a loop?
-Maybe we could memoize or batch these calls?
-
----
-
-👍 Nice use of computed signals here! Very readable.
-
-````
-
-❌ **Bad Comments:**
-
-```markdown
-// Too vague
-This doesn't look right.
-
-// Too harsh
-This is terrible code.
-
-// Not constructive
-Why did you do it this way?
-
-// Nitpicky without reason
-Use single quotes instead of double quotes.
-````
 
 ### Review Communication
 
@@ -525,22 +446,6 @@ export class MyComponent {
 3. **Share knowledge** - Explain patterns and best practices
 4. **Be open to change** - Update practices based on feedback
 5. **Document patterns** - Add to guides when useful
-
-## Review Metrics
-
-We track these metrics to improve our process:
-
-- **Review time** - Time from PR creation to first review
-- **Merge time** - Time from PR creation to merge
-- **Review rounds** - Number of review cycles
-- **Comment density** - Comments per lines changed
-
-**Goals:**
-
-- First review: < 24 hours
-- Merge time: < 3 days
-- Review rounds: < 3
-- Comment density: Balanced (not too few, not too many)
 
 ## When to Merge
 

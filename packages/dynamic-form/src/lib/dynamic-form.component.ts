@@ -29,7 +29,7 @@ import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
 import { InferGlobalFormValue } from './models/types';
-import { flattenFields } from './utils';
+import { flattenFields, flattenFieldsForRendering } from './utils';
 import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
@@ -126,12 +126,19 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
+  private readonly functionRegistry = inject(FunctionRegistryService);
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
+  );
+
+  private readonly memoizedFlattenFieldsForRendering = memoize(
+    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFieldsForRendering(fields, registry),
+    (fields, registry) =>
+      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_rendering_' + Array.from(registry.keys()).sort().join(',')
   );
 
   private readonly memoizedKeyBy = memoize(
@@ -162,6 +169,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       value: this.value,
       defaultValues: this.defaultValues,
       form: this.form(),
+      defaultValidationMessages: this.config().defaultValidationMessages,
     })
   );
 
@@ -256,18 +264,36 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
 
+    // Register validators before form creation
+    const signalFormsConfig = config.signalFormsConfig;
+    if (signalFormsConfig) {
+      // Register custom functions
+      if (signalFormsConfig.customFunctions) {
+        Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
+          this.functionRegistry.registerCustomFunction(name, fn);
+        });
+      }
+
+      // Set all validators from config - change detection is inside set methods
+      this.functionRegistry.setValidators(signalFormsConfig.validators);
+      this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
+      this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
+    }
+
     if (config.fields && config.fields.length > 0) {
       // Use memoized functions for expensive operations with registry
       const flattenedFields = this.memoizedFlattenFields(config.fields, registry);
+      const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(config.fields, registry);
       const fieldsById = this.memoizedKeyBy(flattenedFields);
       const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
 
-      // For rendering, paged forms are now handled by orchestrator, non-paged use flattened
-      const fieldsToRender = modeDetection.mode === 'paged' ? [] : flattenedFields;
+      // For rendering: use flattenedFieldsForRendering which preserves row containers
+      // For paged forms, orchestrator handles rendering separately
+      const fieldsToRender = modeDetection.mode === 'paged' ? [] : flattenedFieldsForRendering;
 
       return {
         fields: fieldsToRender,
-        schemaFields: flattenedFields, // Fields for form schema (always flattened)
+        schemaFields: flattenedFields, // Fields for form schema (always flattened for form values)
         originalFields: config.fields,
         defaultValues,
         schema: undefined,

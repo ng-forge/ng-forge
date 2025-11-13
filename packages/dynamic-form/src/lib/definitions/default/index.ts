@@ -10,5 +10,6 @@ export type { SliderField } from './slider-field';
 export type { ToggleField } from './toggle-field';
 export { type RowField, isRowField } from './row-field';
 export type { GroupField } from './group-field';
+export type { ArrayField } from './array-field';
 export type { PageField } from './page-field';
 export type { TextField, TextElementType, TextProps, TextFieldStyle } from './text-field';

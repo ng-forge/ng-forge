@@ -16,19 +16,21 @@ ng-forge dynamic forms is a type-safe, UI-agnostic form library for Angular 21+ 
 ┌─────────────────────────────────────────────────────────────┐
 │               Core Library (@ng-forge/dynamic-form)          │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │  DynamicForm (Root Component)              │   │
+│  │  DynamicForm (Root Component)                       │   │
 │  │  - Receives FormConfig                              │   │
-│  │  - Creates FormState signal                         │   │
-│  │  - Manages form lifecycle                           │   │
+│  │  - Detects form mode (paged/non-paged)             │   │
+│  │  - Creates Angular signal forms                     │   │
+│  │  - Provides field context to renderers              │   │
+│  │  - Manages form lifecycle and events                │   │
 │  └──────────────────┬──────────────────────────────────┘   │
 │                     │                                        │
 │                     ↓                                        │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │  FormStructureBuilder                               │   │
-│  │  - Parses FormConfig                                │   │
-│  │  - Builds form tree structure                       │   │
-│  │  - Creates Angular signal forms                     │   │
-│  │  - Applies mappers to create component bindings     │   │
+│  │  FieldRendererDirective / PageOrchestrator          │   │
+│  │  - Renders fields dynamically                       │   │
+│  │  - Loads components lazily                          │   │
+│  │  - Applies mappers to create bindings               │   │
+│  │  - Handles paged vs non-paged modes                 │   │
 │  └──────────────────┬──────────────────────────────────┘   │
 │                     │                                        │
 │                     ↓                                        │
@@ -102,57 +104,62 @@ export class DynamicForm {
 - Provide form context to child fields
 - Handle form submission and events
 
-### 2. Form Setup (within DynamicForm)
+### 2. Form Setup & State Management
 
 The form structure is built directly within the `DynamicForm` component using computed signals:
 
 ```typescript
 // Inside DynamicForm component
+
+// 1. Form mode detection (paged vs non-paged)
+private readonly formModeDetection = computed(() => {
+  return detectFormMode(this.config().fields || []);
+});
+
+// 2. Flatten and index fields
 private readonly formSetup = computed(() => {
   const config = this.config();
   const registry = this.rawFieldRegistry();
 
   if (config.fields && config.fields.length > 0) {
-    // 1. Flatten fields for form schema
     const flattenedFields = this.memoizedFlattenFields(config.fields, registry);
-
-    // 2. Index fields by key
     const fieldsById = this.memoizedKeyBy(flattenedFields);
-
-    // 3. Calculate default values
     const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
 
-    // 4. Determine fields to render (paged vs non-paged)
-    const fieldsToRender = modeDetection.mode === 'paged'
-      ? config.fields
-      : flattenedFields;
-
     return {
-      fields: fieldsToRender,
-      schemaFields: flattenedFields,
+      fields: flattenedFields,
+      fieldsById,
       defaultValues,
-      mode: modeDetection.mode,
       registry,
     };
   }
 
-  return { fields: [], schemaFields: [], defaultValues: {}, mode: 'non-paged', registry };
+  return { fields: [], fieldsById: {}, defaultValues: {}, registry };
 });
 
+// 3. Create Angular signal form
 private readonly form = computed(() => {
   const setup = this.formSetup();
-  const schema = createSchemaFromFields(setup.schemaFields, setup.registry);
-  return form(this.entity, schema);
+  const schema = createSchemaFromFields(setup.fields, setup.registry);
+  return form(this.value, schema);
 });
+
+// 4. Field rendering context
+private readonly fieldSignalContext = computed<FieldSignalContext>(() => ({
+  form: this.form,
+  defaultValues: computed(() => this.formSetup().defaultValues),
+  value: this.value,
+  injector: this.injector,
+}));
 ```
 
 **Key Responsibilities:**
 
+- Detect form mode (paged vs non-paged)
 - Flatten and index field definitions
 - Create Angular signal forms with schema
 - Calculate default values
-- Detect form mode (paged vs non-paged)
-- Set up validation through schema creation
+- Provide field context for mappers
 
 ### 3. Field Registry
 
@@ -190,84 +197,109 @@ export class FieldRegistry {
 
 ### 4. Field Rendering System
 
-Fields are rendered using the `FieldRendererDirective` and `ViewContainerRef`:
+Fields are rendered using the `FieldRendererDirective` which handles dynamic component creation:
 
 ```typescript
-// Inside DynamicForm component
-fields = toSignal(
-  this.fields$.pipe(
-    switchMap((fields) => {
-      if (!fields || fields.length === 0) {
-        return of([]);
-      }
-      return forkJoin(this.mapFields(fields));
-    }),
-    map((components) => components.filter(Boolean))
-  ),
-  { initialValue: [] }
-);
+// DynamicForm template
+@if (formModeDetection().mode === 'paged') {
+  <!-- Paged form: Use page orchestrator -->
+  <page-orchestrator
+    [pageFields]="pageFieldDefinitions()"
+    [form]="form()"
+    [fieldSignalContext]="fieldSignalContext()"
+    [config]="{ initialPageIndex: 0 }"
+  />
+} @else {
+  <!-- Non-paged form: Render fields directly -->
+  <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+    <!-- Fields automatically rendered by fieldRenderer directive -->
+  </div>
+}
 
-private async mapSingleField(fieldDef: FieldDef<any>): Promise<ComponentRef<FormUiControl> | undefined> {
-  return this.fieldRegistry
-    .loadTypeComponent(fieldDef.type)
-    .then((componentType) => {
+// FieldRendererDirective (simplified)
+@Directive({ selector: '[fieldRenderer]' })
+export class FieldRendererDirective {
+  fields = input.required<FieldDef<unknown>[]>();
+
+  private async renderFields() {
+    for (const fieldDef of this.fields()) {
+      // 1. Load component for field type
+      const componentType = await this.fieldRegistry.loadTypeComponent(fieldDef.type);
+
+      // 2. Create bindings using mapper
       const bindings = mapFieldToBindings(fieldDef, {
-        fieldSignalContext: this.fieldSignalContext(),
-        fieldRegistry: this.rawFieldRegistry(),
+        fieldSignalContext: this.fieldSignalContext,
+        fieldRegistry: this.fieldRegistry,
       });
 
-      return this.vcr.createComponent(componentType, {
+      // 3. Create component dynamically
+      const componentRef = this.vcr.createComponent(componentType, {
         bindings,
         injector: this.injector
       });
-    });
+    }
+  }
 }
 ```
 
 **Key Responsibilities:**
 
-- Lazy load field components
-- Create component bindings using mappers
-- Dynamically create components using ViewContainerRef
+- Lazy load field components on demand
+- Apply mappers to create component bindings
+- Dynamically create components using Angular's ViewContainerRef
 - Handle component lifecycle and cleanup
+- Support both paged and non-paged rendering modes
 
 ## Data Flow
 
 ### 1. Configuration to Form Structure
 
 ```typescript
-// User defines config
+// 1. User defines config
 const config = {
   fields: [
     { key: 'email', type: 'input', value: '', required: true },
   ],
 } as const satisfies FormConfig;
 
-// ↓ DynamicForm receives config
+// ↓ 2. DynamicForm receives config
+<dynamic-form [config]="config" />
 
-// ↓ FormStructureBuilder parses config
-
-// ↓ Creates Angular signal form
-import { fieldPath, FieldTree } from '@angular/forms/signals';
-
-const formRoot = form({
-  email: fieldPath<string>('', { required: true }),
+// ↓ 3. DynamicForm computes form setup
+const formSetup = computed(() => {
+  const flattenedFields = flattenFields(config.fields, registry);
+  const schema = createSchemaFromFields(flattenedFields, registry);
+  return { fields: flattenedFields, schema };
 });
 
-// ↓ Field Registry provides component
+// ↓ 4. Creates Angular signal form
+const formRoot = form(this.value, schema);
+// Schema includes validation from field config
+
+// ↓ 5. Field Registry provides component
 const inputDefinition = registry.get('input');
 // { name: 'input', loadComponent: () => import('./input.component'), ... }
 
-// ↓ Mapper creates bindings
-const bindings = inputDefinition.mapper(fieldDef, { fieldSignalContext });
+// ↓ 6. Mapper creates bindings
+const bindings = inputDefinition.mapper(fieldDef, {
+  fieldSignalContext: {
+    form: formRoot,
+    defaultValues: computed(() => defaultValues),
+    value: this.value,
+    injector: this.injector,
+  },
+  fieldRegistry: registry,
+});
+// Returns:
 // [
 //   inputBinding('field', () => formRoot.structure.childrenMap.get('email')),
 //   inputBinding('key', () => 'email'),
 //   inputBinding('label', () => fieldDef.label),
-//   // ...
+//   inputBinding('placeholder', () => fieldDef.placeholder),
+//   inputBinding('props', () => fieldDef.props),
 // ]
 
-// ↓ DynamicFieldComponent renders with bindings
+// ↓ 7. FieldRendererDirective creates component
 <InputFieldComponent [field]="..." [key]="'email'" [label]="..." />
 ```
 
@@ -275,46 +307,49 @@ const bindings = inputDefinition.mapper(fieldDef, { fieldSignalContext });
 
 ```typescript
 // User types in input
-<input [field]="field()" (input)="..." />
+<input [field]="field()" />
 
 // ↓ Angular's [field] directive updates signal form
 field().value.set('user@example.com');
 
-// ↓ FormState signal updates (reactive)
-formState.update(state => ({
-  ...state,
-  values: { email: 'user@example.com' },
-}));
+// ↓ Form value signal updates (reactive)
+this.value.set({ email: 'user@example.com' });
 
-// ↓ Conditional logic evaluates (if any)
+// ↓ Conditional logic evaluates (if configured)
+// Logic applicator watches form value changes
 if (logicConfig) {
-  evaluateCondition(logicConfig.condition, formState());
+  evaluateCondition(logicConfig.condition, this.form().value());
 }
 
-// ↓ Component re-renders (OnPush + signals)
-// Only affected components re-render
+// ↓ Components re-render (OnPush + signals)
+// Only affected components re-render due to signal tracking
 ```
 
 ### 3. Form Submission
 
 ```typescript
 // User clicks submit button
-<button type="submit">Submit</button>
+<form (submit)="onSubmit($event)">
+  <button type="submit">Submit</button>
+</form>
 
-// ↓ Button triggers event
-eventBus.dispatch(new SubmitEvent());
+// ↓ DynamicForm handles submit
+onSubmit(event: Event) {
+  event.preventDefault();
 
-// ↓ DynamicForm handles event
-this.eventBus.on(SubmitEvent).subscribe(() => {
-  if (this.formState().valid) {
-    const value = this.extractFormValue();
-    this.submitted.emit(value);
+  // Check validity
+  if (this.form().valid()) {
+    // Emit typed form value
+    this.submitted.emit(this.formValue());
   }
-});
+}
 
 // ↓ Application receives typed value
-onSubmit(value: ExtractFormValue<typeof config>) {
+<dynamic-form [config]="config" (submitted)="handleSubmit($event)" />
+
+handleSubmit(value: ExtractFormValue<typeof config>) {
   // TypeScript knows: { email: string }
+  console.log(value.email);
 }
 ```
 
@@ -616,6 +651,26 @@ Container creates nested object:
   ],
 }
 // Form value: { address: { street: string, city: string } }
+```
+
+### 5. Array Fields
+
+Array fields create dynamic lists of items:
+
+```typescript
+{
+  key: 'contacts',
+  type: 'array',
+  value: [],
+  itemTemplate: {
+    fields: [
+      { key: 'name', type: 'input', value: '' },
+      { key: 'email', type: 'input', value: '' },
+    ],
+  },
+}
+// Form value: { contacts: Array<{ name: string, email: string }> }
+// Users can add/remove items dynamically
 ```
 
 ## Event System

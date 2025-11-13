@@ -50,12 +50,17 @@ import { AsyncPipe } from '@angular/common';
       :host {
         display: block;
       }
+
+      :host([hidden]) {
+        display: none !important;
+      }
     `,
   ],
   host: {
     '[class]': 'className() || ""',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -112,8 +117,9 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
   }
 
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

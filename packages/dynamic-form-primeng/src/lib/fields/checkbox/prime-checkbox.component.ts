@@ -16,6 +16,7 @@ import { AsyncPipe } from '@angular/common';
       <p-checkbox
         [field]="f"
         [inputId]="checkboxId"
+        [disabled]="f().disabled()"
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
@@ -63,8 +64,9 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
   readonly tabIndex = input<number>();
   readonly props = input<PrimeCheckboxProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

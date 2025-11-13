@@ -55,7 +55,7 @@ import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/d
 @Component({
   selector: 'app-login',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
+  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
 })
 export class LoginComponent {
   config = {
@@ -107,15 +107,15 @@ ng-forge dynamic forms supports multiple UI frameworks. Install the integration 
 
 ### Material Design (Production Ready)
 
-```bash group="install" name="npm"
+```bash group="install-material" name="npm"
 npm install @ng-forge/dynamic-form-material
 ```
 
-```bash group="install" name="yarn"
+```bash group="install-material" name="yarn"
 yarn add @ng-forge/dynamic-form-material
 ```
 
-```bash group="install" name="pnpm"
+```bash group="install-material" name="pnpm"
 pnpm add @ng-forge/dynamic-form-material
 ```
 
@@ -131,15 +131,15 @@ See [Material Integration](../ui-libs-integrations/material) for full documentat
 
 ### PrimeNG (Preview)
 
-```bash group="install" name="npm"
+```bash group="install-primeng" name="npm"
 npm install @ng-forge/dynamic-form-primeng
 ```
 
-```bash group="install" name="yarn"
+```bash group="install-primeng" name="yarn"
 yarn add @ng-forge/dynamic-form-primeng
 ```
 
-```bash group="install" name="pnpm"
+```bash group="install-primeng" name="pnpm"
 pnpm add @ng-forge/dynamic-form-primeng
 ```
 
@@ -155,15 +155,15 @@ See [PrimeNG Integration](../ui-libs-integrations/primeng) for full documentatio
 
 ### Bootstrap (Preview)
 
-```bash group="install" name="npm"
+```bash group="install-bootstrap" name="npm"
 npm install @ng-forge/dynamic-form-bootstrap
 ```
 
-```bash group="install" name="yarn"
+```bash group="install-bootstrap" name="yarn"
 yarn add @ng-forge/dynamic-form-bootstrap
 ```
 
-```bash group="install" name="pnpm"
+```bash group="install-bootstrap" name="pnpm"
 pnpm add @ng-forge/dynamic-form-bootstrap
 ```
 
@@ -179,15 +179,15 @@ See [Bootstrap Integration](../ui-libs-integrations/bootstrap) for full document
 
 ### Ionic (Preview)
 
-```bash group="install" name="npm"
+```bash group="install-ionic" name="npm"
 npm install @ng-forge/dynamic-form-ionic
 ```
 
-```bash group="install" name="yarn"
+```bash group="install-ionic" name="yarn"
 yarn add @ng-forge/dynamic-form-ionic
 ```
 
-```bash group="install" name="pnpm"
+```bash group="install-ionic" name="pnpm"
 pnpm add @ng-forge/dynamic-form-ionic
 ```
 
@@ -233,9 +233,9 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 
 ### Build Advanced Forms
 
-- **[Multi-Step Forms](../prebuilt/wizards/multi-step)** - Create wizard-style forms with page navigation
-- **[Repeatable Sections](../prebuilt/arrays/repeatable-sections)** - Dynamic form arrays for adding/removing fields
-- **[Conditional Validation](../core/validation#conditional-validators)** - Validators that activate based on conditions
+- **[Multi-Step Forms](../prebuilt/form-pages)** - Create wizard-style forms with page navigation
+- **[Repeatable Sections](../prebuilt/form-arrays)** - Dynamic form arrays for adding/removing fields
+- **[Conditional Validation](../core/validation/advanced#conditional-validators)** - Validators that activate based on conditions
 
 ### Customize and Extend
 

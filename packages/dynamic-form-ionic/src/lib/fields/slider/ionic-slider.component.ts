@@ -18,6 +18,7 @@ import { AsyncPipe } from '@angular/common';
       [field]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
+      [disabled]="f().disabled()"
       [step]="props()?.step ?? 1"
       [dualKnobs]="props()?.dualKnobs ?? false"
       [pin]="props()?.pin ?? false"
@@ -62,8 +63,9 @@ export default class IonicSliderFieldComponent implements IonicSliderComponent {
 
   readonly props = input<IonicSliderProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

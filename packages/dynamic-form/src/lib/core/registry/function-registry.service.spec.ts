@@ -332,4 +332,336 @@ describe('FunctionRegistryService', () => {
       expect(functionsAgain.statefulFn(mockContext)).toBe(4);
     });
   });
+
+  describe('registerValidator', () => {
+    it('should register a custom validator', () => {
+      const testValidator = vi.fn().mockReturnValue({ kind: 'testError' });
+
+      service.registerValidator('testValidator', testValidator);
+
+      const validator = service.getValidator('testValidator');
+      expect(validator).toBe(testValidator);
+    });
+
+    it('should allow registering multiple validators', () => {
+      const validator1 = vi.fn().mockReturnValue({ kind: 'error1' });
+      const validator2 = vi.fn().mockReturnValue({ kind: 'error2' });
+      const validator3 = vi.fn().mockReturnValue(null);
+
+      service.registerValidator('v1', validator1);
+      service.registerValidator('v2', validator2);
+      service.registerValidator('v3', validator3);
+
+      expect(service.getValidator('v1')).toBe(validator1);
+      expect(service.getValidator('v2')).toBe(validator2);
+      expect(service.getValidator('v3')).toBe(validator3);
+    });
+
+    it('should overwrite existing validator with same name', () => {
+      const originalValidator = vi.fn().mockReturnValue({ kind: 'original' });
+      const newValidator = vi.fn().mockReturnValue({ kind: 'new' });
+
+      service.registerValidator('sameName', originalValidator);
+      service.registerValidator('sameName', newValidator);
+
+      expect(service.getValidator('sameName')).toBe(newValidator);
+      expect(service.getValidator('sameName')).not.toBe(originalValidator);
+    });
+
+    it('should return undefined for unregistered validator', () => {
+      expect(service.getValidator('nonexistent')).toBeUndefined();
+    });
+  });
+
+  describe('clearValidators', () => {
+    it('should remove all registered validators', () => {
+      const v1 = vi.fn().mockReturnValue({ kind: 'error1' });
+      const v2 = vi.fn().mockReturnValue({ kind: 'error2' });
+
+      service.registerValidator('v1', v1);
+      service.registerValidator('v2', v2);
+
+      expect(service.getValidator('v1')).toBeDefined();
+      expect(service.getValidator('v2')).toBeDefined();
+
+      service.clearValidators();
+
+      expect(service.getValidator('v1')).toBeUndefined();
+      expect(service.getValidator('v2')).toBeUndefined();
+    });
+
+    it('should work when no validators are registered', () => {
+      expect(() => service.clearValidators()).not.toThrow();
+    });
+  });
+
+  describe('registerAsyncValidator', () => {
+    it('should register an async validator', () => {
+      const asyncValidator = {
+        params: vi.fn((ctx: any) => ({ value: ctx.value() })),
+        factory: vi.fn(),
+        onSuccess: vi.fn((result: any) => null),
+      };
+
+      service.registerAsyncValidator('asyncTest', asyncValidator);
+
+      const validator = service.getAsyncValidator('asyncTest');
+      expect(validator).toBe(asyncValidator);
+    });
+
+    it('should allow registering multiple async validators', () => {
+      const av1 = {
+        params: vi.fn(),
+        factory: vi.fn(),
+        onSuccess: vi.fn(),
+      };
+      const av2 = {
+        params: vi.fn(),
+        factory: vi.fn(),
+        onSuccess: vi.fn(),
+        onError: vi.fn(),
+      };
+
+      service.registerAsyncValidator('av1', av1);
+      service.registerAsyncValidator('av2', av2);
+
+      expect(service.getAsyncValidator('av1')).toBe(av1);
+      expect(service.getAsyncValidator('av2')).toBe(av2);
+    });
+
+    it('should overwrite existing async validator with same name', () => {
+      const original = {
+        params: vi.fn(),
+        factory: vi.fn(),
+        onSuccess: vi.fn().mockReturnValue({ kind: 'original' }),
+      };
+      const replacement = {
+        params: vi.fn(),
+        factory: vi.fn(),
+        onSuccess: vi.fn().mockReturnValue({ kind: 'new' }),
+      };
+
+      service.registerAsyncValidator('sameName', original);
+      service.registerAsyncValidator('sameName', replacement);
+
+      expect(service.getAsyncValidator('sameName')).toBe(replacement);
+      expect(service.getAsyncValidator('sameName')).not.toBe(original);
+    });
+
+    it('should return undefined for unregistered async validator', () => {
+      expect(service.getAsyncValidator('nonexistent')).toBeUndefined();
+    });
+  });
+
+  describe('clearAsyncValidators', () => {
+    it('should remove all registered async validators', () => {
+      const av1 = { params: vi.fn(), factory: vi.fn(), onSuccess: vi.fn() };
+      const av2 = { params: vi.fn(), factory: vi.fn(), onSuccess: vi.fn() };
+
+      service.registerAsyncValidator('av1', av1);
+      service.registerAsyncValidator('av2', av2);
+
+      expect(service.getAsyncValidator('av1')).toBeDefined();
+      expect(service.getAsyncValidator('av2')).toBeDefined();
+
+      service.clearAsyncValidators();
+
+      expect(service.getAsyncValidator('av1')).toBeUndefined();
+      expect(service.getAsyncValidator('av2')).toBeUndefined();
+    });
+
+    it('should work when no async validators are registered', () => {
+      expect(() => service.clearAsyncValidators()).not.toThrow();
+    });
+  });
+
+  describe('registerHttpValidator', () => {
+    it('should register an HTTP validator', () => {
+      const httpValidator = {
+        request: vi.fn((ctx: any) => `/api/check?value=${ctx.value()}`),
+        onSuccess: vi.fn((result: any) => null),
+      };
+
+      service.registerHttpValidator('httpTest', httpValidator);
+
+      const validator = service.getHttpValidator('httpTest');
+      expect(validator).toBe(httpValidator);
+    });
+
+    it('should allow registering multiple HTTP validators', () => {
+      const hv1 = {
+        request: vi.fn(() => '/api/v1'),
+        onSuccess: vi.fn(),
+      };
+      const hv2 = {
+        request: vi.fn(() => '/api/v2'),
+        onSuccess: vi.fn(),
+        onError: vi.fn(),
+      };
+
+      service.registerHttpValidator('hv1', hv1);
+      service.registerHttpValidator('hv2', hv2);
+
+      expect(service.getHttpValidator('hv1')).toBe(hv1);
+      expect(service.getHttpValidator('hv2')).toBe(hv2);
+    });
+
+    it('should handle HTTP validators with POST method', () => {
+      const postValidator = {
+        request: vi.fn((ctx: any) => ({
+          url: '/api/validate',
+          method: 'POST' as const,
+          body: { value: ctx.value() },
+        })),
+        onSuccess: vi.fn(),
+      };
+
+      service.registerHttpValidator('postValidator', postValidator);
+
+      const validator = service.getHttpValidator('postValidator');
+      expect(validator).toBe(postValidator);
+    });
+
+    it('should overwrite existing HTTP validator with same name', () => {
+      const original = {
+        request: vi.fn(() => '/api/original'),
+        onSuccess: vi.fn(),
+      };
+      const replacement = {
+        request: vi.fn(() => '/api/new'),
+        onSuccess: vi.fn(),
+      };
+
+      service.registerHttpValidator('sameName', original);
+      service.registerHttpValidator('sameName', replacement);
+
+      expect(service.getHttpValidator('sameName')).toBe(replacement);
+      expect(service.getHttpValidator('sameName')).not.toBe(original);
+    });
+
+    it('should return undefined for unregistered HTTP validator', () => {
+      expect(service.getHttpValidator('nonexistent')).toBeUndefined();
+    });
+  });
+
+  describe('clearHttpValidators', () => {
+    it('should remove all registered HTTP validators', () => {
+      const hv1 = { request: vi.fn(), onSuccess: vi.fn() };
+      const hv2 = { request: vi.fn(), onSuccess: vi.fn() };
+
+      service.registerHttpValidator('hv1', hv1);
+      service.registerHttpValidator('hv2', hv2);
+
+      expect(service.getHttpValidator('hv1')).toBeDefined();
+      expect(service.getHttpValidator('hv2')).toBeDefined();
+
+      service.clearHttpValidators();
+
+      expect(service.getHttpValidator('hv1')).toBeUndefined();
+      expect(service.getHttpValidator('hv2')).toBeUndefined();
+    });
+
+    it('should work when no HTTP validators are registered', () => {
+      expect(() => service.clearHttpValidators()).not.toThrow();
+    });
+  });
+
+  describe('clearAll', () => {
+    it('should clear all types of registrations', () => {
+      // Register one of each type
+      const customFn = vi.fn();
+      const validator = vi.fn();
+      const asyncValidator = { params: vi.fn(), factory: vi.fn(), onSuccess: vi.fn() };
+      const httpValidator = { request: vi.fn(), onSuccess: vi.fn() };
+
+      service.registerCustomFunction('fn', customFn);
+      service.registerValidator('v', validator);
+      service.registerAsyncValidator('av', asyncValidator);
+      service.registerHttpValidator('hv', httpValidator);
+
+      // Verify all are registered
+      expect(Object.keys(service.getCustomFunctions())).toHaveLength(1);
+      expect(service.getValidator('v')).toBeDefined();
+      expect(service.getAsyncValidator('av')).toBeDefined();
+      expect(service.getHttpValidator('hv')).toBeDefined();
+
+      // Clear all
+      service.clearAll();
+
+      // Verify all are cleared
+      expect(service.getCustomFunctions()).toEqual({});
+      expect(service.getValidator('v')).toBeUndefined();
+      expect(service.getAsyncValidator('av')).toBeUndefined();
+      expect(service.getHttpValidator('hv')).toBeUndefined();
+    });
+
+    it('should work when nothing is registered', () => {
+      expect(() => service.clearAll()).not.toThrow();
+    });
+
+    it('should allow re-registration after clearing', () => {
+      const fn = vi.fn();
+      const validator = vi.fn();
+
+      service.registerCustomFunction('fn', fn);
+      service.registerValidator('v', validator);
+
+      service.clearAll();
+
+      const newFn = vi.fn();
+      const newValidator = vi.fn();
+
+      service.registerCustomFunction('fn', newFn);
+      service.registerValidator('v', newValidator);
+
+      expect(service.getCustomFunctions().fn).toBe(newFn);
+      expect(service.getValidator('v')).toBe(newValidator);
+    });
+  });
+
+  describe('validator isolation', () => {
+    it('should maintain separate registries for functions and validators', () => {
+      const fn = vi.fn();
+      const validator = vi.fn();
+
+      service.registerCustomFunction('sameName', fn);
+      service.registerValidator('sameName', validator);
+
+      expect(service.getCustomFunctions().sameName).toBe(fn);
+      expect(service.getValidator('sameName')).toBe(validator);
+    });
+
+    it('should maintain separate registries for sync, async, and HTTP validators', () => {
+      const syncValidator = vi.fn();
+      const asyncValidator = { params: vi.fn(), factory: vi.fn(), onSuccess: vi.fn() };
+      const httpValidator = { request: vi.fn(), onSuccess: vi.fn() };
+
+      service.registerValidator('sameName', syncValidator);
+      service.registerAsyncValidator('sameName', asyncValidator);
+      service.registerHttpValidator('sameName', httpValidator);
+
+      expect(service.getValidator('sameName')).toBe(syncValidator);
+      expect(service.getAsyncValidator('sameName')).toBe(asyncValidator);
+      expect(service.getHttpValidator('sameName')).toBe(httpValidator);
+    });
+
+    it('should not affect other registries when clearing one type', () => {
+      const fn = vi.fn();
+      const validator = vi.fn();
+      const asyncValidator = { params: vi.fn(), factory: vi.fn(), onSuccess: vi.fn() };
+      const httpValidator = { request: vi.fn(), onSuccess: vi.fn() };
+
+      service.registerCustomFunction('fn', fn);
+      service.registerValidator('v', validator);
+      service.registerAsyncValidator('av', asyncValidator);
+      service.registerHttpValidator('hv', httpValidator);
+
+      service.clearValidators();
+
+      expect(Object.keys(service.getCustomFunctions())).toHaveLength(1);
+      expect(service.getValidator('v')).toBeUndefined();
+      expect(service.getAsyncValidator('av')).toBeDefined();
+      expect(service.getHttpValidator('hv')).toBeDefined();
+    });
+  });
 });

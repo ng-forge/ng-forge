@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
@@ -18,6 +18,7 @@ import { AsyncPipe } from '@angular/common';
     MatDatepicker,
     MatDatepickerInput,
     MatDatepickerToggle,
+    MatSuffix,
     Field,
     MatError,
     DynamicTextPipe,
@@ -26,6 +27,7 @@ import { AsyncPipe } from '@angular/common';
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
   template: `
     @let f = field();
@@ -45,6 +47,8 @@ import { AsyncPipe } from '@angular/common';
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
       />
 
       <mat-datepicker-toggle matIconSuffix [for]="$any(picker)" />
@@ -62,6 +66,10 @@ import { AsyncPipe } from '@angular/common';
       :host {
         display: block;
         width: 100%;
+      }
+
+      :host([hidden]) {
+        display: none !important;
       }
 
       mat-form-field {
@@ -87,8 +95,9 @@ export default class MatDatepickerFieldComponent implements MatDatepickerCompone
   readonly startAt = input<Date | null>(null);
   readonly props = input<MatDatepickerProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection

@@ -1,4 +1,4 @@
-import { GroupField, PageField, RowField, TextField } from '../../definitions';
+import { ArrayField, GroupField, PageField, RowField, TextField } from '../../definitions';
 
 /**
  * Container fields registry - augment this interface to add custom container fields
@@ -16,6 +16,7 @@ export interface FieldRegistryContainers {
   page: PageField;
   row: RowField;
   group: GroupField;
+  array: ArrayField;
 }
 
 /**
@@ -38,7 +39,7 @@ export interface FieldRegistryLeaves {
  * Global interface for dynamic form field definitions with categorization
  * This interface combines containers and leaves from their respective registries
  *
- * Container fields: Layout fields that contain other fields (page, row, group)
+ * Container fields: Layout fields that contain other fields (page, row, group, array)
  * Leaf fields: Fields that can hold values or display content (input, text, etc.)
  *
  * To add custom fields, augment FieldRegistryContainers or FieldRegistryLeaves

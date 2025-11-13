@@ -41,7 +41,6 @@ import { flattenFields } from '../../utils';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
-  providers: [EventBus],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
@@ -77,6 +76,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   // Parent form context inputs
   parentForm = input.required<ReturnType<typeof form<TModel>>>();
   parentFieldSignalContext = input.required<FieldSignalContext<TModel>>();
+  defaultValidationMessages = input<Record<string, string>>();
 
   private readonly formSetup = computed(() => {
     const groupField = this.field();
@@ -184,6 +184,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
           value: this.parentFieldSignalContext().value, // Pass through the parent's value signal
           defaultValues: this.defaultValues,
           form: this.form() as ReturnType<typeof form<Record<string, unknown>>>, // Use this group's nested form
+          defaultValidationMessages: this.defaultValidationMessages(), // Pass through validation messages
         };
 
         const bindings = mapFieldToBindings(fieldDef, {

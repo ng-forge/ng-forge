@@ -20,7 +20,10 @@ import { AsyncPipe } from '@angular/common';
         [field]="f"
         [id]="key()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.type]="p?.type ?? 'text'"
         [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly() || p?.plaintext"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -49,7 +52,10 @@ import { AsyncPipe } from '@angular/common';
         [field]="f"
         [id]="key()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.type]="p?.type ?? 'text'"
         [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly() || p?.plaintext"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -77,7 +83,15 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class BsInputFieldComponent implements BsInputComponent {
   readonly field = input.required<FieldTree<string>>();
@@ -89,8 +103,9 @@ export default class BsInputFieldComponent implements BsInputComponent {
   readonly tabIndex = input<number>();
   readonly props = input<BsInputProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper

@@ -25,6 +25,10 @@ import { AsyncPipe } from '@angular/common';
         type="date"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
+        [attr.min]="minDate() ?? null"
+        [attr.max]="maxDate() ?? null"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -54,6 +58,10 @@ import { AsyncPipe } from '@angular/common';
         type="date"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
+        [attr.min]="minDate() ?? null"
+        [attr.max]="maxDate() ?? null"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -80,7 +88,15 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'field()().hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
 })
 export default class BsDatepickerFieldComponent implements BsDatepickerComponent {
   readonly field = input.required<FieldTree<Date | string>>();
@@ -96,8 +112,9 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
   readonly startAt = input<Date | null>(null);
   readonly props = input<BsDatepickerProps>();
   readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages);
+  readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
