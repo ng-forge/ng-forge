@@ -26,7 +26,7 @@ import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-for
   template: `
     <div class="login-container">
       <h2>Sign In</h2>
-      <dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
+      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
     </div>
   `,
 })

@@ -132,20 +132,6 @@ Regular expression validation.
 }
 ```
 
-### custom
-
-Custom JavaScript expression.
-
-```typescript
-{
-  validators: [{
-    type: 'custom',
-    expression: 'fieldValue === formValue.password',
-    errorMessage: 'Passwords must match',
-  }],
-}
-```
-
 ## Conditional Operators
 
 Use in `when` conditions:

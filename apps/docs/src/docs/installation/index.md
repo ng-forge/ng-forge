@@ -55,7 +55,7 @@ import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/d
 @Component({
   selector: 'app-login',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
+  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
 })
 export class LoginComponent {
   config = {

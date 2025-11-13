@@ -115,7 +115,7 @@ import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form/
   selector: 'app-tags-form',
   imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" (formSubmit)="onSubmit($event)" />
+    <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" />
     <button (click)="addTag()">Add Tag</button>
   `,
 })
@@ -170,7 +170,7 @@ import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form/
   selector: 'app-contacts-form',
   imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" (formSubmit)="onSubmit($event)" />
+    <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" />
     <button (click)="addContact()">Add Contact</button>
   `,
 })

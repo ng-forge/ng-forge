@@ -139,62 +139,13 @@ Combine multiple validators with different conditions:
 
 ## Cross-Field Validation
 
-Validate a field based on another field's value.
+For validators that need to compare multiple fields (like password confirmation or date ranges), use custom validators with the FieldContext API.
 
-### Password Confirmation
-
-```typescript
-{
-  fields: [
-    {
-      key: 'password',
-      type: 'input',
-      value: '',
-      required: true,
-      minLength: 8,
-      props: { type: 'password' },
-    },
-    {
-      key: 'confirmPassword',
-      type: 'input',
-      value: '',
-      required: true,
-      validators: [{
-        type: 'custom',
-        expression: 'fieldValue === formValue.password',
-        errorMessage: 'Passwords must match',
-      }],
-      props: { type: 'password' },
-    },
-  ],
-}
-```
-
-### Date Range
-
-```typescript
-{
-  fields: [
-    {
-      key: 'startDate',
-      type: 'datepicker',
-      value: null,
-      required: true,
-    },
-    {
-      key: 'endDate',
-      type: 'datepicker',
-      value: null,
-      required: true,
-      validators: [{
-        type: 'custom',
-        expression: 'fieldValue > formValue.startDate',
-        errorMessage: 'End date must be after start date',
-      }],
-    },
-  ],
-}
-```
+See **[Custom Validators](../custom-validators)** for complete documentation on:
+- Synchronous custom validators
+- Cross-field validation patterns
+- FieldContext API for accessing other field values
+- Async validators and HTTP validators
 
 ## Complex Conditional Logic
 
