@@ -21,7 +21,7 @@ import { AsyncPipe } from '@angular/common';
       </label>
       }
 
-      <input type="range" [field]="f" [id]="key()" [attr.step]="props()?.step ?? 1" [attr.tabindex]="tabIndex()" class="form-range" />
+      <input type="range" [field]="f" [id]="key()" [attr.step]="props()?.step ?? step()" [attr.tabindex]="tabIndex()" class="form-range" />
 
       @if (props()?.helpText; as helpText) {
       <div class="form-text">
@@ -60,6 +60,10 @@ export default class BsSliderFieldComponent implements BsSliderComponent {
 
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
+
+  readonly min = input<number>(0);
+  readonly max = input<number>(100);
+  readonly step = input<number>(1);
 
   readonly props = input<BsSliderProps>();
   readonly validationMessages = input<ValidationMessages>();

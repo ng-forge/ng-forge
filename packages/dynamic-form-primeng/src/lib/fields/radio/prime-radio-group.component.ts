@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
+import { FormsModule } from '@angular/forms';
 import { DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
 import { AsyncPipe } from '@angular/common';
+import { RadioButton } from 'primeng/radiobutton';
 
 export interface PrimeRadioGroupProps {
   /**
@@ -16,37 +18,21 @@ export interface PrimeRadioGroupProps {
  */
 @Component({
   selector: 'df-prime-radio-group',
-  imports: [DynamicTextPipe, AsyncPipe],
+  imports: [RadioButton, FormsModule, DynamicTextPipe, AsyncPipe],
   template: `
     <div class="radio-group">
-      @for (option of options(); track option.value) {
+      @for (option of options(); track option.value; let i = $index) {
       <div class="radio-option">
-        <input
-          type="radio"
-          [id]="name() + '-' + option.value"
+        <p-radiobutton
           [name]="name()"
           [value]="option.value"
-          [checked]="value() === option.value"
-          (change)="onRadioChange(option.value)"
+          [ngModel]="value()"
+          (ngModelChange)="onRadioChange($event)"
           [disabled]="disabled() || option.disabled || false"
-          [class.p-radiobutton]="true"
-          [class.p-invalid]="invalid()"
-          style="display: none"
+          [inputId]="name() + '_' + i"
+          [styleClass]="properties()?.styleClass"
         />
-        <label [for]="name() + '-' + option.value" class="radio-option-label">
-          <span class="p-radiobutton p-component" [class.p-radiobutton-checked]="value() === option.value" [class.p-invalid]="invalid()">
-            <span
-              class="p-radiobutton-box"
-              [class.p-highlight]="value() === option.value"
-              [class.p-disabled]="disabled() || option.disabled"
-            >
-              @if (value() === option.value) {
-              <span class="p-radiobutton-icon"></span>
-              }
-            </span>
-          </span>
-          <span class="radio-label-text">{{ option.label | dynamicText | async }}</span>
-        </label>
+        <label [for]="name() + '_' + i" class="radio-option-label">{{ option.label | dynamicText | async }}</label>
       </div>
       }
     </div>

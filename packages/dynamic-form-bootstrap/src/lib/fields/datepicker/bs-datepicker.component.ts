@@ -99,8 +99,8 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly minDate = input<string>();
-  readonly maxDate = input<string>();
+  readonly minDate = input<Date | string | null>(null);
+  readonly maxDate = input<Date | string | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<BsDatepickerProps>();
   readonly validationMessages = input<ValidationMessages>();
@@ -111,4 +111,15 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // Helper methods to convert Date to string for HTML attributes
+  readonly minAsString = computed(() => {
+    const min = this.minDate();
+    return min instanceof Date ? min.toISOString().split('T')[0] : min;
+  });
+
+  readonly maxAsString = computed(() => {
+    const max = this.maxDate();
+    return max instanceof Date ? max.toISOString().split('T')[0] : max;
+  });
 }
