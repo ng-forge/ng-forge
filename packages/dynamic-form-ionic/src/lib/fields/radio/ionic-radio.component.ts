@@ -28,7 +28,7 @@ import { AsyncPipe } from '@angular/common';
       <ion-item [lines]="'none'">
         <ion-radio
           [value]="option.value"
-          [disabled]="f().disabled() || option.disabled || false"
+          [disabled]="option.disabled || false"
           [labelPlacement]="props()?.labelPlacement ?? 'end'"
           [justify]="props()?.justify"
           [color]="props()?.color ?? 'primary'"

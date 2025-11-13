@@ -23,7 +23,6 @@ import { AsyncPipe } from '@angular/common';
         type="checkbox"
         [field]="f"
         [id]="key()"
-        [disabled]="f().disabled()"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
         [attr.tabindex]="tabIndex()"

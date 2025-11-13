@@ -21,16 +21,10 @@ import { AsyncPipe } from '@angular/common';
     <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
-    <div class="radio-group">
+    <div class="radio-group" [field]="f">
       @for (option of options(); track option.value) {
       <div class="radio-option">
-        <p-radioButton
-          [field]="f"
-          [value]="option.value"
-          [disabled]="f().disabled() || option.disabled"
-          [styleClass]="radioClasses()"
-          [inputId]="key() + '-' + option.value"
-        />
+        <p-radioButton [name]="key()" [value]="option.value" [styleClass]="radioClasses()" [inputId]="key() + '-' + option.value" />
         <label [for]="key() + '-' + option.value" class="radio-option-label">
           {{ option.label | dynamicText | async }}
         </label>

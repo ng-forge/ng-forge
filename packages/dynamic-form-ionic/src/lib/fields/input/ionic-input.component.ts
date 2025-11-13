@@ -19,8 +19,6 @@ import { AsyncPipe } from '@angular/common';
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-      [disabled]="f().disabled()"
-      [readonly]="f().readonly()"
       [clearInput]="props()?.clearInput ?? false"
       [counter]="props()?.counter ?? false"
       [color]="props()?.color"

@@ -25,7 +25,6 @@ import { AsyncPipe } from '@angular/common';
       <select
         [field]="f"
         [id]="key()"
-        [disabled]="f().disabled()"
         class="form-select"
         [class.form-select-sm]="props()?.size === 'sm'"
         [class.form-select-lg]="props()?.size === 'lg'"

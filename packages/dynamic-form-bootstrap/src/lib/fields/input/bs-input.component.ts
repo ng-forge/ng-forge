@@ -16,14 +16,13 @@ import { AsyncPipe } from '@angular/common';
     @let f = field(); @let p = props(); @if (p?.floatingLabel) {
     <!-- Floating label variant -->
     <div class="form-floating mb-3">
+      @switch (p?.type ?? 'text') { @case ('email') {
       <input
         [field]="f"
         [id]="key()"
+        type="email"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [attr.type]="p?.type ?? 'text'"
         [attr.tabindex]="tabIndex()"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly() || p?.plaintext"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -31,7 +30,77 @@ import { AsyncPipe } from '@angular/common';
         [class.is-invalid]="f().invalid() && f().touched()"
         [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
       />
-      @if (label()) {
+      } @case ('password') {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="password"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } @case ('number') {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="number"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } @case ('tel') {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="tel"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } @case ('url') {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="url"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } @default {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="text"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } } @if (label()) {
       <label [for]="key()">{{ label() | dynamicText | async }}</label>
       } @if (p?.validFeedback && f().valid() && f().touched()) {
       <div class="valid-feedback d-block">
@@ -46,16 +115,13 @@ import { AsyncPipe } from '@angular/common';
     <div class="mb-3">
       @if (label()) {
       <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
-      }
-
+      } @switch (p?.type ?? 'text') { @case ('email') {
       <input
         [field]="f"
         [id]="key()"
+        type="email"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [attr.type]="p?.type ?? 'text'"
         [attr.tabindex]="tabIndex()"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly() || p?.plaintext"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -63,8 +129,77 @@ import { AsyncPipe } from '@angular/common';
         [class.is-invalid]="f().invalid() && f().touched()"
         [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
       />
-
-      @if (p?.helpText) {
+      } @case ('password') {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="password"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } @case ('number') {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="number"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } @case ('tel') {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="tel"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } @case ('url') {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="url"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } @default {
+      <input
+        [field]="f"
+        [id]="key()"
+        type="text"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.form-control-plaintext]="p?.plaintext"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      />
+      } } @if (p?.helpText) {
       <div class="form-text">
         {{ p?.helpText | dynamicText | async }}
       </div>

@@ -18,21 +18,67 @@ import { InputText } from 'primeng/inputtext';
     <div class="df-prime-field">
       @if (label()) {
       <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
-      }
-
+      } @switch (props()?.type ?? 'text') { @case ('email') {
       <input
         pInputText
         [id]="inputId()"
         [field]="f"
-        [attr.type]="props()?.type ?? 'text'"
+        type="email"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
         [attr.tabindex]="tabIndex()"
         [class]="inputClasses()"
       />
-
-      @if (props()?.hint; as hint) {
+      } @case ('password') {
+      <input
+        pInputText
+        [id]="inputId()"
+        [field]="f"
+        type="password"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        [class]="inputClasses()"
+      />
+      } @case ('number') {
+      <input
+        pInputText
+        [id]="inputId()"
+        [field]="f"
+        type="number"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        [class]="inputClasses()"
+      />
+      } @case ('tel') {
+      <input
+        pInputText
+        [id]="inputId()"
+        [field]="f"
+        type="tel"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        [class]="inputClasses()"
+      />
+      } @case ('url') {
+      <input
+        pInputText
+        [id]="inputId()"
+        [field]="f"
+        type="url"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        [class]="inputClasses()"
+      />
+      } @default {
+      <input
+        pInputText
+        [id]="inputId()"
+        [field]="f"
+        type="text"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        [class]="inputClasses()"
+      />
+      } } @if (props()?.hint; as hint) {
       <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
       } @for (error of errorsToDisplay(); track error.kind) {
       <small class="p-error">{{ error.message }}</small>
