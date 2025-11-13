@@ -148,7 +148,9 @@ function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: 
 /**
  * Create a function-based validator using registered validator functions
  */
-function createFunctionValidator<TValue>(config: CustomValidatorConfig): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
+function createFunctionValidator<TValue>(
+  config: CustomValidatorConfig
+): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const registry = inject(FunctionRegistryService);
   const validatorFn = registry.getValidator(config.functionName!);
 
@@ -165,7 +167,9 @@ function createFunctionValidator<TValue>(config: CustomValidatorConfig): (ctx: F
 /**
  * Create an expression-based validator using secure AST evaluation
  */
-function createExpressionValidator<TValue>(config: CustomValidatorConfig): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
+function createExpressionValidator<TValue>(
+  config: CustomValidatorConfig
+): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
 
@@ -187,6 +191,8 @@ function createExpressionValidator<TValue>(config: CustomValidatorConfig): (ctx:
       const kind = config.kind || 'custom';
       return { kind };
     } catch (error) {
+      // Gracefully degrade on errors (e.g., typos in field names, undefined functions)
+      // Log to console for debugging while keeping form functional
       console.error('[DynamicForm] Error evaluating custom validator expression:', config.expression, error);
       return { kind: config.kind || 'custom' };
     }
