@@ -87,10 +87,6 @@ export const appRoutes: Route[] = [
           import('./examples/conditional-logic-showcase-demo.component').then((m) => m.ConditionalLogicShowcaseDemoComponent),
       },
       {
-        path: 'custom-validators',
-        loadComponent: () => import('./examples/custom-validators-demo.component').then((m) => m.CustomValidatorsDemoComponent),
-      },
-      {
         path: 'expression-validators-demo',
         loadComponent: () => import('./examples/expression-validators-demo.component').then((m) => m.ExpressionValidatorsDemoComponent),
       },

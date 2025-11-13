@@ -92,7 +92,7 @@ export class ExpressionValidatorsDemoComponent {
       required: 'This field is required',
       passwordMismatch: 'Passwords must match',
       endDateBeforeStart: 'End date must be after start date',
-      ageOutOfRange: 'Age must be between {{minAge}} and {{maxAge}}',
+      ageOutOfRange: 'Age must be within the specified range',
       noSpaces: 'Spaces are not allowed',
     },
     fields: [
@@ -123,10 +123,8 @@ export class ExpressionValidatorsDemoComponent {
                 kind: 'passwordMismatch',
               },
             ],
+            // Falls back to defaultValidationMessages.passwordMismatch
             props: { type: 'password' },
-            validationMessages: {
-              passwordMismatch: 'Passwords must match',
-            },
           },
           {
             key: 'startDate',
@@ -180,9 +178,7 @@ export class ExpressionValidatorsDemoComponent {
                 kind: 'ageOutOfRange',
               },
             ],
-            validationMessages: {
-              ageOutOfRange: 'Age must be between the min and max range',
-            },
+            // Falls back to defaultValidationMessages.ageOutOfRange
           },
         ],
       },

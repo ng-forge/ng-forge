@@ -204,6 +204,8 @@ function createExpressionValidator<TValue>(
 
       return validationError;
     } catch (error) {
+      // Gracefully degrade on errors (e.g., typos in field names, undefined functions)
+      // Log to console for debugging while keeping form functional
       console.error('[DynamicForm] Error evaluating custom validator expression:', config.expression, error);
       return { kind: config.kind || 'custom' };
     }
