@@ -17,7 +17,6 @@
 - [ ] ⚡ Performance improvement
 - [ ] ✅ Test update
 - [ ] 🔧 Build/tooling update
-- [ ] 🔒 Security fix
 
 ## Related Issues
 
@@ -34,140 +33,55 @@ Related to #
 -
 -
 
-## Breaking Changes
+<!--
+## Breaking Changes (if applicable)
 
-<!-- If this PR introduces breaking changes, describe them here and how users should migrate -->
+**Before:**
+```typescript
+// Old usage
+```
 
-- **Before:**
+**After:**
+```typescript
+// New usage
+```
 
-  ```typescript
-  // Old usage
-  ```
-
-- **After:**
-
-  ```typescript
-  // New usage
-  ```
-
-- **Migration:**
+**Migration guide:**
+-
+-->
 
 ## Testing
 
-<!-- Describe how you tested these changes -->
-
-### Test Coverage
-
 - [ ] Unit tests added/updated
-- [ ] Integration tests added/updated
-- [ ] E2E tests added/updated (if applicable)
 - [ ] All tests pass locally
-- [ ] Test coverage maintained or improved
-
-### Manual Testing
-
-<!-- Describe manual testing performed -->
-
-- [ ] Tested in browser (specify browsers if relevant)
-- [ ] Tested with different configurations
+- [ ] Tested manually
 - [ ] Tested edge cases
-- [ ] Tested backwards compatibility (if applicable)
 
-### Test Configuration
-
-```typescript
-// If applicable, share test configuration used
-const config = {
-  fields: [
-    // ...
-  ],
-};
-```
+<!-- If applicable, describe manual testing or include test configuration -->
 
 ## Screenshots / Videos
 
 <!-- If applicable, add screenshots or videos to demonstrate the changes -->
 
-**Before:**
-
-**After:**
-
 ## Documentation
 
-<!-- Check all that apply -->
-
-- [ ] Documentation has been updated (if needed)
-- [ ] README updated (if needed)
-- [ ] Developer guides updated (if needed)
+- [ ] Documentation updated (if needed)
 - [ ] API documentation (TSDoc) added/updated
-- [ ] Examples added/updated (if needed)
-- [ ] Changelog entry added (if applicable)
-
-## Performance Impact
-
-<!-- Describe any performance implications -->
-
-- [ ] No performance impact
-- [ ] Performance improved
-- [ ] Performance impact assessed and acceptable
-- [ ] Performance benchmarks included
-
-<!-- If there's a performance impact, provide details -->
+- [ ] Examples updated (if needed)
 
 ## Checklist
 
 <!-- Ensure all items are checked before requesting review -->
 
-### Code Quality
-
 - [ ] Code follows the [coding standards](../CODING_STANDARDS.md)
-- [ ] Code is self-documenting or has appropriate comments
-- [ ] No commented-out code
-- [ ] No console.log() or debugging statements
-- [ ] Error handling is appropriate
-- [ ] Type safety maintained (no `any` types)
-
-### Testing & Quality
-
-- [ ] All new code is covered by tests
-- [ ] All existing tests pass
 - [ ] No linting errors (`pnpm lint`)
 - [ ] Code is formatted (`pnpm lint:fix`)
 - [ ] Build succeeds (`pnpm build:libs`)
-
-### Git
-
 - [ ] Commits follow [conventional commit format](https://www.conventionalcommits.org/)
-- [ ] Commit messages are clear and descriptive
-- [ ] Branch is up to date with main
-- [ ] No merge conflicts
-
-### Review
-
 - [ ] Self-review completed
-- [ ] PR description is complete and clear
-- [ ] Appropriate labels added
-- [ ] Reviewers assigned (if known)
+- [ ] No commented-out code or console.log() statements
+- [ ] Type safety maintained (no `any` types)
 
 ## Additional Notes
 
 <!-- Any additional information that reviewers should know -->
-
-## For Reviewers
-
-<!-- Help guide reviewers on what to focus on -->
-
-## **Focus Areas:**
-
-- **Questions for Reviewers:**
-
--
-- ***
-
-  **Definition of Done:**
-
-- [ ] Code reviewed and approved
-- [ ] All CI checks pass
-- [ ] Documentation complete
-- [ ] No unresolved comments
-- [ ] Ready to merge
