@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { DynamicForm, type FormConfig, type CustomValidator } from '@ng-forge/dynamic-form';
+import { type CustomValidator, DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 import { JsonPipe } from '@angular/common';
 
 // Example of a function-based validator for comparison
@@ -89,6 +89,7 @@ export class ExpressionValidatorsDemoComponent {
 
   config: FormConfig = {
     defaultValidationMessages: {
+      required: 'This field is required',
       passwordMismatch: 'Passwords must match',
       endDateBeforeStart: 'End date must be after start date',
       ageOutOfRange: 'Age must be between {{minAge}} and {{maxAge}}',
@@ -141,7 +142,7 @@ export class ExpressionValidatorsDemoComponent {
             validators: [
               {
                 type: 'custom',
-                expression: 'fieldValue && formValue.startDate ? new Date(fieldValue) > new Date(formValue.startDate) : true',
+                expression: '!fieldValue || !formValue.startDate || new Date(fieldValue) > new Date(formValue.startDate)',
                 kind: 'endDateBeforeStart',
               },
             ],
