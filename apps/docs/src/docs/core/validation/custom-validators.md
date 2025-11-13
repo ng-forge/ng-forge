@@ -6,6 +6,8 @@ keyword: ValidationCustomValidatorsPage
 
 Custom validation functions for complex validation logic that goes beyond built-in validators.
 
+> **💡 Live Demo Available**: See custom validators in action at the [Custom Validators Example](/examples/custom-validators) with a working registration form.
+
 ## Overview
 
 ng-forge supports three types of custom validators using Angular's Signal Forms API:
@@ -98,7 +100,7 @@ const lessThanField: CustomValidator<number> = (ctx, params) => {
   const otherFieldPath = params?.field as string;
 
   // Use valueOf() to access other field - PUBLIC API!
-  const otherValue = ctx.valueOf(otherFieldPath as any);
+  const otherValue = ctx.valueOf(otherFieldPath);
 
   if (otherValue !== undefined && value >= otherValue) {
     return { kind: 'notLessThan' };
@@ -144,7 +146,7 @@ const config = {
 ```typescript
 const passwordMatch: CustomValidator<string> = (ctx) => {
   const confirmPassword = ctx.value();
-  const password = ctx.valueOf('password' as any);
+  const password = ctx.valueOf('password');
 
   if (!confirmPassword || !password) {
     return null; // Let required validator handle empty case
@@ -427,7 +429,7 @@ const ageValidator: CustomValidator<Date> = (ctx) => {
 ```typescript
 const conditionalRequiredValidator: CustomValidator = (ctx) => {
   const value = ctx.value();
-  const employmentStatus = ctx.valueOf('employmentStatus' as any);
+  const employmentStatus = ctx.valueOf('employmentStatus');
 
   // Company name required if employed
   if (employmentStatus === 'employed' && !value) {
@@ -442,7 +444,7 @@ const conditionalRequiredValidator: CustomValidator = (ctx) => {
 ```typescript
 const dateRangeValidator: CustomValidator<Date> = (ctx) => {
   const endDate = ctx.value();
-  const startDate = ctx.valueOf('startDate' as any);
+  const startDate = ctx.valueOf('startDate');
 
   if (startDate && endDate && startDate > endDate) {
     return { kind: 'invalidDateRange' };
@@ -459,8 +461,8 @@ Validators can return multiple errors for cross-field validation:
 const validateDateRange: CustomValidator = (ctx) => {
   const errors: ValidationError[] = [];
 
-  const startDate = ctx.valueOf('startDate' as any);
-  const endDate = ctx.valueOf('endDate' as any);
+  const startDate = ctx.valueOf('startDate');
+  const endDate = ctx.valueOf('endDate');
 
   if (!startDate) errors.push({ kind: 'startDateRequired' });
   if (!endDate) errors.push({ kind: 'endDateRequired' });
@@ -578,48 +580,6 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 6. **Message Priority**: Use field-level messages for customization, form-level for common errors
 7. **Conditional Validation**: Use `condition` function for dynamic validators
 8. **Inverted Logic**: HTTP validators check validity, not data fetching success
-
-## Migration from Legacy API
-
-If you're migrating from the old API:
-
-**Old API:**
-
-```typescript
-// SimpleCustomValidator
-const old: SimpleCustomValidator<string> = (value, formValue) => { /* ... */ };
-
-// ContextAwareValidator
-const old: ContextAwareValidator<string> = (ctx, params) => { /* ... */ };
-
-// TreeValidator
-const old: TreeValidator = (ctx, params) => { /* ... */ };
-
-// Registration
-signalFormsConfig: {
-  simpleValidators: { old },
-  contextValidators: { old },
-  treeValidators: { old }
-}
-```
-
-**New API:**
-
-```typescript
-// Unified CustomValidator (has access to FieldContext)
-const new: CustomValidator<string> = (ctx, params) => {
-  const value = ctx.value();
-  const otherValue = ctx.valueOf('otherField' as any);
-  // ...
-};
-
-// Registration
-signalFormsConfig: {
-  validators: { new }
-}
-```
-
-The new `CustomValidator` type unifies all three old types and always provides access to the full `FieldContext` API.
 
 ## Related Documentation
 
