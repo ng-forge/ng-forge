@@ -1,3 +1,4 @@
+import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MaterialFormTestUtils } from '../../testing/material-test-utils';
 import { MinimalTestBuilder } from '../../testing/minimal-test-builders';
@@ -7,6 +8,14 @@ describe('MatSelectFieldComponent', () => {
     it('should render mat-select element', async () => {
       const { config, initialValue } = MinimalTestBuilder.withSelectOptions([{ label: 'Option 1', value: '1' }]);
       const { fixture } = await MaterialFormTestUtils.createTest({ config, initialValue });
+
+      // Additional stabilization cycles for Material select component
+      // Material components sometimes need multiple cycles to fully initialize
+      for (let i = 0; i < 3; i++) {
+        TestBed.flushEffects();
+        fixture.detectChanges();
+        await fixture.whenStable();
+      }
 
       const select = fixture.debugElement.query(By.css('mat-select'));
       expect(select).not.toBeNull();
