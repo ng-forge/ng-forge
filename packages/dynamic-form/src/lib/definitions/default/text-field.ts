@@ -40,4 +40,6 @@ export type TextProps = {
 /**
  * Text field definition for displaying translatable text content
  */
-export type TextField = FieldDef<TextProps>;
+export interface TextField extends FieldDef<TextProps> {
+  type: 'text';
+}
