@@ -264,6 +264,22 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
 
+    // Register validators before form creation
+    const signalFormsConfig = config.signalFormsConfig;
+    if (signalFormsConfig) {
+      // Register custom functions
+      if (signalFormsConfig.customFunctions) {
+        Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
+          this.functionRegistry.registerCustomFunction(name, fn);
+        });
+      }
+
+      // Set all validators from config - change detection is inside set methods
+      this.functionRegistry.setValidators(signalFormsConfig.validators);
+      this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
+      this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
+    }
+
     if (config.fields && config.fields.length > 0) {
       // Use memoized functions for expensive operations with registry
       const flattenedFields = this.memoizedFlattenFields(config.fields, registry);
@@ -484,9 +500,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     // Set up initialization tracking
     this.setupInitializationTracking();
 
-    // Register custom functions and validators from signalFormsConfig
-    this.setupFunctionAndValidatorRegistration();
-
     // For paged forms, emit initialization event when pages are defined
     explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
       if (mode === 'paged' && pages.length > 0) {
@@ -622,54 +635,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
           this.initializedSubject.error(error);
         },
       });
-  }
-
-  /**
-   * Register custom functions and validators from signalFormsConfig
-   *
-   * This effect runs whenever the config changes and registers any custom functions
-   * or validators defined in signalFormsConfig. It clears existing registrations
-   * before adding new ones to ensure clean state on config changes.
-   */
-  private setupFunctionAndValidatorRegistration(): void {
-    explicitEffect([this.config], ([config]) => {
-      const signalFormsConfig = config.signalFormsConfig;
-
-      // Clear existing registrations to ensure clean state
-      this.functionRegistry.clearAll();
-
-      if (!signalFormsConfig) {
-        return;
-      }
-
-      // Register custom functions
-      if (signalFormsConfig.customFunctions) {
-        Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
-          this.functionRegistry.registerCustomFunction(name, fn);
-        });
-      }
-
-      // Register custom validators
-      if (signalFormsConfig.validators) {
-        Object.entries(signalFormsConfig.validators).forEach(([name, fn]) => {
-          this.functionRegistry.registerValidator(name, fn);
-        });
-      }
-
-      // Register async validators
-      if (signalFormsConfig.asyncValidators) {
-        Object.entries(signalFormsConfig.asyncValidators).forEach(([name, fn]) => {
-          this.functionRegistry.registerAsyncValidator(name, fn);
-        });
-      }
-
-      // Register HTTP validators
-      if (signalFormsConfig.httpValidators) {
-        Object.entries(signalFormsConfig.httpValidators).forEach(([name, config]) => {
-          this.functionRegistry.registerHttpValidator(name, config);
-        });
-      }
-    });
   }
 
   ngOnDestroy(): void {
