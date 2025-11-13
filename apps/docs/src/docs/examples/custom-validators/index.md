@@ -58,12 +58,6 @@ import { JsonPipe } from '@angular/common';
 
     <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
 
-    @if (submitMessage()) {
-    <div style="margin-top: 2rem; padding: 1.5rem; background-color: #4caf50; color: white; border-radius: 4px;">
-      {{ submitMessage() }}
-    </div>
-    }
-
     <div style="margin-top: 2rem;">
       <h4>Form Data:</h4>
       <pre>{{ formValue() | json }}</pre>
@@ -78,8 +72,6 @@ export class CustomValidatorsDemoComponent {
     password: '',
     confirmPassword: '',
   });
-
-  submitMessage = signal<string>('');
 
   config: FormConfig = {
     defaultValidationMessages: {
@@ -197,15 +189,7 @@ export class CustomValidatorsDemoComponent {
     };
   }
 
-  onSubmit(value: unknown) {
-    console.log('Form submitted:', value);
-    this.submitMessage.set('✓ Registration successful! All validators passed.');
-
-    // Clear message after 5 seconds
-    setTimeout(() => {
-      this.submitMessage.set('');
-    }, 5000);
-  }
+  onSubmit(value: unknown) {}
 }
 ```
 
@@ -216,7 +200,7 @@ export class CustomValidatorsDemoComponent {
 ### 1. Sync Validator with FieldContext
 
 ```typescript
-private createUsernameFormatValidator(): CustomValidator {
+function createUsernameFormatValidator(): CustomValidator {
   return (ctx) => {
     const username = ctx.value() as string;
 
@@ -239,7 +223,7 @@ private createUsernameFormatValidator(): CustomValidator {
 ### 2. Cross-Field Validator
 
 ```typescript
-private createPasswordMatchValidator(): CustomValidator {
+function createPasswordMatchValidator(): CustomValidator {
   return (ctx) => {
     const confirmPassword = ctx.value() as string;
     const password = ctx.valueOf('password' as any) as string;
@@ -352,7 +336,7 @@ This example demonstrates:
 **Step 1: Create the validator function**
 
 ```typescript
-private createUsernameFormatValidator(): CustomValidator {
+function createUsernameFormatValidator(): CustomValidator {
   return (ctx) => {
     const username = ctx.value() as string;
     if (username.includes(' ') || username.length < 3) {
@@ -390,7 +374,7 @@ signalFormsConfig: {
 ### Email Domain Validation
 
 ```typescript
-private createEmailDomainValidator(): CustomValidator {
+function createEmailDomainValidator(): CustomValidator {
   const blockedDomains = ['tempmail.com', 'throwaway.email'];
 
   return (ctx) => {
@@ -409,7 +393,7 @@ private createEmailDomainValidator(): CustomValidator {
 ### Age Validation
 
 ```typescript
-private createAgeValidator(): CustomValidator {
+function createAgeValidator(): CustomValidator {
   return (ctx) => {
     const birthDate = ctx.value() as Date;
     const age = calculateAge(birthDate);
@@ -426,7 +410,7 @@ private createAgeValidator(): CustomValidator {
 ### Conditional Required
 
 ```typescript
-private createConditionalRequiredValidator(): CustomValidator {
+function createConditionalRequiredValidator(): CustomValidator {
   return (ctx) => {
     const value = ctx.value();
     const employmentStatus = ctx.valueOf('employmentStatus' as any);
