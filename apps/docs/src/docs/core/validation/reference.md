@@ -132,39 +132,22 @@ Regular expression validation.
 }
 ```
 
-### custom
-
-Custom JavaScript expression.
-
-```typescript
-{
-  validators: [{
-    type: 'custom',
-    expression: 'fieldValue === formValue.password',
-    errorMessage: 'Passwords must match',
-  }],
-}
-```
-
 ## Conditional Operators
 
 Use in `when` conditions:
 
-| Operator         | Description                  | Example                          |
-| ---------------- | ---------------------------- | -------------------------------- |
-| `equals`         | Exact match                  | `value: 'business'`              |
-| `notEquals`      | Not equal to                 | `value: 'pending'`               |
-| `greater`        | Greater than                 | `value: 100`                     |
-| `less`           | Less than                    | `value: 0`                       |
-| `greaterOrEqual` | Greater than or equal        | `value: 18`                      |
-| `lessOrEqual`    | Less than or equal           | `value: 120`                     |
-| `contains`       | String/array contains        | `value: '@gmail.com'`            |
-| `notContains`    | String/array doesn't contain | `value: 'test'`                  |
-| `startsWith`     | String starts with           | `value: 'https://'`              |
-| `endsWith`       | String ends with             | `value: '.com'`                  |
-| `matches`        | RegEx match                  | `value: '^[A-Z]'`                |
-| `in`             | Value in array               | `value: ['admin', 'moderator']`  |
-| `notIn`          | Value not in array           | `value: ['banned', 'suspended']` |
+| Operator         | Description           | Example               |
+| ---------------- | --------------------- | --------------------- |
+| `equals`         | Exact match           | `value: 'business'`   |
+| `notEquals`      | Not equal to          | `value: 'pending'`    |
+| `greater`        | Greater than          | `value: 100`          |
+| `less`           | Less than             | `value: 0`            |
+| `greaterOrEqual` | Greater than or equal | `value: 18`           |
+| `lessOrEqual`    | Less than or equal    | `value: 120`          |
+| `contains`       | String/array contains | `value: '@gmail.com'` |
+| `startsWith`     | String starts with    | `value: 'https://'`   |
+| `endsWith`       | String ends with      | `value: '.com'`       |
+| `matches`        | RegEx match           | `value: '^[A-Z]'`     |
 
 ### Operator Examples
 
@@ -258,8 +241,8 @@ All conditions must be true:
 
 ```typescript
 {
-  logic: 'and',
-  expressions: [
+  type: 'and',
+  conditions: [
     {
       type: 'fieldValue',
       fieldPath: 'accountType',
@@ -282,8 +265,8 @@ At least one condition must be true:
 
 ```typescript
 {
-  logic: 'or',
-  expressions: [
+  type: 'or',
+  conditions: [
     {
       type: 'fieldValue',
       fieldPath: 'role',
@@ -335,7 +318,7 @@ interface ConditionalExpression {
   value?: unknown;
   expression?: string;
   conditions?: {
-    logic: 'and' | 'or';
+    type: 'and' | 'or';
     expressions: ConditionalExpression[];
   };
 }

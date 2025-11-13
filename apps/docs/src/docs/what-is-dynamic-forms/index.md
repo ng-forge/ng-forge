@@ -17,7 +17,7 @@ import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/d
 @Component({
   selector: 'app-registration',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
+  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
 })
 export class RegistrationComponent {
   config = {
@@ -322,7 +322,7 @@ Here's a production-ready, multi-step checkout flow - **fully typed, validated, 
 @Component({
   selector: 'app-checkout',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submit)="processOrder($event)" />`,
+  template: `<dynamic-form [config]="config" (submitted)="processOrder($event)" />`,
 })
 export class CheckoutComponent {
   config = {

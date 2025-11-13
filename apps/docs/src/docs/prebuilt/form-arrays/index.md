@@ -108,14 +108,14 @@ Here's a complete working example of a flat array field with dynamic add/remove:
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { DynamicFormComponent, EventBus } from '@ng-forge/dynamic-form';
+import { DynamicForm, EventBus } from '@ng-forge/dynamic-form';
 import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form/events';
 
 @Component({
   selector: 'app-tags-form',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" (formSubmit)="onSubmit($event)" />
+    <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" />
     <button (click)="addTag()">Add Tag</button>
   `,
 })
@@ -163,14 +163,14 @@ Here's a complete working example of an object array field with validation:
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { DynamicFormComponent, EventBus } from '@ng-forge/dynamic-form';
+import { DynamicForm, EventBus } from '@ng-forge/dynamic-form';
 import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form/events';
 
 @Component({
   selector: 'app-contacts-form',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" (formSubmit)="onSubmit($event)" />
+    <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" />
     <button (click)="addContact()">Add Contact</button>
   `,
 })

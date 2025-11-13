@@ -477,8 +477,8 @@ const config = {
         {
           type: 'hidden',
           condition: {
-            logic: 'or',
-            expressions: [
+            type: 'or',
+            conditions: [
               {
                 type: 'fieldValue',
                 fieldPath: 'accountType',
@@ -565,8 +565,8 @@ logic: [
   {
     type: 'hidden',
     condition: {
-      logic: 'and', // or 'or'
-      expressions: [
+      type: 'and', // or 'or'
+      conditions: [
         {
           /* condition 1 */
         },

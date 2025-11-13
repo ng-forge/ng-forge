@@ -19,7 +19,7 @@ This example demonstrates:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { FormConfig, DynamicFormComponent, InferFormValue } from '@ng-forge/dynamic-form';
+import { FormConfig, DynamicForm, InferFormValue } from '@ng-forge/dynamic-form';
 
 const registrationConfig = {
   fields: [
@@ -352,7 +352,7 @@ type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
 
 @Component({
   selector: 'app-user-registration',
-  imports: [DynamicFormComponent],
+  imports: [DynamicForm],
   template: `
     <div class="registration-container">
       <h1>Create Your Account</h1>

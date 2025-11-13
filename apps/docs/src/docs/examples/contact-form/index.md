@@ -26,7 +26,7 @@ import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-for
   template: `
     <div class="contact-form-container">
       <h2>Contact Us</h2>
-      <dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
+      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
 
       @if (submitted()) {
       <div class="success-message">Thank you for your message! We'll get back to you soon.</div>
