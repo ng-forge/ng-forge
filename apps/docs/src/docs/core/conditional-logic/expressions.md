@@ -72,6 +72,16 @@ Use JavaScript expressions to check the entire form state.
 }
 ```
 
+**Safe member access:** Accessing nested properties on `null` or `undefined` returns `undefined` (no errors thrown):
+
+```typescript
+{
+  type: 'formValue',
+  // Safe even when user, profile, or preferences is null/undefined
+  expression: 'formValue.user.profile.preferences.notifications === true',
+}
+```
+
 ### javascript
 
 Custom JavaScript validation on the field value.
@@ -110,6 +120,16 @@ Advanced custom expressions with access to both field and form values.
 {
   type: 'custom',
   expression: 'fieldValue > formValue.minAge && fieldValue < formValue.maxAge',
+}
+```
+
+**Safe member access:** Like `formValue` expressions, nested property access is safe:
+
+```typescript
+{
+  type: 'custom',
+  // Safe even when nested values are null/undefined
+  expression: 'fieldValue !== formValue.user.profile.firstName',
 }
 ```
 

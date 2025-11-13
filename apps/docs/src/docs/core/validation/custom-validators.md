@@ -74,6 +74,7 @@ For simple validation logic, use inline JavaScript expressions without registeri
 ```
 
 **How it works:**
+
 - `fieldValue` - Current field's value
 - `formValue` - Entire form value object
 - Expression returns `true` = validation passes
@@ -88,9 +89,36 @@ Expression-based validators have access to:
 - **`fieldPath`** - Current field path
 - Custom functions registered in `signalFormsConfig.customFunctions`
 
+### Safe Member Access
+
+**Built-in null/undefined handling**: Member access is safe by default - no manual null checks needed!
+
+```typescript
+// ✅ Works safely even when nested values are null/undefined
+{
+  expression: 'fieldValue !== formValue.user.profile.firstName',
+  kind: 'invalidNested',
+}
+
+// ❌ Unnecessary - Don't do this
+{
+  expression: '!formValue.user || !formValue.user.profile || !formValue.user.profile.firstName || fieldValue !== formValue.user.profile.firstName',
+  kind: 'invalidNested',
+}
+
+// ✅ Better - Safe by default
+{
+  expression: '!formValue.user.profile.firstName || fieldValue !== formValue.user.profile.firstName',
+  kind: 'invalidNested',
+}
+```
+
+Accessing properties on `null` or `undefined` returns `undefined` instead of throwing errors, making expressions cleaner and more maintainable.
+
 ### Common Expression Patterns
 
 **Password confirmation:**
+
 ```typescript
 {
   expression: 'fieldValue === formValue.password',
@@ -99,6 +127,7 @@ Expression-based validators have access to:
 ```
 
 **Date range validation:**
+
 ```typescript
 {
   expression: 'new Date(fieldValue) > new Date(formValue.startDate)',
@@ -107,6 +136,7 @@ Expression-based validators have access to:
 ```
 
 **Conditional required:**
+
 ```typescript
 {
   expression: 'formValue.requiresApproval ? fieldValue?.length > 0 : true',
@@ -115,10 +145,21 @@ Expression-based validators have access to:
 ```
 
 **Numeric comparison:**
+
 ```typescript
 {
   expression: 'fieldValue >= formValue.minAge && fieldValue <= formValue.maxAge',
   kind: 'ageOutOfRange',
+}
+```
+
+**Deeply nested field validation:**
+
+```typescript
+{
+  // Safe to access deeply nested properties
+  expression: 'fieldValue.toLowerCase() !== formValue.user.address.city.toLowerCase()',
+  kind: 'invalidAddress',
 }
 ```
 

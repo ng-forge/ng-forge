@@ -148,7 +148,9 @@ function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: 
 /**
  * Create a function-based validator using registered validator functions
  */
-function createFunctionValidator<TValue>(config: CustomValidatorConfig): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
+function createFunctionValidator<TValue>(
+  config: CustomValidatorConfig
+): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const registry = inject(FunctionRegistryService);
   const validatorFn = registry.getValidator(config.functionName!);
 
@@ -165,7 +167,9 @@ function createFunctionValidator<TValue>(config: CustomValidatorConfig): (ctx: F
 /**
  * Create an expression-based validator using secure AST evaluation
  */
-function createExpressionValidator<TValue>(config: CustomValidatorConfig): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
+function createExpressionValidator<TValue>(
+  config: CustomValidatorConfig
+): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
 
@@ -185,7 +189,20 @@ function createExpressionValidator<TValue>(config: CustomValidatorConfig): (ctx:
 
       // Validation failed - return error with kind
       const kind = config.kind || 'custom';
-      return { kind };
+      const validationError: ValidationError = { kind };
+
+      // Evaluate and include errorParams for message interpolation
+      if (config.errorParams) {
+        Object.entries(config.errorParams).forEach(([key, expression]) => {
+          try {
+            (validationError as unknown as Record<string, unknown>)[key] = ExpressionParser.evaluate(expression, evaluationContext);
+          } catch (err) {
+            console.warn(`[DynamicForm] Error evaluating errorParam "${key}":`, expression, err);
+          }
+        });
+      }
+
+      return validationError;
     } catch (error) {
       console.error('[DynamicForm] Error evaluating custom validator expression:', config.expression, error);
       return { kind: config.kind || 'custom' };

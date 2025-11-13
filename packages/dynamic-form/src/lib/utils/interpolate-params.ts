@@ -39,5 +39,13 @@ function extractErrorParams(error: ValidationError): Record<string, unknown> {
   if ('actual' in error) params.actual = error.actual;
   if ('expected' in error) params.expected = error.expected;
 
+  // Include all custom properties from error object (for custom validators)
+  // Skip 'kind' as it's the error type identifier, not a parameter
+  Object.keys(error).forEach((key) => {
+    if (key !== 'kind' && !(key in params)) {
+      params[key] = error[key as keyof ValidationError];
+    }
+  });
+
   return params;
 }
