@@ -7,6 +7,7 @@ import { isGroupField } from '../definitions/default/group-field';
 import { isArrayField } from '../definitions/default/array-field';
 import { isPageField } from '../definitions/default/page-field';
 import { isRowField } from '../definitions/default/row-field';
+import { getChildPath } from '../models/types/field-helpers';
 
 /**
  * Single entry point to map field data into form
@@ -145,7 +146,7 @@ function mapPageFieldToForm<TValue>(pageField: FieldDef<any>, rootPath: FieldPat
     }
 
     // Get the field path for this child at the root level (not nested under the page)
-    const childPath = (rootPath as any)[childField.key];
+    const childPath = getChildPath(rootPath as any, childField.key);
     if (childPath) {
       // Recursively apply field mapping to the child field at root level
       mapFieldToForm(childField, childPath);
@@ -173,7 +174,7 @@ function mapRowFieldToForm<TValue>(rowField: FieldDef<any>, rootPath: FieldPath<
     }
 
     // Get the field path for this child at the root level (not nested under the row)
-    const childPath = (rootPath as any)[childField.key];
+    const childPath = getChildPath(rootPath as any, childField.key);
     if (childPath) {
       // Recursively apply field mapping to the child field at root level
       mapFieldToForm(childField, childPath);
@@ -199,7 +200,7 @@ function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: Field
     }
 
     // Get the nested path for this child field within the group
-    const nestedPath = (fieldPath as any)[childField.key];
+    const nestedPath = getChildPath(fieldPath as any, childField.key);
     if (nestedPath) {
       // Recursively apply field mapping to the child field
       mapFieldToForm(childField, nestedPath);

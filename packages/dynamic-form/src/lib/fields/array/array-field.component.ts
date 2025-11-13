@@ -4,15 +4,14 @@ import {
   ComponentRef,
   computed,
   DestroyRef,
-  effect,
   inject,
   Injector,
   input,
   linkedSignal,
   ViewContainerRef,
 } from '@angular/core';
-import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, switchMap } from 'rxjs';
+import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { get } from 'lodash-es';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
@@ -149,36 +148,25 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   );
 
   /**
-   * Listen for AddArrayItemEvent and add new items
+   * Listen for AddArrayItemEvent and RemoveArrayItemEvent
+   * Using takeUntilDestroyed() to prevent memory leaks
    */
   constructor() {
-    effect(
-      () => {
-        const subscription = this.eventBus.on<AddArrayItemEvent>('add-array-item').subscribe((event) => {
-          if (event.arrayKey === this.key()) {
-            this.addItem(event.index);
-          }
-        });
+    this.eventBus
+      .on<AddArrayItemEvent>('add-array-item')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((event) => event.arrayKey === this.key())
+      )
+      .subscribe((event) => this.addItem(event.index));
 
-        // Cleanup on destroy
-        this.destroyRef.onDestroy(() => subscription.unsubscribe());
-      },
-      { allowSignalWrites: true }
-    );
-
-    effect(
-      () => {
-        const subscription = this.eventBus.on<RemoveArrayItemEvent>('remove-array-item').subscribe((event) => {
-          if (event.arrayKey === this.key()) {
-            this.removeItem(event.index);
-          }
-        });
-
-        // Cleanup on destroy
-        this.destroyRef.onDestroy(() => subscription.unsubscribe());
-      },
-      { allowSignalWrites: true }
-    );
+    this.eventBus
+      .on<RemoveArrayItemEvent>('remove-array-item')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((event) => event.arrayKey === this.key())
+      )
+      .subscribe((event) => this.removeItem(event.index));
   }
 
   /**

@@ -3,14 +3,61 @@ import { Evaluator, EvaluationScope } from './evaluator';
 import { ASTNode, ExpressionParserError } from './types';
 
 /**
- * Cache for parsed AST nodes to improve performance
- */
-const astCache = new Map<string, ASTNode>();
-
-/**
  * Maximum cache size to prevent memory issues
  */
-const MAX_CACHE_SIZE = 1000;
+const MAX_AST_CACHE_SIZE = 1000;
+
+/**
+ * LRU Cache implementation for AST nodes
+ * Tracks access order to evict least-recently-used entries
+ */
+class LRUCache<K, V> {
+  private cache = new Map<K, V>();
+  private maxSize: number;
+
+  constructor(maxSize: number) {
+    this.maxSize = maxSize;
+  }
+
+  get(key: K): V | undefined {
+    const value = this.cache.get(key);
+    if (value !== undefined) {
+      // Move to end (most recently used)
+      this.cache.delete(key);
+      this.cache.set(key, value);
+    }
+    return value;
+  }
+
+  set(key: K, value: V): void {
+    // Delete if exists to update position
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    }
+
+    // Add to end (most recently used)
+    this.cache.set(key, value);
+
+    // Evict least recently used if over limit
+    if (this.cache.size > this.maxSize) {
+      const firstKey = this.cache.keys().next().value;
+      this.cache.delete(firstKey);
+    }
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+
+  get size(): number {
+    return this.cache.size;
+  }
+}
+
+/**
+ * Cache for parsed AST nodes to improve performance
+ */
+const astCache = new LRUCache<string, ASTNode>(MAX_AST_CACHE_SIZE);
 
 /**
  * Secure expression parser that uses AST-based evaluation instead of eval() or new Function()
@@ -24,7 +71,7 @@ const MAX_CACHE_SIZE = 1000;
 export class ExpressionParser {
   /**
    * Parse an expression string into an AST
-   * Results are cached for performance
+   * Results are cached for performance using LRU eviction
    */
   static parse(expression: string): ASTNode {
     // Check cache first
@@ -37,14 +84,7 @@ export class ExpressionParser {
     const parser = new Parser(expression);
     const ast = parser.parse();
 
-    // Cache the result (with size limit)
-    if (astCache.size >= MAX_CACHE_SIZE) {
-      // Simple FIFO cache eviction
-      const firstKey = astCache.keys().next().value;
-      if (firstKey) {
-        astCache.delete(firstKey);
-      }
-    }
+    // Cache the result (LRU cache handles eviction automatically)
     astCache.set(expression, ast);
 
     return ast;
@@ -84,7 +124,7 @@ export class ExpressionParser {
   static getCacheStats(): { size: number; maxSize: number } {
     return {
       size: astCache.size,
-      maxSize: MAX_CACHE_SIZE,
+      maxSize: MAX_AST_CACHE_SIZE,
     };
   }
 }
