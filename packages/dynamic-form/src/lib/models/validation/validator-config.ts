@@ -1,9 +1,20 @@
 import { ConditionalExpression } from '../expressions/conditional-expression';
 
 /**
- * Configuration for signal forms validator functions that can be serialized from API
+ * Base configuration shared by all validators
  */
-export interface ValidatorConfig {
+export interface BaseValidatorConfig {
+  /** Custom error message */
+  errorMessage?: string;
+
+  /** Conditional logic for when validator applies */
+  when?: ConditionalExpression;
+}
+
+/**
+ * Built-in validator configuration (required, email, min, max, etc.)
+ */
+export interface BuiltInValidatorConfig extends BaseValidatorConfig {
   /** Validator type identifier */
   type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern';
 
@@ -12,10 +23,55 @@ export interface ValidatorConfig {
 
   /** Dynamic value expression that evaluates to validator parameter */
   expression?: string;
-
-  /** Custom error message */
-  errorMessage?: string;
-
-  /** Conditional logic for when validator applies */
-  when?: ConditionalExpression;
 }
+
+/**
+ * Custom validator configuration using Angular's public FieldContext API
+ * Returns ValidationError | ValidationError[] | null synchronously
+ */
+export interface CustomValidatorConfig extends BaseValidatorConfig {
+  /** Validator type identifier */
+  type: 'custom';
+
+  /** Name of registered validator function */
+  functionName: string;
+
+  /** Optional parameters to pass to validator function */
+  params?: Record<string, unknown>;
+}
+
+/**
+ * Async custom validator configuration using Angular's validateAsync API
+ * Returns Observable<ValidationError | ValidationError[] | null>
+ */
+export interface AsyncValidatorConfig extends BaseValidatorConfig {
+  /** Validator type identifier */
+  type: 'customAsync';
+
+  /** Name of registered async validator function */
+  functionName: string;
+
+  /** Optional parameters to pass to validator function */
+  params?: Record<string, unknown>;
+}
+
+/**
+ * HTTP validator configuration using Angular's validateHttp API
+ * Provides optimized HTTP validation with automatic request cancellation
+ */
+export interface HttpValidatorConfig extends BaseValidatorConfig {
+  /** Validator type identifier */
+  type: 'customHttp';
+
+  /** Name of registered HTTP validator configuration */
+  functionName: string;
+
+  /** Optional parameters to pass to HTTP validator */
+  params?: Record<string, unknown>;
+}
+
+/**
+ * Configuration for signal forms validator functions that can be serialized from API
+ * Discriminated union type for type-safe validator configuration
+ */
+export type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | HttpValidatorConfig;
