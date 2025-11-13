@@ -73,26 +73,29 @@ export function mapFieldToForm<TValue>(fieldDef: FieldDef<any>, fieldPath: Field
  * Apply simple validation rules from field properties for backward compatibility
  */
 function applySimpleValidationRules<TValue>(fieldDef: FieldDef<any> & FieldWithValidation, fieldPath: FieldPath<TValue>): void {
+  // Required validator
   if (fieldDef.required) {
     required(fieldPath);
   }
 
+  // Email validator
   if (fieldDef.email) {
     email(fieldPath as FieldPath<string>);
   }
 
-  // Check for min in top-level field or props (for components like slider)
-  const minValue = fieldDef.min !== undefined ? fieldDef.min : (fieldDef.props as any)?.min;
+  // Numeric validators (min/max)
+  const minValue = fieldDef.min ?? (fieldDef.props as any)?.min;
+  const maxValue = fieldDef.max ?? (fieldDef.props as any)?.max;
+
   if (minValue !== undefined) {
     min(fieldPath as FieldPath<number>, minValue);
   }
 
-  // Check for max in top-level field or props (for components like slider)
-  const maxValue = fieldDef.max !== undefined ? fieldDef.max : (fieldDef.props as any)?.max;
   if (maxValue !== undefined) {
     max(fieldPath as FieldPath<number>, maxValue);
   }
 
+  // String length validators
   if (fieldDef.minLength !== undefined) {
     minLength(fieldPath as FieldPath<string>, fieldDef.minLength);
   }
@@ -101,6 +104,7 @@ function applySimpleValidationRules<TValue>(fieldDef: FieldDef<any> & FieldWithV
     maxLength(fieldPath as FieldPath<string>, fieldDef.maxLength);
   }
 
+  // Pattern validator
   if (fieldDef.pattern) {
     const regexPattern = typeof fieldDef.pattern === 'string' ? new RegExp(fieldDef.pattern) : fieldDef.pattern;
     pattern(fieldPath as FieldPath<string>, regexPattern);
@@ -127,6 +131,24 @@ function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<any>, fieldPat
 }
 
 /**
+ * Common helper to map child fields to their parent form paths
+ * @param fields - Array of child field definitions
+ * @param parentPath - The parent field path
+ */
+function mapChildFieldsToForm<TValue>(fields: FieldDef<any>[], parentPath: FieldPath<TValue>): void {
+  for (const childField of fields) {
+    if (!childField.key) {
+      continue;
+    }
+
+    const childPath = getChildPath(parentPath as any, childField.key);
+    if (childPath) {
+      mapFieldToForm(childField, childPath);
+    }
+  }
+}
+
+/**
  * Maps page field children to the root form schema
  * Page fields are layout containers that don't create their own form controls
  * Their children are flattened to the root level of the form
@@ -136,22 +158,8 @@ function mapPageFieldToForm<TValue>(pageField: FieldDef<any>, rootPath: FieldPat
     return;
   }
 
-  // Page fields don't create their own form controls
-  // Instead, their child fields are mapped directly to the root form
-  // Type assertion: After isPageField guard, we know fields contains FieldDef instances
   const fields = pageField.fields as FieldDef<any>[];
-  for (const childField of fields) {
-    if (!childField.key) {
-      continue;
-    }
-
-    // Get the field path for this child at the root level (not nested under the page)
-    const childPath = getChildPath(rootPath as any, childField.key);
-    if (childPath) {
-      // Recursively apply field mapping to the child field at root level
-      mapFieldToForm(childField, childPath);
-    }
-  }
+  mapChildFieldsToForm(fields, rootPath);
 }
 
 /**
@@ -164,22 +172,8 @@ function mapRowFieldToForm<TValue>(rowField: FieldDef<any>, rootPath: FieldPath<
     return;
   }
 
-  // Row fields don't create their own form controls
-  // Instead, their child fields are mapped directly to the root form
-  // Type assertion: After isRowField guard, we know fields contains FieldDef instances
   const fields = rowField.fields as FieldDef<any>[];
-  for (const childField of fields) {
-    if (!childField.key) {
-      continue;
-    }
-
-    // Get the field path for this child at the root level (not nested under the row)
-    const childPath = getChildPath(rootPath as any, childField.key);
-    if (childPath) {
-      // Recursively apply field mapping to the child field at root level
-      mapFieldToForm(childField, childPath);
-    }
-  }
+  mapChildFieldsToForm(fields, rootPath);
 }
 
 /**
@@ -191,21 +185,8 @@ function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: Field
     return;
   }
 
-  // Apply validation for each child field to the appropriate nested path in the parent form
-  // Type assertion: After isGroupField guard, we know fields contains FieldDef instances
   const fields = groupField.fields as FieldDef<any>[];
-  for (const childField of fields) {
-    if (!childField.key) {
-      continue;
-    }
-
-    // Get the nested path for this child field within the group
-    const nestedPath = getChildPath(fieldPath as any, childField.key);
-    if (nestedPath) {
-      // Recursively apply field mapping to the child field
-      mapFieldToForm(childField, nestedPath);
-    }
-  }
+  mapChildFieldsToForm(fields, fieldPath);
 }
 
 /**

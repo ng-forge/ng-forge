@@ -263,42 +263,22 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
       });
   }
 
-  readonly valid = computed(() => {
-    // Validate all array items
+  /**
+   * Computed signal that accesses the array form field from the parent form.
+   * Consolidates the repeated pattern of accessing (parentForm as any)[arrayKey].
+   */
+  private readonly arrayFormField = computed(() => {
     const arrayKey = this.field().key;
     const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.valid() : true;
+    return (parentForm as any)[arrayKey];
   });
 
+  readonly valid = computed(() => this.arrayFormField()?.valid() ?? true);
   readonly invalid = computed(() => !this.valid());
-  readonly dirty = computed(() => {
-    const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.dirty() : false;
-  });
-
-  readonly touched = computed(() => {
-    const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.touched() : false;
-  });
-
-  readonly errors = computed(() => {
-    const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.errors() : null;
-  });
-
-  readonly disabled = computed(() => {
-    const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.disabled() : false;
-  });
+  readonly dirty = computed(() => this.arrayFormField()?.dirty() ?? false);
+  readonly touched = computed(() => this.arrayFormField()?.touched() ?? false);
+  readonly errors = computed(() => this.arrayFormField()?.errors() ?? null);
+  readonly disabled = computed(() => this.arrayFormField()?.disabled() ?? false);
 
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));

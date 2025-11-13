@@ -277,31 +277,29 @@ export class FunctionRegistryService {
   }
 
   /**
+   * Generic helper to set registry values only if they have changed
+   * @param registry - The Map to update
+   * @param values - Object mapping keys to values
+   */
+  private setRegistryIfChanged<T>(registry: Map<string, T>, values: Record<string, T> | undefined): void {
+    if (!values) return;
+
+    const entries = Object.entries(values);
+    const hasChanges = entries.some(([name, value]) => registry.get(name) !== value);
+
+    if (hasChanges) {
+      entries.forEach(([name, value]) => registry.set(name, value));
+    }
+  }
+
+  /**
    * Set validators from a config object
    * Only updates validators if their references have changed
    *
    * @param validators - Object mapping validator names to validator functions
    */
   setValidators(validators: Record<string, CustomValidator> | undefined): void {
-    if (!validators) return;
-
-    // Check if any validator reference has changed
-    const entries = Object.entries(validators);
-    let hasChanges = false;
-
-    for (const [name, fn] of entries) {
-      if (this.validators.get(name) !== fn) {
-        hasChanges = true;
-        break;
-      }
-    }
-
-    // Only update if there are changes
-    if (hasChanges) {
-      entries.forEach(([name, fn]) => {
-        this.validators.set(name, fn);
-      });
-    }
+    this.setRegistryIfChanged(this.validators, validators);
   }
 
   /**
@@ -311,25 +309,7 @@ export class FunctionRegistryService {
    * @param asyncValidators - Object mapping validator names to async validator configs
    */
   setAsyncValidators(asyncValidators: Record<string, AsyncCustomValidator> | undefined): void {
-    if (!asyncValidators) return;
-
-    // Check if any validator reference has changed
-    const entries = Object.entries(asyncValidators);
-    let hasChanges = false;
-
-    for (const [name, config] of entries) {
-      if (this.asyncValidators.get(name) !== config) {
-        hasChanges = true;
-        break;
-      }
-    }
-
-    // Only update if there are changes
-    if (hasChanges) {
-      entries.forEach(([name, config]) => {
-        this.asyncValidators.set(name, config);
-      });
-    }
+    this.setRegistryIfChanged(this.asyncValidators, asyncValidators);
   }
 
   /**
@@ -339,25 +319,7 @@ export class FunctionRegistryService {
    * @param httpValidators - Object mapping validator names to HTTP validator configs
    */
   setHttpValidators(httpValidators: Record<string, HttpCustomValidator> | undefined): void {
-    if (!httpValidators) return;
-
-    // Check if any validator reference has changed
-    const entries = Object.entries(httpValidators);
-    let hasChanges = false;
-
-    for (const [name, config] of entries) {
-      if (this.httpValidators.get(name) !== config) {
-        hasChanges = true;
-        break;
-      }
-    }
-
-    // Only update if there are changes
-    if (hasChanges) {
-      entries.forEach(([name, config]) => {
-        this.httpValidators.set(name, config);
-      });
-    }
+    this.setRegistryIfChanged(this.httpValidators, httpValidators);
   }
 
   /**
