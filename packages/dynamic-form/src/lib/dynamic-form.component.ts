@@ -126,6 +126,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
+  private readonly functionRegistry = inject(FunctionRegistryService);
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
@@ -262,6 +263,22 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const config = this.config();
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
+
+    // Register validators before form creation
+    const signalFormsConfig = config.signalFormsConfig;
+    if (signalFormsConfig) {
+      // Register custom functions
+      if (signalFormsConfig.customFunctions) {
+        Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
+          this.functionRegistry.registerCustomFunction(name, fn);
+        });
+      }
+
+      // Set all validators from config - change detection is inside set methods
+      this.functionRegistry.setValidators(signalFormsConfig.validators);
+      this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
+      this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
+    }
 
     if (config.fields && config.fields.length > 0) {
       // Use memoized functions for expensive operations with registry

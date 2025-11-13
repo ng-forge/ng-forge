@@ -111,7 +111,7 @@ function resolveErrorMessage(
   // Convert DynamicText to Observable
   const messageObservable = dynamicTextToObservable(messageToUse, injector);
 
-  // Apply parameter interpolation
+  // Apply parameter interpolation to support {{param}} syntax
   return messageObservable.pipe(
     map((msg) => ({
       kind: error.kind,
