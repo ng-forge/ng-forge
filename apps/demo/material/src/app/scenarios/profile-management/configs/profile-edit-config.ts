@@ -178,11 +178,8 @@ export const profileEditConfig = {
         },
         {
           key: 'saveProfile',
-          type: 'button',
+          type: 'submit',
           label: 'Save Profile',
-          props: {
-            type: 'submit',
-          },
           event: SubmitEvent,
           col: 6,
         },

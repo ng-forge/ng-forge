@@ -169,10 +169,9 @@ export const accountSetupConfig = {
     },
     {
       key: 'submit',
-      type: 'button',
+      type: 'submit',
       label: 'Continue to Confirmation',
       props: {
-        type: 'submit',
         color: 'primary',
       },
       col: 12,

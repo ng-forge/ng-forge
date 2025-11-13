@@ -345,10 +345,9 @@ export default class SinglePageDemoComponent {
       // Submit button
       {
         key: 'submit',
-        type: 'button',
+        type: 'submit',
         label: this.translationService.translate('form.labels.submit'),
         props: {
-          type: 'submit',
           color: 'primary',
         },
       },

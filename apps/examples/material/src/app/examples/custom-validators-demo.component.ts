@@ -121,12 +121,11 @@ export class CustomValidatorsDemoComponent {
         ],
       },
       {
-        type: 'button',
+        type: 'submit',
         key: 'submit',
         label: 'Register',
         props: {
           color: 'primary',
-          type: 'submit',
         },
       },
     ],

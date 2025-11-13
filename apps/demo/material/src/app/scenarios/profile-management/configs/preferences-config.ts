@@ -189,11 +189,8 @@ export const preferencesConfig = {
         },
         {
           key: 'savePreferences',
-          type: 'button',
+          type: 'submit',
           label: 'Save Preferences',
-          props: {
-            type: 'submit',
-          },
           event: SubmitEvent,
           col: 6,
         },

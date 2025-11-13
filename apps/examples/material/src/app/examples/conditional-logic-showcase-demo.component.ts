@@ -113,7 +113,7 @@ export class ConditionalLogicShowcaseDemoComponent {
           {
             key: 'dateOfBirth',
             type: 'datepicker',
-            value: null,
+            value: undefined,
             label: 'Date of Birth',
             required: true,
             maxDate: new Date(new Date().getFullYear() - 18, 0, 1),

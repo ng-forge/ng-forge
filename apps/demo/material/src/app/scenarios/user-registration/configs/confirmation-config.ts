@@ -1,4 +1,4 @@
-import { FormConfig } from '@ng-forge/dynamic-form';
+import { FormConfig, FormEvent } from '@ng-forge/dynamic-form';
 
 export const confirmationConfig = {
   fields: [
@@ -119,18 +119,17 @@ export const confirmationConfig = {
           key: 'goBack',
           type: 'button',
           label: 'Go Back',
+          event: FormEvent,
           props: {
-            type: 'button',
             color: 'accent',
           },
           col: 6,
         },
         {
           key: 'completeRegistration',
-          type: 'button',
+          type: 'submit',
           label: 'Complete Registration',
           props: {
-            type: 'submit',
             color: 'primary',
           },
           col: 6,

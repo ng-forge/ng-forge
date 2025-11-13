@@ -144,10 +144,9 @@ export const personalInfoConfig = {
     },
     {
       key: 'submit',
-      type: 'button',
+      type: 'submit',
       label: 'Continue to Account Setup',
       props: {
-        type: 'submit',
         color: 'primary',
       },
       col: 12,

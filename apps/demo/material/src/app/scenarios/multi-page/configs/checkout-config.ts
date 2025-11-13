@@ -1,4 +1,4 @@
-import { FormConfig } from '@ng-forge/dynamic-form';
+import { FormConfig, FormEvent } from '@ng-forge/dynamic-form';
 
 export const checkoutConfig = {
   fields: [
@@ -31,6 +31,7 @@ export const checkoutConfig = {
           key: 'applyPromo',
           type: 'button',
           label: 'Apply',
+          event: FormEvent,
           col: 4,
         },
         {
@@ -157,13 +158,13 @@ export const checkoutConfig = {
             {
               key: 'backToShipping',
               type: 'previous',
-          label: 'Back to Shipping',
+              label: 'Back to Shipping',
               col: 6,
             },
             {
               key: 'placeOrder',
               type: 'submit',
-          label: 'Place Order',
+              label: 'Place Order',
               col: 6,
             },
           ],

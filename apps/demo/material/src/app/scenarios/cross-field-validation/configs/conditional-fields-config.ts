@@ -209,10 +209,9 @@ export const conditionalFieldsConfig = {
     },
     {
       key: 'submit',
-      type: 'button',
+      type: 'submit',
       label: 'Continue',
       props: {
-        type: 'submit',
         color: 'primary',
       },
       col: 12,
