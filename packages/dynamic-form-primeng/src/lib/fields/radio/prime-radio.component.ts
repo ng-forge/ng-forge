@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { RadioButton } from 'primeng/radiobutton';
 import {
   createResolvedErrorsSignal,
   DynamicText,
@@ -11,26 +10,18 @@ import {
 } from '@ng-forge/dynamic-form';
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
+import { PrimeRadioGroupComponent } from './prime-radio-group.component';
 
 @Component({
   selector: 'df-prime-radio',
-  imports: [RadioButton, DynamicTextPipe, AsyncPipe, Field],
+  imports: [PrimeRadioGroupComponent, Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @if (label()) {
     <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
-    <div class="radio-group" [field]="f">
-      @for (option of options(); track option.value) {
-      <div class="radio-option">
-        <p-radioButton [name]="key()" [value]="option.value" [styleClass]="radioClasses()" [inputId]="key() + '-' + option.value" />
-        <label [for]="key() + '-' + option.value" class="radio-option-label">
-          {{ option.label | dynamicText | async }}
-        </label>
-      </div>
-      }
-    </div>
+    <df-prime-radio-group [field]="$any(f)" [options]="options()" [properties]="props()" />
 
     @if (props()?.hint; as hint) {
     <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
@@ -46,23 +37,6 @@ import { AsyncPipe } from '@angular/common';
 
       :host([hidden]) {
         display: none !important;
-      }
-
-      .radio-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-
-      .radio-option {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .radio-option-label {
-        cursor: pointer;
-        user-select: none;
       }
 
       .radio-label {
@@ -99,20 +73,4 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  readonly radioClasses = computed(() => {
-    const classes: string[] = [];
-
-    const styleClass = this.props()?.styleClass;
-    if (styleClass) {
-      classes.push(styleClass);
-    }
-
-    // Add p-invalid class when there are errors to display
-    if (this.errorsToDisplay().length > 0) {
-      classes.push('p-invalid');
-    }
-
-    return classes.join(' ');
-  });
 }
