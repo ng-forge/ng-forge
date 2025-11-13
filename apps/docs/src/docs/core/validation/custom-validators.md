@@ -74,6 +74,7 @@ For simple validation logic, use inline JavaScript expressions without registeri
 ```
 
 **How it works:**
+
 - `fieldValue` - Current field's value
 - `formValue` - Entire form value object
 - Expression returns `true` = validation passes
@@ -91,6 +92,7 @@ Expression-based validators have access to:
 ### Common Expression Patterns
 
 **Password confirmation:**
+
 ```typescript
 {
   expression: 'fieldValue === formValue.password',
@@ -99,6 +101,7 @@ Expression-based validators have access to:
 ```
 
 **Date range validation:**
+
 ```typescript
 {
   expression: 'new Date(fieldValue) > new Date(formValue.startDate)',
@@ -107,6 +110,7 @@ Expression-based validators have access to:
 ```
 
 **Conditional required:**
+
 ```typescript
 {
   expression: 'formValue.requiresApproval ? fieldValue?.length > 0 : true',
@@ -115,6 +119,7 @@ Expression-based validators have access to:
 ```
 
 **Numeric comparison:**
+
 ```typescript
 {
   expression: 'fieldValue >= formValue.minAge && fieldValue <= formValue.maxAge',
@@ -136,7 +141,7 @@ Best for validation that needs field value and access to other fields via FieldC
 import { CustomValidator } from '@ng-forge/dynamic-form';
 
 // ✅ RECOMMENDED: Return only kind
-const noSpaces: CustomValidator<string> = (ctx) => {
+const noSpaces: CustomValidator = (ctx) => {
   const value = ctx.value();
   if (typeof value === 'string' && value.includes(' ')) {
     return { kind: 'noSpaces' }; // No hardcoded message
@@ -181,20 +186,18 @@ Use `ctx.valueOf()` to access other field values for comparison validators:
 ```typescript
 import { CustomValidator } from '@ng-forge/dynamic-form';
 
-const lessThanField: CustomValidator<number> = (ctx, params) => {
+const greaterThanMin: CustomValidator = (ctx) => {
   const value = ctx.value();
-  const otherFieldPath = params?.field as string;
+  const minValue = ctx.valueOf('minAge');
 
-  // Use valueOf() to access other field - PUBLIC API!
-  const otherValue = ctx.valueOf(otherFieldPath);
-
-  if (otherValue !== undefined && value >= otherValue) {
-    return { kind: 'notLessThan' };
+  if (minValue !== undefined && value <= minValue) {
+    return { kind: 'notGreaterThanMin' };
   }
   return null;
 };
 
-// Use with parameters and parameterized message
+// Note: Custom validators return only 'kind'. Built-in validators (min, max, etc.)
+// automatically include params for interpolation ({{min}}, {{max}}, etc.)
 const config = {
   fields: [
     { key: 'minAge', type: 'input', value: 0 },
@@ -205,17 +208,16 @@ const config = {
       validators: [
         {
           type: 'custom',
-          functionName: 'lessThanField',
-          params: { field: 'minAge' },
+          functionName: 'greaterThanMin',
         },
       ],
       validationMessages: {
-        notLessThan: 'Must be less than {{field}}', // Interpolates params
+        notGreaterThanMin: 'Maximum age must be greater than minimum age',
       },
     },
   ],
   signalFormsConfig: {
-    validators: { lessThanField },
+    validators: { greaterThanMin },
   },
 };
 ```
@@ -230,7 +232,7 @@ const config = {
 ### Password Confirmation Example
 
 ```typescript
-const passwordMatch: CustomValidator<string> = (ctx) => {
+const passwordMatch: CustomValidator = (ctx) => {
   const confirmPassword = ctx.value();
   const password = ctx.valueOf('password');
 
@@ -267,7 +269,7 @@ import { inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { UserService } from './user.service';
 
-const checkUsernameAvailable: AsyncCustomValidator<string> = {
+const checkUsernameAvailable: AsyncCustomValidator = {
   // Extract params from field context
   params: (ctx) => ({ username: ctx.value() }),
 
@@ -349,7 +351,7 @@ HTTP validators provide optimized HTTP validation with automatic request cancell
 ```typescript
 import { HttpCustomValidator } from '@ng-forge/dynamic-form';
 
-const checkEmailDomain: HttpCustomValidator<string> = {
+const checkEmailDomain: HttpCustomValidator = {
   // Build HTTP request from context
   request: (ctx) => {
     const email = ctx.value();
@@ -432,7 +434,7 @@ interface HttpResourceRequest {
 Apply validators conditionally using the `condition` function:
 
 ```typescript
-const businessEmailValidator: CustomValidator<string> = (ctx) => {
+const businessEmailValidator: CustomValidator = (ctx) => {
   const value = ctx.value();
   const domain = value?.split('@')[1];
 
@@ -484,7 +486,7 @@ The validator is only active when the condition returns `true`, allowing dynamic
 ### Email Domain Validation
 
 ```typescript
-const emailDomainValidator: CustomValidator<string> = (ctx) => {
+const emailDomainValidator: CustomValidator = (ctx) => {
   const blockedDomains = ['tempmail.com', 'throwaway.email'];
   const email = ctx.value();
   const domain = email?.split('@')[1];
@@ -499,7 +501,7 @@ const emailDomainValidator: CustomValidator<string> = (ctx) => {
 ### Age Validation
 
 ```typescript
-const ageValidator: CustomValidator<Date> = (ctx) => {
+const ageValidator: CustomValidator = (ctx) => {
   const birthDate = ctx.value();
   const age = calculateAge(birthDate);
 
@@ -528,7 +530,7 @@ const conditionalRequiredValidator: CustomValidator = (ctx) => {
 ### Date Range Validation
 
 ```typescript
-const dateRangeValidator: CustomValidator<Date> = (ctx) => {
+const dateRangeValidator: CustomValidator = (ctx) => {
   const endDate = ctx.value();
   const startDate = ctx.valueOf('startDate');
 
@@ -623,38 +625,50 @@ Messages can use params from ValidatorConfig:
 
 ## Type Safety
 
-All validator types are fully typed:
+All validator types are fully typed. While validators can optionally use generic type parameters for stricter typing, the simple form without generics works well for most cases:
 
 ```typescript
-// Type-safe value access
-const noSpaces: CustomValidator<string> = (ctx) => {
-  const value = ctx.value(); // Type: string
-  // ...
+// Simple form - works for most cases
+const noSpaces: CustomValidator = (ctx) => {
+  const value = ctx.value();
+  if (typeof value === 'string' && value.includes(' ')) {
+    return { kind: 'noSpaces' };
+  }
+  return null;
 };
 
-// Type-safe async validator
+// With type parameter - for stricter typing (advanced)
+const strictNoSpaces: CustomValidator<string> = (ctx) => {
+  const value = ctx.value(); // Type: string
+  // TypeScript knows value is always string
+  return value.includes(' ') ? { kind: 'noSpaces' } : null;
+};
+
+// Async validators with type parameters (advanced)
 const checkUsername: AsyncCustomValidator<string, { username: string }, { available: boolean }> = {
-  params: (ctx) => ({ username: ctx.value() }), // Type-safe params
+  params: (ctx) => ({ username: ctx.value() }),
   factory: (params) => {
     /* ... */
   },
   onSuccess: (result, ctx) => {
     result.available; // Type: boolean
-    // ...
+    return result.available ? null : { kind: 'usernameTaken' };
   },
 };
 
-// Type-safe HTTP validator
+// HTTP validators with type parameters (advanced)
 const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
   request: (ctx) => ({
     /* ... */
   }),
   onSuccess: (response, ctx) => {
     response.valid; // Type: boolean
-    // ...
+    return response.valid ? null : { kind: 'invalidDomain' };
   },
 };
 ```
+
+**Note:** When registering validators in `signalFormsConfig.validators`, use the simple form without type parameters to avoid TypeScript compatibility issues.
 
 ## Best Practices
 
