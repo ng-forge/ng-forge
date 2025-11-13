@@ -642,7 +642,11 @@ import { TranslateService } from '@ngx-translate/core';
 
 ### Parameterized Messages
 
-Messages can use params from ValidatorConfig by referencing them with the `{{paramName}}` syntax:
+Messages can interpolate params from ValidatorConfig using Angular template syntax (double curly braces around the param name).
+
+**Syntax:** To interpolate a param, wrap its name in double curly braces (same syntax as Angular templates).
+
+**Example:** To access `params.label`, write the param name `label` wrapped in double curly braces in your message string.
 
 ```typescript
 {
@@ -654,10 +658,13 @@ Messages can use params from ValidatorConfig by referencing them with the `{{par
     }
   ],
   validationMessages: {
-    notLessThan: `Must be less than ${'{{label}}'}` // Interpolates params.label
+    // Interpolate params.label using Angular template syntax
+    notLessThan: 'Must be less than (label)'  // Replace (label) with double-curly-brace syntax
   }
 }
 ```
+
+The validation message will render as **"Must be less than Minimum Age"** by interpolating the `label` param value.
 
 ## Type Safety
 
