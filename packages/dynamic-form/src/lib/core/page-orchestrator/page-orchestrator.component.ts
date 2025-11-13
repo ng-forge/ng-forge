@@ -87,7 +87,7 @@ export class PageOrchestratorComponent {
   /**
    * Array of page field definitions to render
    */
-  pageFields = input.required<PageField<RegisteredFieldTypes[]>[]>();
+  pageFields = input.required<PageField[]>();
 
   /**
    * Root form instance from parent DynamicForm
