@@ -18,6 +18,12 @@ export function groupFieldMapper(fieldDef: GroupField, options?: Omit<FieldMappe
   if (options) {
     bindings.push(inputBinding('parentForm', () => options.fieldSignalContext.form));
     bindings.push(inputBinding('parentFieldSignalContext', () => options.fieldSignalContext));
+
+    // Pass defaultValidationMessages through to nested fields
+    const defaultValidationMessages = options.fieldSignalContext.defaultValidationMessages;
+    if (defaultValidationMessages !== undefined) {
+      bindings.push(inputBinding('defaultValidationMessages', () => defaultValidationMessages));
+    }
   }
 
   return bindings;

@@ -89,6 +89,33 @@ expression: 'formValue.__proto__'; // Error: Property "__proto__" is not accessi
 
 **Why?** Dynamic forms need to access any field name you define. The parser blocks only the dangerous properties that could break security.
 
+### Safe Member Access (Built-in)
+
+**Important**: Member access is safe by default - accessing properties on `null` or `undefined` returns `undefined` instead of throwing errors:
+
+```typescript
+// ✅ All of these work safely, even when intermediate values are null/undefined
+expression: 'formValue.user.profile.firstName';
+expression: 'formValue.address.city.toLowerCase()';
+expression: 'formValue.settings.notifications.email';
+
+// If formValue.user is null, the expression returns undefined (no error thrown)
+// If formValue.user.profile is null, the expression returns undefined (no error thrown)
+// No manual null checks needed!
+```
+
+**This means you don't need to write defensive null checks:**
+
+```typescript
+// ❌ Unnecessary - Don't do this
+expression: '!formValue.user || !formValue.user.profile || !formValue.user.profile.firstName || fieldValue !== formValue.user.profile.firstName';
+
+// ✅ Better - Safe by default
+expression: '!formValue.user.profile.firstName || fieldValue !== formValue.user.profile.firstName';
+```
+
+The parser automatically handles null/undefined at every level of property access, making expressions cleaner and more maintainable.
+
 ## Available Context Variables
 
 When expressions are evaluated, they have access to:

@@ -55,6 +55,21 @@ describe('ExpressionParser', () => {
       expect(ExpressionParser.evaluate('nullValue.property', scope)).toBeUndefined();
       expect(ExpressionParser.evaluate('undefinedValue.property', scope)).toBeUndefined();
     });
+
+    it('should handle deeply nested null/undefined safely', () => {
+      // Test deeply nested access when intermediate values are null/undefined
+      const scope1 = { formValue: null };
+      expect(ExpressionParser.evaluate('formValue.user.profile.firstName', scope1)).toBeUndefined();
+
+      const scope2 = { formValue: { user: null } };
+      expect(ExpressionParser.evaluate('formValue.user.profile.firstName', scope2)).toBeUndefined();
+
+      const scope3 = { formValue: { user: { profile: null } } };
+      expect(ExpressionParser.evaluate('formValue.user.profile.firstName', scope3)).toBeUndefined();
+
+      const scope4 = { formValue: { user: { profile: { firstName: 'John' } } } };
+      expect(ExpressionParser.evaluate('formValue.user.profile.firstName', scope4)).toBe('John');
+    });
   });
 
   describe('arithmetic operations', () => {
