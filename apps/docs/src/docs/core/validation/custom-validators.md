@@ -233,7 +233,7 @@ const greaterThanMin: CustomValidator = (ctx) => {
 };
 
 // Note: Custom validators return only 'kind'. Built-in validators (min, max, etc.)
-// automatically include params for interpolation ({{min}}, {{max}}, etc.)
+// automatically include params for interpolation (e.g., {{min}}, {{max}}, etc.)
 const config = {
   fields: [
     { key: 'minAge', type: 'input', value: 0 },
@@ -642,7 +642,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 ### Parameterized Messages
 
-Messages can use params from ValidatorConfig:
+Messages can use params from ValidatorConfig by referencing them with the `{{paramName}}` syntax:
 
 ```typescript
 {
@@ -654,7 +654,7 @@ Messages can use params from ValidatorConfig:
     }
   ],
   validationMessages: {
-    notLessThan: 'Must be less than {{label}}' // Uses params.label
+    notLessThan: `Must be less than ${'{{label}}'}` // Interpolates params.label
   }
 }
 ```
