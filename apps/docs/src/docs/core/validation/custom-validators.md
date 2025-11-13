@@ -6,8 +6,6 @@ keyword: ValidationCustomValidatorsPage
 
 Custom validation functions for complex validation logic that goes beyond built-in validators.
 
-> **💡 Live Demo Available**: See custom validators in action at the [Custom Validators Example](/examples/custom-validators) with a working registration form.
-
 ## Overview
 
 ng-forge supports three types of custom validators using Angular's Signal Forms API:
@@ -17,6 +15,12 @@ ng-forge supports three types of custom validators using Angular's Signal Forms 
 3. **HttpCustomValidator** - HTTP-specific validators with automatic request cancellation
 
 **Key Principle:** Validators should focus on validation logic, NOT presentation. Return only the error `kind` and configure messages at field level for proper i18n support.
+
+## Live Demo
+
+Try the interactive example below to see custom validators in action:
+
+{{ NgDocActions.demo("CustomValidatorsDemoComponent", { container: false }) }}
 
 ## Message Resolution (STRICT)
 
