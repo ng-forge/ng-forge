@@ -627,7 +627,7 @@ export interface FieldDef<TProps> {
   /**
    * Field type identifier for component selection.
    *
-   * @defaultValue undefined
+   * @value undefined
    */
   type: string;
 }

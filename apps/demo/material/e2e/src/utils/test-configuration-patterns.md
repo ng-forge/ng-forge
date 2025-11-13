@@ -12,7 +12,7 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
   key: 'firstName',
   type: 'input',
   label: 'First Name',
-  defaultValue: 'John'
+  value: 'John'
 }
 
 // Required input field
@@ -21,7 +21,7 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
   type: 'input',
   label: 'Email',
   required: true,
-  defaultValue: ''
+  value: ''
 }
 
 // Input with props/attributes
@@ -30,7 +30,7 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
   type: 'input',
   label: 'Email Address',
   placeholder: 'Enter your email',
-  defaultValue: 'test@example.com',
+  value: 'test@example.com',
   props: {
     type: 'email',
     placeholder: 'Enter email'
@@ -56,7 +56,7 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
   key: 'isActive',
   type: 'checkbox',
   label: 'Is Active',
-  defaultValue: false
+  value: false
 }
 
 // Required checkbox
@@ -65,7 +65,7 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
   type: 'checkbox',
   label: 'Accept Terms',
   required: true,
-  defaultValue: false
+  value: false
 }
 ```
 
@@ -109,13 +109,13 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
       key: 'firstName',
       type: 'input',
       label: 'First Name',
-      defaultValue: 'John'
+      value: 'John'
     },
     {
       key: 'lastName',
       type: 'input',
       label: 'Last Name',
-      defaultValue: 'Doe'
+      value: 'Doe'
     }
   ]
 }
@@ -139,13 +139,13 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
       key: 'street',
       type: 'input',
       label: 'Street',
-      defaultValue: '123 Main St'
+      value: '123 Main St'
     },
     {
       key: 'city',
       type: 'input',
       label: 'City',
-      defaultValue: 'New York'
+      value: 'New York'
     }
   ]
 }
@@ -174,13 +174,13 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
           key: 'first',
           type: 'input',
           label: 'First',
-          defaultValue: 'John'
+          value: 'John'
         },
         {
           key: 'last',
           type: 'input',
           label: 'Last',
-          defaultValue: 'Doe'
+          value: 'Doe'
         }
       ]
     },
@@ -188,7 +188,7 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
       key: 'email',
       type: 'input',
       label: 'Email',
-      defaultValue: 'john.doe@example.com'
+      value: 'john.doe@example.com'
     }
   ]
 }
@@ -212,7 +212,7 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
       key: 'firstName',
       type: 'input',
       label: 'First Name',
-      defaultValue: ''
+      value: ''
     }
   ]
 }
@@ -228,7 +228,7 @@ This document catalogs configuration patterns for e2e testing of the dynamic for
   type: 'input',
   label: 'Email',
   required: true,
-  defaultValue: ''
+  value: ''
 }
 ```
 
@@ -415,27 +415,27 @@ const formConfig: FormConfig = {
       type: 'input',
       label: 'First Name',
       required: true,
-      defaultValue: 'John',
+      value: 'John',
     },
     {
       key: 'lastName',
       type: 'input',
       label: 'Last Name',
       required: true,
-      defaultValue: 'Doe',
+      value: 'Doe',
     },
     {
       key: 'email',
       type: 'input',
       label: 'Email',
       required: true,
-      defaultValue: 'john.doe@example.com',
+      value: 'john.doe@example.com',
     },
     {
       key: 'isActive',
       type: 'checkbox',
       label: 'Is Active',
-      defaultValue: true,
+      value: true,
     },
   ];
 }
@@ -450,7 +450,7 @@ const formConfig: FormConfig = {
       key: 'username',
       type: 'input',
       label: 'Username',
-      defaultValue: 'johndoe',
+      value: 'johndoe',
     },
     {
       key: 'personalInfo',
@@ -461,13 +461,13 @@ const formConfig: FormConfig = {
           key: 'firstName',
           type: 'input',
           label: 'First Name',
-          defaultValue: 'John',
+          value: 'John',
         },
         {
           key: 'lastName',
           type: 'input',
           label: 'Last Name',
-          defaultValue: 'Doe',
+          value: 'Doe',
         },
       ],
     },
@@ -480,13 +480,13 @@ const formConfig: FormConfig = {
           key: 'street',
           type: 'input',
           label: 'Street',
-          defaultValue: '123 Main St',
+          value: '123 Main St',
         },
         {
           key: 'city',
           type: 'input',
           label: 'City',
-          defaultValue: 'New York',
+          value: 'New York',
         },
       ],
     },
@@ -494,7 +494,7 @@ const formConfig: FormConfig = {
       key: 'isActive',
       type: 'checkbox',
       label: 'Is Active',
-      defaultValue: true,
+      value: true,
     },
   ];
 }

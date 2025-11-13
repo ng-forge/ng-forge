@@ -302,7 +302,7 @@ export default class SinglePageDemoComponent {
         key: 'newsletter',
         type: 'toggle',
         label: this.translationService.translate('form.labels.newsletter'),
-        defaultValue: false,
+        value: false,
       },
 
       // Interest areas (multi-checkbox)
@@ -331,7 +331,7 @@ export default class SinglePageDemoComponent {
           step: 1,
           tickInterval: 1,
         },
-        defaultValue: 2,
+        value: 2,
       },
 
       // Terms and conditions

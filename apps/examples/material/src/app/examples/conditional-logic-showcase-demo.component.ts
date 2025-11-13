@@ -959,7 +959,7 @@ export class ConditionalLogicShowcaseDemoComponent {
           {
             key: 'backgroundCheck',
             type: 'checkbox',
-            checked: false,
+            value: false,
             label: 'I consent to a background check as part of the certification process',
             required: true,
             validationMessages: {
@@ -970,7 +970,7 @@ export class ConditionalLogicShowcaseDemoComponent {
           {
             key: 'ethicsAgreement',
             type: 'checkbox',
-            checked: false,
+            value: false,
             label: 'I agree to abide by the professional code of ethics',
             required: true,
             validationMessages: {
@@ -999,7 +999,7 @@ export class ConditionalLogicShowcaseDemoComponent {
           {
             key: 'hasPortfolio',
             type: 'toggle',
-            checked: false,
+            value: false,
             label: 'I will submit a professional portfolio',
             props: { color: 'primary' },
             logic: [
@@ -1116,7 +1116,7 @@ export class ConditionalLogicShowcaseDemoComponent {
           {
             key: 'acknowledgement',
             type: 'checkbox',
-            checked: false,
+            value: false,
             label: 'I certify that all information provided in this application is true and accurate',
             required: true,
             validationMessages: {
@@ -1127,7 +1127,7 @@ export class ConditionalLogicShowcaseDemoComponent {
           {
             key: 'marketingConsent',
             type: 'checkbox',
-            checked: false,
+            value: false,
             label: 'I would like to receive updates about certification programs and professional development opportunities',
             props: { color: 'primary' },
           },

@@ -136,7 +136,7 @@ test.describe('Demo Scenarios Functionality', () => {
     test('should have form fields in profile edit', async ({ page }) => {
       await page.goto('http://localhost:4200/profile-management');
 
-      // Check that form fields exist (no defaultValue anymore)
+      // Check that form fields exist (no value anymore)
       await expect(page.getByLabel('First Name')).toBeVisible();
       await expect(page.getByLabel('Last Name')).toBeVisible();
       await expect(page.getByLabel('Email Address')).toBeVisible();

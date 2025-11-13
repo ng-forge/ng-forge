@@ -129,7 +129,7 @@ export interface FieldDef<TProps> {
 ```typescript
 export type BaseValueField<TProps, TValue> = FieldDef<TProps> & {
   value: TValue;
-  defaultValue?: TValue;
+  value?: TValue;
   placeholder?: DynamicText;
   required?: boolean;
   // Validation properties
@@ -693,7 +693,7 @@ Field types are discriminated by the `type` property:
 type AnyField =
   | { key: string; type: 'input'; value: string /* ... */ }
   | { key: string; type: 'select'; value: unknown; options: FieldOption[] /* ... */ }
-  | { key: string; type: 'checkbox'; checked: boolean /* ... */ };
+  | { key: string; type: 'checkbox'; value: boolean /* ... */ };
 
 function handleField(field: AnyField) {
   if (field.type === 'input') {
@@ -703,8 +703,8 @@ function handleField(field: AnyField) {
     // TypeScript knows: field.options exists
     console.log(field.options.length);
   } else if (field.type === 'checkbox') {
-    // TypeScript knows: field.checked exists
-    console.log(field.checked ? 'Checked' : 'Unchecked');
+    // TypeScript knows: field.value exists
+    console.log(field.value ? 'Checked' : 'Unchecked');
   }
 }
 ```
@@ -715,7 +715,7 @@ Used extensively for type inference:
 
 ```typescript
 // Extract value type from field
-type ExtractFieldValueType<T> = T extends { value: infer V } ? V : T extends { checked: infer C } ? C : never;
+type ExtractFieldValueType<T> = T extends { value: infer V } ? V : never;
 
 // Extract props from field
 type ExtractProps<T> = T extends { props: infer P } ? P : never;
