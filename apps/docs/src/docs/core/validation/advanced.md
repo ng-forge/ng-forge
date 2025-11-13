@@ -139,10 +139,28 @@ Combine multiple validators with different conditions:
 
 ## Cross-Field Validation
 
-For validators that need to compare multiple fields (like password confirmation or date ranges), use custom validators with the FieldContext API.
+For validators that need to compare multiple fields (like password confirmation or date ranges), use custom validators.
+
+**Quick example using expressions:**
+
+```typescript
+{
+  key: 'confirmPassword',
+  type: 'input',
+  validators: [{
+    type: 'custom',
+    expression: 'fieldValue === formValue.password',
+    kind: 'passwordMismatch',
+  }],
+  validationMessages: {
+    passwordMismatch: 'Passwords must match',
+  },
+}
+```
 
 See **[Custom Validators](../custom-validators)** for complete documentation on:
-- Synchronous custom validators
+- Expression-based validators (simple, inline expressions)
+- Function-based validators (complex, reusable logic)
 - Cross-field validation patterns
 - FieldContext API for accessing other field values
 - Async validators and HTTP validators

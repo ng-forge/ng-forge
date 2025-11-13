@@ -44,7 +44,89 @@ You can define messages at the form level for common validation errors:
 }
 ```
 
-## Synchronous Custom Validators
+## Two Validator Patterns
+
+ng-forge supports two patterns for custom validators:
+
+1. **Function-based** - Register reusable validator functions (best for complex logic, reusability)
+2. **Expression-based** - Inline JavaScript expressions (best for simple, one-off validations)
+
+## Expression-Based Validators
+
+For simple validation logic, use inline JavaScript expressions without registering functions.
+
+### Basic Example
+
+```typescript
+{
+  key: 'confirmPassword',
+  type: 'input',
+  value: '',
+  validators: [{
+    type: 'custom',
+    expression: 'fieldValue === formValue.password',
+    kind: 'passwordMismatch',
+  }],
+  validationMessages: {
+    passwordMismatch: 'Passwords must match',
+  },
+}
+```
+
+**How it works:**
+- `fieldValue` - Current field's value
+- `formValue` - Entire form value object
+- Expression returns `true` = validation passes
+- Expression returns `false` = validation fails with the specified `kind`
+
+### Available Context
+
+Expression-based validators have access to:
+
+- **`fieldValue`** - Current field value
+- **`formValue`** - Complete form value object (e.g., `formValue.password`, `formValue.email`)
+- **`fieldPath`** - Current field path
+- Custom functions registered in `signalFormsConfig.customFunctions`
+
+### Common Expression Patterns
+
+**Password confirmation:**
+```typescript
+{
+  expression: 'fieldValue === formValue.password',
+  kind: 'passwordMismatch',
+}
+```
+
+**Date range validation:**
+```typescript
+{
+  expression: 'new Date(fieldValue) > new Date(formValue.startDate)',
+  kind: 'endDateBeforeStart',
+}
+```
+
+**Conditional required:**
+```typescript
+{
+  expression: 'formValue.requiresApproval ? fieldValue?.length > 0 : true',
+  kind: 'approvalRequired',
+}
+```
+
+**Numeric comparison:**
+```typescript
+{
+  expression: 'fieldValue >= formValue.minAge && fieldValue <= formValue.maxAge',
+  kind: 'ageOutOfRange',
+}
+```
+
+### Security
+
+Expressions use **secure AST-based parsing** - no `eval()` or `new Function()`. Only safe JavaScript operations are allowed.
+
+## Function-Based Validators
 
 Best for validation that needs field value and access to other fields via FieldContext.
 
