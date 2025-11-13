@@ -18,9 +18,9 @@ ng-forge supports three types of custom validators using Angular's Signal Forms 
 
 ## Live Demo
 
-Try the interactive example below to see custom validators in action:
+Try the interactive example below to see both expression-based and function-based validators in action:
 
-{{ NgDocActions.demo("CustomValidatorsDemoComponent", { container: false }) }}
+{{ NgDocActions.demo("ExpressionValidatorsIframeDemoComponent", { container: false }) }}
 
 ## Message Resolution (STRICT)
 

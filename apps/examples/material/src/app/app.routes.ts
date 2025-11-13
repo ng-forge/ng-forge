@@ -90,6 +90,10 @@ export const appRoutes: Route[] = [
         path: 'custom-validators',
         loadComponent: () => import('./examples/custom-validators-demo.component').then((m) => m.CustomValidatorsDemoComponent),
       },
+      {
+        path: 'expression-validators-demo',
+        loadComponent: () => import('./examples/expression-validators-demo.component').then((m) => m.ExpressionValidatorsDemoComponent),
+      },
     ],
   },
 ];
