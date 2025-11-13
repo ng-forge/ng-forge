@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-form';
 import { AsyncPipe } from '@angular/common';
