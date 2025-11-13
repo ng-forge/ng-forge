@@ -3,7 +3,7 @@ import { DynamicForm, type FormConfig, type CustomValidator } from '@ng-forge/dy
 import { JsonPipe } from '@angular/common';
 
 // Example of a function-based validator for comparison
-const noSpaces: CustomValidator<string> = (ctx) => {
+const noSpaces: CustomValidator = (ctx) => {
   const value = ctx.value();
   if (typeof value === 'string' && value.includes(' ')) {
     return { kind: 'noSpaces' };
@@ -29,42 +29,44 @@ const noSpaces: CustomValidator<string> = (ctx) => {
         <pre>{{ formValue() | json }}</pre>
 
         @if (submitMessage()) {
-          <div class="submit-success">{{ submitMessage() }}</div>
+        <div class="submit-success">{{ submitMessage() }}</div>
         }
       </div>
     </div>
   `,
-  styles: [`
-    .demo-section {
-      padding: 20px;
-    }
+  styles: [
+    `
+      .demo-section {
+        padding: 20px;
+      }
 
-    .example-result {
-      margin-top: 20px;
-      padding: 16px;
-      background: #f5f5f5;
-      border-radius: 4px;
-    }
+      .example-result {
+        margin-top: 20px;
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 4px;
+      }
 
-    .example-result h4 {
-      margin-top: 0;
-      margin-bottom: 12px;
-    }
+      .example-result h4 {
+        margin-top: 0;
+        margin-bottom: 12px;
+      }
 
-    .example-result pre {
-      margin: 0;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
+      .example-result pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
 
-    .submit-success {
-      margin-top: 16px;
-      padding: 12px;
-      background: #4caf50;
-      color: white;
-      border-radius: 4px;
-    }
-  `],
+      .submit-success {
+        margin-top: 16px;
+        padding: 12px;
+        background: #4caf50;
+        color: white;
+        border-radius: 4px;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExpressionValidatorsDemoComponent {
@@ -75,9 +77,9 @@ export class ExpressionValidatorsDemoComponent {
     confirmPassword: '',
     startDate: null as Date | null,
     endDate: null as Date | null,
-    minAge: 18,
-    maxAge: 65,
-    age: null as number | null,
+    minAge: '18',
+    maxAge: '65',
+    age: '',
 
     // Function-based example
     nickname: '',
@@ -97,7 +99,6 @@ export class ExpressionValidatorsDemoComponent {
         type: 'group',
         key: 'expressionExamples',
         label: '1. Expression-Based Validators',
-        description: 'Simple inline expressions - no function registration needed',
         fields: [
           {
             key: 'password',
@@ -130,14 +131,12 @@ export class ExpressionValidatorsDemoComponent {
             key: 'startDate',
             type: 'datepicker',
             label: 'Start Date',
-            value: null,
             required: true,
           },
           {
             key: 'endDate',
             type: 'datepicker',
             label: 'End Date',
-            value: null,
             required: true,
             validators: [
               {
@@ -151,33 +150,26 @@ export class ExpressionValidatorsDemoComponent {
             },
           },
           {
-            type: 'row',
-            key: 'ageRange',
-            label: 'Age Range',
-            fields: [
-              {
-                key: 'minAge',
-                type: 'input',
-                label: 'Minimum Age',
-                value: 18,
-                required: true,
-                props: { type: 'number' },
-              },
-              {
-                key: 'maxAge',
-                type: 'input',
-                label: 'Maximum Age',
-                value: 65,
-                required: true,
-                props: { type: 'number' },
-              },
-            ],
+            key: 'minAge',
+            type: 'input',
+            label: 'Minimum Age',
+            value: '18',
+            required: true,
+            props: { type: 'number' },
+          },
+          {
+            key: 'maxAge',
+            type: 'input',
+            label: 'Maximum Age',
+            value: '65',
+            required: true,
+            props: { type: 'number' },
           },
           {
             key: 'age',
             type: 'input',
             label: 'Your Age',
-            value: null,
+            value: '',
             required: true,
             props: { type: 'number' },
             validators: [
@@ -197,7 +189,6 @@ export class ExpressionValidatorsDemoComponent {
         type: 'group',
         key: 'functionExample',
         label: '2. Function-Based Validator (for comparison)',
-        description: 'Registered reusable function - best for complex logic',
         fields: [
           {
             key: 'nickname',
