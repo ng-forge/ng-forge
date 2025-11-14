@@ -20,15 +20,15 @@ pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-bootstrap bootstrap
 
 Optional: For advanced datepicker features with calendar UI:
 
-```bash group="install" name="npm"
+```bash group="install-ng-bootstrap" name="npm"
 npm install @ng-bootstrap/ng-bootstrap
 ```
 
-```bash group="install" name="yarn"
+```bash group="install-ng-bootstrap" name="yarn"
 yarn add @ng-bootstrap/ng-bootstrap
 ```
 
-```bash group="install" name="pnpm"
+```bash group="install-ng-bootstrap" name="pnpm"
 pnpm add @ng-bootstrap/ng-bootstrap
 ```
 

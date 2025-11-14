@@ -167,6 +167,22 @@ export type ContainerField<TProps> = FieldDef<TProps> & {
 };
 ```
 
+**5. ArrayField (Dynamic Lists)**
+
+```typescript
+export type ArrayField<TProps> = FieldDef<TProps> & {
+  key: string;
+  value: unknown[];
+  itemTemplate: {
+    fields: AnyField[];
+  };
+  minItems?: number;
+  maxItems?: number;
+  addButtonLabel?: DynamicText;
+  removeButtonLabel?: DynamicText;
+};
+```
+
 ### Adapter Field Types
 
 Adapters extend base types with UI-specific props:
@@ -231,6 +247,17 @@ const config = {
         { key: 'city', type: 'input', value: '' },
       ],
     },
+    {
+      key: 'contacts',
+      type: 'array',
+      value: [],
+      itemTemplate: {
+        fields: [
+          { key: 'name', type: 'input', value: '' },
+          { key: 'email', type: 'input', value: '' },
+        ],
+      },
+    },
   ],
 } as const satisfies FormConfig;
 
@@ -243,6 +270,11 @@ type FormValue = {
     street?: string;
     city?: string;
   };
+  contacts?: Array<{
+    // array creates array of objects
+    name?: string;
+    email?: string;
+  }>;
 };
 ```
 

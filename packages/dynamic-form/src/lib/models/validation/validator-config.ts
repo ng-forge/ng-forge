@@ -28,16 +28,39 @@ export interface BuiltInValidatorConfig extends BaseValidatorConfig {
 /**
  * Custom validator configuration using Angular's public FieldContext API
  * Returns ValidationError | ValidationError[] | null synchronously
+ *
+ * Supports two patterns:
+ * 1. Function-based: { type: 'custom', functionName: 'myValidator' }
+ * 2. Expression-based: { type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }
  */
 export interface CustomValidatorConfig extends BaseValidatorConfig {
   /** Validator type identifier */
   type: 'custom';
 
-  /** Name of registered validator function */
-  functionName: string;
+  /** Name of registered validator function (function-based pattern) */
+  functionName?: string;
 
   /** Optional parameters to pass to validator function */
   params?: Record<string, unknown>;
+
+  /** JavaScript expression to evaluate (expression-based pattern) */
+  expression?: string;
+
+  /** Error kind for expression-based validators - links to validationMessages */
+  kind?: string;
+
+  /**
+   * Parameters to include in error object for message interpolation (expression-based pattern)
+   * Map of parameter names to expressions that will be evaluated in the same context as the validation expression
+   *
+   * @example
+   * errorParams: {
+   *   minValue: 'formValue.minValue',
+   *   maxValue: 'formValue.maxValue'
+   * }
+   * // Allows message template: "Value must be between {{minValue}} and {{maxValue}}"
+   */
+  errorParams?: Record<string, string>;
 }
 
 /**

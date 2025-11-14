@@ -17,10 +17,53 @@ export function interpolateParams(message: string, error: ValidationError): stri
 
   Object.entries(params).forEach(([key, value]) => {
     const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-    result = result.replace(placeholder, String(value));
+    result = result.replace(placeholder, safeToString(value));
   });
 
   return result;
+}
+
+/**
+ * Safely converts a value to a string, handling complex objects
+ * @internal
+ */
+function safeToString(value: unknown): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  // Handle primitives directly
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  // Handle RegExp (has its own toString)
+  if (value instanceof RegExp) {
+    return value.toString();
+  }
+
+  // Handle Date
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  // Handle arrays
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  }
+
+  // For objects, try JSON.stringify first, fall back to empty string
+  try {
+    // Check if object has a custom toString that's not Object.prototype.toString
+    if (typeof value === 'object' && value.toString !== Object.prototype.toString) {
+      return value.toString();
+    }
+    // Otherwise use JSON representation
+    return JSON.stringify(value);
+  } catch {
+    // If JSON.stringify fails (circular reference, etc.), return empty string
+    return '[object]';
+  }
 }
 
 /**
@@ -38,6 +81,14 @@ function extractErrorParams(error: ValidationError): Record<string, unknown> {
   if ('pattern' in error) params.pattern = error.pattern;
   if ('actual' in error) params.actual = error.actual;
   if ('expected' in error) params.expected = error.expected;
+
+  // Include all custom properties from error object (for custom validators)
+  // Skip 'kind' as it's the error type identifier, not a parameter
+  Object.keys(error).forEach((key) => {
+    if (key !== 'kind' && !(key in params)) {
+      params[key] = error[key as keyof ValidationError];
+    }
+  });
 
   return params;
 }

@@ -111,7 +111,7 @@ export class CompleteFormDemoComponent {
         value: '',
         maxLength: 500,
         validationMessages: {
-          maxLength: 'Must not exceed {maxLength} characters',
+          maxLength: 'Must not exceed 500 characters',
         },
         props: {
           rows: 4,

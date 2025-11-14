@@ -278,14 +278,20 @@ eventBus.on('some-random-event'); // No type checking
 
 ## Integration with Forms
 
-Event bus is automatically provided to all form components:
+The event bus is automatically provided by the `DynamicForm` component to all child field components. You don't need to manually provide it:
 
 ```typescript
+// The DynamicForm component internally provides EventBus
+// All child field components can inject and use it
+import { DynamicForm } from '@ng-forge/dynamic-form';
+
 @Component({
-  providers: [EventBus], // Automatically provided by DynamicForm
+  selector: 'app-my-form',
+  imports: [DynamicForm],
+  template: `<dynamic-form [config]="config" />`,
 })
-export class DynamicFormComponent {
-  // Event bus available to all child field components
+export class MyFormComponent {
+  // EventBus is available to all field components rendered by DynamicForm
 }
 ```
 
