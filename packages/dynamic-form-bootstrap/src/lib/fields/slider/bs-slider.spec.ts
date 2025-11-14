@@ -551,6 +551,29 @@ describe('BsSliderFieldComponent', () => {
 
       expect(BootstrapFormTestUtils.getFormValue(component).brightness).toBe(65);
     });
+
+    it('should clamp values to valid range via browser native slider', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'volume',
+          type: 'slider',
+          props: {
+            min: 0,
+            max: 100,
+          },
+        })
+        .build();
+
+      const { fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { volume: 50 },
+      });
+
+      const slider = fixture.debugElement.query(By.css('input[type="range"]'));
+
+      expect(slider.nativeElement.min).toBe('0');
+      expect(slider.nativeElement.max).toBe('100');
+    });
   });
 
   describe('Edge Cases and Robustness Tests', () => {
