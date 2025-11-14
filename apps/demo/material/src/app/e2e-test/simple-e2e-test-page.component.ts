@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ViewChild, inject, effect, viewChild } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, SubmitEvent, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Simple E2E Test Page Component
@@ -180,6 +180,8 @@ import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-for
   ],
 })
 export class SimpleE2ETestPageComponent {
+  private eventBus = inject(EventBus, { optional: true });
+
   currentConfig = signal<FormConfig | null>(null);
   currentTestId = signal<string>('default');
   currentTitle = signal<string>('');
@@ -191,6 +193,13 @@ export class SimpleE2ETestPageComponent {
 
   constructor() {
     this.setupScenarioLoader();
+
+    // Expose EventBus to window for E2E tests when it's available
+    effect(() => {
+      if (this.eventBus) {
+        (window as any).testEventBus = this.eventBus;
+      }
+    });
   }
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
@@ -299,8 +308,10 @@ export class SimpleE2ETestPageComponent {
   }
 
   private setupScenarioLoader(): void {
-    // Expose SubmitEvent globally for e2e tests
+    // Expose events globally for e2e tests
     (window as any).SubmitEvent = SubmitEvent;
+    (window as any).AddArrayItemEvent = AddArrayItemEvent;
+    (window as any).RemoveArrayItemEvent = RemoveArrayItemEvent;
 
     // Create global function for loading test scenarios
     (window as any).loadTestScenario = (
