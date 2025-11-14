@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Form Orchestration and State Management Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/e2e-test');
+    await page.goto('http://localhost:4200/e2e-test');
 
     // Wait for the page to be fully loaded before proceeding
     await page.waitForLoadState('networkidle');

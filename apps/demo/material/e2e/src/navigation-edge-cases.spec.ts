@@ -5,7 +5,7 @@ import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 test.describe('Navigation Edge Cases and Error Handling Tests', () => {
   test.beforeEach(async ({ page }) => {
     const waitHelpers = new DeterministicWaitHelpers(page);
-    await page.goto('/e2e-test');
+    await page.goto('http://localhost:4200/e2e-test');
 
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');

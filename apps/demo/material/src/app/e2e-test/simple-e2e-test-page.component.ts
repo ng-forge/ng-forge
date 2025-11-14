@@ -15,10 +15,10 @@ import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-for
       <p>Basic testing page for automated tests</p>
 
       @if (currentConfig()) {
-      <div class="e2e-test-container" [attr.data-testid]="currentTestId()">
+      <div class="e2e-test-container" [id]="currentTestId()" [attr.data-testid]="currentTestId()">
         @if (currentTitle()) {
         <div class="form-header">
-          <h2 [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
+          <h2 [id]="currentTestId() + '-title'" [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
           @if (currentDescription()) {
           <p class="description">{{ currentDescription() }}</p>
           }
@@ -39,14 +39,18 @@ import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-for
             <summary>Form State (for debugging)</summary>
             <div class="form-data">
               <strong>Form Value:</strong>
-              <pre [attr.data-testid]="'form-value-' + currentTestId()">{{ formValue() | json }}</pre>
+              <pre [id]="'form-value-' + currentTestId()" [attr.data-testid]="'form-value-' + currentTestId()">{{
+                formValue() | json
+              }}</pre>
             </div>
             @if (submissionLog().length > 0) {
             <div class="submission-log">
               <strong>Submission Log:</strong>
-              <ul [attr.data-testid]="'submission-log-' + currentTestId()">
+              <ul [id]="'submission-log-' + currentTestId()" [attr.data-testid]="'submission-log-' + currentTestId()">
                 @for (submission of submissionLog(); track submission.timestamp; let i = $index) {
-                <li [attr.data-testid]="'submission-' + i">{{ submission.timestamp }}: {{ submission.data | json }}</li>
+                <li [id]="'submission-' + i" [attr.data-testid]="'submission-' + i">
+                  {{ submission.timestamp }}: {{ submission.data | json }}
+                </li>
                 }
               </ul>
             </div>

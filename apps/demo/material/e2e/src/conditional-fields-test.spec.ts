@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test';
-import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 
 test.describe('Conditional Fields Test', () => {
   test('should load conditional fields without injection errors', async ({ page }) => {
@@ -14,15 +13,11 @@ test.describe('Conditional Fields Test', () => {
     // Navigate to cross-field validation
     await page.goto('http://localhost:4200/cross-field-validation');
 
-    // Wait for page to load
-    const waitHelpers = new DeterministicWaitHelpers(page);
-    await waitHelpers.waitForAngularStability();
-
     // Click on Conditional Fields tab
-    await page.getByText('Conditional Fields').click();
+    await page.getByRole('button', { name: 'Conditional Fields' }).click();
 
     // Wait for tab content to load
-    await waitHelpers.waitForAngularStability();
+    await page.waitForTimeout(300);
 
     // Check if radio buttons are visible (this would trigger the injection error if present)
     await expect(page.getByText('Do you have an existing account?')).toBeVisible();
@@ -31,7 +26,9 @@ test.describe('Conditional Fields Test', () => {
 
     // Try to interact with radio buttons to trigger logic
     await page.getByLabel('Yes, I have an account').check();
-    await waitHelpers.waitForAngularStability();
+
+    // Wait for conditional logic to apply
+    await page.waitForTimeout(200);
 
     // Check if conditional fields appear
     await expect(page.getByLabel('Login Email')).toBeVisible();
@@ -39,11 +36,14 @@ test.describe('Conditional Fields Test', () => {
 
     // Switch to other option
     await page.getByLabel('No, I need to create one').check();
-    await waitHelpers.waitForAngularStability();
+
+    // Wait for conditional logic to apply
+    await page.waitForTimeout(200);
 
     // Check if different fields appear
     await expect(page.getByLabel('First Name')).toBeVisible();
     await expect(page.getByLabel('Last Name')).toBeVisible();
+    await expect(page.getByLabel('Email Address')).toBeVisible();
 
     // Check for any console errors, specifically injection context errors
     const injectionErrors = consoleErrors.filter(

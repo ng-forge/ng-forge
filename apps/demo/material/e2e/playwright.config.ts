@@ -36,32 +36,10 @@ export default defineConfig({
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },
-  /* Run tests serially to avoid resource issues in container */
-  /* TODO: Revert to workers: undefined (parallel) after tests are fixed and stable */
-  workers: 1,
-  /* Increase timeout for slower tests */
-  timeout: 60000,
-  /* Retry flaky tests due to resource constraints */
-  retries: 2,
   projects: [
     {
       name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        launchOptions: {
-          args: [
-            '--disable-gpu',
-            '--disable-dev-shm-usage',
-            '--disable-setuid-sandbox',
-            '--no-sandbox',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-software-rasterizer',
-          ],
-        },
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
 
     {

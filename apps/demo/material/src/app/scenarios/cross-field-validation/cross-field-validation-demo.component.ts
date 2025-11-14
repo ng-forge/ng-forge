@@ -3,9 +3,16 @@ import { JsonPipe } from '@angular/common';
 import { PasswordMatchingFormComponent } from './components/password-matching-form.component';
 import { ConditionalFieldsFormComponent } from './components/conditional-fields-form.component';
 import { DependentValidationFormComponent } from './components/dependent-validation-form.component';
+import { FormResetClearFormComponent } from './components/form-reset-clear-form.component';
 
 @Component({
-  imports: [JsonPipe, PasswordMatchingFormComponent, ConditionalFieldsFormComponent, DependentValidationFormComponent],
+  imports: [
+    JsonPipe,
+    PasswordMatchingFormComponent,
+    ConditionalFieldsFormComponent,
+    DependentValidationFormComponent,
+    FormResetClearFormComponent,
+  ],
   selector: 'demo-cross-field-validation',
   template: `
     <div class="cross-field-validation-demo">
@@ -27,6 +34,8 @@ import { DependentValidationFormComponent } from './components/dependent-validat
         <demo-conditional-fields-form (submitted)="onSubmit($event)" />
         } @case ('dependent-validation') {
         <demo-dependent-validation-form (submitted)="onSubmit($event)" />
+        } @case ('form-reset-clear') {
+        <demo-form-reset-clear-form (submitted)="onSubmit($event)" />
         } }
       </div>
 
@@ -157,6 +166,11 @@ export class CrossFieldValidationDemoComponent {
       id: 'dependent-validation',
       name: 'Dependent Validation',
       description: 'Fields with cascading dependencies',
+    },
+    {
+      id: 'form-reset-clear',
+      name: 'Form Reset & Clear',
+      description: 'Demonstrates form reset and clear functionality',
     },
   ];
 

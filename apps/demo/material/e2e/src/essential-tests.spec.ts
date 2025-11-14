@@ -1,41 +1,34 @@
 import { expect, test } from '@playwright/test';
-import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
 
 test.describe('Essential Tests - Quick Validation', () => {
   test('basic form functionality works', async ({ page }) => {
-    const waitHelpers = new DeterministicWaitHelpers(page);
-    await page.goto('/cross-field-validation');
+    await page.goto('http://localhost:4200/cross-field-validation');
 
     // Wait for page to load
     await page.waitForLoadState('networkidle');
 
     // Check page loads correctly
-    await expect(page.getByText('Cross-Field Validation Demo')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Cross-Field Validation/i })).toBeVisible();
 
-    // Test basic form interaction - use more specific selector
-    await page.getByRole('button', { name: 'Password Matching' }).click();
-    await waitHelpers.waitForAngularStability();
+    // Test basic form interaction - Password Matching is default tab
+    await expect(page.getByRole('button', { name: 'Password Matching' })).toHaveClass(/active/);
     await expect(page.getByLabel('Password').first()).toBeVisible();
 
     console.log('✅ Basic form functionality test passed');
   });
 
   test('age-based logic works correctly', async ({ page }) => {
-    const waitHelpers = new DeterministicWaitHelpers(page);
-    await page.goto('/cross-field-validation');
+    await page.goto('http://localhost:4200/cross-field-validation');
     await page.waitForLoadState('networkidle');
 
     // Go to dependent validation
-    await page.getByText('Dependent Validation').click();
-    await waitHelpers.waitForAngularStability();
+    await page.getByRole('button', { name: 'Dependent Validation' }).click();
+    await page.waitForTimeout(300);
 
     // Test age under 18 - guardian consent should be visible
     await page.getByLabel('Age').fill('16');
     await page.getByLabel('Age').blur();
-    // Wait for conditional field to appear
-    await waitHelpers.waitForConditionalFieldChange('guardian-consent', true).catch(() => {
-      // Field might have different test ID
-    });
+    await page.waitForTimeout(200);
 
     await expect(page.getByLabel('Guardian Consent Required')).toBeVisible();
 
@@ -43,33 +36,26 @@ test.describe('Essential Tests - Quick Validation', () => {
     await page.getByLabel('Age').clear();
     await page.getByLabel('Age').fill('25');
     await page.getByLabel('Age').blur();
-    await waitHelpers.waitForAngularStability();
+    await page.waitForTimeout(200);
 
-    // For now, just check it doesn't throw errors - we know this logic needs fixing
-    const isVisible = await page
-      .getByLabel('Guardian Consent Required')
-      .isVisible()
-      .catch(() => true);
-    console.log(`Guardian consent visible for age 25: ${isVisible}`);
+    await expect(page.getByLabel('Guardian Consent Required')).not.toBeVisible();
 
-    // Don't fail the test for now - just log the issue
-    console.log('⚠️ Age logic needs investigation but form loads correctly');
+    console.log('✅ Age logic test passed');
   });
 
   test('multi-page navigation works', async ({ page }) => {
-    const waitHelpers = new DeterministicWaitHelpers(page);
-    await page.goto('/multi-page');
+    await page.goto('http://localhost:4200/user-registration');
     await page.waitForLoadState('networkidle');
 
-    // Check page loads - use more flexible selector
-    await expect(page.getByText('Multi-Page')).toBeVisible();
+    // Check page loads
+    await expect(page.getByRole('heading', { name: /User Registration/i })).toBeVisible();
 
-    // Test one scenario
-    await page.getByText('E-Commerce Checkout').click();
-    await waitHelpers.waitForScenarioLoad();
+    // Test scenario button navigation
+    await page.getByRole('button', { name: 'Personal Information' }).first().click();
+    await page.waitForTimeout(300);
 
     // Just verify it loads without throwing errors
-    await expect(page.locator('form')).toBeVisible();
+    await expect(page.getByLabel('First Name')).toBeVisible();
 
     console.log('✅ Multi-page navigation test passed');
   });
