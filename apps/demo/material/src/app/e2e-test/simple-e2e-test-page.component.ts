@@ -1,6 +1,14 @@
-import { Component, signal, ViewChild, inject, effect, viewChild } from '@angular/core';
+import { Component, signal, ViewChild, inject, effect, viewChild, resource } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig, SubmitEvent, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
+import {
+  DynamicForm,
+  type FormConfig,
+  SubmitEvent,
+  EventBus,
+  AddArrayItemEvent,
+  RemoveArrayItemEvent,
+  FunctionRegistryService,
+} from '@ng-forge/dynamic-form';
 
 /**
  * Simple E2E Test Page Component
@@ -181,6 +189,7 @@ import { DynamicForm, type FormConfig, SubmitEvent, EventBus, AddArrayItemEvent,
 })
 export class SimpleE2ETestPageComponent {
   private eventBus = inject(EventBus, { optional: true });
+  private functionRegistry = inject(FunctionRegistryService);
 
   currentConfig = signal<FormConfig | null>(null);
   currentTestId = signal<string>('default');
@@ -193,12 +202,85 @@ export class SimpleE2ETestPageComponent {
 
   constructor() {
     this.setupScenarioLoader();
+    this.registerAsyncValidators();
 
     // Expose EventBus to window for E2E tests when it's available
     effect(() => {
       if (this.eventBus) {
         (window as any).testEventBus = this.eventBus;
       }
+    });
+  }
+
+  /**
+   * Register async validators for E2E testing
+   * These validators are used by async-validation.spec.ts
+   */
+  private registerAsyncValidators(): void {
+    // HTTP Validator: Username availability check (GET request)
+    this.functionRegistry.registerHttpValidator('checkUsernameAvailability', {
+      request: (ctx) => {
+        const username = ctx.value();
+        if (!username || typeof username !== 'string') return undefined;
+        return `/api/users/check-username?username=${encodeURIComponent(username)}`;
+      },
+      onSuccess: (result: any) => {
+        return result?.available ? null : { kind: 'usernameTaken' };
+      },
+      onError: (error) => {
+        console.error('Username check failed:', error);
+        return null; // Don't block form on network errors
+      },
+    });
+
+    // HTTP Validator: Email validation (POST request)
+    this.functionRegistry.registerHttpValidator('validateEmail', {
+      request: (ctx) => {
+        const email = ctx.value();
+        if (!email || typeof email !== 'string') return undefined;
+        return {
+          url: '/api/users/validate-email',
+          method: 'POST',
+          body: { email },
+          headers: { 'Content-Type': 'application/json' },
+        };
+      },
+      onSuccess: (result: any) => {
+        return result?.valid ? null : { kind: 'invalidEmail' };
+      },
+      onError: (error) => {
+        console.error('Email validation failed:', error);
+        return { kind: 'emailValidationError' };
+      },
+    });
+
+    // Async Validator: Simulate database lookup with resource API
+    this.functionRegistry.registerAsyncValidator('checkProductCode', {
+      params: (ctx) => ({
+        productCode: ctx.value(),
+        timestamp: Date.now(), // Force refresh
+      }),
+      factory: (params) => {
+        return resource({
+          request: () => params(),
+          loader: async ({ request }) => {
+            if (!request?.productCode) return null;
+
+            // Simulate async database lookup with delay
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
+            // Mock database: these product codes are "taken"
+            const takenCodes = ['PROD-001', 'PROD-002', 'TEST-123'];
+            const isTaken = takenCodes.includes(request.productCode as string);
+
+            return { available: !isTaken };
+          },
+        });
+      },
+      onSuccess: (result) => {
+        if (!result) return null;
+        return result.available ? null : { kind: 'productCodeTaken' };
+      },
     });
   }
 
