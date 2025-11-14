@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@playwright/test';
+import { E2EScenarioLoader } from './utils/e2e-form-helpers';
 
 test.describe('Cross-Field Validation Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -10,67 +11,64 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test('should test password confirmation validation', async ({ page }) => {
     // Load password confirmation scenario
-    await page.evaluate(() => {
-      const SubmitEvent = (window as any).SubmitEvent;
+    const loader = new E2EScenarioLoader(page);
+    const passwordConfig = {
+      fields: [
+        {
+          key: 'password',
+          type: 'input',
+          label: 'Password',
+          props: {
+            type: 'password',
+            placeholder: 'Enter password',
+          },
+          required: true,
+          minLength: 8,
+          col: 6,
+        },
+        {
+          key: 'confirmPassword',
+          type: 'input',
+          label: 'Confirm Password',
+          props: {
+            type: 'password',
+            placeholder: 'Confirm password',
+          },
+          required: true,
+          col: 6,
+          validators: [
+            {
+              type: 'custom',
+              name: 'passwordMatch',
+              message: 'Passwords must match',
+            },
+          ],
+        },
+        {
+          key: 'email',
+          type: 'input',
+          label: 'Email',
+          props: {
+            type: 'email',
+            placeholder: 'Enter email',
+          },
+          email: true,
+          required: true,
+          col: 12,
+        },
+        {
+          key: 'submitPassword',
+          type: 'submit',
+          label: 'Create Account',
+          col: 12,
+        },
+      ],
+    };
 
-      const passwordConfig = {
-        fields: [
-          {
-            key: 'password',
-            type: 'input',
-            label: 'Password',
-            props: {
-              type: 'password',
-              placeholder: 'Enter password',
-            },
-            required: true,
-            minLength: 8,
-            col: 6,
-          },
-          {
-            key: 'confirmPassword',
-            type: 'input',
-            label: 'Confirm Password',
-            props: {
-              type: 'password',
-              placeholder: 'Confirm password',
-            },
-            required: true,
-            col: 6,
-            validators: [
-              {
-                type: 'custom',
-                name: 'passwordMatch',
-                message: 'Passwords must match',
-              },
-            ],
-          },
-          {
-            key: 'email',
-            type: 'input',
-            label: 'Email',
-            props: {
-              type: 'email',
-              placeholder: 'Enter email',
-            },
-            email: true,
-            required: true,
-            col: 12,
-          },
-          {
-            key: 'submitPassword',
-            type: 'submit',
-            label: 'Create Account',
-            col: 12,
-          },
-        ],
-      };
-
-      (window as any).loadTestScenario(passwordConfig, {
-        testId: 'password-validation',
-        title: 'Password Confirmation Validation',
-        description: 'Testing password and confirm password validation',
-      });
+    await loader.loadScenario(passwordConfig, {
+      testId: 'password-validation',
+      title: 'Password Confirmation Validation',
+      description: 'Testing password and confirm password validation',
     });
 
     // Wait for page to be fully loaded
@@ -103,77 +101,79 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test('should test conditional required fields', async ({ page }) => {
     // Load conditional required fields scenario
-    await page.evaluate(() => {
-      const conditionalConfig = {
-        fields: [
-          {
-            key: 'hasAddress',
-            type: 'checkbox',
-            label: 'I have a different billing address',
-            col: 12,
+    const loader = new E2EScenarioLoader(page);
+    const conditionalConfig = {
+      fields: [
+        {
+          key: 'hasAddress',
+          type: 'checkbox',
+          label: 'I have a different billing address',
+          col: 12,
+        },
+        {
+          key: 'streetAddress',
+          type: 'input',
+          label: 'Street Address',
+          props: {
+            placeholder: 'Enter street address',
           },
-          {
-            key: 'streetAddress',
-            type: 'input',
-            label: 'Street Address',
-            props: {
-              placeholder: 'Enter street address',
-            },
-            // This would typically be conditionally required based on hasAddress
-            col: 12,
+          // This would typically be conditionally required based on hasAddress
+          col: 12,
+        },
+        {
+          key: 'city',
+          type: 'input',
+          label: 'City',
+          props: {
+            placeholder: 'Enter city',
           },
-          {
-            key: 'city',
-            type: 'input',
-            label: 'City',
-            props: {
-              placeholder: 'Enter city',
-            },
-            col: 6,
+          col: 6,
+        },
+        {
+          key: 'zipCode',
+          type: 'input',
+          label: 'ZIP Code',
+          props: {
+            placeholder: 'Enter ZIP code',
           },
-          {
-            key: 'zipCode',
-            type: 'input',
-            label: 'ZIP Code',
-            props: {
-              placeholder: 'Enter ZIP code',
-            },
-            pattern: '^[0-9]{5}(-[0-9]{4})?$',
-            col: 6,
-          },
-          {
-            key: 'country',
-            type: 'select',
-            label: 'Country',
-            options: [
-              { value: 'us', label: 'United States' },
-              { value: 'ca', label: 'Canada' },
-              { value: 'mx', label: 'Mexico' },
-              { value: 'other', label: 'Other' },
-            ],
-            col: 12,
-          },
-          {
-            key: 'submitConditional',
-            type: 'submit',
-            label: 'Submit Address',
-            col: 12,
-          },
-        ],
-      };
+          pattern: '^[0-9]{5}(-[0-9]{4})?$',
+          col: 6,
+        },
+        {
+          key: 'country',
+          type: 'select',
+          label: 'Country',
+          options: [
+            { value: 'us', label: 'United States' },
+            { value: 'ca', label: 'Canada' },
+            { value: 'mx', label: 'Mexico' },
+            { value: 'other', label: 'Other' },
+          ],
+          col: 12,
+        },
+        {
+          key: 'submitConditional',
+          type: 'submit',
+          label: 'Submit Address',
+          col: 12,
+        },
+      ],
+    };
 
-      (window as any).loadTestScenario(conditionalConfig, {
-        testId: 'conditional-validation',
-        title: 'Conditional Field Validation',
-        description: 'Testing conditional required fields and dynamic validation',
-      });
+    await loader.loadScenario(conditionalConfig, {
+      testId: 'conditional-validation',
+      title: 'Conditional Field Validation',
+      description: 'Testing conditional required fields and dynamic validation',
     });
 
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    // Wait for form to render
+    await page.waitForSelector('#conditional-validation', { state: 'visible', timeout: 10000 });
 
     // Initially, address fields should be optional
     await page.click('#submitConditional button');
+
+    // Open details to check submission
+    await page.click('.form-state summary');
 
     // Check if submission occurred (basic form should submit)
     const submissionExists = await page.locator('#submission-0').isVisible();
@@ -187,19 +187,18 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.fill('#city input', 'New York');
     await page.fill('#zipCode input', '10001');
 
-    // Select country
+    // Select country using CDK overlay
     await page.click('#country mat-select');
-    await page.click('mat-option[value="us"]');
+    await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'United States' }).click();
 
     // Submit with address information
     await page.click('#submitConditional button');
 
-    // Verify submission contains address information
-    const submissionCount = await page.locator('[data-testid^="submission-').count();
-    expect(submissionCount).toBeGreaterThan(0);
+    // Wait for the new submission to appear
+    await page.waitForSelector('[id^="submission-"]', { timeout: 5000 });
 
-    // Get the latest submission
-    const latestSubmission = page.locator(`#submission-${submissionCount - 1}`);
+    // Get the latest submission using .last() to avoid index issues across browsers
+    const latestSubmission = page.locator('[id^="submission-"]').last();
     await expect(latestSubmission).toContainText('123 Main Street');
     await expect(latestSubmission).toContainText('New York');
     await expect(latestSubmission).toContainText('10001');
@@ -208,128 +207,130 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test('should test dependent select fields', async ({ page }) => {
     // Load dependent select fields scenario
-    await page.evaluate(() => {
-      const dependentConfig = {
-        fields: [
-          {
-            key: 'category',
-            type: 'select',
-            label: 'Product Category',
-            options: [
-              { value: 'electronics', label: 'Electronics' },
-              { value: 'clothing', label: 'Clothing' },
-              { value: 'books', label: 'Books' },
-            ],
-            required: true,
-            col: 6,
+    const loader = new E2EScenarioLoader(page);
+    const dependentConfig = {
+      fields: [
+        {
+          key: 'category',
+          type: 'select',
+          label: 'Product Category',
+          options: [
+            { value: 'electronics', label: 'Electronics' },
+            { value: 'clothing', label: 'Clothing' },
+            { value: 'books', label: 'Books' },
+          ],
+          required: true,
+          col: 6,
+        },
+        {
+          key: 'subcategory',
+          type: 'select',
+          label: 'Subcategory',
+          options: [
+            // In a real scenario, these would be filtered based on category
+            { value: 'laptop', label: 'Laptop' },
+            { value: 'phone', label: 'Phone' },
+            { value: 'tablet', label: 'Tablet' },
+            { value: 'shirt', label: 'Shirt' },
+            { value: 'pants', label: 'Pants' },
+            { value: 'shoes', label: 'Shoes' },
+            { value: 'fiction', label: 'Fiction' },
+            { value: 'nonfiction', label: 'Non-Fiction' },
+            { value: 'textbook', label: 'Textbook' },
+          ],
+          col: 6,
+        },
+        {
+          key: 'productName',
+          type: 'input',
+          label: 'Product Name',
+          props: {
+            placeholder: 'Enter product name',
           },
-          {
-            key: 'subcategory',
-            type: 'select',
-            label: 'Subcategory',
-            options: [
-              // In a real scenario, these would be filtered based on category
-              { value: 'laptop', label: 'Laptop' },
-              { value: 'phone', label: 'Phone' },
-              { value: 'tablet', label: 'Tablet' },
-              { value: 'shirt', label: 'Shirt' },
-              { value: 'pants', label: 'Pants' },
-              { value: 'shoes', label: 'Shoes' },
-              { value: 'fiction', label: 'Fiction' },
-              { value: 'nonfiction', label: 'Non-Fiction' },
-              { value: 'textbook', label: 'Textbook' },
-            ],
-            col: 6,
+          required: true,
+          col: 12,
+        },
+        {
+          key: 'price',
+          type: 'input',
+          label: 'Price',
+          props: {
+            type: 'number',
+            placeholder: 'Enter price',
+            step: '0.01',
           },
-          {
-            key: 'productName',
-            type: 'input',
-            label: 'Product Name',
-            props: {
-              placeholder: 'Enter product name',
-            },
-            required: true,
-            col: 12,
-          },
-          {
-            key: 'price',
-            type: 'input',
-            label: 'Price',
-            props: {
-              type: 'number',
-              placeholder: 'Enter price',
-              step: '0.01',
-            },
-            min: 0,
-            required: true,
-            col: 6,
-          },
-          {
-            key: 'currency',
-            type: 'select',
-            label: 'Currency',
-            options: [
-              { value: 'usd', label: 'USD' },
-              { value: 'eur', label: 'EUR' },
-              { value: 'gbp', label: 'GBP' },
-              { value: 'cad', label: 'CAD' },
-            ],
-            defaultValue: 'usd',
-            col: 6,
-          },
-          {
-            key: 'submitDependent',
-            type: 'submit',
-            label: 'Add Product',
-            col: 12,
-          },
-        ],
-      };
+          min: 0,
+          required: true,
+          col: 6,
+        },
+        {
+          key: 'currency',
+          type: 'select',
+          label: 'Currency',
+          options: [
+            { value: 'usd', label: 'USD' },
+            { value: 'eur', label: 'EUR' },
+            { value: 'gbp', label: 'GBP' },
+            { value: 'cad', label: 'CAD' },
+          ],
+          defaultValue: 'usd',
+          col: 6,
+        },
+        {
+          key: 'submitDependent',
+          type: 'submit',
+          label: 'Add Product',
+          col: 12,
+        },
+      ],
+    };
 
-      (window as any).loadTestScenario(dependentConfig, {
-        testId: 'dependent-fields',
-        title: 'Dependent Field Testing',
-        description: 'Testing dependent select fields and cascading updates',
-      });
+    await loader.loadScenario(dependentConfig, {
+      testId: 'dependent-fields',
+      title: 'Dependent Field Testing',
+      description: 'Testing dependent select fields and cascading updates',
     });
 
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    // Wait for form to render
+    await page.waitForSelector('#dependent-fields', { state: 'visible', timeout: 10000 });
 
     // Select electronics category
     await page.click('#category mat-select');
-    await page.click('mat-option[value="electronics"]');
+    await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Electronics' }).click();
 
     // Select laptop subcategory (relevant to electronics)
     await page.click('#subcategory mat-select');
-    await page.click('mat-option[value="laptop"]');
+    await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Laptop' }).click();
 
     // Fill product details
-    await page.fill('#productName input', 'MacBook Pro 16"');
+    await page.fill('#productName input', 'MacBook Pro 16');
     await page.fill('#price input', '2499.99');
 
     // Currency should default to USD, but let's verify and change it
     await page.click('#currency mat-select');
-    await page.click('mat-option[value="eur"]');
+    await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'EUR' }).click();
 
     // Submit the form
     await page.click('#submitDependent button');
+
+    // Open details to check submission
+    await page.click('.form-state summary');
 
     // Verify submission contains dependent field values
     await expect(page.locator('#submission-0')).toBeVisible();
     await expect(page.locator('#submission-0')).toContainText('electronics');
     await expect(page.locator('#submission-0')).toContainText('laptop');
-    await expect(page.locator('#submission-0')).toContainText('MacBook Pro 16"');
+    await expect(page.locator('#submission-0')).toContainText('MacBook Pro 16');
     await expect(page.locator('#submission-0')).toContainText('2499.99');
     await expect(page.locator('#submission-0')).toContainText('eur');
 
     // Test changing category and ensuring form state updates
     await page.click('#category mat-select');
-    await page.click('mat-option[value="clothing"]');
+    await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Clothing' }).click();
 
     // Change subcategory to clothing-related
     await page.click('#subcategory mat-select');
-    await page.click('mat-option[value="shirt"]');
+    await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Shirt' }).click();
 
     // Update product details
     await page.fill('#productName input', 'Cotton T-Shirt');
@@ -348,74 +349,73 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test('should test field enable/disable based on other fields', async ({ page }) => {
     // Load field enable/disable scenario
-    await page.evaluate(() => {
-      const enableDisableConfig = {
-        fields: [
-          {
-            key: 'shippingMethod',
-            type: 'radio',
-            label: 'Shipping Method',
-            options: [
-              { value: 'standard', label: 'Standard (5-7 days)' },
-              { value: 'express', label: 'Express (2-3 days)' },
-              { value: 'overnight', label: 'Overnight' },
-              { value: 'pickup', label: 'Store Pickup' },
-            ],
-            required: true,
-            col: 12,
+    const loader = new E2EScenarioLoader(page);
+    const enableDisableConfig = {
+      fields: [
+        {
+          key: 'shippingMethod',
+          type: 'radio',
+          label: 'Shipping Method',
+          options: [
+            { value: 'standard', label: 'Standard (5-7 days)' },
+            { value: 'express', label: 'Express (2-3 days)' },
+            { value: 'overnight', label: 'Overnight' },
+            { value: 'pickup', label: 'Store Pickup' },
+          ],
+          required: true,
+          col: 12,
+        },
+        {
+          key: 'shippingAddress',
+          type: 'textarea',
+          label: 'Shipping Address',
+          props: {
+            placeholder: 'Enter shipping address',
+            rows: 3,
           },
-          {
-            key: 'shippingAddress',
-            type: 'textarea',
-            label: 'Shipping Address',
-            props: {
-              placeholder: 'Enter shipping address',
-              rows: 3,
-            },
-            // Would typically be disabled when "pickup" is selected
-            col: 12,
+          // Would typically be disabled when "pickup" is selected
+          col: 12,
+        },
+        {
+          key: 'expressInstructions',
+          type: 'textarea',
+          label: 'Special Delivery Instructions',
+          props: {
+            placeholder: 'Special instructions for express/overnight delivery',
+            rows: 2,
           },
-          {
-            key: 'expressInstructions',
-            type: 'textarea',
-            label: 'Special Delivery Instructions',
-            props: {
-              placeholder: 'Special instructions for express/overnight delivery',
-              rows: 2,
-            },
-            // Would typically be enabled only for express/overnight
-            col: 12,
-          },
-          {
-            key: 'storeLocation',
-            type: 'select',
-            label: 'Store Pickup Location',
-            options: [
-              { value: 'downtown', label: 'Downtown Store' },
-              { value: 'mall', label: 'Shopping Mall Store' },
-              { value: 'airport', label: 'Airport Store' },
-            ],
-            // Would typically be enabled only for pickup
-            col: 12,
-          },
-          {
-            key: 'submitEnableDisable',
-            type: 'submit',
-            label: 'Complete Order',
-            col: 12,
-          },
-        ],
-      };
+          // Would typically be enabled only for express/overnight
+          col: 12,
+        },
+        {
+          key: 'storeLocation',
+          type: 'select',
+          label: 'Store Pickup Location',
+          options: [
+            { value: 'downtown', label: 'Downtown Store' },
+            { value: 'mall', label: 'Shopping Mall Store' },
+            { value: 'airport', label: 'Airport Store' },
+          ],
+          // Would typically be enabled only for pickup
+          col: 12,
+        },
+        {
+          key: 'submitEnableDisable',
+          type: 'submit',
+          label: 'Complete Order',
+          col: 12,
+        },
+      ],
+    };
 
-      (window as any).loadTestScenario(enableDisableConfig, {
-        testId: 'enable-disable',
-        title: 'Field Enable/Disable Testing',
-        description: 'Testing conditional field enabling and disabling based on other field values',
-      });
+    await loader.loadScenario(enableDisableConfig, {
+      testId: 'enable-disable',
+      title: 'Field Enable/Disable Testing',
+      description: 'Testing conditional field enabling and disabling based on other field values',
     });
 
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    // Wait for form to render
+    await page.waitForSelector('#enable-disable', { state: 'visible', timeout: 10000 });
 
     // Test standard shipping scenario
     await page.click('#shippingMethod mat-radio-button:has-text("Standard")');
@@ -428,6 +428,9 @@ test.describe('Cross-Field Validation Tests', () => {
 
     // Submit with standard shipping
     await page.click('#submitEnableDisable button');
+
+    // Open details to check submission
+    await page.click('.form-state summary');
 
     // Verify submission
     await expect(page.locator('#submission-0')).toBeVisible();
@@ -453,7 +456,7 @@ test.describe('Cross-Field Validation Tests', () => {
 
     // Select pickup location
     await page.click('#storeLocation mat-select');
-    await page.click('mat-option[value="downtown"]');
+    await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Downtown Store' }).click();
 
     // Clear shipping address since pickup doesn't need it
     await page.fill('#shippingAddress textarea', '');

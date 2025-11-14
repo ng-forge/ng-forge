@@ -1,51 +1,51 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
+import { E2EScenarioLoader } from './utils/e2e-form-helpers';
 import { expect, test } from '@playwright/test';
 
 test.describe('Error Handling and Edge Cases', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/e2e-test');
+    await page.goto('http://localhost:4200/e2e-test');
   });
 
   test('should handle invalid field configurations gracefully', async ({ page }) => {
     // Load scenario with potentially invalid configurations
-    await page.evaluate(() => {
-      const invalidConfig = {
-        fields: [
-          // Field with missing required properties
-          {
-            key: 'missingType',
-            label: 'Field without type',
-            // type property is missing
+    const loader = new E2EScenarioLoader(page);
+    const invalidConfig = {
+      fields: [
+        // Field with missing required properties
+        {
+          key: 'missingType',
+          label: 'Field without type',
+          // type property is missing
+        },
+        // Field with invalid type
+        {
+          key: 'invalidType',
+          type: 'nonexistent-field-type',
+          label: 'Invalid Field Type',
+        },
+        // Valid field for comparison
+        {
+          key: 'validField',
+          type: 'input',
+          label: 'Valid Field',
+          props: {
+            placeholder: 'This should work',
           },
-          // Field with invalid type
-          {
-            key: 'invalidType',
-            type: 'nonexistent-field-type',
-            label: 'Invalid Field Type',
-          },
-          // Valid field for comparison
-          {
-            key: 'validField',
-            type: 'input',
-            label: 'Valid Field',
-            props: {
-              placeholder: 'This should work',
-            },
-          },
-          {
-            key: 'submitInvalid',
-            type: 'submit',
-            label: 'Submit Invalid Config',
-          },
-        ],
-      };
+        },
+        {
+          key: 'submitInvalid',
+          type: 'submit',
+          label: 'Submit Invalid Config',
+        },
+      ],
+    };
 
-      (window as any).loadTestScenario(invalidConfig, {
-        testId: 'invalid-config',
-        title: 'Invalid Configuration Test',
-        description: 'Testing form behavior with invalid field configurations',
-      });
+    await loader.loadScenario(invalidConfig, {
+      testId: 'invalid-config',
+      title: 'Invalid Configuration Test',
+      description: 'Testing form behavior with invalid field configurations',
     });
 
     // Wait a moment for any rendering to complete
@@ -133,10 +133,10 @@ test.describe('Error Handling and Edge Cases', () => {
         await page.fill('#lastName input', 'Data');
 
         // Navigate away and back
-        await page.goto('/');
+        await page.goto('http://localhost:4200/');
         const waitHelpers = new DeterministicWaitHelpers(page);
         await waitHelpers.waitForAngularStability();
-        await page.goto('/e2e-test');
+        await page.goto('http://localhost:4200/e2e-test');
 
         // Reload the scenario
         await page.click('.load-basic-btn');

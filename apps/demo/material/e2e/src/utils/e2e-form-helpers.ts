@@ -311,6 +311,64 @@ export class E2ECrossFieldValidationHelpers {
 }
 
 /**
+ * Test Scenario Loading Helper
+ * Provides utilities for loading test scenarios with proper initialization handling
+ */
+export class E2EScenarioLoader {
+  constructor(private page: Page) {}
+
+  /**
+   * Waits for the window.loadTestScenario function to become available
+   * This is crucial for parallel test execution to avoid race conditions
+   */
+  async waitForScenarioLoader(timeout = 10000): Promise<void> {
+    await this.page.waitForFunction(() => typeof (window as any).loadTestScenario === 'function', { timeout });
+  }
+
+  /**
+   * Loads a test scenario configuration safely
+   * Automatically waits for the loader to be available before proceeding
+   */
+  async loadScenario(
+    config: any,
+    options?: {
+      testId?: string;
+      title?: string;
+      description?: string;
+      initialValue?: Record<string, unknown>;
+    }
+  ): Promise<void> {
+    // Wait for the loadTestScenario function to be available
+    await this.waitForScenarioLoader();
+
+    // Load the scenario
+    await this.page.evaluate(
+      ({ config, options }) => {
+        (window as any).loadTestScenario(config, options);
+      },
+      { config, options }
+    );
+
+    // Wait for Angular to stabilize after loading the scenario
+    await this.page.waitForLoadState('domcontentloaded');
+
+    // Wait for the dynamic form to be visible
+    await this.page.locator('dynamic-form, e2e-test-host').first().waitFor({ state: 'visible', timeout: 5000 });
+  }
+
+  /**
+   * Clears the current test scenario
+   */
+  async clearScenario(): Promise<void> {
+    await this.page.evaluate(() => {
+      if (typeof (window as any).clearTestScenario === 'function') {
+        (window as any).clearTestScenario();
+      }
+    });
+  }
+}
+
+/**
  * Translation Testing Helper
  */
 export class E2ETranslationHelpers {

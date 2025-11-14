@@ -1,190 +1,190 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
+import { E2EScenarioLoader } from './utils/e2e-form-helpers';
 import { expect, test } from '@playwright/test';
 
 test.describe('Multi-Page Navigation Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/e2e-test');
+    await page.goto('http://localhost:4200/e2e-test');
   });
 
   test('should test basic multi-page navigation with registration wizard', async ({ page }) => {
     // Load registration wizard scenario (3 pages)
-    await page.evaluate(() => {
-      const registrationConfig = {
-        fields: [
-          // Page 1: Account Setup
-          {
-            key: 'accountPage',
-            type: 'page',
-            title: 'Account Setup',
-            description: 'Create your account credentials',
-            fields: [
-              {
-                key: 'username',
-                type: 'input',
-                label: 'Username',
-                props: {
-                  placeholder: 'Enter username',
-                },
-                required: true,
-                minLength: 3,
-                col: 6,
+    const loader = new E2EScenarioLoader(page);
+    const registrationConfig = {
+      fields: [
+        // Page 1: Account Setup
+        {
+          key: 'accountPage',
+          type: 'page',
+          title: 'Account Setup',
+          description: 'Create your account credentials',
+          fields: [
+            {
+              key: 'username',
+              type: 'input',
+              label: 'Username',
+              props: {
+                placeholder: 'Enter username',
               },
-              {
-                key: 'email',
-                type: 'input',
-                label: 'Email Address',
-                props: {
-                  type: 'email',
-                  placeholder: 'Enter email',
-                },
-                email: true,
-                required: true,
-                col: 6,
+              required: true,
+              minLength: 3,
+              col: 6,
+            },
+            {
+              key: 'email',
+              type: 'input',
+              label: 'Email Address',
+              props: {
+                type: 'email',
+                placeholder: 'Enter email',
               },
-              {
-                key: 'password',
-                type: 'input',
-                label: 'Password',
-                props: {
-                  type: 'password',
-                  placeholder: 'Enter password',
-                },
-                required: true,
-                minLength: 8,
-                col: 6,
+              email: true,
+              required: true,
+              col: 6,
+            },
+            {
+              key: 'password',
+              type: 'input',
+              label: 'Password',
+              props: {
+                type: 'password',
+                placeholder: 'Enter password',
               },
-              {
-                key: 'confirmPassword',
-                type: 'input',
-                label: 'Confirm Password',
-                props: {
-                  type: 'password',
-                  placeholder: 'Confirm password',
-                },
-                required: true,
-                col: 6,
+              required: true,
+              minLength: 8,
+              col: 6,
+            },
+            {
+              key: 'confirmPassword',
+              type: 'input',
+              label: 'Confirm Password',
+              props: {
+                type: 'password',
+                placeholder: 'Confirm password',
               },
-            ],
-          },
-          // Page 2: Personal Information
-          {
-            key: 'personalPage',
-            type: 'page',
-            title: 'Personal Information',
-            description: 'Tell us about yourself',
-            fields: [
-              {
-                key: 'firstName',
-                type: 'input',
-                label: 'First Name',
-                props: {
-                  placeholder: 'Enter first name',
-                },
-                required: true,
-                col: 6,
+              required: true,
+              col: 6,
+            },
+          ],
+        },
+        // Page 2: Personal Information
+        {
+          key: 'personalPage',
+          type: 'page',
+          title: 'Personal Information',
+          description: 'Tell us about yourself',
+          fields: [
+            {
+              key: 'firstName',
+              type: 'input',
+              label: 'First Name',
+              props: {
+                placeholder: 'Enter first name',
               },
-              {
-                key: 'lastName',
-                type: 'input',
-                label: 'Last Name',
-                props: {
-                  placeholder: 'Enter last name',
-                },
-                required: true,
-                col: 6,
+              required: true,
+              col: 6,
+            },
+            {
+              key: 'lastName',
+              type: 'input',
+              label: 'Last Name',
+              props: {
+                placeholder: 'Enter last name',
               },
-              {
-                key: 'birthDate',
-                type: 'input',
-                label: 'Date of Birth',
-                props: {
-                  type: 'date',
-                },
-                required: true,
-                col: 6,
+              required: true,
+              col: 6,
+            },
+            {
+              key: 'birthDate',
+              type: 'input',
+              label: 'Date of Birth',
+              props: {
+                type: 'date',
               },
-              {
-                key: 'phoneNumber',
-                type: 'input',
-                label: 'Phone Number',
-                props: {
-                  type: 'tel',
-                  placeholder: 'Enter phone number',
-                },
-                pattern: '^[+]?[0-9\\s\\-\\(\\)]+$',
-                col: 6,
+              required: true,
+              col: 6,
+            },
+            {
+              key: 'phoneNumber',
+              type: 'input',
+              label: 'Phone Number',
+              props: {
+                type: 'tel',
+                placeholder: 'Enter phone number',
               },
-            ],
-          },
-          // Page 3: Preferences
-          {
-            key: 'preferencesPage',
-            type: 'page',
-            title: 'Preferences',
-            description: 'Customize your experience',
-            fields: [
-              {
-                key: 'newsletter',
-                type: 'checkbox',
-                label: 'Subscribe to newsletter',
-                col: 12,
-              },
-              {
-                key: 'language',
-                type: 'select',
-                label: 'Preferred Language',
-                options: [
-                  { value: 'en', label: 'English' },
-                  { value: 'es', label: 'Spanish' },
-                  { value: 'fr', label: 'French' },
-                  { value: 'de', label: 'German' },
-                ],
-                defaultValue: 'en',
-                col: 6,
-              },
-              {
-                key: 'timezone',
-                type: 'select',
-                label: 'Timezone',
-                options: [
-                  { value: 'UTC', label: 'UTC' },
-                  { value: 'EST', label: 'Eastern Time' },
-                  { value: 'PST', label: 'Pacific Time' },
-                  { value: 'GMT', label: 'Greenwich Mean Time' },
-                ],
-                col: 6,
-              },
-              {
-                key: 'terms',
-                type: 'checkbox',
-                label: 'I agree to the Terms of Service',
-                required: true,
-                col: 12,
-              },
-              {
-                key: 'submitRegistration',
-                type: 'submit',
-                label: 'Complete Registration',
-                col: 12,
-              },
-            ],
-          },
-        ],
-      };
+              pattern: '^[+]?[0-9\\s\\-\\(\\)]+$',
+              col: 6,
+            },
+          ],
+        },
+        // Page 3: Preferences
+        {
+          key: 'preferencesPage',
+          type: 'page',
+          title: 'Preferences',
+          description: 'Customize your experience',
+          fields: [
+            {
+              key: 'newsletter',
+              type: 'checkbox',
+              label: 'Subscribe to newsletter',
+              col: 12,
+            },
+            {
+              key: 'language',
+              type: 'select',
+              label: 'Preferred Language',
+              options: [
+                { value: 'en', label: 'English' },
+                { value: 'es', label: 'Spanish' },
+                { value: 'fr', label: 'French' },
+                { value: 'de', label: 'German' },
+              ],
+              defaultValue: 'en',
+              col: 6,
+            },
+            {
+              key: 'timezone',
+              type: 'select',
+              label: 'Timezone',
+              options: [
+                { value: 'UTC', label: 'UTC' },
+                { value: 'EST', label: 'Eastern Time' },
+                { value: 'PST', label: 'Pacific Time' },
+                { value: 'GMT', label: 'Greenwich Mean Time' },
+              ],
+              col: 6,
+            },
+            {
+              key: 'terms',
+              type: 'checkbox',
+              label: 'I agree to the Terms of Service',
+              required: true,
+              col: 12,
+            },
+            {
+              key: 'submitRegistration',
+              type: 'submit',
+              label: 'Complete Registration',
+              col: 12,
+            },
+          ],
+        },
+      ],
+    };
 
-      (window as any).loadTestScenario(registrationConfig, {
-        testId: 'multi-page-registration',
-        title: 'Multi-Page Registration Wizard',
-        description: 'Testing multi-page form navigation and validation',
-      });
+    await loader.loadScenario(registrationConfig, {
+      testId: 'multi-page-registration',
+      title: 'Multi-Page Registration Wizard',
+      description: 'Testing multi-page form navigation and validation',
     });
 
     // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    const waitHelpers = new DeterministicWaitHelpers(page);
 
-    // Verify we start on page 1 (Account Setup)
-    await expect(page.locator('text=Account Setup')).toBeVisible();
+    // Verify we start on page 1 (Account Setup) by checking for the username field
+    await page.waitForSelector('#username input', { state: 'visible', timeout: 10000 });
     await expect(page.locator('#username input')).toBeVisible();
 
     // Fill page 1 fields
@@ -203,7 +203,6 @@ test.describe('Multi-Page Navigation Tests', () => {
     }
 
     // Wait a moment for page transition
-    const waitHelpers = new DeterministicWaitHelpers(page);
     await waitHelpers.waitForAngularStability();
 
     // Verify we're on page 2 (Personal Information) - check if page 2 content is visible
@@ -223,7 +222,6 @@ test.describe('Multi-Page Navigation Tests', () => {
       const nextButton2 = page.locator('[data-testid="next-button"]');
       if (await nextButton2.isVisible()) {
         await nextButton2.click();
-        const waitHelpers = new DeterministicWaitHelpers(page);
         await waitHelpers.waitForAngularStability();
       }
 
@@ -264,83 +262,83 @@ test.describe('Multi-Page Navigation Tests', () => {
 
   test('should test page navigation with validation constraints', async ({ page }) => {
     // Load a simpler 2-page form with validation
-    await page.evaluate(() => {
-      const validationConfig = {
-        fields: [
-          // Page 1: Required fields
-          {
-            key: 'page1',
-            type: 'page',
-            title: 'Required Information',
-            fields: [
-              {
-                key: 'requiredField',
-                type: 'input',
-                label: 'Required Field',
-                props: {
-                  placeholder: 'This field is required',
-                },
-                required: true,
-                col: 12,
+    const loader = new E2EScenarioLoader(page);
+    const validationConfig = {
+      fields: [
+        // Page 1: Required fields
+        {
+          key: 'page1',
+          type: 'page',
+          title: 'Required Information',
+          fields: [
+            {
+              key: 'requiredField',
+              type: 'input',
+              label: 'Required Field',
+              props: {
+                placeholder: 'This field is required',
               },
-              {
-                key: 'emailField',
-                type: 'input',
-                label: 'Email',
-                props: {
-                  type: 'email',
-                  placeholder: 'Enter valid email',
-                },
-                email: true,
-                required: true,
-                col: 12,
+              required: true,
+              col: 12,
+            },
+            {
+              key: 'emailField',
+              type: 'input',
+              label: 'Email',
+              props: {
+                type: 'email',
+                placeholder: 'Enter valid email',
               },
-            ],
-          },
-          // Page 2: Optional fields
-          {
-            key: 'page2',
-            type: 'page',
-            title: 'Additional Details',
-            fields: [
-              {
-                key: 'optionalField',
-                type: 'input',
-                label: 'Optional Field',
-                props: {
-                  placeholder: 'This field is optional',
-                },
-                col: 12,
+              email: true,
+              required: true,
+              col: 12,
+            },
+          ],
+        },
+        // Page 2: Optional fields
+        {
+          key: 'page2',
+          type: 'page',
+          title: 'Additional Details',
+          fields: [
+            {
+              key: 'optionalField',
+              type: 'input',
+              label: 'Optional Field',
+              props: {
+                placeholder: 'This field is optional',
               },
-              {
-                key: 'submitValidation',
-                type: 'submit',
-                label: 'Submit Form',
-                col: 12,
-              },
-            ],
-          },
-        ],
-      };
+              col: 12,
+            },
+            {
+              key: 'submitValidation',
+              type: 'submit',
+              label: 'Submit Form',
+              col: 12,
+            },
+          ],
+        },
+      ],
+    };
 
-      (window as any).loadTestScenario(validationConfig, {
-        testId: 'validation-navigation',
-        title: 'Navigation with Validation',
-        description: 'Testing page navigation with validation constraints',
-      });
+    await loader.loadScenario(validationConfig, {
+      testId: 'validation-navigation',
+      title: 'Navigation with Validation',
+      description: 'Testing page navigation with validation constraints',
     });
 
     // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
-    // Verify we start on page 1
-    await expect(page.locator('text=Required Information')).toBeVisible();
+    // Verify we start on page 1 by checking for the required field
+    await page.waitForSelector('#requiredField input', { state: 'visible', timeout: 10000 });
 
     // Try to navigate to page 2 without filling required fields
     const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
       await waitHelpers.waitForPageTransition();
 
       // Should still be on page 1 due to validation (or show validation errors)
@@ -355,7 +353,7 @@ test.describe('Multi-Page Navigation Tests', () => {
     // Now try navigation again
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
       await waitHelpers.waitForPageTransition();
     }
 
@@ -379,84 +377,85 @@ test.describe('Multi-Page Navigation Tests', () => {
 
   test('should test backward navigation and data persistence', async ({ page }) => {
     // Load 3-page form for backward navigation testing
-    await page.evaluate(() => {
-      const backwardNavConfig = {
-        fields: [
-          {
-            key: 'page1',
-            type: 'page',
-            title: 'Step 1',
-            fields: [
-              {
-                key: 'field1',
-                type: 'input',
-                label: 'Field 1',
-                props: {
-                  placeholder: 'Enter data for step 1',
-                },
-                col: 12,
+    const loader = new E2EScenarioLoader(page);
+    const backwardNavConfig = {
+      fields: [
+        {
+          key: 'page1',
+          type: 'page',
+          title: 'Step 1',
+          fields: [
+            {
+              key: 'field1',
+              type: 'input',
+              label: 'Field 1',
+              props: {
+                placeholder: 'Enter data for step 1',
               },
-            ],
-          },
-          {
-            key: 'page2',
-            type: 'page',
-            title: 'Step 2',
-            fields: [
-              {
-                key: 'field2',
-                type: 'input',
-                label: 'Field 2',
-                props: {
-                  placeholder: 'Enter data for step 2',
-                },
-                col: 12,
+              col: 12,
+            },
+          ],
+        },
+        {
+          key: 'page2',
+          type: 'page',
+          title: 'Step 2',
+          fields: [
+            {
+              key: 'field2',
+              type: 'input',
+              label: 'Field 2',
+              props: {
+                placeholder: 'Enter data for step 2',
               },
-            ],
-          },
-          {
-            key: 'page3',
-            type: 'page',
-            title: 'Step 3',
-            fields: [
-              {
-                key: 'field3',
-                type: 'input',
-                label: 'Field 3',
-                props: {
-                  placeholder: 'Enter data for step 3',
-                },
-                col: 12,
+              col: 12,
+            },
+          ],
+        },
+        {
+          key: 'page3',
+          type: 'page',
+          title: 'Step 3',
+          fields: [
+            {
+              key: 'field3',
+              type: 'input',
+              label: 'Field 3',
+              props: {
+                placeholder: 'Enter data for step 3',
               },
-              {
-                key: 'submitBackward',
-                type: 'submit',
-                label: 'Submit',
-                col: 12,
-              },
-            ],
-          },
-        ],
-      };
+              col: 12,
+            },
+            {
+              key: 'submitBackward',
+              type: 'submit',
+              label: 'Submit',
+              col: 12,
+            },
+          ],
+        },
+      ],
+    };
 
-      (window as any).loadTestScenario(backwardNavConfig, {
-        testId: 'backward-navigation',
-        title: 'Backward Navigation Test',
-        description: 'Testing backward navigation and data persistence',
-      });
+    await loader.loadScenario(backwardNavConfig, {
+      testId: 'backward-navigation',
+      title: 'Backward Navigation Test',
+      description: 'Testing backward navigation and data persistence',
     });
 
     // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Fill and navigate forward through all pages
+    await page.waitForSelector('#field1 input', { state: 'visible', timeout: 10000 });
     await page.fill('#field1 input', 'Data from step 1');
 
     // Navigate to page 2
     const nextButton = page.locator('[data-testid="next-button"]');
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      const waitHelpers = new DeterministicWaitHelpers(page);
+      await waitHelpers.waitForAngularStability();
       await waitHelpers.waitForPageTransition();
     }
 
@@ -467,7 +466,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       // Navigate to page 3
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
         await waitHelpers.waitForPageTransition();
       }
     }
@@ -480,7 +479,6 @@ test.describe('Multi-Page Navigation Tests', () => {
       const backButton = page.locator('[data-testid="previous-button"]');
       if (await backButton.isVisible()) {
         await backButton.click();
-        const waitHelpers = new DeterministicWaitHelpers(page);
         await waitHelpers.waitForAngularStability();
 
         // Verify we're back on page 2 and data is preserved
@@ -490,7 +488,6 @@ test.describe('Multi-Page Navigation Tests', () => {
         // Go back one more time
         if (await backButton.isVisible()) {
           await backButton.click();
-          const waitHelpers = new DeterministicWaitHelpers(page);
           await waitHelpers.waitForAngularStability();
 
           // Verify we're back on page 1 and data is preserved
@@ -506,75 +503,75 @@ test.describe('Multi-Page Navigation Tests', () => {
 
   test('should test direct page navigation and URL routing', async ({ page }) => {
     // Load multi-page form and test direct navigation if supported
-    await page.evaluate(() => {
-      const directNavConfig = {
-        fields: [
-          {
-            key: 'intro',
-            type: 'page',
-            title: 'Introduction',
-            fields: [
-              {
-                key: 'introText',
-                type: 'input',
-                label: 'Introduction',
-                props: {
-                  placeholder: 'Introduction text',
-                },
-                col: 12,
+    const loader = new E2EScenarioLoader(page);
+    const directNavConfig = {
+      fields: [
+        {
+          key: 'intro',
+          type: 'page',
+          title: 'Introduction',
+          fields: [
+            {
+              key: 'introText',
+              type: 'input',
+              label: 'Introduction',
+              props: {
+                placeholder: 'Introduction text',
               },
-            ],
-          },
-          {
-            key: 'details',
-            type: 'page',
-            title: 'Details',
-            fields: [
-              {
-                key: 'detailText',
-                type: 'input',
-                label: 'Details',
-                props: {
-                  placeholder: 'Detail text',
-                },
-                col: 12,
+              col: 12,
+            },
+          ],
+        },
+        {
+          key: 'details',
+          type: 'page',
+          title: 'Details',
+          fields: [
+            {
+              key: 'detailText',
+              type: 'input',
+              label: 'Details',
+              props: {
+                placeholder: 'Detail text',
               },
-            ],
-          },
-          {
-            key: 'summary',
-            type: 'page',
-            title: 'Summary',
-            fields: [
-              {
-                key: 'summaryText',
-                type: 'input',
-                label: 'Summary',
-                props: {
-                  placeholder: 'Summary text',
-                },
-                col: 12,
+              col: 12,
+            },
+          ],
+        },
+        {
+          key: 'summary',
+          type: 'page',
+          title: 'Summary',
+          fields: [
+            {
+              key: 'summaryText',
+              type: 'input',
+              label: 'Summary',
+              props: {
+                placeholder: 'Summary text',
               },
-              {
-                key: 'submitDirect',
-                type: 'submit',
-                label: 'Submit',
-                col: 12,
-              },
-            ],
-          },
-        ],
-      };
+              col: 12,
+            },
+            {
+              key: 'submitDirect',
+              type: 'submit',
+              label: 'Submit',
+              col: 12,
+            },
+          ],
+        },
+      ],
+    };
 
-      (window as any).loadTestScenario(directNavConfig, {
-        testId: 'direct-navigation',
-        title: 'Direct Page Navigation',
-        description: 'Testing direct page navigation and URL routing',
-      });
+    await loader.loadScenario(directNavConfig, {
+      testId: 'direct-navigation',
+      title: 'Direct Page Navigation',
+      description: 'Testing direct page navigation and URL routing',
     });
 
     // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Check for page indicators or direct navigation elements
     const pageIndicators = await page.locator('.page-indicator, .step-indicator, .breadcrumb').count();
@@ -586,7 +583,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       const page3Indicator = page.locator('.page-indicator').nth(2).or(page.locator('[data-page="2"]'));
       if (await page3Indicator.isVisible()) {
         await page3Indicator.click();
-        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
         await waitHelpers.waitForAngularStability();
 
         // Verify we jumped to page 3
@@ -605,61 +602,61 @@ test.describe('Multi-Page Navigation Tests', () => {
 
   test('should test page transitions and loading states', async ({ page }) => {
     // Load form and test transition behaviors
-    await page.evaluate(() => {
-      const transitionConfig = {
-        fields: [
-          {
-            key: 'loadingPage1',
-            type: 'page',
-            title: 'Page 1',
-            fields: [
-              {
-                key: 'data1',
-                type: 'textarea',
-                label: 'Large Data Field',
-                props: {
-                  placeholder: 'Enter large amount of data',
-                  rows: 5,
-                },
-                col: 12,
+    const loader = new E2EScenarioLoader(page);
+    const transitionConfig = {
+      fields: [
+        {
+          key: 'loadingPage1',
+          type: 'page',
+          title: 'Page 1',
+          fields: [
+            {
+              key: 'data1',
+              type: 'textarea',
+              label: 'Large Data Field',
+              props: {
+                placeholder: 'Enter large amount of data',
+                rows: 5,
               },
-            ],
-          },
-          {
-            key: 'loadingPage2',
-            type: 'page',
-            title: 'Page 2',
-            fields: [
-              {
-                key: 'data2',
-                type: 'textarea',
-                label: 'More Data',
-                props: {
-                  placeholder: 'Enter more data',
-                  rows: 5,
-                },
-                col: 12,
+              col: 12,
+            },
+          ],
+        },
+        {
+          key: 'loadingPage2',
+          type: 'page',
+          title: 'Page 2',
+          fields: [
+            {
+              key: 'data2',
+              type: 'textarea',
+              label: 'More Data',
+              props: {
+                placeholder: 'Enter more data',
+                rows: 5,
               },
-              {
-                key: 'submitTransition',
-                type: 'submit',
-                label: 'Submit',
-                col: 12,
-              },
-            ],
-          },
-        ],
-      };
+              col: 12,
+            },
+            {
+              key: 'submitTransition',
+              type: 'submit',
+              label: 'Submit',
+              col: 12,
+            },
+          ],
+        },
+      ],
+    };
 
-      (window as any).loadTestScenario(transitionConfig, {
-        testId: 'page-transitions',
-        title: 'Page Transition Testing',
-        description: 'Testing page transitions and loading behaviors',
-      });
+    await loader.loadScenario(transitionConfig, {
+      testId: 'page-transitions',
+      title: 'Page Transition Testing',
+      description: 'Testing page transitions and loading behaviors',
     });
 
     // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    const waitHelpers = new DeterministicWaitHelpers(page);
+    await waitHelpers.waitForAngularStability();
 
     // Fill data and test smooth transitions
     const data1Field = page.locator('#data1 textarea');
@@ -678,7 +675,7 @@ test.describe('Multi-Page Navigation Tests', () => {
           await loadingIndicator.waitFor({ state: 'hidden', timeout: 5000 });
         }
 
-        const waitHelpers = new DeterministicWaitHelpers(page);
+        await waitHelpers.waitForAngularStability();
         await waitHelpers.waitForAngularStability();
 
         // Verify page 2 is accessible

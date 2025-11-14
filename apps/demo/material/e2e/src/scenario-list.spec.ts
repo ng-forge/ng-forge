@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Material Demo App - Scenario List', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:4200/');
   });
 
   test('should display the demo app header', async ({ page }) => {
@@ -11,7 +11,7 @@ test.describe('Material Demo App - Scenario List', () => {
   });
 
   test('should navigate to scenarios page by default', async ({ page }) => {
-    await expect(page).toHaveURL('/scenarios');
+    await expect(page).toHaveURL('http://localhost:4200/scenarios');
     await expect(page.locator('h2')).toContainText('E2E Testing Scenarios');
   });
 
@@ -48,9 +48,8 @@ test.describe('Material Demo App - Scenario List', () => {
     await expect(multiPageCard).toBeVisible();
     await expect(multiPageCard).toHaveClass(/scenario-card/);
 
-    // Multi-page card should be clickable and ready
-    const multiPageLink = multiPageCard.locator('a');
-    await expect(multiPageLink).toHaveAttribute('href', '/multi-page');
+    // Multi-page card should be clickable and ready - the card itself is the link
+    await expect(multiPageCard).toHaveAttribute('href', '/multi-page');
   });
 
   test('should display scenario descriptions', async ({ page }) => {
@@ -62,14 +61,14 @@ test.describe('Material Demo App - Scenario List', () => {
   });
 
   test('should navigate to multi-page scenario successfully', async ({ page }) => {
-    // Click on multi-page scenario
-    await page.locator('[data-testid="multi-page-scenario"] a').click();
+    // Click on multi-page scenario - the test id is on the link itself
+    await page.locator('[data-testid="multi-page-scenario"]').click();
 
     // Should navigate to multi-page route
-    await expect(page).toHaveURL('/multi-page');
+    await expect(page).toHaveURL('http://localhost:4200/multi-page');
 
-    // Should display multi-page demo content
-    await expect(page.locator('h1')).toContainText('Multi-Page Form Demo');
+    // Should display multi-page demo content - use getByRole to get the specific heading
+    await expect(page.getByRole('heading', { name: 'Multi-Page Form Demo' })).toBeVisible();
     await expect(page.locator('dynamic-form')).toBeVisible();
   });
 
