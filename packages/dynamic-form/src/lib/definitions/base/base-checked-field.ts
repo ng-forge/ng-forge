@@ -5,9 +5,7 @@ import { Prettify } from '../../models/prettify';
 import { DynamicText } from '../../pipes';
 
 export interface BaseCheckedField<TProps> extends FieldDef<TProps>, FieldWithValidation {
-  checked?: boolean;
-
-  defaultValue?: boolean;
+  value?: boolean;
 
   /**
    * Placeholder text displayed when the field is empty.
@@ -19,18 +17,9 @@ export interface BaseCheckedField<TProps> extends FieldDef<TProps>, FieldWithVal
 }
 
 export function isCheckedField<TProps>(field: FieldDef<TProps>): field is BaseCheckedField<TProps> {
-  return 'checked' in field && typeof (field as { checked: unknown }).checked === 'boolean';
+  return field.type === 'checkbox';
 }
 
-type ExcludedKeys =
-  | 'type'
-  | 'conditionals'
-  | 'defaultValue'
-  | 'checked'
-  | 'disabled'
-  | 'readonly'
-  | 'hidden'
-  | 'col'
-  | keyof FieldWithValidation;
+type ExcludedKeys = 'type' | 'conditionals' | 'value' | 'disabled' | 'readonly' | 'hidden' | 'col' | keyof FieldWithValidation;
 
 export type CheckedFieldComponent<T extends BaseCheckedField<any>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

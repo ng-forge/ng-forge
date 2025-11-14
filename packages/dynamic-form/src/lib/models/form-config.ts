@@ -74,7 +74,7 @@ export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredF
    *
    * Controls form-wide behavior like validation timing and disabled state.
    *
-   * @defaultValue {}
+   * @value {}
    */
   options?: FormOptions;
 
@@ -172,7 +172,7 @@ export interface SignalFormsConfig {
    * When enabled, automatically converts legacy Angular reactive forms
    * validation to signal forms validation.
    *
-   * @defaultValue false
+   * @value false
    */
   migrateLegacyValidation?: boolean;
 
@@ -388,7 +388,7 @@ export interface SignalFormsConfig {
    * When enabled, throws errors for invalid expressions instead of
    * failing silently. Useful for debugging and development.
    *
-   * @defaultValue false
+   * @value false
    */
   strictMode?: boolean;
 }
@@ -417,7 +417,7 @@ export interface FormOptions {
    * When enabled, form fields are validated immediately when
    * their values change, providing real-time feedback.
    *
-   * @defaultValue false
+   * @value false
    */
   validateOnChange?: boolean;
 
@@ -427,7 +427,7 @@ export interface FormOptions {
    * When enabled, form fields are validated when they lose focus,
    * providing validation feedback after user interaction.
    *
-   * @defaultValue true
+   * @value true
    */
   validateOnBlur?: boolean;
 
@@ -437,7 +437,7 @@ export interface FormOptions {
    * When enabled, all form fields become read-only and cannot
    * be modified by user interaction.
    *
-   * @defaultValue false
+   * @value false
    */
   disabled?: boolean;
 }

@@ -66,10 +66,9 @@ export const passwordMatchingConfig = {
     },
     {
       key: 'submit',
-      type: 'button',
+      type: 'submit',
       label: 'Create Account',
       props: {
-        type: 'submit',
         color: 'primary',
       },
       col: 12,

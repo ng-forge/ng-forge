@@ -277,12 +277,8 @@ export class SimpleE2ETestPageComponent {
         },
         {
           key: 'submit',
-          type: 'button',
+          type: 'submit',
           label: 'Submit',
-          event: SubmitEvent,
-          props: {
-            type: 'submit',
-          },
         },
       ],
     };

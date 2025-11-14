@@ -38,8 +38,7 @@ import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
  * but NOT pages or other arrays. Runtime validation enforces these rules.
  */
 export interface ArrayField<TFields extends ArrayAllowedChildren[] = ArrayAllowedChildren[]> extends FieldDef<never> {
-  /** Field type identifier */
-
+  type: 'array';
   /**
    * Template field definition(s) that will be cloned for each array item.
    * Typically contains a single field definition:

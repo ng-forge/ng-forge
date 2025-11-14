@@ -7,7 +7,7 @@ import { omit } from '../../utils/object-utils';
 export type ValueFieldMapperOptions<TModel = any> = Omit<FieldMapperOptions<TModel>, 'fieldRegistry'>;
 
 export function valueFieldMapper(fieldDef: BaseValueField<any, any>, options: ValueFieldMapperOptions): Binding[] {
-  const omittedFields = omit(fieldDef, ['value', 'defaultValue']);
+  const omittedFields = omit(fieldDef, ['value']);
 
   const bindings: Binding[] = baseFieldMapper(omittedFields);
 

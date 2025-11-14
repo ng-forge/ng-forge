@@ -184,11 +184,11 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     const currentArray = (parentValue as any)?.[arrayKey] || [];
 
     // Create default value for new item
-    const defaultValue = getFieldDefaultValue(template, this.fieldRegistry.raw);
+    const value = getFieldDefaultValue(template, this.fieldRegistry.raw);
 
     // Insert new item at specified index
     const newArray = [...currentArray];
-    newArray.splice(insertIndex, 0, defaultValue);
+    newArray.splice(insertIndex, 0, value);
 
     // Update parent form value
     (this.parentForm()() as any)[arrayKey].set(newArray);

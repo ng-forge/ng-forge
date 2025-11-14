@@ -1,3 +1,5 @@
 import { BaseCheckedField } from '../base';
 
-export type ToggleField<TProps> = BaseCheckedField<TProps>;
+export interface ToggleField<TProps> extends BaseCheckedField<TProps> {
+  type: 'toggle';
+}

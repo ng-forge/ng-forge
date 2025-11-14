@@ -616,8 +616,8 @@ describe('schema-transformation', () => {
       const registry = new Map<string, FieldTypeDefinition>([['input', { valueHandling: 'include' }]]);
 
       const fields: FieldDef[] = [
-        { key: 'field1', type: 'input', defaultValue: 'value1' },
-        { key: 'field2', type: 'input', defaultValue: 'value2' },
+        { key: 'field1', type: 'input', value: 'value1' },
+        { key: 'field2', type: 'input', value: 'value2' },
       ];
 
       const defaultValues = fieldsToDefaultValues(fields, registry);
@@ -632,8 +632,8 @@ describe('schema-transformation', () => {
       const registry = new Map<string, FieldTypeDefinition>([['input', { valueHandling: 'include' }]]);
 
       const fields: FieldDef[] = [
-        { type: 'input', defaultValue: 'value1' },
-        { key: 'field2', type: 'input', defaultValue: 'value2' },
+        { type: 'input', value: 'value1' },
+        { key: 'field2', type: 'input', value: 'value2' },
       ];
 
       const defaultValues = fieldsToDefaultValues(fields, registry);
@@ -648,7 +648,7 @@ describe('schema-transformation', () => {
 
       const fields: FieldDef[] = [
         { key: 'field1', type: 'input' },
-        { key: 'field2', type: 'input', defaultValue: 'value2' },
+        { key: 'field2', type: 'input', value: 'value2' },
       ];
 
       const defaultValues = fieldsToDefaultValues(fields, registry);

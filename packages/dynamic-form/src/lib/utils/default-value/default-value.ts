@@ -25,7 +25,7 @@ import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-t
  *   key: 'address',
  *   fields: [
  *     { type: 'input', key: 'street' },
- *     { type: 'input', key: 'city', defaultValue: 'New York' }
+ *     { type: 'input', key: 'city', value: 'New York' }
  *   ]
  * }, registry); // { street: '', city: 'New York' }
  * ```
@@ -62,22 +62,22 @@ export function getFieldDefaultValue(field: FieldDef<any>, registry: Map<string,
     return groupDefaults;
   }
 
-  // Use explicit defaultValue if provided, with type-specific handling for null
-  if ('defaultValue' in field) {
-    // If defaultValue is explicitly set (even to null/undefined), respect it
-    if (field.defaultValue !== null && field.defaultValue !== undefined) {
-      return field.defaultValue;
+  // Use explicit value if provided, with type-specific handling for null
+  if ('value' in field) {
+    // If value is explicitly set (even to null/undefined), respect it
+    if (field.value !== null && field.value !== undefined) {
+      return field.value;
     }
 
     // Handle explicit null: use type-specific default
-    if (field.defaultValue === null) {
+    if (field.value === null) {
       return field.type === 'checkbox' ? false : '';
     }
 
     // Handle explicit undefined: fall through to type-specific defaults
   }
 
-  // Type-specific defaults when no defaultValue is specified
+  // Type-specific defaults when no value is specified
   if (field.type === 'checkbox') {
     return false;
   }

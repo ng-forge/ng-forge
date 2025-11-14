@@ -30,9 +30,10 @@ export type GroupAllowedChildren = LeafFieldTypes | RowField;
 
 /**
  * Fields that are allowed as children of Array fields
- * Arrays can contain: rows and leaf fields (but NOT pages or other arrays)
+ * Arrays can contain: rows, groups, and leaf fields (but NOT pages or other arrays)
+ * Groups are used for creating object arrays where each array item is an object
  */
-export type ArrayAllowedChildren = LeafFieldTypes | RowField;
+export type ArrayAllowedChildren = LeafFieldTypes | RowField | GroupField;
 
 /**
  * Validates that a fields array contains only allowed child types for a Page

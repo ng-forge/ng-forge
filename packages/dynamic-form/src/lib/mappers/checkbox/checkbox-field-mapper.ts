@@ -7,7 +7,7 @@ import { omit } from '../../utils/object-utils';
 export type CheckboxFieldMapperOptions<TModel = any> = Omit<FieldMapperOptions<TModel>, 'fieldRegistry'>;
 
 export function checkboxFieldMapper(fieldDef: BaseCheckedField<any>, options: CheckboxFieldMapperOptions): Binding[] {
-  const omittedFields = omit(fieldDef, ['checked', 'defaultValue']) as FieldDef<any>;
+  const omittedFields = omit(fieldDef, ['value']) as FieldDef<any>;
 
   const bindings: Binding[] = baseFieldMapper(omittedFields);
 
