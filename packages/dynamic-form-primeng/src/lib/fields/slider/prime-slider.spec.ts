@@ -147,8 +147,6 @@ describe('PrimeSliderFieldComponent', () => {
       const sliders = fixture.debugElement.queryAll(By.css('p-slider'));
 
       expect(sliders.length).toBe(4);
-      // Angular 21: Field directive handles min/max bindings automatically
-      // Verify sliders are rendered correctly
       expect(sliders[0].componentInstance.step).toBe(1);
       expect(sliders[1].componentInstance.step).toBe(5);
       expect(sliders[2].componentInstance.step).toBe(0.5);

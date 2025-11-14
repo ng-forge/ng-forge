@@ -341,7 +341,12 @@ describe('BsSliderFieldComponent', () => {
 
   describe('Minimal Configuration Tests', () => {
     it('should render with default Bootstrap configuration', async () => {
-      const config = BootstrapFormTestUtils.builder().bsSliderField({ key: 'volume' }).build();
+      const config = BootstrapFormTestUtils.builder()
+        .bsSliderField({
+          key: 'volume',
+          props: { min: 0, max: 100, step: 1 },
+        })
+        .build();
 
       const { fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -353,7 +358,8 @@ describe('BsSliderFieldComponent', () => {
 
       expect(slider).toBeTruthy();
       expect(sliderInput).toBeTruthy();
-      // Angular 21: Field directive handles min/max bindings automatically
+      expect(sliderInput.nativeElement.getAttribute('min')).toBe('0');
+      expect(sliderInput.nativeElement.getAttribute('max')).toBe('100');
       expect(sliderInput.nativeElement.getAttribute('step')).toBe('1');
     });
 
@@ -426,6 +432,124 @@ describe('BsSliderFieldComponent', () => {
       formValue = BootstrapFormTestUtils.getFormValue(component);
       expect(formValue.volume).toBe(70);
       expect(formValue.brightness).toBe(200);
+    });
+  });
+
+  describe('Min/Max Slider Constraints', () => {
+    it('should set min and max attributes correctly on the native slider', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'volume',
+          type: 'slider',
+          props: {
+            min: 10,
+            max: 90,
+          },
+        })
+        .build();
+
+      const { fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { volume: 50 },
+      });
+
+      const sliderInput = fixture.debugElement.query(By.css('input[type="range"]'));
+      expect(sliderInput.nativeElement.getAttribute('min')).toBe('10');
+      expect(sliderInput.nativeElement.getAttribute('max')).toBe('90');
+    });
+
+    it('should accept values within valid range', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'volume',
+          type: 'slider',
+          props: {
+            min: 0,
+            max: 100,
+          },
+        })
+        .build();
+
+      const { component, fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { volume: 50 },
+      });
+
+      await BootstrapFormTestUtils.simulateBsSlider(fixture, 'input[type="range"]', 75);
+
+      expect(BootstrapFormTestUtils.getFormValue(component).volume).toBe(75);
+    });
+
+    it('should handle values at minimum boundary', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'volume',
+          type: 'slider',
+          props: {
+            min: 0,
+            max: 100,
+          },
+        })
+        .build();
+
+      const { component, fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { volume: 50 },
+      });
+
+      await BootstrapFormTestUtils.simulateBsSlider(fixture, 'input[type="range"]', 0);
+
+      expect(BootstrapFormTestUtils.getFormValue(component).volume).toBe(0);
+    });
+
+    it('should handle values at maximum boundary', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'volume',
+          type: 'slider',
+          props: {
+            min: 0,
+            max: 100,
+          },
+        })
+        .build();
+
+      const { component, fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { volume: 50 },
+      });
+
+      await BootstrapFormTestUtils.simulateBsSlider(fixture, 'input[type="range"]', 100);
+
+      expect(BootstrapFormTestUtils.getFormValue(component).volume).toBe(100);
+    });
+
+    it('should respect custom min/max ranges', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'brightness',
+          type: 'slider',
+          props: {
+            min: 20,
+            max: 80,
+            step: 5,
+          },
+        })
+        .build();
+
+      const { component, fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { brightness: 50 },
+      });
+
+      const sliderInput = fixture.debugElement.query(By.css('input[type="range"]'));
+      expect(sliderInput.nativeElement.getAttribute('min')).toBe('20');
+      expect(sliderInput.nativeElement.getAttribute('max')).toBe('80');
+      expect(sliderInput.nativeElement.getAttribute('step')).toBe('5');
+
+      await BootstrapFormTestUtils.simulateBsSlider(fixture, 'input[type="range"]', 65);
+
+      expect(BootstrapFormTestUtils.getFormValue(component).brightness).toBe(65);
     });
   });
 

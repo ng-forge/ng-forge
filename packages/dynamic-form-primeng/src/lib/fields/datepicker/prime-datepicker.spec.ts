@@ -124,7 +124,6 @@ describe('PrimeDatepickerFieldComponent', () => {
 
       const calendar = fixture.debugElement.query(By.directive(DatePicker));
       expect(calendar).toBeTruthy();
-      // Component-specific properties are tested at the component level
     });
   });
 
