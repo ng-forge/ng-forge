@@ -265,45 +265,55 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
 
-    // Register validators before form creation
-    const signalFormsConfig = config.signalFormsConfig;
-    if (signalFormsConfig) {
-      // Register custom functions
-      if (signalFormsConfig.customFunctions) {
-        Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
-          this.functionRegistry.registerCustomFunction(name, fn);
-        });
-      }
-
-      // Set all validators from config - change detection is inside set methods
-      this.functionRegistry.setValidators(signalFormsConfig.validators);
-      this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
-      this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
-    }
+    this.registerValidatorsFromConfig(config);
 
     if (config.fields && config.fields.length > 0) {
-      // Use memoized functions for expensive operations with registry
-      const flattenedFields = this.memoizedFlattenFields(config.fields, registry);
-      const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(config.fields, registry);
-      const fieldsById = this.memoizedKeyBy(flattenedFields);
-      const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
-
-      // For rendering: use flattenedFieldsForRendering which preserves row containers
-      // For paged forms, orchestrator handles rendering separately
-      const fieldsToRender = modeDetection.mode === 'paged' ? [] : flattenedFieldsForRendering;
-
-      return {
-        fields: fieldsToRender,
-        schemaFields: flattenedFields, // Fields for form schema (always flattened for form values)
-        originalFields: config.fields,
-        defaultValues,
-        schema: undefined,
-        mode: modeDetection.mode,
-        registry, // Include registry for schema creation
-      };
+      return this.createFormSetupFromConfig(config.fields, modeDetection.mode, registry);
     }
 
-    // Fallback: empty form
+    return this.createEmptyFormSetup(registry);
+  });
+
+  private registerValidatorsFromConfig(config: FormConfig<TFields>): void {
+    const signalFormsConfig = config.signalFormsConfig;
+    if (!signalFormsConfig) return;
+
+    // Register custom functions
+    if (signalFormsConfig.customFunctions) {
+      Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
+        this.functionRegistry.registerCustomFunction(name, fn);
+      });
+    }
+
+    // Set all validators from config - change detection is inside set methods
+    this.functionRegistry.setValidators(signalFormsConfig.validators);
+    this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
+    this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
+  }
+
+  private createFormSetupFromConfig(fields: FieldDef<any>[], mode: 'paged' | 'non-paged', registry: Map<string, FieldTypeDefinition>) {
+    // Use memoized functions for expensive operations with registry
+    const flattenedFields = this.memoizedFlattenFields(fields, registry);
+    const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
+    const fieldsById = this.memoizedKeyBy(flattenedFields);
+    const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
+
+    // For rendering: use flattenedFieldsForRendering which preserves row containers
+    // For paged forms, orchestrator handles rendering separately
+    const fieldsToRender = mode === 'paged' ? [] : flattenedFieldsForRendering;
+
+    return {
+      fields: fieldsToRender,
+      schemaFields: flattenedFields, // Fields for form schema (always flattened for form values)
+      originalFields: fields,
+      defaultValues,
+      schema: undefined,
+      mode,
+      registry, // Include registry for schema creation
+    };
+  }
+
+  private createEmptyFormSetup(registry: Map<string, FieldTypeDefinition>) {
     return {
       fields: [],
       schemaFields: [],
@@ -312,7 +322,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       mode: 'non-paged' as const,
       registry, // Include registry even for empty forms
     };
-  });
+  }
 
   /**
    * Page field definitions for paged forms.
@@ -574,7 +584,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       .catch((error) => {
         // Only log errors if component hasn't been destroyed
         if (!this.destroyRef.destroyed) {
-          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+          const fieldKey = fieldDef.key || '<no key>';
+          console.error(
+            `[DynamicForm] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
+              `Ensure the field type is registered in your field registry.`,
+            error
+          );
         }
         return undefined;
       });

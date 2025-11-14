@@ -198,7 +198,13 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
       .catch((error) => {
         // Only log errors if component hasn't been destroyed
         if (!this.destroyRef.destroyed) {
-          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+          const fieldKey = fieldDef.key || '<no key>';
+          const groupKey = this.field().key;
+          console.error(
+            `[GroupField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+              `within group '${groupKey}'. Ensure the field type is registered in your field registry.`,
+            error
+          );
         }
         return undefined;
       });

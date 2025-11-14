@@ -256,7 +256,13 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
       })
       .catch((error) => {
         if (!this.destroyRef.destroyed) {
-          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+          const fieldKey = fieldDef.key || '<no key>';
+          const arrayKey = this.field().key;
+          console.error(
+            `[ArrayField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+              `within array '${arrayKey}'. Ensure the field type is registered in your field registry.`,
+            error
+          );
         }
         return undefined;
       });

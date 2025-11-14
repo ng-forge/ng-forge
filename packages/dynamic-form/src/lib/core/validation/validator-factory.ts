@@ -155,7 +155,10 @@ function createFunctionValidator<TValue>(
   const validatorFn = registry.getValidator(config.functionName!);
 
   if (!validatorFn) {
-    console.warn(`[DynamicForm] Custom validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    console.warn(
+      `[DynamicForm] Custom validator "${config.functionName}" not found in registry. ` +
+        `Ensure it's registered using signalFormsConfig.validators or check the function name for typos.`
+    );
     return () => null;
   }
 
@@ -228,7 +231,10 @@ function applyAsyncValidator<TValue>(config: AsyncValidatorConfig, fieldPath: Fi
   const validatorConfig = registry.getAsyncValidator(config.functionName);
 
   if (!validatorConfig) {
-    console.warn(`[DynamicForm] Async validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    console.warn(
+      `[DynamicForm] Async validator "${config.functionName}" not found in registry. ` +
+        `Ensure it's registered using signalFormsConfig.asyncValidators or check the function name for typos.`
+    );
     return;
   }
 
@@ -276,7 +282,10 @@ function applyHttpValidator<TValue>(config: HttpValidatorConfig, fieldPath: Fiel
   const httpValidatorConfig = registry.getHttpValidator(config.functionName);
 
   if (!httpValidatorConfig) {
-    console.warn(`[DynamicForm] HTTP validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    console.warn(
+      `[DynamicForm] HTTP validator "${config.functionName}" not found in registry. ` +
+        `Ensure it's registered using signalFormsConfig.httpValidators or check the function name for typos.`
+    );
     return;
   }
 
