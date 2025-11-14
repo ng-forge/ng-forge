@@ -30,6 +30,7 @@ export const profileEditConfig = {
             placeholder: 'Enter your first name',
             appearance: 'outline',
           },
+          defaultValue: 'John',
           required: true,
           col: 6,
         },

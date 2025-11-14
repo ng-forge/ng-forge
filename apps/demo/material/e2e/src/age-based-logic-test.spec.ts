@@ -14,51 +14,49 @@ test.describe('Age-Based Logic Test', () => {
     await page.goto('http://localhost:4200/cross-field-validation');
 
     // Click on Dependent Validation tab
-    await page.getByText('Dependent Validation').click();
+    await page.getByRole('button', { name: 'Dependent Validation' }).click();
 
     // Wait for tab content to load
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(300);
 
-    // Test with age under 18 (should show guardian consent) - using ID selectors
-    await page.locator('#age input').fill('16');
-    await page.waitForTimeout(500);
+    // Test with age under 18 (should show guardian consent)
+    await page.getByLabel('Age').fill('16');
+    await page.getByLabel('Age').blur(); // Trigger change event
 
     // Guardian consent should be visible
-    await expect(page.locator('#guardianConsent')).toBeVisible();
+    await expect(page.getByLabel('Guardian Consent Required')).toBeVisible();
 
     // Test with age 18 or over (should hide guardian consent)
-    await page.locator('#age input').clear();
-    await page.locator('#age input').fill('25');
-    await page.locator('#age input').blur(); // Trigger change event
-    await page.waitForTimeout(1000);
+    await page.getByLabel('Age').clear();
+    await page.getByLabel('Age').fill('25');
+    await page.getByLabel('Age').blur(); // Trigger change event
 
     // Guardian consent should not be visible
-    await expect(page.locator('#guardianConsent')).not.toBeVisible();
+    await expect(page.getByLabel('Guardian Consent Required')).not.toBeVisible();
 
     // Test boundary case - exactly 18
-    await page.locator('#age input').clear();
-    await page.locator('#age input').fill('18');
-    await page.locator('#age input').blur(); // Trigger change event
-    await page.waitForTimeout(1000);
+    await page.getByLabel('Age').clear();
+    await page.getByLabel('Age').fill('18');
+    await page.getByLabel('Age').blur(); // Trigger change event
 
     // Guardian consent should not be visible for 18
-    await expect(page.locator('#guardianConsent')).not.toBeVisible();
+    await expect(page.getByLabel('Guardian Consent Required')).not.toBeVisible();
 
-    // Test country/state dropdown logic using ID selectors
-    await page.locator('#country mat-select').click();
-    await page.locator('mat-option[value="us"]').click();
-    await page.waitForTimeout(500);
+    // Test country/state dropdown logic
+    await expect(page.getByLabel('State/Province')).toBeDisabled();
+
+    await page.getByLabel('Country').click();
+    await page.getByRole('option', { name: 'United States' }).click();
 
     // State should be enabled
-    await expect(page.locator('#state mat-select')).toBeEnabled();
+    await expect(page.getByLabel('State/Province')).toBeEnabled();
 
     // Select a state
-    await page.locator('#state mat-select').click();
-    await page.locator('mat-option[value="ca"]').click();
-    await page.waitForTimeout(500);
+    await page.getByLabel('State/Province').click();
+    await page.getByRole('option', { name: 'California' }).click();
 
     // City should be enabled
-    await expect(page.locator('#city input')).toBeEnabled();
+    await expect(page.getByLabel('City')).toBeEnabled();
 
     // Check for any console errors
     const jsErrors = consoleErrors.filter(

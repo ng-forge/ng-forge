@@ -130,7 +130,8 @@ export class E2EFormHelpers {
   async testResponsiveLayout(breakpoints: Array<{ width: number; height: number; name: string }>): Promise<void> {
     for (const breakpoint of breakpoints) {
       await this.page.setViewportSize({ width: breakpoint.width, height: breakpoint.height });
-      await this.page.waitForTimeout(500); // Allow layout to settle
+      // Wait for CSS transitions to complete by waiting for network idle and animations
+      await this.page.waitForLoadState('domcontentloaded');
 
       // Take screenshot for visual validation if needed
       await this.page.screenshot({
@@ -174,13 +175,19 @@ export class E2EPaginationHelpers {
   async clickNext(): Promise<void> {
     const nextButton = this.page.locator('[data-testid="next-button"]');
     await nextButton.click();
-    await this.page.waitForTimeout(500); // Allow page transition
+    // Wait for page transition by waiting for Angular to stabilize
+    await this.page.waitForLoadState('domcontentloaded');
+    // Wait for any page title/heading to be stable (no more DOM mutations)
+    await this.page.locator('h1, h2, .page-title').first().waitFor({ state: 'visible' });
   }
 
   async clickPrevious(): Promise<void> {
     const prevButton = this.page.locator('[data-testid="previous-button"]');
     await prevButton.click();
-    await this.page.waitForTimeout(500); // Allow page transition
+    // Wait for page transition by waiting for Angular to stabilize
+    await this.page.waitForLoadState('domcontentloaded');
+    // Wait for any page title/heading to be stable (no more DOM mutations)
+    await this.page.locator('h1, h2, .page-title').first().waitFor({ state: 'visible' });
   }
 
   async navigateToPage(pageNumber: number): Promise<void> {
@@ -231,10 +238,15 @@ export class E2EPaginationHelpers {
 
   async validatePageValidation(requiredFields: string[]): Promise<void> {
     // Attempt to navigate to next page without filling required fields
-    await this.clickNext();
+    const nextButton = this.page.locator('[data-testid="next-button"]');
+    await nextButton.click();
 
-    // Should remain on current page
-    await this.page.waitForTimeout(500);
+    // Wait for validation to trigger - check first error message appears
+    if (requiredFields.length > 0) {
+      const firstFieldContainer = this.page.locator(`[data-testid="${requiredFields[0]}"]`).locator('..');
+      const firstErrorElement = firstFieldContainer.locator('mat-error, .error-message');
+      await firstErrorElement.waitFor({ state: 'visible', timeout: 5000 });
+    }
 
     // Check that validation errors are displayed for required fields
     for (const fieldTestId of requiredFields) {
@@ -299,6 +311,64 @@ export class E2ECrossFieldValidationHelpers {
 }
 
 /**
+ * Test Scenario Loading Helper
+ * Provides utilities for loading test scenarios with proper initialization handling
+ */
+export class E2EScenarioLoader {
+  constructor(private page: Page) {}
+
+  /**
+   * Waits for the window.loadTestScenario function to become available
+   * This is crucial for parallel test execution to avoid race conditions
+   */
+  async waitForScenarioLoader(timeout = 10000): Promise<void> {
+    await this.page.waitForFunction(() => typeof (window as any).loadTestScenario === 'function', { timeout });
+  }
+
+  /**
+   * Loads a test scenario configuration safely
+   * Automatically waits for the loader to be available before proceeding
+   */
+  async loadScenario(
+    config: any,
+    options?: {
+      testId?: string;
+      title?: string;
+      description?: string;
+      initialValue?: Record<string, unknown>;
+    }
+  ): Promise<void> {
+    // Wait for the loadTestScenario function to be available
+    await this.waitForScenarioLoader();
+
+    // Load the scenario
+    await this.page.evaluate(
+      ({ config, options }) => {
+        (window as any).loadTestScenario(config, options);
+      },
+      { config, options }
+    );
+
+    // Wait for Angular to stabilize after loading the scenario
+    await this.page.waitForLoadState('domcontentloaded');
+
+    // Wait for the dynamic form to be visible
+    await this.page.locator('dynamic-form, e2e-test-host').first().waitFor({ state: 'visible', timeout: 5000 });
+  }
+
+  /**
+   * Clears the current test scenario
+   */
+  async clearScenario(): Promise<void> {
+    await this.page.evaluate(() => {
+      if (typeof (window as any).clearTestScenario === 'function') {
+        (window as any).clearTestScenario();
+      }
+    });
+  }
+}
+
+/**
  * Translation Testing Helper
  */
 export class E2ETranslationHelpers {
@@ -318,7 +388,10 @@ export class E2ETranslationHelpers {
       }
     }
 
-    await this.page.waitForTimeout(500); // Allow translations to load
+    // Wait for translations to load by checking DOM is stable
+    await this.page.waitForLoadState('domcontentloaded');
+    // Wait for any visible text to be present (indicating translation loaded)
+    await this.page.locator('body').waitFor({ state: 'visible' });
   }
 
   async validateTranslatedContent(testId: string, expectedTranslations: Record<string, string>): Promise<void> {

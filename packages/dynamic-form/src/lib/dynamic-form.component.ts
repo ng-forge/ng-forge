@@ -27,6 +27,8 @@ import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
+import { FormResetEvent } from './events/constants/form-reset.event';
+import { FormClearEvent } from './events/constants/form-clear.event';
 import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
 import { InferGlobalFormValue } from './models/types';
 import { flattenFields, flattenFieldsForRendering } from './utils';
@@ -485,6 +487,34 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    */
   readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit').pipe(map(() => this.value())));
 
+  /**
+   * Emitted when the form is reset to its default values.
+   *
+   * Subscribe to this output to react when the form is reset.
+   *
+   * @example
+   * ```typescript
+   * onFormReset() {
+   *   console.log('Form was reset to default values');
+   * }
+   * ```
+   */
+  readonly reset = outputFromObservable(this.eventBus.on<FormResetEvent>('form-reset'));
+
+  /**
+   * Emitted when the form is cleared.
+   *
+   * Subscribe to this output to react when the form is cleared.
+   *
+   * @example
+   * ```typescript
+   * onFormClear() {
+   *   console.log('Form was cleared');
+   * }
+   * ```
+   */
+  readonly cleared = outputFromObservable(this.eventBus.on<FormClearEvent>('form-clear'));
+
   readonly events = outputFromObservable(this.eventBus.events$);
 
   private readonly componentId = 'dynamic-form';
@@ -507,6 +537,16 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         // This happens after the page orchestrator is set up
         this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
       }
+    });
+
+    // Listen for form reset events
+    this.eventBus.on<FormResetEvent>('form-reset').subscribe(() => {
+      this.onFormReset();
+    });
+
+    // Listen for form clear events
+    this.eventBus.on<FormClearEvent>('form-clear').subscribe(() => {
+      this.onFormClear();
     });
   }
 
@@ -590,6 +630,28 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   protected onSubmit(event: Event): void {
     event.preventDefault();
     this.eventBus.dispatch(SubmitEvent, this.value());
+  }
+
+  /**
+   * Handles form reset. Restores all form field values to their
+   * initial default values as defined in the form configuration.
+   */
+  private onFormReset(): void {
+    const defaults = this.defaultValues();
+    // Update both the form instance and the value model
+    this.form()().value.set(defaults);
+    this.value.set(defaults);
+  }
+
+  /**
+   * Handles form clear. Clears all form field values,
+   * resetting them to an empty state.
+   */
+  private onFormClear(): void {
+    const emptyValue = {} as TModel;
+    // Update both the form instance and the value model
+    this.form()().value.set(emptyValue);
+    this.value.set(emptyValue);
   }
 
   /**

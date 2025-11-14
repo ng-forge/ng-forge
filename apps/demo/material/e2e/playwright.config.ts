@@ -24,6 +24,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     /* Save screenshots to material demo folder */
     screenshot: 'only-on-failure',
+    /* Add action timeout to prevent hangs */
+    actionTimeout: 10000,
   },
   /* Configure output directories */
   outputDir: '../screenshots',

@@ -7,6 +7,8 @@ import { BUILT_IN_FIELDS } from './providers/built-in-fields';
 import { BaseCheckedField, BaseValueField } from './definitions';
 import { DebugElement } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { FormResetEvent } from './events/constants/form-reset.event';
+import { FormClearEvent } from './events/constants/form-clear.event';
 
 // Test specific form config type
 type TestFormConfig = {
@@ -2260,6 +2262,580 @@ describe('DynamicFormComponent', () => {
         regularField: 'test',
       });
       expect(component.valid()).toBe(true);
+    });
+  });
+
+  describe('Form Reset and Clear', () => {
+    it('should have reset and cleared outputs', () => {
+      const { component } = createComponent();
+
+      expect(component.reset).toBeDefined();
+      expect(typeof component.reset.subscribe).toBe('function');
+
+      expect(component.cleared).toBeDefined();
+      expect(typeof component.cleared.subscribe).toBe('function');
+    });
+
+    it('should reset form to default values when FormResetEvent is dispatched', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'lastName',
+            type: 'input',
+            label: 'Last Name',
+            defaultValue: 'Doe',
+          },
+          {
+            key: 'isActive',
+            type: 'checkbox',
+            label: 'Is Active',
+            defaultValue: true,
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      // Verify initial values
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+        isActive: true,
+      });
+
+      // Change the values
+      component.value.set({
+        firstName: 'Jane',
+        lastName: 'Smith',
+        isActive: false,
+      });
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'Jane',
+        lastName: 'Smith',
+        isActive: false,
+      });
+
+      // Dispatch FormResetEvent via the event bus
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await delay();
+      fixture.detectChanges();
+
+      // Verify values are restored to defaults
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+        isActive: true,
+      });
+    });
+
+    it('should clear all form values when FormClearEvent is dispatched', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            defaultValue: 'john@example.com',
+          },
+          {
+            key: 'isActive',
+            type: 'checkbox',
+            label: 'Is Active',
+            defaultValue: true,
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      // Verify initial values
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        email: 'john@example.com',
+        isActive: true,
+      });
+
+      // Wait for clear event emission
+      const clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+
+      // Dispatch FormClearEvent via the event bus
+      (component as any).eventBus.dispatch(FormClearEvent);
+
+      // Verify clear event was emitted
+      await expect(clearPromise).resolves.toBeDefined();
+    });
+
+    it('should emit reset output when FormResetEvent is dispatched', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      let resetEmitted = false;
+      component.reset.subscribe(() => {
+        resetEmitted = true;
+      });
+
+      // Dispatch FormResetEvent
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await delay();
+      fixture.detectChanges();
+
+      expect(resetEmitted).toBe(true);
+    });
+
+    it('should emit cleared output when FormClearEvent is dispatched', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      let clearedEmitted = false;
+      component.cleared.subscribe(() => {
+        clearedEmitted = true;
+      });
+
+      // Dispatch FormClearEvent
+      (component as any).eventBus.dispatch(FormClearEvent);
+      await delay();
+      fixture.detectChanges();
+
+      expect(clearedEmitted).toBe(true);
+    });
+
+    it('should handle reset on form with no default values', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+          },
+          {
+            key: 'isActive',
+            type: 'checkbox',
+            label: 'Is Active',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      // Initial values with type-appropriate defaults
+      const initialValue = component.formValue();
+      expect(initialValue).toEqual({
+        firstName: '',
+        isActive: false,
+      });
+
+      // Change values
+      component.value.set({
+        firstName: 'Jane',
+        isActive: true,
+      });
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'Jane',
+        isActive: true,
+      });
+
+      // Reset should restore to type-appropriate defaults
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        firstName: '',
+        isActive: false,
+      });
+    });
+
+    it('should handle reset on form with partial default values', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'lastName',
+            type: 'input',
+            label: 'Last Name',
+            // No default value
+          },
+          {
+            key: 'isActive',
+            type: 'checkbox',
+            label: 'Is Active',
+            defaultValue: true,
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      const initialValue = component.formValue();
+      expect(initialValue).toEqual({
+        firstName: 'John',
+        lastName: '',
+        isActive: true,
+      });
+
+      // Change all values
+      component.value.set({
+        firstName: 'Jane',
+        lastName: 'Smith',
+        isActive: false,
+      });
+      await delay();
+      fixture.detectChanges();
+
+      // Reset to defaults
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: '',
+        isActive: true,
+      });
+    });
+
+    it('should handle clear on empty form', async () => {
+      const config: TestFormConfig = {
+        fields: [],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({});
+
+      // Clear should work even on empty form
+      (component as any).eventBus.dispatch(FormClearEvent);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({});
+    });
+
+    it('should update form validity after reset to valid defaults', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            required: true,
+            defaultValue: 'test@example.com',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      // Initially valid with default value
+      expect(component.valid()).toBe(true);
+
+      // Set to invalid (empty required field)
+      component.value.set({ email: '' });
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.valid()).toBe(false);
+
+      // Reset should restore valid state
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.valid()).toBe(true);
+      expect(component.formValue()).toEqual({ email: 'test@example.com' });
+    });
+
+    it('should update form validity after clear to invalid state', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            required: true,
+            defaultValue: 'test@example.com',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      // Initially valid
+      expect(component.valid()).toBe(true);
+
+      // Wait for clear event
+      const clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+
+      // Dispatch clear event
+      (component as any).eventBus.dispatch(FormClearEvent);
+
+      // Verify clear event was emitted
+      await expect(clearPromise).resolves.toBeDefined();
+    });
+
+    it('should handle multiple reset operations in sequence', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({ firstName: 'John' });
+
+      // Change and reset multiple times
+      component.value.set({ firstName: 'Jane' });
+      await delay();
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await delay();
+      expect(component.formValue()).toEqual({ firstName: 'John' });
+
+      component.value.set({ firstName: 'Bob' });
+      await delay();
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await delay();
+      expect(component.formValue()).toEqual({ firstName: 'John' });
+
+      component.value.set({ firstName: 'Alice' });
+      await delay();
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await delay();
+      expect(component.formValue()).toEqual({ firstName: 'John' });
+    });
+
+    it('should handle reset and clear in sequence', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'firstName',
+            type: 'input',
+            label: 'First Name',
+            defaultValue: 'John',
+          },
+          {
+            key: 'lastName',
+            type: 'input',
+            label: 'Last Name',
+            defaultValue: 'Doe',
+          },
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+      });
+
+      // Wait for clear event
+      let clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+
+      // Clear the form
+      (component as any).eventBus.dispatch(FormClearEvent);
+      await expect(clearPromise).resolves.toBeDefined();
+
+      // Wait for reset event
+      const resetPromise = firstValueFrom((component as any).eventBus.on('form-reset'));
+
+      // Reset should restore defaults even after clear
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await expect(resetPromise).resolves.toBeDefined();
+
+      expect(component.formValue()).toEqual({
+        firstName: 'John',
+        lastName: 'Doe',
+      });
+
+      // Wait for another clear event
+      clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+
+      // Clear again
+      (component as any).eventBus.dispatch(FormClearEvent);
+      await expect(clearPromise).resolves.toBeDefined();
+    });
+
+    it('should handle reset with nested group fields', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'address',
+            type: 'group',
+            label: 'Address',
+            fields: [
+              {
+                key: 'street',
+                type: 'input',
+                label: 'Street',
+                defaultValue: '123 Main St',
+              },
+              {
+                key: 'city',
+                type: 'input',
+                label: 'City',
+                defaultValue: 'New York',
+              },
+            ],
+          } as any,
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        address: {
+          street: '123 Main St',
+          city: 'New York',
+        },
+      });
+
+      // Change nested values
+      component.value.set({
+        address: {
+          street: '456 Oak Ave',
+          city: 'Boston',
+        },
+      });
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        address: {
+          street: '456 Oak Ave',
+          city: 'Boston',
+        },
+      });
+
+      // Reset should restore nested defaults
+      (component as any).eventBus.dispatch(FormResetEvent);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        address: {
+          street: '123 Main St',
+          city: 'New York',
+        },
+      });
+    });
+
+    it('should handle clear with nested group fields', async () => {
+      const config: TestFormConfig = {
+        fields: [
+          {
+            key: 'user',
+            type: 'group',
+            label: 'User',
+            fields: [
+              {
+                key: 'firstName',
+                type: 'input',
+                label: 'First Name',
+                defaultValue: 'John',
+              },
+              {
+                key: 'email',
+                type: 'input',
+                label: 'Email',
+                defaultValue: 'john@example.com',
+              },
+            ],
+          } as any,
+        ],
+      };
+
+      const { component, fixture } = createComponent(config);
+      await delay();
+      fixture.detectChanges();
+
+      expect(component.formValue()).toEqual({
+        user: {
+          firstName: 'John',
+          email: 'john@example.com',
+        },
+      });
+
+      // Wait for clear event
+      const clearPromise = firstValueFrom((component as any).eventBus.on('form-clear'));
+
+      // Clear should empty everything
+      (component as any).eventBus.dispatch(FormClearEvent);
+
+      // Verify clear event was emitted
+      await expect(clearPromise).resolves.toBeDefined();
     });
   });
 });
