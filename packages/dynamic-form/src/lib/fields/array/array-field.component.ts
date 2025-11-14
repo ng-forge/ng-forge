@@ -12,7 +12,6 @@ import {
 } from '@angular/core';
 import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map, of, switchMap } from 'rxjs';
-import { get } from 'lodash-es';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
@@ -96,7 +95,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   private readonly arrayItemCount = linkedSignal(() => {
     const parentValue = this.parentFieldSignalContext().value();
     const arrayKey = this.field().key;
-    const arrayValue = get(parentValue, arrayKey);
+    const arrayValue = (parentValue as any)?.[arrayKey];
 
     // Initialize with existing array length or 0
     if (Array.isArray(arrayValue)) {
@@ -182,7 +181,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     // Get current parent value
     const parentValue = this.parentFieldSignalContext().value();
     const arrayKey = this.field().key;
-    const currentArray = get(parentValue, arrayKey) || [];
+    const currentArray = (parentValue as any)?.[arrayKey] || [];
 
     // Create default value for new item
     const defaultValue = getFieldDefaultValue(template, this.fieldRegistry.raw);
@@ -210,7 +209,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     // Get current parent value
     const parentValue = this.parentFieldSignalContext().value();
     const arrayKey = this.field().key;
-    const currentArray = get(parentValue, arrayKey) || [];
+    const currentArray = (parentValue as any)?.[arrayKey] || [];
 
     // Remove item at specified index
     const newArray = [...currentArray];

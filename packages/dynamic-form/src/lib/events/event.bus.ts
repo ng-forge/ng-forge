@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { filter, Observable, Subject } from 'rxjs';
 import { FormEvent, FormEventConstructor } from './interfaces/form-event';
-import { isArray } from 'lodash-es';
 
 /**
  * Event bus service for form-wide event communication.
@@ -109,7 +108,7 @@ export class EventBus {
    * ```
    */
   on<T extends FormEvent>(eventType: T['type'] | Array<T['type']>): Observable<T> {
-    if (isArray(eventType)) {
+    if (Array.isArray(eventType)) {
       return this.pipeline$.pipe(filter((event): event is T => eventType.includes(event.type)));
     }
 
