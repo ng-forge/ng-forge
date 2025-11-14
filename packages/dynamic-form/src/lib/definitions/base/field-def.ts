@@ -145,7 +145,7 @@ export interface FieldDef<TProps> {
    * When true, the field is rendered in a disabled state and cannot
    * receive user input. The value can still be modified programmatically.
    *
-   * @defaultValue false
+   * @value false
    */
   disabled?: boolean;
 
@@ -155,7 +155,7 @@ export interface FieldDef<TProps> {
    * When true, the field displays its value but cannot be modified
    * by user interaction. Differs from disabled in styling and accessibility.
    *
-   * @defaultValue false
+   * @value false
    */
   readonly?: boolean;
 
@@ -165,7 +165,7 @@ export interface FieldDef<TProps> {
    * When true, the field is not rendered in the UI but still participates
    * in form state and validation. Useful for conditional field display.
    *
-   * @defaultValue false
+   * @value false
    */
   hidden?: boolean;
 
@@ -198,7 +198,7 @@ export interface FieldDef<TProps> {
    * col: 3   // Quarter width
    * ```
    *
-   * @defaultValue 12
+   * @value 12
    */
   col?: number;
 }

@@ -13,8 +13,7 @@ import { isArray } from 'lodash-es';
  * Runtime validation enforces these rules.
  */
 export interface RowField<TFields extends RowAllowedChildren[] = RowAllowedChildren[]> extends FieldDef<never> {
-  /** Field type identifier */
-
+  type: 'row';
   /** Child definitions to render within this row */
   fields: TFields;
 }

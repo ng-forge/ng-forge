@@ -150,11 +150,11 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     <T extends FieldDef<any>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
       const result: Record<string, unknown> = {};
       for (const [key, field] of Object.entries(fieldsById)) {
-        const defaultValue = getFieldDefaultValue(field, registry);
+        const value = getFieldDefaultValue(field, registry);
         // Only include fields that have non-undefined default values
         // This excludes fields with valueHandling: 'exclude'
-        if (defaultValue !== undefined) {
-          result[key] = defaultValue;
+        if (value !== undefined) {
+          result[key] = value;
         }
       }
       return result as TModel;
@@ -213,7 +213,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * <dynamic-form [config]="config" [formOptions]="formOptionsSignal()" />
    * ```
    *
-   * @defaultValue undefined
+   * @value undefined
    */
   formOptions = input<FormOptions | undefined>(undefined);
 
@@ -232,7 +232,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * <dynamic-form [config]="config" [(value)]="formData" />
    * ```
    *
-   * @defaultValue undefined
+   * @value undefined
    */
   value = model<Partial<TModel> | undefined>(undefined);
 

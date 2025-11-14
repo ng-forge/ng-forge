@@ -164,7 +164,6 @@ export class CompleteFormDemoComponent {
         label: 'Subscribe to newsletter',
         props: {
           labelPlacement: 'end',
-          helperText: 'Get updates about new features and special offers',
         },
       },
 

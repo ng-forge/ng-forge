@@ -25,7 +25,7 @@ import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-t
  *   key: 'address',
  *   fields: [
  *     { type: 'input', key: 'street' },
- *     { type: 'input', key: 'city', defaultValue: 'New York' }
+ *     { type: 'input', key: 'city', value: 'New York' }
  *   ]
  * }, registry); // { street: '', city: 'New York' }
  * ```
@@ -62,11 +62,11 @@ export function getFieldDefaultValue(field: FieldDef<any>, registry: Map<string,
     return groupDefaults;
   }
 
-  if ('defaultValue' in field && field.defaultValue !== undefined) {
-    return field.defaultValue;
+  if ('value' in field && field.value !== undefined) {
+    return field.value;
   }
 
-  if ('defaultValue' in field && field.defaultValue === null) {
+  if ('value' in field && field.value === null) {
     if (field.type === 'checkbox') {
       return false;
     }

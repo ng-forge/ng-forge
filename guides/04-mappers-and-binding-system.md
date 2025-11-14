@@ -156,8 +156,8 @@ Maps fields with form values (input, select, textarea, etc.):
 export type ValueFieldMapperOptions<TModel = any> = Omit<FieldMapperOptions<TModel>, 'fieldRegistry'>;
 
 export function valueFieldMapper(fieldDef: BaseValueField<any, any>, options: ValueFieldMapperOptions): Binding[] {
-  // 1. Omit value and defaultValue from field definition
-  const omittedFields = omit(fieldDef, ['value', 'defaultValue']);
+  // 1. Omit value and value from field definition
+  const omittedFields = omit(fieldDef, ['value', 'value']);
 
   // 2. Start with base bindings (includes label, placeholder, className, props, etc.)
   const bindings: Binding[] = baseFieldMapper(omittedFields);

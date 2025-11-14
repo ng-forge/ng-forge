@@ -64,9 +64,9 @@ export function fieldsToDefaultValues<TModel = unknown>(fields: FieldDef<any>[],
   for (const field of fields) {
     if (!field.key) continue;
 
-    const defaultValue = getFieldDefaultValue(field, registry);
-    if (defaultValue !== undefined) {
-      defaultValues[field.key] = defaultValue;
+    const value = getFieldDefaultValue(field, registry);
+    if (value !== undefined) {
+      defaultValues[field.key] = value;
     }
   }
 
