@@ -14,7 +14,8 @@ import {
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, map, of, switchMap } from 'rxjs';
-import { get, keyBy, mapValues, memoize } from 'lodash-es';
+import { memoize } from 'lodash-es';
+import { keyBy, mapValues } from '../../utils/object-utils';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
@@ -113,7 +114,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
     const defaults = this.defaultValues();
 
     // Extract the group's nested values from parent form
-    const groupValue = get(parentValue, groupKey) || {};
+    const groupValue = (parentValue as any)?.[groupKey] || {};
     return { ...defaults, ...groupValue };
   });
 

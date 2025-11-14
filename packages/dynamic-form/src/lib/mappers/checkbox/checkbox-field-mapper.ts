@@ -2,7 +2,7 @@ import { BaseCheckedField, FieldDef } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
 import { baseFieldMapper } from '../base/base-field-mapper';
 import { FieldMapperOptions } from '../types';
-import { omit } from 'lodash-es';
+import { omit } from '../../utils/object-utils';
 
 export type CheckboxFieldMapperOptions<TModel = any> = Omit<FieldMapperOptions<TModel>, 'fieldRegistry'>;
 
