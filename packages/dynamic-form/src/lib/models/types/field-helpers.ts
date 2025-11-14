@@ -112,18 +112,3 @@ export type ValidateRootFields<TFields extends RegisteredFieldTypes[]> =
 export type FieldPathAccess<TValue> = {
   [K in keyof TValue]: FieldPath<TValue[K]>;
 };
-
-/**
- * Helper function to get a child path from a parent path in a type-safe manner
- * While this still uses 'any', it centralizes the type casting and makes it explicit
- *
- * @param path - The parent field path
- * @param key - The child field key
- * @returns The child field path, or undefined if it doesn't exist
- */
-export function getChildPath<TValue, K extends keyof TValue>(
-  path: FieldPath<TValue> & FieldPathAccess<TValue>,
-  key: K
-): FieldPath<TValue[K]> | undefined {
-  return path[key] as FieldPath<TValue[K]> | undefined;
-}

@@ -18,10 +18,20 @@ import { inject } from '@angular/core';
 import { AsyncValidatorConfig, CustomValidatorConfig, HttpValidatorConfig, ValidatorConfig } from '../../models';
 import { createLogicFunction } from '../expressions';
 import { createDynamicValueFunction } from '../values';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser';
 import { CustomValidator } from './validator-types';
+
+/**
+ * Helper to create conditional logic function from when expression.
+ * Returns undefined if no when condition is specified.
+ * Reduces duplication across validator types.
+ */
+function createConditionalLogic<TValue>(when: ConditionalExpression | undefined): LogicFn<TValue, boolean> | undefined {
+  return when ? (createLogicFunction(when) as LogicFn<TValue, boolean>) : undefined;
+}
 
 /**
  * Apply validator configuration to field path, following the logic pattern
@@ -131,8 +141,8 @@ function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: 
   }
 
   // Apply with conditional logic if specified
-  if (config.when) {
-    const whenLogic = createLogicFunction(config.when);
+  const whenLogic = createConditionalLogic<TValue>(config.when);
+  if (whenLogic) {
     const conditionalValidator = (ctx: FieldContext<TValue>) => {
       if (!whenLogic(ctx)) {
         return null; // Condition not met, skip validation
@@ -249,8 +259,8 @@ function applyAsyncValidator<TValue>(config: AsyncValidatorConfig, fieldPath: Fi
   };
 
   // Apply with conditional logic if specified
-  if (config.when) {
-    const whenLogic = createLogicFunction(config.when);
+  const whenLogic = createConditionalLogic<TValue>(config.when);
+  if (whenLogic) {
     // For conditional async validators, we wrap the params function
     const conditionalOptions = {
       ...asyncOptions,
@@ -299,8 +309,8 @@ function applyHttpValidator<TValue>(config: HttpValidatorConfig, fieldPath: Fiel
   };
 
   // Apply with conditional logic if specified
-  if (config.when) {
-    const whenLogic = createLogicFunction(config.when);
+  const whenLogic = createConditionalLogic<TValue>(config.when);
+  if (whenLogic) {
     // For conditional HTTP validators, we wrap the request function
     const conditionalOptions = {
       ...httpOptions,

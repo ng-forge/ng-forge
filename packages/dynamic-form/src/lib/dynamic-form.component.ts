@@ -139,19 +139,28 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
-    (fields, registry) =>
-      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
+    // Optimized key generation - avoid JSON.stringify but ensure uniqueness
+    (fields, registry) => {
+      const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
+      const registryKeys = Array.from(registry.keys()).sort().join('|');
+      return `${fieldKeys}__${registryKeys}`;
+    }
   );
 
   private readonly memoizedFlattenFieldsForRendering = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFieldsForRendering(fields, registry),
-    (fields, registry) =>
-      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_rendering_' + Array.from(registry.keys()).sort().join(',')
+    // Optimized key generation with stable registry keys
+    (fields, registry) => {
+      const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
+      const registryKeys = Array.from(registry.keys()).sort().join('|');
+      return `render_${fieldKeys}__${registryKeys}`;
+    }
   );
 
   private readonly memoizedKeyBy = memoize(
     <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
-    (fields) => fields.map((f) => f.key).join(',')
+    // Optimized key generation - fields already have keys
+    (fields) => fields.map((f) => f.key).join('|')
   );
 
   private readonly memoizedDefaultValues = memoize(
@@ -167,7 +176,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       }
       return result as TModel;
     },
-    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(',')
+    // Optimized key generation with stable ordering
+    (fieldsById, registry) => {
+      const fieldKeys = Object.keys(fieldsById).sort().join('|');
+      const registryKeys = Array.from(registry.keys()).sort().join('|');
+      return `defaults_${fieldKeys}__${registryKeys}`;
+    }
   );
 
   // Memoized field signal context to avoid recreation for every field

@@ -106,7 +106,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
 
   /**
    * Generate field instances for each array item.
-   * Each item gets a unique key based on array index.
+   * Uses structural sharing to reduce memory allocation.
    */
   private readonly fieldInstances = computed(() => {
     const template = this.fieldTemplate();
@@ -117,13 +117,17 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
       return [];
     }
 
-    // Create one instance per array item
-    return Array.from({ length: count }, (_, index) => ({
+    // Cache the base properties that don't change per item
+    // Only key and index vary per item
+    const baseInstance = {
       ...template,
-      // Generate unique key for array item: arrayKey[index]
-      key: `${arrayKey}[${index}]`,
-      // Store original template key for value extraction
       _templateKey: template.key,
+    };
+
+    // Create instances with only the varying properties
+    return Array.from({ length: count }, (_, index) => ({
+      ...baseInstance,
+      key: `${arrayKey}[${index}]`,
       _arrayIndex: index,
     })) as FieldDef<any>[];
   });
