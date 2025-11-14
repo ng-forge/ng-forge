@@ -158,9 +158,6 @@ export const accountSetupConfig = {
             { value: 'personal', label: 'Personal Account' },
             { value: 'business', label: 'Business Account' },
           ],
-          props: {
-            appearance: 'outline',
-          },
           required: true,
           col: 12,
         },
@@ -169,10 +166,9 @@ export const accountSetupConfig = {
     },
     {
       key: 'submit',
-      type: 'button',
+      type: 'submit',
       label: 'Continue to Confirmation',
       props: {
-        type: 'submit',
         color: 'primary',
       },
       col: 12,

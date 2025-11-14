@@ -206,11 +206,10 @@ export class ExpressionValidatorsDemoComponent {
         ],
       },
       {
-        type: 'button',
+        type: 'submit',
         key: 'submit',
         label: 'Submit Form',
         props: {
-          type: 'submit',
           color: 'primary',
         },
       },

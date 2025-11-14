@@ -189,10 +189,9 @@ export const dependentValidationConfig = {
     },
     {
       key: 'submit',
-      type: 'button',
+      type: 'submit',
       label: 'Submit Information',
       props: {
-        type: 'submit',
         color: 'primary',
       },
       col: 12,

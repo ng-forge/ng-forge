@@ -1,4 +1,4 @@
-import { CheckboxField, CheckedFieldComponent } from '@ng-forge/dynamic-form';
+import { ToggleField, CheckedFieldComponent } from '@ng-forge/dynamic-form';
 
 export interface IonicToggleProps {
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
@@ -7,6 +7,6 @@ export interface IonicToggleProps {
   enableOnOffLabels?: boolean;
 }
 
-export type IonicToggleField = CheckboxField<IonicToggleProps>;
+export type IonicToggleField = ToggleField<IonicToggleProps>;
 
 export type IonicToggleComponent = CheckedFieldComponent<IonicToggleField>;

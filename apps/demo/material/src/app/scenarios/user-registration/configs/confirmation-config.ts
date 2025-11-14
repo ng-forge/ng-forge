@@ -119,18 +119,19 @@ export const confirmationConfig = {
           key: 'goBack',
           type: 'button',
           label: 'Go Back',
+          event: class GoBackEvent {
+            readonly type = 'go-back' as const;
+          },
           props: {
-            type: 'button',
             color: 'accent',
           },
           col: 6,
         },
         {
           key: 'completeRegistration',
-          type: 'button',
+          type: 'submit',
           label: 'Complete Registration',
           props: {
-            type: 'submit',
             color: 'primary',
           },
           col: 6,

@@ -21,6 +21,7 @@ interface ContainerFieldWithFields extends FieldDef<any> {
  * Runtime validation enforces these rules.
  */
 export interface PageField<TFields extends PageAllowedChildren[] = PageAllowedChildren[]> extends FieldDef<never> {
+  type: 'page';
   /** Child field definitions to render within this page */
   fields: TFields;
 }

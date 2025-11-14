@@ -9,7 +9,6 @@ import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
 import { FieldTree } from '@angular/forms/signals';
-import { RegisteredFieldTypes } from '../../models';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -87,7 +86,7 @@ export class PageOrchestratorComponent {
   /**
    * Array of page field definitions to render
    */
-  pageFields = input.required<PageField<RegisteredFieldTypes[]>[]>();
+  pageFields = input.required<PageField[]>();
 
   /**
    * Root form instance from parent DynamicForm
