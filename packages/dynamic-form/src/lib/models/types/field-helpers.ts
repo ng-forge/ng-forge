@@ -125,5 +125,5 @@ export function getChildPath<TValue, K extends keyof TValue>(
   path: FieldPath<TValue> & FieldPathAccess<TValue>,
   key: K
 ): FieldPath<TValue[K]> | undefined {
-  return path[key];
+  return path[key] as FieldPath<TValue[K]> | undefined;
 }

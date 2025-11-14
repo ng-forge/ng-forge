@@ -7,7 +7,6 @@ import { isGroupField } from '../definitions/default/group-field';
 import { isArrayField } from '../definitions/default/array-field';
 import { isPageField } from '../definitions/default/page-field';
 import { isRowField } from '../definitions/default/row-field';
-import { getChildPath } from '../models/types/field-helpers';
 
 /**
  * Single entry point to map field data into form
@@ -141,7 +140,8 @@ function mapChildFieldsToForm<TValue>(fields: FieldDef<any>[], parentPath: Field
       continue;
     }
 
-    const childPath = getChildPath(parentPath as any, childField.key);
+    // Type assertion needed due to dynamic field keys
+    const childPath = (parentPath as any)[childField.key] as FieldPath<any> | undefined;
     if (childPath) {
       mapFieldToForm(childField, childPath);
     }
