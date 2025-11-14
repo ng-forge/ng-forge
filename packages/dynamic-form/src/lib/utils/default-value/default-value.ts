@@ -62,17 +62,22 @@ export function getFieldDefaultValue(field: FieldDef<any>, registry: Map<string,
     return groupDefaults;
   }
 
-  if ('defaultValue' in field && field.defaultValue !== undefined) {
-    return field.defaultValue;
-  }
-
-  if ('defaultValue' in field && field.defaultValue === null) {
-    if (field.type === 'checkbox') {
-      return false;
+  // Use explicit defaultValue if provided, with type-specific handling for null
+  if ('defaultValue' in field) {
+    // If defaultValue is explicitly set (even to null/undefined), respect it
+    if (field.defaultValue !== null && field.defaultValue !== undefined) {
+      return field.defaultValue;
     }
-    return '';
+
+    // Handle explicit null: use type-specific default
+    if (field.defaultValue === null) {
+      return field.type === 'checkbox' ? false : '';
+    }
+
+    // Handle explicit undefined: fall through to type-specific defaults
   }
 
+  // Type-specific defaults when no defaultValue is specified
   if (field.type === 'checkbox') {
     return false;
   }

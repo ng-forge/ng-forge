@@ -12,6 +12,7 @@ import {
   model,
   OnDestroy,
   runInInjectionContext,
+  signal,
   untracked,
   ViewContainerRef,
 } from '@angular/core';
@@ -128,6 +129,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
+
+  /**
+   * Signal tracking field loading errors for error boundary pattern.
+   * Collects all errors that occur during async field component loading.
+   */
+  readonly fieldLoadingErrors = signal<Array<{ fieldType: string; fieldKey: string; error: Error }>>([]);
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
@@ -511,6 +518,11 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     // Set up initialization tracking
     this.setupInitializationTracking();
 
+    // Clear field loading errors when config changes
+    explicitEffect([this.config], () => {
+      this.fieldLoadingErrors.set([]);
+    });
+
     // For paged forms, emit initialization event when pages are defined
     explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
       if (mode === 'paged' && pages.length > 0) {
@@ -582,9 +594,20 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
       })
       .catch((error) => {
-        // Only log errors if component hasn't been destroyed
+        // Only log and track errors if component hasn't been destroyed
         if (!this.destroyRef.destroyed) {
           const fieldKey = fieldDef.key || '<no key>';
+
+          // Track error in signal for error boundary pattern
+          this.fieldLoadingErrors.update((errors) => [
+            ...errors,
+            {
+              fieldType: fieldDef.type,
+              fieldKey,
+              error: error instanceof Error ? error : new Error(String(error)),
+            },
+          ]);
+
           console.error(
             `[DynamicForm] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
               `Ensure the field type is registered in your field registry.`,
