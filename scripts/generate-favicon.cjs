@@ -9,9 +9,9 @@ const path = require('path');
 
 async function generateFavicon() {
   try {
-    console.log('🎨 Generating favicon.ico from logo-icon.svg...\n');
+    console.log('🎨 Generating favicon.ico from logo-icon-light.svg...\n');
 
-    const logoPath = path.join(__dirname, '..', 'logo-icon.svg');
+    const logoPath = path.join(__dirname, '..', 'logo-icon-light.svg');
     const outputDir = path.join(__dirname, '..', 'apps/docs/src');
 
     const sizes = [16, 32, 48];
