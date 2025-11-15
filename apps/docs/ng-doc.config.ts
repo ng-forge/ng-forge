@@ -4,7 +4,6 @@ const config: NgDocConfiguration = {
   docsPath: 'apps/docs/src/docs',
   outDir: 'dist',
   cache: true,
-  logo: 'logo-icon.svg',
   repoConfig: {
     url: 'https://github.com/ng-forge/ng-forge',
     mainBranch: 'main',
@@ -13,6 +12,7 @@ const config: NgDocConfiguration = {
   },
   guide: {
     anchorHeadings: ['h2', 'h3', 'h4'],
+    headerTemplate: 'apps/docs/src/header-template.html',
   },
   shiki: {
     themes: {
