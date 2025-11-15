@@ -273,7 +273,7 @@ test.describe('Cross-Field Validation Tests', () => {
             { value: 'gbp', label: 'GBP' },
             { value: 'cad', label: 'CAD' },
           ],
-          defaultValue: 'usd',
+          value: 'usd',
           col: 6,
         },
         {

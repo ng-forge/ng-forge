@@ -141,7 +141,7 @@ test.describe('Multi-Page Navigation Tests', () => {
                 { value: 'fr', label: 'French' },
                 { value: 'de', label: 'German' },
               ],
-              defaultValue: 'en',
+              value: 'en',
               col: 6,
             },
             {
