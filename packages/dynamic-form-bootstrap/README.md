@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ng-forge/ng-forge/main/logo-light.svg" alt="ng-forge logo" width="400"/>
+</p>
+
 # @ng-forge/dynamic-form-bootstrap
 
 Bootstrap 5 field components for `@ng-forge/dynamic-form` - Build dynamic forms with native HTML elements styled with Bootstrap CSS classes.

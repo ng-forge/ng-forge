@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ng-forge/ng-forge/main/logo-light.svg" alt="ng-forge logo" width="400"/>
+</p>
+
 # @ng-forge/dynamic-form
 
 The core library for building type-safe, dynamic Angular forms with signal forms integration.
