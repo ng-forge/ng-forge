@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ng-forge/ng-forge/main/logo-light.svg" alt="ng-forge logo" width="400"/>
+</p>
+
 # @ng-forge/dynamic-form-primeng
 
 Beautiful PrimeNG implementation for ng-forge dynamic forms.

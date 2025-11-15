@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "nx run-many -t build",
     "build:libs": "nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic",
     "build:docs": "nx build docs",
