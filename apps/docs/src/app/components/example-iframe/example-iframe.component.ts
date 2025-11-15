@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 import { ENVIRONMENT } from '../../config/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { NgDocThemeService } from '@ng-doc/app/services/theme';
 
 @Component({
   selector: 'example-iframe',
@@ -13,6 +14,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
       </div>
       }
       <iframe
+        #exampleIframe
         [src]="trustedSrc()"
         [style.height]="height()"
         [style.width]="width()"
@@ -156,8 +158,10 @@ export class ExampleIframeComponent {
 
   private env = inject(ENVIRONMENT);
   private sanitizer = inject(DomSanitizer);
+  private themeService = inject(NgDocThemeService);
 
   loading = signal(true);
+  iframeElement = viewChild<ElementRef<HTMLIFrameElement>>('exampleIframe');
 
   iframeSrc = computed(() => {
     const baseUrl = this.env.exampleBaseUrls[this.library()];
@@ -169,7 +173,39 @@ export class ExampleIframeComponent {
     return this.sanitizer.bypassSecurityTrustResourceUrl(this.iframeSrc());
   });
 
+  constructor() {
+    // Sync theme changes to iframe
+    effect(() => {
+      const iframe = this.iframeElement()?.nativeElement;
+      const theme = this.themeService.currentTheme;
+
+      if (iframe && iframe.contentWindow && !this.loading()) {
+        this.sendThemeToIframe(iframe, theme);
+      }
+    });
+  }
+
   onLoad(): void {
     this.loading.set(false);
+
+    // Send initial theme to iframe once loaded
+    const iframe = this.iframeElement()?.nativeElement;
+    if (iframe) {
+      this.sendThemeToIframe(iframe, this.themeService.currentTheme);
+    }
+  }
+
+  private sendThemeToIframe(iframe: HTMLIFrameElement, theme: string): void {
+    try {
+      iframe.contentWindow?.postMessage(
+        {
+          type: 'THEME_CHANGE',
+          theme: theme,
+        },
+        '*'
+      );
+    } catch (error) {
+      console.warn('Failed to send theme to iframe:', error);
+    }
   }
 }
