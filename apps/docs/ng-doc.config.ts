@@ -12,7 +12,6 @@ const config: NgDocConfiguration = {
   },
   guide: {
     anchorHeadings: ['h2', 'h3', 'h4'],
-    headerTemplate: 'apps/docs/src/header-template.html',
   },
   shiki: {
     themes: {
