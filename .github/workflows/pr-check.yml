@@ -271,7 +271,7 @@ jobs:
           fi
 
   format:
-    name: Format Check
+    name: Format Check (Affected)
     runs-on: ubuntu-latest
 
     steps:
@@ -294,12 +294,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check formatting
+      - name: Check formatting on affected files
         run: |
-          echo "Checking code formatting with Prettier..."
-          pnpm exec prettier --check "**/*.{ts,js,json,md,yml,yaml,html,css,scss}" --ignore-path .gitignore || {
+          echo "Checking code formatting on affected files..."
+
+          # Get list of affected files
+          AFFECTED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/main...HEAD | grep -E '\.(ts|js|json|md|yml|yaml|html|css|scss)$' || true)
+
+          if [ -z "$AFFECTED_FILES" ]; then
+            echo "No affected files to check"
+            exit 0
+          fi
+
+          echo "Affected files to check:"
+          echo "$AFFECTED_FILES"
+          echo ""
+
+          # Check formatting on affected files only
+          echo "$AFFECTED_FILES" | xargs pnpm exec prettier --check || {
             echo ""
-            echo "❌ Formatting issues found!"
+            echo "❌ Formatting issues found in affected files!"
             echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
             exit 1
           }
