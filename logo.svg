@@ -1,0 +1,97 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Angular-inspired gradient -->
+    <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DD0031;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C3002F;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Accent gradient for forms -->
+    <linearGradient id="formGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DD0031;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="190" fill="#1E1E1E" opacity="0.05"/>
+
+  <!-- Anvil base (forge symbol) -->
+  <g transform="translate(200, 200)">
+    <!-- Anvil body -->
+    <path d="M -60 40 L -50 20 L 50 20 L 60 40 Z" fill="url(#forgeGradient)"/>
+    <rect x="-70" y="40" width="140" height="25" rx="4" fill="url(#forgeGradient)"/>
+    <path d="M -50 20 L -45 -10 L 45 -10 L 50 20 Z" fill="url(#forgeGradient)" opacity="0.9"/>
+
+    <!-- Anvil horn (left side) -->
+    <path d="M -45 -10 Q -60 -15 -65 -20 L -55 -25 Q -50 -20 -45 -15 Z" fill="url(#forgeGradient)"/>
+
+    <!-- Dynamic form layers (stacked papers with glow) -->
+    <g transform="translate(0, -80)">
+      <!-- Back form layer -->
+      <rect x="-45" y="-35" width="90" height="65" rx="4" fill="#FFE5ED" opacity="0.3" transform="rotate(-8)"/>
+
+      <!-- Middle form layer -->
+      <g transform="rotate(-4)">
+        <rect x="-45" y="-35" width="90" height="65" rx="4" fill="#FFE5ED" opacity="0.5"/>
+        <!-- Form lines -->
+        <line x1="-35" y1="-20" x2="35" y2="-20" stroke="url(#formGradient)" stroke-width="2" opacity="0.6"/>
+        <line x1="-35" y1="-5" x2="35" y2="-5" stroke="url(#formGradient)" stroke-width="2" opacity="0.6"/>
+      </g>
+
+      <!-- Front form layer (main) -->
+      <g filter="url(#glow)">
+        <rect x="-45" y="-35" width="90" height="65" rx="4" fill="white" stroke="url(#formGradient)" stroke-width="2"/>
+
+        <!-- Form field lines (dynamic feel) -->
+        <line x1="-35" y1="-22" x2="15" y2="-22" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="-35" y1="-10" x2="25" y2="-10" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="-35" y1="2" x2="10" y2="2" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="-35" y1="14" x2="30" y2="14" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
+
+        <!-- Checkmark/validation icon -->
+        <circle cx="25" cy="-22" r="6" fill="url(#forgeGradient)" opacity="0.2"/>
+        <path d="M 22 -22 L 24 -20 L 28 -24" stroke="url(#forgeGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </g>
+    </g>
+
+    <!-- Hammer (crafting/building symbol) -->
+    <g transform="translate(65, -65) rotate(45)">
+      <rect x="-5" y="-25" width="10" height="40" rx="2" fill="#8B4513" opacity="0.8"/>
+      <rect x="-12" y="-30" width="24" height="12" rx="2" fill="url(#forgeGradient)"/>
+      <rect x="-10" y="-32" width="20" height="4" fill="#C3002F"/>
+    </g>
+
+    <!-- Sparkles/magic effect (dynamic aspect) -->
+    <g opacity="0.8">
+      <path d="M -80 -50 L -78 -48 L -80 -46 L -82 -48 Z" fill="url(#formGradient)"/>
+      <path d="M -75 -55 L -74 -54 L -75 -53 L -76 -54 Z" fill="url(#formGradient)"/>
+      <path d="M 70 -40 L 72 -38 L 70 -36 L 68 -38 Z" fill="url(#formGradient)"/>
+      <path d="M 75 -50 L 76 -49 L 75 -48 L 74 -49 Z" fill="url(#formGradient)"/>
+      <path d="M -70 5 L -68 7 L -70 9 L -72 7 Z" fill="url(#formGradient)"/>
+    </g>
+
+    <!-- Angular bracket accent -->
+    <g transform="translate(-85, -20)" opacity="0.3">
+      <path d="M 0 -10 L -5 0 L 0 10" stroke="url(#forgeGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+    <g transform="translate(85, -20)" opacity="0.3">
+      <path d="M 0 -10 L 5 0 L 0 10" stroke="url(#forgeGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Optional: Text version -->
+  <!--
+  <text x="200" y="360" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="url(#forgeGradient)">ng-forge</text>
+  <text x="200" y="385" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#666">dynamic forms</text>
+  -->
+</svg>
