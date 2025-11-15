@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 32x32 simplified version for .ico -->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Simplified anvil -->
+  <path d="M 6 26 L 8 16 L 24 16 L 26 26 Z" fill="#244858"/>
+  <rect x="8" y="14" width="16" height="2" rx="0.5" fill="#244858"/>
+  <rect x="4" y="26" width="24" height="4" rx="1" fill="#1a3542"/>
+
+  <!-- Simplified hammer -->
+  <path d="M 20 6 L 24 10 L 22 12 L 18 8 Z" fill="#244858"/>
+  <rect x="20" y="8" width="2" height="10" transform="rotate(-45 21 13)" fill="#6b4423"/>
+</svg>
