@@ -24,7 +24,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
 
       <input
         type="range"
-        dfInputConstraints
+        df-bs-input-constraints
         [field]="f"
         [id]="key()"
         [dfMin]="props()?.min ?? min()"
