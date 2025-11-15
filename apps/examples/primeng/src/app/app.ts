@@ -1,6 +1,9 @@
-import { Component, Renderer2, inject, DestroyRef } from '@angular/core';
+import { Component, Renderer2, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { DOCUMENT } from '@angular/common';
+import { fromEvent } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   imports: [RouterModule],
@@ -12,22 +15,17 @@ export class App {
   protected title = 'PrimeNG Examples';
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
-  private destroyRef = inject(DestroyRef);
 
   constructor() {
     // Listen for theme messages from parent (docs app)
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'THEME_CHANGE') {
+    fromEvent<MessageEvent>(window, 'message')
+      .pipe(
+        filter((event) => event.data?.type === 'THEME_CHANGE'),
+        takeUntilDestroyed()
+      )
+      .subscribe((event) => {
         this.applyTheme(event.data.theme);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-
-    // Clean up event listener on destroy
-    this.destroyRef.onDestroy(() => {
-      window.removeEventListener('message', handleMessage);
-    });
+      });
   }
 
   private applyTheme(theme: 'light' | 'dark'): void {
