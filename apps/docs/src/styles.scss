@@ -17,7 +17,17 @@
   display: none !important;
 }
 
-// Swap to dark logo in dark theme
+// Swap to dark logo when system prefers dark (auto mode)
+@media (prefers-color-scheme: dark) {
+  .logo-light {
+    display: none !important;
+  }
+  .logo-dark {
+    display: block !important;
+  }
+}
+
+// Explicit dark theme
 [data-theme='dark'] .logo-light,
 html[data-theme='dark'] .logo-light,
 body[data-theme='dark'] .logo-light {
@@ -28,6 +38,19 @@ body[data-theme='dark'] .logo-light {
 html[data-theme='dark'] .logo-dark,
 body[data-theme='dark'] .logo-dark {
   display: block !important;
+}
+
+// Explicit light theme (override system preference)
+[data-theme='light'] .logo-light,
+html[data-theme='light'] .logo-light,
+body[data-theme='light'] .logo-light {
+  display: block !important;
+}
+
+[data-theme='light'] .logo-dark,
+html[data-theme='light'] .logo-dark,
+body[data-theme='light'] .logo-dark {
+  display: none !important;
 }
 
 // ============================================
