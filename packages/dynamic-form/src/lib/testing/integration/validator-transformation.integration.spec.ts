@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { form, FieldPath, schema } from '@angular/forms/signals';
+import { form, schema } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { applyValidator, applyValidators } from '../../core/validation/validator-factory';
 import { ValidatorConfig } from '../../models';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
@@ -49,7 +50,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.email as FieldPath<string>);
+            applyValidator(config, path.email as SchemaPath<string>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -69,7 +70,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.age as FieldPath<number>);
+            applyValidator(config, path.age as SchemaPath<number>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -89,7 +90,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.age as FieldPath<number>);
+            applyValidator(config, path.age as SchemaPath<number>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -109,7 +110,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.username as FieldPath<string>);
+            applyValidator(config, path.username as SchemaPath<string>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -129,7 +130,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.username as FieldPath<string>);
+            applyValidator(config, path.username as SchemaPath<string>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -149,7 +150,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.code as FieldPath<string>);
+            applyValidator(config, path.code as SchemaPath<string>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -169,7 +170,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.zipCode as FieldPath<string>);
+            applyValidator(config, path.zipCode as SchemaPath<string>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -290,7 +291,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.age as FieldPath<number>);
+            applyValidator(config, path.age as SchemaPath<number>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -315,7 +316,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.age as FieldPath<number>);
+            applyValidator(config, path.age as SchemaPath<number>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -347,7 +348,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidators(configs, path.password as FieldPath<string>);
+            applyValidators(configs, path.password as SchemaPath<string>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -377,7 +378,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidators(configs, path.username as FieldPath<string>);
+            applyValidators(configs, path.username as SchemaPath<string>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -404,7 +405,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.email as FieldPath<string>);
+            applyValidator(config, path.email as SchemaPath<string>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -426,7 +427,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidator(config, path.phone as FieldPath<string>);
+            applyValidator(config, path.phone as SchemaPath<string>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);
@@ -449,7 +450,7 @@ describe('Validator Transformation Pipeline Integration', () => {
         const formInstance = form(
           formValue,
           schema<typeof formValue>((path) => {
-            applyValidators(configs, path.rating as FieldPath<number>);
+            applyValidators(configs, path.rating as SchemaPath<number>);
           })
         );
         rootFormRegistry.registerRootForm(formInstance);

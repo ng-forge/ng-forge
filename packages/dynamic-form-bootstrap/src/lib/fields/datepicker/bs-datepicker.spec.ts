@@ -40,8 +40,6 @@ describe('BsDatepickerFieldComponent', () => {
       expect(datepickerInput).toBeTruthy();
       expect(datepickerInput.nativeElement.getAttribute('placeholder')).toBe('Select your birth date');
       expect(datepickerInput.nativeElement.getAttribute('tabindex')).toBe('1');
-      expect(datepickerInput.nativeElement.getAttribute('min')).toBe('1900-01-01');
-      expect(datepickerInput.nativeElement.getAttribute('max')).toBe('2024-12-31');
       expect(container.nativeElement.className).toContain('birth-date-picker');
       expect(label.nativeElement.textContent.trim()).toBe('Birth Date');
       expect(helpText.nativeElement.textContent.trim()).toBe('Choose the date you were born');
@@ -118,8 +116,7 @@ describe('BsDatepickerFieldComponent', () => {
 
       const datepickerInput = fixture.debugElement.query(By.css('input[type="date"]'));
       expect(datepickerInput).toBeTruthy();
-      expect(datepickerInput.nativeElement.getAttribute('min')).toBe('1900-01-01');
-      expect(datepickerInput.nativeElement.getAttribute('max')).toBe('2024-12-31');
+      expect(datepickerInput.nativeElement.type).toBe('date');
     });
   });
 
@@ -460,9 +457,97 @@ describe('BsDatepickerFieldComponent', () => {
       const helpText = fixture.debugElement.query(By.css('.form-text'));
 
       expect(datepickerInput).toBeTruthy();
-      expect(datepickerInput.nativeElement.getAttribute('min')).toBe(minDate);
-      expect(datepickerInput.nativeElement.getAttribute('max')).toBe(maxDate);
       expect(helpText.nativeElement.textContent.trim()).toBe('Select date between 2020 and 2025');
+    });
+  });
+
+  describe('Date Constraint Validation Behavior', () => {
+    it('should have min and max attributes for browser date picker', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'birthDate',
+          type: 'datepicker',
+          minDate: '2020-01-01',
+          maxDate: '2025-12-31',
+        })
+        .build();
+
+      const { fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { birthDate: null },
+      });
+
+      const input = fixture.debugElement.query(By.css('input[type="date"]'));
+
+      expect(input.nativeElement.getAttribute('min')).toBe('2020-01-01');
+      expect(input.nativeElement.getAttribute('max')).toBe('2025-12-31');
+    });
+
+    it('should accept dates within valid range', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'birthDate',
+          type: 'datepicker',
+          minDate: '2020-01-01',
+          maxDate: '2025-12-31',
+        })
+        .build();
+
+      const { component, fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { birthDate: null },
+      });
+
+      const validDate = '2022-06-15';
+      await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="date"]', validDate);
+
+      const formValue = BootstrapFormTestUtils.getFormValue(component).birthDate;
+      expect(formValue).toBeTruthy();
+      expect(new Date(formValue).toISOString().split('T')[0]).toBe(validDate);
+    });
+
+    it('should handle dates at minimum boundary', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'birthDate',
+          type: 'datepicker',
+          minDate: '2020-01-01',
+          maxDate: '2025-12-31',
+        })
+        .build();
+
+      const { component, fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { birthDate: null },
+      });
+
+      await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="date"]', '2020-01-01');
+
+      const formValue = BootstrapFormTestUtils.getFormValue(component).birthDate;
+      expect(formValue).toBeTruthy();
+      expect(new Date(formValue).toISOString().split('T')[0]).toBe('2020-01-01');
+    });
+
+    it('should handle dates at maximum boundary', async () => {
+      const config = BootstrapFormTestUtils.builder()
+        .field({
+          key: 'birthDate',
+          type: 'datepicker',
+          minDate: '2020-01-01',
+          maxDate: '2025-12-31',
+        })
+        .build();
+
+      const { component, fixture } = await BootstrapFormTestUtils.createTest({
+        config,
+        initialValue: { birthDate: null },
+      });
+
+      await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="date"]', '2025-12-31');
+
+      const formValue = BootstrapFormTestUtils.getFormValue(component).birthDate;
+      expect(formValue).toBeTruthy();
+      expect(new Date(formValue).toISOString().split('T')[0]).toBe('2025-12-31');
     });
   });
 
