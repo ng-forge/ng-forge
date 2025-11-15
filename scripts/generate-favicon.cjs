@@ -12,7 +12,7 @@ async function generateFavicon() {
     console.log('🎨 Generating favicon.ico from logo-icon-light.svg...\n');
 
     const logoPath = path.join(__dirname, '..', 'logo-icon-light.svg');
-    const outputDir = path.join(__dirname, '..', 'apps/docs/src');
+    const outputDir = path.join(__dirname, '..', 'apps/docs/public');
 
     const sizes = [16, 32, 48];
     const pngBuffers = [];
