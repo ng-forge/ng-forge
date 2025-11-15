@@ -36,7 +36,7 @@ export function arrayItemFieldMapper(fieldDef: FieldDef<any>, options: FieldMapp
         // This uses Angular Signal Forms' native array support
         const arrayField = (formRoot as any)[arrayName];
         return arrayField ? arrayField[index] : undefined;
-      }),
+      })
     );
   } else {
     // Standard field access for non-array keys
@@ -46,7 +46,7 @@ export function arrayItemFieldMapper(fieldDef: FieldDef<any>, options: FieldMapp
         const childrenMap = (formRoot as any).structure?.childrenMap?.();
         const formField = childrenMap?.get(fieldDef.key);
         return formField?.fieldProxy;
-      }),
+      })
     );
   }
 

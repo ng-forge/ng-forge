@@ -317,7 +317,7 @@ describe('FunctionRegistryService', () => {
             callCount++;
             return callCount;
           };
-        })(),
+        })()
       );
 
       service.registerCustomFunction('statefulFn', statefulFunction);

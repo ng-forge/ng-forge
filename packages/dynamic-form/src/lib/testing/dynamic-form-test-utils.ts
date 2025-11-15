@@ -169,7 +169,7 @@ export class DynamicFormTestUtils {
       // Add input-specific bindings
       bindings.push(
         inputBinding('type', () => (fieldDef.props as Record<string, unknown>)?.['type'] || 'text'),
-        inputBinding('placeholder', () => (fieldDef.props as Record<string, unknown>)?.['placeholder'] || ''),
+        inputBinding('placeholder', () => (fieldDef.props as Record<string, unknown>)?.['placeholder'] || '')
       );
 
       return bindings;
@@ -269,7 +269,7 @@ export class DynamicFormTestUtils {
   private static async waitForElement<T extends Element>(
     fixture: ComponentFixture<DynamicForm>,
     selector: string,
-    maxAttempts = 10,
+    maxAttempts = 10
   ): Promise<T> {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const element = fixture.nativeElement.querySelector(selector) as T;

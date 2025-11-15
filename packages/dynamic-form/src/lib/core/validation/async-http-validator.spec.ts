@@ -101,7 +101,7 @@ describe('Async and HTTP Validator Integration', () => {
               expect(() => {
                 applyValidator(config, path.username);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -121,7 +121,7 @@ describe('Async and HTTP Validator Integration', () => {
             formValue,
             schema<typeof formValue>((path) => {
               applyValidator(config, path.field);
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -167,7 +167,7 @@ describe('Async and HTTP Validator Integration', () => {
               expect(() => {
                 applyValidator(config, path.field);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -208,7 +208,7 @@ describe('Async and HTTP Validator Integration', () => {
               expect(() => {
                 applyValidator(config, path.password);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -305,7 +305,7 @@ describe('Async and HTTP Validator Integration', () => {
               expect(() => {
                 applyValidator(config, path.username);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -325,7 +325,7 @@ describe('Async and HTTP Validator Integration', () => {
             formValue,
             schema<typeof formValue>((path) => {
               applyValidator(config, path.field);
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -362,7 +362,7 @@ describe('Async and HTTP Validator Integration', () => {
               expect(() => {
                 applyValidator(config, path.field);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -392,7 +392,7 @@ describe('Async and HTTP Validator Integration', () => {
               expect(() => {
                 applyValidator(config, path.field);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -435,7 +435,7 @@ describe('Async and HTTP Validator Integration', () => {
               expect(() => {
                 applyValidator(config, path.zipCode);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -470,7 +470,7 @@ describe('Async and HTTP Validator Integration', () => {
               expect(() => {
                 applyValidator(config, path.field);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -560,7 +560,7 @@ describe('Async and HTTP Validator Integration', () => {
               applyValidator({ type: 'custom', functionName: 'minLength' }, path.username);
               applyValidator({ type: 'customAsync', functionName: 'checkAvailable' }, path.username);
             }).not.toThrow();
-          }),
+          })
         );
         rootFormRegistry.registerRootForm(formInstance);
       });

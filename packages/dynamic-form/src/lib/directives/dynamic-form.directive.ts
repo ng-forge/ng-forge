@@ -57,7 +57,7 @@ export class FieldRendererDirective implements OnDestroy {
       () => {
         this.fieldsInitializedSubject.next();
       },
-      { injector: this.injector },
+      { injector: this.injector }
     );
   }
 

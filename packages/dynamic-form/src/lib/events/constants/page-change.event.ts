@@ -9,6 +9,6 @@ export class PageChangeEvent implements FormEvent {
     /** Total number of pages */
     public readonly totalPages: number,
     /** Previous page index (0-based), undefined if first navigation */
-    public readonly previousPageIndex?: number,
+    public readonly previousPageIndex?: number
   ) {}
 }

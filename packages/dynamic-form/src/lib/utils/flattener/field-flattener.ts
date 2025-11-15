@@ -82,7 +82,7 @@ export interface FlattenedField extends FieldDef<unknown> {
 export function flattenFields(
   fields: FieldDef<unknown>[],
   registry: Map<string, FieldTypeDefinition>,
-  options: { preserveRows?: boolean } = {},
+  options: { preserveRows?: boolean } = {}
 ): FlattenedField[] {
   const result: FlattenedField[] = [];
   let autoKeyCounter = 0;

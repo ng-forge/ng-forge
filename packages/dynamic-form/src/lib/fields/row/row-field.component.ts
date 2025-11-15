@@ -59,7 +59,7 @@ export default class RowFieldComponent {
     computed(() => {
       const rowField = this.field();
       return rowField.fields || [];
-    }),
+    })
   );
 
   fields = toSignal(
@@ -71,9 +71,9 @@ export default class RowFieldComponent {
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
     ),
-    { initialValue: [] },
+    { initialValue: [] }
   );
 
   private mapFields(fields: readonly any[]): Promise<ComponentRef<FormUiControl>>[] {
@@ -112,7 +112,7 @@ export default class RowFieldComponent {
           console.error(
             `[RowField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within row '${rowKey}'. Ensure the field type is registered in your field registry.`,
-            error,
+            error
           );
         }
         return undefined;

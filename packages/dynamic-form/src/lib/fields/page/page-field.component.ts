@@ -93,7 +93,7 @@ export default class PageFieldComponent {
       console.error(
         `[PageField] Invalid configuration: Page '${pageField.key}' contains nested page fields. ` +
           `Pages cannot contain other pages. Consider using groups or rows for nested structure.`,
-        pageField,
+        pageField
       );
     }
 
@@ -111,7 +111,7 @@ export default class PageFieldComponent {
       }
 
       return pageField.fields || [];
-    }),
+    })
   );
 
   fields = toSignal(
@@ -123,9 +123,9 @@ export default class PageFieldComponent {
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
     ),
-    { initialValue: [] },
+    { initialValue: [] }
   );
 
   private mapFields(fields: any[]): Promise<ComponentRef<FormUiControl>>[] {
@@ -159,7 +159,7 @@ export default class PageFieldComponent {
           console.error(
             `[PageField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within page '${pageKey}'. Ensure the field type is registered in your field registry.`,
-            error,
+            error
           );
         }
         return undefined;

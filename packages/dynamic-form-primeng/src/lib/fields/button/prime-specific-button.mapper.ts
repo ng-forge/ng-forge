@@ -9,7 +9,7 @@ import { FieldMapperOptions } from '@ng-forge/dynamic-form';
  */
 export function submitButtonFieldMapper(
   fieldDef: FieldDef<Record<string, unknown>>,
-  options?: Omit<FieldMapperOptions, 'fieldRegistry'>,
+  options?: Omit<FieldMapperOptions, 'fieldRegistry'>
 ): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
@@ -25,8 +25,8 @@ export function submitButtonFieldMapper(
           const explicitlyDisabled = fieldDef.disabled || false;
           const formInvalid = !form().valid();
           return explicitlyDisabled || formInvalid;
-        })(),
-      ),
+        })()
+      )
     );
   } else {
     // Fallback if no form context is available

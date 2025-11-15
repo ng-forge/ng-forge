@@ -13,73 +13,68 @@ import { AsyncPipe } from '@angular/common';
   imports: [Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let p = props();
-    @if (p?.floatingLabel) {
-      <!-- Floating label variant -->
-      <div class="form-floating mb-3">
-        <textarea
-          [field]="f"
-          [id]="key()"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [rows]="p?.rows || 4"
-          [attr.tabindex]="tabIndex()"
-          [disabled]="f().disabled()"
-          [readonly]="f().readonly()"
-          class="form-control"
-          [class.form-control-sm]="p?.size === 'sm'"
-          [class.form-control-lg]="p?.size === 'lg'"
-          [class.is-invalid]="f().invalid() && f().touched()"
-          [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-        ></textarea>
+    @let f = field(); @let p = props(); @if (p?.floatingLabel) {
+    <!-- Floating label variant -->
+    <div class="form-floating mb-3">
+      <textarea
+        [field]="f"
+        [id]="key()"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [rows]="p?.rows || 4"
+        [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      ></textarea>
 
-        @if (label()) {
-          <label [for]="key()">{{ label() | dynamicText | async }}</label>
-        }
-        @if (p?.validFeedback && f().valid() && f().touched()) {
-          <div class="valid-feedback d-block">
-            {{ p?.validFeedback | dynamicText | async }}
-          </div>
-        }
-        @for (error of errorsToDisplay(); track error.kind) {
-          <div class="invalid-feedback d-block">{{ error.message }}</div>
-        }
+      @if (label()) {
+      <label [for]="key()">{{ label() | dynamicText | async }}</label>
+      } @if (p?.validFeedback && f().valid() && f().touched()) {
+      <div class="valid-feedback d-block">
+        {{ p?.validFeedback | dynamicText | async }}
       </div>
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    </div>
     } @else {
-      <!-- Standard variant -->
-      <div class="mb-3">
-        @if (label()) {
-          <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
-        }
+    <!-- Standard variant -->
+    <div class="mb-3">
+      @if (label()) {
+      <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
+      }
 
-        <textarea
-          [field]="f"
-          [id]="key()"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [rows]="p?.rows || 4"
-          [attr.tabindex]="tabIndex()"
-          [disabled]="f().disabled()"
-          [readonly]="f().readonly()"
-          class="form-control"
-          [class.form-control-sm]="p?.size === 'sm'"
-          [class.form-control-lg]="p?.size === 'lg'"
-          [class.is-invalid]="f().invalid() && f().touched()"
-          [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-        ></textarea>
+      <textarea
+        [field]="f"
+        [id]="key()"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [rows]="p?.rows || 4"
+        [attr.tabindex]="tabIndex()"
+        [disabled]="f().disabled()"
+        [readonly]="f().readonly()"
+        class="form-control"
+        [class.form-control-sm]="p?.size === 'sm'"
+        [class.form-control-lg]="p?.size === 'lg'"
+        [class.is-invalid]="f().invalid() && f().touched()"
+        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+      ></textarea>
 
-        @if (p?.helpText) {
-          <div class="form-text">
-            {{ p?.helpText | dynamicText | async }}
-          </div>
-        }
-        @if (p?.validFeedback && f().valid() && f().touched()) {
-          <div class="valid-feedback d-block">
-            {{ p?.validFeedback | dynamicText | async }}
-          </div>
-        }
-        @for (error of errorsToDisplay(); track error.kind) {
-          <div class="invalid-feedback d-block">{{ error.message }}</div>
-        }
+      @if (p?.helpText) {
+      <div class="form-text">
+        {{ p?.helpText | dynamicText | async }}
       </div>
+      } @if (p?.validFeedback && f().valid() && f().touched()) {
+      <div class="valid-feedback d-block">
+        {{ p?.validFeedback | dynamicText | async }}
+      </div>
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    </div>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

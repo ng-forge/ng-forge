@@ -27,9 +27,7 @@
 // Animation support (optional - can be overridden by consumers)
 @media (prefers-reduced-motion: no-preference) {
   .df-page-container {
-    transition:
-      opacity 0.3s ease-in-out,
-      transform 0.3s ease-in-out;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
   }
 
   .df-page-container.df-page-visible {

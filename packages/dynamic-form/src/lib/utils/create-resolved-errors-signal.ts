@@ -38,7 +38,7 @@ export function createResolvedErrorsSignal<T>(
   field: Signal<FieldTree<T>>,
   validationMessages: Signal<ValidationMessages | undefined>,
   defaultValidationMessages: Signal<ValidationMessages | undefined> = signal(undefined),
-  injector = inject(Injector),
+  injector = inject(Injector)
 ): Signal<ResolvedError[]> {
   // Ensure validationMessages is never undefined (mappers pass {} if not defined)
   const messages = computed(() => validationMessages() ?? {});
@@ -71,7 +71,7 @@ export function createResolvedErrorsSignal<T>(
       return errorResolvers.length > 0
         ? combineLatest(errorResolvers).pipe(map((errors) => errors.filter((e): e is ResolvedError => e !== null)))
         : of([]);
-    }),
+    })
   );
 
   // Convert observable back to signal using toSignal with injector
@@ -88,7 +88,7 @@ function resolveErrorMessage(
   error: ValidationError,
   fieldMessages: ValidationMessages,
   defaultMessages: ValidationMessages,
-  injector: Injector,
+  injector: Injector
 ): Observable<ResolvedError | null> {
   // Check for field-level custom message first
   const fieldMessage = fieldMessages[error.kind];
@@ -103,7 +103,7 @@ function resolveErrorMessage(
   if (!messageToUse) {
     console.warn(
       `[ng-forge] No validation message found for error kind "${error.kind}". ` +
-        `Please provide a message via field-level validationMessages or form-level defaultValidationMessages.`,
+        `Please provide a message via field-level validationMessages or form-level defaultValidationMessages.`
     );
     return of(null);
   }
@@ -116,6 +116,6 @@ function resolveErrorMessage(
     map((msg) => ({
       kind: error.kind,
       message: interpolateParams(msg, error),
-    })),
+    }))
   );
 }

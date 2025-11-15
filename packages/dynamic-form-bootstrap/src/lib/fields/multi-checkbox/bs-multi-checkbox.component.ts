@@ -19,43 +19,41 @@ import { AsyncPipe } from '@angular/common';
   imports: [DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-    @if (label(); as label) {
-      <div class="form-label">{{ label | dynamicText | async }}</div>
+    @let f = field(); @if (label(); as label) {
+    <div class="form-label">{{ label | dynamicText | async }}</div>
     }
 
     <div class="checkbox-group">
       @for (option of options(); track option.value; let i = $index) {
-        <div
-          class="form-check"
-          [class.form-switch]="props()?.switch"
-          [class.form-check-inline]="props()?.inline"
-          [class.form-check-reverse]="props()?.reverse"
-        >
-          <input
-            type="checkbox"
-            [id]="key() + '_' + i"
-            [checked]="isChecked(option)"
-            [disabled]="f().disabled() || option.disabled"
-            (change)="onCheckboxChange(option, $any($event.target).checked)"
-            class="form-check-input"
-            [class.is-invalid]="f().invalid() && f().touched()"
-            [attr.tabindex]="tabIndex()"
-          />
-          <label [for]="key() + '_' + i" class="form-check-label">
-            {{ option.label | dynamicText | async }}
-          </label>
-        </div>
+      <div
+        class="form-check"
+        [class.form-switch]="props()?.switch"
+        [class.form-check-inline]="props()?.inline"
+        [class.form-check-reverse]="props()?.reverse"
+      >
+        <input
+          type="checkbox"
+          [id]="key() + '_' + i"
+          [checked]="isChecked(option)"
+          [disabled]="f().disabled() || option.disabled"
+          (change)="onCheckboxChange(option, $any($event.target).checked)"
+          class="form-check-input"
+          [class.is-invalid]="f().invalid() && f().touched()"
+          [attr.tabindex]="tabIndex()"
+        />
+        <label [for]="key() + '_' + i" class="form-check-label">
+          {{ option.label | dynamicText | async }}
+        </label>
+      </div>
       }
     </div>
 
     @if (props()?.helpText; as helpText) {
-      <div class="form-text">
-        {{ helpText | dynamicText | async }}
-      </div>
-    }
-    @for (error of errorsToDisplay(); track error.kind) {
-      <div class="invalid-feedback d-block">{{ error.message }}</div>
+    <div class="form-text">
+      {{ helpText | dynamicText | async }}
+    </div>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <div class="invalid-feedback d-block">{{ error.message }}</div>
     }
   `,
   styles: [
@@ -107,7 +105,7 @@ export default class BsMultiCheckboxFieldComponent<T extends ValueType> implemen
       const currentValues = this.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
-    { equal: isEqual },
+    { equal: isEqual }
   );
 
   constructor() {

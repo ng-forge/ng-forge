@@ -24,7 +24,7 @@ export class FieldContextRegistryService {
   createEvaluationContext<TValue>(
     fieldContext: FieldContext<TValue>,
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
-    formId = 'default',
+    formId = 'default'
   ): EvaluationContext {
     const fieldValue = fieldContext.value();
 
@@ -100,7 +100,7 @@ export class FieldContextRegistryService {
    */
   createFallbackContext<TValue>(
     fieldContext: FieldContext<TValue>,
-    customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
+    customFunctions?: Record<string, (context: EvaluationContext) => unknown>
   ): EvaluationContext {
     const fieldValue = fieldContext.value();
 

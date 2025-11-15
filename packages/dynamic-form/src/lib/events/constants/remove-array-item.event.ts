@@ -23,6 +23,6 @@ export class RemoveArrayItemEvent implements FormEvent {
     /** The key of the array field to remove an item from */
     public readonly arrayKey: string,
     /** Index of the item to remove (defaults to last item) */
-    public readonly index?: number,
+    public readonly index?: number
   ) {}
 }

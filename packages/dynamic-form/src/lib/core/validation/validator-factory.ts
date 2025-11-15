@@ -159,7 +159,7 @@ function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: 
  * Create a function-based validator using registered validator functions
  */
 function createFunctionValidator<TValue>(
-  config: CustomValidatorConfig,
+  config: CustomValidatorConfig
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const registry = inject(FunctionRegistryService);
   const validatorFn = registry.getValidator(config.functionName!);
@@ -167,7 +167,7 @@ function createFunctionValidator<TValue>(
   if (!validatorFn) {
     console.warn(
       `[DynamicForm] Custom validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using signalFormsConfig.validators or check the function name for typos.`,
+        `Ensure it's registered using signalFormsConfig.validators or check the function name for typos.`
     );
     return () => null;
   }
@@ -181,7 +181,7 @@ function createFunctionValidator<TValue>(
  * Create an expression-based validator using secure AST evaluation
  */
 function createExpressionValidator<TValue>(
-  config: CustomValidatorConfig,
+  config: CustomValidatorConfig
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
@@ -243,7 +243,7 @@ function applyAsyncValidator<TValue>(config: AsyncValidatorConfig, fieldPath: Fi
   if (!validatorConfig) {
     console.warn(
       `[DynamicForm] Async validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using signalFormsConfig.asyncValidators or check the function name for typos.`,
+        `Ensure it's registered using signalFormsConfig.asyncValidators or check the function name for typos.`
     );
     return;
   }
@@ -294,7 +294,7 @@ function applyHttpValidator<TValue>(config: HttpValidatorConfig, fieldPath: Fiel
   if (!httpValidatorConfig) {
     console.warn(
       `[DynamicForm] HTTP validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using signalFormsConfig.httpValidators or check the function name for typos.`,
+        `Ensure it's registered using signalFormsConfig.httpValidators or check the function name for typos.`
     );
     return;
   }

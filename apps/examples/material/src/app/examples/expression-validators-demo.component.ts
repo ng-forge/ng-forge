@@ -29,7 +29,7 @@ const noSpaces: CustomValidator = (ctx) => {
         <pre>{{ formValue() | json }}</pre>
 
         @if (submitMessage()) {
-          <div class="submit-success">{{ submitMessage() }}</div>
+        <div class="submit-success">{{ submitMessage() }}</div>
         }
       </div>
     </div>

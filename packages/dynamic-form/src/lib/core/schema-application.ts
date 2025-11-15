@@ -19,7 +19,7 @@ export function applySchema<TValue>(config: SchemaApplicationConfig, fieldPath: 
     console.error(
       `[Schema] Schema not found: '${config.schema}'. ` +
         `Available schemas: ${availableSchemas}. ` +
-        `Ensure the schema is registered in your schema registry.`,
+        `Ensure the schema is registered in your schema registry.`
     );
     return;
   }

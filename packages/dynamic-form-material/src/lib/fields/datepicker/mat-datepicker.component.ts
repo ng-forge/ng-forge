@@ -38,7 +38,7 @@ import { AsyncPipe } from '@angular/common';
       [class]="className() || ''"
     >
       @if (label(); as label) {
-        <mat-label>{{ label | dynamicText | async }}</mat-label>
+      <mat-label>{{ label | dynamicText | async }}</mat-label>
       }
 
       <input
@@ -55,10 +55,9 @@ import { AsyncPipe } from '@angular/common';
       <mat-datepicker #picker [startAt]="startAt()" [startView]="props()?.startView || 'month'" [touchUi]="props()?.touchUi ?? false" />
 
       @if (props()?.hint; as hint) {
-        <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
-      }
-      @for (error of errorsToDisplay(); track error.kind) {
-        <mat-error>{{ error.message }}</mat-error>
+      <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
+      } @for (error of errorsToDisplay(); track error.kind) {
+      <mat-error>{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,

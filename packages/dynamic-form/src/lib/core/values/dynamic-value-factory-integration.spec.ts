@@ -19,7 +19,7 @@ describe('dynamic-value-factory (integration)', () => {
 
   function createMockFieldContext<T>(
     value: T,
-    mockFormValue: Record<string, unknown> = { username: 'test', email: 'test@example.com' },
+    mockFormValue: Record<string, unknown> = { username: 'test', email: 'test@example.com' }
   ): FieldContext<T> {
     const formValueSignal = signal(mockFormValue);
     const mockRootField = Object.assign(
@@ -30,14 +30,14 @@ describe('dynamic-value-factory (integration)', () => {
         touched: signal(false),
         dirty: signal(false),
       }),
-      { formValue: formValueSignal },
+      { formValue: formValueSignal }
     ) as FieldTree<unknown>;
 
     return {
       value: signal(value),
       field: mockRootField,
       valueOf: () => mockFormValue,
-      stateOf: () => ({}) as any,
+      stateOf: () => ({} as any),
     } as any;
   }
 
@@ -63,7 +63,7 @@ describe('dynamic-value-factory (integration)', () => {
           touched: signal(false),
           dirty: signal(false),
         }),
-        { formValue: mockFormValue },
+        { formValue: mockFormValue }
       ) as FieldTree<unknown>;
       rootFormRegistry.registerRootForm(mockRootField);
 
@@ -86,7 +86,7 @@ describe('dynamic-value-factory (integration)', () => {
           touched: signal(false),
           dirty: signal(false),
         }),
-        { formValue: mockFormValue },
+        { formValue: mockFormValue }
       ) as FieldTree<unknown>;
       rootFormRegistry.registerRootForm(mockRootField);
 

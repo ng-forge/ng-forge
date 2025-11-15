@@ -163,14 +163,12 @@ type FieldType = 'input' | 'select' | 'checkbox';
   selector: 'app-user-form',
   imports: [CommonModule, FormsModule],
   template: `
-    @let user = userSignal();
-    @if (user) {
-      <div>{{ user.name }}</div>
+    @let user = userSignal(); @if (user) {
+    <div>{{ user.name }}</div>
     } @else {
-      <div>Loading...</div>
-    }
-    @for (item of items(); track item.id) {
-      <div>{{ item.name }}</div>
+    <div>Loading...</div>
+    } @for (item of items(); track item.id) {
+    <div>{{ item.name }}</div>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

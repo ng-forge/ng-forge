@@ -145,9 +145,9 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
     ),
-    { initialValue: [] },
+    { initialValue: [] }
   );
 
   /**
@@ -159,7 +159,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
       .on<AddArrayItemEvent>('add-array-item')
       .pipe(
         takeUntilDestroyed(),
-        filter((event) => event.arrayKey === this.key()),
+        filter((event) => event.arrayKey === this.key())
       )
       .subscribe((event) => this.addItem(event.index));
 
@@ -167,7 +167,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
       .on<RemoveArrayItemEvent>('remove-array-item')
       .pipe(
         takeUntilDestroyed(),
-        filter((event) => event.arrayKey === this.key()),
+        filter((event) => event.arrayKey === this.key())
       )
       .subscribe((event) => this.removeItem(event.index));
   }
@@ -265,7 +265,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
           console.error(
             `[ArrayField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within array '${arrayKey}'. Ensure the field type is registered in your field registry.`,
-            error,
+            error
           );
         }
         return undefined;

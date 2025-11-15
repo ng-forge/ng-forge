@@ -272,16 +272,16 @@ import { SuperUIInputComponent, SuperUIInputProps } from './superui-input.type';
     <div class="df-superui-field">
       <!-- Label -->
       @if (label(); as label) {
-        <label [for]="key()" class="df-superui-label">
-          {{ label | dynamicText | async }}
-        </label>
+      <label [for]="key()" class="df-superui-label">
+        {{ label | dynamicText | async }}
+      </label>
       }
 
       <!-- Input Container -->
       <div class="df-superui-input-container">
         <!-- Left Icon -->
         @if (props()?.icon && props()?.iconPosition === 'left') {
-          <super-icon [name]="props()!.icon" />
+        <super-icon [name]="props()!.icon" />
         }
 
         <!-- Input -->
@@ -298,15 +298,15 @@ import { SuperUIInputComponent, SuperUIInputProps } from './superui-input.type';
 
         <!-- Right Icon -->
         @if (props()?.icon && props()?.iconPosition === 'right') {
-          <super-icon [name]="props()!.icon" />
+        <super-icon [name]="props()!.icon" />
         }
       </div>
 
       <!-- Hint -->
       @if (props()?.hint; as hint) {
-        <div class="df-superui-hint">
-          {{ hint | dynamicText | async }}
-        </div>
+      <div class="df-superui-hint">
+        {{ hint | dynamicText | async }}
+      </div>
       }
 
       <!-- Errors -->
@@ -503,11 +503,11 @@ import { ValidationErrors } from '@angular/forms';
   selector: 'df-superui-errors',
   template: `
     @if (shouldShowErrors()) {
-      <div class="df-superui-errors">
-        @for (error of errorMessages(); track error) {
-          <div class="df-superui-error">{{ error }}</div>
-        }
-      </div>
+    <div class="df-superui-errors">
+      @for (error of errorMessages(); track error) {
+      <div class="df-superui-error">{{ error }}</div>
+      }
+    </div>
     }
   `,
   styleUrl: '../styles/_form-field.scss',

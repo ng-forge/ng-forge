@@ -39,13 +39,13 @@ import { AsyncPipe } from '@angular/common';
       [attr.tabindex]="tabIndex()"
     >
       @for (option of options(); track option.value) {
-        <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
-          {{ option.label | dynamicText | async }}
-        </ion-select-option>
+      <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
+        {{ option.label | dynamicText | async }}
+      </ion-select-option>
       }
       <div slot="error">
         @for (error of errorsToDisplay(); track error.kind) {
-          <ion-note color="danger">{{ error.message }}</ion-note>
+        <ion-note color="danger">{{ error.message }}</ion-note>
         }
       </div>
     </ion-select>

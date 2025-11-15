@@ -10,9 +10,8 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-mat-slider',
   imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe],
   template: `
-    @let f = field();
-    @if (label(); as label) {
-      <div class="slider-label">{{ label | dynamicText | async }}</div>
+    @let f = field(); @if (label(); as label) {
+    <div class="slider-label">{{ label | dynamicText | async }}</div>
     }
 
     <mat-slider
@@ -28,10 +27,9 @@ import { AsyncPipe } from '@angular/common';
     </mat-slider>
 
     @if (props()?.hint; as hint) {
-      <div class="mat-hint">{{ hint | dynamicText | async }}</div>
-    }
-    @for (error of errorsToDisplay(); track error.kind) {
-      <mat-error>{{ error.message }}</mat-error>
+    <div class="mat-hint">{{ hint | dynamicText | async }}</div>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <mat-error>{{ error.message }}</mat-error>
     }
   `,
   styles: [

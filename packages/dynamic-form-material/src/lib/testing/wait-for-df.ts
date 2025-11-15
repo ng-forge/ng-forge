@@ -61,7 +61,7 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
     // Check for field components and Material components
     const fieldComponents = formElement.querySelectorAll('[data-testid]');
     const materialComponents = formElement.querySelectorAll(
-      'mat-checkbox, mat-slide-toggle, mat-radio-group, mat-select, input[matInput], textarea[matInput], mat-slider, button[mat-button], button[mat-raised-button], button[mat-flat-button]',
+      'mat-checkbox, mat-slide-toggle, mat-radio-group, mat-select, input[matInput], textarea[matInput], mat-slider, button[mat-button], button[mat-raised-button], button[mat-flat-button]'
     );
 
     const currentComponentCount = fieldComponents.length + materialComponents.length;

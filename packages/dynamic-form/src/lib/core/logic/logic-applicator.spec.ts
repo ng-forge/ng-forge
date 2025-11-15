@@ -35,7 +35,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.email);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -60,7 +60,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.email);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -82,7 +82,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.email);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -103,7 +103,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.email);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -125,7 +125,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.email);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -145,7 +145,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.email);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -165,7 +165,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.email);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -186,7 +186,7 @@ describe('logic-applicator', () => {
             formValue,
             schema<typeof formValue>((path) => {
               applyLogic(config, path.email);
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
 
@@ -211,7 +211,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.field);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -236,7 +236,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.email);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -257,7 +257,7 @@ describe('logic-applicator', () => {
               expect(() => {
                 applyLogic(config, path.email);
               }).not.toThrow();
-            }),
+            })
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -280,7 +280,7 @@ describe('logic-applicator', () => {
             expect(() => {
               applyMultipleLogic(configs, path.email);
             }).not.toThrow();
-          }),
+          })
         );
         rootFormRegistry.registerRootForm(formInstance);
       });
@@ -297,7 +297,7 @@ describe('logic-applicator', () => {
             expect(() => {
               applyMultipleLogic(configs, path.email);
             }).not.toThrow();
-          }),
+          })
         );
         rootFormRegistry.registerRootForm(formInstance);
       });
@@ -317,7 +317,7 @@ describe('logic-applicator', () => {
             expect(() => {
               applyMultipleLogic(configs, path.email);
             }).not.toThrow();
-          }),
+          })
         );
         rootFormRegistry.registerRootForm(formInstance);
       });
@@ -336,7 +336,7 @@ describe('logic-applicator', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyMultipleLogic(configs, path.email);
-          }),
+          })
         );
         rootFormRegistry.registerRootForm(formInstance);
 

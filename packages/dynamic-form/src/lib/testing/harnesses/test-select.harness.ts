@@ -11,7 +11,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
     <select [field]="f">
       <option value="">Select...</option>
       @for (option of options(); track option.value) {
-        <option [value]="option.value">{{ option.label }}</option>
+      <option [value]="option.value">{{ option.label }}</option>
       }
     </select>
   `,

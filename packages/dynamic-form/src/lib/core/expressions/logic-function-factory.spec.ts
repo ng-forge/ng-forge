@@ -43,7 +43,7 @@ describe('logic-function-factory', () => {
       expression: ConditionalExpression,
       fieldValue: T,
       mockValueOf?: (path: any) => any,
-      customFormValue?: any,
+      customFormValue?: any
     ): boolean {
       return runInInjectionContext(injector, () => {
         // Set up the root form registry with mock data
@@ -60,7 +60,7 @@ describe('logic-function-factory', () => {
             touched: signal(false),
             dirty: signal(false),
           }),
-          { formValue: mockFormValue },
+          { formValue: mockFormValue }
         ) as any;
 
         rootFormRegistry.registerRootForm(mockRootField);
@@ -182,7 +182,7 @@ describe('logic-function-factory', () => {
             customFunctions: expect.objectContaining({
               validateField: mockCustomFn,
             }),
-          }),
+          })
         );
       });
 

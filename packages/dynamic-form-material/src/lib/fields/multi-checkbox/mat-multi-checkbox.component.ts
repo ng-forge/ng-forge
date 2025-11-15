@@ -21,30 +21,28 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-mat-multi-checkbox',
   imports: [MatCheckbox, ValueInArrayPipe, MatError, DynamicTextPipe, AsyncPipe],
   template: `
-    @let f = field();
-    @if (label(); as label) {
-      <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
+    @let f = field(); @if (label(); as label) {
+    <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
     <div class="checkbox-group">
       @for (option of options(); track option.value) {
-        <mat-checkbox
-          [checked]="option | inArray: valueViewModel()"
-          [disabled]="f().disabled() || option.disabled"
-          [color]="props()?.color || 'primary'"
-          [labelPosition]="props()?.labelPosition || 'after'"
-          (change)="onCheckboxChange(option, $event.checked)"
-        >
-          {{ option.label | dynamicText | async }}
-        </mat-checkbox>
+      <mat-checkbox
+        [checked]="option | inArray : valueViewModel()"
+        [disabled]="f().disabled() || option.disabled"
+        [color]="props()?.color || 'primary'"
+        [labelPosition]="props()?.labelPosition || 'after'"
+        (change)="onCheckboxChange(option, $event.checked)"
+      >
+        {{ option.label | dynamicText | async }}
+      </mat-checkbox>
       }
     </div>
 
     @if (props()?.hint; as hint) {
-      <div class="mat-hint">{{ hint | dynamicText | async }}</div>
-    }
-    @for (error of errorsToDisplay(); track error.kind) {
-      <mat-error>{{ error.message }}</mat-error>
+    <div class="mat-hint">{{ hint | dynamicText | async }}</div>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <mat-error>{{ error.message }}</mat-error>
     }
   `,
   styles: [
@@ -85,7 +83,7 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
       const currentValues = this.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
-    { equal: isEqual },
+    { equal: isEqual }
   );
 
   constructor() {

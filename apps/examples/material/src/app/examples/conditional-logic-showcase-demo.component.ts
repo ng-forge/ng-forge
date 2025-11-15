@@ -11,14 +11,13 @@ import { JsonPipe } from '@angular/common';
   template: `
     <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
 
-    @let message = submitMessage();
-    @if (message) {
-      <div
-        class="success-message"
-        style="margin-top: 2rem; padding: 1.5rem; background-color: #4caf50; color: white; border-radius: 4px; text-align: center;"
-      >
-        {{ message }}
-      </div>
+    @let message = submitMessage(); @if (message) {
+    <div
+      class="success-message"
+      style="margin-top: 2rem; padding: 1.5rem; background-color: #4caf50; color: white; border-radius: 4px; text-align: center;"
+    >
+      {{ message }}
+    </div>
     }
 
     <div class="example-result" style="margin-top: 2rem;">
@@ -1163,14 +1162,14 @@ export class ConditionalLogicShowcaseDemoComponent {
       value.certificationType === 'associate'
         ? 'Associate'
         : value.certificationType === 'professional'
-          ? 'Professional'
-          : value.certificationType === 'expert'
-            ? 'Expert'
-            : 'Specialist';
+        ? 'Professional'
+        : value.certificationType === 'expert'
+        ? 'Expert'
+        : 'Specialist';
 
     this.submitMessage.set(
       `Thank you, ${value.firstName}! Your ${certType} certification application has been submitted successfully. ` +
-        `You will receive a confirmation email at ${value.email} within 24 hours.`,
+        `You will receive a confirmation email at ${value.email} within 24 hours.`
     );
   }
 }

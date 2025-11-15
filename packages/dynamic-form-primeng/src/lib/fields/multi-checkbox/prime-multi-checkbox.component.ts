@@ -22,30 +22,28 @@ import { AsyncPipe } from '@angular/common';
   imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormsModule],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-    @if (label(); as label) {
-      <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
+    @let f = field(); @if (label(); as label) {
+    <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
     <div class="checkbox-group" [class]="groupClasses()">
       @for (option of options(); track option.value) {
-        <div class="checkbox-option">
-          <p-checkbox
-            [inputId]="key() + '-' + option.value"
-            [binary]="false"
-            [value]="option.value"
-            [(ngModel)]="valueViewModel"
-            [disabled]="f().disabled() || option.disabled || false"
-          />
-          <label [for]="key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
-        </div>
+      <div class="checkbox-option">
+        <p-checkbox
+          [inputId]="key() + '-' + option.value"
+          [binary]="false"
+          [value]="option.value"
+          [(ngModel)]="valueViewModel"
+          [disabled]="f().disabled() || option.disabled || false"
+        />
+        <label [for]="key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
+      </div>
       }
     </div>
     @if (props()?.hint; as hint) {
-      <small class="p-hint">{{ hint | dynamicText | async }}</small>
-    }
-    @for (error of errorsToDisplay(); track error.kind) {
-      <small class="p-error">{{ error.message }}</small>
+    <small class="p-hint">{{ hint | dynamicText | async }}</small>
+    } @for (error of errorsToDisplay(); track error.kind) {
+    <small class="p-error">{{ error.message }}</small>
     }
   `,
   styles: [

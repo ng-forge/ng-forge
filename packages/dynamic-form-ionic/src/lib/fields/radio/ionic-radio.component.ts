@@ -19,29 +19,28 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-ionic-radio',
   imports: [IonRadioGroup, IonRadio, IonItem, IonNote, Field, DynamicTextPipe, AsyncPipe],
   template: `
-    @let f = field();
-    @if (label(); as label) {
-      <div class="radio-label">{{ label | dynamicText | async }}</div>
+    @let f = field(); @if (label(); as label) {
+    <div class="radio-label">{{ label | dynamicText | async }}</div>
     }
 
     <ion-radio-group [field]="f" [compareWith]="props()?.compareWith || defaultCompare">
       @for (option of options(); track option.value) {
-        <ion-item [lines]="'none'">
-          <ion-radio
-            [value]="option.value"
-            [disabled]="f().disabled() || option.disabled || false"
-            [labelPlacement]="props()?.labelPlacement ?? 'end'"
-            [justify]="props()?.justify"
-            [color]="props()?.color ?? 'primary'"
-          >
-            {{ option.label | dynamicText | async }}
-          </ion-radio>
-        </ion-item>
+      <ion-item [lines]="'none'">
+        <ion-radio
+          [value]="option.value"
+          [disabled]="f().disabled() || option.disabled || false"
+          [labelPlacement]="props()?.labelPlacement ?? 'end'"
+          [justify]="props()?.justify"
+          [color]="props()?.color ?? 'primary'"
+        >
+          {{ option.label | dynamicText | async }}
+        </ion-radio>
+      </ion-item>
       }
     </ion-radio-group>
 
     @for (error of errorsToDisplay(); track error.kind) {
-      <ion-note color="danger">{{ error.message }}</ion-note>
+    <ion-note color="danger">{{ error.message }}</ion-note>
     }
   `,
   styles: [

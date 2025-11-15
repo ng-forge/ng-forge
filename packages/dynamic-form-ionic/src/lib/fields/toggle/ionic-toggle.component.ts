@@ -27,7 +27,7 @@ import { AsyncPipe } from '@angular/common';
     </ion-toggle>
 
     @for (error of errorsToDisplay(); track error.kind) {
-      <ion-note color="danger">{{ error.message }}</ion-note>
+    <ion-note color="danger">{{ error.message }}</ion-note>
     }
   `,
   styles: [

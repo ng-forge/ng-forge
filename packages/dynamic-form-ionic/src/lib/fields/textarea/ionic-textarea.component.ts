@@ -28,12 +28,12 @@ import { AsyncPipe } from '@angular/common';
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
       [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-      [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
+      [errorText]="f().invalid() && f().touched() ? (props()?.errorText | dynamicText | async) ?? undefined : undefined"
       [attr.tabindex]="tabIndex()"
     >
       <div slot="error">
         @for (error of errorsToDisplay(); track error.kind) {
-          <ion-note color="danger">{{ error.message }}</ion-note>
+        <ion-note color="danger">{{ error.message }}</ion-note>
         }
       </div>
     </ion-textarea>

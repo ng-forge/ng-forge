@@ -74,7 +74,7 @@ The root component that applications interact with:
   selector: 'dynamic-form',
   template: `
     @for (fieldContext of fieldContexts(); track fieldContext.fieldDef.key) {
-      <dynamic-field [context]="fieldContext" />
+    <dynamic-field [context]="fieldContext" />
     }
   `,
 })
@@ -691,7 +691,7 @@ export class EventBus {
   on<T extends FormEvent>(eventType: FormEventConstructor<T>): Observable<T> {
     return this.subject.pipe(
       filter((event) => event.type === eventType.eventName),
-      map((event) => event as T),
+      map((event) => event as T)
     );
   }
 }
