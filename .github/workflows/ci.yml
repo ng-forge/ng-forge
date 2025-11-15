@@ -42,6 +42,9 @@ jobs:
           path: |
             dist/packages/dynamic-form
             dist/packages/dynamic-form-material
+            dist/packages/dynamic-form-bootstrap
+            dist/packages/dynamic-form-ionic
+            dist/packages/dynamic-form-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
@@ -77,6 +80,9 @@ jobs:
           path: |
             dist/packages/dynamic-form
             dist/packages/dynamic-form-material
+            dist/packages/dynamic-form-bootstrap
+            dist/packages/dynamic-form-ionic
+            dist/packages/dynamic-form-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
@@ -118,6 +124,9 @@ jobs:
           path: |
             dist/packages/dynamic-form
             dist/packages/dynamic-form-material
+            dist/packages/dynamic-form-bootstrap
+            dist/packages/dynamic-form-ionic
+            dist/packages/dynamic-form-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
@@ -165,6 +174,9 @@ jobs:
           path: |
             dist/packages/dynamic-form
             dist/packages/dynamic-form-material
+            dist/packages/dynamic-form-bootstrap
+            dist/packages/dynamic-form-ionic
+            dist/packages/dynamic-form-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
