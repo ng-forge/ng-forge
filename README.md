@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="logo.svg" alt="ng-forge logo" width="200"/>
+  <img src="logo.svg" alt="ng-forge logo" width="400"/>
 </p>
-
-# Ng-Forge Dynamic Forms
 
 **Stop writing repetitive form code.** Build type-safe, dynamic Angular forms in minutes, not hours.
 
