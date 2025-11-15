@@ -96,18 +96,18 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
       (submit)="onSubmit($event)"
     >
       @if (formModeDetection().mode === 'paged') {
-      <!-- Paged form: Use page orchestrator with page field definitions -->
-      <page-orchestrator
-        [pageFields]="pageFieldDefinitions()"
-        [form]="form()"
-        [fieldSignalContext]="fieldSignalContext()"
-        [config]="{ initialPageIndex: 0 }"
-      />
+        <!-- Paged form: Use page orchestrator with page field definitions -->
+        <page-orchestrator
+          [pageFields]="pageFieldDefinitions()"
+          [form]="form()"
+          [fieldSignalContext]="fieldSignalContext()"
+          [config]="{ initialPageIndex: 0 }"
+        />
       } @else {
-      <!-- Non-paged form: Render fields directly with grid system -->
-      <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-        <!-- Fields will be automatically rendered by the fieldRenderer directive -->
-      </div>
+        <!-- Non-paged form: Render fields directly with grid system -->
+        <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+          <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+        </div>
       }
     </form>
   `,
@@ -144,7 +144,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
       const registryKeys = Array.from(registry.keys()).sort().join('|');
       return `${fieldKeys}__${registryKeys}`;
-    }
+    },
   );
 
   private readonly memoizedFlattenFieldsForRendering = memoize(
@@ -154,13 +154,13 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
       const registryKeys = Array.from(registry.keys()).sort().join('|');
       return `render_${fieldKeys}__${registryKeys}`;
-    }
+    },
   );
 
   private readonly memoizedKeyBy = memoize(
     <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
     // Optimized key generation - fields already have keys
-    (fields) => fields.map((f) => f.key).join('|')
+    (fields) => fields.map((f) => f.key).join('|'),
   );
 
   private readonly memoizedDefaultValues = memoize(
@@ -181,7 +181,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       const fieldKeys = Object.keys(fieldsById).sort().join('|');
       const registryKeys = Array.from(registry.keys()).sort().join('|');
       return `defaults_${fieldKeys}__${registryKeys}`;
-    }
+    },
   );
 
   // Memoized field signal context to avoid recreation for every field
@@ -192,7 +192,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       defaultValues: this.defaultValues,
       form: this.form(),
       defaultValidationMessages: this.config().defaultValidationMessages,
-    })
+    }),
   );
 
   // Memoized field registry raw access
@@ -566,7 +566,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   public onPageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
 
   public onPageNavigationStateChange = outputFromObservable(
-    this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change')
+    this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change'),
   );
 
   private fields$ = toObservable(computed(() => this.formSetup().fields));
@@ -580,9 +580,9 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter(Boolean))
+      map((components) => components.filter(Boolean)),
     ),
-    { initialValue: [] }
+    { initialValue: [] },
   );
 
   private mapFields(fields: FieldDef<unknown>[]): Promise<ComponentRef<FormUiControl>>[] {
@@ -625,7 +625,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
           console.error(
             `[DynamicForm] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
               `Ensure the field type is registered in your field registry.`,
-            error
+            error,
           );
         }
         return undefined;
@@ -672,12 +672,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
             return this.eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
               filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
               map(() => true),
-              take(1) // Only take the first initialization event
+              take(1), // Only take the first initialization event
             );
           }
 
           return createInitializationTracker(this.eventBus, count);
-        })
+        }),
       )
       .subscribe({
         next: (initialized) => {

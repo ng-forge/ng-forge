@@ -269,7 +269,7 @@ export class DynamicFormTestUtils {
   private static async waitForElement<T extends Element>(
     fixture: ComponentFixture<DynamicForm>,
     selector: string,
-    maxAttempts = 10
+    maxAttempts = 10,
   ): Promise<T> {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const element = fixture.nativeElement.querySelector(selector) as T;

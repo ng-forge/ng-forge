@@ -112,7 +112,7 @@ export default class RowFieldComponent {
           console.error(
             `[RowField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within row '${rowKey}'. Ensure the field type is registered in your field registry.`,
-            error
+            error,
           );
         }
         return undefined;

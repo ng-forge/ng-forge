@@ -38,10 +38,13 @@ export function omit<T extends Record<string, any>, K extends keyof T>(obj: T, k
  * ```
  */
 export function keyBy<T extends Record<string, any>>(array: T[], key: keyof T): Record<string, T> {
-  return array.reduce((acc, item) => {
-    acc[item[key]] = item;
-    return acc;
-  }, {} as Record<string, T>);
+  return array.reduce(
+    (acc, item) => {
+      acc[item[key]] = item;
+      return acc;
+    },
+    {} as Record<string, T>,
+  );
 }
 
 /**
@@ -59,8 +62,11 @@ export function keyBy<T extends Record<string, any>>(array: T[], key: keyof T): 
  * ```
  */
 export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: string) => U): Record<string, U> {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
-    acc[key] = fn(value, key);
-    return acc;
-  }, {} as Record<string, U>);
+  return Object.entries(obj).reduce(
+    (acc, [key, value]) => {
+      acc[key] = fn(value, key);
+      return acc;
+    },
+    {} as Record<string, U>,
+  );
 }
