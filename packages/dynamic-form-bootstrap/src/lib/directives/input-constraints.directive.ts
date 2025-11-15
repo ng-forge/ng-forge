@@ -1,4 +1,4 @@
-import { Directive, effect, ElementRef, inject, input } from '@angular/core';
+import { Directive, ElementRef, inject, input } from '@angular/core';
 import { explicitEffect } from 'ngxtension';
 
 /**
