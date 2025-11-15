@@ -1,6 +1,5 @@
 import { FieldDef } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
-import { entries } from 'lodash-es';
 import { getGridClassString } from '../../utils/grid-classes/grid-classes';
 
 export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
@@ -56,7 +55,7 @@ export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
     'validationMessages', // Handled in value/checkbox mappers
   ]);
 
-  for (const [key, value] of entries(fieldDef)) {
+  for (const [key, value] of Object.entries(fieldDef)) {
     if (!excludedKeys.has(key) && !validationKeys.has(key) && value !== undefined) {
       bindings.push(inputBinding(key, () => value));
     }

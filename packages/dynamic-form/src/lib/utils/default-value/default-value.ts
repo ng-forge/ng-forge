@@ -30,7 +30,7 @@ import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-t
  * }, registry); // { street: '', city: 'New York' }
  * ```
  */
-export function getFieldDefaultValue(field: FieldDef<any>, registry: Map<string, FieldTypeDefinition>): unknown {
+export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<string, FieldTypeDefinition>): unknown {
   const valueHandling = getFieldValueHandling(field.type, registry);
 
   // Fields with 'exclude' or 'flatten' handling don't contribute direct values
@@ -45,7 +45,7 @@ export function getFieldDefaultValue(field: FieldDef<any>, registry: Map<string,
 
   // Group fields with 'include' handling create nested objects
   if (field.type === 'group' && 'fields' in field) {
-    const fields = field.fields as readonly FieldDef<any>[];
+    const fields = field.fields as readonly FieldDef<unknown>[];
     if (!fields || fields.length === 0) {
       return undefined;
     }
@@ -62,17 +62,22 @@ export function getFieldDefaultValue(field: FieldDef<any>, registry: Map<string,
     return groupDefaults;
   }
 
-  if ('value' in field && field.value !== undefined) {
-    return field.value;
-  }
-
-  if ('value' in field && field.value === null) {
-    if (field.type === 'checkbox') {
-      return false;
+  // Use explicit value if provided, with type-specific handling for null
+  if ('value' in field) {
+    // If value is explicitly set (even to null/undefined), respect it
+    if (field.value !== null && field.value !== undefined) {
+      return field.value;
     }
-    return '';
+
+    // Handle explicit null: use type-specific default
+    if (field.value === null) {
+      return field.type === 'checkbox' ? false : '';
+    }
+
+    // Handle explicit undefined: fall through to type-specific defaults
   }
 
+  // Type-specific defaults when no value is specified
   if (field.type === 'checkbox') {
     return false;
   }

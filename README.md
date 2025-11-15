@@ -87,6 +87,8 @@ This monorepo contains:
 | ------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | [@ng-forge/dynamic-form](./packages/dynamic-form)                   | Core library - UI-agnostic dynamic forms | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-form.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form)                   |
 | [@ng-forge/dynamic-form-material](./packages/dynamic-form-material) | Material Design implementation           | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-form-material.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form-material) |
+| [@ng-forge/dynamic-form-primeng](./packages/dynamic-form-primeng)   | PrimeNG implementation                   | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-form-primeng.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form-primeng)   |
+| [@ng-forge/dynamic-form-ionic](./packages/dynamic-form-ionic)       | Ionic implementation                     | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-form-ionic.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form-ionic)       |
 
 ## 🎯 Quick Start
 
@@ -173,7 +175,7 @@ export class RegistrationComponent {
 }
 ```
 
-**Result:** A production-ready form with validation, error messages, type safety, and beautiful UI in ~30 lines of code.
+**Result:** A form with validation, error messages, type safety, and beautiful UI in ~30 lines of code.
 
 ## 💡 Advanced Features
 
@@ -298,13 +300,6 @@ import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 provideDynamicForm(...withMaterialFields());
 ```
 
-### Bootstrap (Official)
-
-```typescript
-import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
-provideDynamicForm(...withBootstrapFields());
-```
-
 ### PrimeNG (Official)
 
 ```typescript
@@ -374,13 +369,14 @@ pnpm run serve:docs
 ng-forge/
 ├── packages/
 │   ├── dynamic-form/          # Core library
-│   ├── dynamic-form-material/  # Material Design integration
-│   ├── dynamic-form-bootstrap/ # Bootstrap integration
-│   ├── dynamic-form-primeng/   # PrimeNG integration
-│   └── dynamic-form-ionic/     # Ionic integration
+│   ├── dynamic-form-material/ # Material Design integration
+│   ├── dynamic-form-primeng/  # PrimeNG integration
+│   └── dynamic-form-ionic/    # Ionic integration
 ├── apps/
-│   └── docs/                   # Documentation site
-└── tools/                      # Build tools and scripts
+│   ├── docs/                  # Documentation site
+│   ├── demo/                  # Demo applications
+│   └── examples/              # Example applications
+└── tools/                     # Build tools and scripts
 ```
 
 ## 🤝 Contributing

@@ -4,16 +4,14 @@ import {
   ComponentRef,
   computed,
   DestroyRef,
-  effect,
   inject,
   Injector,
   input,
   linkedSignal,
   ViewContainerRef,
 } from '@angular/core';
-import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, switchMap } from 'rxjs';
-import { get } from 'lodash-es';
+import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
@@ -83,7 +81,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
    * Store the field template in a linkedSignal for type enforcement.
    * This template is cloned when adding new items dynamically.
    */
-  private readonly fieldTemplate = linkedSignal<FieldDef<any> | null>(() => {
+  private readonly fieldTemplate = linkedSignal<FieldDef<unknown> | null>(() => {
     const arrayField = this.field();
     // Array fields should have exactly one field as the template
     return arrayField.fields && arrayField.fields.length > 0 ? arrayField.fields[0] : null;
@@ -97,7 +95,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   private readonly arrayItemCount = linkedSignal(() => {
     const parentValue = this.parentFieldSignalContext().value();
     const arrayKey = this.field().key;
-    const arrayValue = get(parentValue, arrayKey);
+    const arrayValue = (parentValue as any)?.[arrayKey];
 
     // Initialize with existing array length or 0
     if (Array.isArray(arrayValue)) {
@@ -108,7 +106,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
 
   /**
    * Generate field instances for each array item.
-   * Each item gets a unique key based on array index.
+   * Uses structural sharing to reduce memory allocation.
    */
   private readonly fieldInstances = computed(() => {
     const template = this.fieldTemplate();
@@ -119,15 +117,19 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
       return [];
     }
 
-    // Create one instance per array item
-    return Array.from({ length: count }, (_, index) => ({
+    // Cache the base properties that don't change per item
+    // Only key and index vary per item
+    const baseInstance = {
       ...template,
-      // Generate unique key for array item: arrayKey[index]
-      key: `${arrayKey}[${index}]`,
-      // Store original template key for value extraction
       _templateKey: template.key,
+    };
+
+    // Create instances with only the varying properties
+    return Array.from({ length: count }, (_, index) => ({
+      ...baseInstance,
+      key: `${arrayKey}[${index}]`,
       _arrayIndex: index,
-    })) as FieldDef<any>[];
+    })) as FieldDef<unknown>[];
   });
 
   // Convert to observable for field mapping
@@ -136,7 +138,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   // Create field components
   fields = toSignal(
     this.fields$.pipe(
-      switchMap((fields: FieldDef<any>[]) => {
+      switchMap((fields: FieldDef<unknown>[]) => {
         if (!fields || fields.length === 0) {
           return of([]);
         }
@@ -149,36 +151,25 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   );
 
   /**
-   * Listen for AddArrayItemEvent and add new items
+   * Listen for AddArrayItemEvent and RemoveArrayItemEvent
+   * Using takeUntilDestroyed() to prevent memory leaks
    */
   constructor() {
-    effect(
-      () => {
-        const subscription = this.eventBus.on<AddArrayItemEvent>('add-array-item').subscribe((event) => {
-          if (event.arrayKey === this.key()) {
-            this.addItem(event.index);
-          }
-        });
+    this.eventBus
+      .on<AddArrayItemEvent>('add-array-item')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((event) => event.arrayKey === this.key())
+      )
+      .subscribe((event) => this.addItem(event.index));
 
-        // Cleanup on destroy
-        this.destroyRef.onDestroy(() => subscription.unsubscribe());
-      },
-      { allowSignalWrites: true }
-    );
-
-    effect(
-      () => {
-        const subscription = this.eventBus.on<RemoveArrayItemEvent>('remove-array-item').subscribe((event) => {
-          if (event.arrayKey === this.key()) {
-            this.removeItem(event.index);
-          }
-        });
-
-        // Cleanup on destroy
-        this.destroyRef.onDestroy(() => subscription.unsubscribe());
-      },
-      { allowSignalWrites: true }
-    );
+    this.eventBus
+      .on<RemoveArrayItemEvent>('remove-array-item')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((event) => event.arrayKey === this.key())
+      )
+      .subscribe((event) => this.removeItem(event.index));
   }
 
   /**
@@ -194,7 +185,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     // Get current parent value
     const parentValue = this.parentFieldSignalContext().value();
     const arrayKey = this.field().key;
-    const currentArray = get(parentValue, arrayKey) || [];
+    const currentArray = (parentValue as any)?.[arrayKey] || [];
 
     // Create default value for new item
     const value = getFieldDefaultValue(template, this.fieldRegistry.raw);
@@ -222,7 +213,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     // Get current parent value
     const parentValue = this.parentFieldSignalContext().value();
     const arrayKey = this.field().key;
-    const currentArray = get(parentValue, arrayKey) || [];
+    const currentArray = (parentValue as any)?.[arrayKey] || [];
 
     // Remove item at specified index
     const newArray = [...currentArray];
@@ -235,13 +226,13 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     this.arrayItemCount.set(newArray.length);
   }
 
-  private mapFields(fields: FieldDef<any>[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: FieldDef<unknown>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map((fieldDef) => this.mapSingleField(fieldDef))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
   }
 
-  private async mapSingleField(fieldDef: FieldDef<any>): Promise<ComponentRef<FormUiControl> | undefined> {
+  private async mapSingleField(fieldDef: FieldDef<unknown>): Promise<ComponentRef<FormUiControl> | undefined> {
     return this.fieldRegistry
       .loadTypeComponent(fieldDef.type)
       .then((componentType) => {
@@ -269,48 +260,34 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
       })
       .catch((error) => {
         if (!this.destroyRef.destroyed) {
-          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+          const fieldKey = fieldDef.key || '<no key>';
+          const arrayKey = this.field().key;
+          console.error(
+            `[ArrayField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+              `within array '${arrayKey}'. Ensure the field type is registered in your field registry.`,
+            error
+          );
         }
         return undefined;
       });
   }
 
-  readonly valid = computed(() => {
-    // Validate all array items
+  /**
+   * Computed signal that accesses the array form field from the parent form.
+   * Consolidates the repeated pattern of accessing (parentForm as any)[arrayKey].
+   */
+  private readonly arrayFormField = computed(() => {
     const arrayKey = this.field().key;
     const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.valid() : true;
+    return (parentForm as any)[arrayKey];
   });
 
+  readonly valid = computed(() => this.arrayFormField()?.valid() ?? true);
   readonly invalid = computed(() => !this.valid());
-  readonly dirty = computed(() => {
-    const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.dirty() : false;
-  });
-
-  readonly touched = computed(() => {
-    const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.touched() : false;
-  });
-
-  readonly errors = computed(() => {
-    const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.errors() : null;
-  });
-
-  readonly disabled = computed(() => {
-    const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
-    const arrayField = (parentForm as any)[arrayKey];
-    return arrayField ? arrayField.disabled() : false;
-  });
+  readonly dirty = computed(() => this.arrayFormField()?.dirty() ?? false);
+  readonly touched = computed(() => this.arrayFormField()?.touched() ?? false);
+  readonly errors = computed(() => this.arrayFormField()?.errors() ?? null);
+  readonly disabled = computed(() => this.arrayFormField()?.disabled() ?? false);
 
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
