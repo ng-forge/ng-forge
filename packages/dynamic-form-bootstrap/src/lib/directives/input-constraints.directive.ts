@@ -5,7 +5,7 @@ import { Directive, effect, ElementRef, inject, input } from '@angular/core';
  * Workaround for Angular 21 NG8022 error when using [field] directive
  */
 @Directive({
-  selector: 'input[df-bs-input-constraints]',
+  selector: 'input[dfBsInputConstraints]',
 })
 export class InputConstraintsDirective {
   readonly dfMin = input<number | string | null | undefined>();
@@ -15,25 +15,25 @@ export class InputConstraintsDirective {
   private readonly el = inject<ElementRef<HTMLInputElement>>(ElementRef);
 
   constructor() {
-    // Use effect to reactively update attributes when inputs change
-    effect(() => {
-      const nativeElement = this.el.nativeElement;
+    const nativeElement = this.el.nativeElement;
 
-      const minValue = this.dfMin();
+    explicitEffect([this.dfMin], ([minValue]) => {
       if (minValue !== null && minValue !== undefined) {
         nativeElement.setAttribute('min', String(minValue));
       } else {
         nativeElement.removeAttribute('min');
       }
+    });
 
-      const maxValue = this.dfMax();
+    explicitEffect([this.dfMax], ([maxValue]) => {
       if (maxValue !== null && maxValue !== undefined) {
         nativeElement.setAttribute('max', String(maxValue));
       } else {
         nativeElement.removeAttribute('max');
       }
+    });
 
-      const stepValue = this.dfStep();
+    explicitEffect([this.dfStep], ([stepValue]) => {
       if (stepValue !== null && stepValue !== undefined) {
         nativeElement.setAttribute('step', String(stepValue));
       } else {

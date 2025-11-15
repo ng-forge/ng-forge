@@ -21,7 +21,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
     <!-- Floating label variant -->
     <div class="form-floating mb-3">
       <input
-        df-bs-input-constraints
+        dfBsInputConstraints
         [field]="f"
         [id]="key()"
         type="date"
@@ -53,7 +53,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
       }
 
       <input
-        df-bs-input-constraints
+        dfBsInputConstraints
         [field]="f"
         [id]="key()"
         type="date"
