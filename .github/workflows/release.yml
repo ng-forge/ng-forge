@@ -18,7 +18,7 @@ on:
         default: false
         type: boolean
       dry_run:
-        description: 'Dry run (don\'t actually publish)'
+        description: "Dry run (don't actually publish)"
         required: false
         default: false
         type: boolean

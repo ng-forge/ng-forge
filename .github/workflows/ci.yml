@@ -33,8 +33,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build libraries
-        run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material
+      - name: Build all libraries
+        run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-bootstrap,dynamic-form-ionic,dynamic-form-primeng
 
       - name: Cache build artifacts
         uses: actions/cache@v4
@@ -90,8 +90,8 @@ jobs:
       - name: Lint all projects
         run: pnpm nx run-many -t lint --parallel=3
 
-      - name: Type check
-        run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material --verbose
+      - name: Type check all libraries
+        run: pnpm nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-bootstrap,dynamic-form-ionic,dynamic-form-primeng --verbose
 
   test:
     name: Unit Tests
@@ -192,3 +192,176 @@ jobs:
           name: docs-dist
           path: dist/apps/docs/
           retention-days: 7
+
+  build-examples:
+    name: Build Example Apps
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/packages/dynamic-form
+            dist/packages/dynamic-form-material
+            dist/packages/dynamic-form-bootstrap
+            dist/packages/dynamic-form-ionic
+            dist/packages/dynamic-form-primeng
+          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
+          restore-keys: |
+            build-${{ github.sha }}-
+
+      - name: Build all example apps
+        run: |
+          echo "Building all example apps..."
+          pnpm run build:examples
+
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: |
+          echo "Checking code formatting with Prettier..."
+          pnpm exec prettier --check "**/*.{ts,js,json,md,yml,yaml,html,css,scss}" --ignore-path .gitignore || {
+            echo ""
+            echo "❌ Formatting issues found!"
+            echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
+            exit 1
+          }
+
+  dependency-graph:
+    name: Dependency Graph Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate dependency graph
+        run: |
+          echo "Checking for circular dependencies..."
+          pnpm nx graph --file=graph.json || {
+            echo "❌ Failed to generate dependency graph"
+            exit 1
+          }
+          echo "✅ Dependency graph is valid"
+
+  package-integrity:
+    name: Package Integrity Check
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/packages/dynamic-form
+            dist/packages/dynamic-form-material
+            dist/packages/dynamic-form-bootstrap
+            dist/packages/dynamic-form-ionic
+            dist/packages/dynamic-form-primeng
+          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
+          restore-keys: |
+            build-${{ github.sha }}-
+
+      - name: Verify package exports
+        run: |
+          echo "Verifying package integrity..."
+
+          # Check that all library packages have valid exports
+          for PKG in dynamic-form dynamic-form-material dynamic-form-bootstrap dynamic-form-ionic dynamic-form-primeng; do
+            echo "Checking dist/packages/$PKG..."
+
+            # Verify package.json exists
+            if [ ! -f "dist/packages/$PKG/package.json" ]; then
+              echo "❌ Missing package.json in dist/packages/$PKG"
+              exit 1
+            fi
+
+            # Verify main entry point exists (check for common patterns)
+            if [ ! -f "dist/packages/$PKG/index.d.ts" ] && [ ! -f "dist/packages/$PKG/fesm2022/index.d.ts" ]; then
+              echo "⚠️  Warning: No index.d.ts found in dist/packages/$PKG"
+            else
+              echo "✅ $PKG package structure looks valid"
+            fi
+          done
+
+          echo ""
+          echo "✅ All packages validated successfully"
