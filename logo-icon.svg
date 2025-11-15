@@ -8,34 +8,78 @@
       <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#DD0031;stop-opacity:1" />
     </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#505050;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#707070;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#404040;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.25"/>
+    </filter>
   </defs>
 
   <!-- Simplified icon version -->
-  <g transform="translate(100, 100)">
-    <!-- Anvil (simplified) -->
-    <rect x="-35" y="30" width="70" height="15" rx="3" fill="url(#gradient)"/>
-    <path d="M -25 30 L -22 5 L 22 5 L 25 30 Z" fill="url(#gradient)" opacity="0.9"/>
+  <g transform="translate(100, 105)">
 
-    <!-- Form document -->
-    <g transform="translate(0, -35)">
-      <rect x="-30" y="-25" width="60" height="50" rx="3" fill="white" stroke="url(#formGrad)" stroke-width="2.5"/>
+    <!-- ANVIL -->
+    <g filter="url(#shadow)">
+      <!-- Anvil horn -->
+      <path d="M -45 -5 L -30 -12 L -27 -2 L -37 3 Z" fill="url(#metalGrad)"/>
+      <!-- Anvil face -->
+      <rect x="-27" y="-12" width="50" height="11" rx="1.5" fill="url(#metalGrad)"/>
+      <!-- Anvil body -->
+      <path d="M -24 -1 L -21 12 L 20 12 L 23 -1 Z" fill="url(#metalGrad)"/>
+      <!-- Anvil waist -->
+      <rect x="-20" y="12" width="41" height="5" fill="#505050"/>
+      <!-- Anvil base -->
+      <rect x="-28" y="17" width="55" height="11" rx="2" fill="url(#metalGrad)"/>
+      <!-- Hardy hole -->
+      <rect x="5" y="-9" width="5" height="5" fill="#2a2a2a" rx="0.5"/>
+      <!-- Highlight -->
+      <rect x="-26" y="-10.5" width="18" height="2" rx="0.5" fill="white" opacity="0.3"/>
+    </g>
+
+    <!-- FORM DOCUMENT on anvil -->
+    <g transform="translate(-3, -32)">
+      <!-- Shadow pages -->
+      <rect x="-26" y="-14" width="52" height="38" rx="2" fill="#FFE5ED" opacity="0.5" transform="translate(2, 2)"/>
+      <!-- Main form -->
+      <rect x="-26" y="-14" width="52" height="38" rx="2" fill="white" stroke="url(#formGrad)" stroke-width="2"/>
       <!-- Form lines -->
-      <line x1="-20" y1="-15" x2="10" y2="-15" stroke="url(#formGrad)" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="-20" y1="-5" x2="15" y2="-5" stroke="url(#formGrad)" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="-20" y1="5" x2="5" y2="5" stroke="url(#formGrad)" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="-20" y1="15" x2="18" y2="15" stroke="url(#formGrad)" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Check -->
-      <circle cx="15" cy="-15" r="4" fill="url(#gradient)" opacity="0.2"/>
-      <path d="M 13 -15 L 14.5 -13.5 L 17 -16.5" stroke="url(#gradient)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <line x1="-20" y1="-8" x2="8" y2="-8" stroke="url(#formGrad)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-20" y1="-1" x2="14" y2="-1" stroke="url(#formGrad)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-20" y1="6" x2="4" y2="6" stroke="url(#formGrad)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-20" y1="13" x2="12" y2="13" stroke="url(#formGrad)" stroke-width="2" stroke-linecap="round"/>
+      <!-- Checkbox -->
+      <rect x="13" y="-10.5" width="7" height="7" rx="1.5" stroke="url(#gradient)" stroke-width="1.2" fill="none"/>
+      <path d="M 14.5 -7 L 16 -5.5 L 19.5 -9" stroke="url(#gradient)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Radio button -->
+      <circle cx="18" cy="-1" r="3.5" stroke="url(#gradient)" stroke-width="1.2" fill="none"/>
+      <circle cx="18" cy="-1" r="1.8" fill="url(#gradient)"/>
     </g>
 
-    <!-- Hammer -->
-    <g transform="translate(38, -38) rotate(45)">
-      <rect x="-3" y="-15" width="6" height="25" rx="1.5" fill="#8B4513" opacity="0.8"/>
-      <rect x="-7" y="-18" width="14" height="8" rx="1.5" fill="url(#gradient)"/>
+    <!-- HAMMER striking -->
+    <g transform="translate(35, -52) rotate(-35)">
+      <!-- Handle -->
+      <rect x="-2.5" y="0" width="5" height="40" rx="1.5" fill="#8B4513"/>
+      <rect x="-2" y="0" width="2" height="37" fill="#A0522D" opacity="0.6"/>
+      <!-- Hammer head -->
+      <g transform="translate(0, -5)">
+        <rect x="-11" y="-7.5" width="22" height="10" rx="1.5" fill="url(#metalGrad)"/>
+        <rect x="-11" y="-6" width="22" height="7.5" rx="1" fill="#606060"/>
+        <rect x="-9" y="-6" width="9" height="2" rx="0.5" fill="white" opacity="0.4"/>
+        <ellipse cx="0" cy="-2.5" rx="2" ry="3" fill="#2a2a2a"/>
+      </g>
     </g>
 
-    <!-- Sparkle -->
-    <path d="M -45 -28 L -43 -26 L -45 -24 L -47 -26 Z" fill="url(#formGrad)" opacity="0.8"/>
+    <!-- Impact sparks -->
+    <g opacity="0.9">
+      <path d="M 16 -40 L 18 -38 L 16 -36 L 14 -38 Z" fill="#FFD700"/>
+      <path d="M 12 -42 L 13.5 -40.5 L 12 -39 L 10.5 -40.5 Z" fill="#FFA500"/>
+      <path d="M 20 -36 L 21.5 -34.5 L 20 -33 L 18.5 -34.5 Z" fill="#FFD700"/>
+      <circle cx="22" cy="-44" r="1.5" fill="#FFD700" opacity="0.8"/>
+      <circle cx="10" cy="-43" r="1" fill="#FFA500" opacity="0.7"/>
+    </g>
+
   </g>
 </svg>

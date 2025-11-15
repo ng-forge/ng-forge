@@ -12,86 +12,123 @@
       <stop offset="100%" style="stop-color:#DD0031;stop-opacity:1" />
     </linearGradient>
 
+    <!-- Metallic gradient for anvil -->
+    <linearGradient id="metalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#505050;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#707070;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#404040;stop-opacity:1" />
+    </linearGradient>
+
     <!-- Glow effect -->
     <filter id="glow">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+
+    <!-- Shadow -->
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
   </defs>
 
   <!-- Background circle -->
-  <circle cx="200" cy="200" r="190" fill="#1E1E1E" opacity="0.05"/>
+  <circle cx="200" cy="200" r="190" fill="#F5F5F5" opacity="0.3"/>
 
-  <!-- Anvil base (forge symbol) -->
   <g transform="translate(200, 200)">
-    <!-- Anvil body -->
-    <path d="M -60 40 L -50 20 L 50 20 L 60 40 Z" fill="url(#forgeGradient)"/>
-    <rect x="-70" y="40" width="140" height="25" rx="4" fill="url(#forgeGradient)"/>
-    <path d="M -50 20 L -45 -10 L 45 -10 L 50 20 Z" fill="url(#forgeGradient)" opacity="0.9"/>
 
-    <!-- Anvil horn (left side) -->
-    <path d="M -45 -10 Q -60 -15 -65 -20 L -55 -25 Q -50 -20 -45 -15 Z" fill="url(#forgeGradient)"/>
+    <!-- CLASSIC BLACKSMITH ANVIL -->
+    <g filter="url(#shadow)">
+      <!-- Anvil Horn (pointed end on left) -->
+      <path d="M -80 -10 L -55 -20 L -50 -5 L -65 5 Z" fill="url(#metalGradient)"/>
 
-    <!-- Dynamic form layers (stacked papers with glow) -->
-    <g transform="translate(0, -80)">
-      <!-- Back form layer -->
-      <rect x="-45" y="-35" width="90" height="65" rx="4" fill="#FFE5ED" opacity="0.3" transform="rotate(-8)"/>
+      <!-- Anvil Face (flat top working surface) -->
+      <rect x="-50" y="-20" width="85" height="18" rx="2" fill="url(#metalGradient)"/>
 
-      <!-- Middle form layer -->
-      <g transform="rotate(-4)">
-        <rect x="-45" y="-35" width="90" height="65" rx="4" fill="#FFE5ED" opacity="0.5"/>
-        <!-- Form lines -->
-        <line x1="-35" y1="-20" x2="35" y2="-20" stroke="url(#formGradient)" stroke-width="2" opacity="0.6"/>
-        <line x1="-35" y1="-5" x2="35" y2="-5" stroke="url(#formGradient)" stroke-width="2" opacity="0.6"/>
+      <!-- Anvil Body (main mass) -->
+      <path d="M -45 -2 L -40 20 L 30 20 L 35 -2 Z" fill="url(#metalGradient)"/>
+
+      <!-- Anvil Waist (narrow middle section) -->
+      <rect x="-38" y="20" width="70" height="8" fill="#505050"/>
+
+      <!-- Anvil Base (bottom foot) -->
+      <rect x="-50" y="28" width="95" height="18" rx="3" fill="url(#metalGradient)"/>
+
+      <!-- Hardy Hole (square hole on anvil face) -->
+      <rect x="5" y="-16" width="8" height="8" fill="#2a2a2a" rx="1"/>
+
+      <!-- Highlight on anvil face -->
+      <rect x="-48" y="-18" width="30" height="3" rx="1" fill="white" opacity="0.3"/>
+    </g>
+
+    <!-- FORM DOCUMENT on anvil -->
+    <g transform="translate(-5, -50)" filter="url(#glow)">
+      <!-- Paper shadow/back pages -->
+      <rect x="-42" y="-22" width="84" height="60" rx="3" fill="#FFE5ED" opacity="0.4" transform="translate(3, 3)"/>
+      <rect x="-42" y="-22" width="84" height="60" rx="3" fill="#FFE5ED" opacity="0.6" transform="translate(1.5, 1.5)"/>
+
+      <!-- Main form document -->
+      <rect x="-42" y="-22" width="84" height="60" rx="3" fill="white" stroke="url(#formGradient)" stroke-width="2.5"/>
+
+      <!-- Form field lines -->
+      <line x1="-32" y1="-12" x2="12" y2="-12" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="-32" y1="-2" x2="22" y2="-2" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="-32" y1="8" x2="8" y2="8" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="-32" y1="18" x2="18" y2="18" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="-32" y1="28" x2="25" y2="28" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- Checkbox/validation icons -->
+      <rect x="18" y="-15" width="10" height="10" rx="2" stroke="url(#forgeGradient)" stroke-width="1.5" fill="none"/>
+      <path d="M 20 -10 L 23 -7 L 27 -13" stroke="url(#forgeGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+      <circle cx="28" cy="-2" r="5" stroke="url(#forgeGradient)" stroke-width="1.5" fill="none"/>
+      <circle cx="28" cy="-2" r="2.5" fill="url(#forgeGradient)"/>
+    </g>
+
+    <!-- BLACKSMITH HAMMER striking the form -->
+    <g transform="translate(55, -85) rotate(-35)">
+      <!-- Hammer handle -->
+      <rect x="-4" y="0" width="8" height="65" rx="2" fill="#8B4513"/>
+      <rect x="-3.5" y="0" width="3" height="60" fill="#A0522D" opacity="0.6"/> <!-- wood grain highlight -->
+
+      <!-- Hammer head -->
+      <g transform="translate(0, -8)">
+        <!-- Hammer face (striking surface) -->
+        <rect x="-18" y="-12" width="36" height="16" rx="2" fill="url(#metalGradient)"/>
+        <!-- Hammer peen (back end) -->
+        <rect x="-18" y="-10" width="36" height="12" rx="1" fill="#606060"/>
+        <!-- Highlight on hammer -->
+        <rect x="-15" y="-10" width="15" height="3" rx="1" fill="white" opacity="0.4"/>
+        <!-- Hammer eye (handle hole) -->
+        <ellipse cx="0" cy="-4" rx="3" ry="5" fill="#2a2a2a"/>
       </g>
-
-      <!-- Front form layer (main) -->
-      <g filter="url(#glow)">
-        <rect x="-45" y="-35" width="90" height="65" rx="4" fill="white" stroke="url(#formGradient)" stroke-width="2"/>
-
-        <!-- Form field lines (dynamic feel) -->
-        <line x1="-35" y1="-22" x2="15" y2="-22" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="-35" y1="-10" x2="25" y2="-10" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="-35" y1="2" x2="10" y2="2" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="-35" y1="14" x2="30" y2="14" stroke="url(#formGradient)" stroke-width="2.5" stroke-linecap="round"/>
-
-        <!-- Checkmark/validation icon -->
-        <circle cx="25" cy="-22" r="6" fill="url(#forgeGradient)" opacity="0.2"/>
-        <path d="M 22 -22 L 24 -20 L 28 -24" stroke="url(#forgeGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      </g>
     </g>
 
-    <!-- Hammer (crafting/building symbol) -->
-    <g transform="translate(65, -65) rotate(45)">
-      <rect x="-5" y="-25" width="10" height="40" rx="2" fill="#8B4513" opacity="0.8"/>
-      <rect x="-12" y="-30" width="24" height="12" rx="2" fill="url(#forgeGradient)"/>
-      <rect x="-10" y="-32" width="20" height="4" fill="#C3002F"/>
+    <!-- Impact sparks where hammer meets form -->
+    <g opacity="0.9">
+      <!-- Large spark burst -->
+      <path d="M 25 -65 L 28 -62 L 25 -59 L 22 -62 Z" fill="#FFD700"/>
+      <path d="M 20 -68 L 22 -66 L 20 -64 L 18 -66 Z" fill="#FFA500"/>
+      <path d="M 30 -60 L 32 -58 L 30 -56 L 28 -58 Z" fill="#FFD700"/>
+      <path d="M 18 -62 L 20 -60 L 18 -58 L 16 -60 Z" fill="#FF8C00"/>
+      <path d="M 32 -67 L 34 -65 L 32 -63 L 30 -65 Z" fill="#FFA500"/>
+
+      <!-- Flying sparks -->
+      <circle cx="35" cy="-72" r="2" fill="#FFD700" opacity="0.8"/>
+      <circle cx="15" cy="-70" r="1.5" fill="#FFA500" opacity="0.7"/>
+      <circle cx="28" cy="-75" r="1" fill="#FFD700" opacity="0.6"/>
     </g>
 
-    <!-- Sparkles/magic effect (dynamic aspect) -->
-    <g opacity="0.8">
-      <path d="M -80 -50 L -78 -48 L -80 -46 L -82 -48 Z" fill="url(#formGradient)"/>
-      <path d="M -75 -55 L -74 -54 L -75 -53 L -76 -54 Z" fill="url(#formGradient)"/>
-      <path d="M 70 -40 L 72 -38 L 70 -36 L 68 -38 Z" fill="url(#formGradient)"/>
-      <path d="M 75 -50 L 76 -49 L 75 -48 L 74 -49 Z" fill="url(#formGradient)"/>
-      <path d="M -70 5 L -68 7 L -70 9 L -72 7 Z" fill="url(#formGradient)"/>
+    <!-- Angular brackets accent -->
+    <g opacity="0.2">
+      <path d="M -95 -30 L -100 -20 L -95 -10" stroke="url(#forgeGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M 95 -30 L 100 -20 L 95 -10" stroke="url(#forgeGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </g>
 
-    <!-- Angular bracket accent -->
-    <g transform="translate(-85, -20)" opacity="0.3">
-      <path d="M 0 -10 L -5 0 L 0 10" stroke="url(#forgeGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </g>
-    <g transform="translate(85, -20)" opacity="0.3">
-      <path d="M 0 -10 L 5 0 L 0 10" stroke="url(#forgeGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </g>
+    <!-- Subtle text label -->
+    <text x="0" y="80" font-family="Arial, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="url(#forgeGradient)" opacity="0.8">ng-forge</text>
+    <text x="0" y="98" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#666" opacity="0.7">dynamic forms</text>
   </g>
-
-  <!-- Optional: Text version -->
-  <!--
-  <text x="200" y="360" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="url(#forgeGradient)">ng-forge</text>
-  <text x="200" y="385" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#666">dynamic forms</text>
-  -->
 </svg>
