@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Optimized for 48x48 -->
+
+  <!-- Anvil base -->
+  <rect x="6" y="34" width="36" height="6" rx="1.5" fill="#2D3748"/>
+
+  <!-- Anvil body -->
+  <rect x="9" y="26" width="30" height="8" fill="#4A5568"/>
+  <path d="M 9 26 L 12 18 L 36 18 L 39 26 Z" fill="#4A5568"/>
+
+  <!-- Anvil top -->
+  <rect x="12" y="15" width="24" height="3" rx="1" fill="#4A5568"/>
+
+  <!-- Form shield -->
+  <path d="M 24 6 L 36 10 L 35 24 L 24 28 L 13 24 L 12 10 Z"
+        fill="white" stroke="#DD0031" stroke-width="2"/>
+
+  <!-- Form lines -->
+  <line x1="17" y1="13" x2="28" y2="13" stroke="#DD0031" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="17" y1="18" x2="28" y2="18" stroke="#DD0031" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="17" y1="23" x2="28" y2="23" stroke="#DD0031" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Checkmark -->
+  <rect x="29" y="12" width="5" height="5" rx="1" stroke="#DD0031" stroke-width="1" fill="none"/>
+  <path d="M 30 14.5 L 31.5 16 L 33.5 13" stroke="#DD0031" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

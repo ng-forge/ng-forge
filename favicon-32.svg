@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Optimized for 32x32 -->
+
+  <!-- Anvil -->
+  <rect x="4" y="22" width="24" height="4" rx="1" fill="#2D3748"/>
+  <path d="M 6 22 L 8 12 L 24 12 L 26 22 Z" fill="#4A5568"/>
+  <rect x="8" y="10" width="16" height="2" rx="0.5" fill="#4A5568"/>
+
+  <!-- Form shield -->
+  <path d="M 16 4 L 24 7 L 23 16 L 16 19 L 9 16 L 8 7 Z"
+        fill="white" stroke="#DD0031" stroke-width="1.5"/>
+
+  <!-- Form lines -->
+  <line x1="11" y1="9" x2="19" y2="9" stroke="#DD0031" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="11" y1="12" x2="19" y2="12" stroke="#DD0031" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="11" y1="15" x2="19" y2="15" stroke="#DD0031" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- Checkmark -->
+  <path d="M 20 9 L 21 10 L 23 7" stroke="#DD0031" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
