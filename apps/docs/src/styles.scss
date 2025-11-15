@@ -7,6 +7,30 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 // ============================================
+// THEME-AWARE LOGO
+// ============================================
+// Show light logo by default (light theme)
+.logo-light {
+  display: block !important;
+}
+.logo-dark {
+  display: none !important;
+}
+
+// Swap to dark logo in dark theme
+[data-theme='dark'] .logo-light,
+html[data-theme='dark'] .logo-light,
+body[data-theme='dark'] .logo-light {
+  display: none !important;
+}
+
+[data-theme='dark'] .logo-dark,
+html[data-theme='dark'] .logo-dark,
+body[data-theme='dark'] .logo-dark {
+  display: block !important;
+}
+
+// ============================================
 // IFRAME EXAMPLES
 // ============================================
 // PrimeNG and Ionic examples are loaded via iframes
