@@ -29,7 +29,7 @@ import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-for
       <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
 
       @if (submitted()) {
-        <div class="success-message">Thank you for your message! We'll get back to you soon.</div>
+      <div class="success-message">Thank you for your message! We'll get back to you soon.</div>
       }
     </div>
   `,

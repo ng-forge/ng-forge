@@ -7,10 +7,10 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   template: `
     <div class="example-iframe-container" [style.height]="height()">
       @if (loading()) {
-        <div class="example-loading">
-          <div class="spinner"></div>
-          <p>Loading example...</p>
-        </div>
+      <div class="example-loading">
+        <div class="spinner"></div>
+        <p>Loading example...</p>
+      </div>
       }
       <iframe
         [src]="trustedSrc()"
@@ -24,10 +24,10 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
       </iframe>
     </div>
     @if (code()) {
-      <details open>
-        <summary>View Config</summary>
-        <pre><code>{{ code() }}</code></pre>
-      </details>
+    <details open>
+      <summary>View Config</summary>
+      <pre><code>{{ code() }}</code></pre>
+    </details>
     }
   `,
   styles: [

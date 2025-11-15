@@ -66,7 +66,7 @@ test.describe('Age-Based Logic Test', () => {
         error.includes('FunctionRegistryService') ||
         error.includes('inject()') ||
         error.includes('injection context') ||
-        error.includes('ERROR'),
+        error.includes('ERROR')
     );
 
     expect(jsErrors).toHaveLength(0);

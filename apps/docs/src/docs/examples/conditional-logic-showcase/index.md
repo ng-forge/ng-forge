@@ -1201,11 +1201,10 @@ type CertificationFormValue = InferFormValue<typeof certificationConfig.fields>;
     <div class="certification-container">
       <df-dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
 
-      @let message = submitMessage();
-      @if (message) {
-        <div class="success-message">
-          {{ message }}
-        </div>
+      @let message = submitMessage(); @if (message) {
+      <div class="success-message">
+        {{ message }}
+      </div>
       }
     </div>
   `,
@@ -1246,14 +1245,14 @@ export class ConditionalLogicShowcaseComponent {
       value.certificationType === 'associate'
         ? 'Associate'
         : value.certificationType === 'professional'
-          ? 'Professional'
-          : value.certificationType === 'expert'
-            ? 'Expert'
-            : 'Specialist';
+        ? 'Professional'
+        : value.certificationType === 'expert'
+        ? 'Expert'
+        : 'Specialist';
 
     this.submitMessage.set(
       `Thank you, ${value.firstName}! Your ${certType} certification application has been submitted successfully. ` +
-        `You will receive a confirmation email at ${value.email} within 24 hours.`,
+        `You will receive a confirmation email at ${value.email} within 24 hours.`
     );
   }
 }

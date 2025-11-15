@@ -359,11 +359,10 @@ type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
 
       <df-dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
 
-      @let message = submitMessage();
-      @if (message) {
-        <div class="success-message">
-          {{ message }}
-        </div>
+      @let message = submitMessage(); @if (message) {
+      <div class="success-message">
+        {{ message }}
+      </div>
       }
     </div>
   `,

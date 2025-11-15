@@ -297,9 +297,9 @@ Creating custom field components is straightforward - no `ControlValueAccessor` 
     <label>{{ label() }}</label>
     <div class="stars">
       @for (star of [1, 2, 3, 4, 5]; track star) {
-        <button (click)="rating.set(star)" type="button">
-          {{ star <= rating() ? '⭐' : '☆' }}
-        </button>
+      <button (click)="rating.set(star)" type="button">
+        {{ star <= rating() ? '⭐' : '☆' }}
+      </button>
       }
     </div>
   `,

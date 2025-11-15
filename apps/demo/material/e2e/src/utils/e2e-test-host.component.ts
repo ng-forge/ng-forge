@@ -13,12 +13,12 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
   template: `
     <div class="e2e-test-container" [attr.data-testid]="testId()">
       @if (title()) {
-        <div class="form-header">
-          <h2 [attr.data-testid]="title() + '-title'">{{ title() }}</h2>
-          @if (description()) {
-            <p class="description">{{ description() }}</p>
-          }
-        </div>
+      <div class="form-header">
+        <h2 [attr.data-testid]="title() + '-title'">{{ title() }}</h2>
+        @if (description()) {
+        <p class="description">{{ description() }}</p>
+        }
+      </div>
       }
 
       <dynamic-form
@@ -37,20 +37,19 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
             <pre [attr.data-testid]="'form-value-' + testId()">{{ formValue() | json }}</pre>
           </div>
           @if (showConfig()) {
-            <div class="form-config">
-              <strong>Form Config:</strong>
-              <pre [attr.data-testid]="'form-config-' + testId()">{{ config() | json }}</pre>
-            </div>
-          }
-          @if (submissionLog().length > 0) {
-            <div class="submission-log">
-              <strong>Submission Log:</strong>
-              <ul [attr.data-testid]="'submission-log-' + testId()">
-                @for (submission of submissionLog(); track submission.timestamp; let i = $index) {
-                  <li [attr.data-testid]="'submission-' + i">{{ submission.timestamp }}: {{ submission.data | json }}</li>
-                }
-              </ul>
-            </div>
+          <div class="form-config">
+            <strong>Form Config:</strong>
+            <pre [attr.data-testid]="'form-config-' + testId()">{{ config() | json }}</pre>
+          </div>
+          } @if (submissionLog().length > 0) {
+          <div class="submission-log">
+            <strong>Submission Log:</strong>
+            <ul [attr.data-testid]="'submission-log-' + testId()">
+              @for (submission of submissionLog(); track submission.timestamp; let i = $index) {
+              <li [attr.data-testid]="'submission-' + i">{{ submission.timestamp }}: {{ submission.data | json }}</li>
+              }
+            </ul>
+          </div>
           }
         </details>
       </div>
@@ -175,7 +174,7 @@ export class E2ETestHostComponent {
     window.dispatchEvent(
       new CustomEvent('formSubmitted', {
         detail: submission,
-      }),
+      })
     );
   }
 

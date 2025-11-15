@@ -14,10 +14,10 @@ import { TranslationService } from '../../services/mock-translate.service';
       <dynamic-form [config]="formConfig" data-testid="demo-form" (submitted)="onFormSubmit($event)" [(value)]="currentFormValue" />
 
       @if (submittedData(); as data) {
-        <div class="submission-result" data-testid="submission-result">
-          <h3>Form Submitted Successfully!</h3>
-          <pre>{{ data | json }}</pre>
-        </div>
+      <div class="submission-result" data-testid="submission-result">
+        <h3>Form Submitted Successfully!</h3>
+        <pre>{{ data | json }}</pre>
+      </div>
       }
     </div>
   `,
