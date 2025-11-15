@@ -44,7 +44,9 @@ describe('schema-transformation', () => {
           );
           rootFormRegistry.registerRootForm(formInstance);
 
-          expect(consoleErrorSpy).toHaveBeenCalledWith('Schema not found: nonexistentSchema');
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            "[Schema] Schema not found: 'nonexistentSchema'. Available schemas: <none>. Ensure the schema is registered in your schema registry."
+          );
           consoleErrorSpy.mockRestore();
         });
       });

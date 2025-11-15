@@ -12,6 +12,7 @@ import {
   model,
   OnDestroy,
   runInInjectionContext,
+  signal,
   untracked,
   ViewContainerRef,
 } from '@angular/core';
@@ -19,7 +20,8 @@ import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs';
-import { isEqual, keyBy, memoize } from 'lodash-es';
+import { isEqual, memoize } from 'lodash-es';
+import { keyBy } from './utils/object-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
@@ -94,18 +96,18 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
       (submit)="onSubmit($event)"
     >
       @if (formModeDetection().mode === 'paged') {
-        <!-- Paged form: Use page orchestrator with page field definitions -->
-        <page-orchestrator
-          [pageFields]="pageFieldDefinitions()"
-          [form]="form()"
-          [fieldSignalContext]="fieldSignalContext()"
-          [config]="{ initialPageIndex: 0 }"
-        />
+      <!-- Paged form: Use page orchestrator with page field definitions -->
+      <page-orchestrator
+        [pageFields]="pageFieldDefinitions()"
+        [form]="form()"
+        [fieldSignalContext]="fieldSignalContext()"
+        [config]="{ initialPageIndex: 0 }"
+      />
       } @else {
-        <!-- Non-paged form: Render fields directly with grid system -->
-        <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-          <!-- Fields will be automatically rendered by the fieldRenderer directive -->
-        </div>
+      <!-- Non-paged form: Render fields directly with grid system -->
+      <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+        <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+      </div>
       }
     </form>
   `,
@@ -128,26 +130,41 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly rootFormRegistry = inject(RootFormRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
 
+  /**
+   * Signal tracking field loading errors for error boundary pattern.
+   * Collects all errors that occur during async field component loading.
+   */
+  readonly fieldLoadingErrors = signal<Array<{ fieldType: string; fieldKey: string; error: Error }>>([]);
+
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
-    (fields, registry) =>
-      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(','),
+    // Optimized key generation - avoid JSON.stringify but ensure uniqueness
+    (fields, registry) => {
+      const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
+      const registryKeys = Array.from(registry.keys()).sort().join('|');
+      return `${fieldKeys}__${registryKeys}`;
+    }
   );
 
   private readonly memoizedFlattenFieldsForRendering = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFieldsForRendering(fields, registry),
-    (fields, registry) =>
-      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_rendering_' + Array.from(registry.keys()).sort().join(','),
+    // Optimized key generation with stable registry keys
+    (fields, registry) => {
+      const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
+      const registryKeys = Array.from(registry.keys()).sort().join('|');
+      return `render_${fieldKeys}__${registryKeys}`;
+    }
   );
 
   private readonly memoizedKeyBy = memoize(
     <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
-    (fields) => fields.map((f) => f.key).join(','),
+    // Optimized key generation - fields already have keys
+    (fields) => fields.map((f) => f.key).join('|')
   );
 
   private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<any>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
+    <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
       const result: Record<string, unknown> = {};
       for (const [key, field] of Object.entries(fieldsById)) {
         const value = getFieldDefaultValue(field, registry);
@@ -159,7 +176,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       }
       return result as TModel;
     },
-    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(','),
+    // Optimized key generation with stable ordering
+    (fieldsById, registry) => {
+      const fieldKeys = Object.keys(fieldsById).sort().join('|');
+      const registryKeys = Array.from(registry.keys()).sort().join('|');
+      return `defaults_${fieldKeys}__${registryKeys}`;
+    }
   );
 
   // Memoized field signal context to avoid recreation for every field
@@ -170,7 +192,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       defaultValues: this.defaultValues,
       form: this.form(),
       defaultValidationMessages: this.config().defaultValidationMessages,
-    }),
+    })
   );
 
   // Memoized field registry raw access
@@ -264,45 +286,55 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
 
-    // Register validators before form creation
-    const signalFormsConfig = config.signalFormsConfig;
-    if (signalFormsConfig) {
-      // Register custom functions
-      if (signalFormsConfig.customFunctions) {
-        Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
-          this.functionRegistry.registerCustomFunction(name, fn);
-        });
-      }
-
-      // Set all validators from config - change detection is inside set methods
-      this.functionRegistry.setValidators(signalFormsConfig.validators);
-      this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
-      this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
-    }
+    this.registerValidatorsFromConfig(config);
 
     if (config.fields && config.fields.length > 0) {
-      // Use memoized functions for expensive operations with registry
-      const flattenedFields = this.memoizedFlattenFields(config.fields, registry);
-      const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(config.fields, registry);
-      const fieldsById = this.memoizedKeyBy(flattenedFields);
-      const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
-
-      // For rendering: use flattenedFieldsForRendering which preserves row containers
-      // For paged forms, orchestrator handles rendering separately
-      const fieldsToRender = modeDetection.mode === 'paged' ? [] : flattenedFieldsForRendering;
-
-      return {
-        fields: fieldsToRender,
-        schemaFields: flattenedFields, // Fields for form schema (always flattened for form values)
-        originalFields: config.fields,
-        defaultValues,
-        schema: undefined,
-        mode: modeDetection.mode,
-        registry, // Include registry for schema creation
-      };
+      return this.createFormSetupFromConfig(config.fields, modeDetection.mode, registry);
     }
 
-    // Fallback: empty form
+    return this.createEmptyFormSetup(registry);
+  });
+
+  private registerValidatorsFromConfig(config: FormConfig<TFields>): void {
+    const signalFormsConfig = config.signalFormsConfig;
+    if (!signalFormsConfig) return;
+
+    // Register custom functions
+    if (signalFormsConfig.customFunctions) {
+      Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
+        this.functionRegistry.registerCustomFunction(name, fn);
+      });
+    }
+
+    // Set all validators from config - change detection is inside set methods
+    this.functionRegistry.setValidators(signalFormsConfig.validators);
+    this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
+    this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
+  }
+
+  private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: 'paged' | 'non-paged', registry: Map<string, FieldTypeDefinition>) {
+    // Use memoized functions for expensive operations with registry
+    const flattenedFields = this.memoizedFlattenFields(fields, registry);
+    const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
+    const fieldsById = this.memoizedKeyBy(flattenedFields);
+    const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
+
+    // For rendering: use flattenedFieldsForRendering which preserves row containers
+    // For paged forms, orchestrator handles rendering separately
+    const fieldsToRender = mode === 'paged' ? [] : flattenedFieldsForRendering;
+
+    return {
+      fields: fieldsToRender,
+      schemaFields: flattenedFields, // Fields for form schema (always flattened for form values)
+      originalFields: fields,
+      defaultValues,
+      schema: undefined,
+      mode,
+      registry, // Include registry for schema creation
+    };
+  }
+
+  private createEmptyFormSetup(registry: Map<string, FieldTypeDefinition>) {
     return {
       fields: [],
       schemaFields: [],
@@ -311,7 +343,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       mode: 'non-paged' as const,
       registry, // Include registry even for empty forms
     };
-  });
+  }
 
   /**
    * Page field definitions for paged forms.
@@ -500,6 +532,11 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     // Set up initialization tracking
     this.setupInitializationTracking();
 
+    // Clear field loading errors when config changes
+    explicitEffect([this.config], () => {
+      this.fieldLoadingErrors.set([]);
+    });
+
     // For paged forms, emit initialization event when pages are defined
     explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
       if (mode === 'paged' && pages.length > 0) {
@@ -529,7 +566,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   public onPageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
 
   public onPageNavigationStateChange = outputFromObservable(
-    this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change'),
+    this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change')
   );
 
   private fields$ = toObservable(computed(() => this.formSetup().fields));
@@ -543,18 +580,18 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter(Boolean)),
+      map((components) => components.filter(Boolean))
     ),
-    { initialValue: [] },
+    { initialValue: [] }
   );
 
-  private mapFields(fields: FieldDef<any>[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: FieldDef<unknown>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map((fieldDef) => this.mapSingleField(fieldDef))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
   }
 
-  private async mapSingleField(fieldDef: FieldDef<any>): Promise<ComponentRef<FormUiControl> | undefined> {
+  private async mapSingleField(fieldDef: FieldDef<unknown>): Promise<ComponentRef<FormUiControl> | undefined> {
     return this.fieldRegistry
       .loadTypeComponent(fieldDef.type)
       .then((componentType) => {
@@ -571,9 +608,25 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
       })
       .catch((error) => {
-        // Only log errors if component hasn't been destroyed
+        // Only log and track errors if component hasn't been destroyed
         if (!this.destroyRef.destroyed) {
-          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+          const fieldKey = fieldDef.key || '<no key>';
+
+          // Track error in signal for error boundary pattern
+          this.fieldLoadingErrors.update((errors) => [
+            ...errors,
+            {
+              fieldType: fieldDef.type,
+              fieldKey,
+              error: error instanceof Error ? error : new Error(String(error)),
+            },
+          ]);
+
+          console.error(
+            `[DynamicForm] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
+              `Ensure the field type is registered in your field registry.`,
+            error
+          );
         }
         return undefined;
       });
@@ -619,12 +672,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
             return this.eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
               filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
               map(() => true),
-              take(1), // Only take the first initialization event
+              take(1) // Only take the first initialization event
             );
           }
 
           return createInitializationTracker(this.eventBus, count);
-        }),
+        })
       )
       .subscribe({
         next: (initialized) => {

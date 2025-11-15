@@ -19,7 +19,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
   imports: [Field],
 })
 export default class TestSelectHarness {
-  readonly field = input.required<FieldTree<any>>();
+  readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
   // Field-specific properties
@@ -29,5 +29,5 @@ export default class TestSelectHarness {
   readonly tabIndex = input<number | undefined>(undefined);
   readonly hidden = input<boolean>(false);
   readonly readonly = input<boolean>(false);
-  readonly props = input<Record<string, any>>({});
+  readonly props = input<Record<string, unknown>>({});
 }

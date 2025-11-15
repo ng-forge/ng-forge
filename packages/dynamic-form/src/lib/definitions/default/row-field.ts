@@ -1,6 +1,5 @@
 import { FieldComponent, FieldDef } from '../base';
 import { RowAllowedChildren } from '../../models/types/nesting-constraints';
-import { isArray } from 'lodash-es';
 
 /**
  * Row field interface for creating horizontal layouts
@@ -23,7 +22,7 @@ export interface RowField<TFields extends RowAllowedChildren[] = RowAllowedChild
  * After this guard, TypeScript knows the field is a RowField and can access its properties safely
  */
 export function isRowField(field: FieldDef<any>): field is RowField {
-  return field.type === 'row' && 'fields' in field && isArray((field as RowField).fields);
+  return field.type === 'row' && 'fields' in field && Array.isArray((field as RowField).fields);
 }
 
 export type RowComponent = FieldComponent<RowField<RowAllowedChildren[]>>;

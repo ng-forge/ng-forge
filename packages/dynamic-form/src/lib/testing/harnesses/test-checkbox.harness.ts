@@ -14,7 +14,7 @@ export default class TestCheckboxHarness {
 
   // Field-specific properties
   readonly label = input<string>('');
-  readonly props = input<Record<string, any>>({});
+  readonly props = input<Record<string, unknown>>({});
   readonly className = input<string>('');
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();

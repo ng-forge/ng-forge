@@ -264,13 +264,33 @@ export class DynamicFormTestUtils {
   }
 
   /**
+   * Waits for an element to appear in the DOM with retries
+   */
+  private static async waitForElement<T extends Element>(
+    fixture: ComponentFixture<DynamicForm>,
+    selector: string,
+    maxAttempts = 10
+  ): Promise<T> {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const element = fixture.nativeElement.querySelector(selector) as T;
+      if (element) {
+        return element;
+      }
+
+      // Wait and retry
+      TestBed.flushEffects();
+      fixture.detectChanges();
+      await delay(50);
+    }
+
+    throw new Error(`Element not found with selector: ${selector} after ${maxAttempts} attempts`);
+  }
+
+  /**
    * Simulates user input on a field element
    */
   static async simulateInput(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
-    const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
-    if (!input) {
-      throw new Error(`Input element not found with selector: ${selector}`);
-    }
+    const input = await DynamicFormTestUtils.waitForElement<HTMLInputElement>(fixture, selector);
 
     input.value = value;
     input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -282,10 +302,7 @@ export class DynamicFormTestUtils {
    * Simulates user blur on a field element
    */
   static async simulateBlur(fixture: ComponentFixture<DynamicForm>, selector: string): Promise<void> {
-    const element = fixture.nativeElement.querySelector(selector);
-    if (!element) {
-      throw new Error(`Element not found with selector: ${selector}`);
-    }
+    const element = await DynamicFormTestUtils.waitForElement<Element>(fixture, selector);
 
     element.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
@@ -296,10 +313,7 @@ export class DynamicFormTestUtils {
    * Simulates user selection on a select element
    */
   static async simulateSelect(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
-    const select = fixture.nativeElement.querySelector(selector) as HTMLSelectElement;
-    if (!select) {
-      throw new Error(`Select element not found with selector: ${selector}`);
-    }
+    const select = await DynamicFormTestUtils.waitForElement<HTMLSelectElement>(fixture, selector);
 
     select.value = value;
     select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -311,10 +325,7 @@ export class DynamicFormTestUtils {
    * Simulates checkbox toggle
    */
   static async simulateCheckbox(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
-    const checkbox = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
-    if (!checkbox) {
-      throw new Error(`Checkbox element not found with selector: ${selector}`);
-    }
+    const checkbox = await DynamicFormTestUtils.waitForElement<HTMLInputElement>(fixture, selector);
 
     checkbox.checked = checked;
     checkbox.dispatchEvent(new Event('input', { bubbles: true }));
@@ -327,10 +338,7 @@ export class DynamicFormTestUtils {
    * Simulates button click
    */
   static async simulateButtonClick(fixture: ComponentFixture<DynamicForm>, selector: string): Promise<void> {
-    const button = fixture.nativeElement.querySelector(selector) as HTMLButtonElement;
-    if (!button) {
-      throw new Error(`Button element not found with selector: ${selector}`);
-    }
+    const button = await DynamicFormTestUtils.waitForElement<HTMLButtonElement>(fixture, selector);
 
     button.click();
     fixture.detectChanges();
@@ -368,11 +376,8 @@ export class DynamicFormTestUtils {
   /**
    * Asserts that a field has a specific value
    */
-  static assertFieldValue(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedValue: string): void {
-    const element = fixture.nativeElement.querySelector(fieldSelector) as HTMLInputElement;
-    if (!element) {
-      throw new Error(`Field element not found with selector: ${fieldSelector}`);
-    }
+  static async assertFieldValue(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedValue: string): Promise<void> {
+    const element = await DynamicFormTestUtils.waitForElement<HTMLInputElement>(fixture, fieldSelector);
 
     const actualValue = element.type === 'checkbox' ? element.checked.toString() : element.value;
     if (actualValue !== expectedValue) {

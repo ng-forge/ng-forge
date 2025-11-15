@@ -1,6 +1,5 @@
 import { FieldComponent, FieldDef } from '../base';
 import { PageAllowedChildren } from '../../models/types/nesting-constraints';
-import { isArray } from 'lodash-es';
 
 /**
  * Helper interface for container fields (row/group) within nested checking
@@ -31,7 +30,7 @@ export interface PageField<TFields extends PageAllowedChildren[] = PageAllowedCh
  * After this guard, TypeScript knows the field is a PageField and can access its properties safely
  */
 export function isPageField(field: FieldDef<any>): field is PageField {
-  return field.type === 'page' && 'fields' in field && isArray((field as PageField).fields);
+  return field.type === 'page' && 'fields' in field && Array.isArray((field as PageField).fields);
 }
 
 export type PageComponent = FieldComponent<PageField>;
@@ -49,7 +48,7 @@ export function validatePageNesting(pageField: PageField): boolean {
  * Type guard to check if a field is a container with fields property
  */
 function isContainerWithFields(field: FieldDef<any>): field is ContainerFieldWithFields {
-  return (field.type === 'row' || field.type === 'group') && 'fields' in field && isArray((field as ContainerFieldWithFields).fields);
+  return (field.type === 'row' || field.type === 'group') && 'fields' in field && Array.isArray((field as ContainerFieldWithFields).fields);
 }
 
 /**

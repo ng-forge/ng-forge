@@ -13,7 +13,7 @@ export default class TestButtonHarness {
 
   // Field-specific properties
   readonly label = input<string>('');
-  readonly props = input<Record<string, any>>({});
+  readonly props = input<Record<string, unknown>>({});
 
   handleClick(): void {
     const onClick = this.props()?.['onClick'];

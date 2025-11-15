@@ -316,7 +316,7 @@ export class StarRatingComponent {
 
 ## Real-World Example: E-Commerce Checkout
 
-Here's a production-ready, multi-step checkout flow - **fully typed, validated, and beautiful** - in under 60 lines:
+Here's a multi-step checkout flow - **fully typed, validated, and beautiful** - in under 60 lines:
 
 ```typescript
 @Component({
@@ -488,7 +488,7 @@ provideDynamicForm([
 | **Ionic**           | `@ng-forge/dynamic-form-ionic`     | 🧪 Preview      |
 | **Custom**          | Build your own                     | ✅ Full Support |
 
-**Material Design** integration is production-ready with complete documentation. **PrimeNG, Bootstrap, and Ionic** integrations are in preview - functional but APIs may change. See individual pages for details.
+**Material Design**, **PrimeNG, Bootstrap, and Ionic** integrations are in preview - functional but APIs may change. See individual pages for details.
 
 ## Performance Features
 
@@ -508,7 +508,7 @@ provideDynamicForm([
 
 ### UI Implementations
 
-- **[Material Design](../ui-libs-integrations/material)** - Production-ready Material integration
+- **[Material Design](../ui-libs-integrations/material)** - Preview Material integration
 - **[Custom Integration Guide](../deep-dive/custom-integrations)** - Build your own UI integration
 
 ### Advanced Topics
