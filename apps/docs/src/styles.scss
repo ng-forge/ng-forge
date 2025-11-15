@@ -9,7 +9,7 @@
 // ============================================
 // THEME-AWARE LOGO
 // ============================================
-// Show light logo by default (light theme)
+// Show light logo by default
 .logo-light {
   display: block !important;
 }
@@ -17,12 +17,14 @@
   display: none !important;
 }
 
-// Swap to dark logo when system prefers dark (auto mode)
+// Swap to dark logo when system prefers dark (only in auto mode - no explicit theme set)
 @media (prefers-color-scheme: dark) {
-  .logo-light {
+  html:not([data-theme]) .logo-light,
+  body:not([data-theme]) .logo-light {
     display: none !important;
   }
-  .logo-dark {
+  html:not([data-theme]) .logo-dark,
+  body:not([data-theme]) .logo-dark {
     display: block !important;
   }
 }
@@ -40,7 +42,7 @@ body[data-theme='dark'] .logo-dark {
   display: block !important;
 }
 
-// Explicit light theme (override system preference)
+// Explicit light theme
 [data-theme='light'] .logo-light,
 html[data-theme='light'] .logo-light,
 body[data-theme='light'] .logo-light {
