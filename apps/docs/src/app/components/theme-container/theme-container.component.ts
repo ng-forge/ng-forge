@@ -7,7 +7,7 @@ import { Component, ChangeDetectionStrategy, input, computed } from '@angular/co
       <ng-content></ng-content>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThemeContainerComponent {
   theme = input<'material' | 'primeng' | 'ionic'>('material');

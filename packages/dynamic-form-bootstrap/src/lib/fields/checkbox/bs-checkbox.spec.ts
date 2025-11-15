@@ -51,9 +51,7 @@ describe('BsCheckboxFieldComponent', () => {
     });
 
     it('should handle user interactions and update form value', async () => {
-      const config = BootstrapFormTestUtils.builder()
-        .bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' })
-        .build();
+      const config = BootstrapFormTestUtils.builder().bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' }).build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -75,9 +73,7 @@ describe('BsCheckboxFieldComponent', () => {
     });
 
     it('should reflect external value changes in checkbox', async () => {
-      const config = BootstrapFormTestUtils.builder()
-        .bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' })
-        .build();
+      const config = BootstrapFormTestUtils.builder().bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' }).build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -159,9 +155,7 @@ describe('BsCheckboxFieldComponent', () => {
     });
 
     it('should not display help text when not provided', async () => {
-      const config = BootstrapFormTestUtils.builder()
-        .bsCheckboxField({ key: 'newsletter', label: 'Newsletter' })
-        .build();
+      const config = BootstrapFormTestUtils.builder().bsCheckboxField({ key: 'newsletter', label: 'Newsletter' }).build();
 
       const { fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -245,11 +239,7 @@ describe('BsCheckboxFieldComponent', () => {
       });
 
       // Simulate first checkbox click using utility
-      await BootstrapFormTestUtils.simulateBsCheckbox(
-        fixture,
-        '.form-check-input[type="checkbox"]:first-of-type',
-        true
-      );
+      await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]:first-of-type', true);
 
       let formValue = BootstrapFormTestUtils.getFormValue(component);
       expect(formValue['acceptTerms']).toBe(true);
@@ -257,11 +247,7 @@ describe('BsCheckboxFieldComponent', () => {
       expect(formValue['enableNotifications']).toBe(false);
 
       // Simulate third checkbox click using utility
-      await BootstrapFormTestUtils.simulateBsCheckbox(
-        fixture,
-        '.form-check-input[type="checkbox"]:nth-of-type(3)',
-        true
-      );
+      await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]:nth-of-type(3)', true);
 
       formValue = BootstrapFormTestUtils.getFormValue(component);
       expect(formValue['acceptTerms']).toBe(true);
@@ -328,9 +314,7 @@ describe('BsCheckboxFieldComponent', () => {
     });
 
     it('should apply default Bootstrap configuration', async () => {
-      const config = BootstrapFormTestUtils.builder()
-        .bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' })
-        .build();
+      const config = BootstrapFormTestUtils.builder().bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' }).build();
 
       const { fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -369,9 +353,7 @@ describe('BsCheckboxFieldComponent', () => {
     });
 
     it('should handle undefined form values gracefully', async () => {
-      const config = BootstrapFormTestUtils.builder()
-        .bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' })
-        .build();
+      const config = BootstrapFormTestUtils.builder().bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' }).build();
 
       const { fixture } = await BootstrapFormTestUtils.createTest({ config }); // No initial value provided
 
@@ -380,9 +362,7 @@ describe('BsCheckboxFieldComponent', () => {
     });
 
     it('should handle null form values gracefully', async () => {
-      const config = BootstrapFormTestUtils.builder()
-        .bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' })
-        .build();
+      const config = BootstrapFormTestUtils.builder().bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' }).build();
 
       const { fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -394,9 +374,7 @@ describe('BsCheckboxFieldComponent', () => {
     });
 
     it('should handle programmatic value updates correctly', async () => {
-      const config = BootstrapFormTestUtils.builder()
-        .bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' })
-        .build();
+      const config = BootstrapFormTestUtils.builder().bsCheckboxField({ key: 'acceptTerms', label: 'Accept Terms' }).build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
         config,

@@ -1,7 +1,7 @@
 name: ✨ Feature Request
 description: Suggest a new feature or enhancement
-title: "[Feature]: "
-labels: ["enhancement", "needs-triage"]
+title: '[Feature]: '
+labels: ['enhancement', 'needs-triage']
 body:
   - type: markdown
     attributes:
@@ -75,14 +75,14 @@ body:
       label: Which package should this be added to?
       multiple: true
       options:
-        - "@ng-forge/dynamic-form (core)"
-        - "@ng-forge/dynamic-form-material"
-        - "@ng-forge/dynamic-form-primeng"
-        - "@ng-forge/dynamic-form-ionic"
-        - "@ng-forge/dynamic-form-bootstrap"
-        - "New package"
-        - "Documentation"
-        - "Not sure"
+        - '@ng-forge/dynamic-form (core)'
+        - '@ng-forge/dynamic-form-material'
+        - '@ng-forge/dynamic-form-primeng'
+        - '@ng-forge/dynamic-form-ionic'
+        - '@ng-forge/dynamic-form-bootstrap'
+        - 'New package'
+        - 'Documentation'
+        - 'Not sure'
     validations:
       required: true
 
@@ -131,9 +131,9 @@ body:
       label: Breaking Change?
       description: Would this require breaking changes to the API?
       options:
-        - "No"
-        - "Yes"
-        - "Not sure"
+        - 'No'
+        - 'Yes'
+        - 'Not sure'
     validations:
       required: true
 
@@ -143,9 +143,9 @@ body:
       label: Priority
       description: How important is this feature to you?
       options:
-        - "Nice to have"
-        - "Important"
-        - "Critical"
+        - 'Nice to have'
+        - 'Important'
+        - 'Critical'
     validations:
       required: true
 

@@ -20,14 +20,6 @@ export function isCheckedField<TProps>(field: FieldDef<TProps>): field is BaseCh
   return field.type === 'checkbox';
 }
 
-type ExcludedKeys =
-  | 'type'
-  | 'conditionals'
-  | 'value'
-  | 'disabled'
-  | 'readonly'
-  | 'hidden'
-  | 'col'
-  | keyof FieldWithValidation;
+type ExcludedKeys = 'type' | 'conditionals' | 'value' | 'disabled' | 'readonly' | 'hidden' | 'col' | keyof FieldWithValidation;
 
 export type CheckedFieldComponent<T extends BaseCheckedField<any>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;
