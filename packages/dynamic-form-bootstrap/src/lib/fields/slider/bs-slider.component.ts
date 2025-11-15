@@ -21,16 +21,7 @@ import { AsyncPipe } from '@angular/common';
       </label>
       }
 
-      <input
-        type="range"
-        [field]="f"
-        [id]="key()"
-        [attr.min]="props()?.min ?? min()"
-        [attr.max]="props()?.max ?? max()"
-        [attr.step]="props()?.step ?? step()"
-        [attr.tabindex]="tabIndex()"
-        class="form-range"
-      />
+      <input type="range" [field]="f" [id]="key()" [attr.tabindex]="tabIndex()" class="form-range" />
 
       @if (props()?.helpText; as helpText) {
       <div class="form-text">
