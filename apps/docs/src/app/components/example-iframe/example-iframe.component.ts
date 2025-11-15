@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal, viewChild, DestroyRef } from '@angular/core';
 import { ENVIRONMENT } from '../../config/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'example-iframe',
@@ -159,6 +160,7 @@ export class ExampleIframeComponent {
   private env = inject(ENVIRONMENT);
   private sanitizer = inject(DomSanitizer);
   private themeService = inject(NgDocThemeService);
+  private destroyRef = inject(DestroyRef);
 
   loading = signal(true);
   iframeElement = viewChild<ElementRef<HTMLIFrameElement>>('exampleIframe');
@@ -174,15 +176,16 @@ export class ExampleIframeComponent {
   });
 
   constructor() {
-    // Sync theme changes to iframe
-    effect(() => {
-      const iframe = this.iframeElement()?.nativeElement;
-      const theme = this.themeService.currentTheme;
-
-      if (iframe && iframe.contentWindow && !this.loading()) {
-        this.sendThemeToIframe(iframe, theme);
-      }
-    });
+    // Sync theme changes to iframe using RxJS observable
+    this.themeService
+      .themeChanges()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((theme) => {
+        const iframe = this.iframeElement()?.nativeElement;
+        if (iframe && iframe.contentWindow && !this.loading()) {
+          this.sendThemeToIframe(iframe, theme);
+        }
+      });
   }
 
   onLoad(): void {

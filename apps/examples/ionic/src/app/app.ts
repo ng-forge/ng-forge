@@ -1,4 +1,4 @@
-import { Component, Renderer2, inject } from '@angular/core';
+import { Component, Renderer2, inject, DestroyRef } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { DOCUMENT } from '@angular/common';
@@ -13,13 +13,21 @@ export class App {
   protected title = 'Ionic Examples';
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
+  private destroyRef = inject(DestroyRef);
 
   constructor() {
     // Listen for theme messages from parent (docs app)
-    window.addEventListener('message', (event) => {
+    const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'THEME_CHANGE') {
         this.applyTheme(event.data.theme);
       }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    // Clean up event listener on destroy
+    this.destroyRef.onDestroy(() => {
+      window.removeEventListener('message', handleMessage);
     });
   }
 
