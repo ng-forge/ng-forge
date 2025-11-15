@@ -21,7 +21,7 @@ export interface FlattenedField extends FieldDef<unknown> {
  *
  * Handles different field types with specific flattening strategies:
  * - **Page fields**: Children are flattened and merged into the result (no wrapper)
- * - **Row fields**: Children are flattened and merged into the result (no wrapper)
+ * - **Row fields**: Children are flattened and merged into the result (no wrapper), unless preserveRows=true
  * - **Group fields**: Maintains group structure with flattened children nested under the group key
  * - **Array fields**: Maintains array structure with flattened children nested under the array key
  * - **Other fields**: Pass through unchanged with guaranteed key generation
@@ -30,6 +30,8 @@ export interface FlattenedField extends FieldDef<unknown> {
  *
  * @param fields - Array of field definitions that may contain nested structures
  * @param registry - Field type registry for determining value handling behavior
+ * @param options - Configuration options for flattening behavior
+ * @param options.preserveRows - When true, keep row fields in structure for DOM rendering (grid layout)
  * @returns Flattened array of field definitions with guaranteed keys
  *
  * @example
@@ -52,7 +54,7 @@ export interface FlattenedField extends FieldDef<unknown> {
  *   }
  * ];
  *
- * const flattened = flattenFields(hierarchicalFields);
+ * const flattened = flattenFields(hierarchicalFields, registry);
  * // Result: [
  * //   { type: 'input', key: 'firstName' },
  * //   { type: 'input', key: 'lastName' },
@@ -68,7 +70,7 @@ export interface FlattenedField extends FieldDef<unknown> {
  *   { type: 'button', label: 'Submit' }
  * ];
  *
- * const flattened = flattenFields(fieldsWithoutKeys);
+ * const flattened = flattenFields(fieldsWithoutKeys, registry);
  * // Result: [
  * //   { type: 'input', label: 'Name', key: 'auto_field_0' },
  * //   { type: 'button', label: 'Submit', key: 'auto_field_1' }
@@ -77,49 +79,76 @@ export interface FlattenedField extends FieldDef<unknown> {
  *
  * @public
  */
-export function flattenFields(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>): FlattenedField[] {
+export function flattenFields(
+  fields: FieldDef<unknown>[],
+  registry: Map<string, FieldTypeDefinition>,
+  options: { preserveRows?: boolean } = {}
+): FlattenedField[] {
   const result: FlattenedField[] = [];
   let autoKeyCounter = 0;
 
+  // Process each field using appropriate strategy based on field type and configuration
   for (const field of fields) {
+    // Step 1: Determine how this field type should handle its value in the form
+    // valueHandling can be: 'include', 'exclude', or 'flatten'
     const valueHandling = getFieldValueHandling(field.type, registry);
 
-    if (valueHandling === 'flatten' && 'fields' in field) {
-      // Flatten children to current level
+    // Step 2: Check if this is a row field that should be preserved for DOM rendering
+    // Row fields need to render their container element for grid layouts to work
+    if (options.preserveRows && isRowField(field)) {
       if (field.fields) {
-        // Handle both array (page/row fields) and object (group fields)
-        // Type assertion: fields can be unknown[] from container field generics, but we know they're FieldDef[]
+        // Normalize field children to array format (handles both array and object syntax)
         const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-        const flattenedChildren = flattenFields(fieldsArray as FieldDef<unknown>[], registry);
+
+        // Recursively flatten children while preserving row structure
+        const flattenedChildren = flattenFields(fieldsArray as FieldDef<unknown>[], registry, options);
+
+        // Keep the row field in the result with its flattened children
+        // This allows the row component to render its container while children are flattened
+        result.push({
+          ...field,
+          fields: flattenedChildren,
+          key: field.key || `auto_row_${autoKeyCounter++}`,
+        } as FlattenedField);
+      }
+    } else if (valueHandling === 'flatten' && 'fields' in field) {
+      // Step 3: Handle fields with 'flatten' value handling (typically page/row fields)
+      // These fields are pure containers - merge their children directly into the parent level
+      if (field.fields) {
+        const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
+        const flattenedChildren = flattenFields(fieldsArray as FieldDef<unknown>[], registry, options);
+
+        // Spread children directly into result - the container field itself is discarded
+        // This is used for page fields (form structure) and row fields (form values)
         result.push(...flattenedChildren);
       }
     } else if (isGroupField(field)) {
-      // Groups always maintain their structure (even if they have 'include' handling)
-      // Type assertion: After isGroupField guard, we know fields contains FieldDef instances
+      // Step 4: Handle group fields - preserve structure for nested form values
+      // Group fields create a nested object in the form value: { groupKey: { field1: value1, ... } }
       const childFieldsArray = Object.values(field.fields) as FieldDef<unknown>[];
-      const flattenedChildren = flattenFields(childFieldsArray, registry);
+      const flattenedChildren = flattenFields(childFieldsArray, registry, options);
 
-      // Add only the group field with its flattened children, not the children separately
+      // Keep the group field with its recursively flattened children nested under its key
       result.push({
         ...field,
         fields: flattenedChildren,
         key: field.key || `auto_group_${autoKeyCounter++}`,
       } as FlattenedField);
     } else if (isArrayField(field)) {
-      // Arrays always maintain their structure (even if they have 'include' handling)
-      // Type assertion: After isArrayField guard, we know fields contains FieldDef instances
+      // Step 5: Handle array fields - preserve structure for array form values
+      // Array fields create an array in the form value: { arrayKey: [item1, item2, ...] }
       const childFieldsArray = Object.values(field.fields) as FieldDef<unknown>[];
-      const flattenedChildren = flattenFields(childFieldsArray, registry);
+      const flattenedChildren = flattenFields(childFieldsArray, registry, options);
 
-      // Add only the array field with its flattened children, not the children separately
+      // Keep the array field with its template definition nested under its key
       result.push({
         ...field,
         fields: flattenedChildren,
         key: field.key || `auto_array_${autoKeyCounter++}`,
       } as FlattenedField);
     } else {
-      // All other fields (include/exclude) maintain their structure
-      // The value handling will be processed later in schema creation
+      // Step 6: Handle all other fields (inputs, buttons, etc.) - pass through unchanged
+      // These fields are leaf nodes that don't contain children and map directly to form controls
       const key = field.key || `auto_field_${autoKeyCounter++}`;
       result.push({
         ...field,
@@ -134,11 +163,11 @@ export function flattenFields(fields: FieldDef<unknown>[], registry: Map<string,
 /**
  * Flattens fields for DOM rendering, preserving structural container fields.
  *
- * Unlike {@link flattenFields}, this function keeps row fields in the structure
- * so they can render their container elements in the DOM. This is essential for
- * the grid system to work correctly.
+ * This is a convenience wrapper around {@link flattenFields} with `preserveRows: true`.
+ * It keeps row fields in the structure so they can render their container elements
+ * in the DOM, which is essential for the grid system to work correctly.
  *
- * The difference from `flattenFields`:
+ * The difference from `flattenFields()`:
  * - **Row fields**: Preserved in structure with flattened children (for grid layout)
  * - **Page fields**: Still flattened (handled by page orchestrator)
  * - **Group/Array fields**: Same behavior (preserved with flattened children)
@@ -175,61 +204,5 @@ export function flattenFields(fields: FieldDef<unknown>[], registry: Map<string,
  * @public
  */
 export function flattenFieldsForRendering(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>): FlattenedField[] {
-  const result: FlattenedField[] = [];
-  let autoKeyCounter = 0;
-
-  for (const field of fields) {
-    const valueHandling = getFieldValueHandling(field.type, registry);
-
-    // Special handling for row fields: preserve them in structure for DOM rendering
-    if (isRowField(field)) {
-      if (field.fields) {
-        const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-        const flattenedChildren = flattenFieldsForRendering(fieldsArray as FieldDef<unknown>[], registry);
-
-        // Keep the row field with its flattened children
-        result.push({
-          ...field,
-          fields: flattenedChildren,
-          key: field.key || `auto_row_${autoKeyCounter++}`,
-        } as FlattenedField);
-      }
-    } else if (valueHandling === 'flatten' && 'fields' in field) {
-      // For other flatten fields (like page), extract children
-      if (field.fields) {
-        const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-        const flattenedChildren = flattenFieldsForRendering(fieldsArray as FieldDef<unknown>[], registry);
-        result.push(...flattenedChildren);
-      }
-    } else if (isGroupField(field)) {
-      // Groups maintain their structure
-      const childFieldsArray = Object.values(field.fields) as FieldDef<unknown>[];
-      const flattenedChildren = flattenFieldsForRendering(childFieldsArray, registry);
-
-      result.push({
-        ...field,
-        fields: flattenedChildren,
-        key: field.key || `auto_group_${autoKeyCounter++}`,
-      } as FlattenedField);
-    } else if (isArrayField(field)) {
-      // Arrays maintain their structure
-      const childFieldsArray = Object.values(field.fields) as FieldDef<unknown>[];
-      const flattenedChildren = flattenFieldsForRendering(childFieldsArray, registry);
-
-      result.push({
-        ...field,
-        fields: flattenedChildren,
-        key: field.key || `auto_array_${autoKeyCounter++}`,
-      } as FlattenedField);
-    } else {
-      // All other fields maintain their structure
-      const key = field.key || `auto_field_${autoKeyCounter++}`;
-      result.push({
-        ...field,
-        key,
-      } as FlattenedField);
-    }
-  }
-
-  return result;
+  return flattenFields(fields, registry, { preserveRows: true });
 }

@@ -93,43 +93,47 @@ export function mapFieldToForm(fieldDef: FieldDef<any>, fieldPath: SchemaPath<an
 function applySimpleValidationRules(fieldDef: FieldDef<any> & FieldWithValidation, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   const path = toSupportedPath(fieldPath);
 
+  // Required validator
   if (fieldDef.required) {
     required(path);
   }
 
+  // Email validator
   if (fieldDef.email) {
     // Email validator expects SchemaPath<string>
-    email(fieldPath as SchemaPath<string, SchemaPathRules.Supported>);
+    email(path as SchemaPath<string, SchemaPathRules.Supported>);
   }
 
-  // Check for min in top-level field or props (for components like slider)
-  const minValue = fieldDef.min !== undefined ? fieldDef.min : (fieldDef.props as any)?.min;
+  // Numeric validators (min/max)
+  const minValue = fieldDef.min ?? (fieldDef.props as any)?.min;
+  const maxValue = fieldDef.max ?? (fieldDef.props as any)?.max;
+
   if (minValue !== undefined) {
     // Min validator expects SchemaPath<number>
-    min(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, minValue);
+    min(path as SchemaPath<number, SchemaPathRules.Supported>, minValue);
   }
 
-  // Check for max in top-level field or props (for components like slider)
-  const maxValue = fieldDef.max !== undefined ? fieldDef.max : (fieldDef.props as any)?.max;
   if (maxValue !== undefined) {
     // Max validator expects SchemaPath<number>
-    max(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, maxValue);
+    max(path as SchemaPath<number, SchemaPathRules.Supported>, maxValue);
   }
 
+  // String length validators
   if (fieldDef.minLength !== undefined) {
     // MinLength validator expects SchemaPath<string>
-    minLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, fieldDef.minLength);
+    minLength(path as SchemaPath<string, SchemaPathRules.Supported>, fieldDef.minLength);
   }
 
   if (fieldDef.maxLength !== undefined) {
     // MaxLength validator expects SchemaPath<string>
-    maxLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, fieldDef.maxLength);
+    maxLength(path as SchemaPath<string, SchemaPathRules.Supported>, fieldDef.maxLength);
   }
 
+  // Pattern validator
   if (fieldDef.pattern) {
     const regexPattern = typeof fieldDef.pattern === 'string' ? new RegExp(fieldDef.pattern) : fieldDef.pattern;
     // Pattern validator expects SchemaPath<string>
-    pattern(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, regexPattern);
+    pattern(path as SchemaPath<string, SchemaPathRules.Supported>, regexPattern);
   }
 }
 
@@ -153,6 +157,25 @@ function mapFieldSpecificConfiguration(fieldDef: FieldDef<any>, fieldPath: Schem
 }
 
 /**
+ * Common helper to map child fields to their parent form paths
+ * @param fields - Array of child field definitions
+ * @param parentPath - The parent field path
+ */
+function mapChildFieldsToForm<TValue>(fields: FieldDef<any>[], parentPath: SchemaPath<TValue> | SchemaPathTree<TValue>): void {
+  for (const childField of fields) {
+    if (!childField.key) {
+      continue;
+    }
+
+    // Type assertion needed due to dynamic field keys
+    const childPath = (parentPath as any)[childField.key] as SchemaPath<any> | SchemaPathTree<any> | undefined;
+    if (childPath) {
+      mapFieldToForm(childField, childPath);
+    }
+  }
+}
+
+/**
  * Maps page field children to the root form schema
  * Page fields are layout containers that don't create their own form controls
  * Their children are flattened to the root level of the form
@@ -162,22 +185,8 @@ function mapPageFieldToForm(pageField: FieldDef<any>, rootPath: SchemaPath<any> 
     return;
   }
 
-  // Page fields don't create their own form controls
-  // Instead, their child fields are mapped directly to the root form
-  // Type assertion: After isPageField guard, we know fields contains FieldDef instances
   const fields = pageField.fields as FieldDef<any>[];
-  for (const childField of fields) {
-    if (!childField.key) {
-      continue;
-    }
-
-    // Get the field path for this child at the root level (not nested under the page)
-    const childPath = (rootPath as any)[childField.key];
-    if (childPath) {
-      // Recursively apply field mapping to the child field at root level
-      mapFieldToForm(childField, childPath);
-    }
-  }
+  mapChildFieldsToForm(fields, rootPath);
 }
 
 /**
@@ -190,22 +199,8 @@ function mapRowFieldToForm(rowField: FieldDef<any>, rootPath: SchemaPath<any> | 
     return;
   }
 
-  // Row fields don't create their own form controls
-  // Instead, their child fields are mapped directly to the root form
-  // Type assertion: After isRowField guard, we know fields contains FieldDef instances
   const fields = rowField.fields as FieldDef<any>[];
-  for (const childField of fields) {
-    if (!childField.key) {
-      continue;
-    }
-
-    // Get the field path for this child at the root level (not nested under the row)
-    const childPath = (rootPath as any)[childField.key];
-    if (childPath) {
-      // Recursively apply field mapping to the child field at root level
-      mapFieldToForm(childField, childPath);
-    }
-  }
+  mapChildFieldsToForm(fields, rootPath);
 }
 
 /**
@@ -217,21 +212,8 @@ function mapGroupFieldToForm(groupField: FieldDef<any>, fieldPath: SchemaPath<an
     return;
   }
 
-  // Apply validation for each child field to the appropriate nested path in the parent form
-  // Type assertion: After isGroupField guard, we know fields contains FieldDef instances
   const fields = groupField.fields as FieldDef<any>[];
-  for (const childField of fields) {
-    if (!childField.key) {
-      continue;
-    }
-
-    // Get the nested path for this child field within the group
-    const nestedPath = (fieldPath as any)[childField.key];
-    if (nestedPath) {
-      // Recursively apply field mapping to the child field
-      mapFieldToForm(childField, nestedPath);
-    }
-  }
+  mapChildFieldsToForm(fields, fieldPath);
 }
 
 /**

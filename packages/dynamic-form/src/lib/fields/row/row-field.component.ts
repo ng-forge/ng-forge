@@ -107,7 +107,13 @@ export default class RowFieldComponent {
       .catch((error) => {
         // Only log errors if component hasn't been destroyed
         if (!this.destroyRef.destroyed) {
-          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+          const fieldKey = fieldDef.key || '<no key>';
+          const rowKey = this.field().key || '<no key>';
+          console.error(
+            `[RowField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+              `within row '${rowKey}'. Ensure the field type is registered in your field registry.`,
+            error
+          );
         }
         return undefined;
       });

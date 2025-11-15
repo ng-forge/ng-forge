@@ -16,7 +16,7 @@ export default class TestInputHarness {
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
   readonly type = input<string>('text');
-  readonly props = input<Record<string, any>>({});
+  readonly props = input<Record<string, unknown>>({});
   readonly className = input<string>('');
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();

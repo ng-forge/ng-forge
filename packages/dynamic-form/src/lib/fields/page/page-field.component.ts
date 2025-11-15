@@ -90,7 +90,11 @@ export default class PageFieldComponent {
     const valid = validatePageNesting(pageField);
 
     if (!valid) {
-      console.error('Page fields cannot contain nested page fields:', pageField);
+      console.error(
+        `[PageField] Invalid configuration: Page '${pageField.key}' contains nested page fields. ` +
+          `Pages cannot contain other pages. Consider using groups or rows for nested structure.`,
+        pageField
+      );
     }
 
     return valid;
@@ -150,7 +154,13 @@ export default class PageFieldComponent {
       .catch((error) => {
         // Only log errors if component hasn't been destroyed
         if (!this.destroyRef.destroyed) {
-          console.error(`Failed to load component for field type '${fieldDef.type}':`, error);
+          const fieldKey = fieldDef.key || '<no key>';
+          const pageKey = this.field().key;
+          console.error(
+            `[PageField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+              `within page '${pageKey}'. Ensure the field type is registered in your field registry.`,
+            error
+          );
         }
         return undefined;
       });

@@ -22,7 +22,12 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
   const schema = schemaRegistry.resolveSchema(config.schema);
 
   if (!schema) {
-    console.error(`Schema not found: ${config.schema}`);
+    const availableSchemas = Array.from(schemaRegistry.getAllSchemas().keys()).join(', ') || '<none>';
+    console.error(
+      `[Schema] Schema not found: '${config.schema}'. ` +
+        `Available schemas: ${availableSchemas}. ` +
+        `Ensure the schema is registered in your schema registry.`
+    );
     return;
   }
 

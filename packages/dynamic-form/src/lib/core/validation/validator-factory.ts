@@ -20,10 +20,20 @@ import { inject } from '@angular/core';
 import { AsyncValidatorConfig, CustomValidatorConfig, HttpValidatorConfig, ValidatorConfig } from '../../models';
 import { createLogicFunction } from '../expressions';
 import { createDynamicValueFunction } from '../values';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser';
 import { CustomValidator } from './validator-types';
+
+/**
+ * Helper to create conditional logic function from when expression.
+ * Returns undefined if no when condition is specified.
+ * Reduces duplication across validator types.
+ */
+function createConditionalLogic<TValue>(when: ConditionalExpression | undefined): LogicFn<TValue, boolean> | undefined {
+  return when ? (createLogicFunction(when) as LogicFn<TValue, boolean>) : undefined;
+}
 
 /**
  * Safely cast a SchemaPathTree to SchemaPath with Supported rules.
@@ -170,8 +180,8 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
   }
 
   // Apply with conditional logic if specified
-  if (config.when) {
-    const whenLogic = createLogicFunction(config.when);
+  const whenLogic = createConditionalLogic<any>(config.when);
+  if (whenLogic) {
     const conditionalValidator = (ctx: FieldContext<any>) => {
       if (!whenLogic(ctx)) {
         return null; // Condition not met, skip validation
@@ -194,7 +204,10 @@ function createFunctionValidator<TValue>(
   const validatorFn = registry.getValidator(config.functionName!);
 
   if (!validatorFn) {
-    console.warn(`[DynamicForm] Custom validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    console.warn(
+      `[DynamicForm] Custom validator "${config.functionName}" not found in registry. ` +
+        `Ensure it's registered using signalFormsConfig.validators or check the function name for typos.`
+    );
     return () => null;
   }
 
@@ -267,7 +280,10 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
   const validatorConfig = registry.getAsyncValidator(config.functionName);
 
   if (!validatorConfig) {
-    console.warn(`[DynamicForm] Async validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    console.warn(
+      `[DynamicForm] Async validator "${config.functionName}" not found in registry. ` +
+        `Ensure it's registered using signalFormsConfig.asyncValidators or check the function name for typos.`
+    );
     return;
   }
 
@@ -282,8 +298,8 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
   };
 
   // Apply with conditional logic if specified
-  if (config.when) {
-    const whenLogic = createLogicFunction(config.when);
+  const whenLogic = createConditionalLogic<any>(config.when);
+  if (whenLogic) {
     // For conditional async validators, we wrap the params function
     const conditionalOptions = {
       ...asyncOptions,
@@ -316,7 +332,10 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
   const httpValidatorConfig = registry.getHttpValidator(config.functionName);
 
   if (!httpValidatorConfig) {
-    console.warn(`[DynamicForm] HTTP validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    console.warn(
+      `[DynamicForm] HTTP validator "${config.functionName}" not found in registry. ` +
+        `Ensure it's registered using signalFormsConfig.httpValidators or check the function name for typos.`
+    );
     return;
   }
 
@@ -330,8 +349,8 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
   };
 
   // Apply with conditional logic if specified
-  if (config.when) {
-    const whenLogic = createLogicFunction(config.when);
+  const whenLogic = createConditionalLogic<any>(config.when);
+  if (whenLogic) {
     // For conditional HTTP validators, we wrap the request function
     const conditionalOptions = {
       ...httpOptions,

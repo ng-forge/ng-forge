@@ -105,7 +105,7 @@ export class LoginComponent {
 
 ng-forge dynamic forms supports multiple UI frameworks. Install the integration package for your preferred framework:
 
-### Material Design (Production Ready)
+### Material Design (Preview)
 
 ```bash group="install-material" name="npm"
 npm install @ng-forge/dynamic-form-material
