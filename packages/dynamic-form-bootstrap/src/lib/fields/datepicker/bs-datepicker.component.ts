@@ -3,6 +3,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { BsDatepickerComponent, BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
+import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
 /**
  * Bootstrap datepicker field component
@@ -13,17 +14,20 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-bs-datepicker',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @if (p?.floatingLabel) {
     <!-- Floating label variant -->
     <div class="form-floating mb-3">
       <input
+        dfInputConstraints
         [field]="f"
         [id]="key()"
         type="date"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [dfMin]="minAsString()"
+        [dfMax]="maxAsString()"
         [attr.tabindex]="tabIndex()"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
@@ -49,10 +53,13 @@ import { AsyncPipe } from '@angular/common';
       }
 
       <input
+        dfInputConstraints
         [field]="f"
         [id]="key()"
         type="date"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [dfMin]="minAsString()"
+        [dfMax]="maxAsString()"
         [attr.tabindex]="tabIndex()"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"

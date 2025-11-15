@@ -3,10 +3,11 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { BsSliderComponent, BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
+import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
 @Component({
   selector: 'df-bs-slider',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -21,7 +22,17 @@ import { AsyncPipe } from '@angular/common';
       </label>
       }
 
-      <input type="range" [field]="f" [id]="key()" [attr.tabindex]="tabIndex()" class="form-range" />
+      <input
+        type="range"
+        dfInputConstraints
+        [field]="f"
+        [id]="key()"
+        [dfMin]="props()?.min ?? min()"
+        [dfMax]="props()?.max ?? max()"
+        [dfStep]="props()?.step ?? step()"
+        [attr.tabindex]="tabIndex()"
+        class="form-range"
+      />
 
       @if (props()?.helpText; as helpText) {
       <div class="form-text">
