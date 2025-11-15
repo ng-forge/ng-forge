@@ -54,13 +54,15 @@ export const passwordMatchingConfig = {
       },
       required: true,
       minLength: 8,
+      validationMessages: {
+        passwordMismatch: 'Passwords must match',
+      },
       col: 6,
     },
     {
       key: 'passwordHint',
       type: 'text',
-      label:
-        'Password must contain at least 8 characters. Note: Password matching validation would typically be implemented using custom validators.',
+      label: 'Password must contain at least 8 characters.',
       className: 'password-hint',
       col: 12,
     },
