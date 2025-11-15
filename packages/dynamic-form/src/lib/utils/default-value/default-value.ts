@@ -30,7 +30,7 @@ import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-t
  * }, registry); // { street: '', city: 'New York' }
  * ```
  */
-export function getFieldDefaultValue(field: FieldDef<any>, registry: Map<string, FieldTypeDefinition>): unknown {
+export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<string, FieldTypeDefinition>): unknown {
   const valueHandling = getFieldValueHandling(field.type, registry);
 
   // Fields with 'exclude' or 'flatten' handling don't contribute direct values
@@ -45,7 +45,7 @@ export function getFieldDefaultValue(field: FieldDef<any>, registry: Map<string,
 
   // Group fields with 'include' handling create nested objects
   if (field.type === 'group' && 'fields' in field) {
-    const fields = field.fields as readonly FieldDef<any>[];
+    const fields = field.fields as readonly FieldDef<unknown>[];
     if (!fields || fields.length === 0) {
       return undefined;
     }

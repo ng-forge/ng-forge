@@ -81,7 +81,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
    * Store the field template in a linkedSignal for type enforcement.
    * This template is cloned when adding new items dynamically.
    */
-  private readonly fieldTemplate = linkedSignal<FieldDef<any> | null>(() => {
+  private readonly fieldTemplate = linkedSignal<FieldDef<unknown> | null>(() => {
     const arrayField = this.field();
     // Array fields should have exactly one field as the template
     return arrayField.fields && arrayField.fields.length > 0 ? arrayField.fields[0] : null;
@@ -129,7 +129,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
       ...baseInstance,
       key: `${arrayKey}[${index}]`,
       _arrayIndex: index,
-    })) as FieldDef<any>[];
+    })) as FieldDef<unknown>[];
   });
 
   // Convert to observable for field mapping
@@ -138,7 +138,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   // Create field components
   fields = toSignal(
     this.fields$.pipe(
-      switchMap((fields: FieldDef<any>[]) => {
+      switchMap((fields: FieldDef<unknown>[]) => {
         if (!fields || fields.length === 0) {
           return of([]);
         }
@@ -226,13 +226,13 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     this.arrayItemCount.set(newArray.length);
   }
 
-  private mapFields(fields: FieldDef<any>[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: FieldDef<unknown>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map((fieldDef) => this.mapSingleField(fieldDef))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
   }
 
-  private async mapSingleField(fieldDef: FieldDef<any>): Promise<ComponentRef<FormUiControl> | undefined> {
+  private async mapSingleField(fieldDef: FieldDef<unknown>): Promise<ComponentRef<FormUiControl> | undefined> {
     return this.fieldRegistry
       .loadTypeComponent(fieldDef.type)
       .then((componentType) => {

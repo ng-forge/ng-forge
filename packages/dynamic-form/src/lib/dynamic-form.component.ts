@@ -164,7 +164,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<any>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
+    <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
       const result: Record<string, unknown> = {};
       for (const [key, field] of Object.entries(fieldsById)) {
         const value = getFieldDefaultValue(field, registry);
@@ -312,7 +312,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
   }
 
-  private createFormSetupFromConfig(fields: FieldDef<any>[], mode: 'paged' | 'non-paged', registry: Map<string, FieldTypeDefinition>) {
+  private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: 'paged' | 'non-paged', registry: Map<string, FieldTypeDefinition>) {
     // Use memoized functions for expensive operations with registry
     const flattenedFields = this.memoizedFlattenFields(fields, registry);
     const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
@@ -585,13 +585,13 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     { initialValue: [] }
   );
 
-  private mapFields(fields: FieldDef<any>[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFields(fields: FieldDef<unknown>[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
       .map((fieldDef) => this.mapSingleField(fieldDef))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
   }
 
-  private async mapSingleField(fieldDef: FieldDef<any>): Promise<ComponentRef<FormUiControl> | undefined> {
+  private async mapSingleField(fieldDef: FieldDef<unknown>): Promise<ComponentRef<FormUiControl> | undefined> {
     return this.fieldRegistry
       .loadTypeComponent(fieldDef.type)
       .then((componentType) => {
