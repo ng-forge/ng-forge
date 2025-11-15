@@ -76,7 +76,9 @@ template: `{{ calculateTotal() }}`  // Don't call functions - use computed()
 ### Component Structure (Order Matters!)
 
 ```typescript
-@Component({ /* ... */ })
+@Component({
+  /* ... */
+})
 export class MyComponent {
   // 1. Inputs (required first, then optional)
   readonly field = input.required<FieldTree<string>>();
@@ -95,13 +97,19 @@ export class MyComponent {
   private service = inject(MyService);
 
   // 6. Lifecycle hooks / constructor
-  constructor() { /* ... */ }
+  constructor() {
+    /* ... */
+  }
 
   // 7. Public methods
-  increment(): void { /* ... */ }
+  increment(): void {
+    /* ... */
+  }
 
   // 8. Private methods
-  private helper(): void { /* ... */ }
+  private helper(): void {
+    /* ... */
+  }
 }
 ```
 
@@ -175,7 +183,7 @@ import * as _ from 'lodash';        // Use lodash-es for tree-shaking
 
 ### Documentation (TSDoc)
 
-```typescript
+````typescript
 /**
  * Represents a dynamic form field definition.
  *
@@ -198,7 +206,7 @@ export interface FieldDef<TProps> {
   /** Field type identifier */
   type: string;
 }
-```
+````
 
 ## Pre-Commit Checklist
 
@@ -237,9 +245,9 @@ NgModules
 ### ❌ Type Safety Issues
 
 ```typescript
-function process(data: any)         // Use unknown
+function process(data: any); // Use unknown
 // @ts-ignore                       // Fix the type error
-const value: object[]               // Use specific type
+const value: object[]; // Use specific type
 ```
 
 ## Quick Tools Reference

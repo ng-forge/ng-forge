@@ -9,7 +9,6 @@ import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
 import { FieldTree } from '@angular/forms/signals';
-import { RegisteredFieldTypes } from '../../models';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -96,12 +95,12 @@ export class PageOrchestratorComponent {
   /**
    * Array of page field definitions to render
    */
-  pageFields = input.required<PageField<RegisteredFieldTypes[]>[]>();
+  pageFields = input.required<PageField[]>();
 
   /**
    * Root form instance from parent DynamicForm
    */
-  form = input.required<FieldTree<unknown>>();
+  form = input.required<FieldTree<any>>();
 
   /**
    * Field signal context for child fields
@@ -119,7 +118,11 @@ export class PageOrchestratorComponent {
   private readonly currentPageIndex = linkedSignal(() => {
     const totalPages = this.pageFields().length;
     const initialIndex = this.config().initialPageIndex ?? 0;
-    return totalPages > 0 ? Math.max(0, Math.min(initialIndex, totalPages - 1)) : 0;
+
+    if (totalPages === 0) return 0;
+
+    // Clamp initial index within valid page range
+    return Math.max(0, Math.min(initialIndex, totalPages - 1));
   });
 
   /**

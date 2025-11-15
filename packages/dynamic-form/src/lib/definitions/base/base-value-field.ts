@@ -10,8 +10,6 @@ export type ValueType = (typeof ValueType)[number];
 export interface BaseValueField<TProps, TValue> extends FieldDef<TProps>, FieldWithValidation {
   value?: TValue;
 
-  defaultValue?: TValue;
-
   /**
    * Placeholder text displayed when the field is empty.
    * Supports static strings, Observables, and Signals for dynamic content.
@@ -30,7 +28,6 @@ type ExcludedKeys =
   | 'conditionals'
   | 'value'
   | 'valueType'
-  | 'defaultValue'
   | 'disabled'
   | 'readonly'
   | 'hidden'

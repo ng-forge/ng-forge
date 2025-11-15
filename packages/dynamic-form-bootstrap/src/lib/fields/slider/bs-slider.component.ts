@@ -3,10 +3,11 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { BsSliderComponent, BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
+import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
 @Component({
   selector: 'df-bs-slider',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -23,13 +24,13 @@ import { AsyncPipe } from '@angular/common';
 
       <input
         type="range"
+        dfBsInputConstraints
         [field]="f"
         [id]="key()"
-        [attr.min]="props()?.min ?? f().min?.() ?? 0"
-        [attr.max]="props()?.max ?? f().max?.() ?? 100"
-        [attr.step]="props()?.step ?? 1"
+        [dfMin]="props()?.min ?? min()"
+        [dfMax]="props()?.max ?? max()"
+        [dfStep]="props()?.step ?? step()"
         [attr.tabindex]="tabIndex()"
-        [disabled]="f().disabled()"
         class="form-range"
       />
 
@@ -70,6 +71,10 @@ export default class BsSliderFieldComponent implements BsSliderComponent {
 
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
+
+  readonly min = input<number>(0);
+  readonly max = input<number>(100);
+  readonly step = input<number>(1);
 
   readonly props = input<BsSliderProps>();
   readonly validationMessages = input<ValidationMessages>();

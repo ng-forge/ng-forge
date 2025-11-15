@@ -31,6 +31,9 @@ export const checkoutConfig = {
           key: 'applyPromo',
           type: 'button',
           label: 'Apply',
+          event: class ApplyPromoEvent {
+            readonly type = 'apply-promo' as const;
+          },
           col: 4,
         },
         {
@@ -157,13 +160,13 @@ export const checkoutConfig = {
             {
               key: 'backToShipping',
               type: 'previous',
-          label: 'Back to Shipping',
+              label: 'Back to Shipping',
               col: 6,
             },
             {
               key: 'placeOrder',
               type: 'submit',
-          label: 'Place Order',
+              label: 'Place Order',
               col: 6,
             },
           ],

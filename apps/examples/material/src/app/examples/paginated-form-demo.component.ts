@@ -319,13 +319,13 @@ export class PaginatedFormDemoComponent {
             key: 'newsletter',
             type: 'checkbox',
             label: 'Subscribe to newsletter',
-            checked: true,
+            value: true,
           },
           {
             key: 'notifications',
             type: 'toggle',
             label: 'Enable notifications',
-            checked: false,
+            value: false,
           },
           {
             key: 'terms',

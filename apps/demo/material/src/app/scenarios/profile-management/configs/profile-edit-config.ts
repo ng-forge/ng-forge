@@ -41,7 +41,7 @@ export const profileEditConfig = {
           props: {
             placeholder: 'Enter your last name',
           },
-          defaultValue: 'Doe',
+          value: 'Doe',
           required: true,
           col: 6,
         },
@@ -53,7 +53,7 @@ export const profileEditConfig = {
             type: 'email',
             placeholder: 'Enter your email address',
           },
-          defaultValue: 'john.doe@example.com',
+          value: 'john.doe@example.com',
           email: true,
           required: true,
           col: 12,
@@ -65,7 +65,7 @@ export const profileEditConfig = {
           props: {
             placeholder: 'How others see your name',
           },
-          defaultValue: 'John D.',
+          value: 'John D.',
           col: 6,
         },
         {
@@ -75,7 +75,7 @@ export const profileEditConfig = {
           props: {
             placeholder: 'Your professional title',
           },
-          defaultValue: 'Software Engineer',
+          value: 'Software Engineer',
           col: 6,
         },
       ],
@@ -94,7 +94,7 @@ export const profileEditConfig = {
             type: 'tel',
             placeholder: '+1 (555) 123-4567',
           },
-          defaultValue: '+1 (555) 123-4567',
+          value: '+1 (555) 123-4567',
           col: 6,
         },
         {
@@ -115,7 +115,7 @@ export const profileEditConfig = {
             type: 'url',
             placeholder: 'https://yourwebsite.com',
           },
-          defaultValue: 'https://johndoe.dev',
+          value: 'https://johndoe.dev',
           col: 6,
         },
         {
@@ -125,7 +125,7 @@ export const profileEditConfig = {
           props: {
             placeholder: 'LinkedIn profile URL',
           },
-          defaultValue: 'https://linkedin.com/in/johndoe',
+          value: 'https://linkedin.com/in/johndoe',
           col: 6,
         },
       ],
@@ -144,7 +144,7 @@ export const profileEditConfig = {
             placeholder: 'Tell us about yourself...',
             rows: 4,
           },
-          defaultValue: 'Passionate software engineer with 5+ years of experience in web development and cloud technologies.',
+          value: 'Passionate software engineer with 5+ years of experience in web development and cloud technologies.',
           col: 12,
         },
         {
@@ -154,7 +154,7 @@ export const profileEditConfig = {
           props: {
             placeholder: 'JavaScript, TypeScript, Angular, React...',
           },
-          defaultValue: 'JavaScript, TypeScript, Angular, Node.js, AWS',
+          value: 'JavaScript, TypeScript, Angular, Node.js, AWS',
           col: 12,
         },
       ],
@@ -179,12 +179,8 @@ export const profileEditConfig = {
         },
         {
           key: 'saveProfile',
-          type: 'button',
+          type: 'submit',
           label: 'Save Profile',
-          props: {
-            type: 'submit',
-          },
-          event: SubmitEvent,
           col: 6,
         },
       ],

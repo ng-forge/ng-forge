@@ -47,8 +47,6 @@ import { AsyncPipe } from '@angular/common';
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
       />
 
       <mat-datepicker-toggle matIconSuffix [for]="$any(picker)" />

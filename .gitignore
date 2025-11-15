@@ -58,3 +58,6 @@ playwright/.cache/
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 /example/
+
+# Playwright test screenshots
+**/screenshots/

@@ -1,7 +1,7 @@
 name: ❓ Question / Help
 description: Ask a question or get help with ng-forge
-title: "[Question]: "
-labels: ["question"]
+title: '[Question]: '
+labels: ['question']
 body:
   - type: markdown
     attributes:
@@ -47,13 +47,13 @@ body:
       label: Which package is this about?
       multiple: true
       options:
-        - "@ng-forge/dynamic-form (core)"
-        - "@ng-forge/dynamic-form-material"
-        - "@ng-forge/dynamic-form-primeng"
-        - "@ng-forge/dynamic-form-ionic"
-        - "@ng-forge/dynamic-form-bootstrap"
-        - "All packages / General"
-        - "Not sure"
+        - '@ng-forge/dynamic-form (core)'
+        - '@ng-forge/dynamic-form-material'
+        - '@ng-forge/dynamic-form-primeng'
+        - '@ng-forge/dynamic-form-ionic'
+        - '@ng-forge/dynamic-form-bootstrap'
+        - 'All packages / General'
+        - 'Not sure'
     validations:
       required: false
 
@@ -103,7 +103,7 @@ body:
     attributes:
       label: Package Version
       description: What version are you using?
-      placeholder: "1.0.0"
+      placeholder: '1.0.0'
     validations:
       required: false
 
@@ -112,7 +112,7 @@ body:
     attributes:
       label: Angular Version
       description: What version of Angular are you using?
-      placeholder: "21.0.0"
+      placeholder: '21.0.0'
     validations:
       required: false
 

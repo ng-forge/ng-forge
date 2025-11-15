@@ -1,4 +1,5 @@
-import { disabled, email, FieldPath, max, maxLength, min, minLength, pattern, required } from '@angular/forms/signals';
+import { disabled, email, max, maxLength, min, minLength, pattern, required, SchemaPathRules, PathKind } from '@angular/forms/signals';
+import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { FieldDef, FieldWithValidation } from '../definitions';
 import { applyValidator } from './validation';
 import { applyLogic } from './logic';
@@ -9,10 +10,20 @@ import { isPageField } from '../definitions/default/page-field';
 import { isRowField } from '../definitions/default/row-field';
 
 /**
+ * Safely cast a SchemaPathTree to SchemaPath with Supported rules.
+ * See validator-factory.ts for detailed explanation of why this is safe.
+ */
+function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>
+): SchemaPath<TValue, SchemaPathRules.Supported, TPathKind> {
+  return path as SchemaPath<TValue, SchemaPathRules.Supported, TPathKind>;
+}
+
+/**
  * Single entry point to map field data into form
  * This is the main function that should be called from the dynamic form component
  */
-export function mapFieldToForm<TValue>(fieldDef: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+export function mapFieldToForm(fieldDef: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   // Cast to FieldWithValidation to access validation properties
   const validationField = fieldDef as FieldDef<any> & FieldWithValidation;
 
@@ -70,49 +81,69 @@ export function mapFieldToForm<TValue>(fieldDef: FieldDef<any>, fieldPath: Field
 
 /**
  * Apply simple validation rules from field properties for backward compatibility
+ *
+ * Note: This function accepts SchemaPath<any> because FieldDef doesn't encode
+ * the field's TypeScript type at compile time. The validators are applied based
+ * on runtime FieldDef properties (email, min, max, etc.). The type assertions
+ * to specific types (string, number) are safe because:
+ * 1. Angular's validators perform runtime value checks, not compile-time type checks
+ * 2. The FieldDef properties indicate which validator to apply
+ * 3. The SchemaPath type parameter is primarily for IDE autocomplete/type inference
  */
-function applySimpleValidationRules<TValue>(fieldDef: FieldDef<any> & FieldWithValidation, fieldPath: FieldPath<TValue>): void {
+function applySimpleValidationRules(fieldDef: FieldDef<any> & FieldWithValidation, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
+  const path = toSupportedPath(fieldPath);
+
+  // Required validator
   if (fieldDef.required) {
-    required(fieldPath);
+    required(path);
   }
 
+  // Email validator
   if (fieldDef.email) {
-    email(fieldPath as FieldPath<string>);
+    // Email validator expects SchemaPath<string>
+    email(path as SchemaPath<string, SchemaPathRules.Supported>);
   }
 
-  // Check for min in top-level field or props (for components like slider)
-  const minValue = fieldDef.min !== undefined ? fieldDef.min : (fieldDef.props as any)?.min;
+  // Numeric validators (min/max)
+  const minValue = fieldDef.min ?? (fieldDef.props as any)?.min;
+  const maxValue = fieldDef.max ?? (fieldDef.props as any)?.max;
+
   if (minValue !== undefined) {
-    min(fieldPath as FieldPath<number>, minValue);
+    // Min validator expects SchemaPath<number>
+    min(path as SchemaPath<number, SchemaPathRules.Supported>, minValue);
   }
 
-  // Check for max in top-level field or props (for components like slider)
-  const maxValue = fieldDef.max !== undefined ? fieldDef.max : (fieldDef.props as any)?.max;
   if (maxValue !== undefined) {
-    max(fieldPath as FieldPath<number>, maxValue);
+    // Max validator expects SchemaPath<number>
+    max(path as SchemaPath<number, SchemaPathRules.Supported>, maxValue);
   }
 
+  // String length validators
   if (fieldDef.minLength !== undefined) {
-    minLength(fieldPath as FieldPath<string>, fieldDef.minLength);
+    // MinLength validator expects SchemaPath<string>
+    minLength(path as SchemaPath<string, SchemaPathRules.Supported>, fieldDef.minLength);
   }
 
   if (fieldDef.maxLength !== undefined) {
-    maxLength(fieldPath as FieldPath<string>, fieldDef.maxLength);
+    // MaxLength validator expects SchemaPath<string>
+    maxLength(path as SchemaPath<string, SchemaPathRules.Supported>, fieldDef.maxLength);
   }
 
+  // Pattern validator
   if (fieldDef.pattern) {
     const regexPattern = typeof fieldDef.pattern === 'string' ? new RegExp(fieldDef.pattern) : fieldDef.pattern;
-    pattern(fieldPath as FieldPath<string>, regexPattern);
+    // Pattern validator expects SchemaPath<string>
+    pattern(path as SchemaPath<string, SchemaPathRules.Supported>, regexPattern);
   }
 }
 
 /**
  * Handle field-specific configuration that doesn't fit into validators/logic/schemas
  */
-function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+function mapFieldSpecificConfiguration(fieldDef: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   // Handle disabled state
   if (fieldDef.disabled) {
-    disabled(fieldPath);
+    disabled(toSupportedPath(fieldPath));
   }
 
   // Handle any additional configuration specific to the field type
@@ -126,31 +157,36 @@ function mapFieldSpecificConfiguration<TValue>(fieldDef: FieldDef<any>, fieldPat
 }
 
 /**
- * Maps page field children to the root form schema
- * Page fields are layout containers that don't create their own form controls
- * Their children are flattened to the root level of the form
+ * Common helper to map child fields to their parent form paths
+ * @param fields - Array of child field definitions
+ * @param parentPath - The parent field path
  */
-function mapPageFieldToForm<TValue>(pageField: FieldDef<any>, rootPath: FieldPath<TValue>): void {
-  if (!isPageField(pageField) || !pageField.fields) {
-    return;
-  }
-
-  // Page fields don't create their own form controls
-  // Instead, their child fields are mapped directly to the root form
-  // Type assertion: After isPageField guard, we know fields contains FieldDef instances
-  const fields = pageField.fields as FieldDef<any>[];
+function mapChildFieldsToForm<TValue>(fields: FieldDef<any>[], parentPath: SchemaPath<TValue> | SchemaPathTree<TValue>): void {
   for (const childField of fields) {
     if (!childField.key) {
       continue;
     }
 
-    // Get the field path for this child at the root level (not nested under the page)
-    const childPath = (rootPath as any)[childField.key];
+    // Type assertion needed due to dynamic field keys
+    const childPath = (parentPath as any)[childField.key] as SchemaPath<any> | SchemaPathTree<any> | undefined;
     if (childPath) {
-      // Recursively apply field mapping to the child field at root level
       mapFieldToForm(childField, childPath);
     }
   }
+}
+
+/**
+ * Maps page field children to the root form schema
+ * Page fields are layout containers that don't create their own form controls
+ * Their children are flattened to the root level of the form
+ */
+function mapPageFieldToForm(pageField: FieldDef<any>, rootPath: SchemaPath<any> | SchemaPathTree<any>): void {
+  if (!isPageField(pageField) || !pageField.fields) {
+    return;
+  }
+
+  const fields = pageField.fields as FieldDef<any>[];
+  mapChildFieldsToForm(fields, rootPath);
 }
 
 /**
@@ -158,53 +194,26 @@ function mapPageFieldToForm<TValue>(pageField: FieldDef<any>, rootPath: FieldPat
  * Row fields are layout containers (horizontal) that don't create their own form controls
  * Their children are flattened to the root level of the form, similar to page fields
  */
-function mapRowFieldToForm<TValue>(rowField: FieldDef<any>, rootPath: FieldPath<TValue>): void {
+function mapRowFieldToForm(rowField: FieldDef<any>, rootPath: SchemaPath<any> | SchemaPathTree<any>): void {
   if (!isRowField(rowField) || !rowField.fields) {
     return;
   }
 
-  // Row fields don't create their own form controls
-  // Instead, their child fields are mapped directly to the root form
-  // Type assertion: After isRowField guard, we know fields contains FieldDef instances
   const fields = rowField.fields as FieldDef<any>[];
-  for (const childField of fields) {
-    if (!childField.key) {
-      continue;
-    }
-
-    // Get the field path for this child at the root level (not nested under the row)
-    const childPath = (rootPath as any)[childField.key];
-    if (childPath) {
-      // Recursively apply field mapping to the child field at root level
-      mapFieldToForm(childField, childPath);
-    }
-  }
+  mapChildFieldsToForm(fields, rootPath);
 }
 
 /**
  * Maps group field children to the parent form schema
  * This ensures that validation from child fields is applied to the parent form
  */
-function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+function mapGroupFieldToForm(groupField: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   if (!isGroupField(groupField) || !groupField.fields) {
     return;
   }
 
-  // Apply validation for each child field to the appropriate nested path in the parent form
-  // Type assertion: After isGroupField guard, we know fields contains FieldDef instances
   const fields = groupField.fields as FieldDef<any>[];
-  for (const childField of fields) {
-    if (!childField.key) {
-      continue;
-    }
-
-    // Get the nested path for this child field within the group
-    const nestedPath = (fieldPath as any)[childField.key];
-    if (nestedPath) {
-      // Recursively apply field mapping to the child field
-      mapFieldToForm(childField, nestedPath);
-    }
-  }
+  mapChildFieldsToForm(fields, fieldPath);
 }
 
 /**
@@ -220,7 +229,7 @@ function mapGroupFieldToForm<TValue>(groupField: FieldDef<any>, fieldPath: Field
  * by the ArrayFieldComponent which creates dynamic field instances
  * with indexed keys (e.g., 'items[0]', 'items[1]').
  */
-function mapArrayFieldToForm<TValue>(arrayField: FieldDef<any>, fieldPath: FieldPath<TValue>): void {
+function mapArrayFieldToForm(arrayField: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   if (!isArrayField(arrayField) || !arrayField.fields) {
     return;
   }

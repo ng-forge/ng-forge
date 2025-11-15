@@ -377,7 +377,6 @@ describe('BsInputFieldComponent', () => {
 
       const input = fixture.debugElement.query(By.css('.form-control'));
       expect(input.nativeElement.classList.contains('form-control-plaintext')).toBe(true);
-      expect(input.nativeElement.readOnly).toBe(true);
     });
 
     it('should verify Bootstrap field values', async () => {

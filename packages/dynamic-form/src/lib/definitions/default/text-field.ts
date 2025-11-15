@@ -1,4 +1,5 @@
 import { FieldDef } from '../base/field-def';
+import { LogicConfig } from '../../models/logic';
 
 /**
  * Text element type for rendering different HTML text elements
@@ -40,4 +41,8 @@ export type TextProps = {
 /**
  * Text field definition for displaying translatable text content
  */
-export type TextField = FieldDef<TextProps>;
+export interface TextField extends FieldDef<TextProps> {
+  type: 'text';
+  /** Logic rules for conditional visibility (hidden, readonly, disabled) */
+  readonly logic?: LogicConfig[];
+}

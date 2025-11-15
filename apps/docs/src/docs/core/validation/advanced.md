@@ -159,6 +159,7 @@ For validators that need to compare multiple fields (like password confirmation 
 ```
 
 See **[Custom Validators](../custom-validators)** for complete documentation on:
+
 - Expression-based validators (simple, inline expressions)
 - Function-based validators (complex, reusable logic)
 - Cross-field validation patterns

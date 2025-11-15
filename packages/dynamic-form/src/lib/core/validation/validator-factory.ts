@@ -1,7 +1,6 @@
 import {
   email,
   FieldContext,
-  FieldPath,
   LogicFn,
   max,
   maxLength,
@@ -13,41 +12,84 @@ import {
   validateAsync,
   validateHttp,
   ValidationError,
+  SchemaPathRules,
+  PathKind,
 } from '@angular/forms/signals';
+import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { inject } from '@angular/core';
 import { AsyncValidatorConfig, CustomValidatorConfig, HttpValidatorConfig, ValidatorConfig } from '../../models';
 import { createLogicFunction } from '../expressions';
 import { createDynamicValueFunction } from '../values';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser';
 import { CustomValidator } from './validator-types';
 
 /**
- * Apply validator configuration to field path, following the logic pattern
+ * Helper to create conditional logic function from when expression.
+ * Returns undefined if no when condition is specified.
+ * Reduces duplication across validator types.
  */
-export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: FieldPath<TValue>): void {
+function createConditionalLogic<TValue>(when: ConditionalExpression | undefined): LogicFn<TValue, boolean> | undefined {
+  return when ? (createLogicFunction(when) as LogicFn<TValue, boolean>) : undefined;
+}
+
+/**
+ * Safely cast a SchemaPathTree to SchemaPath with Supported rules.
+ *
+ * This is safe when TValue is not an AbstractControl, because:
+ * - SchemaPathTree<T> for non-AbstractControl is: SchemaPath<T, Supported> & {...nested}
+ * - The intersection type is structurally compatible with SchemaPath<T, Supported>
+ * - We only work with signal forms, never reactive forms (AbstractControl)
+ *
+ * TypeScript can't automatically narrow this because SchemaPathTree is defined as a
+ * conditional type, but at runtime the value is always the correct type for our use case.
+ */
+function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>
+): SchemaPath<TValue, SchemaPathRules.Supported, TPathKind> {
+  // The cast is safe because SchemaPathTree extends SchemaPath, and we constrain TValue
+  // to exclude AbstractControl in our public APIs (we never pass reactive form controls)
+  return path as SchemaPath<TValue, SchemaPathRules.Supported, TPathKind>;
+}
+
+/**
+ * Apply validator configuration to field path, following the logic pattern.
+ *
+ * Accepts both SchemaPath and SchemaPathTree to support being called from both
+ * individual field mappings and schema functions.
+ *
+ * Note: ValidatorConfig is runtime configuration that doesn't encode the field's
+ * TypeScript type. The type assertions to specific types (string, number) are safe
+ * because Angular's validators perform runtime value checks regardless of the static
+ * type parameter.
+ */
+export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
+  const path = toSupportedPath(fieldPath);
   switch (config.type) {
     case 'required':
       if (config.when) {
         const whenLogic = createLogicFunction(config.when);
-        required(fieldPath, { when: whenLogic });
+        required(path, { when: whenLogic });
       } else {
-        required(fieldPath);
+        required(path);
       }
       break;
 
     case 'email':
-      email(fieldPath as FieldPath<string>);
+      // Email validator expects SchemaPath<string>
+      email(fieldPath as SchemaPath<string, SchemaPathRules.Supported>);
       break;
 
     case 'min':
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMin = createDynamicValueFunction<number, number>(config.expression);
-          min(fieldPath as FieldPath<number>, dynamicMin);
+          // Min validator expects SchemaPath<number>
+          min(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, dynamicMin);
         } else {
-          min(fieldPath as FieldPath<number>, config.value);
+          min(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, config.value);
         }
       }
       break;
@@ -56,9 +98,10 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMax = createDynamicValueFunction<number, number>(config.expression);
-          max(fieldPath as FieldPath<number>, dynamicMax);
+          // Max validator expects SchemaPath<number>
+          max(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, dynamicMax);
         } else {
-          max(fieldPath as FieldPath<number>, config.value);
+          max(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, config.value);
         }
       }
       break;
@@ -67,9 +110,10 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMinLength = createDynamicValueFunction<string, number>(config.expression);
-          minLength(fieldPath as FieldPath<string>, dynamicMinLength);
+          // MinLength validator expects SchemaPath<string>
+          minLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, dynamicMinLength);
         } else {
-          minLength(fieldPath as FieldPath<string>, config.value);
+          minLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, config.value);
         }
       }
       break;
@@ -78,9 +122,10 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMaxLength = createDynamicValueFunction<string, number>(config.expression);
-          maxLength(fieldPath as FieldPath<string>, dynamicMaxLength);
+          // MaxLength validator expects SchemaPath<string>
+          maxLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, dynamicMaxLength);
         } else {
-          maxLength(fieldPath as FieldPath<string>, config.value);
+          maxLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, config.value);
         }
       }
       break;
@@ -90,23 +135,27 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
         const regexPattern = typeof config.value === 'string' ? new RegExp(config.value) : config.value;
         if (config.expression) {
           const dynamicPattern = createDynamicValueFunction<string | undefined, RegExp | undefined>(config.expression);
-          pattern(fieldPath as FieldPath<string>, dynamicPattern as LogicFn<string | undefined, RegExp | undefined>);
+          // Pattern validator expects SchemaPath<string>
+          pattern(
+            fieldPath as SchemaPath<string, SchemaPathRules.Supported>,
+            dynamicPattern as LogicFn<string | undefined, RegExp | undefined>
+          );
         } else {
-          pattern(fieldPath as FieldPath<string>, regexPattern);
+          pattern(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, regexPattern);
         }
       }
       break;
 
     case 'custom':
-      applyCustomValidator(config, fieldPath);
+      applyCustomValidator(config, path);
       break;
 
     case 'customAsync':
-      applyAsyncValidator(config, fieldPath);
+      applyAsyncValidator(config, path);
       break;
 
     case 'customHttp':
-      applyHttpValidator(config, fieldPath);
+      applyHttpValidator(config, path);
       break;
   }
 }
@@ -115,25 +164,25 @@ export function applyValidator<TValue>(config: ValidatorConfig, fieldPath: Field
  * Apply custom validator to field path using Angular's public validate() API
  * Supports both function-based and expression-based validators
  */
-function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: FieldPath<TValue>): void {
+function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<any, SchemaPathRules.Supported>): void {
   // Determine validator type and create appropriate validator function
-  let validatorFn: (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
+  let validatorFn: (ctx: FieldContext<any>) => ValidationError | ValidationError[] | null;
 
   if (config.expression) {
     // Expression-based validator
-    validatorFn = createExpressionValidator<TValue>(config);
+    validatorFn = createExpressionValidator<any>(config);
   } else if (config.functionName) {
     // Function-based validator
-    validatorFn = createFunctionValidator<TValue>(config);
+    validatorFn = createFunctionValidator<any>(config);
   } else {
     console.warn('[DynamicForm] Custom validator must have either "expression" or "functionName"');
     return;
   }
 
   // Apply with conditional logic if specified
-  if (config.when) {
-    const whenLogic = createLogicFunction(config.when);
-    const conditionalValidator = (ctx: FieldContext<TValue>) => {
+  const whenLogic = createConditionalLogic<any>(config.when);
+  if (whenLogic) {
+    const conditionalValidator = (ctx: FieldContext<any>) => {
       if (!whenLogic(ctx)) {
         return null; // Condition not met, skip validation
       }
@@ -155,7 +204,10 @@ function createFunctionValidator<TValue>(
   const validatorFn = registry.getValidator(config.functionName!);
 
   if (!validatorFn) {
-    console.warn(`[DynamicForm] Custom validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    console.warn(
+      `[DynamicForm] Custom validator "${config.functionName}" not found in registry. ` +
+        `Ensure it's registered using signalFormsConfig.validators or check the function name for typos.`
+    );
     return () => null;
   }
 
@@ -221,20 +273,23 @@ function createExpressionValidator<TValue>(
  * - onSuccess: Maps resource result to validation errors
  * - onError: Optional handler for resource errors
  */
-function applyAsyncValidator<TValue>(config: AsyncValidatorConfig, fieldPath: FieldPath<TValue>): void {
+function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<any, SchemaPathRules.Supported>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get async validator config from registry
   const validatorConfig = registry.getAsyncValidator(config.functionName);
 
   if (!validatorConfig) {
-    console.warn(`[DynamicForm] Async validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    console.warn(
+      `[DynamicForm] Async validator "${config.functionName}" not found in registry. ` +
+        `Ensure it's registered using signalFormsConfig.asyncValidators or check the function name for typos.`
+    );
     return;
   }
 
   // Build Angular's AsyncValidatorOptions
   const asyncOptions = {
-    params: (ctx: FieldContext<TValue>) => {
+    params: (ctx: FieldContext<any>) => {
       return validatorConfig.params(ctx, config.params);
     },
     factory: validatorConfig.factory,
@@ -243,21 +298,22 @@ function applyAsyncValidator<TValue>(config: AsyncValidatorConfig, fieldPath: Fi
   };
 
   // Apply with conditional logic if specified
-  if (config.when) {
-    const whenLogic = createLogicFunction(config.when);
+  const whenLogic = createConditionalLogic<any>(config.when);
+  if (whenLogic) {
     // For conditional async validators, we wrap the params function
     const conditionalOptions = {
       ...asyncOptions,
-      params: (ctx: FieldContext<TValue>) => {
+      params: (ctx: FieldContext<any>) => {
         if (!whenLogic(ctx)) {
           return undefined; // Skip validation when condition not met
         }
         return asyncOptions.params(ctx);
       },
     };
-    validateAsync(fieldPath, conditionalOptions as any);
+    // TypeScript needs help with the ResourceRef generic - the types are correct at runtime
+    validateAsync(fieldPath, conditionalOptions as Parameters<typeof validateAsync>[1]);
   } else {
-    validateAsync(fieldPath, asyncOptions as any);
+    validateAsync(fieldPath, asyncOptions as Parameters<typeof validateAsync>[1]);
   }
 }
 
@@ -269,20 +325,23 @@ function applyAsyncValidator<TValue>(config: AsyncValidatorConfig, fieldPath: Fi
  * - onSuccess: Maps HTTP response to validation errors (inverted logic!)
  * - onError: Optional handler for HTTP errors
  */
-function applyHttpValidator<TValue>(config: HttpValidatorConfig, fieldPath: FieldPath<TValue>): void {
+function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<any, SchemaPathRules.Supported>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get HTTP validator config from registry
   const httpValidatorConfig = registry.getHttpValidator(config.functionName);
 
   if (!httpValidatorConfig) {
-    console.warn(`[DynamicForm] HTTP validator "${config.functionName}" not found in registry. Did you forget to register it?`);
+    console.warn(
+      `[DynamicForm] HTTP validator "${config.functionName}" not found in registry. ` +
+        `Ensure it's registered using signalFormsConfig.httpValidators or check the function name for typos.`
+    );
     return;
   }
 
   // Build Angular's HttpValidatorOptions
   const httpOptions = {
-    request: (ctx: FieldContext<TValue>) => {
+    request: (ctx: FieldContext<any>) => {
       return httpValidatorConfig.request(ctx, config.params);
     },
     onSuccess: httpValidatorConfig.onSuccess,
@@ -290,27 +349,28 @@ function applyHttpValidator<TValue>(config: HttpValidatorConfig, fieldPath: Fiel
   };
 
   // Apply with conditional logic if specified
-  if (config.when) {
-    const whenLogic = createLogicFunction(config.when);
+  const whenLogic = createConditionalLogic<any>(config.when);
+  if (whenLogic) {
     // For conditional HTTP validators, we wrap the request function
     const conditionalOptions = {
       ...httpOptions,
-      request: (ctx: FieldContext<TValue>) => {
+      request: (ctx: FieldContext<any>) => {
         if (!whenLogic(ctx)) {
           return undefined; // Skip validation when condition not met
         }
         return httpOptions.request(ctx);
       },
     };
-    validateHttp(fieldPath, conditionalOptions as any);
+    // TypeScript needs help with the HttpResourceRequest generic - the types are correct at runtime
+    validateHttp(fieldPath, conditionalOptions as Parameters<typeof validateHttp>[1]);
   } else {
-    validateHttp(fieldPath, httpOptions as any);
+    validateHttp(fieldPath, httpOptions as Parameters<typeof validateHttp>[1]);
   }
 }
 
 /**
  * Apply multiple validators to a field path
  */
-export function applyValidators<TValue>(configs: ValidatorConfig[], fieldPath: FieldPath<TValue>): void {
+export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   configs.forEach((config) => applyValidator(config, fieldPath));
 }

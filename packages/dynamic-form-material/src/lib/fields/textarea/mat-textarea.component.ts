@@ -23,11 +23,8 @@ import { AsyncPipe } from '@angular/common';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
-        [attr.maxlength]="props()?.maxLength"
         [attr.tabindex]="tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
       ></textarea>
 
       @if (props()?.hint; as hint) {

@@ -134,7 +134,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -155,7 +155,7 @@ describe('DynamicFormComponent', () => {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true,
+            value: true,
           },
         ],
       };
@@ -176,13 +176,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: false,
+            value: false,
           },
         ],
       };
@@ -208,7 +208,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
             required: true,
           },
         ],
@@ -232,7 +232,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -257,7 +257,7 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'Email',
             required: true,
-            defaultValue: '',
+            value: '',
           },
         ],
       };
@@ -278,14 +278,14 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'First Name',
             required: true,
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
             required: true,
-            defaultValue: '',
+            value: '',
           },
         ],
       };
@@ -306,14 +306,14 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'First Name',
             required: true,
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
             required: true,
-            defaultValue: 'Doe',
+            value: 'Doe',
           },
         ],
       };
@@ -362,25 +362,25 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'age',
             type: 'input',
             label: 'Age',
-            defaultValue: '25',
+            value: '25',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true,
+            value: true,
           },
           {
             key: 'isAdmin',
             type: 'checkbox',
             label: 'Is Admin',
-            defaultValue: false,
+            value: false,
           },
         ],
       };
@@ -405,7 +405,7 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'Email Address',
             placeholder: 'Enter your email',
-            defaultValue: 'test@example.com',
+            value: 'test@example.com',
             // Removed props object as test components don't support it
           },
         ],
@@ -428,7 +428,7 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'Email',
             required: true,
-            defaultValue: '',
+            value: '',
           },
         ],
       };
@@ -455,7 +455,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -474,13 +474,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true,
+            value: true,
           },
         ],
       };
@@ -502,52 +502,52 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
             required: true,
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: 'Doe',
+            value: 'Doe',
             required: true,
           },
           {
             key: 'email',
             type: 'input',
             label: 'Email',
-            defaultValue: 'john.doe@example.com',
+            value: 'john.doe@example.com',
             required: true,
           },
           {
             key: 'age',
             type: 'input',
             label: 'Age',
-            defaultValue: '30',
+            value: '30',
           },
           {
             key: 'country',
             type: 'input',
             label: 'Country',
-            defaultValue: 'USA',
+            value: 'USA',
           },
           {
             key: 'bio',
             type: 'input',
             label: 'Biography',
-            defaultValue: 'Software developer',
+            value: 'Software developer',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true,
+            value: true,
           },
           {
             key: 'isAdmin',
             type: 'checkbox',
             label: 'Is Admin',
-            defaultValue: false,
+            value: false,
           },
         ],
       };
@@ -577,28 +577,28 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
             required: true,
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: '',
+            value: '',
             required: true,
           },
           {
             key: 'email',
             type: 'input',
             label: 'Email',
-            defaultValue: 'john@example.com',
+            value: 'john@example.com',
             required: false,
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true,
+            value: true,
           },
         ],
       };
@@ -634,7 +634,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -652,13 +652,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John', // Keep same default to preserve value
+            value: 'John', // Keep same default to preserve value
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: 'Smith',
+            value: 'Smith',
           },
         ],
       };
@@ -682,7 +682,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -724,7 +724,7 @@ describe('DynamicFormComponent', () => {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: false,
+            value: false,
           },
         ],
       };
@@ -771,19 +771,19 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: 'Doe',
+            value: 'Doe',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: false,
+            value: false,
           },
         ],
       };
@@ -855,7 +855,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -895,7 +895,7 @@ describe('DynamicFormComponent', () => {
 
     it('should emit validityChange when validity state changes', async () => {
       const config: TestFormConfig = {
-        fields: [{ key: 'email', type: 'input', label: 'Email', required: true, defaultValue: '' }],
+        fields: [{ key: 'email', type: 'input', label: 'Email', required: true, value: '' }],
       };
       const { component, fixture } = createComponent(config);
 
@@ -916,7 +916,7 @@ describe('DynamicFormComponent', () => {
 
     it('should emit dirtyChange when form is modified', async () => {
       const config: TestFormConfig = {
-        fields: [{ key: 'firstName', type: 'input', label: 'Name', defaultValue: 'John' }],
+        fields: [{ key: 'firstName', type: 'input', label: 'Name', value: 'John' }],
       };
       const { component, fixture } = createComponent(config);
 
@@ -956,13 +956,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: 'Doe',
+            value: 'Doe',
           },
         ],
       };
@@ -998,19 +998,19 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: 'Doe',
+            value: 'Doe',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true,
+            value: true,
           },
         ],
       };
@@ -1048,13 +1048,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: 'Doe',
+            value: 'Doe',
           },
         ],
       };
@@ -1092,7 +1092,7 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'Email',
             required: true,
-            defaultValue: 'test@example.com',
+            value: 'test@example.com',
           },
         ],
       };
@@ -1117,7 +1117,7 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'Email',
             required: true,
-            defaultValue: 'test@example.com',
+            value: 'test@example.com',
           },
         ],
       };
@@ -1136,7 +1136,7 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'Email',
             required: true,
-            defaultValue: '',
+            value: '',
           },
         ],
       };
@@ -1156,7 +1156,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1195,13 +1195,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: null,
+            value: null,
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: undefined,
+            value: undefined,
           },
         ],
       };
@@ -1228,13 +1228,13 @@ describe('DynamicFormComponent', () => {
             key: 'field-with-dashes',
             type: 'input',
             label: 'Field with Dashes',
-            defaultValue: 'test',
+            value: 'test',
           },
           {
             key: 'field_with_underscores',
             type: 'input',
             label: 'Field with Underscores',
-            defaultValue: 'test2',
+            value: 'test2',
           },
         ],
       };
@@ -1257,7 +1257,7 @@ describe('DynamicFormComponent', () => {
             key: 'longText',
             type: 'input',
             label: 'Long Text',
-            defaultValue: longValue,
+            value: longValue,
           },
         ],
       };
@@ -1276,7 +1276,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1312,7 +1312,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
             required: true,
           },
         ],
@@ -1343,13 +1343,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true,
+            value: true,
           },
         ],
       };
@@ -1380,7 +1380,7 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'Email',
             required: true,
-            defaultValue: 'test@example.com',
+            value: 'test@example.com',
           },
         ],
       };
@@ -1410,7 +1410,7 @@ describe('DynamicFormComponent', () => {
             type: 'input',
             label: 'Email',
             required: true,
-            defaultValue: '',
+            value: '',
           },
         ],
       };
@@ -1447,7 +1447,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1466,7 +1466,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1500,13 +1500,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: 'Doe',
+            value: 'Doe',
           },
         ],
       };
@@ -1536,7 +1536,7 @@ describe('DynamicFormComponent', () => {
             key: 'email',
             type: 'input',
             label: 'Email',
-            defaultValue: '',
+            value: '',
             required: true,
           },
         ],
@@ -1572,7 +1572,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1599,7 +1599,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1625,7 +1625,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1662,7 +1662,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1697,7 +1697,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1722,13 +1722,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true,
+            value: true,
           },
         ],
       };
@@ -1751,7 +1751,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1782,7 +1782,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1800,13 +1800,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'email',
             type: 'input',
             label: 'Email',
-            defaultValue: 'test@example.com',
+            value: 'test@example.com',
           },
         ],
       };
@@ -1828,13 +1828,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'email',
             type: 'input',
             label: 'Email',
-            defaultValue: 'test@example.com',
+            value: 'test@example.com',
           },
         ],
       };
@@ -1855,7 +1855,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1875,13 +1875,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'lastName',
             type: 'input',
             label: 'Last Name',
-            defaultValue: 'Doe',
+            value: 'Doe',
           },
         ],
       };
@@ -1910,13 +1910,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John', // default is John but current value should be preserved
+            value: 'John', // default is John but current value should be preserved
           },
           {
             key: 'email',
             type: 'input',
             label: 'Email',
-            defaultValue: 'test@example.com',
+            value: 'test@example.com',
           },
         ],
       };
@@ -1939,13 +1939,13 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
           {
             key: 'temporaryField',
             type: 'input',
             label: 'Temporary',
-            defaultValue: 'temp',
+            value: 'temp',
           },
         ],
       };
@@ -1966,7 +1966,7 @@ describe('DynamicFormComponent', () => {
             key: 'firstName',
             type: 'input',
             label: 'First Name',
-            defaultValue: 'John',
+            value: 'John',
           },
         ],
       };
@@ -1994,13 +1994,13 @@ describe('DynamicFormComponent', () => {
                 key: 'firstName',
                 type: 'input',
                 label: 'First Name',
-                defaultValue: 'John',
+                value: 'John',
               },
               {
                 key: 'lastName',
                 type: 'input',
                 label: 'Last Name',
-                defaultValue: 'Doe',
+                value: 'Doe',
               },
             ],
           } as any,
@@ -2030,19 +2030,19 @@ describe('DynamicFormComponent', () => {
                 key: 'street',
                 type: 'input',
                 label: 'Street',
-                defaultValue: '123 Main St',
+                value: '123 Main St',
               },
               {
                 key: 'city',
                 type: 'input',
                 label: 'City',
-                defaultValue: 'New York',
+                value: 'New York',
               },
               {
                 key: 'zipCode',
                 type: 'input',
                 label: 'ZIP Code',
-                defaultValue: '10001',
+                value: '10001',
               },
             ],
           } as any,
@@ -2080,13 +2080,13 @@ describe('DynamicFormComponent', () => {
                     key: 'first',
                     type: 'input',
                     label: 'First',
-                    defaultValue: 'John',
+                    value: 'John',
                   },
                   {
                     key: 'last',
                     type: 'input',
                     label: 'Last',
-                    defaultValue: 'Doe',
+                    value: 'Doe',
                   },
                 ],
               } as any,
@@ -2094,7 +2094,7 @@ describe('DynamicFormComponent', () => {
                 key: 'email',
                 type: 'input',
                 label: 'Email',
-                defaultValue: 'john.doe@example.com',
+                value: 'john.doe@example.com',
               },
             ],
           } as any,
@@ -2122,7 +2122,7 @@ describe('DynamicFormComponent', () => {
             key: 'username',
             type: 'input',
             label: 'Username',
-            defaultValue: 'johndoe',
+            value: 'johndoe',
           },
           {
             key: 'personalInfo',
@@ -2133,13 +2133,13 @@ describe('DynamicFormComponent', () => {
                 key: 'firstName',
                 type: 'input',
                 label: 'First Name',
-                defaultValue: 'John',
+                value: 'John',
               },
               {
                 key: 'lastName',
                 type: 'input',
                 label: 'Last Name',
-                defaultValue: 'Doe',
+                value: 'Doe',
               },
             ],
           } as any,
@@ -2152,13 +2152,13 @@ describe('DynamicFormComponent', () => {
                 key: 'street',
                 type: 'input',
                 label: 'Street',
-                defaultValue: '123 Main St',
+                value: '123 Main St',
               },
               {
                 key: 'city',
                 type: 'input',
                 label: 'City',
-                defaultValue: 'New York',
+                value: 'New York',
               },
             ],
           } as any,
@@ -2166,7 +2166,7 @@ describe('DynamicFormComponent', () => {
             key: 'isActive',
             type: 'checkbox',
             label: 'Is Active',
-            defaultValue: true,
+            value: true,
           },
         ],
       };
@@ -2201,14 +2201,14 @@ describe('DynamicFormComponent', () => {
                 type: 'input',
                 label: 'Email',
                 required: true,
-                defaultValue: '', // Empty required field should make form invalid
+                value: '', // Empty required field should make form invalid
               },
               {
                 key: 'name',
                 type: 'input',
                 label: 'Name',
                 required: false,
-                defaultValue: 'John',
+                value: 'John',
               },
             ],
           } as any,
@@ -2248,7 +2248,7 @@ describe('DynamicFormComponent', () => {
             key: 'regularField',
             type: 'input',
             label: 'Regular Field',
-            defaultValue: 'test',
+            value: 'test',
           },
         ],
       };
