@@ -30,7 +30,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.email);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -51,7 +51,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.email as SchemaPath<string>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -71,7 +71,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.age as SchemaPath<number>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -91,7 +91,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.age as SchemaPath<number>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -111,7 +111,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.username as SchemaPath<string>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -131,7 +131,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.username as SchemaPath<string>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -151,7 +151,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.code as SchemaPath<string>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -171,7 +171,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.zipCode as SchemaPath<string>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -201,7 +201,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.state);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -230,7 +230,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.state);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -256,7 +256,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.state);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -292,7 +292,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.age as SchemaPath<number>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -317,7 +317,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.age as SchemaPath<number>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -349,7 +349,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidators(configs, path.password as SchemaPath<string>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -379,7 +379,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidators(configs, path.username as SchemaPath<string>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -406,7 +406,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.email as SchemaPath<string>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -428,7 +428,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidator(config, path.phone as SchemaPath<string>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -451,7 +451,7 @@ describe('Validator Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyValidators(configs, path.rating as SchemaPath<number>);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 

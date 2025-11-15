@@ -65,7 +65,7 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
       'df-bs-input, df-bs-select, df-bs-checkbox, df-bs-radio, df-bs-toggle, ' +
         'df-bs-textarea, df-bs-datepicker, df-bs-slider, df-bs-button, df-bs-multi-checkbox, ' +
         'input.form-control, select.form-select, input[type="checkbox"].form-check-input, ' +
-        'input[type="radio"].form-check-input, button.btn, [data-testid]'
+        'input[type="radio"].form-check-input, button.btn, [data-testid]',
     );
 
     const currentComponentCount = bsComponents.length;
@@ -74,7 +74,7 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
       console.log(
         `[${iterations}] count=${currentComponentCount}, prev=${previousComponentCount}, stable=${stableCount}, elapsed=${
           Date.now() - startTime
-        }ms`
+        }ms`,
       );
     }
 

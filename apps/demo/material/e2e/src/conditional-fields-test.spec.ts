@@ -45,7 +45,7 @@ test.describe('Conditional Fields Test', () => {
 
     // Check for any console errors, specifically injection context errors
     const injectionErrors = consoleErrors.filter(
-      (error) => error.includes('FunctionRegistryService') || error.includes('inject()') || error.includes('injection context')
+      (error) => error.includes('FunctionRegistryService') || error.includes('inject()') || error.includes('injection context'),
     );
 
     expect(injectionErrors).toHaveLength(0);

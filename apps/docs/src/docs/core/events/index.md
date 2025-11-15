@@ -116,7 +116,10 @@ export class SaveDraftEvent implements FormEvent {
 export class ValidationErrorEvent implements FormEvent {
   readonly type = 'validation-error' as const;
 
-  constructor(public readonly fieldKey: string, public readonly errorMessage: string) {}
+  constructor(
+    public readonly fieldKey: string,
+    public readonly errorMessage: string,
+  ) {}
 }
 ```
 

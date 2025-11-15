@@ -17,7 +17,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 
     <div class="df-prime-field">
       @if (label()) {
-      <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
+        <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
       <p-toggleSwitch
@@ -30,9 +30,10 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
       />
 
       @if (props()?.hint; as hint) {
-      <small class="p-hint">{{ hint | dynamicText | async }}</small>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <small class="p-error">{{ error.message }}</small>
+        <small class="p-hint">{{ hint | dynamicText | async }}</small>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <small class="p-error">{{ error.message }}</small>
       }
     </div>
   `,

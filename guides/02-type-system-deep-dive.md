@@ -316,10 +316,10 @@ type ExtractFieldValue<T extends FieldConfig> =
   T extends ContainerFieldConfig
     ? ExtractContainerValue<T>
     : // Value fields (input, select, etc.)
-    T extends ValueFieldConfig
-    ? ExtractValueFieldValue<T>
-    : // Non-value fields (button, text)
-      never;
+      T extends ValueFieldConfig
+      ? ExtractValueFieldValue<T>
+      : // Non-value fields (button, text)
+        never;
 ```
 
 **Step 4: Handle Container Fields**
@@ -334,11 +334,11 @@ type ExtractContainerValue<T extends ContainerFieldConfig> =
         : never
       : never
     : // Row/Page: flattened children
-    T extends { type: 'row' | 'page'; fields: infer F }
-    ? F extends readonly FieldConfig[]
-      ? ExtractFieldsValue<F>
-      : never
-    : never;
+      T extends { type: 'row' | 'page'; fields: infer F }
+      ? F extends readonly FieldConfig[]
+        ? ExtractFieldsValue<F>
+        : never
+      : never;
 ```
 
 **Step 5: Handle Value Fields**
@@ -347,8 +347,8 @@ type ExtractContainerValue<T extends ContainerFieldConfig> =
 type ExtractValueFieldValue<T extends ValueFieldConfig> = T extends { key: infer K; value: infer V; required: true }
   ? { [P in K & string]: V } // Required: not optional
   : T extends { key: infer K; value: infer V }
-  ? { [P in K & string]?: V } // Not required: optional
-  : never;
+    ? { [P in K & string]?: V } // Not required: optional
+    : never;
 ```
 
 **Step 6: Utility Types**
@@ -418,20 +418,16 @@ export type ValueFieldComponent<T extends BaseValueField<any, any>> = Prettify<
 **Breakdown:**
 
 1. **`Pick<T, 'label' | 'placeholder' | 'className' | 'tabIndex'>`**
-
    - Extracts standard field properties
 
 2. **`field: FieldTree<ExtractFieldValueType<T>>`**
-
    - Angular signal form field
    - Generic type matches field's value type
 
 3. **`key: string`**
-
    - Field identifier
 
 4. **`props: ExtractProps<T>`**
-
    - UI-specific properties
 
 5. **`WithInputSignals<...>`**

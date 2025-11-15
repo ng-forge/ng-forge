@@ -26,7 +26,7 @@ describe('createResolvedErrorsSignal', () => {
           initialValue,
           schema<{ email: string }>((path) => {
             applyValidator({ type: 'required' }, path.email as SchemaPath<string>);
-          })
+          }),
         );
 
         const emailFieldProxy = testForm().structure.childrenMap().get('email').fieldProxy;
@@ -58,7 +58,7 @@ describe('createResolvedErrorsSignal', () => {
           initialValue,
           schema<{ email: string }>((path) => {
             applyValidator({ type: 'required' }, path.email as SchemaPath<string>);
-          })
+          }),
         );
 
         const emailFieldProxy = testForm().structure.childrenMap().get('email').fieldProxy;
@@ -86,7 +86,7 @@ describe('createResolvedErrorsSignal', () => {
           initialValue,
           schema<{ email: string }>((path) => {
             applyValidator({ type: 'required' }, path.email as SchemaPath<string>);
-          })
+          }),
         );
 
         const emailFieldProxy = testForm().structure.childrenMap().get('email').fieldProxy;
@@ -121,7 +121,7 @@ describe('createResolvedErrorsSignal', () => {
             applyValidator({ type: 'required' }, path.password as SchemaPath<string>);
             applyValidator({ type: 'minLength', value: 8 }, path.password as SchemaPath<string>);
             applyValidator({ type: 'pattern', value: '^[a-zA-Z0-9]+$' }, path.password as SchemaPath<string>);
-          })
+          }),
         );
 
         const passwordFieldProxy = testForm().structure.childrenMap().get('password').fieldProxy;
@@ -160,7 +160,7 @@ describe('createResolvedErrorsSignal', () => {
           initialValue,
           schema<{ age: number }>((path) => {
             applyValidator({ type: 'min', value: 18 }, path.age as SchemaPath<number>);
-          })
+          }),
         );
 
         const ageFieldProxy = testForm().structure.childrenMap().get('age').fieldProxy;

@@ -17,7 +17,7 @@ import { Slider } from 'primeng/slider';
 
     <div class="df-prime-field">
       @if (label(); as label) {
-      <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
+        <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       }
 
       <p-slider
@@ -31,9 +31,10 @@ import { Slider } from 'primeng/slider';
       />
 
       @if (props()?.hint; as hint) {
-      <small class="p-hint">{{ hint | dynamicText | async }}</small>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <small class="p-error">{{ error.message }}</small>
+        <small class="p-hint">{{ hint | dynamicText | async }}</small>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <small class="p-error">{{ error.message }}</small>
       }
     </div>
   `,

@@ -35,7 +35,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
         formValue,
         schema<typeof formValue>((path) => {
           applyLogic(config, path.email);
-        })
+        }),
       );
       rootFormRegistry.registerRootForm(formInstance);
 
@@ -64,7 +64,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
         formValue,
         schema<typeof formValue>((path) => {
           applyLogic(config, path.username);
-        })
+        }),
       );
       rootFormRegistry.registerRootForm(formInstance);
 
@@ -89,7 +89,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
         formValue,
         schema<typeof formValue>((path) => {
           applyLogic(hiddenConfig, path.email);
-        })
+        }),
       );
       rootFormRegistry.registerRootForm(formInstance);
 
@@ -121,7 +121,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
         formValue,
         schema<typeof formValue>((path) => {
           applyLogic(hiddenConfig, path.email);
-        })
+        }),
       );
 
       // Register AFTER form creation (like component does)

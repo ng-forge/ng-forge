@@ -25,9 +25,10 @@ import { AsyncPipe } from '@angular/common';
     </mat-checkbox>
 
     @if (props()?.hint; as hint) {
-    <div class="mat-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
-    } @for (error of errorsToDisplay(); track error.kind) {
-    <mat-error [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
+      <div class="mat-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
+    }
+    @for (error of errorsToDisplay(); track error.kind) {
+      <mat-error [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
     }
   `,
   styles: [

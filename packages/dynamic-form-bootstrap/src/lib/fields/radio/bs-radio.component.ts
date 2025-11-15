@@ -21,15 +21,16 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
 
     <div class="mb-3">
       @if (label(); as label) {
-      <div class="form-label">{{ label | dynamicText | async }}</div>
+        <div class="form-label">{{ label | dynamicText | async }}</div>
       }
 
       <df-bs-radio-group [field]="$any(f)" [label]="label()" [options]="options()" [properties]="props()" />
 
       @if (props()?.helpText; as helpText) {
-      <div class="form-text">{{ helpText | dynamicText | async }}</div>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <div class="invalid-feedback d-block">{{ error.message }}</div>
+        <div class="form-text">{{ helpText | dynamicText | async }}</div>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
     </div>
   `,
