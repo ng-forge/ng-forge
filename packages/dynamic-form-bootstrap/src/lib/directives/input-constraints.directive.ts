@@ -1,18 +1,20 @@
-import { Directive, effect, ElementRef, input } from '@angular/core';
+import { Directive, effect, ElementRef, inject, input } from '@angular/core';
 
 /**
  * Directive to set min, max, and step attributes on form inputs
  * Workaround for Angular 21 NG8022 error when using [field] directive
  */
 @Directive({
-  selector: 'input[dfInputConstraints]',
+  selector: 'input[df-bs-input-constraints]',
 })
 export class InputConstraintsDirective {
   readonly dfMin = input<number | string | null | undefined>();
   readonly dfMax = input<number | string | null | undefined>();
   readonly dfStep = input<number | string | null | undefined>();
 
-  constructor(private el: ElementRef<HTMLInputElement>) {
+  private readonly el = inject<ElementRef<HTMLInputElement>>(ElementRef);
+
+  constructor() {
     // Use effect to reactively update attributes when inputs change
     effect(() => {
       const nativeElement = this.el.nativeElement;
