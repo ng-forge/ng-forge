@@ -37,7 +37,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.username);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -68,7 +68,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.email);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -106,7 +106,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.field);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -138,7 +138,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.email);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -182,7 +182,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.password);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -224,7 +224,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.username);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -472,7 +472,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.email);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -501,7 +501,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.password);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -537,7 +537,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.age);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -569,7 +569,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.zipCode);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -597,7 +597,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.field);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -619,7 +619,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.field);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -654,7 +654,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           formValue,
           schema<typeof formValue>((path) => {
             mapFieldToForm(fieldDef, path.email);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 

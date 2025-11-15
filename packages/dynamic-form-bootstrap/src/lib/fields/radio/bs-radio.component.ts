@@ -21,49 +21,54 @@ import { FormsModule } from '@angular/forms';
 
     <div class="mb-3">
       @if (label(); as label) {
-      <div class="form-label">{{ label | dynamicText | async }}</div>
-      } @if (props()?.buttonGroup) {
-      <div class="btn-group" role="group" [attr.aria-label]="label() | dynamicText | async">
+        <div class="form-label">{{ label | dynamicText | async }}</div>
+      }
+      @if (props()?.buttonGroup) {
+        <div class="btn-group" role="group" [attr.aria-label]="label() | dynamicText | async">
+          @for (option of options(); track option.value; let i = $index) {
+            <input
+              type="radio"
+              [name]="key()"
+              [value]="option.value"
+              [(ngModel)]="f().value"
+              [disabled]="option.disabled || f().disabled()"
+              class="btn-check"
+              [id]="key() + '_' + i"
+              autocomplete="off"
+            />
+            <label
+              class="btn btn-outline-primary"
+              [class.btn-sm]="props()?.buttonSize === 'sm'"
+              [class.btn-lg]="props()?.buttonSize === 'lg'"
+              [for]="key() + '_' + i"
+            >
+              {{ option.label | dynamicText | async }}
+            </label>
+          }
+        </div>
+      } @else {
         @for (option of options(); track option.value; let i = $index) {
-        <input
-          type="radio"
-          [name]="key()"
-          [value]="option.value"
-          [(ngModel)]="f().value"
-          [disabled]="option.disabled || f().disabled()"
-          class="btn-check"
-          [id]="key() + '_' + i"
-          autocomplete="off"
-        />
-        <label
-          class="btn btn-outline-primary"
-          [class.btn-sm]="props()?.buttonSize === 'sm'"
-          [class.btn-lg]="props()?.buttonSize === 'lg'"
-          [for]="key() + '_' + i"
-        >
-          {{ option.label | dynamicText | async }}
-        </label>
+          <div class="form-check" [class.form-check-inline]="props()?.inline" [class.form-check-reverse]="props()?.reverse">
+            <input
+              type="radio"
+              [name]="key()"
+              [value]="option.value"
+              [(ngModel)]="f().value"
+              [disabled]="option.disabled || f().disabled()"
+              class="form-check-input"
+              [id]="key() + '_' + i"
+            />
+            <label class="form-check-label" [for]="key() + '_' + i">
+              {{ option.label | dynamicText | async }}
+            </label>
+          </div>
         }
-      </div>
-      } @else { @for (option of options(); track option.value; let i = $index) {
-      <div class="form-check" [class.form-check-inline]="props()?.inline" [class.form-check-reverse]="props()?.reverse">
-        <input
-          type="radio"
-          [name]="key()"
-          [value]="option.value"
-          [(ngModel)]="f().value"
-          [disabled]="option.disabled || f().disabled()"
-          class="form-check-input"
-          [id]="key() + '_' + i"
-        />
-        <label class="form-check-label" [for]="key() + '_' + i">
-          {{ option.label | dynamicText | async }}
-        </label>
-      </div>
-      } } @if (props()?.helpText; as helpText) {
-      <div class="form-text">{{ helpText | dynamicText | async }}</div>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+      @if (props()?.helpText; as helpText) {
+        <div class="form-text">{{ helpText | dynamicText | async }}</div>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
     </div>
   `,

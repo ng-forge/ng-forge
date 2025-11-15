@@ -1,11 +1,7 @@
 import { FieldTypeDefinition, valueFieldMapper, checkboxFieldMapper } from '@ng-forge/dynamic-form';
 import { BsField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/bs-button.mapper';
-import {
-  submitButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-} from '../fields/button/bs-specific-button.mapper';
+import { submitButtonFieldMapper, nextButtonFieldMapper, previousButtonFieldMapper } from '../fields/button/bs-specific-button.mapper';
 
 export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   {

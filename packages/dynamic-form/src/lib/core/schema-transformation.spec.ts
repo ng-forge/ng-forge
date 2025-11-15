@@ -40,7 +40,7 @@ describe('schema-transformation', () => {
             formValue,
             schema<typeof formValue>((path) => {
               applySchema(config, path.email);
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
 
@@ -69,7 +69,7 @@ describe('schema-transformation', () => {
               expect(() => {
                 applySchema(config, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -97,7 +97,7 @@ describe('schema-transformation', () => {
               expect(() => {
                 applySchema(config, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -129,7 +129,7 @@ describe('schema-transformation', () => {
               expect(() => {
                 applySchema(config, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -155,7 +155,7 @@ describe('schema-transformation', () => {
               expect(() => {
                 applySchema(config, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -182,7 +182,7 @@ describe('schema-transformation', () => {
               expect(() => {
                 applySchema(config, path.value);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -208,7 +208,7 @@ describe('schema-transformation', () => {
               expect(() => {
                 applySchema(config, path.value);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -234,7 +234,7 @@ describe('schema-transformation', () => {
               expect(() => {
                 applySchema(config, path.items);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -260,7 +260,7 @@ describe('schema-transformation', () => {
               expect(() => {
                 applySchema(config, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -286,7 +286,7 @@ describe('schema-transformation', () => {
             expect(() => {
               schemaFn(path.email);
             }).not.toThrow();
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
       });
@@ -309,7 +309,7 @@ describe('schema-transformation', () => {
             expect(() => {
               schemaFn(path.email);
             }).not.toThrow();
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
       });
@@ -337,7 +337,7 @@ describe('schema-transformation', () => {
             expect(() => {
               schemaFn(path.email);
             }).not.toThrow();
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
       });
@@ -359,7 +359,7 @@ describe('schema-transformation', () => {
             expect(() => {
               schemaFn(path.email);
             }).not.toThrow();
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
       });
@@ -389,7 +389,7 @@ describe('schema-transformation', () => {
             expect(() => {
               schemaFn(path.email);
             }).not.toThrow();
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
       });

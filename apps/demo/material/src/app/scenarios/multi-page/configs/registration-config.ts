@@ -123,13 +123,13 @@ export const registrationConfig = {
             {
               key: 'previousToWelcome',
               type: 'previous',
-          label: 'Previous',
+              label: 'Previous',
               col: 6,
             },
             {
               key: 'nextToSecurity',
               type: 'next',
-          label: 'Next',
+              label: 'Next',
               col: 6,
             },
           ],
@@ -204,13 +204,13 @@ export const registrationConfig = {
             {
               key: 'previousToPersonal',
               type: 'previous',
-          label: 'Previous',
+              label: 'Previous',
               col: 6,
             },
             {
               key: 'nextToPreferences',
               type: 'next',
-          label: 'Next',
+              label: 'Next',
               col: 6,
             },
           ],
@@ -268,13 +268,13 @@ export const registrationConfig = {
             {
               key: 'previousToSecurity',
               type: 'previous',
-          label: 'Previous',
+              label: 'Previous',
               col: 6,
             },
             {
               key: 'submit',
               type: 'submit',
-          label: 'Complete Registration',
+              label: 'Complete Registration',
               col: 6,
             },
           ],

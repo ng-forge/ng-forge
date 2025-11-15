@@ -1,11 +1,6 @@
 import { checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-form';
 import { IonicField } from '../types/types';
-import {
-  buttonFieldMapper,
-  submitButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-} from '../fields/button';
+import { buttonFieldMapper, submitButtonFieldMapper, nextButtonFieldMapper, previousButtonFieldMapper } from '../fields/button';
 
 /**
  * Ionic field type definitions

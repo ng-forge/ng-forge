@@ -17,31 +17,33 @@ import { AsyncPipe } from '@angular/common';
   imports: [RadioButton, DynamicTextPipe, AsyncPipe, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @if (label()) {
-    <div class="radio-label">{{ label() | dynamicText | async }}</div>
+    @let f = field();
+    @if (label()) {
+      <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
     <div class="radio-group">
       @for (option of options(); track option.value) {
-      <div class="radio-option">
-        <p-radioButton
-          [field]="f"
-          [value]="option.value"
-          [disabled]="f().disabled() || option.disabled"
-          [styleClass]="radioClasses()"
-          [inputId]="key() + '-' + option.value"
-        />
-        <label [for]="key() + '-' + option.value" class="radio-option-label">
-          {{ option.label | dynamicText | async }}
-        </label>
-      </div>
+        <div class="radio-option">
+          <p-radioButton
+            [field]="f"
+            [value]="option.value"
+            [disabled]="f().disabled() || option.disabled"
+            [styleClass]="radioClasses()"
+            [inputId]="key() + '-' + option.value"
+          />
+          <label [for]="key() + '-' + option.value" class="radio-option-label">
+            {{ option.label | dynamicText | async }}
+          </label>
+        </div>
       }
     </div>
 
     @if (props()?.hint; as hint) {
-    <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
-    } @for (error of errorsToDisplay(); track error.kind) {
-    <small class="p-error">{{ error.message }}</small>
+      <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+    }
+    @for (error of errorsToDisplay(); track error.kind) {
+      <small class="p-error">{{ error.message }}</small>
     }
   `,
   styles: [

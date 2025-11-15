@@ -13,12 +13,12 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="mb-3">
       @if (label(); as label) {
-      <label [for]="key()" class="form-label">
-        {{ label | dynamicText | async }}
-        @if (props()?.showValue) {
-        <span class="ms-2 badge bg-secondary"> {{ props()?.valuePrefix }}{{ f().value() }}{{ props()?.valueSuffix }} </span>
-        }
-      </label>
+        <label [for]="key()" class="form-label">
+          {{ label | dynamicText | async }}
+          @if (props()?.showValue) {
+            <span class="ms-2 badge bg-secondary"> {{ props()?.valuePrefix }}{{ f().value() }}{{ props()?.valueSuffix }} </span>
+          }
+        </label>
       }
 
       <input
@@ -34,11 +34,12 @@ import { AsyncPipe } from '@angular/common';
       />
 
       @if (props()?.helpText; as helpText) {
-      <div class="form-text">
-        {{ helpText | dynamicText | async }}
-      </div>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <div class="invalid-feedback d-block">{{ error.message }}</div>
+        <div class="form-text">
+          {{ helpText | dynamicText | async }}
+        </div>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
     </div>
   `,

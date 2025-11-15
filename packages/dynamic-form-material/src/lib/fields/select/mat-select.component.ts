@@ -22,7 +22,7 @@ import { AsyncPipe } from '@angular/common';
 
     <mat-form-field [appearance]="props()?.appearance || 'fill'" [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'">
       @if (label(); as label) {
-      <mat-label>{{ label | dynamicText | async }}</mat-label>
+        <mat-label>{{ label | dynamicText | async }}</mat-label>
       }
 
       <mat-select
@@ -33,16 +33,17 @@ import { AsyncPipe } from '@angular/common';
         [disabled]="f().disabled()"
       >
         @for (option of options(); track option.value) {
-        <mat-option [value]="option.value" [disabled]="option.disabled || false">
-          {{ option.label | dynamicText | async }}
-        </mat-option>
+          <mat-option [value]="option.value" [disabled]="option.disabled || false">
+            {{ option.label | dynamicText | async }}
+          </mat-option>
         }
       </mat-select>
 
       @if (props()?.hint; as hint) {
-      <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <mat-error>{{ error.message }}</mat-error>
+        <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <mat-error>{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,

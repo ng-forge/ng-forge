@@ -149,7 +149,7 @@ function applyCustomValidator<TValue>(config: CustomValidatorConfig, fieldPath: 
  * Create a function-based validator using registered validator functions
  */
 function createFunctionValidator<TValue>(
-  config: CustomValidatorConfig
+  config: CustomValidatorConfig,
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const registry = inject(FunctionRegistryService);
   const validatorFn = registry.getValidator(config.functionName!);
@@ -168,7 +168,7 @@ function createFunctionValidator<TValue>(
  * Create an expression-based validator using secure AST evaluation
  */
 function createExpressionValidator<TValue>(
-  config: CustomValidatorConfig
+  config: CustomValidatorConfig,
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);

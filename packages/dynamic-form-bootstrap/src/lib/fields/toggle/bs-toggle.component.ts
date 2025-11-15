@@ -35,11 +35,12 @@ import { AsyncPipe } from '@angular/common';
     </div>
 
     @if (props()?.helpText; as helpText) {
-    <div class="form-text" [attr.hidden]="f().hidden() || null">
-      {{ helpText | dynamicText | async }}
-    </div>
-    } @for (error of errorsToDisplay(); track error.kind) {
-    <div class="invalid-feedback d-block">{{ error.message }}</div>
+      <div class="form-text" [attr.hidden]="f().hidden() || null">
+        {{ helpText | dynamicText | async }}
+      </div>
+    }
+    @for (error of errorsToDisplay(); track error.kind) {
+      <div class="invalid-feedback d-block">{{ error.message }}</div>
     }
   `,
   styles: [

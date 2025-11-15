@@ -24,14 +24,15 @@ import { AsyncPipe } from '@angular/common';
         [attr.tabindex]="tabIndex()"
       />
       @if (label(); as labelText) {
-      <label [for]="checkboxId" class="ml-2">{{ labelText | dynamicText | async }}</label>
+        <label [for]="checkboxId" class="ml-2">{{ labelText | dynamicText | async }}</label>
       }
     </div>
 
     @if (props()?.hint; as hint) {
-    <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
-    } @for (error of errorsToDisplay(); track error.kind) {
-    <small class="p-error">{{ error.message }}</small>
+      <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+    }
+    @for (error of errorsToDisplay(); track error.kind) {
+      <small class="p-error">{{ error.message }}</small>
     }
   `,
   styles: [

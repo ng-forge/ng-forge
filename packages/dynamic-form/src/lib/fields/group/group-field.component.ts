@@ -55,18 +55,18 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   private readonly memoizedFlattenFields = memoize(
     (fields: FieldDef<any>[], registry: Map<string, any>) => flattenFields(fields, registry),
     (fields, registry) =>
-      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
+      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(','),
   );
 
   private readonly memoizedKeyBy = memoize(
     <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
-    (fields) => fields.map((f) => f.key).join(',')
+    (fields) => fields.map((f) => f.key).join(','),
   );
 
   private readonly memoizedDefaultValues = memoize(
     <T extends FieldDef<any>>(fieldsById: Record<string, T>, registry: Map<string, any>) =>
       mapValues(fieldsById, (field) => getFieldDefaultValue(field, registry)),
-    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(',')
+    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(','),
   );
 
   /** Field configuration input */
@@ -157,9 +157,9 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
     ),
-    { initialValue: [] }
+    { initialValue: [] },
   );
 
   private mapFields(fields: FieldDef<any>[]): Promise<ComponentRef<FormUiControl>>[] {

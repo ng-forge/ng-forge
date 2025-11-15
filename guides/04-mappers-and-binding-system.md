@@ -413,14 +413,14 @@ export const CUSTOM_FIELD_TYPES: FieldTypeDefinition[] = [
 
     <div class="rating-field">
       @if (label(); as label) {
-      <label>{{ label | dynamicText | async }}</label>
+        <label>{{ label | dynamicText | async }}</label>
       }
 
       <div class="stars">
         @for (star of stars(); track star) {
-        <button type="button" [disabled]="readonly()" (click)="rate(star)" [class.active]="star <= f().value()">
-          <i [class]="icon()"></i>
-        </button>
+          <button type="button" [disabled]="readonly()" (click)="rate(star)" [class.active]="star <= f().value()">
+            <i [class]="icon()"></i>
+          </button>
         }
       </div>
     </div>
@@ -528,7 +528,7 @@ export function outputFieldMapper(fieldDef: CustomField, options: FieldMapperOpt
     outputBinding('valueChanged', (newValue: any) => {
       console.log('Value changed:', newValue);
       // Handle custom logic
-    })
+    }),
   );
 
   return bindings;
@@ -722,7 +722,7 @@ bindings.push(inputBinding('maxRating', () => maxRating));
 ```typescript
 export function customMapper(
   fieldDef: CustomField, // Specific type
-  options: FieldMapperOptions
+  options: FieldMapperOptions,
 ): Binding[] {
   // TypeScript knows all properties
 }
@@ -733,7 +733,7 @@ export function customMapper(
 ```typescript
 export function customMapper(
   fieldDef: any, // Too generic
-  options: any
+  options: any,
 ): any {
   // No type safety
 }

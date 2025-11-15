@@ -38,7 +38,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(pageField, path as any);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -62,7 +62,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(groupField, path.address);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -83,7 +83,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -106,7 +106,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -127,7 +127,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -148,7 +148,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.age);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -169,7 +169,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.age);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -190,7 +190,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.username);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -211,7 +211,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.username);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -232,7 +232,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.username);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -253,7 +253,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.username);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -273,7 +273,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.field);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -296,7 +296,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -320,7 +320,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -341,7 +341,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -365,7 +365,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -388,7 +388,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -409,7 +409,7 @@ describe('form-mapping', () => {
             formValue,
             schema<typeof formValue>((path) => {
               mapFieldToForm(fieldDef, path.email);
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
 
@@ -432,7 +432,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(fieldDef, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -457,7 +457,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(pageField, path as any);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -480,7 +480,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(pageField, path as any);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -500,7 +500,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(pageField, path as any);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -519,7 +519,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(pageField, path as any);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -545,7 +545,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(pageField, path as any);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -571,7 +571,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(groupField, path.address);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -595,7 +595,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(groupField, path.address);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -616,7 +616,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(groupField, path.address);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -636,7 +636,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(groupField, path.address);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -666,7 +666,7 @@ describe('form-mapping', () => {
               expect(() => {
                 mapFieldToForm(groupField, path.address);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });

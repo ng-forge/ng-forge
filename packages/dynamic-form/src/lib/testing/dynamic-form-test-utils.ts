@@ -169,7 +169,7 @@ export class DynamicFormTestUtils {
       // Add input-specific bindings
       bindings.push(
         inputBinding('type', () => (fieldDef.props as Record<string, unknown>)?.['type'] || 'text'),
-        inputBinding('placeholder', () => (fieldDef.props as Record<string, unknown>)?.['placeholder'] || '')
+        inputBinding('placeholder', () => (fieldDef.props as Record<string, unknown>)?.['placeholder'] || ''),
       );
 
       return bindings;

@@ -107,7 +107,7 @@ export default class PageFieldComponent {
       }
 
       return pageField.fields || [];
-    })
+    }),
   );
 
   fields = toSignal(
@@ -119,9 +119,9 @@ export default class PageFieldComponent {
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
     ),
-    { initialValue: [] }
+    { initialValue: [] },
   );
 
   private mapFields(fields: any[]): Promise<ComponentRef<FormUiControl>>[] {

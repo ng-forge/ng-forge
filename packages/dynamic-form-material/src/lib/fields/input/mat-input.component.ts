@@ -17,7 +17,7 @@ import { AsyncPipe } from '@angular/common';
 
     <mat-form-field [appearance]="props()?.appearance ?? 'outline'" [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'">
       @if (label()) {
-      <mat-label>{{ label() | dynamicText | async }}</mat-label>
+        <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }
 
       <input
@@ -31,9 +31,10 @@ import { AsyncPipe } from '@angular/common';
       />
 
       @if (props()?.hint; as hint) {
-      <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <mat-error>{{ error.message }}</mat-error>
+        <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <mat-error>{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,

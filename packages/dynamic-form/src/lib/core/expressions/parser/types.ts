@@ -104,7 +104,11 @@ export interface ArrayLiteralNode {
  * Parser error with position information
  */
 export class ExpressionParserError extends Error {
-  constructor(message: string, public position: number, public expression: string) {
+  constructor(
+    message: string,
+    public position: number,
+    public expression: string,
+  ) {
     super(`${message} at position ${position} in expression: ${expression}`);
     this.name = 'ExpressionParserError';
   }

@@ -143,9 +143,9 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
     ),
-    { initialValue: [] }
+    { initialValue: [] },
   );
 
   /**
@@ -163,7 +163,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
         // Cleanup on destroy
         this.destroyRef.onDestroy(() => subscription.unsubscribe());
       },
-      { allowSignalWrites: true }
+      { allowSignalWrites: true },
     );
 
     effect(
@@ -177,7 +177,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
         // Cleanup on destroy
         this.destroyRef.onDestroy(() => subscription.unsubscribe());
       },
-      { allowSignalWrites: true }
+      { allowSignalWrites: true },
     );
   }
 

@@ -14,39 +14,43 @@ import { ConfirmationFormComponent } from './components/confirmation-form.compon
 
       <div class="demo-controls">
         @for (scenario of scenarios; track scenario.id) {
-        <button (click)="loadScenario(scenario.id)" [class.active]="currentScenario() === scenario.id" class="scenario-btn">
-          {{ scenario.name }}
-        </button>
+          <button (click)="loadScenario(scenario.id)" [class.active]="currentScenario() === scenario.id" class="scenario-btn">
+            {{ scenario.name }}
+          </button>
         }
       </div>
 
       <div class="form-container">
-        @switch (currentScenario()) { @case ('personal-info') {
-        <demo-personal-info-form (submitted)="onSubmit($event)" />
-        } @case ('account-setup') {
-        <demo-account-setup-form (submitted)="onSubmit($event)" />
-        } @case ('confirmation') {
-        <demo-confirmation-form (submitted)="onSubmit($event)" />
-        } }
+        @switch (currentScenario()) {
+          @case ('personal-info') {
+            <demo-personal-info-form (submitted)="onSubmit($event)" />
+          }
+          @case ('account-setup') {
+            <demo-account-setup-form (submitted)="onSubmit($event)" />
+          }
+          @case ('confirmation') {
+            <demo-confirmation-form (submitted)="onSubmit($event)" />
+          }
+        }
       </div>
 
       @if (showDebug()) {
-      <div class="debug-section">
-        <details>
-          <summary>Current Scenario</summary>
-          <pre>{{ currentScenario() | json }}</pre>
-        </details>
+        <div class="debug-section">
+          <details>
+            <summary>Current Scenario</summary>
+            <pre>{{ currentScenario() | json }}</pre>
+          </details>
 
-        <details>
-          <summary>Submission History</summary>
-          @for (submission of submissions(); track submission; let i = $index) {
-          <div class="submission-item">
-            <h4>Submission {{ i + 1 }}</h4>
-            <pre>{{ submission | json }}</pre>
-          </div>
-          }
-        </details>
-      </div>
+          <details>
+            <summary>Submission History</summary>
+            @for (submission of submissions(); track submission; let i = $index) {
+              <div class="submission-item">
+                <h4>Submission {{ i + 1 }}</h4>
+                <pre>{{ submission | json }}</pre>
+              </div>
+            }
+          </details>
+        </div>
       }
     </div>
   `,
