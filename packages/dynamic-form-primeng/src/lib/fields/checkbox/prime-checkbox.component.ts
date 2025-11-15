@@ -16,7 +16,6 @@ import { AsyncPipe } from '@angular/common';
       <p-checkbox
         [field]="f"
         [inputId]="checkboxId"
-        [disabled]="f().disabled()"
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"

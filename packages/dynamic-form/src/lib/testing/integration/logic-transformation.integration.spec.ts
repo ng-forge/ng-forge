@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { form, FieldPath, schema } from '@angular/forms/signals';
+import { form, schema } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { applyLogic, applyMultipleLogic } from '../../core/logic/logic-applicator';
 import { LogicConfig } from '../../models/logic';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';

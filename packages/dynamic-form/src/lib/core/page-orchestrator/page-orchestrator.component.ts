@@ -91,7 +91,7 @@ export class PageOrchestratorComponent {
   /**
    * Root form instance from parent DynamicForm
    */
-  form = input.required<FieldTree<unknown>>();
+  form = input.required<FieldTree<any>>();
 
   /**
    * Field signal context for child fields

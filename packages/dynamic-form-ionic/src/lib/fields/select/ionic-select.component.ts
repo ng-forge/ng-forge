@@ -26,7 +26,6 @@ import { AsyncPipe } from '@angular/common';
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() ?? props()?.placeholder | dynamicText | async) ?? ''"
-      [disabled]="f().disabled()"
       [multiple]="props()?.multiple ?? false"
       [compareWith]="props()?.compareWith ?? defaultCompare"
       [interface]="props()?.interface ?? 'alert'"

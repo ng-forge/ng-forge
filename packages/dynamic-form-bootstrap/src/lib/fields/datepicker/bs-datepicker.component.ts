@@ -3,6 +3,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { BsDatepickerComponent, BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
+import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
 /**
  * Bootstrap datepicker field component
@@ -13,22 +14,21 @@ import { AsyncPipe } from '@angular/common';
  */
 @Component({
   selector: 'df-bs-datepicker',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @if (p?.floatingLabel) {
     <!-- Floating label variant -->
     <div class="form-floating mb-3">
       <input
+        dfBsInputConstraints
         [field]="f"
         [id]="key()"
         type="date"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [dfMin]="minAsString()"
+        [dfMax]="maxAsString()"
         [attr.tabindex]="tabIndex()"
-        [attr.min]="minDate() ?? null"
-        [attr.max]="maxDate() ?? null"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -53,15 +53,14 @@ import { AsyncPipe } from '@angular/common';
       }
 
       <input
+        dfBsInputConstraints
         [field]="f"
         [id]="key()"
         type="date"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [dfMin]="minAsString()"
+        [dfMax]="maxAsString()"
         [attr.tabindex]="tabIndex()"
-        [attr.min]="minDate() ?? null"
-        [attr.max]="maxDate() ?? null"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
         class="form-control"
         [class.form-control-sm]="p?.size === 'sm'"
         [class.form-control-lg]="p?.size === 'lg'"
@@ -107,8 +106,8 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly minDate = input<string>();
-  readonly maxDate = input<string>();
+  readonly minDate = input<Date | string | null>(null);
+  readonly maxDate = input<Date | string | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<BsDatepickerProps>();
   readonly validationMessages = input<ValidationMessages>();
@@ -119,4 +118,15 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // Helper methods to convert Date to string for HTML attributes
+  readonly minAsString = computed(() => {
+    const min = this.minDate();
+    return min instanceof Date ? min.toISOString().split('T')[0] : min;
+  });
+
+  readonly maxAsString = computed(() => {
+    const max = this.maxDate();
+    return max instanceof Date ? max.toISOString().split('T')[0] : max;
+  });
 }

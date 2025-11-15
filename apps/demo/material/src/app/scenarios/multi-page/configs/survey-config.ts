@@ -106,13 +106,13 @@ export const surveyConfig = {
             {
               key: 'previousToIntro',
               type: 'previous',
-          label: 'Previous',
+              label: 'Previous',
               col: 6,
             },
             {
               key: 'nextToFeedback',
               type: 'next',
-          label: 'Next',
+              label: 'Next',
               col: 6,
             },
           ],

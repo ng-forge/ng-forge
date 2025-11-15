@@ -69,11 +69,7 @@ describe('BsTextareaFieldComponent', () => {
       expect(BootstrapFormTestUtils.getFormValue(component).comments).toBe('');
 
       // Simulate user typing using utility
-      await BootstrapFormTestUtils.simulateBsInput(
-        fixture,
-        'textarea.form-control',
-        'This is a multi-line comment\nwith line breaks'
-      );
+      await BootstrapFormTestUtils.simulateBsInput(fixture, 'textarea.form-control', 'This is a multi-line comment\nwith line breaks');
 
       // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component).comments).toBe('This is a multi-line comment\nwith line breaks');
@@ -250,10 +246,7 @@ describe('BsTextareaFieldComponent', () => {
     });
 
     it('should handle multiple textareas with independent value changes', async () => {
-      const config = BootstrapFormTestUtils.builder()
-        .bsTextareaField({ key: 'description' })
-        .bsTextareaField({ key: 'feedback' })
-        .build();
+      const config = BootstrapFormTestUtils.builder().bsTextareaField({ key: 'description' }).bsTextareaField({ key: 'feedback' }).build();
 
       const { component, fixture } = await BootstrapFormTestUtils.createTest({
         config,
@@ -404,7 +397,7 @@ describe('BsTextareaFieldComponent', () => {
         initialValue: { comments: '' },
       });
 
-      const specialText = 'José María < @#$%^&*()\nSecond line with émojis <‰\nThird line with symbols: ¿¡§';
+      const specialText = 'Josï¿½ Marï¿½a < @#$%^&*()\nSecond line with ï¿½mojis <ï¿½\nThird line with symbols: ï¿½ï¿½ï¿½';
 
       // Simulate typing special characters using utility
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'textarea.form-control', specialText);

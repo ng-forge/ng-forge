@@ -2,12 +2,6 @@ name: Deploy to GitHub Pages
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version (e.g., 1.0.0, patch, minor, major)'
-        required: false
-        default: ''
-        type: string
 
 permissions:
   contents: write
@@ -15,7 +9,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: false
 
 jobs:
@@ -87,16 +81,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Version bump (if specified)
-        if: ${{ github.event.inputs.version != '' }}
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          pnpm run release:version ${{ github.event.inputs.version }}
-          git push --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build example apps
         run: |

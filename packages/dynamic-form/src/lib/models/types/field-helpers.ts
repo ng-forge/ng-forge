@@ -2,7 +2,7 @@
  * Helper types for creating type-safe field configurations with proper nesting constraints
  */
 
-import { FieldPath } from '@angular/forms/signals';
+import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { PageField, RowField, GroupField, ArrayField } from '../../definitions';
 import { RegisteredFieldTypes } from '../registry/field-registry';
 import { PageAllowedChildren, RowAllowedChildren, GroupAllowedChildren, ArrayAllowedChildren } from './nesting-constraints';
@@ -110,5 +110,5 @@ export type ValidateRootFields<TFields extends RegisteredFieldTypes[]> =
  * This allows accessing child paths while maintaining some type safety
  */
 export type FieldPathAccess<TValue> = {
-  [K in keyof TValue]: FieldPath<TValue[K]>;
+  [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>;
 };

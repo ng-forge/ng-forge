@@ -99,7 +99,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
       <!-- Paged form: Use page orchestrator with page field definitions -->
       <page-orchestrator
         [pageFields]="pageFieldDefinitions()"
-        [form]="form()"
+        [form]="$any(form())"
         [fieldSignalContext]="fieldSignalContext()"
         [config]="{ initialPageIndex: 0 }"
       />
