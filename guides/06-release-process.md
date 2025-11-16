@@ -2,6 +2,34 @@
 
 This guide explains how to release new versions of the ng-forge libraries.
 
+## Quick Reference
+
+**TL;DR - Release in 5 steps:**
+
+1. **Create**: `./scripts/create-release-branch.sh patch` (or minor/major)
+2. **Review**: Create PR for the release branch, get approval
+3. **Dry Run**: Trigger workflow with `dry_run: true`, verify output
+4. **Release**: Trigger workflow with `publish: true`, `dry_run: false`
+5. **Verify**: Check npm, GitHub releases, test installation
+
+**Common Commands:**
+```bash
+# Create patch release from latest commit
+./scripts/create-release-branch.sh patch
+
+# Create minor release from specific commit
+./scripts/create-release-branch.sh minor abc1234
+
+# Create release with specific version
+./scripts/create-release-branch.sh 1.2.3 abc1234
+
+# View release status
+gh release list
+npm view @ng-forge/dynamic-form versions
+```
+
+---
+
 ## Overview
 
 The ng-forge project uses a **release branch strategy** where releases are created from specific commits on the `main` branch. This allows for:
@@ -10,6 +38,18 @@ The ng-forge project uses a **release branch strategy** where releases are creat
 - **Independence**: Continue development on main while preparing a release
 - **Safety**: Fix issues in the release branch without affecting main
 - **Clarity**: Each release maps to a specific branch and commit
+
+## Release Checklist
+
+Before starting a release, review the [Release Checklist](../.github/RELEASE_CHECKLIST.md) to ensure all prerequisites are met.
+
+The checklist covers:
+- Pre-release verification
+- Branch creation
+- Review process
+- Dry-run testing
+- Release execution
+- Post-release verification
 
 ## Release Branch Naming
 
@@ -304,6 +344,75 @@ git cherry-pick <commit-hash-from-release-branch>
 git push
 ```
 
+## Rollback Procedure
+
+If a release fails or you need to roll back:
+
+### During the Release (Before Completion)
+
+If the workflow fails midway:
+
+1. Check the GitHub Actions logs to identify what failed
+2. Fix the issue in the release branch
+3. Push the fix: `git push origin release-1.0.0`
+4. Re-run the workflow from GitHub Actions
+
+### After Release (Published to npm/GitHub)
+
+If you discover issues after the release completes:
+
+#### Delete the Git Tag
+
+```bash
+# Delete locally
+git tag -d v1.0.0
+
+# Delete from remote
+git push origin :refs/tags/v1.0.0
+```
+
+#### Delete the GitHub Release
+
+```bash
+# Using GitHub CLI
+gh release delete v1.0.0 --yes
+
+# Or manually via GitHub web interface:
+# Navigate to Releases → Click the release → Delete
+```
+
+#### Unpublish from npm
+
+**Warning**: npm only allows unpublishing within 24 hours of publication, and only if no other packages depend on it.
+
+```bash
+# Within 24 hours (use with caution)
+npm unpublish @ng-forge/dynamic-form@1.0.0
+
+# For all 5 packages
+npm unpublish @ng-forge/dynamic-form@1.0.0
+npm unpublish @ng-forge/dynamic-form-material@1.0.0
+npm unpublish @ng-forge/dynamic-form-primeng@1.0.0
+npm unpublish @ng-forge/dynamic-form-ionic@1.0.0
+npm unpublish @ng-forge/dynamic-form-bootstrap@1.0.0
+```
+
+**After 24 hours**: You cannot unpublish. Instead:
+
+1. Publish a new patch version with the fix (e.g., 1.0.1)
+2. Mark the problematic version as deprecated:
+   ```bash
+   npm deprecate @ng-forge/dynamic-form@1.0.0 "This version has issues, please upgrade to 1.0.1"
+   ```
+
+#### Clean Up and Retry
+
+After rollback:
+
+1. Fix the issue in your release branch
+2. Update the version to a new patch (e.g., 1.0.0 → 1.0.1)
+3. Run the release workflow again
+
 ## GitHub Release Features
 
 The workflow creates rich GitHub Releases with:
@@ -378,6 +487,48 @@ npm view @ng-forge/dynamic-form version
 git checkout main
 git fetch --tags
 ```
+
+## Future Enhancements
+
+### Using Nx's Built-in Changelog
+
+Currently, the workflow uses custom git log formatting for changelogs. In the future, we could leverage Nx's built-in changelog generation for richer formatting:
+
+```bash
+# Instead of custom git log
+pnpm nx release changelog
+```
+
+This would provide:
+
+- Automatic categorization by commit type (feat, fix, chore, etc.)
+- Breaking changes section
+- Contributors list
+- Better conventional commit parsing
+
+The configuration is already in place in `nx.json`:
+
+```json
+"changelog": {
+  "workspaceChangelog": {
+    "createRelease": "github"
+  }
+}
+```
+
+### Pre-release Support
+
+To support alpha, beta, and RC releases:
+
+1. Update branch naming pattern to support `release-1.0.0-beta.1`
+2. Update version validation regex in workflow
+3. Add pre-release flag to GitHub Release creation
+4. Document pre-release workflow
+
+Example pre-release versions:
+- `1.0.0-alpha.1` - Alpha release
+- `1.0.0-beta.1` - Beta release
+- `1.0.0-rc.1` - Release candidate
 
 ## Questions?
 
