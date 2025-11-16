@@ -3,15 +3,6 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Release type (patch, minor, major) or specific version (e.g., 1.2.3)'
-        required: true
-        default: 'patch'
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
       publish:
         description: 'Publish to npm'
         required: true
@@ -22,6 +13,9 @@ on:
         required: false
         default: false
         type: boolean
+  push:
+    branches:
+      - 'release-*'
 
 permissions:
   contents: write
@@ -54,37 +48,77 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Get version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Extract version from branch name if on release branch
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          if [[ "$BRANCH_NAME" =~ ^release-(.+)$ ]]; then
+            BRANCH_VERSION="${BASH_REMATCH[1]}"
+            echo "Branch version: $BRANCH_VERSION"
+            echo "Package version: $VERSION"
+
+            # Verify they match
+            if [[ "$VERSION" != "$BRANCH_VERSION" ]]; then
+              echo "⚠️ Warning: Branch name ($BRANCH_VERSION) doesn't match package.json version ($VERSION)"
+            fi
+          fi
+
       - name: Build and test libraries
         run: |
-          pnpm nx run-many -t build -p dynamic-form,dynamic-form-material
-          pnpm nx run-many -t test -p dynamic-form,dynamic-form-material --configuration=ci
+          pnpm nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic
+          pnpm nx run-many -t test -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic --configuration=ci
 
       - name: Configure Git
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-      - name: Version bump
+      - name: Generate Changelog
+        id: changelog
         run: |
-          if [[ "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            pnpm nx release version ${{ github.event.inputs.version }}
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found, generating full changelog"
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
           else
-            pnpm nx release version ${{ github.event.inputs.version }}
+            echo "Generating changelog since $PREV_TAG"
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
           fi
 
-          # Get the new version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          # Create changelog file
+          cat > RELEASE_NOTES.md <<EOF
+          ## What's Changed
+
+          ${CHANGELOG}
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${{ env.VERSION }}
+          EOF
+
+          cat RELEASE_NOTES.md
+
+      - name: Create/Update Git Tag
+        run: |
+          git tag -a "v${{ env.VERSION }}" -m "Release v${{ env.VERSION }}"
+          git push origin "v${{ env.VERSION }}" --force
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ env.NEW_VERSION }}
-          release_name: Release v${{ env.NEW_VERSION }}
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          body_path: RELEASE_NOTES.md
           draft: false
           prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm (dry-run)
         if: ${{ github.event.inputs.dry_run == 'true' }}
@@ -93,11 +127,21 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
-        if: ${{ github.event.inputs.publish == 'true' && github.event.inputs.dry_run == 'false' }}
+        if: ${{ (github.event.inputs.publish == 'true' && github.event.inputs.dry_run != 'true') || github.event_name == 'push' }}
         run: pnpm nx release publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Push changes
+      - name: Post-release summary
+        if: success()
         run: |
-          git push --follow-tags
+          echo "✅ Release v${{ env.VERSION }} completed successfully!"
+          echo ""
+          echo "📦 Published packages:"
+          echo "- @ng-forge/dynamic-form@${{ env.VERSION }}"
+          echo "- @ng-forge/dynamic-form-material@${{ env.VERSION }}"
+          echo "- @ng-forge/dynamic-form-primeng@${{ env.VERSION }}"
+          echo "- @ng-forge/dynamic-form-ionic@${{ env.VERSION }}"
+          echo ""
+          echo "🔗 GitHub Release: https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }}"
+          echo "🔗 npm: https://www.npmjs.com/package/@ng-forge/dynamic-form/v/${{ env.VERSION }}"

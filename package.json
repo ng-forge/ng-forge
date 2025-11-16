@@ -32,7 +32,11 @@
     "release:version:major": "nx release version major",
     "release:publish": "nx release publish",
     "release:publish:dry-run": "nx release publish --dry-run",
-    "release": "pnpm run build:libs && pnpm run test:ci && nx release version && nx release publish"
+    "release": "pnpm run build:libs && pnpm run test:ci && nx release version && nx release publish",
+    "release:branch": "bash scripts/create-release-branch.sh",
+    "release:branch:patch": "bash scripts/create-release-branch.sh patch",
+    "release:branch:minor": "bash scripts/create-release-branch.sh minor",
+    "release:branch:major": "bash scripts/create-release-branch.sh major"
   },
   "private": true,
   "devDependencies": {
