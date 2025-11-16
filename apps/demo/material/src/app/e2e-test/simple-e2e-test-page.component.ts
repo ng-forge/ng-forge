@@ -1,16 +1,6 @@
-import { Component, signal, ViewChild, inject, effect, viewChild, resource } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import {
-  DynamicForm,
-  type FormConfig,
-  SubmitEvent,
-  EventBus,
-  AddArrayItemEvent,
-  RemoveArrayItemEvent,
-  FormResetEvent,
-  FormClearEvent,
-  FunctionRegistryService,
-} from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Simple E2E Test Page Component
@@ -19,17 +9,16 @@ import {
 @Component({
   selector: 'demo-simple-e2e-test-page',
   imports: [DynamicForm, JsonPipe],
-  providers: [FunctionRegistryService],
   template: `
     <div class="e2e-test-page">
       <h1>Simple E2E Test Environment</h1>
       <p>Basic testing page for automated tests</p>
 
       @if (currentConfig()) {
-      <div class="e2e-test-container" [id]="currentTestId()" [attr.data-testid]="currentTestId()">
+      <div class="e2e-test-container" [attr.data-testid]="currentTestId()">
         @if (currentTitle()) {
         <div class="form-header">
-          <h2 [id]="currentTestId() + '-title'" [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
+          <h2 [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
           @if (currentDescription()) {
           <p class="description">{{ currentDescription() }}</p>
           }
@@ -50,18 +39,14 @@ import {
             <summary>Form State (for debugging)</summary>
             <div class="form-data">
               <strong>Form Value:</strong>
-              <pre [id]="'form-value-' + currentTestId()" [attr.data-testid]="'form-value-' + currentTestId()">{{
-                formValue() | json
-              }}</pre>
+              <pre [attr.data-testid]="'form-value-' + currentTestId()">{{ formValue() | json }}</pre>
             </div>
             @if (submissionLog().length > 0) {
             <div class="submission-log">
               <strong>Submission Log:</strong>
-              <ul [id]="'submission-log-' + currentTestId()" [attr.data-testid]="'submission-log-' + currentTestId()">
+              <ul [attr.data-testid]="'submission-log-' + currentTestId()">
                 @for (submission of submissionLog(); track submission.timestamp; let i = $index) {
-                <li [id]="'submission-' + i" [attr.data-testid]="'submission-' + i">
-                  {{ submission.timestamp }}: {{ submission.data | json }}
-                </li>
+                <li [attr.data-testid]="'submission-' + i">{{ submission.timestamp }}: {{ submission.data | json }}</li>
                 }
               </ul>
             </div>
@@ -191,9 +176,6 @@ import {
   ],
 })
 export class SimpleE2ETestPageComponent {
-  private eventBus = inject(EventBus, { optional: true });
-  private functionRegistry = inject(FunctionRegistryService);
-
   currentConfig = signal<FormConfig | null>(null);
   currentTestId = signal<string>('default');
   currentTitle = signal<string>('');
@@ -205,87 +187,6 @@ export class SimpleE2ETestPageComponent {
 
   constructor() {
     this.setupScenarioLoader();
-    this.registerAsyncValidators();
-
-    // Expose EventBus to window for E2E tests when it's available
-    effect(() => {
-      if (this.eventBus) {
-        (window as any).testEventBus = this.eventBus;
-      }
-    });
-  }
-
-  /**
-   * Register async validators for E2E testing
-   * These validators are used by async-validation.spec.ts
-   */
-  private registerAsyncValidators(): void {
-    // HTTP Validator: Username availability check (GET request)
-    this.functionRegistry.registerHttpValidator('checkUsernameAvailability', {
-      request: (ctx) => {
-        const username = ctx.value();
-        if (!username || typeof username !== 'string') return undefined;
-        return `/api/users/check-username?username=${encodeURIComponent(username)}`;
-      },
-      onSuccess: (result: any) => {
-        return result?.available ? null : { kind: 'usernameTaken' };
-      },
-      onError: (error) => {
-        console.error('Username check failed:', error);
-        return null; // Don't block form on network errors
-      },
-    });
-
-    // HTTP Validator: Email validation (POST request)
-    this.functionRegistry.registerHttpValidator('validateEmail', {
-      request: (ctx) => {
-        const email = ctx.value();
-        if (!email || typeof email !== 'string') return undefined;
-        return {
-          url: '/api/users/validate-email',
-          method: 'POST',
-          body: { email },
-          headers: { 'Content-Type': 'application/json' },
-        };
-      },
-      onSuccess: (result: any) => {
-        return result?.valid ? null : { kind: 'invalidEmail' };
-      },
-      onError: (error) => {
-        console.error('Email validation failed:', error);
-        return { kind: 'emailValidationError' };
-      },
-    });
-
-    // TODO: Re-enable async validator with resource API once Angular resource API is updated
-    // Async Validator: Simulate database lookup with resource API
-    // this.functionRegistry.registerAsyncValidator('checkProductCode', {
-    //   params: (ctx) => ({
-    //     productCode: ctx.value(),
-    //     timestamp: Date.now(), // Force refresh
-    //   }),
-    //   factory: (params) => {
-    //     return resource({
-    //       request: () => params(),
-    //       loader: async (request) => {
-    //         if (!request?.productCode) return null;
-    //
-    //         // Simulate async database lookup with delay
-    //         await new Promise((resolve) => setTimeout(resolve, 500));
-    //
-    //         // Mock database: these product codes are "taken"
-    //         const takenCodes = ['PROD-001', 'PROD-002', 'TEST-123'];
-    //         const isTaken = takenCodes.includes(request.productCode as string);
-    //
-    //         return { available: !isTaken };
-    //       },
-    //     });
-    //   },
-    //   onSuccess: (result) => {
-    //     if (!result) return null;
-    //     return result.available ? null : { kind: 'productCodeTaken' };
-    //   },
-    // });
   }
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
@@ -390,12 +291,8 @@ export class SimpleE2ETestPageComponent {
   }
 
   private setupScenarioLoader(): void {
-    // Expose events globally for e2e tests
+    // Expose SubmitEvent globally for e2e tests
     (window as any).SubmitEvent = SubmitEvent;
-    (window as any).AddArrayItemEvent = AddArrayItemEvent;
-    (window as any).RemoveArrayItemEvent = RemoveArrayItemEvent;
-    (window as any).FormResetEvent = FormResetEvent;
-    (window as any).FormClearEvent = FormClearEvent;
 
     // Create global function for loading test scenarios
     (window as any).loadTestScenario = (

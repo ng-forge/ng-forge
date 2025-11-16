@@ -11,10 +11,10 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
   selector: 'e2e-test-host',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <div class="e2e-test-container" [id]="testId()" [attr.data-testid]="testId()">
+    <div class="e2e-test-container" [attr.data-testid]="testId()">
       @if (title()) {
       <div class="form-header">
-        <h2 [id]="testId() + '-title'" [attr.data-testid]="testId() + '-title'">{{ title() }}</h2>
+        <h2 [attr.data-testid]="title() + '-title'">{{ title() }}</h2>
         @if (description()) {
         <p class="description">{{ description() }}</p>
         }
@@ -34,7 +34,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
           <summary>Form State (for debugging)</summary>
           <div class="form-data">
             <strong>Form Value:</strong>
-            <pre [id]="'form-value-' + testId()" [attr.data-testid]="'form-value-' + testId()">{{ formValue() | json }}</pre>
+            <pre [attr.data-testid]="'form-value-' + testId()">{{ formValue() | json }}</pre>
           </div>
           @if (showConfig()) {
           <div class="form-config">
@@ -44,11 +44,9 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
           } @if (submissionLog().length > 0) {
           <div class="submission-log">
             <strong>Submission Log:</strong>
-            <ul [id]="'submission-log-' + testId()" [attr.data-testid]="'submission-log-' + testId()">
+            <ul [attr.data-testid]="'submission-log-' + testId()">
               @for (submission of submissionLog(); track submission.timestamp; let i = $index) {
-              <li [id]="'submission-' + i" [attr.data-testid]="'submission-' + i">
-                {{ submission.timestamp }}: {{ submission.data | json }}
-              </li>
+              <li [attr.data-testid]="'submission-' + i">{{ submission.timestamp }}: {{ submission.data | json }}</li>
               }
             </ul>
           </div>
