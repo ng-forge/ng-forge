@@ -13,6 +13,7 @@ This guide explains how to release new versions of the ng-forge libraries.
 5. **Verify**: Check npm, GitHub releases, test installation
 
 **Common Commands:**
+
 ```bash
 # Create patch release from latest commit
 ./scripts/create-release-branch.sh patch
@@ -44,6 +45,7 @@ The ng-forge project uses a **release branch strategy** where releases are creat
 Before starting a release, review the [Release Checklist](../.github/RELEASE_CHECKLIST.md) to ensure all prerequisites are met.
 
 The checklist covers:
+
 - Pre-release verification
 - Branch creation
 - Review process
@@ -56,6 +58,7 @@ The checklist covers:
 All release branches follow the pattern: `release-X.Y.Z`
 
 Examples:
+
 - `release-1.0.0` - First stable release
 - `release-1.0.1` - Patch release
 - `release-1.1.0` - Minor release
@@ -124,6 +127,7 @@ Use the helper script to create a release branch:
 ```
 
 The script will:
+
 1. ✅ Create a new branch from the specified commit
 2. ✅ Bump versions in all package.json files
 3. ✅ Commit the version changes
@@ -171,6 +175,7 @@ The release is triggered manually through GitHub Actions:
 **Important**: Always do a dry run first (`dry_run: true`) to verify everything works before the actual release.
 
 This will:
+
 1. ✅ Build all libraries
 2. ✅ Run all tests
 3. ✅ Verify version matches branch name
@@ -197,6 +202,7 @@ Use for bug fixes and minor updates:
 ```
 
 **When to use**:
+
 - Bug fixes
 - Documentation updates
 - Performance improvements (non-breaking)
@@ -210,6 +216,7 @@ Use for new features that are backward compatible:
 ```
 
 **When to use**:
+
 - New features
 - New components or directives
 - Deprecations (with backward compatibility)
@@ -223,6 +230,7 @@ Use for breaking changes:
 ```
 
 **When to use**:
+
 - Breaking API changes
 - Removed deprecated features
 - Major architecture changes
@@ -233,11 +241,13 @@ Use for breaking changes:
 If you need to patch an old release:
 
 1. Create a new release branch from the old tag:
+
    ```bash
    git checkout -b release-1.0.2 v1.0.1
    ```
 
 2. Apply your fix:
+
    ```bash
    # Make changes
    git add .
@@ -245,6 +255,7 @@ If you need to patch an old release:
    ```
 
 3. Bump version manually:
+
    ```bash
    pnpm nx release version 1.0.2
    git add .
@@ -424,6 +435,7 @@ The workflow creates rich GitHub Releases with:
 - **Assets**: Automatically attached by GitHub
 
 You can edit the release notes after creation to add:
+
 - Migration guides
 - Breaking change details
 - Special thanks
@@ -526,6 +538,7 @@ To support alpha, beta, and RC releases:
 4. Document pre-release workflow
 
 Example pre-release versions:
+
 - `1.0.0-alpha.1` - Alpha release
 - `1.0.0-beta.1` - Beta release
 - `1.0.0-rc.1` - Release candidate
