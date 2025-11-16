@@ -9,6 +9,16 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico" sizes="any" />
   </head>
   <body>
+    <script>
+      // Check if we were redirected from 404.html
+      (function () {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect != location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
     <app-root></app-root>
   </body>
 </html>
