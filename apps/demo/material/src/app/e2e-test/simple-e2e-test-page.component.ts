@@ -7,6 +7,8 @@ import {
   EventBus,
   AddArrayItemEvent,
   RemoveArrayItemEvent,
+  FormResetEvent,
+  FormClearEvent,
   FunctionRegistryService,
 } from '@ng-forge/dynamic-form';
 
@@ -392,6 +394,8 @@ export class SimpleE2ETestPageComponent {
     (window as any).SubmitEvent = SubmitEvent;
     (window as any).AddArrayItemEvent = AddArrayItemEvent;
     (window as any).RemoveArrayItemEvent = RemoveArrayItemEvent;
+    (window as any).FormResetEvent = FormResetEvent;
+    (window as any).FormClearEvent = FormClearEvent;
 
     // Create global function for loading test scenarios
     (window as any).loadTestScenario = (
