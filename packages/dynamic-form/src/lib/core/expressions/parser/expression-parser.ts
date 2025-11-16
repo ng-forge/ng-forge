@@ -108,7 +108,7 @@ export class ExpressionParser {
       throw new ExpressionParserError(
         `Error evaluating expression: ${error instanceof Error ? error.message : String(error)}`,
         0,
-        expression
+        expression,
       );
     }
   }

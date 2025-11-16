@@ -23,6 +23,6 @@ export class AddArrayItemEvent implements FormEvent {
     /** The key of the array field to add an item to */
     public readonly arrayKey: string,
     /** Optional index where to insert the item (defaults to end of array) */
-    public readonly index?: number
+    public readonly index?: number,
   ) {}
 }

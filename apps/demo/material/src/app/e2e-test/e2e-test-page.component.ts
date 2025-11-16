@@ -16,40 +16,40 @@ import * as testScenarios from '../../../e2e/src/utils/scenarios';
       <p>This page is used for automated testing. Load test scenarios via JavaScript console or window object.</p>
 
       @if (currentConfig()) {
-      <e2e-test-host
-        [config]="currentConfig()!"
-        [testId]="currentTestId()"
-        [title]="currentTitle()"
-        [description]="currentDescription()"
-        [showConfig]="true"
-        [initialValue]="currentInitialValue()"
-      >
-      </e2e-test-host>
+        <e2e-test-host
+          [config]="currentConfig()!"
+          [testId]="currentTestId()"
+          [title]="currentTitle()"
+          [description]="currentDescription()"
+          [showConfig]="true"
+          [initialValue]="currentInitialValue()"
+        >
+        </e2e-test-host>
       } @else {
-      <div class="no-scenario">
-        <h2>No Scenario Loaded</h2>
-        <p>Use the following JavaScript to load a test scenario:</p>
-        <pre><code>window.loadTestScenario(scenarioConfig);</code></pre>
+        <div class="no-scenario">
+          <h2>No Scenario Loaded</h2>
+          <p>Use the following JavaScript to load a test scenario:</p>
+          <pre><code>window.loadTestScenario(scenarioConfig);</code></pre>
 
-        <h3>Available Scenarios:</h3>
-        <ul>
-          <li>userProfile</li>
-          <li>contactForm</li>
-          <li>registrationForm</li>
-          <li>gridLayout</li>
-          <li>surveyForm</li>
-          <li>complexValidation</li>
-          <li>registrationWizard</li>
-          <li>customerSurvey</li>
-          <li>jobApplication</li>
-          <li>ecommerceCheckout</li>
-          <li>ecommerceRegistration</li>
-          <li>healthcareRegistration</li>
-          <li>corporateEventRegistration</li>
-        </ul>
+          <h3>Available Scenarios:</h3>
+          <ul>
+            <li>userProfile</li>
+            <li>contactForm</li>
+            <li>registrationForm</li>
+            <li>gridLayout</li>
+            <li>surveyForm</li>
+            <li>complexValidation</li>
+            <li>registrationWizard</li>
+            <li>customerSurvey</li>
+            <li>jobApplication</li>
+            <li>ecommerceCheckout</li>
+            <li>ecommerceRegistration</li>
+            <li>healthcareRegistration</li>
+            <li>corporateEventRegistration</li>
+          </ul>
 
-        <h3>Example Usage:</h3>
-        <pre><code>
+          <h3>Example Usage:</h3>
+          <pre><code>
 // Load a specific scenario
 const &#123; getScenario &#125; = window.testUtils;
 window.loadTestScenario(getScenario('userProfile'));
@@ -65,7 +65,7 @@ window.loadTestScenario(&#123;
   &#125;]
 &#125;);
           </code></pre>
-      </div>
+        </div>
       }
     </div>
   `,
@@ -176,7 +176,7 @@ export class E2ETestPageComponent {
         title?: string;
         description?: string;
         initialValue?: Record<string, unknown>;
-      }
+      },
     ) => {
       this.currentConfig.set(config);
       this.currentTestId.set(options?.testId || 'default');

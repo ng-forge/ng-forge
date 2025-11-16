@@ -15,53 +15,53 @@ import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-for
       <p>Basic testing page for automated tests</p>
 
       @if (currentConfig()) {
-      <div class="e2e-test-container" [attr.data-testid]="currentTestId()">
-        @if (currentTitle()) {
-        <div class="form-header">
-          <h2 [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
-          @if (currentDescription()) {
-          <p class="description">{{ currentDescription() }}</p>
+        <div class="e2e-test-container" [attr.data-testid]="currentTestId()">
+          @if (currentTitle()) {
+            <div class="form-header">
+              <h2 [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
+              @if (currentDescription()) {
+                <p class="description">{{ currentDescription() }}</p>
+              }
+            </div>
           }
-        </div>
-        }
 
-        <dynamic-form
-          [config]="currentConfig()!"
-          [(value)]="formValue"
-          (submitted)="onSubmitted($event)"
-          (initialized)="onFormInitialized()"
-          [attr.data-testid]="'dynamic-form-' + currentTestId()"
-        >
-        </dynamic-form>
+          <dynamic-form
+            [config]="currentConfig()!"
+            [(value)]="formValue"
+            (submitted)="onSubmitted($event)"
+            (initialized)="onFormInitialized()"
+            [attr.data-testid]="'dynamic-form-' + currentTestId()"
+          >
+          </dynamic-form>
 
-        <div class="output" [attr.data-testid]="'form-output-' + currentTestId()">
-          <details class="form-state">
-            <summary>Form State (for debugging)</summary>
-            <div class="form-data">
-              <strong>Form Value:</strong>
-              <pre [attr.data-testid]="'form-value-' + currentTestId()">{{ formValue() | json }}</pre>
-            </div>
-            @if (submissionLog().length > 0) {
-            <div class="submission-log">
-              <strong>Submission Log:</strong>
-              <ul [attr.data-testid]="'submission-log-' + currentTestId()">
-                @for (submission of submissionLog(); track submission.timestamp; let i = $index) {
-                <li [attr.data-testid]="'submission-' + i">{{ submission.timestamp }}: {{ submission.data | json }}</li>
-                }
-              </ul>
-            </div>
-            }
-          </details>
+          <div class="output" [attr.data-testid]="'form-output-' + currentTestId()">
+            <details class="form-state">
+              <summary>Form State (for debugging)</summary>
+              <div class="form-data">
+                <strong>Form Value:</strong>
+                <pre [attr.data-testid]="'form-value-' + currentTestId()">{{ formValue() | json }}</pre>
+              </div>
+              @if (submissionLog().length > 0) {
+                <div class="submission-log">
+                  <strong>Submission Log:</strong>
+                  <ul [attr.data-testid]="'submission-log-' + currentTestId()">
+                    @for (submission of submissionLog(); track submission.timestamp; let i = $index) {
+                      <li [attr.data-testid]="'submission-' + i">{{ submission.timestamp }}: {{ submission.data | json }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </details>
+          </div>
         </div>
-      </div>
       } @else {
-      <div class="no-scenario">
-        <h2>No Scenario Loaded</h2>
-        <p>Use JavaScript to load a test scenario:</p>
-        <pre><code>window.loadTestScenario(config);</code></pre>
+        <div class="no-scenario">
+          <h2>No Scenario Loaded</h2>
+          <p>Use JavaScript to load a test scenario:</p>
+          <pre><code>window.loadTestScenario(config);</code></pre>
 
-        <button (click)="loadBasicScenario()" class="load-basic-btn">Load Basic Test Scenario</button>
-      </div>
+          <button (click)="loadBasicScenario()" class="load-basic-btn">Load Basic Test Scenario</button>
+        </div>
       }
     </div>
   `,
@@ -207,7 +207,7 @@ export class SimpleE2ETestPageComponent {
     window.dispatchEvent(
       new CustomEvent('formSubmitted', {
         detail: submission,
-      })
+      }),
     );
   }
 
@@ -223,7 +223,7 @@ export class SimpleE2ETestPageComponent {
           testId: this.currentTestId(),
           timestamp: new Date().toISOString(),
         },
-      })
+      }),
     );
   }
 
@@ -301,7 +301,7 @@ export class SimpleE2ETestPageComponent {
         testId?: string;
         title?: string;
         description?: string;
-      }
+      },
     ) => {
       this.currentConfig.set(config);
       this.currentTestId.set(options?.testId || 'default');

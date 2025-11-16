@@ -20,8 +20,8 @@ export class App {
   isDark = toSignal(
     this.themeService.themeChanges().pipe(
       startWith(this.themeService.currentTheme),
-      map((theme) => theme === 'dark')
+      map((theme) => theme === 'dark'),
     ),
-    { requireSync: true }
+    { requireSync: true },
   );
 }

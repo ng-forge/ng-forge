@@ -27,7 +27,7 @@ export class FormModeValidator {
           const pageField = field as any;
           if (!validatePageNesting(pageField)) {
             additionalErrors.push(
-              `Page field at index ${i} (key: "${pageField.key || 'unknown'}") contains nested page fields, which is not allowed.`
+              `Page field at index ${i} (key: "${pageField.key || 'unknown'}") contains nested page fields, which is not allowed.`,
             );
           }
         }
@@ -55,7 +55,7 @@ export class FormModeValidator {
 
     if (!result.isValid) {
       const errorMessage = [`Invalid form configuration (${result.mode} mode):`, ...result.errors.map((error) => `  - ${error}`)].join(
-        '\n'
+        '\n',
       );
 
       throw new Error(errorMessage);
@@ -70,7 +70,7 @@ export class FormModeValidator {
    */
   private static generateWarnings<TFields extends RegisteredFieldTypes[]>(
     fields: TFields,
-    modeDetection: FormModeDetectionResult
+    modeDetection: FormModeDetectionResult,
   ): string[] {
     const warnings: string[] = [];
 

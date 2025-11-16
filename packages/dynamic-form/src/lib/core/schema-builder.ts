@@ -12,7 +12,7 @@ import { getFieldDefaultValue } from '../utils/default-value/default-value';
  */
 export function createSchemaFromFields<TModel = unknown>(
   fields: FieldDef<any>[],
-  registry: Map<string, FieldTypeDefinition>
+  registry: Map<string, FieldTypeDefinition>,
 ): Schema<TModel> {
   return schema<TModel>((path) => {
     for (const fieldDef of fields) {

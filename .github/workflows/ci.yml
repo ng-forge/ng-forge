@@ -263,7 +263,7 @@ jobs:
       - name: Check formatting
         run: |
           echo "Checking code formatting with Prettier..."
-          pnpm exec prettier --check "**/*.{ts,js,json,md,yml,yaml,html,css,scss}" --ignore-path .gitignore || {
+          pnpm exec prettier --check "**/*.{ts,js,json,md,yml,yaml,html,css,scss}" || {
             echo ""
             echo "❌ Formatting issues found!"
             echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
