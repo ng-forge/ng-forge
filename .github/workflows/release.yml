@@ -70,8 +70,8 @@ jobs:
 
       - name: Build and test libraries
         run: |
-          pnpm nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic
-          pnpm nx run-many -t test -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic --configuration=ci
+          pnpm nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic,dynamic-form-bootstrap
+          pnpm nx run-many -t test -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic,dynamic-form-bootstrap --configuration=ci
 
       - name: Configure Git
         run: |
@@ -142,6 +142,7 @@ jobs:
           echo "- @ng-forge/dynamic-form-material@${{ env.VERSION }}"
           echo "- @ng-forge/dynamic-form-primeng@${{ env.VERSION }}"
           echo "- @ng-forge/dynamic-form-ionic@${{ env.VERSION }}"
+          echo "- @ng-forge/dynamic-form-bootstrap@${{ env.VERSION }}"
           echo ""
           echo "🔗 GitHub Release: https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }}"
           echo "🔗 npm: https://www.npmjs.com/package/@ng-forge/dynamic-form/v/${{ env.VERSION }}"
