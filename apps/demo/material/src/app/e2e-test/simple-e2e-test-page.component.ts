@@ -17,6 +17,7 @@ import {
 @Component({
   selector: 'demo-simple-e2e-test-page',
   imports: [DynamicForm, JsonPipe],
+  providers: [FunctionRegistryService],
   template: `
     <div class="e2e-test-page">
       <h1>Simple E2E Test Environment</h1>
@@ -254,34 +255,35 @@ export class SimpleE2ETestPageComponent {
       },
     });
 
+    // TODO: Re-enable async validator with resource API once Angular resource API is updated
     // Async Validator: Simulate database lookup with resource API
-    this.functionRegistry.registerAsyncValidator('checkProductCode', {
-      params: (ctx) => ({
-        productCode: ctx.value(),
-        timestamp: Date.now(), // Force refresh
-      }),
-      factory: (params) => {
-        return resource({
-          request: () => params(),
-          loader: async ({ request }) => {
-            if (!request?.productCode) return null;
-
-            // Simulate async database lookup with delay
-            await new Promise((resolve) => setTimeout(resolve, 500));
-
-            // Mock database: these product codes are "taken"
-            const takenCodes = ['PROD-001', 'PROD-002', 'TEST-123'];
-            const isTaken = takenCodes.includes(request.productCode as string);
-
-            return { available: !isTaken };
-          },
-        });
-      },
-      onSuccess: (result) => {
-        if (!result) return null;
-        return result.available ? null : { kind: 'productCodeTaken' };
-      },
-    });
+    // this.functionRegistry.registerAsyncValidator('checkProductCode', {
+    //   params: (ctx) => ({
+    //     productCode: ctx.value(),
+    //     timestamp: Date.now(), // Force refresh
+    //   }),
+    //   factory: (params) => {
+    //     return resource({
+    //       request: () => params(),
+    //       loader: async (request) => {
+    //         if (!request?.productCode) return null;
+    //
+    //         // Simulate async database lookup with delay
+    //         await new Promise((resolve) => setTimeout(resolve, 500));
+    //
+    //         // Mock database: these product codes are "taken"
+    //         const takenCodes = ['PROD-001', 'PROD-002', 'TEST-123'];
+    //         const isTaken = takenCodes.includes(request.productCode as string);
+    //
+    //         return { available: !isTaken };
+    //       },
+    //     });
+    //   },
+    //   onSuccess: (result) => {
+    //     if (!result) return null;
+    //     return result.available ? null : { kind: 'productCodeTaken' };
+    //   },
+    // });
   }
 
   onSubmitted(value: Record<string, unknown> | undefined): void {

@@ -692,8 +692,8 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private onFormReset(): void {
     const defaults = this.defaultValues();
     // Update both the form instance and the value model
-    this.form()().value.set(defaults);
-    this.value.set(defaults);
+    this.form()().value.set(defaults as any);
+    this.value.set(defaults as Partial<TModel>);
   }
 
   /**
@@ -701,9 +701,9 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * resetting them to an empty state.
    */
   private onFormClear(): void {
-    const emptyValue = {} as TModel;
+    const emptyValue = {} as Partial<TModel>;
     // Update both the form instance and the value model
-    this.form()().value.set(emptyValue);
+    this.form()().value.set(emptyValue as any);
     this.value.set(emptyValue);
   }
 

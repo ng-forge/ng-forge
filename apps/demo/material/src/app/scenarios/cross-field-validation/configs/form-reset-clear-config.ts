@@ -1,5 +1,5 @@
 import { FormConfig } from '@ng-forge/dynamic-form';
-import { FormResetEvent, FormClearEvent } from '@ng-forge/dynamic-form';
+import { FormResetEvent, FormClearEvent, SubmitEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Form configuration demonstrating reset and clear functionality.
@@ -30,7 +30,7 @@ export const formResetClearConfig = {
       key: 'firstName',
       type: 'input',
       label: 'First Name',
-      defaultValue: 'John',
+      value: 'John',
       required: true,
       col: 6,
       props: {
@@ -41,7 +41,7 @@ export const formResetClearConfig = {
       key: 'lastName',
       type: 'input',
       label: 'Last Name',
-      defaultValue: 'Doe',
+      value: 'Doe',
       required: true,
       col: 6,
       props: {
@@ -52,7 +52,7 @@ export const formResetClearConfig = {
       key: 'email',
       type: 'input',
       label: 'Email',
-      defaultValue: 'john.doe@example.com',
+      value: 'john.doe@example.com',
       required: true,
       col: 6,
       props: {
@@ -64,7 +64,7 @@ export const formResetClearConfig = {
       key: 'phone',
       type: 'input',
       label: 'Phone',
-      defaultValue: '+1-555-0123',
+      value: '+1-555-0123',
       col: 6,
       props: {
         appearance: 'outline',
@@ -74,7 +74,7 @@ export const formResetClearConfig = {
       key: 'country',
       type: 'select',
       label: 'Country',
-      defaultValue: 'us',
+      value: 'us',
       options: [
         { label: 'United States', value: 'us' },
         { label: 'Canada', value: 'ca' },
@@ -90,7 +90,7 @@ export const formResetClearConfig = {
       key: 'subscribe',
       type: 'checkbox',
       label: 'Subscribe to newsletter',
-      defaultValue: true,
+      value: true,
       col: 6,
     },
     {
@@ -119,6 +119,7 @@ export const formResetClearConfig = {
       key: 'submit-button',
       type: 'button',
       label: 'Submit',
+      event: SubmitEvent,
       col: 4,
       props: {
         type: 'submit',
