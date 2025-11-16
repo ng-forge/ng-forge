@@ -48,7 +48,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
               },
             ],
           },
-          { testId: 'reset-defaults' }
+          { testId: 'reset-defaults' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -83,9 +83,55 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await emailInput.inputValue()).toBe('john.doe@example.com');
     });
 
-    test.skip('should reset select fields to default values', async ({ page }) => {
-      // Note: Material uses mat-select which has complex DOM structure
-      // Skipping this test as it requires Material-specific selectors
+    test('should reset select fields to default values', async ({ page }) => {
+      await page.evaluate(() => {
+        (window as any).loadTestScenario(
+          {
+            fields: [
+              {
+                key: 'country',
+                type: 'select',
+                label: 'Country',
+                value: 'us',
+                options: [
+                  { value: 'us', label: 'United States' },
+                  { value: 'uk', label: 'United Kingdom' },
+                  { value: 'ca', label: 'Canada' },
+                ],
+              },
+              {
+                key: 'reset-button',
+                type: 'button',
+                label: 'Reset',
+                event: (window as any).FormResetEvent,
+                props: {
+                  type: 'button',
+                },
+              },
+            ],
+          },
+          { testId: 'reset-select' },
+        );
+      });
+      await page.waitForLoadState('networkidle');
+
+      // Verify default value is set (US)
+      await expect(page.locator('#country mat-select')).toContainText('United States');
+
+      // Change to UK
+      await page.click('#country mat-select');
+      await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'United Kingdom' }).click();
+      await page.waitForTimeout(200);
+
+      // Verify changed value
+      await expect(page.locator('#country mat-select')).toContainText('United Kingdom');
+
+      // Reset
+      await page.locator('#reset-button button').click();
+      await page.waitForTimeout(300);
+
+      // Verify reset to default (US)
+      await expect(page.locator('#country mat-select')).toContainText('United States');
     });
 
     test('should reset checkbox fields to default values', async ({ page }) => {
@@ -116,7 +162,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
               },
             ],
           },
-          { testId: 'reset-checkbox' }
+          { testId: 'reset-checkbox' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -173,7 +219,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
               },
             ],
           },
-          { testId: 'reset-validation' }
+          { testId: 'reset-validation' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -238,7 +284,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
               },
             ],
           },
-          { testId: 'clear-all' }
+          { testId: 'clear-all' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -267,9 +313,54 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await emailInput.inputValue()).toBe('');
     });
 
-    test.skip('should clear select fields', async ({ page }) => {
-      // Note: Material uses mat-select which has complex DOM structure
-      // Skipping this test as it requires Material-specific selectors
+    test('should clear select fields', async ({ page }) => {
+      await page.evaluate(() => {
+        (window as any).loadTestScenario(
+          {
+            fields: [
+              {
+                key: 'language',
+                type: 'select',
+                label: 'Preferred Language',
+                options: [
+                  { value: 'en', label: 'English' },
+                  { value: 'es', label: 'Spanish' },
+                  { value: 'fr', label: 'French' },
+                ],
+                // No default value
+              },
+              {
+                key: 'clear-button',
+                type: 'button',
+                label: 'Clear',
+                event: (window as any).FormClearEvent,
+                props: {
+                  type: 'button',
+                },
+              },
+            ],
+          },
+          { testId: 'clear-select' },
+        );
+      });
+      await page.waitForLoadState('networkidle');
+
+      // Select Spanish
+      await page.click('#language mat-select');
+      await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Spanish' }).click();
+      await page.waitForTimeout(200);
+
+      // Verify selected value
+      await expect(page.locator('#language mat-select')).toContainText('Spanish');
+
+      // Clear form
+      await page.locator('#clear-button button').click();
+      await page.waitForTimeout(300);
+
+      // Verify select is cleared (should show placeholder or be empty)
+      const selectText = await page.locator('#language mat-select').textContent();
+      // After clear, should not contain the previous value
+      expect(selectText?.trim()).not.toBe('Spanish');
     });
 
     test('should clear checkbox fields', async ({ page }) => {
@@ -294,7 +385,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
               },
             ],
           },
-          { testId: 'clear-checkbox' }
+          { testId: 'clear-checkbox' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -358,7 +449,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
               },
             ],
           },
-          { testId: 'reset-vs-clear' }
+          { testId: 'reset-vs-clear' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -430,7 +521,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
               },
             ],
           },
-          { testId: 'required-reset-clear' }
+          { testId: 'required-reset-clear' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -493,7 +584,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
               },
             ],
           },
-          { testId: 'reset-nested' }
+          { testId: 'reset-nested' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -549,7 +640,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
               },
             ],
           },
-          { testId: 'multiple-cycles' }
+          { testId: 'multiple-cycles' },
         );
       });
       await page.waitForLoadState('networkidle');

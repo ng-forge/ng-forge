@@ -11,6 +11,23 @@ test.describe('Array Fields Tests', () => {
   test.describe('Array Operations', () => {
     test('should add new array items dynamically', async ({ page }) => {
       await page.evaluate(() => {
+        const emailFieldTemplate = {
+          key: 'email',
+          type: 'input',
+          label: 'Email',
+          props: {
+            type: 'email',
+          },
+        };
+
+        class AddEmailsEvent extends (window as any).AddArrayItemEvent {
+          constructor() {
+            super('emails', emailFieldTemplate);
+          }
+        }
+        // Attach to window so Angular can access it later
+        (window as any).AddEmailsEvent = AddEmailsEvent;
+
         (window as any).loadTestScenario(
           {
             fields: [
@@ -18,33 +35,21 @@ test.describe('Array Fields Tests', () => {
                 key: 'emails',
                 type: 'array',
                 label: 'Email Addresses',
-                fields: [
-                  {
-                    key: 'email',
-                    type: 'input',
-                    label: 'Email',
-                    props: {
-                      type: 'email',
-                    },
-                  },
-                ],
+                fields: [emailFieldTemplate],
               },
               {
                 key: 'addEmailButton',
                 type: 'button',
                 label: 'Add',
                 className: 'array-add-button',
-                event: class {
-                  readonly type = 'add-array-item' as const;
-                  readonly arrayKey = 'emails';
-                },
+                event: (window as any).AddEmailsEvent,
                 props: {
                   color: 'primary',
                 },
               },
             ],
           },
-          { testId: 'array-add' }
+          { testId: 'array-add' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -72,6 +77,13 @@ test.describe('Array Fields Tests', () => {
 
     test('should remove array items', async ({ page }) => {
       await page.evaluate(() => {
+        class RemovePhonesEvent extends (window as any).RemoveArrayItemEvent {
+          constructor() {
+            super('phones');
+          }
+        }
+        (window as any).RemovePhonesEvent = RemovePhonesEvent;
+
         (window as any).loadTestScenario(
           {
             fields: [
@@ -93,14 +105,11 @@ test.describe('Array Fields Tests', () => {
                 type: 'button',
                 label: 'Remove',
                 className: 'array-remove-button',
-                event: class {
-                  readonly type = 'remove-array-item' as const;
-                  readonly arrayKey = 'phones';
-                },
+                event: (window as any).RemovePhonesEvent,
               },
             ],
           },
-          { testId: 'array-remove' }
+          { testId: 'array-remove' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -121,6 +130,19 @@ test.describe('Array Fields Tests', () => {
 
     test('should maintain input values after add/remove operations', async ({ page }) => {
       await page.evaluate(() => {
+        const taskFieldTemplate = {
+          key: 'taskName',
+          type: 'input',
+          label: 'Task',
+        };
+
+        class AddTasksEvent extends (window as any).AddArrayItemEvent {
+          constructor() {
+            super('tasks', taskFieldTemplate);
+          }
+        }
+        (window as any).AddTasksEvent = AddTasksEvent;
+
         (window as any).loadTestScenario(
           {
             fields: [
@@ -128,30 +150,21 @@ test.describe('Array Fields Tests', () => {
                 key: 'tasks',
                 type: 'array',
                 label: 'Tasks',
-                fields: [
-                  {
-                    key: 'taskName',
-                    type: 'input',
-                    label: 'Task',
-                  },
-                ],
+                fields: [taskFieldTemplate],
               },
               {
                 key: 'addTaskButton',
                 type: 'button',
                 label: 'Add',
                 className: 'array-add-button',
-                event: class {
-                  readonly type = 'add-array-item' as const;
-                  readonly arrayKey = 'tasks';
-                },
+                event: (window as any).AddTasksEvent,
                 props: {
                   color: 'primary',
                 },
               },
             ],
           },
-          { testId: 'array-values' }
+          { testId: 'array-values' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -182,6 +195,33 @@ test.describe('Array Fields Tests', () => {
   test.describe('Array Validation', () => {
     test('should validate individual array items', async ({ page }) => {
       await page.evaluate(() => {
+        const memberFieldsTemplate = {
+          key: 'member',
+          type: 'group',
+          fields: [
+            {
+              key: 'name',
+              type: 'input',
+              label: 'Name',
+              required: true,
+            },
+            {
+              key: 'email',
+              type: 'input',
+              label: 'Email',
+              required: true,
+              email: true,
+            },
+          ],
+        };
+
+        class AddMembersEvent extends (window as any).AddArrayItemEvent {
+          constructor() {
+            super('members', memberFieldsTemplate);
+          }
+        }
+        (window as any).AddMembersEvent = AddMembersEvent;
+
         (window as any).loadTestScenario(
           {
             fields: [
@@ -189,35 +229,18 @@ test.describe('Array Fields Tests', () => {
                 key: 'members',
                 type: 'array',
                 label: 'Team Members',
-                fields: [
-                  {
-                    key: 'name',
-                    type: 'input',
-                    label: 'Name',
-                    required: true,
-                  },
-                  {
-                    key: 'email',
-                    type: 'input',
-                    label: 'Email',
-                    required: true,
-                    email: true,
-                  },
-                ],
+                fields: [memberFieldsTemplate],
               },
               {
                 key: 'addMemberButton',
                 type: 'button',
                 label: 'Add',
                 className: 'array-add-button',
-                event: class {
-                  readonly type = 'add-array-item' as const;
-                  readonly arrayKey = 'members';
-                },
+                event: (window as any).AddMembersEvent,
               },
             ],
           },
-          { testId: 'array-item-validation' }
+          { testId: 'array-item-validation' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -237,6 +260,19 @@ test.describe('Array Fields Tests', () => {
 
     test('should enforce minimum array length', async ({ page }) => {
       await page.evaluate(() => {
+        const itemFieldTemplate = {
+          key: 'item',
+          type: 'input',
+          label: 'Item',
+        };
+
+        class AddItemsEvent extends (window as any).AddArrayItemEvent {
+          constructor() {
+            super('items', itemFieldTemplate);
+          }
+        }
+        (window as any).AddItemsEvent = AddItemsEvent;
+
         (window as any).loadTestScenario(
           {
             fields: [
@@ -245,23 +281,14 @@ test.describe('Array Fields Tests', () => {
                 type: 'array',
                 label: 'Items',
                 minLength: 2,
-                fields: [
-                  {
-                    key: 'item',
-                    type: 'input',
-                    label: 'Item',
-                  },
-                ],
+                fields: [itemFieldTemplate],
               },
               {
                 key: 'addItemButton',
                 type: 'button',
                 label: 'Add Item',
                 className: 'array-add-button',
-                event: class {
-                  readonly type = 'add-array-item' as const;
-                  readonly arrayKey = 'items';
-                },
+                event: (window as any).AddItemsEvent,
               },
               {
                 key: 'submit',
@@ -270,7 +297,7 @@ test.describe('Array Fields Tests', () => {
               },
             ],
           },
-          { testId: 'array-min-length' }
+          { testId: 'array-min-length' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -282,6 +309,19 @@ test.describe('Array Fields Tests', () => {
 
     test('should enforce maximum array length', async ({ page }) => {
       await page.evaluate(() => {
+        const tagFieldTemplate = {
+          key: 'tag',
+          type: 'input',
+          label: 'Tag',
+        };
+
+        class AddTagsEvent extends (window as any).AddArrayItemEvent {
+          constructor() {
+            super('tags', tagFieldTemplate);
+          }
+        }
+        (window as any).AddTagsEvent = AddTagsEvent;
+
         (window as any).loadTestScenario(
           {
             fields: [
@@ -291,27 +331,18 @@ test.describe('Array Fields Tests', () => {
                 label: 'Tags (max 3)',
                 maxLength: 3,
                 value: [{ tag: 'tag1' }, { tag: 'tag2' }],
-                fields: [
-                  {
-                    key: 'tag',
-                    type: 'input',
-                    label: 'Tag',
-                  },
-                ],
+                fields: [tagFieldTemplate],
               },
               {
                 key: 'addTagButton',
                 type: 'button',
                 label: 'Add',
                 className: 'array-add-button',
-                event: class {
-                  readonly type = 'add-array-item' as const;
-                  readonly arrayKey = 'tags';
-                },
+                event: (window as any).AddTagsEvent,
               },
             ],
           },
-          { testId: 'array-max-length' }
+          { testId: 'array-max-length' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -337,6 +368,41 @@ test.describe('Array Fields Tests', () => {
   test.describe('Complex Array Structures', () => {
     test('should handle nested fields within array items', async ({ page }) => {
       await page.evaluate(() => {
+        const userFieldsTemplate = {
+          key: 'user',
+          type: 'group',
+          fields: [
+            {
+              key: 'firstName',
+              type: 'input',
+              label: 'First Name',
+              col: 6,
+            },
+            {
+              key: 'lastName',
+              type: 'input',
+              label: 'Last Name',
+              col: 6,
+            },
+            {
+              key: 'role',
+              type: 'select',
+              label: 'Role',
+              options: [
+                { value: 'admin', label: 'Admin' },
+                { value: 'user', label: 'User' },
+              ],
+            },
+          ],
+        };
+
+        class AddUsersEvent extends (window as any).AddArrayItemEvent {
+          constructor() {
+            super('users', userFieldsTemplate);
+          }
+        }
+        (window as any).AddUsersEvent = AddUsersEvent;
+
         (window as any).loadTestScenario(
           {
             fields: [
@@ -344,43 +410,18 @@ test.describe('Array Fields Tests', () => {
                 key: 'users',
                 type: 'array',
                 label: 'Users',
-                fields: [
-                  {
-                    key: 'firstName',
-                    type: 'input',
-                    label: 'First Name',
-                    col: 6,
-                  },
-                  {
-                    key: 'lastName',
-                    type: 'input',
-                    label: 'Last Name',
-                    col: 6,
-                  },
-                  {
-                    key: 'role',
-                    type: 'select',
-                    label: 'Role',
-                    options: [
-                      { value: 'admin', label: 'Admin' },
-                      { value: 'user', label: 'User' },
-                    ],
-                  },
-                ],
+                fields: [userFieldsTemplate],
               },
               {
                 key: 'addUserButton',
                 type: 'button',
                 label: 'Add',
                 className: 'array-add-button',
-                event: class {
-                  readonly type = 'add-array-item' as const;
-                  readonly arrayKey = 'users';
-                },
+                event: (window as any).AddUsersEvent,
               },
             ],
           },
-          { testId: 'array-nested' }
+          { testId: 'array-nested' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -441,7 +482,7 @@ test.describe('Array Fields Tests', () => {
               },
             ],
           },
-          { testId: 'array-initial-values' }
+          { testId: 'array-initial-values' },
         );
       });
       await page.waitForLoadState('networkidle');

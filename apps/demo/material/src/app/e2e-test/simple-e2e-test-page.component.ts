@@ -1,6 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, model, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-form';
+import {
+  DynamicForm,
+  type FormConfig,
+  SubmitEvent,
+  FormResetEvent,
+  FormClearEvent,
+  AddArrayItemEvent,
+  RemoveArrayItemEvent,
+} from '@ng-forge/dynamic-form';
+import { getFieldDefaultValue, FieldDef, injectFieldRegistry, flattenFields } from '@ng-forge/dynamic-form';
 
 /**
  * Simple E2E Test Page Component
@@ -15,53 +24,53 @@ import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-for
       <p>Basic testing page for automated tests</p>
 
       @if (currentConfig()) {
-      <div class="e2e-test-container" [attr.data-testid]="currentTestId()">
-        @if (currentTitle()) {
-        <div class="form-header">
-          <h2 [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
-          @if (currentDescription()) {
-          <p class="description">{{ currentDescription() }}</p>
+        <div class="e2e-test-container" [attr.data-testid]="currentTestId()">
+          @if (currentTitle()) {
+            <div class="form-header">
+              <h2 [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
+              @if (currentDescription()) {
+                <p class="description">{{ currentDescription() }}</p>
+              }
+            </div>
           }
-        </div>
-        }
 
-        <dynamic-form
-          [config]="currentConfig()!"
-          [(value)]="formValue"
-          (submitted)="onSubmitted($event)"
-          (initialized)="onFormInitialized()"
-          [attr.data-testid]="'dynamic-form-' + currentTestId()"
-        >
-        </dynamic-form>
+          <dynamic-form
+            [config]="currentConfig()!"
+            [(value)]="formValue"
+            (submitted)="onSubmitted($event)"
+            (initialized)="onFormInitialized()"
+            [attr.data-testid]="'dynamic-form-' + currentTestId()"
+          >
+          </dynamic-form>
 
-        <div class="output" [attr.data-testid]="'form-output-' + currentTestId()">
-          <details class="form-state">
-            <summary>Form State (for debugging)</summary>
-            <div class="form-data">
-              <strong>Form Value:</strong>
-              <pre [attr.data-testid]="'form-value-' + currentTestId()">{{ formValue() | json }}</pre>
-            </div>
-            @if (submissionLog().length > 0) {
-            <div class="submission-log">
-              <strong>Submission Log:</strong>
-              <ul [attr.data-testid]="'submission-log-' + currentTestId()">
-                @for (submission of submissionLog(); track submission.timestamp; let i = $index) {
-                <li [attr.data-testid]="'submission-' + i">{{ submission.timestamp }}: {{ submission.data | json }}</li>
-                }
-              </ul>
-            </div>
-            }
-          </details>
+          <div class="output" [attr.data-testid]="'form-output-' + currentTestId()">
+            <details class="form-state">
+              <summary>Form State (for debugging)</summary>
+              <div class="form-data">
+                <strong>Form Value:</strong>
+                <pre [attr.data-testid]="'form-value-' + currentTestId()">{{ formValue() | json }}</pre>
+              </div>
+              @if (submissionLog().length > 0) {
+                <div class="submission-log">
+                  <strong>Submission Log:</strong>
+                  <ul [attr.data-testid]="'submission-log-' + currentTestId()">
+                    @for (submission of submissionLog(); track submission.timestamp; let i = $index) {
+                      <li [attr.data-testid]="'submission-' + i">{{ submission.timestamp }}: {{ submission.data | json }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </details>
+          </div>
         </div>
-      </div>
       } @else {
-      <div class="no-scenario">
-        <h2>No Scenario Loaded</h2>
-        <p>Use JavaScript to load a test scenario:</p>
-        <pre><code>window.loadTestScenario(config);</code></pre>
+        <div class="no-scenario">
+          <h2>No Scenario Loaded</h2>
+          <p>Use JavaScript to load a test scenario:</p>
+          <pre><code>window.loadTestScenario(config);</code></pre>
 
-        <button (click)="loadBasicScenario()" class="load-basic-btn">Load Basic Test Scenario</button>
-      </div>
+          <button (click)="loadBasicScenario()" class="load-basic-btn">Load Basic Test Scenario</button>
+        </div>
       }
     </div>
   `,
@@ -176,12 +185,14 @@ import { DynamicForm, type FormConfig, SubmitEvent } from '@ng-forge/dynamic-for
   ],
 })
 export class SimpleE2ETestPageComponent {
+  private readonly fieldRegistry = injectFieldRegistry();
+
   currentConfig = signal<FormConfig | null>(null);
   currentTestId = signal<string>('default');
   currentTitle = signal<string>('');
   currentDescription = signal<string>('');
 
-  formValue = signal<Record<string, unknown>>({});
+  formValue = model<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);
   formInitialized = signal<boolean>(false);
 
@@ -207,7 +218,7 @@ export class SimpleE2ETestPageComponent {
     window.dispatchEvent(
       new CustomEvent('formSubmitted', {
         detail: submission,
-      })
+      }),
     );
   }
 
@@ -223,7 +234,7 @@ export class SimpleE2ETestPageComponent {
           testId: this.currentTestId(),
           timestamp: new Date().toISOString(),
         },
-      })
+      }),
     );
   }
 
@@ -290,9 +301,39 @@ export class SimpleE2ETestPageComponent {
     this.formInitialized.set(false);
   }
 
+  /**
+   * Extracts default values from a form configuration.
+   * This mimics the behavior of DynamicForm's internal defaultValues computation.
+   */
+  private extractDefaultValues(config: FormConfig): Record<string, unknown> {
+    if (!config.fields || config.fields.length === 0) {
+      return {};
+    }
+
+    const registry = this.fieldRegistry.raw;
+    const flattenedFields = flattenFields(config.fields as FieldDef<unknown>[], registry);
+
+    const result: Record<string, unknown> = {};
+    for (const field of flattenedFields) {
+      if (field.key) {
+        const value = getFieldDefaultValue(field, registry);
+        // Only include fields that have non-undefined default values
+        if (value !== undefined) {
+          result[field.key] = value;
+        }
+      }
+    }
+
+    return result;
+  }
+
   private setupScenarioLoader(): void {
-    // Expose SubmitEvent globally for e2e tests
+    // Expose events globally for e2e tests
     (window as any).SubmitEvent = SubmitEvent;
+    (window as any).FormResetEvent = FormResetEvent;
+    (window as any).FormClearEvent = FormClearEvent;
+    (window as any).AddArrayItemEvent = AddArrayItemEvent;
+    (window as any).RemoveArrayItemEvent = RemoveArrayItemEvent;
 
     // Create global function for loading test scenarios
     (window as any).loadTestScenario = (
@@ -301,13 +342,17 @@ export class SimpleE2ETestPageComponent {
         testId?: string;
         title?: string;
         description?: string;
-      }
+      },
     ) => {
       this.currentConfig.set(config);
       this.currentTestId.set(options?.testId || 'default');
       this.currentTitle.set(options?.title || '');
       this.currentDescription.set(options?.description || '');
       this.formInitialized.set(false);
+
+      // Extract and set default values from config
+      const defaultValues = this.extractDefaultValues(config);
+      this.formValue.set(defaultValues);
     };
 
     // Helper function to clear current scenario

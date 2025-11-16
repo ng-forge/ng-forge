@@ -1,9 +1,8 @@
-import { FieldDef } from '@ng-forge/dynamic-form';
+import { FieldDef, FieldMapperOptions } from '@ng-forge/dynamic-form';
 import { Binding, inputBinding } from '@angular/core';
 import { baseFieldMapper } from '@ng-forge/dynamic-form';
-import { entries } from 'lodash-es';
 
-export function buttonFieldMapper(fieldDef: FieldDef<any>): Binding[] {
+export function buttonFieldMapper(fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Add disabled binding since baseFieldMapper excludes it

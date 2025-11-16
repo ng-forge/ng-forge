@@ -527,7 +527,7 @@ test.describe('Material Components Tests', () => {
 
       // Verify form value contains array
       await page.click('.form-state summary');
-      const formValue = await page.locator('#form-value-multi-checkbox-array').textContent();
+      const formValue = await page.locator('[data-testid="form-value-multi-checkbox-array"]').textContent();
 
       expect(formValue).toContain('typescript');
       expect(formValue).toContain('angular');

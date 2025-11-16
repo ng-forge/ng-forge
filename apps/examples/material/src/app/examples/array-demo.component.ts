@@ -57,6 +57,71 @@ export class ArrayDemoComponent {
     contacts: [],
   });
 
+  // Field templates for array items
+  private readonly tagTemplate = {
+    key: 'tag',
+    type: 'input',
+    label: 'Tag',
+    value: '',
+    required: true,
+    minLength: 2,
+    props: {
+      placeholder: 'Enter a tag',
+      hint: 'Tags must be at least 2 characters',
+    },
+  } as const;
+
+  private readonly contactTemplate = {
+    key: 'contact',
+    type: 'group',
+    fields: [
+      {
+        key: 'name',
+        type: 'input',
+        label: 'Contact Name',
+        value: '',
+        required: true,
+        minLength: 2,
+        props: {
+          placeholder: 'Enter contact name',
+          hint: 'Full name of the emergency contact',
+        },
+      },
+      {
+        key: 'phone',
+        type: 'input',
+        label: 'Phone Number',
+        value: '',
+        required: true,
+        pattern: /^\d{10}$/,
+        validationMessages: {
+          pattern: 'Please enter a valid 10-digit phone number',
+        },
+        props: {
+          type: 'tel',
+          placeholder: '5551234567',
+          hint: 'Enter 10-digit phone number without spaces or dashes',
+        },
+      },
+      {
+        key: 'relationship',
+        type: 'select',
+        label: 'Relationship',
+        value: 'friend',
+        required: true,
+        options: [
+          { label: 'Family', value: 'family' },
+          { label: 'Friend', value: 'friend' },
+          { label: 'Colleague', value: 'colleague' },
+          { label: 'Other', value: 'other' },
+        ],
+        props: {
+          hint: 'Select your relationship to this contact',
+        },
+      },
+    ],
+  } as const;
+
   config = {
     fields: [
       {
@@ -76,20 +141,7 @@ export class ArrayDemoComponent {
         key: 'tags',
         type: 'array',
         label: 'Tags',
-        fields: [
-          {
-            key: 'tag',
-            type: 'input',
-            label: 'Tag',
-            value: '',
-            required: true,
-            minLength: 2,
-            props: {
-              placeholder: 'Enter a tag',
-              hint: 'Tags must be at least 2 characters',
-            },
-          },
-        ],
+        fields: [this.tagTemplate],
       },
       {
         key: 'sectionTitle2',
@@ -108,58 +160,7 @@ export class ArrayDemoComponent {
         key: 'contacts',
         type: 'array',
         label: 'Emergency Contacts',
-        fields: [
-          {
-            key: 'contact',
-            type: 'group',
-            fields: [
-              {
-                key: 'name',
-                type: 'input',
-                label: 'Contact Name',
-                value: '',
-                required: true,
-                minLength: 2,
-                props: {
-                  placeholder: 'Enter contact name',
-                  hint: 'Full name of the emergency contact',
-                },
-              },
-              {
-                key: 'phone',
-                type: 'input',
-                label: 'Phone Number',
-                value: '',
-                required: true,
-                pattern: /^\d{10}$/,
-                validationMessages: {
-                  pattern: 'Please enter a valid 10-digit phone number',
-                },
-                props: {
-                  type: 'tel',
-                  placeholder: '5551234567',
-                  hint: 'Enter 10-digit phone number without spaces or dashes',
-                },
-              },
-              {
-                key: 'relationship',
-                type: 'select',
-                label: 'Relationship',
-                value: 'friend',
-                required: true,
-                options: [
-                  { label: 'Family', value: 'family' },
-                  { label: 'Friend', value: 'friend' },
-                  { label: 'Colleague', value: 'colleague' },
-                  { label: 'Other', value: 'other' },
-                ],
-                props: {
-                  hint: 'Select your relationship to this contact',
-                },
-              },
-            ],
-          },
-        ],
+        fields: [this.contactTemplate],
       },
       submitButton({
         key: 'submit',
@@ -172,11 +173,11 @@ export class ArrayDemoComponent {
   } as const satisfies FormConfig;
 
   addTag() {
-    this.eventBus.dispatch(AddArrayItemEvent, 'tags');
+    this.eventBus.dispatch(AddArrayItemEvent, 'tags', this.tagTemplate);
   }
 
   addContact() {
-    this.eventBus.dispatch(AddArrayItemEvent, 'contacts');
+    this.eventBus.dispatch(AddArrayItemEvent, 'contacts', this.contactTemplate);
   }
 
   removeTag(index: number) {

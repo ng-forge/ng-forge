@@ -8,8 +8,7 @@ test.describe('User Workflows E2E Tests', () => {
   });
 
   test.describe('User Registration Workflow', () => {
-    test.skip('should complete full registration workflow', async ({ page }) => {
-      // Note: Waiting for formSubmitted event causes timeout - needs investigation
+    test('should complete full registration workflow', async ({ page }) => {
       await page.evaluate(() => {
         (window as any).loadTestScenario(
           {
@@ -73,7 +72,7 @@ test.describe('User Workflows E2E Tests', () => {
               },
             ],
           },
-          { testId: 'registration-workflow' }
+          { testId: 'registration-workflow' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -99,12 +98,8 @@ test.describe('User Workflows E2E Tests', () => {
       // Submit button should now be enabled
       await expect(submitButton).toBeEnabled();
 
-      // Submit the form
-      await submitButton.click();
-      await page.waitForTimeout(500);
-
-      // Wait for formSubmitted event
-      const submittedData = await page.evaluate(
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
         () =>
           new Promise((resolve) => {
             window.addEventListener(
@@ -112,10 +107,16 @@ test.describe('User Workflows E2E Tests', () => {
               (event: any) => {
                 resolve(event.detail.data);
               },
-              { once: true }
+              { once: true },
             );
-          })
+          }),
       );
+
+      // Submit the form
+      await submitButton.click();
+
+      // Wait for formSubmitted event
+      const submittedData = await submittedDataPromise;
 
       // Verify submitted data
       expect(submittedData).toMatchObject({
@@ -176,7 +177,7 @@ test.describe('User Workflows E2E Tests', () => {
               },
             ],
           },
-          { testId: 'profile-edit' }
+          { testId: 'profile-edit' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -195,7 +196,7 @@ test.describe('User Workflows E2E Tests', () => {
 
       // Verify form value was updated
       const formValue = await page.evaluate(() => {
-        const pre = document.querySelector('#form-value-profile-edit');
+        const pre = document.querySelector('[data-testid="form-value-profile-edit"]');
         return pre ? JSON.parse(pre.textContent || '{}') : null;
       });
 
@@ -209,8 +210,7 @@ test.describe('User Workflows E2E Tests', () => {
   });
 
   test.describe('Multi-Field Validation Workflow', () => {
-    test.skip('should validate required fields before allowing submission', async ({ page }) => {
-      // Note: Number field type not found - needs investigation
+    test('should validate required fields before allowing submission', async ({ page }) => {
       await page.evaluate(() => {
         (window as any).loadTestScenario(
           {
@@ -234,11 +234,14 @@ test.describe('User Workflows E2E Tests', () => {
               },
               {
                 key: 'age',
-                type: 'number',
+                type: 'input',
                 label: 'Age',
                 required: true,
                 min: 18,
                 max: 120,
+                props: {
+                  type: 'number',
+                },
               },
               {
                 key: 'submit',
@@ -247,7 +250,7 @@ test.describe('User Workflows E2E Tests', () => {
               },
             ],
           },
-          { testId: 'validation-workflow' }
+          { testId: 'validation-workflow' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -325,7 +328,7 @@ test.describe('User Workflows E2E Tests', () => {
               },
             ],
           },
-          { testId: 'reset-workflow' }
+          { testId: 'reset-workflow' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -400,7 +403,7 @@ test.describe('User Workflows E2E Tests', () => {
               },
             ],
           },
-          { testId: 'contact-form' }
+          { testId: 'contact-form' },
         );
       });
       await page.waitForLoadState('networkidle');
@@ -426,7 +429,7 @@ test.describe('User Workflows E2E Tests', () => {
 
       // Verify submission
       const formValue = await page.evaluate(() => {
-        const pre = document.querySelector('#form-value-contact-form');
+        const pre = document.querySelector('[data-testid="form-value-contact-form"]');
         return pre ? JSON.parse(pre.textContent || '{}') : null;
       });
 

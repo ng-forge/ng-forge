@@ -86,7 +86,7 @@ test.describe('Cross-Field Validation Tests', () => {
     // For now, we'll test the form state
     await page.waitForSelector('.form-state summary', { timeout: 10000 });
     await page.click('.form-state summary');
-    const formValue = await page.locator('#form-value-password-validation').textContent();
+    const formValue = await page.locator('[data-testid="form-value-password-validation"]').textContent();
     expect(formValue).toContain('password123');
     expect(formValue).toContain('differentpassword');
 
@@ -95,8 +95,8 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitPassword button');
 
     // Should submit successfully with matching passwords
-    await expect(page.locator('#submission-0')).toBeVisible();
-    await expect(page.locator('#submission-0')).toContainText('test@example.com');
+    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('test@example.com');
   });
 
   test('should test conditional required fields', async ({ page }) => {
@@ -167,7 +167,7 @@ test.describe('Cross-Field Validation Tests', () => {
     });
 
     // Wait for form to render
-    await page.waitForSelector('#conditional-validation', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('[data-testid="conditional-validation"]', { state: 'visible', timeout: 10000 });
 
     // Initially, address fields should be optional
     await page.click('#submitConditional button');
@@ -176,7 +176,7 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('.form-state summary');
 
     // Check if submission occurred (basic form should submit)
-    const submissionExists = await page.locator('#submission-0').isVisible();
+    const submissionExists = await page.locator('[data-testid="submission-0"]').isVisible();
     console.log('Initial submission exists:', submissionExists);
 
     // Check the "has address" checkbox
@@ -195,10 +195,10 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitConditional button');
 
     // Wait for the new submission to appear
-    await page.waitForSelector('[id^="submission-"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid^="submission-"]', { timeout: 5000 });
 
     // Get the latest submission using .last() to avoid index issues across browsers
-    const latestSubmission = page.locator('[id^="submission-"]').last();
+    const latestSubmission = page.locator('[data-testid^="submission-"]').last();
     await expect(latestSubmission).toContainText('123 Main Street');
     await expect(latestSubmission).toContainText('New York');
     await expect(latestSubmission).toContainText('10001');
@@ -292,7 +292,7 @@ test.describe('Cross-Field Validation Tests', () => {
     });
 
     // Wait for form to render
-    await page.waitForSelector('#dependent-fields', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('[data-testid="dependent-fields"]', { state: 'visible', timeout: 10000 });
 
     // Select electronics category
     await page.click('#category mat-select');
@@ -317,12 +317,12 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('.form-state summary');
 
     // Verify submission contains dependent field values
-    await expect(page.locator('#submission-0')).toBeVisible();
-    await expect(page.locator('#submission-0')).toContainText('electronics');
-    await expect(page.locator('#submission-0')).toContainText('laptop');
-    await expect(page.locator('#submission-0')).toContainText('MacBook Pro 16');
-    await expect(page.locator('#submission-0')).toContainText('2499.99');
-    await expect(page.locator('#submission-0')).toContainText('eur');
+    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('electronics');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('laptop');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('MacBook Pro 16');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('2499.99');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('eur');
 
     // Test changing category and ensuring form state updates
     await page.click('#category mat-select');
@@ -340,11 +340,11 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitDependent button');
 
     // Verify second submission
-    await expect(page.locator('#submission-1')).toBeVisible();
-    await expect(page.locator('#submission-1')).toContainText('clothing');
-    await expect(page.locator('#submission-1')).toContainText('shirt');
-    await expect(page.locator('#submission-1')).toContainText('Cotton T-Shirt');
-    await expect(page.locator('#submission-1')).toContainText('29.99');
+    await expect(page.locator('[data-testid="submission-1"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-1"]')).toContainText('clothing');
+    await expect(page.locator('[data-testid="submission-1"]')).toContainText('shirt');
+    await expect(page.locator('[data-testid="submission-1"]')).toContainText('Cotton T-Shirt');
+    await expect(page.locator('[data-testid="submission-1"]')).toContainText('29.99');
   });
 
   test('should test field enable/disable based on other fields', async ({ page }) => {
@@ -415,7 +415,7 @@ test.describe('Cross-Field Validation Tests', () => {
     });
 
     // Wait for form to render
-    await page.waitForSelector('#enable-disable', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('[data-testid="enable-disable"]', { state: 'visible', timeout: 10000 });
 
     // Test standard shipping scenario
     await page.click('#shippingMethod mat-radio-button:has-text("Standard")');
@@ -433,9 +433,9 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('.form-state summary');
 
     // Verify submission
-    await expect(page.locator('#submission-0')).toBeVisible();
-    await expect(page.locator('#submission-0')).toContainText('standard');
-    await expect(page.locator('#submission-0')).toContainText('123 Main St');
+    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('standard');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('123 Main St');
 
     // Test express shipping scenario
     await page.click('#shippingMethod mat-radio-button:has-text("Express")');
@@ -447,9 +447,9 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitEnableDisable button');
 
     // Verify second submission
-    await expect(page.locator('#submission-1')).toBeVisible();
-    await expect(page.locator('#submission-1')).toContainText('express');
-    await expect(page.locator('#submission-1')).toContainText('Ring doorbell twice');
+    await expect(page.locator('[data-testid="submission-1"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-1"]')).toContainText('express');
+    await expect(page.locator('[data-testid="submission-1"]')).toContainText('Ring doorbell twice');
 
     // Test pickup scenario
     await page.click('#shippingMethod mat-radio-button:has-text("Store Pickup")');
@@ -465,8 +465,8 @@ test.describe('Cross-Field Validation Tests', () => {
     await page.click('#submitEnableDisable button');
 
     // Verify third submission
-    await expect(page.locator('#submission-2')).toBeVisible();
-    await expect(page.locator('#submission-2')).toContainText('pickup');
-    await expect(page.locator('#submission-2')).toContainText('downtown');
+    await expect(page.locator('[data-testid="submission-2"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-2"]')).toContainText('pickup');
+    await expect(page.locator('[data-testid="submission-2"]')).toContainText('downtown');
   });
 });

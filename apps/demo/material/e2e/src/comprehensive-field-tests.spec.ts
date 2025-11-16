@@ -179,13 +179,13 @@ test.describe('Comprehensive Material Field Tests', () => {
     });
 
     // Wait for form to initialize and render
-    await page.waitForSelector('#comprehensive-fields', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('[data-testid="comprehensive-fields"]', { state: 'visible', timeout: 10000 });
 
     // Verify the form container is visible
-    await expect(page.locator('#comprehensive-fields')).toBeVisible();
+    await expect(page.locator('[data-testid="comprehensive-fields"]')).toBeVisible();
 
     // Test title and description (use the testId for the container)
-    await expect(page.locator('#comprehensive-fields-title')).toContainText('Comprehensive Field Testing');
+    await expect(page.locator('[data-testid="comprehensive-fields-title"]')).toContainText('Comprehensive Field Testing');
 
     // Test Text Input
     await expect(page.locator('#textInput input')).toBeVisible();
@@ -253,7 +253,7 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('.form-state summary');
 
     // Verify submission contains all field values
-    const submissionElement = page.locator('#submission-0');
+    const submissionElement = page.locator('[data-testid="submission-0"]');
     await expect(submissionElement).toBeVisible();
     await expect(submissionElement).toContainText('Test text value');
     await expect(submissionElement).toContainText('test@example.com');
@@ -335,7 +335,7 @@ test.describe('Comprehensive Material Field Tests', () => {
     });
 
     // Wait for form to render
-    await page.waitForSelector('#validation-test', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('[data-testid="validation-test"]', { state: 'visible', timeout: 10000 });
 
     // Verify submit button is disabled when form is empty (validation working)
     await expect(page.locator('#submitValidation button')).toBeDisabled();
@@ -365,11 +365,11 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('.form-state summary');
 
     // Verify successful submission
-    await expect(page.locator('#submission-0')).toBeVisible();
-    await expect(page.locator('#submission-0')).toContainText('Valid text input');
-    await expect(page.locator('#submission-0')).toContainText('valid@example.com');
-    await expect(page.locator('#submission-0')).toContainText('50');
-    await expect(page.locator('#submission-0')).toContainText('Valid Name');
+    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Valid text input');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('valid@example.com');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('50');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Valid Name');
   });
 
   test('should test responsive grid layout', async ({ page }) => {
@@ -484,7 +484,7 @@ test.describe('Comprehensive Material Field Tests', () => {
     });
 
     // Wait for form to render
-    await page.waitForSelector('#grid-layout', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('[data-testid="grid-layout"]', { state: 'visible', timeout: 10000 });
 
     // Test desktop layout (default)
     await expect(page.locator('#fullWidth')).toBeVisible();
@@ -523,11 +523,11 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.click('.form-state summary');
 
     // Verify submission contains all grid field values
-    await expect(page.locator('#submission-0')).toBeVisible();
-    await expect(page.locator('#submission-0')).toContainText('Full width content');
-    await expect(page.locator('#submission-0')).toContainText('Half 1');
-    await expect(page.locator('#submission-0')).toContainText('Half 2');
-    await expect(page.locator('#submission-0')).toContainText('Third 1');
+    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Full width content');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Half 1');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Half 2');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Third 1');
 
     // Reset viewport back to desktop
     await page.setViewportSize({ width: 1280, height: 720 });
@@ -579,14 +579,14 @@ test.describe('Comprehensive Material Field Tests', () => {
     });
 
     // Wait for form to render
-    await page.waitForSelector('#state-management', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('[data-testid="state-management"]', { state: 'visible', timeout: 10000 });
 
     // Wait for first input field to be visible
     await page.waitForSelector('#stateInput1 input', { state: 'visible', timeout: 5000 });
 
     // Initially form should be mostly empty (checkbox fields initialize with false)
     await page.click('.form-state summary');
-    const initialFormValue = await page.locator('#form-value-state-management').textContent();
+    const initialFormValue = await page.locator('[data-testid="form-value-state-management"]').textContent();
     // Checkbox fields start with false, so we just verify it's not fully populated yet
     expect(initialFormValue).toBeDefined();
 
@@ -596,14 +596,14 @@ test.describe('Comprehensive Material Field Tests', () => {
     // Wait for form value to update (Angular needs time to update the model)
     await page.waitForFunction(
       () => {
-        const element = document.querySelector('#form-value-state-management');
+        const element = document.querySelector('[data-testid="form-value-state-management"]');
         return element?.textContent?.includes('First value') || false;
       },
-      { timeout: 5000 }
+      { timeout: 5000 },
     );
 
     // Check that form state reflects the change
-    const updatedFormValue = await page.locator('#form-value-state-management').textContent();
+    const updatedFormValue = await page.locator('[data-testid="form-value-state-management"]').textContent();
     expect(updatedFormValue).toContain('First value');
 
     // Fill second input
@@ -616,7 +616,7 @@ test.describe('Comprehensive Material Field Tests', () => {
     await page.waitForTimeout(100);
 
     // Check final form state
-    const finalFormValue = await page.locator('#form-value-state-management').textContent();
+    const finalFormValue = await page.locator('[data-testid="form-value-state-management"]').textContent();
     expect(finalFormValue).toContain('First value');
     expect(finalFormValue).toContain('Second value');
     expect(finalFormValue).toContain('true'); // checkbox should be true
@@ -626,17 +626,17 @@ test.describe('Comprehensive Material Field Tests', () => {
 
     // Details is already open from earlier, so we can check submission directly
     // Check submission log
-    await expect(page.locator('#submission-0')).toBeVisible();
-    await expect(page.locator('#submission-0')).toContainText('First value');
-    await expect(page.locator('#submission-0')).toContainText('Second value');
+    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('First value');
+    await expect(page.locator('[data-testid="submission-0"]')).toContainText('Second value');
 
     // Test multiple submissions
     await page.fill('#stateInput1 input', 'Modified first value');
     await page.click('#submitState button');
 
     // Should have two submissions now
-    await expect(page.locator('#submission-0')).toBeVisible();
-    await expect(page.locator('#submission-1')).toBeVisible();
-    await expect(page.locator('#submission-1')).toContainText('Modified first value');
+    await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-1"]')).toBeVisible();
+    await expect(page.locator('[data-testid="submission-1"]')).toContainText('Modified first value');
   });
 });

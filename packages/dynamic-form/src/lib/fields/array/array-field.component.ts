@@ -145,9 +145,9 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
     ),
-    { initialValue: [] }
+    { initialValue: [] },
   );
 
   /**
@@ -155,47 +155,54 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
    * Using takeUntilDestroyed() to prevent memory leaks
    */
   constructor() {
+    // Store key signal reference for use in subscription
+    const keySignal = this.key;
+
     this.eventBus
       .on<AddArrayItemEvent>('add-array-item')
       .pipe(
         takeUntilDestroyed(),
-        filter((event) => event.arrayKey === this.key())
+        filter((event) => event.arrayKey === keySignal()),
       )
-      .subscribe((event) => this.addItem(event.index));
+      .subscribe((event) => this.addItem(event.field, event.index));
 
     this.eventBus
       .on<RemoveArrayItemEvent>('remove-array-item')
       .pipe(
         takeUntilDestroyed(),
-        filter((event) => event.arrayKey === this.key())
+        filter((event) => event.arrayKey === keySignal()),
       )
       .subscribe((event) => this.removeItem(event.index));
   }
 
   /**
    * Add a new item to the array
+   * @param fieldTemplate - The field template to use for the new item (provided by the event)
+   * @param index - Optional index where to insert the item
    */
-  private addItem(index?: number): void {
-    const template = this.fieldTemplate();
-    if (!template) return;
+  private addItem(fieldTemplate: FieldDef<unknown>, index?: number): void {
+    if (!fieldTemplate) {
+      return;
+    }
 
     const currentCount = this.arrayItemCount();
     const insertIndex = index !== undefined ? Math.min(index, currentCount) : currentCount;
 
     // Get current parent value
-    const parentValue = this.parentFieldSignalContext().value();
+    const context = this.parentFieldSignalContext();
+    const parentValue = context.value();
     const arrayKey = this.field().key;
     const currentArray = (parentValue as any)?.[arrayKey] || [];
 
-    // Create default value for new item
-    const value = getFieldDefaultValue(template, this.fieldRegistry.raw);
+    // Create default value for new item using the template from the event
+    const value = getFieldDefaultValue(fieldTemplate, this.fieldRegistry.raw);
 
     // Insert new item at specified index
     const newArray = [...currentArray];
     newArray.splice(insertIndex, 0, value);
 
-    // Update parent form value
-    (this.parentForm()() as any)[arrayKey].set(newArray);
+    // Update parent form value by updating the entire value signal
+    context.value.set({ ...parentValue, [arrayKey]: newArray } as any);
 
     // Update count
     this.arrayItemCount.set(newArray.length);
@@ -211,7 +218,8 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     const removeIndex = index !== undefined ? Math.min(index, currentCount - 1) : currentCount - 1;
 
     // Get current parent value
-    const parentValue = this.parentFieldSignalContext().value();
+    const context = this.parentFieldSignalContext();
+    const parentValue = context.value();
     const arrayKey = this.field().key;
     const currentArray = (parentValue as any)?.[arrayKey] || [];
 
@@ -219,8 +227,8 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     const newArray = [...currentArray];
     newArray.splice(removeIndex, 1);
 
-    // Update parent form value
-    (this.parentForm()() as any)[arrayKey].set(newArray);
+    // Update parent form value by updating the entire value signal
+    context.value.set({ ...parentValue, [arrayKey]: newArray } as any);
 
     // Update count
     this.arrayItemCount.set(newArray.length);
@@ -265,7 +273,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
           console.error(
             `[ArrayField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within array '${arrayKey}'. Ensure the field type is registered in your field registry.`,
-            error
+            error,
           );
         }
         return undefined;

@@ -14,7 +14,7 @@ import { isRowField } from '../definitions/default/row-field';
  * See validator-factory.ts for detailed explanation of why this is safe.
  */
 function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
-  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>
+  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>,
 ): SchemaPath<TValue, SchemaPathRules.Supported, TPathKind> {
   return path as SchemaPath<TValue, SchemaPathRules.Supported, TPathKind>;
 }
@@ -241,9 +241,7 @@ function mapArrayFieldToForm(arrayField: FieldDef<any>, fieldPath: SchemaPath<an
   // array items are dynamic and may not exist yet. The ArrayFieldComponent
   // manages the lifecycle of array items and ensures validation from the
   // template is applied to each dynamically created item.
-  //
-  // TODO: Support array-level validation (min/max length, unique items, etc.)
-  // This would be applied to the array field itself, not individual items:
-  //   if (arrayField.minLength) minLength(fieldPath, arrayField.minLength);
-  //   if (arrayField.maxLength) maxLength(fieldPath, arrayField.maxLength);
+
+  // Array fields are mapped to form but validation is handled separately
+  // The array field component manages its own items dynamically
 }

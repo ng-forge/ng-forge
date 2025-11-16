@@ -82,5 +82,9 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
     return false;
   }
 
+  if (field.type === 'array') {
+    return [];
+  }
+
   return '';
 }
