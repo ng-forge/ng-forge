@@ -92,7 +92,6 @@
     "tslib": "^2.3.0",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.40.0",
-    "verdaccio": "^6.0.5",
     "vite": "^7.1.11",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.0",
