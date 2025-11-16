@@ -30,6 +30,13 @@ log_error() {
     echo -e "${RED}✗${NC} $1"
 }
 
+# Check if pnpm is installed
+if ! command -v pnpm &> /dev/null; then
+    log_error "pnpm is not installed. Please install it first:"
+    log_error "npm install -g pnpm@8.15.1"
+    exit 1
+fi
+
 # Check if we're in a git repository
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
     log_error "Not in a git repository"

@@ -21,6 +21,31 @@ Examples:
 - `release-1.1.0` - Minor release
 - `release-2.0.0` - Major release
 
+## Branch Naming Conventions
+
+The project uses different branch naming conventions for different purposes:
+
+### Development Branches (feat/, fix/, chore/, etc.)
+
+For regular development work, use conventional commit prefixes:
+
+- `feat/user-authentication` - New features
+- `fix/validation-bug` - Bug fixes
+- `chore/update-deps` - Maintenance tasks
+- `docs/api-guide` - Documentation
+- `refactor/simplify-parser` - Code refactoring
+- `test/add-unit-tests` - Test additions
+
+### Release Branches (release-X.Y.Z)
+
+For releases, always use the semantic version number:
+
+- `release-1.0.0` - Major release
+- `release-1.1.0` - Minor release
+- `release-1.0.1` - Patch release
+
+**Important**: Release branches must match the version in `package.json` exactly. The CI workflow will fail if they don't match.
+
 ## Release Workflow
 
 ### 1. Decide What to Release
@@ -92,34 +117,26 @@ git push
 
 ### 4. Trigger the Release
 
-The release can be triggered in two ways:
+The release is triggered manually through GitHub Actions:
 
-#### Option A: Automatic (Push to Branch)
+1. Navigate to: `Actions` → `Release` workflow
+2. Click `Run workflow`
+3. Select your release branch: `release-1.0.0`
+4. Fill in the inputs:
+   - **Version**: Enter the version (e.g., `1.0.0`) - must match your branch name
+   - **Publish to npm**: `true` to publish, `false` to skip publishing
+   - **Dry run**: `false` for actual release, `true` to test without publishing
+5. Click `Run workflow`
 
-Simply pushing to a `release-*` branch triggers the release workflow automatically:
-
-```bash
-git push origin release-1.0.0
-```
+**Important**: Always do a dry run first (`dry_run: true`) to verify everything works before the actual release.
 
 This will:
 1. ✅ Build all libraries
 2. ✅ Run all tests
-3. ✅ Create a git tag (e.g., `v1.0.0`)
-4. ✅ Create a GitHub Release with changelog
-5. ✅ Publish to npm
-
-#### Option B: Manual (GitHub Actions)
-
-Go to GitHub Actions and manually trigger the workflow:
-
-1. Navigate to: `Actions` → `Release` workflow
-2. Click `Run workflow`
-3. Select branch: `release-1.0.0`
-4. Choose options:
-   - **Publish to npm**: `true` (to publish) or `false` (to skip)
-   - **Dry run**: `true` (to test without publishing)
-5. Click `Run workflow`
+3. ✅ Verify version matches branch name
+4. ✅ Create a git tag (e.g., `v1.0.0`)
+5. ✅ Create a GitHub Release with changelog
+6. ✅ Publish to npm (if `publish: true` and `dry_run: false`)
 
 ### 5. Verify the Release
 
