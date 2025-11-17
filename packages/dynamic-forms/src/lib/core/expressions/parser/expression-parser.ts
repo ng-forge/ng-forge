@@ -106,7 +106,7 @@ export class ExpressionParser {
       }
       // Wrap other errors for consistency
       throw new ExpressionParserError(
-        `[ng-forge: Dynamic Forms] Error evaluating expression: ${error instanceof Error ? error.message : String(error)}`,
+        `[Dynamic Forms] Error evaluating expression: ${error instanceof Error ? error.message : String(error)}`,
         0,
         expression,
       );

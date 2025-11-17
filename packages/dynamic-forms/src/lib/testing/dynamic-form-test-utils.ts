@@ -282,7 +282,7 @@ export class DynamicFormTestUtils {
       await delay(50);
     }
 
-    throw new Error(`[ng-forge: Dynamic Forms] Element not found with selector: ${selector} after ${maxAttempts} attempts`);
+    throw new Error(`[Dynamic Forms] Element not found with selector: ${selector} after ${maxAttempts} attempts`);
   }
 
   /**
@@ -380,7 +380,7 @@ export class DynamicFormTestUtils {
 
     const actualValue = element.type === 'checkbox' ? element.checked.toString() : element.value;
     if (actualValue !== expectedValue) {
-      throw new Error(`[ng-forge: Dynamic Forms] Expected field value to be "${expectedValue}", but got "${actualValue}"`);
+      throw new Error(`[Dynamic Forms] Expected field value to be "${expectedValue}", but got "${actualValue}"`);
     }
   }
 
@@ -390,7 +390,7 @@ export class DynamicFormTestUtils {
   static assertFormValue(component: DynamicForm, expectedValue: Record<string, unknown>): void {
     const actualValue = component.formValue();
     if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {
-      throw new Error(`[ng-forge: Dynamic Forms] Expected form value to be ${JSON.stringify(expectedValue)}, but got ${JSON.stringify(actualValue)}`);
+      throw new Error(`[Dynamic Forms] Expected form value to be ${JSON.stringify(expectedValue)}, but got ${JSON.stringify(actualValue)}`);
     }
   }
 }
