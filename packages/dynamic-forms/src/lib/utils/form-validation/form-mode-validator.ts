@@ -54,7 +54,7 @@ export class FormModeValidator {
     const result = this.validateFormConfiguration(fields);
 
     if (!result.isValid) {
-      const errorMessage = [`Invalid form configuration (${result.mode} mode):`, ...result.errors.map((error) => `  - ${error}`)].join(
+      const errorMessage = [`[ng-forge: Dynamic Forms] Invalid form configuration (${result.mode} mode):`, ...result.errors.map((error) => `  - ${error}`)].join(
         '\n',
       );
 

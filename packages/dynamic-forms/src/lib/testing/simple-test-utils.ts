@@ -111,7 +111,7 @@ export class SimpleTestUtils {
   static async simulateInput(fixture: any, selector: string, value: string): Promise<void> {
     const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!input) {
-      throw new Error(`Input element not found with selector: ${selector}`);
+      throw new Error(`[ng-forge: Dynamic Forms] Input element not found with selector: ${selector}`);
     }
 
     input.value = value;
@@ -126,7 +126,7 @@ export class SimpleTestUtils {
   static async simulateCheckbox(fixture: any, selector: string, checked: boolean): Promise<void> {
     const checkbox = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!checkbox) {
-      throw new Error(`Checkbox element not found with selector: ${selector}`);
+      throw new Error(`[ng-forge: Dynamic Forms] Checkbox element not found with selector: ${selector}`);
     }
 
     checkbox.checked = checked;
@@ -155,7 +155,7 @@ export class SimpleTestUtils {
   static assertFormValue(component: any, expectedValue: Record<string, unknown>): void {
     const actualValue = component.formValue();
     if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {
-      throw new Error(`Expected form value to be ${JSON.stringify(expectedValue)}, but got ${JSON.stringify(actualValue)}`);
+      throw new Error(`[ng-forge: Dynamic Forms] Expected form value to be ${JSON.stringify(expectedValue)}, but got ${JSON.stringify(actualValue)}`);
     }
   }
 }
