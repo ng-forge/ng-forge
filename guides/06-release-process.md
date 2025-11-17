@@ -8,8 +8,8 @@ This guide explains how to release new versions of the ng-forge libraries.
 
 1. **Create**: `./scripts/create-release-branch.sh patch` (or minor/major)
 2. **Review**: Create PR for the release branch, get approval
-3. **Dry Run**: Trigger workflow with `dry_run: true`, verify output
-4. **Release**: Trigger workflow with `publish: true`, `dry_run: false`
+3. **Dry Run**: Comment `/release dry-run` on the PR (or `/release`)
+4. **Release**: Comment `/release publish` on the PR
 5. **Verify**: Check npm, GitHub releases, test installation
 
 **Common Commands:**
@@ -161,7 +161,44 @@ git push
 
 ### 4. Trigger the Release
 
-The release is triggered manually through GitHub Actions:
+The release can be triggered in two ways:
+
+#### Option A: PR Comment (Recommended)
+
+Comment on the release PR to trigger the workflow:
+
+**Dry Run (Test without publishing):**
+
+```
+/release dry-run
+```
+
+or simply:
+
+```
+/release
+```
+
+**Publish to npm:**
+
+```
+/release publish
+```
+
+The workflow will:
+
+- Automatically detect the version from the branch name
+- Post a comment confirming the release has started
+- Show you a link to track progress
+
+**Benefits:**
+
+- ✅ Trigger directly from PR - no need to navigate to Actions tab
+- ✅ Version automatically extracted from branch name
+- ✅ Clear audit trail in PR conversation
+- ✅ Easy to use
+
+#### Option B: Manual GitHub Actions Trigger
 
 1. Navigate to: `Actions` → `Release` workflow
 2. Click `Run workflow`
@@ -172,9 +209,11 @@ The release is triggered manually through GitHub Actions:
    - **Dry run**: `false` for actual release, `true` to test without publishing
 5. Click `Run workflow`
 
-**Important**: Always do a dry run first (`dry_run: true`) to verify everything works before the actual release.
+**Important**: Always do a dry run first to verify everything works before the actual release.
 
-This will:
+---
+
+The workflow will:
 
 1. ✅ Build all libraries
 2. ✅ Run all tests
