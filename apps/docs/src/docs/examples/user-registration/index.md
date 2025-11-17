@@ -19,7 +19,7 @@ This example demonstrates:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { FormConfig, DynamicForm, InferFormValue } from '@ng-forge/dynamic-form';
+import { FormConfig, DynamicForm, ExtractFormValue } from '@ng-forge/dynamic-form';
 
 const registrationConfig = {
   fields: [
@@ -101,11 +101,12 @@ const registrationConfig = {
             {
               type: 'custom',
               expression: 'fieldValue === formValue.password',
-              errorMessage: 'Passwords do not match',
+              kind: 'passwordMismatch',
             },
           ],
           validationMessages: {
             required: 'Please confirm your password',
+            passwordMismatch: 'Passwords do not match',
           },
           props: {
             type: 'password',
@@ -348,7 +349,7 @@ const registrationConfig = {
   ],
 } as const satisfies FormConfig;
 
-type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
+type RegistrationValue = ExtractFormValue<typeof registrationConfig>;
 
 @Component({
   selector: 'app-user-registration',
@@ -357,7 +358,7 @@ type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
     <div class="registration-container">
       <h1>Create Your Account</h1>
 
-      <df-dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
+      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
 
       @let message = submitMessage();
       @if (message) {
@@ -461,8 +462,11 @@ Password confirmation with cross-field validation:
   validators: [{
     type: 'custom',
     expression: 'fieldValue === formValue.password',
-    errorMessage: 'Passwords do not match',
+    kind: 'passwordMismatch',
   }],
+  validationMessages: {
+    passwordMismatch: 'Passwords do not match',
+  },
 }
 ```
 
@@ -513,7 +517,7 @@ Uses datepicker `maxDate` to ensure users are at least 13 years old:
 Full type inference for form values:
 
 ```typescript
-type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
+type RegistrationValue = ExtractFormValue<typeof registrationConfig>;
 
 // TypeScript knows the exact structure:
 // {
