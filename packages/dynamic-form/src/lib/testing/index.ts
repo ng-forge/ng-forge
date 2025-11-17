@@ -1,5 +1,6 @@
 export { delay } from './delay';
 export { DynamicFormTestUtils, FormConfigBuilder, type DynamicFormTestConfig, type DynamicFormTestResult } from './dynamic-form-test-utils';
+export { createTestFormInjector, testMapper, createTestFieldContext, type TestFieldContextConfig } from './mapper-test-utils';
 export {
   SimpleTestUtils,
   TestFormConfigBuilder as SimpleFormConfigBuilder,

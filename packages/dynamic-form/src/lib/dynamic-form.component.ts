@@ -23,7 +23,7 @@ import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs'
 import { isEqual, memoize } from 'lodash-es';
 import { keyBy } from './utils/object-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
-import { FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes } from './models';
+import { FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes, FIELD_SIGNAL_CONTEXT } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
@@ -194,6 +194,19 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       defaultValidationMessages: this.config().defaultValidationMessages,
     }),
   );
+
+  // Injector that provides FIELD_SIGNAL_CONTEXT for mappers and child components
+  private readonly fieldInjector = computed(() => {
+    return Injector.create({
+      parent: this.injector,
+      providers: [
+        {
+          provide: FIELD_SIGNAL_CONTEXT,
+          useValue: this.fieldSignalContext(),
+        },
+      ],
+    });
+  });
 
   // Memoized field registry raw access
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
@@ -600,12 +613,13 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
           return undefined;
         }
 
-        const bindings = mapFieldToBindings(fieldDef, {
-          fieldSignalContext: this.fieldSignalContext(),
-          fieldRegistry: this.rawFieldRegistry(),
+        // Run mapper in injection context so it can inject FIELD_SIGNAL_CONTEXT
+        const bindings = runInInjectionContext(this.fieldInjector(), () => {
+          return mapFieldToBindings(fieldDef, this.rawFieldRegistry());
         });
 
-        return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
+        // Create component with field injector so child components can also inject FIELD_SIGNAL_CONTEXT
+        return this.vcr.createComponent(componentType, { bindings, injector: this.fieldInjector() }) as ComponentRef<FormUiControl>;
       })
       .catch((error) => {
         // Only log and track errors if component hasn't been destroyed

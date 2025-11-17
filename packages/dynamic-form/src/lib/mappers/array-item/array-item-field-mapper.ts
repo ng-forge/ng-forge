@@ -1,6 +1,6 @@
-import { Binding, inputBinding } from '@angular/core';
+import { Binding, inject, inputBinding } from '@angular/core';
 import { FieldDef } from '../../definitions';
-import { FieldMapperOptions } from '../types';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { baseFieldMapper } from '../base/base-field-mapper';
 
 /**
@@ -14,7 +14,9 @@ import { baseFieldMapper } from '../base/base-field-mapper';
  * This enables array item fields to correctly bind to and update individual
  * array elements in the parent form.
  */
-export function arrayItemFieldMapper(fieldDef: FieldDef<any>, options: FieldMapperOptions): Binding[] {
+export function arrayItemFieldMapper(fieldDef: FieldDef<any>): Binding[] {
+  const context = inject(FIELD_SIGNAL_CONTEXT);
+
   // Start with base field mapper for common properties (label, className, etc.)
   const bindings: Binding[] = baseFieldMapper(fieldDef);
   const key = fieldDef.key;
@@ -31,7 +33,7 @@ export function arrayItemFieldMapper(fieldDef: FieldDef<any>, options: FieldMapp
     // The factory function will be called when the component needs the field
     bindings.push(
       inputBinding('field', () => {
-        const formRoot = options.fieldSignalContext.form();
+        const formRoot = context.form();
         // Access: parentForm().arrayName[index]
         // This uses Angular Signal Forms' native array support
         const arrayField = (formRoot as any)[arrayName];
@@ -42,7 +44,7 @@ export function arrayItemFieldMapper(fieldDef: FieldDef<any>, options: FieldMapp
     // Standard field access for non-array keys
     bindings.push(
       inputBinding('field', () => {
-        const formRoot = options.fieldSignalContext.form();
+        const formRoot = context.form();
         const childrenMap = (formRoot as any).structure?.childrenMap?.();
         const formField = childrenMap?.get(fieldDef.key);
         return formField?.fieldProxy;

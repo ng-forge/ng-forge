@@ -22,6 +22,7 @@ import { FieldRendererDirective } from '../../directives/dynamic-form.directive'
 import { form, FormUiControl } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions';
 import { FieldSignalContext } from '../../mappers';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { createSchemaFromFields } from '../../core';
@@ -48,6 +49,7 @@ import { flattenFields } from '../../utils';
 export default class GroupFieldComponent<T extends any[], TModel = Record<string, unknown>> {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
+  private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
@@ -73,11 +75,6 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   /** Field configuration input */
   field = input.required<GroupField<T>>();
   key = input.required<string>();
-
-  // Parent form context inputs
-  parentForm = input.required<ReturnType<typeof form<TModel>>>();
-  parentFieldSignalContext = input.required<FieldSignalContext<TModel>>();
-  defaultValidationMessages = input<Record<string, string>>();
 
   private readonly formSetup = computed(() => {
     const groupField = this.field();
@@ -109,7 +106,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
 
   // Create reactive group value signal that extracts group-specific values from parent form
   private readonly entity = linkedSignal(() => {
-    const parentValue = this.parentFieldSignalContext().value();
+    const parentValue = this.parentFieldSignalContext.value();
     const groupKey = this.field().key;
     const defaults = this.defaultValues();
 
@@ -140,6 +137,27 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   readonly touched = computed(() => this.form()().touched());
   readonly errors = computed(() => this.form()().errors());
   readonly disabled = computed(() => this.form()().disabled());
+
+  // Create scoped child injector for nested fields with group's form context
+  private readonly groupInjector = computed(() => {
+    const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
+      injector: this.injector,
+      value: this.parentFieldSignalContext.value, // Pass through parent's value signal
+      defaultValues: this.defaultValues, // Group-specific defaults
+      form: this.form() as ReturnType<typeof form<Record<string, unknown>>>, // Group's nested form
+      defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages, // Pass through validation messages
+    };
+
+    return Injector.create({
+      parent: this.injector,
+      providers: [
+        {
+          provide: FIELD_SIGNAL_CONTEXT,
+          useValue: groupFieldSignalContext,
+        },
+      ],
+    });
+  });
 
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
@@ -178,22 +196,13 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
           return undefined;
         }
 
-        // Create nested field signal context for group children
-        // This creates a new form context scoped to this group
-        const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
-          injector: this.injector,
-          value: this.parentFieldSignalContext().value, // Pass through the parent's value signal
-          defaultValues: this.defaultValues,
-          form: this.form() as ReturnType<typeof form<Record<string, unknown>>>, // Use this group's nested form
-          defaultValidationMessages: this.defaultValidationMessages(), // Pass through validation messages
-        };
-
-        const bindings = mapFieldToBindings(fieldDef, {
-          fieldSignalContext: groupFieldSignalContext,
-          fieldRegistry: this.fieldRegistry.raw,
+        // Run mapper in scoped injection context with group's form context
+        const bindings = runInInjectionContext(this.groupInjector(), () => {
+          return mapFieldToBindings(fieldDef, this.fieldRegistry.raw);
         });
 
-        return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
+        // Create component with scoped injector so nested fields access group's form context
+        return this.vcr.createComponent(componentType, { bindings, injector: this.groupInjector() }) as ComponentRef<FormUiControl>;
       })
       .catch((error) => {
         // Only log errors if component hasn't been destroyed

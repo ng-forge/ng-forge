@@ -15,9 +15,10 @@ import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { form, FormUiControl } from '@angular/forms/signals';
+import { form, FormUiControl, runInInjectionContext } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions';
 import { FieldSignalContext } from '../../mappers';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { arrayItemFieldMapper } from '../../mappers/array-item/array-item-field-mapper';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent, SubmitEvent } from '../../events';
@@ -65,6 +66,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
 export default class ArrayFieldComponent<T extends any[], TModel = Record<string, unknown>> {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
+  private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
@@ -72,10 +74,6 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   /** Field configuration input */
   field = input.required<ArrayField<T>>();
   key = input.required<string>();
-
-  // Parent form context inputs
-  parentForm = input.required<ReturnType<typeof form<TModel>>>();
-  parentFieldSignalContext = input.required<FieldSignalContext<TModel>>();
 
   /**
    * Store the field template in a linkedSignal for type enforcement.
@@ -93,7 +91,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
    * Grows/shrinks based on AddArrayItemEvent/RemoveArrayItemEvent.
    */
   private readonly arrayItemCount = linkedSignal(() => {
-    const parentValue = this.parentFieldSignalContext().value();
+    const parentValue = this.parentFieldSignalContext.value();
     const arrayKey = this.field().key;
     const arrayValue = (parentValue as any)?.[arrayKey];
 
@@ -183,7 +181,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     const insertIndex = index !== undefined ? Math.min(index, currentCount) : currentCount;
 
     // Get current parent value
-    const parentValue = this.parentFieldSignalContext().value();
+    const parentValue = this.parentFieldSignalContext.value();
     const arrayKey = this.field().key;
     const currentArray = (parentValue as any)?.[arrayKey] || [];
 
@@ -195,7 +193,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     newArray.splice(insertIndex, 0, value);
 
     // Update parent form value
-    (this.parentForm()() as any)[arrayKey].set(newArray);
+    (this.parentFieldSignalContext.form() as any)[arrayKey].set(newArray);
 
     // Update count
     this.arrayItemCount.set(newArray.length);
@@ -211,7 +209,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     const removeIndex = index !== undefined ? Math.min(index, currentCount - 1) : currentCount - 1;
 
     // Get current parent value
-    const parentValue = this.parentFieldSignalContext().value();
+    const parentValue = this.parentFieldSignalContext.value();
     const arrayKey = this.field().key;
     const currentArray = (parentValue as any)?.[arrayKey] || [];
 
@@ -220,7 +218,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
     newArray.splice(removeIndex, 1);
 
     // Update parent form value
-    (this.parentForm()() as any)[arrayKey].set(newArray);
+    (this.parentFieldSignalContext.form() as any)[arrayKey].set(newArray);
 
     // Update count
     this.arrayItemCount.set(newArray.length);
@@ -240,23 +238,33 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
           return undefined;
         }
 
-        // For array items, use the parent's form context
+        // For array items, create scoped context with parent's form
         // Each field will bind to the array index in the parent form
         const arrayFieldSignalContext: FieldSignalContext<TModel> = {
           injector: this.injector,
-          value: this.parentFieldSignalContext().value,
-          defaultValues: this.parentFieldSignalContext().defaultValues,
-          form: this.parentForm(),
+          value: this.parentFieldSignalContext.value,
+          defaultValues: this.parentFieldSignalContext.defaultValues,
+          form: this.parentFieldSignalContext.form,
         };
+
+        // Create scoped child injector for array item
+        const arrayItemInjector = Injector.create({
+          parent: this.injector,
+          providers: [
+            {
+              provide: FIELD_SIGNAL_CONTEXT,
+              useValue: arrayFieldSignalContext,
+            },
+          ],
+        });
 
         // Use custom array item mapper that handles array notation parsing
         // This enables keys like 'tags[0]' to correctly access parentForm().tags[0]
-        const bindings = arrayItemFieldMapper(fieldDef, {
-          fieldSignalContext: arrayFieldSignalContext,
-          fieldRegistry: this.fieldRegistry.raw,
+        const bindings = runInInjectionContext(arrayItemInjector, () => {
+          return arrayItemFieldMapper(fieldDef);
         });
 
-        return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
+        return this.vcr.createComponent(componentType, { bindings, injector: arrayItemInjector }) as ComponentRef<FormUiControl>;
       })
       .catch((error) => {
         if (!this.destroyRef.destroyed) {
@@ -278,7 +286,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
    */
   private readonly arrayFormField = computed(() => {
     const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
+    const parentForm = this.parentFieldSignalContext.form();
     return (parentForm as any)[arrayKey];
   });
 
