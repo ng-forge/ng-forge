@@ -5,5 +5,4 @@ export * from './checkbox/checkbox-field-mapper';
 export * from './row/row-field-mapper';
 export * from './group/group-field-mapper';
 export * from './array/array-field-mapper';
-export * from './array-item/array-item-field-mapper';
 export * from './page/page-field-mapper';
