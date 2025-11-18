@@ -1,4 +1,4 @@
-import { EnvironmentProviders, makeEnvironmentProviders, Provider } from '@angular/core';
+import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
 import { FieldDef } from '../definitions/base';
