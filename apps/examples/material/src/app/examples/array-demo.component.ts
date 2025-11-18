@@ -14,7 +14,6 @@ const tagTemplate = {
       key: 'value',
       type: 'input',
       label: 'Tag',
-      value: '',
       required: true,
       minLength: 2,
       props: {
@@ -49,7 +48,6 @@ const contactTemplate = {
       key: 'name',
       type: 'input',
       label: 'Contact Name',
-      value: '',
       required: true,
       minLength: 2,
       props: {
@@ -61,7 +59,6 @@ const contactTemplate = {
       key: 'phone',
       type: 'input',
       label: 'Phone Number',
-      value: '',
       required: true,
       pattern: /^\d{10}$/,
       validationMessages: {
@@ -77,7 +74,6 @@ const contactTemplate = {
       key: 'relationship',
       type: 'select',
       label: 'Relationship',
-      value: 'friend',
       required: true,
       options: [
         { label: 'Family', value: 'family' },
@@ -139,8 +135,14 @@ class AddContactEvent extends AddArrayItemEvent {
 })
 export class ArrayDemoComponent {
   formValue = signal({
-    tags: [],
-    contacts: [],
+    tags: [{ value: 'angular' }, { value: 'typescript' }],
+    contacts: [
+      {
+        name: 'Jane Smith',
+        phone: '5551234567',
+        relationship: 'family',
+      },
+    ],
   });
 
   config = {
