@@ -6,6 +6,7 @@ import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PreviousPageEvent, PageChangeEvent } from '../../events/constants';
 import { PageField } from '../../definitions/default/page-field';
 import { FieldSignalContext } from '../../mappers/types';
+import { firstValueFrom, take } from 'rxjs';
 
 describe('PageOrchestratorComponent', () => {
   let component: PageOrchestratorComponent;
@@ -206,26 +207,24 @@ describe('PageOrchestratorComponent', () => {
         expect(result.newPageIndex).toBe(1);
       });
 
-      it('should dispatch PageChangeEvent', (done) => {
-        eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-          expect(event.currentPageIndex).toBe(1);
-          expect(event.totalPages).toBe(3);
-          expect(event.previousPageIndex).toBe(0);
-          done();
-        });
-
+      it('should dispatch PageChangeEvent', async () => {
+        const eventPromise = firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1)));
         component.navigateToNextPage();
+
+        const event = await eventPromise;
+        expect(event.currentPageIndex).toBe(1);
+        expect(event.totalPages).toBe(3);
+        expect(event.previousPageIndex).toBe(0);
       });
 
-      it('should include previous page index in event', (done) => {
+      it('should include previous page index in event', async () => {
         component.navigateToPage(1);
 
-        eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-          expect(event.previousPageIndex).toBe(1);
-          done();
-        });
-
+        const eventPromise = firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1)));
         component.navigateToNextPage();
+
+        const event = await eventPromise;
+        expect(event.previousPageIndex).toBe(1);
       });
     });
 
@@ -258,20 +257,21 @@ describe('PageOrchestratorComponent', () => {
         expect(component.state().currentPageIndex).toBe(2);
       });
 
-      it('should not dispatch event when on last page', (done) => {
+      it('should not dispatch event when on last page', async () => {
         component.navigateToPage(2);
 
         let eventDispatched = false;
-        eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
+        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
           eventDispatched = true;
         });
 
         component.navigateToNextPage();
 
-        setTimeout(() => {
-          expect(eventDispatched).toBe(false);
-          done();
-        }, 50);
+        // Wait to ensure no events are dispatched
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        expect(eventDispatched).toBe(false);
+
+        subscription.unsubscribe();
       });
     });
 
@@ -303,18 +303,19 @@ describe('PageOrchestratorComponent', () => {
         expect(component.state().currentPageIndex).toBe(initialIndex);
       });
 
-      it('should not dispatch event when disabled', (done) => {
+      it('should not dispatch event when disabled', async () => {
         let eventDispatched = false;
-        eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
+        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
           eventDispatched = true;
         });
 
         component.navigateToNextPage();
 
-        setTimeout(() => {
-          expect(eventDispatched).toBe(false);
-          done();
-        }, 50);
+        // Wait to ensure no events are dispatched
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        expect(eventDispatched).toBe(false);
+
+        subscription.unsubscribe();
       });
     });
   });
@@ -368,15 +369,14 @@ describe('PageOrchestratorComponent', () => {
         expect(result.newPageIndex).toBe(0);
       });
 
-      it('should dispatch PageChangeEvent', (done) => {
-        eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-          expect(event.currentPageIndex).toBe(0);
-          expect(event.totalPages).toBe(3);
-          expect(event.previousPageIndex).toBe(1);
-          done();
-        });
-
+      it('should dispatch PageChangeEvent', async () => {
+        const eventPromise = firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1)));
         component.navigateToPreviousPage();
+
+        const event = await eventPromise;
+        expect(event.currentPageIndex).toBe(0);
+        expect(event.totalPages).toBe(3);
+        expect(event.previousPageIndex).toBe(1);
       });
     });
 
@@ -401,18 +401,19 @@ describe('PageOrchestratorComponent', () => {
         expect(component.state().currentPageIndex).toBe(0);
       });
 
-      it('should not dispatch event when on first page', (done) => {
+      it('should not dispatch event when on first page', async () => {
         let eventDispatched = false;
-        eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
+        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
           eventDispatched = true;
         });
 
         component.navigateToPreviousPage();
 
-        setTimeout(() => {
-          expect(eventDispatched).toBe(false);
-          done();
-        }, 50);
+        // Wait to ensure no events are dispatched
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        expect(eventDispatched).toBe(false);
+
+        subscription.unsubscribe();
       });
     });
 
@@ -482,14 +483,13 @@ describe('PageOrchestratorComponent', () => {
         expect(result.success).toBe(true);
       });
 
-      it('should dispatch PageChangeEvent', (done) => {
-        eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-          expect(event.currentPageIndex).toBe(2);
-          expect(event.totalPages).toBe(3);
-          done();
-        });
-
+      it('should dispatch PageChangeEvent', async () => {
+        const eventPromise = firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1)));
         component.navigateToPage(2);
+
+        const event = await eventPromise;
+        expect(event.currentPageIndex).toBe(2);
+        expect(event.totalPages).toBe(3);
       });
 
       it('should allow navigation to current page (no-op)', () => {
@@ -534,18 +534,19 @@ describe('PageOrchestratorComponent', () => {
         expect(component.state().currentPageIndex).toBe(initialIndex);
       });
 
-      it('should not dispatch event for invalid input', (done) => {
+      it('should not dispatch event for invalid input', async () => {
         let eventDispatched = false;
-        eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
+        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
           eventDispatched = true;
         });
 
         component.navigateToPage(100);
 
-        setTimeout(() => {
-          expect(eventDispatched).toBe(false);
-          done();
-        }, 50);
+        // Wait to ensure no events are dispatched
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        expect(eventDispatched).toBe(false);
+
+        subscription.unsubscribe();
       });
     });
 
@@ -557,20 +558,21 @@ describe('PageOrchestratorComponent', () => {
         expect(result.success).toBe(true);
       });
 
-      it('should not dispatch event when already on target page', (done) => {
+      it('should not dispatch event when already on target page', async () => {
         component.navigateToPage(1);
 
         let eventCount = 0;
-        eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
+        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
           eventCount++;
         });
 
         component.navigateToPage(1);
 
-        setTimeout(() => {
-          expect(eventCount).toBe(0); // No new event
-          done();
-        }, 50);
+        // Wait to ensure no events are dispatched
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        expect(eventCount).toBe(0); // No new event
+
+        subscription.unsubscribe();
       });
 
       it('should return current page as newPageIndex', () => {
@@ -693,40 +695,36 @@ describe('PageOrchestratorComponent', () => {
     });
 
     describe('PageChangeEvent Emission', () => {
-      it('should dispatch PageChangeEvent on successful navigation', (done) => {
-        eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-          expect(event.type).toBe('page-change');
-          done();
-        });
-
+      it('should dispatch PageChangeEvent on successful navigation', async () => {
+        const eventPromise = firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1)));
         component.navigateToNextPage();
+
+        const event = await eventPromise;
+        expect(event.type).toBe('page-change');
       });
 
-      it('should include currentPageIndex in event', (done) => {
-        eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-          expect(event.currentPageIndex).toBe(1);
-          done();
-        });
-
+      it('should include currentPageIndex in event', async () => {
+        const eventPromise = firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1)));
         component.navigateToNextPage();
+
+        const event = await eventPromise;
+        expect(event.currentPageIndex).toBe(1);
       });
 
-      it('should include totalPages in event', (done) => {
-        eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-          expect(event.totalPages).toBe(3);
-          done();
-        });
-
+      it('should include totalPages in event', async () => {
+        const eventPromise = firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1)));
         component.navigateToNextPage();
+
+        const event = await eventPromise;
+        expect(event.totalPages).toBe(3);
       });
 
-      it('should include previousPageIndex in event', (done) => {
-        eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-          expect(event.previousPageIndex).toBe(0);
-          done();
-        });
-
+      it('should include previousPageIndex in event', async () => {
+        const eventPromise = firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1)));
         component.navigateToNextPage();
+
+        const event = await eventPromise;
+        expect(event.previousPageIndex).toBe(0);
       });
     });
   });
