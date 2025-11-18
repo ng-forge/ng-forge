@@ -67,7 +67,7 @@ export const appConfig: ApplicationConfig = {
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-contact-form',
@@ -88,7 +88,8 @@ export class ContactFormComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: any) {
+  onSubmit(value: ExtractFormValue<typeof this.config>) {
+    // TypeScript knows: { email: string }
     console.log('Form submitted:', value);
   }
 }
