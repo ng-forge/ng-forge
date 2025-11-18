@@ -7,7 +7,6 @@ import { FieldDef, InputField, SelectField } from '../definitions';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { delay } from './delay';
 import { checkboxFieldMapper, valueFieldMapper } from '../mappers';
-import { FieldMapperOptions } from '../mappers/types';
 import { BUILT_IN_FIELDS } from '../providers/built-in-fields';
 
 /**
@@ -163,8 +162,8 @@ export class DynamicFormTestUtils {
    */
   static registerTestFields(fieldRegistry: ReturnType<typeof injectFieldRegistry>): void {
     // Input field mapper that extends value field mapper
-    const inputMapper = (fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
-      const bindings = valueFieldMapper(fieldDef, options);
+    const inputMapper = (fieldDef: FieldDef<any>) => {
+      const bindings = valueFieldMapper(fieldDef);
 
       // Add input-specific bindings
       bindings.push(
@@ -176,8 +175,8 @@ export class DynamicFormTestUtils {
     };
 
     // Select field mapper that extends value field mapper
-    const selectMapper = (fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
-      const bindings = valueFieldMapper(fieldDef, options);
+    const selectMapper = (fieldDef: FieldDef<any>) => {
+      const bindings = valueFieldMapper(fieldDef);
 
       // Add select-specific bindings - options should be at root level
       bindings.push(inputBinding('options', () => (fieldDef as any).options || []));
@@ -186,13 +185,13 @@ export class DynamicFormTestUtils {
     };
 
     // Checkbox field mapper - uses checked instead of value
-    const checkboxMapper = (fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
-      return checkboxFieldMapper(fieldDef, options);
+    const checkboxMapper = (fieldDef: FieldDef<any>) => {
+      return checkboxFieldMapper(fieldDef);
     };
 
     // Button field mapper that extends value field mapper
-    const buttonMapper = (fieldDef: FieldDef<any>, options: Omit<FieldMapperOptions, 'fieldRegistry'>) => {
-      return valueFieldMapper(fieldDef, options);
+    const buttonMapper = (fieldDef: FieldDef<any>) => {
+      return valueFieldMapper(fieldDef);
     };
 
     // Register built-in fields first (page, row, group)
