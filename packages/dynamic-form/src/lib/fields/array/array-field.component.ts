@@ -17,7 +17,7 @@ import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { form, FormUiControl, FieldTree } from '@angular/forms/signals';
+import { FieldTree, form, FormUiControl } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
@@ -370,15 +370,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const bindings = runInInjectionContext(arrayItemInjector, () => {
       return mapFieldToBindings(template, this.fieldRegistry.raw);
     });
-
-    // Add arrayContext binding
-    bindings.push(
-      inputBinding('arrayContext', () => ({
-        arrayKey,
-        index,
-        formValue: this.parentFieldSignalContext.value(),
-      })),
-    );
 
     return this.vcr.createComponent(componentType, { bindings, injector: arrayItemInjector });
   }
