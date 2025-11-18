@@ -5,13 +5,16 @@ import { detectFormMode, FormModeDetectionResult } from '../../models/types/form
 import { FormModeValidator } from '../../utils/form-validation/form-mode-validator';
 import { DynamicFormTestResult, DynamicFormTestUtils } from '../dynamic-form-test-utils';
 import { FormConfig } from '../../models/form-config';
+import { provideDynamicForm } from '../../providers';
 
 describe('Page Orchestration Integration', () => {
   let testResult: DynamicFormTestResult;
   let eventBus: EventBus;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({}).compileComponents();
+    await TestBed.configureTestingModule({
+      providers: [provideDynamicForm()],
+    }).compileComponents();
   });
 
   afterEach(() => {
