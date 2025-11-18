@@ -16,7 +16,7 @@ import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { form, FormUiControl } from '@angular/forms/signals';
+import { FormUiControl } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions';
 import { FieldSignalContext } from '../../mappers';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
