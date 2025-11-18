@@ -49,23 +49,48 @@ Add PrimeNG styles to your `styles.scss`:
 @import 'primeicons/primeicons.css';
 ```
 
-### 2. Configure Providers (Component-Level)
+### 2. Configure Providers in App Config
 
-**Recommended approach** - Use component-level providers for better isolation:
+Add the dynamic form providers to your application configuration:
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(...withPrimeNGFields())],
+};
+```
+
+### 3. Use in Components
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicForm, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
   selector: 'app-contact-form',
   imports: [DynamicForm],
-  providers: [provideDynamicForm(...withPrimeNGFields())],
   template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
 export class ContactFormComponent {
-  // Component implementation...
+  config = {
+    fields: [
+      {
+        key: 'email',
+        type: 'input',
+        value: '',
+        label: 'Email',
+        required: true,
+        email: true,
+      },
+    ],
+  } as const satisfies FormConfig;
+
+  onSubmit(value: any) {
+    console.log('Form submitted:', value);
+  }
 }
 ```
 

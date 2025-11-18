@@ -20,7 +20,6 @@ This library provides 13 field types that integrate Bootstrap 5 styling with the
 - ✅ **Validation Feedback**: Built-in styles for validation states (.is-invalid, .is-valid)
 - ✅ **Floating Labels**: Modern floating label design pattern
 - ✅ **Flexible Layouts**: Support for inline, horizontal, and stacked form layouts
-- ✅ **Component-Level Providers**: Isolated configurations per component
 - ✅ **Type-Safe**: Full TypeScript support with module augmentation
 
 ## Installation
@@ -59,21 +58,28 @@ pnpm add @ng-bootstrap/ng-bootstrap
 @import 'bootstrap/dist/css/bootstrap.min.css';
 ```
 
-### 2. Use component-level providers:
+### 2. Configure providers in your app config:
 
 ```typescript
-import { Component } from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
 import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
 
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(...withBootstrapFields())],
+};
+```
+
+### 3. Use the form in your components:
+
+```typescript
+import { Component } from '@angular/core';
+import { DynamicForm } from '@ng-forge/dynamic-form';
+
 @Component({
   selector: 'app-my-form',
-  providers: [provideDynamicForm(...withBootstrapFields())],
-  template: `
-    <form [dynamicForm]="config">
-      <dynamic-form-fields />
-    </form>
-  `,
+  imports: [DynamicForm],
+  template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
 })
 export class MyFormComponent {
   config = {
@@ -90,6 +96,10 @@ export class MyFormComponent {
       },
     ],
   };
+
+  onSubmit(value: any) {
+    console.log('Form submitted:', value);
+  }
 }
 ```
 
