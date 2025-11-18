@@ -7,6 +7,7 @@ import { ValidationMessages } from '../models/validation-types';
 /**
  * Configuration for creating a test form injector with field signal context
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface TestFieldContextConfig<TModel = any> {
   /**
    * Parent injector to use. If not provided, uses an empty injector.
@@ -60,9 +61,8 @@ export interface TestFieldContextConfig<TModel = any> {
  * });
  * ```
  */
-export function createTestFormInjector<TModel = any>(
-  config: TestFieldContextConfig<TModel> = {}
-): Injector {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createTestFormInjector<TModel = any>(config: TestFieldContextConfig<TModel> = {}): Injector {
   const {
     parentInjector,
     initialValue = {} as Partial<TModel>,
@@ -81,7 +81,7 @@ export function createTestFormInjector<TModel = any>(
     formInstance = customForm;
   } else {
     const tempInjector = parentInjector || Injector.create({ providers: [] });
-    formInstance = runInInjectionContext(tempInjector, () => form(value));
+    formInstance = runInInjectionContext(tempInjector, () => form(value)) as ReturnType<typeof form<TModel>>;
   }
 
   // Create field signal context
@@ -129,10 +129,8 @@ export function createTestFormInjector<TModel = any>(
  * );
  * ```
  */
-export function testMapper<T>(
-  mapperFn: () => T,
-  context?: TestFieldContextConfig
-): T {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function testMapper<T>(mapperFn: () => T, context?: TestFieldContextConfig<any>): T {
   const testInjector = createTestFormInjector(context);
   return runInInjectionContext(testInjector, mapperFn);
 }
@@ -156,9 +154,8 @@ export function testMapper<T>(
  * });
  * ```
  */
-export function createTestFieldContext<TModel = any>(
-  config: TestFieldContextConfig<TModel> = {}
-): FieldSignalContext<TModel> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createTestFieldContext<TModel = any>(config: TestFieldContextConfig<TModel> = {}): FieldSignalContext<TModel> {
   const {
     parentInjector,
     initialValue = {} as Partial<TModel>,
@@ -175,7 +172,7 @@ export function createTestFieldContext<TModel = any>(
   if (customForm) {
     formInstance = customForm;
   } else {
-    formInstance = runInInjectionContext(injector, () => form(value));
+    formInstance = runInInjectionContext(injector, () => form(value)) as ReturnType<typeof form<TModel>>;
   }
 
   return {
