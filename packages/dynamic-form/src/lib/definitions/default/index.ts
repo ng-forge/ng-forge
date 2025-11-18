@@ -1,7 +1,7 @@
 export type { InputField, InputProps } from './input-field';
 export type { CheckboxField } from './checkbox-field';
 export type { SelectField, SelectProps } from './select-field';
-export type { ButtonField } from './button-field';
+export type { ButtonField, EventArgs } from './button-field';
 export type { TextareaField, TextareaProps } from './textarea-field';
 export type { RadioField } from './radio-field';
 export type { MultiCheckboxField } from './multi-checkbox-field';

@@ -1,7 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { ButtonDirective } from 'primeng/button';
-import { DynamicText, DynamicTextPipe, EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
+import {
+  ArrayItemContext,
+  DynamicText,
+  DynamicTextPipe,
+  EventArgs,
+  EventBus,
+  FormEvent,
+  FormEventConstructor,
+  resolveTokens,
+} from '@ng-forge/dynamic-form';
 import { PrimeButtonComponent, PrimeButtonProps } from './prime-button.type';
 
 /**
@@ -44,11 +53,29 @@ export default class PrimeButtonFieldComponent<TEvent extends FormEvent> impleme
   readonly className = input<string>('');
 
   readonly event = input.required<FormEventConstructor<TEvent>>();
+  readonly eventArgs = input<EventArgs>();
   readonly props = input<PrimeButtonProps>();
+
+  // Array item context for token resolution (only set for add/remove array item buttons)
+  readonly eventContext = input<ArrayItemContext>();
 
   buttonTestId = computed(() => `${this.props()?.type}-${this.key()}`);
 
   triggerEvent(): void {
-    this.eventBus.dispatch(this.event());
+    const args = this.eventArgs();
+
+    if (args && args.length > 0) {
+      // Get context or build default from key
+      const context = this.eventContext() || { key: this.key() };
+
+      // Resolve tokens in event args using the provided context
+      const resolvedArgs = resolveTokens(args, context);
+
+      // Dispatch event with resolved args
+      this.eventBus.dispatch(this.event(), ...resolvedArgs);
+    } else {
+      // No args, dispatch event without arguments
+      this.eventBus.dispatch(this.event());
+    }
   }
 }

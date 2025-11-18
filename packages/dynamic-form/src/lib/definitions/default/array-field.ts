@@ -37,7 +37,7 @@ import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
  * Nesting constraints: Arrays can contain rows, leaf fields, or groups (for object arrays),
  * but NOT pages or other arrays. Runtime validation enforces these rules.
  */
-export interface ArrayField<TFields extends ArrayAllowedChildren[] = ArrayAllowedChildren[]> extends FieldDef<never> {
+export interface ArrayField<TFields extends readonly ArrayAllowedChildren[] = readonly ArrayAllowedChildren[]> extends FieldDef<never> {
   type: 'array';
   /**
    * Template field definition(s) that will be cloned for each array item.
@@ -45,7 +45,7 @@ export interface ArrayField<TFields extends ArrayAllowedChildren[] = ArrayAllowe
    * - For flat arrays: A leaf field (input, select, checkbox, etc.)
    * - For object arrays: A group field containing multiple child fields
    */
-  fields: TFields;
+  readonly fields: TFields;
 }
 
 /**

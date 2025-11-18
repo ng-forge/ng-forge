@@ -24,6 +24,6 @@ export function mapFieldToBindings(fieldDef: FieldDef<any>, fieldRegistry: Map<s
     return fieldType.mapper(fieldDef);
   }
 
-  // Fallback to base mapper
-  return baseFieldMapper(fieldDef);
+  // Fallback to base mapper with options
+  return baseFieldMapper(fieldDef, options);
 }

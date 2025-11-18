@@ -22,9 +22,27 @@ export function valueFieldMapper(fieldDef: BaseValueField<any, any>): Binding[] 
   const formRoot = context.form();
   const childrenMap = (formRoot as any).structure?.childrenMap?.();
 
-  const formField = childrenMap?.get(fieldDef.key);
-  if (formField?.fieldProxy) {
-    bindings.push(inputBinding('field', () => formField.fieldProxy));
+  // Check if this is an array item field (has array notation like tags[0])
+  const arrayMatch = fieldDef.key.match(/^(.+)\[(\d+)\]$/);
+
+  if (arrayMatch) {
+    // Parse array notation to extract array name and index
+    const [, arrayName, indexStr] = arrayMatch;
+    const index = parseInt(indexStr, 10);
+
+    // Access the array field node, then the element at the index
+    const arrayFieldNode = childrenMap?.get(arrayName);
+    const arrayItemFieldProxy = arrayFieldNode?.fieldProxy?.[index];
+
+    if (arrayItemFieldProxy) {
+      bindings.push(inputBinding('field', () => arrayItemFieldProxy));
+    }
+  } else {
+    // Standard field access for non-array keys
+    const formField = childrenMap?.get(fieldDef.key);
+    if (formField?.fieldProxy) {
+      bindings.push(inputBinding('field', () => formField.fieldProxy));
+    }
   }
 
   return bindings;
