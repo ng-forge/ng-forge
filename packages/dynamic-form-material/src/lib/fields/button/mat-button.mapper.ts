@@ -8,7 +8,7 @@ import {
 } from '@ng-forge/dynamic-form';
 import { Binding, inject, inputBinding } from '@angular/core';
 
-export function buttonFieldMapper(fieldDef: FieldDef<any>): Binding[] {
+export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Optionally inject array context if this button is rendered within an array

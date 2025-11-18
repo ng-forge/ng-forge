@@ -101,6 +101,7 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const parentForm = this.parentFieldSignalContext.form();
 
     // Access the array FieldTree through the form's structure
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const childrenMap = (parentForm as any).structure?.childrenMap?.();
     if (!childrenMap) return [];
 
