@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { IonicTextareaComponent, IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
+import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 /**
  * Ionic textarea field component
@@ -17,14 +18,14 @@ import { AsyncPipe } from '@angular/common';
     <ion-textarea
       [field]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
-      [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
+      [labelPlacement]="effectiveLabelPlacement()"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
       [rows]="props()?.rows ?? 4"
       [autoGrow]="props()?.autoGrow ?? false"
       [counter]="props()?.counter ?? false"
       [color]="props()?.color"
-      [fill]="props()?.fill ?? 'outline'"
-      [shape]="props()?.shape"
+      [fill]="effectiveFill()"
+      [shape]="effectiveShape()"
       [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
       [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
@@ -52,6 +53,8 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class IonicTextareaFieldComponent implements IonicTextareaComponent {
+  private ionicConfig = inject(IONIC_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -68,4 +71,17 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // Config-aware computed properties
+  readonly effectiveFill = computed(() =>
+    this.props()?.fill ?? this.ionicConfig?.fill ?? 'outline'
+  );
+
+  readonly effectiveShape = computed(() =>
+    this.props()?.shape ?? this.ionicConfig?.shape
+  );
+
+  readonly effectiveLabelPlacement = computed(() =>
+    this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'stacked'
+  );
 }

@@ -1,4 +1,5 @@
 import type { FieldTypeDefinition } from '@ng-forge/dynamic-form';
+import type { Provider } from '@angular/core';
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
 import {
   IonicButtonField,
@@ -15,6 +16,8 @@ import {
   IonicTextareaField,
   IonicToggleField,
 } from '../fields';
+import { IonicConfig } from '../models/ionic-config';
+import { IONIC_CONFIG } from '../models/ionic-config.token';
 
 /**
  * Configure dynamic forms with Ionic field types.
@@ -38,6 +41,37 @@ import {
  */
 export function withIonicFields(): FieldTypeDefinition[] {
   return IONIC_FIELD_TYPES;
+}
+
+/**
+ * Configure global defaults for Ionic fields.
+ *
+ * This function provides global configuration that applies to all Ionic fields
+ * in the form. Field-level props will override these global defaults.
+ *
+ * @param config - Global Ionic configuration
+ * @returns Array of Angular providers
+ *
+ * @example
+ * ```typescript
+ * // Application-level setup with global Ionic config
+ * bootstrapApplication(AppComponent, {
+ *   providers: [
+ *     provideDynamicForm(...withIonicFields()),
+ *     ...withIonicConfig({ fill: 'outline', shape: 'round' })
+ *   ]
+ * });
+ * ```
+ *
+ * @public
+ */
+export function withIonicConfig(config: IonicConfig): Provider[] {
+  return [
+    {
+      provide: IONIC_CONFIG,
+      useValue: config,
+    },
+  ];
 }
 
 /**

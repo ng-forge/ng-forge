@@ -22,16 +22,19 @@ pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
 
 ### 1. Configure Providers
 
-Add Ionic field types to your application:
+Add Ionic field types and global configuration to your application:
 
 ```typescript
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
+import { withIonicFields, withIonicConfig } from '@ng-forge/dynamic-form-ionic';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withIonicFields())],
+  providers: [
+    provideDynamicForm(...withIonicFields()),
+    ...withIonicConfig({ fill: 'outline', labelPlacement: 'floating' }),
+  ],
 };
 ```
 
@@ -122,6 +125,185 @@ export class ContactFormComponent {
   } as const satisfies FormConfig;
 }
 ```
+
+## Global Configuration
+
+You can configure default values for all Ionic fields using the `withIonicConfig()` provider function. This allows you to set consistent defaults across your entire application or specific components without repeating props on every field.
+
+### Basic Usage
+
+As shown in the Quick Start section above, you can add global configuration at the application level:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withIonicFields, withIonicConfig } from '@ng-forge/dynamic-form-ionic';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(...withIonicFields()),
+    ...withIonicConfig({
+      fill: 'outline',
+      labelPlacement: 'floating',
+      color: 'primary',
+    }),
+  ],
+};
+```
+
+### Component-Level Configuration
+
+You can also apply global configuration at the component level for specific forms:
+
+```typescript
+import { Component, signal } from '@angular/core';
+import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withIonicFields, withIonicConfig } from '@ng-forge/dynamic-form-ionic';
+
+@Component({
+  selector: 'app-settings-form',
+  imports: [DynamicForm],
+  providers: [
+    provideDynamicForm(...withIonicFields()),
+    ...withIonicConfig({
+      fill: 'solid',
+      labelPlacement: 'stacked',
+      clearInput: true,
+    }),
+  ],
+  template: `<dynamic-form [config]="config" [(value)]="formValue" />`,
+})
+export class SettingsFormComponent {
+  formValue = signal({});
+  config = {
+    fields: [
+      // All input fields will use 'solid' fill and 'stacked' labels by default
+      { key: 'username', type: 'input', label: 'Username', value: '' },
+    ],
+  } as const satisfies FormConfig;
+}
+```
+
+### Available Configuration Options
+
+| Option                   | Type                                                                                               | Default          | Description                                    |
+| ------------------------ | -------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------- |
+| `fill`                   | `'solid' \| 'outline'`                                                                             | `'solid'`        | Input field fill style                         |
+| `labelPlacement`         | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                                           | `'stacked'`      | Label position for input fields                |
+| `color`                  | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'`                     | `'primary'`      | Ionic theme color                              |
+| `mode`                   | `'ios' \| 'md'`                                                                                    | -                | Force platform-specific styling                |
+| `clearInput`             | `boolean`                                                                                          | `false`          | Show clear button on inputs                    |
+| `selectInterface`        | `'action-sheet' \| 'alert' \| 'popover'`                                                           | `'action-sheet'` | Mobile selection UI for selects                |
+| `datepickerPresentation` | `'date' \| 'time' \| 'date-time' \| 'month' \| 'year'`                                             | `'date'`         | Datepicker presentation type                   |
+| `showDefaultButtons`     | `boolean`                                                                                          | `true`           | Show cancel/done buttons in datepickers        |
+| `sliderPin`              | `boolean`                                                                                          | `false`          | Show value pin on slider thumb                 |
+| `sliderTicks`            | `boolean`                                                                                          | `false`          | Show tick marks on sliders                     |
+| `sliderSnaps`            | `boolean`                                                                                          | `false`          | Snap slider to tick marks                      |
+| `textareaAutoGrow`       | `boolean`                                                                                          | `false`          | Auto-resize textareas based on content         |
+| `buttonExpand`           | `'full' \| 'block'`                                                                                | -                | Button width expansion                         |
+| `buttonFill`             | `'clear' \| 'outline' \| 'solid' \| 'default'`                                                     | `'solid'`        | Button fill style                              |
+| `buttonShape`            | `'round'`                                                                                          | -                | Rounded button shape                           |
+| `buttonSize`             | `'small' \| 'default' \| 'large'`                                                                  | `'default'`      | Button size                                    |
+| `checkboxLabelPlacement` | `'start' \| 'end'`                                                                                 | `'end'`          | Label position for checkboxes                  |
+| `radioLabelPlacement`    | `'start' \| 'end' \| 'fixed'`                                                                      | `'end'`          | Label position for radio buttons               |
+| `toggleLabelPlacement`   | `'start' \| 'end' \| 'fixed'`                                                                      | `'end'`          | Label position for toggles                     |
+| `enableOnOffLabels`      | `boolean`                                                                                          | `false`          | Show on/off labels on toggles                  |
+
+### Field-Level Overrides
+
+Field-level props always take precedence over global configuration. This allows you to set sensible defaults while customizing specific fields:
+
+```typescript
+import { Component, signal } from '@angular/core';
+import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withIonicFields, withIonicConfig } from '@ng-forge/dynamic-form-ionic';
+
+@Component({
+  selector: 'app-user-form',
+  imports: [DynamicForm],
+  providers: [
+    provideDynamicForm(...withIonicFields()),
+    ...withIonicConfig({
+      fill: 'outline', // Global default
+      labelPlacement: 'floating',
+      color: 'primary',
+    }),
+  ],
+  template: `<dynamic-form [config]="config" [(value)]="formValue" />`,
+})
+export class UserFormComponent {
+  formValue = signal({});
+  config = {
+    fields: [
+      {
+        key: 'email',
+        type: 'input',
+        label: 'Email',
+        value: '',
+        // Uses global 'outline' fill and 'floating' label placement
+      },
+      {
+        key: 'bio',
+        type: 'textarea',
+        label: 'Bio',
+        value: '',
+        props: {
+          fill: 'solid', // Overrides global 'outline'
+          labelPlacement: 'stacked', // Overrides global 'floating'
+          rows: 4,
+          autoGrow: true,
+        },
+      },
+      {
+        type: 'submit',
+        key: 'submit',
+        label: 'Submit',
+        props: {
+          color: 'success', // Override global 'primary'
+          expand: 'block',
+        },
+      },
+    ],
+  } as const satisfies FormConfig;
+}
+```
+
+### Configuration Priority
+
+The configuration system follows this priority order (highest to lowest):
+
+1. **Field-level props** - Props defined directly on the field
+2. **Global configuration** - Values from `withIonicConfig()`
+3. **Default values** - Built-in defaults from the library
+
+This means you can set application-wide defaults with `withIonicConfig()`, override them for specific components, and further customize individual fields as needed.
+
+### Platform-Specific Styling
+
+A common use case is to set different defaults based on the platform:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { provideDynamicForm } from '@ng-forge/dynamic-form';
+import { withIonicFields, withIonicConfig } from '@ng-forge/dynamic-form-ionic';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(...withIonicFields()),
+    ...withIonicConfig({
+      fill: 'outline',
+      labelPlacement: 'floating',
+      // iOS-style action sheets, MD-style on Android
+      selectInterface: 'action-sheet',
+    }),
+  ],
+};
+```
+
+---
 
 ## Complete Form Example
 

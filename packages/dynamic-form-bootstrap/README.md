@@ -107,6 +107,27 @@ export class MyFormComponent {
 }
 ```
 
+### Global Configuration (Optional)
+
+Configure default props for all Bootstrap fields at the application or component level:
+
+```typescript
+import { withBootstrapConfig } from '@ng-forge/dynamic-form-bootstrap';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(...withBootstrapFields()),
+    ...withBootstrapConfig({
+      floatingLabel: true,
+      size: 'lg',
+      variant: 'primary',
+    }),
+  ],
+};
+```
+
+Field-level props always override global configuration. See the [full documentation](https://ng-forge.github.io/ng-forge/ui-libs-integrations/bootstrap) for all available options.
+
 ## Field Types
 
 All 13 field types are documented in detail in the main documentation. Here are the available types:

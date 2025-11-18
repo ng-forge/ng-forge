@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { withBootstrapConfig } from '@ng-forge/dynamic-form-bootstrap';
 
 @Component({
   selector: 'bs-example-complete-form-demo',
   imports: [DynamicForm, JsonPipe],
+  providers: [...withBootstrapConfig({ floatingLabel: true })],
   template: `
     <dynamic-form [config]="config" [(value)]="formValue" />
     <div class="example-result">
@@ -49,7 +51,6 @@ export class CompleteFormDemoComponent {
         },
         props: {
           placeholder: 'Enter your first name',
-          floatingLabel: true,
         },
       },
       {
@@ -64,7 +65,6 @@ export class CompleteFormDemoComponent {
         },
         props: {
           placeholder: 'Enter your last name',
-          floatingLabel: true,
         },
       },
       {
@@ -80,7 +80,6 @@ export class CompleteFormDemoComponent {
         props: {
           type: 'email',
           placeholder: 'user@example.com',
-          floatingLabel: true,
           helpText: 'We will never share your email',
         },
       },
@@ -101,7 +100,6 @@ export class CompleteFormDemoComponent {
         props: {
           type: 'number',
           placeholder: '18',
-          floatingLabel: true,
         },
       },
       {
@@ -123,7 +121,6 @@ export class CompleteFormDemoComponent {
         ],
         props: {
           placeholder: 'Select your country',
-          floatingLabel: true,
         },
       },
 
@@ -143,7 +140,6 @@ export class CompleteFormDemoComponent {
         ],
         props: {
           placeholder: 'Choose a plan',
-          floatingLabel: true,
         },
       },
       {
@@ -152,7 +148,6 @@ export class CompleteFormDemoComponent {
         label: 'Bio',
         props: {
           placeholder: 'Tell us about yourself',
-          floatingLabel: true,
           helpText: 'Optional - share a bit about yourself',
           rows: 4,
         },

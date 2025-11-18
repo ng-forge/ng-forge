@@ -13,8 +13,5 @@ export class CheckboxIframeDemoComponent {
   type: 'checkbox',
   label: 'Subscribe to newsletter',
   value: false,
-  props: {
-    labelPlacement: 'end',
-  },
 }`;
 }

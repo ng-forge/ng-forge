@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import {
@@ -11,6 +11,7 @@ import {
 } from '@ng-forge/dynamic-form';
 import { IonicSelectComponent, IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
+import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 /**
  * Ionic select field component
@@ -24,17 +25,17 @@ import { AsyncPipe } from '@angular/common';
     <ion-select
       [field]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
-      [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
+      [labelPlacement]="effectiveLabelPlacement()"
       [placeholder]="(placeholder() ?? props()?.placeholder | dynamicText | async) ?? ''"
       [multiple]="props()?.multiple ?? false"
       [compareWith]="props()?.compareWith ?? defaultCompare"
-      [interface]="props()?.interface ?? 'alert'"
+      [interface]="effectiveInterface()"
       [interfaceOptions]="props()?.interfaceOptions ?? {}"
       [cancelText]="props()?.cancelText ?? 'Cancel'"
       [okText]="props()?.okText ?? 'OK'"
       [color]="props()?.color"
-      [fill]="props()?.fill ?? 'outline'"
-      [shape]="props()?.shape"
+      [fill]="effectiveFill()"
+      [shape]="effectiveShape()"
       [attr.tabindex]="tabIndex()"
     >
       @for (option of options(); track option.value) {
@@ -65,6 +66,8 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class IonicSelectFieldComponent<T> implements IonicSelectComponent<T> {
+  private ionicConfig = inject(IONIC_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 
@@ -86,4 +89,21 @@ export default class IonicSelectFieldComponent<T> implements IonicSelectComponen
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
+
+  // Config-aware computed properties
+  readonly effectiveFill = computed(() =>
+    this.props()?.fill ?? this.ionicConfig?.fill ?? 'outline'
+  );
+
+  readonly effectiveShape = computed(() =>
+    this.props()?.shape ?? this.ionicConfig?.shape
+  );
+
+  readonly effectiveLabelPlacement = computed(() =>
+    this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'stacked'
+  );
+
+  readonly effectiveInterface = computed(() =>
+    this.props()?.interface ?? this.ionicConfig?.selectInterface ?? 'alert'
+  );
 }

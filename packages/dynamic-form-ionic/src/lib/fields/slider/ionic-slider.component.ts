@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonRange } from '@ionic/angular/standalone';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { IonicSliderComponent, IonicSliderProps } from './ionic-slider.type';
 import { AsyncPipe } from '@angular/common';
+import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 /**
  * Ionic slider field component using IonRange
@@ -52,6 +53,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicSliderFieldComponent implements IonicSliderComponent {
+  private ionicConfig = inject(IONIC_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<number>>();
   readonly key = input.required<string>();
 

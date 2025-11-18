@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { withBootstrapConfig } from '@ng-forge/dynamic-form-bootstrap';
 import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'bs-example-user-registration-demo',
   imports: [DynamicForm, JsonPipe],
+  providers: [...withBootstrapConfig({ floatingLabel: true })],
   host: {
     class: 'example-container',
   },
@@ -49,7 +51,6 @@ export class UserRegistrationDemoComponent {
         },
         props: {
           placeholder: 'Enter your first name',
-          floatingLabel: true,
         },
       },
       {
@@ -64,7 +65,6 @@ export class UserRegistrationDemoComponent {
         },
         props: {
           placeholder: 'Enter your last name',
-          floatingLabel: true,
         },
       },
       {
@@ -80,7 +80,6 @@ export class UserRegistrationDemoComponent {
         props: {
           type: 'email',
           placeholder: 'user@example.com',
-          floatingLabel: true,
           helpText: 'We will never share your email',
         },
       },
@@ -123,7 +122,6 @@ export class UserRegistrationDemoComponent {
         ],
         props: {
           placeholder: 'Select your country',
-          floatingLabel: true,
         },
       },
 
@@ -143,7 +141,6 @@ export class UserRegistrationDemoComponent {
         ],
         props: {
           placeholder: 'Choose a plan',
-          floatingLabel: true,
           size: 'lg',
         },
       },
@@ -153,7 +150,6 @@ export class UserRegistrationDemoComponent {
         label: 'Bio',
         props: {
           placeholder: 'Tell us about yourself',
-          floatingLabel: true,
           helpText: 'Optional - share a bit about yourself',
           rows: 4,
         },

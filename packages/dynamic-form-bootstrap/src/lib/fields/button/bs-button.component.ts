@@ -11,6 +11,7 @@ import {
   resolveTokens,
 } from '@ng-forge/dynamic-form';
 import { BsButtonComponent, BsButtonProps } from './bs-button.type';
+import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 
 /**
  * Bootstrap button component
@@ -42,6 +43,7 @@ import { BsButtonComponent, BsButtonProps } from './bs-button.type';
 })
 export default class BsButtonFieldComponent<TEvent extends FormEvent> implements BsButtonComponent<TEvent> {
   private readonly eventBus = inject(EventBus);
+  private bootstrapConfig = inject(BOOTSTRAP_CONFIG, { optional: true });
 
   readonly key = input.required<string>();
   readonly label = input.required<DynamicText>();
@@ -59,17 +61,33 @@ export default class BsButtonFieldComponent<TEvent extends FormEvent> implements
 
   buttonTestId = computed(() => `${this.props()?.type || 'button'}-${this.key()}`);
 
+  readonly effectiveSize = computed(() =>
+    this.props()?.size ?? this.bootstrapConfig?.size
+  );
+
+  readonly effectiveVariant = computed(() =>
+    this.props()?.variant ?? this.bootstrapConfig?.buttonVariant ?? 'primary'
+  );
+
+  readonly effectiveOutline = computed(() =>
+    this.props()?.outline ?? this.bootstrapConfig?.buttonOutline ?? false
+  );
+
+  readonly effectiveBlock = computed(() =>
+    this.props()?.block ?? this.bootstrapConfig?.buttonBlock ?? false
+  );
+
   buttonClasses = computed(() => {
     const p = this.props();
-    const variant = p?.variant || 'primary';
-    const outline = p?.outline ? 'outline-' : '';
+    const variant = this.effectiveVariant();
+    const outline = this.effectiveOutline() ? 'outline-' : '';
 
     return [
       'btn',
       `btn-${outline}${variant}`,
-      p?.size === 'sm' && 'btn-sm',
-      p?.size === 'lg' && 'btn-lg',
-      p?.block && 'w-100',
+      this.effectiveSize() === 'sm' && 'btn-sm',
+      this.effectiveSize() === 'lg' && 'btn-lg',
+      this.effectiveBlock() && 'w-100',
       p?.active && 'active',
       this.className(),
     ]

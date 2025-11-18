@@ -139,6 +139,27 @@ export class ContactFormComponent {
 }
 ```
 
+### Global Configuration (Optional)
+
+Configure default props for all Ionic fields at the application or component level:
+
+```typescript
+import { withIonicConfig } from '@ng-forge/dynamic-form-ionic';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(...withIonicFields()),
+    ...withIonicConfig({
+      fill: 'outline',
+      labelPlacement: 'floating',
+      color: 'primary',
+    }),
+  ],
+};
+```
+
+Field-level props always override global configuration. See the [full documentation](https://ng-forge.github.io/ng-forge/ui-libs-integrations/ionic) for all available options.
+
 ## Customization
 
 ### Using with Multiple UI Libraries

@@ -14,7 +14,6 @@ export class ButtonIframeDemoComponent {
   label: 'Submit',
   props: {
     color: 'primary',
-    fill: 'solid',
   },
 }`;
 }

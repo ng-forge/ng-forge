@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
@@ -13,6 +13,7 @@ import {
 } from '@ng-forge/dynamic-form';
 import { MatSelectComponent, MatSelectProps } from './mat-select.type';
 import { AsyncPipe } from '@angular/common';
+import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-select',
@@ -20,7 +21,7 @@ import { AsyncPipe } from '@angular/common';
   template: `
     @let f = field();
 
-    <mat-form-field [appearance]="props()?.appearance || 'fill'" [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'">
+    <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label(); as label) {
         <mat-label>{{ label | dynamicText | async }}</mat-label>
       }
@@ -71,6 +72,8 @@ import { AsyncPipe } from '@angular/common';
   },
 })
 export default class MatSelectFieldComponent<T> implements MatSelectComponent<T> {
+  private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 
@@ -84,6 +87,11 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
   readonly props = input<MatSelectProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  // Merged config with global defaults
+  readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'fill');
+
+  readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

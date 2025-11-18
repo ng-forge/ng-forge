@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { PrimeDatepickerComponent, PrimeDatepickerProps } from './prime-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { DatePicker } from 'primeng/datepicker';
+import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 /**
  * PrimeNG datepicker field component
@@ -27,11 +28,11 @@ import { DatePicker } from 'primeng/datepicker';
         [attr.tabindex]="tabIndex()"
         [dateFormat]="props()?.dateFormat || 'mm/dd/yy'"
         [inline]="props()?.inline ?? false"
-        [showIcon]="props()?.showIcon ?? true"
+        [showIcon]="effectiveShowIcon()"
         [showButtonBar]="props()?.showButtonBar ?? false"
         [selectionMode]="props()?.selectionMode || 'single'"
-        [touchUI]="props()?.touchUI ?? false"
-        [view]="props()?.view || 'date'"
+        [touchUI]="effectiveTouchUI()"
+        [view]="effectiveView()"
         [styleClass]="datepickerClasses()"
       />
 
@@ -59,6 +60,8 @@ import { DatePicker } from 'primeng/datepicker';
   ],
 })
 export default class PrimeDatepickerFieldComponent implements PrimeDatepickerComponent {
+  private primengConfig = inject(PRIMENG_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<Date | null>>();
   readonly key = input.required<string>();
 
@@ -81,10 +84,26 @@ export default class PrimeDatepickerFieldComponent implements PrimeDatepickerCom
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
+  readonly effectiveStyleClass = computed(() =>
+    this.props()?.styleClass ?? this.primengConfig?.styleClass
+  );
+
+  readonly effectiveShowIcon = computed(() =>
+    this.props()?.showIcon ?? this.primengConfig?.datepickerShowIcon ?? true
+  );
+
+  readonly effectiveTouchUI = computed(() =>
+    this.props()?.touchUI ?? this.primengConfig?.datepickerTouchUI ?? false
+  );
+
+  readonly effectiveView = computed(() =>
+    this.props()?.view ?? this.primengConfig?.datepickerView ?? 'date'
+  );
+
   readonly datepickerClasses = computed(() => {
     const classes: string[] = [];
 
-    const styleClass = this.props()?.styleClass;
+    const styleClass = this.effectiveStyleClass();
     if (styleClass) {
       classes.push(styleClass);
     }

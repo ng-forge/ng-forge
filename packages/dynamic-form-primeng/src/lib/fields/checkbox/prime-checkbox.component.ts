@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { PrimeCheckboxComponent, PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
+import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 @Component({
   selector: 'df-prime-checkbox',
@@ -54,6 +55,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeCheckboxFieldComponent implements PrimeCheckboxComponent {
+  private primengConfig = inject(PRIMENG_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -72,10 +75,14 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
+  readonly effectiveStyleClass = computed(() =>
+    this.props()?.styleClass ?? this.primengConfig?.styleClass
+  );
+
   readonly checkboxClasses = computed(() => {
     const classes: string[] = [];
 
-    const styleClass = this.props()?.styleClass;
+    const styleClass = this.effectiveStyleClass();
     if (styleClass) {
       classes.push(styleClass);
     }

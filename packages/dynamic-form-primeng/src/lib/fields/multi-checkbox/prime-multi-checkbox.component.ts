@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
 import { Checkbox } from 'primeng/checkbox';
@@ -15,6 +15,7 @@ import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PrimeMultiCheckboxComponent, PrimeMultiCheckboxProps } from './prime-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
+import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 @Component({
   selector: 'df-prime-multi-checkbox',
@@ -73,6 +74,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> implements PrimeMultiCheckboxComponent<T> {
+  private primengConfig = inject(PRIMENG_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<T[]>>();
   readonly key = input.required<string>();
 
@@ -93,10 +96,14 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
+  readonly effectiveStyleClass = computed(() =>
+    this.props()?.styleClass ?? this.primengConfig?.styleClass
+  );
+
   readonly groupClasses = computed(() => {
     const classes: string[] = [];
 
-    const styleClass = this.props()?.styleClass;
+    const styleClass = this.effectiveStyleClass();
     if (styleClass) {
       classes.push(styleClass);
     }

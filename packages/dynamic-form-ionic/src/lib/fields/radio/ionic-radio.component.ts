@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonItem, IonNote, IonRadio, IonRadioGroup } from '@ionic/angular/standalone';
 import {
@@ -11,6 +11,7 @@ import {
 } from '@ng-forge/dynamic-form';
 import { IonicRadioComponent, IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
+import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 /**
  * Ionic radio field component
@@ -71,6 +72,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<T> {
+  private ionicConfig = inject(IONIC_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 

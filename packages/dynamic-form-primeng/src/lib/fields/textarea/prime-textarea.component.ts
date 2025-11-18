@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { TextareaModule } from 'primeng/textarea';
 import { FormsModule } from '@angular/forms';
+import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 @Component({
   selector: 'df-prime-textarea',
@@ -57,6 +58,8 @@ import { FormsModule } from '@angular/forms';
   ],
 })
 export default class PrimeTextareaFieldComponent implements PrimeTextareaComponent {
+  private primengConfig = inject(PRIMENG_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -74,10 +77,22 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
+  readonly effectiveVariant = computed(() =>
+    this.props()?.variant ?? this.primengConfig?.variant ?? 'outlined'
+  );
+
+  readonly effectiveSize = computed(() =>
+    this.props()?.size ?? this.primengConfig?.size
+  );
+
+  readonly effectiveStyleClass = computed(() =>
+    this.props()?.styleClass ?? this.primengConfig?.styleClass
+  );
+
   readonly textareaClasses = computed(() => {
     const classes: string[] = [];
 
-    const styleClass = this.props()?.styleClass;
+    const styleClass = this.effectiveStyleClass();
     if (styleClass) {
       classes.push(styleClass);
     }

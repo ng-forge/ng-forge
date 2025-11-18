@@ -162,9 +162,6 @@ export class CompleteFormDemoComponent {
         key: 'newsletter',
         type: 'checkbox',
         label: 'Subscribe to newsletter',
-        props: {
-          labelPlacement: 'end',
-        },
       },
 
       // Submit button

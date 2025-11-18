@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import {
   createResolvedErrorsSignal,
@@ -11,6 +11,7 @@ import {
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeRadioGroupComponent } from './prime-radio-group.component';
+import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 @Component({
   selector: 'df-prime-radio',
@@ -56,6 +57,8 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<T> {
+  private primengConfig = inject(PRIMENG_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 
@@ -75,4 +78,8 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  readonly effectiveStyleClass = computed(() =>
+    this.props()?.styleClass ?? this.primengConfig?.styleClass
+  );
 }

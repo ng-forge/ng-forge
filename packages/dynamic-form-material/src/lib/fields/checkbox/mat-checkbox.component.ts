@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-checkbox',
@@ -14,10 +15,10 @@ import { AsyncPipe } from '@angular/common';
 
     <mat-checkbox
       [field]="f"
-      [labelPosition]="props()?.labelPosition || 'after'"
+      [labelPosition]="effectiveLabelPosition()"
       [indeterminate]="props()?.indeterminate || false"
       [color]="props()?.color || 'primary'"
-      [disableRipple]="props()?.disableRipple || false"
+      [disableRipple]="effectiveDisableRipple()"
       [attr.tabindex]="tabIndex()"
       [attr.hidden]="f().hidden() || null"
     >
@@ -51,6 +52,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
+  private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -62,6 +65,11 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly props = input<MatCheckboxProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  // Merged config with global defaults
+  readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
+
+  readonly effectiveLabelPosition = computed(() => this.props()?.labelPosition ?? this.materialConfig?.labelPosition ?? 'after');
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

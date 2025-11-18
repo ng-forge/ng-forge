@@ -51,7 +51,26 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-### 2. Create a Form
+### 2. Set Global Defaults (Optional)
+
+Configure default props for all Material fields:
+
+```typescript
+import { withMaterialConfig } from '@ng-forge/dynamic-form-material';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(...withMaterialFields()),
+    ...withMaterialConfig({
+      appearance: 'outline',
+      subscriptSizing: 'fixed',
+      color: 'primary',
+    }),
+  ],
+};
+```
+
+### 3. Create a Form
 
 ```typescript
 import { Component } from '@angular/core';

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, provideDynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { withMaterialConfig, withMaterialFields } from '@ng-forge/dynamic-form-material';
 import { JsonPipe } from '@angular/common';
 
 @Component({
@@ -27,6 +28,10 @@ import { JsonPipe } from '@angular/common';
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    provideDynamicForm(...withMaterialFields()),
+    ...withMaterialConfig({ appearance: 'outline' }),
+  ],
 })
 export class ConditionalLogicShowcaseDemoComponent {
   formValue = signal({
@@ -74,7 +79,6 @@ export class ConditionalLogicShowcaseDemoComponent {
                 label: 'First Name',
                 required: true,
                 col: 6,
-                props: { appearance: 'outline' },
               },
               {
                 key: 'lastName',
@@ -83,7 +87,6 @@ export class ConditionalLogicShowcaseDemoComponent {
                 label: 'Last Name',
                 required: true,
                 col: 6,
-                props: { appearance: 'outline' },
               },
             ],
           },
@@ -96,7 +99,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             email: true,
             props: {
               type: 'email',
-              appearance: 'outline',
               hint: 'We will send certification updates to this email',
             },
           },
@@ -108,7 +110,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             required: true,
             props: {
               type: 'tel',
-              appearance: 'outline',
             },
           },
           {
@@ -135,7 +136,6 @@ export class ConditionalLogicShowcaseDemoComponent {
               maxDate: 'You must be at least 18 years old to apply',
             },
             props: {
-              appearance: 'outline',
               hint: 'Must be 18 or older',
             },
           },
@@ -152,7 +152,6 @@ export class ConditionalLogicShowcaseDemoComponent {
               { value: 'specialist', label: 'Specialist - Domain-specific certification' },
             ],
             props: {
-              appearance: 'outline',
               placeholder: 'Select certification level',
               hint: 'This determines the requirements for your application',
             },
@@ -171,7 +170,6 @@ export class ConditionalLogicShowcaseDemoComponent {
               { value: 'other', label: 'Other' },
             ],
             props: {
-              appearance: 'outline',
               placeholder: 'Select your country',
             },
           },
@@ -233,7 +231,6 @@ export class ConditionalLogicShowcaseDemoComponent {
               },
             ],
             props: {
-              appearance: 'outline',
               placeholder: 'Select state/province',
               hint: 'Only shown for US/Canada',
             },
@@ -272,9 +269,6 @@ export class ConditionalLogicShowcaseDemoComponent {
               { value: 'master', label: 'Master Degree' },
               { value: 'doctorate', label: 'Doctorate' },
             ],
-            props: {
-              appearance: 'outline',
-            },
           },
           {
             key: 'graduationYear',
@@ -288,7 +282,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             },
             props: {
               type: 'number',
-              appearance: 'outline',
             },
           },
           {
@@ -302,7 +295,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             },
             props: {
               type: 'number',
-              appearance: 'outline',
               hint: 'Minimum experience varies by certification level',
             },
           },
@@ -370,9 +362,6 @@ export class ConditionalLogicShowcaseDemoComponent {
                 errorMessage: 'Company name is required for employed applicants',
               },
             ],
-            props: {
-              appearance: 'outline',
-            },
           },
           {
             key: 'jobTitle',
@@ -423,9 +412,6 @@ export class ConditionalLogicShowcaseDemoComponent {
                 errorMessage: 'Job title is required for employed applicants',
               },
             ],
-            props: {
-              appearance: 'outline',
-            },
           },
           {
             key: 'industry',
@@ -466,7 +452,6 @@ export class ConditionalLogicShowcaseDemoComponent {
               },
             ],
             props: {
-              appearance: 'outline',
               placeholder: 'Select your industry',
             },
           },
@@ -498,7 +483,6 @@ export class ConditionalLogicShowcaseDemoComponent {
               },
             ],
             props: {
-              appearance: 'outline',
               hint: 'e.g., Cloud Architecture, Data Science, Cybersecurity',
             },
           },
@@ -532,7 +516,6 @@ export class ConditionalLogicShowcaseDemoComponent {
               },
             ],
             props: {
-              appearance: 'outline',
               rows: 4,
               hint: 'Describe 2-3 significant projects or achievements',
             },
@@ -603,7 +586,6 @@ export class ConditionalLogicShowcaseDemoComponent {
                 label: 'Reference Name',
                 required: true,
                 col: 6,
-                props: { appearance: 'outline' },
               },
               {
                 key: 'reference1Email',
@@ -613,7 +595,7 @@ export class ConditionalLogicShowcaseDemoComponent {
                 required: true,
                 email: true,
                 col: 6,
-                props: { type: 'email', appearance: 'outline' },
+                props: { type: 'email' },
               },
             ],
           },
@@ -624,7 +606,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             label: 'Professional Relationship',
             required: true,
             props: {
-              appearance: 'outline',
               hint: 'e.g., Former Manager, Colleague, Client',
             },
           },
@@ -656,7 +637,6 @@ export class ConditionalLogicShowcaseDemoComponent {
                 value: '',
                 label: 'Reference Name',
                 col: 6,
-                props: { appearance: 'outline' },
                 // DEMO: Required for non-Associate
                 logic: [
                   {
@@ -687,7 +667,7 @@ export class ConditionalLogicShowcaseDemoComponent {
                 label: 'Reference Email',
                 email: true,
                 col: 6,
-                props: { type: 'email', appearance: 'outline' },
+                props: { type: 'email' },
                 logic: [
                   {
                     type: 'hidden',
@@ -718,7 +698,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             value: '',
             label: 'Professional Relationship',
             props: {
-              appearance: 'outline',
               hint: 'e.g., Former Manager, Colleague, Client',
             },
             logic: [
@@ -771,7 +750,6 @@ export class ConditionalLogicShowcaseDemoComponent {
                 value: '',
                 label: 'Reference Name',
                 col: 6,
-                props: { appearance: 'outline' },
                 logic: [
                   {
                     type: 'hidden',
@@ -801,7 +779,7 @@ export class ConditionalLogicShowcaseDemoComponent {
                 label: 'Reference Email',
                 email: true,
                 col: 6,
-                props: { type: 'email', appearance: 'outline' },
+                props: { type: 'email' },
                 logic: [
                   {
                     type: 'hidden',
@@ -832,7 +810,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             value: '',
             label: 'Professional Relationship',
             props: {
-              appearance: 'outline',
               hint: 'e.g., Former Manager, Colleague, Client',
             },
             logic: [
@@ -907,7 +884,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             value: '',
             label: 'Other Professional Organization',
             props: {
-              appearance: 'outline',
               hint: 'Please specify the organization name',
             },
             // DEMO: Complex AND condition - shown only if "other" is selected AND not Associate
@@ -1022,7 +998,6 @@ export class ConditionalLogicShowcaseDemoComponent {
             label: 'Portfolio URL',
             props: {
               type: 'url',
-              appearance: 'outline',
               hint: 'Link to your online portfolio or GitHub profile',
             },
             // DEMO: Complex multi-condition logic

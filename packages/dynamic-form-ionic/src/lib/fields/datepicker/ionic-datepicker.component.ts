@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import {
   IonButton,
@@ -16,6 +16,7 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
+import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 /**
  * Ionic datepicker field component
@@ -107,6 +108,8 @@ import { format } from 'date-fns';
   },
 })
 export default class IonicDatepickerFieldComponent implements IonicDatepickerComponent {
+  private ionicConfig = inject(IONIC_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<Date | null>>();
   readonly key = input.required<string>();
 

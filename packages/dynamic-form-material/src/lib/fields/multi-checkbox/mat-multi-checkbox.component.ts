@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import {
@@ -16,6 +16,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxComponent, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
@@ -32,7 +33,8 @@ import { AsyncPipe } from '@angular/common';
           [checked]="option | inArray: valueViewModel()"
           [disabled]="f().disabled() || option.disabled"
           [color]="props()?.color || 'primary'"
-          [labelPosition]="props()?.labelPosition || 'after'"
+          [labelPosition]="effectiveLabelPosition()"
+          [disableRipple]="effectiveDisableRipple()"
           (change)="onCheckboxChange(option, $event.checked)"
         >
           {{ option.label | dynamicText | async }}
@@ -68,6 +70,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatMultiCheckboxFieldComponent<T extends ValueType> implements MatMultiCheckboxComponent<T> {
+  private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<T[]>>();
   readonly key = input.required<string>();
 
@@ -79,6 +83,11 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatMultiCheckboxProps>();
+
+  // Merged config with global defaults
+  readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
+
+  readonly effectiveLabelPosition = computed(() => this.props()?.labelPosition ?? this.materialConfig?.labelPosition ?? 'after');
 
   valueViewModel = linkedSignal<FieldOption<T>[]>(
     () => {

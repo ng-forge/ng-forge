@@ -35,7 +35,6 @@ export const conditionalFieldsConfig = {
       props: {
         type: 'email',
         placeholder: 'Enter your existing email',
-        appearance: 'outline',
       },
       required: true,
       email: true,
@@ -59,7 +58,6 @@ export const conditionalFieldsConfig = {
       props: {
         type: 'password',
         placeholder: 'Enter your password',
-        appearance: 'outline',
       },
       required: true,
       col: 6,
@@ -81,7 +79,6 @@ export const conditionalFieldsConfig = {
       label: 'First Name',
       props: {
         placeholder: 'Enter your first name',
-        appearance: 'outline',
       },
       required: true,
       col: 6,
@@ -103,7 +100,6 @@ export const conditionalFieldsConfig = {
       label: 'Last Name',
       props: {
         placeholder: 'Enter your last name',
-        appearance: 'outline',
       },
       required: true,
       col: 6,
@@ -126,7 +122,6 @@ export const conditionalFieldsConfig = {
       props: {
         type: 'email',
         placeholder: 'Enter your email address',
-        appearance: 'outline',
       },
       required: true,
       email: true,
@@ -163,7 +158,6 @@ export const conditionalFieldsConfig = {
           label: 'Street Address',
           props: {
             placeholder: 'Enter shipping street address',
-            appearance: 'outline',
           },
           required: true,
           col: 12,
@@ -174,7 +168,6 @@ export const conditionalFieldsConfig = {
           label: 'City',
           props: {
             placeholder: 'Enter shipping city',
-            appearance: 'outline',
           },
           required: true,
           col: 6,
@@ -185,7 +178,6 @@ export const conditionalFieldsConfig = {
           label: 'ZIP Code',
           props: {
             placeholder: 'Enter ZIP code',
-            appearance: 'outline',
           },
           required: true,
           col: 6,

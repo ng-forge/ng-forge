@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
-import { submitButton } from '@ng-forge/dynamic-form-primeng';
+import { submitButton, withPrimeNGConfig } from '@ng-forge/dynamic-form-primeng';
 
 @Component({
   selector: 'app-complete-prime-form',
   imports: [DynamicForm, JsonPipe],
+  providers: [
+    ...withPrimeNGConfig({ variant: 'outlined' })
+  ],
   template: `
     <dynamic-form [config]="config" [(value)]="formValue" />
     <div class="example-result">
@@ -50,7 +53,6 @@ export class CompletePrimeFormComponent {
         },
         props: {
           placeholder: 'Enter your first name',
-          variant: 'outlined',
         },
       },
       {
@@ -65,7 +67,6 @@ export class CompletePrimeFormComponent {
         },
         props: {
           placeholder: 'Enter your last name',
-          variant: 'outlined',
         },
       },
       {
@@ -81,7 +82,6 @@ export class CompletePrimeFormComponent {
         props: {
           type: 'email',
           placeholder: 'user@example.com',
-          variant: 'outlined',
           hint: 'We will never share your email',
         },
       },

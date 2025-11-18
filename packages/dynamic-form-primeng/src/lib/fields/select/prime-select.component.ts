@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import {
   createResolvedErrorsSignal,
@@ -12,6 +12,7 @@ import { AsyncPipe } from '@angular/common';
 import { Select } from 'primeng/select';
 import { MultiSelect } from 'primeng/multiselect';
 import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
+import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 @Component({
   selector: 'df-prime-select',
@@ -73,6 +74,8 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
   ],
 })
 export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponent<T> {
+  private primengConfig = inject(PRIMENG_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 
@@ -95,10 +98,22 @@ export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponen
 
   readonly isMultiple = computed(() => this.props()?.multiple ?? false);
 
+  readonly effectiveVariant = computed(() =>
+    this.props()?.variant ?? this.primengConfig?.variant ?? 'outlined'
+  );
+
+  readonly effectiveSize = computed(() =>
+    this.props()?.size ?? this.primengConfig?.size
+  );
+
+  readonly effectiveStyleClass = computed(() =>
+    this.props()?.styleClass ?? this.primengConfig?.styleClass
+  );
+
   readonly selectClasses = computed(() => {
     const classes: string[] = [];
 
-    const styleClass = this.props()?.styleClass;
+    const styleClass = this.effectiveStyleClass();
     if (styleClass) {
       classes.push(styleClass);
     }

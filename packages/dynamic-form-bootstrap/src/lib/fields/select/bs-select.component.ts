@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import {
   createResolvedErrorsSignal,
@@ -10,6 +10,7 @@ import {
 } from '@ng-forge/dynamic-form';
 import { BsSelectComponent, BsSelectProps } from './bs-select.type';
 import { AsyncPipe } from '@angular/common';
+import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 
 @Component({
   selector: 'df-bs-select',
@@ -26,8 +27,8 @@ import { AsyncPipe } from '@angular/common';
         [field]="f"
         [id]="key()"
         class="form-select"
-        [class.form-select-sm]="props()?.size === 'sm'"
-        [class.form-select-lg]="props()?.size === 'lg'"
+        [class.form-select-sm]="effectiveSize() === 'sm'"
+        [class.form-select-lg]="effectiveSize() === 'lg'"
         [class.is-invalid]="f().invalid() && f().touched()"
         [multiple]="props()?.multiple || false"
         [size]="props()?.htmlSize"
@@ -66,7 +67,9 @@ import { AsyncPipe } from '@angular/common';
     `,
   ],
 })
-export default class BsSelectFieldComponent<T extends string = string> implements BsSelectComponent<T> {
+export default class BsSelectFieldComponent<T extends string> implements BsSelectComponent<T> {
+  private bootstrapConfig = inject(BOOTSTRAP_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 
@@ -86,6 +89,10 @@ export default class BsSelectFieldComponent<T extends string = string> implement
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  readonly effectiveSize = computed(() =>
+    this.props()?.size ?? this.bootstrapConfig?.size
+  );
 
   defaultCompare = Object.is;
 

@@ -12,6 +12,7 @@ import {
 } from '@ng-forge/dynamic-form';
 import { IonicButtonComponent, IonicButtonProps } from './ionic-button.type';
 import { AsyncPipe } from '@angular/common';
+import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 /**
  * Ionic button component
@@ -26,12 +27,12 @@ import { AsyncPipe } from '@angular/common';
   template: `
     <ion-button
       [type]="props()?.type || 'button'"
-      [expand]="props()?.expand"
-      [fill]="props()?.fill || 'solid'"
-      [shape]="props()?.shape"
-      [size]="props()?.size"
+      [expand]="effectiveExpand()"
+      [fill]="effectiveFill()"
+      [shape]="effectiveShape()"
+      [size]="effectiveSize()"
       [color]="props()?.color || 'primary'"
-      [strong]="props()?.strong"
+      [strong]="effectiveStrong()"
       [class]="className() || ''"
       [disabled]="disabled() || false"
       [attr.data-testid]="buttonTestId()"
@@ -44,6 +45,7 @@ import { AsyncPipe } from '@angular/common';
 })
 export default class IonicButtonFieldComponent<TEvent extends FormEvent> implements IonicButtonComponent<TEvent> {
   private readonly eventBus = inject(EventBus);
+  private ionicConfig = inject(IONIC_CONFIG, { optional: true });
 
   readonly key = input.required<string>();
   readonly label = input.required<DynamicText>();
@@ -60,6 +62,27 @@ export default class IonicButtonFieldComponent<TEvent extends FormEvent> impleme
   readonly eventContext = input<ArrayItemContext>();
 
   buttonTestId = computed(() => `${this.props()?.type || 'button'}-${this.key()}`);
+
+  // Config-aware computed properties
+  readonly effectiveFill = computed(() =>
+    this.props()?.fill ?? this.ionicConfig?.buttonFill ?? 'solid'
+  );
+
+  readonly effectiveSize = computed(() =>
+    this.props()?.size ?? this.ionicConfig?.buttonSize
+  );
+
+  readonly effectiveExpand = computed(() =>
+    this.props()?.expand ?? this.ionicConfig?.buttonExpand
+  );
+
+  readonly effectiveStrong = computed(() =>
+    this.props()?.strong ?? this.ionicConfig?.buttonStrong
+  );
+
+  readonly effectiveShape = computed(() =>
+    this.props()?.shape ?? this.ionicConfig?.shape
+  );
 
   triggerEvent(): void {
     const args = this.eventArgs();

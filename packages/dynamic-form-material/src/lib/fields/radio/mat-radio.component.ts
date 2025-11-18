@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import {
@@ -12,6 +12,7 @@ import {
 import { MatRadioComponent, MatRadioProps } from './mat-radio.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-radio',
@@ -28,7 +29,8 @@ import { AsyncPipe } from '@angular/common';
           [value]="option.value"
           [disabled]="option.disabled || false"
           [color]="props()?.color || 'primary'"
-          [labelPosition]="props()?.labelPosition || 'after'"
+          [labelPosition]="effectiveLabelPosition()"
+          [disableRipple]="effectiveDisableRipple()"
         >
           {{ option.label | dynamicText | async }}
         </mat-radio-button>
@@ -62,6 +64,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatRadioFieldComponent<T> implements MatRadioComponent<T> {
+  private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 
@@ -75,6 +79,11 @@ export default class MatRadioFieldComponent<T> implements MatRadioComponent<T> {
   readonly props = input<MatRadioProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  // Merged config with global defaults
+  readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
+
+  readonly effectiveLabelPosition = computed(() => this.props()?.labelPosition ?? this.materialConfig?.labelPosition ?? 'after');
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

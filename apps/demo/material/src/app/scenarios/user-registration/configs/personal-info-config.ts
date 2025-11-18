@@ -28,7 +28,6 @@ export const personalInfoConfig = {
           label: 'First Name',
           props: {
             placeholder: 'Enter your first name',
-            appearance: 'outline',
           },
           required: true,
           col: 6,
@@ -39,7 +38,6 @@ export const personalInfoConfig = {
           label: 'Last Name',
           props: {
             placeholder: 'Enter your last name',
-            appearance: 'outline',
           },
           required: true,
           col: 6,
@@ -51,7 +49,6 @@ export const personalInfoConfig = {
           props: {
             type: 'email',
             placeholder: 'Enter your email address',
-            appearance: 'outline',
           },
           required: true,
           email: true,
@@ -64,7 +61,6 @@ export const personalInfoConfig = {
           props: {
             type: 'tel',
             placeholder: '+1 (555) 123-4567',
-            appearance: 'outline',
           },
           required: true,
           col: 6,
@@ -73,9 +69,6 @@ export const personalInfoConfig = {
           key: 'dateOfBirth',
           type: 'datepicker',
           label: 'Date of Birth',
-          props: {
-            appearance: 'outline',
-          },
           required: true,
           col: 6,
         },
@@ -93,7 +86,6 @@ export const personalInfoConfig = {
           label: 'Street Address',
           props: {
             placeholder: '123 Main Street',
-            appearance: 'outline',
           },
           required: true,
           col: 12,
@@ -104,7 +96,6 @@ export const personalInfoConfig = {
           label: 'City',
           props: {
             placeholder: 'Enter your city',
-            appearance: 'outline',
           },
           required: true,
           col: 4,
@@ -122,7 +113,6 @@ export const personalInfoConfig = {
           ],
           props: {
             placeholder: 'Select state',
-            appearance: 'outline',
           },
           required: true,
           col: 4,
@@ -133,7 +123,6 @@ export const personalInfoConfig = {
           label: 'ZIP Code',
           props: {
             placeholder: '12345',
-            appearance: 'outline',
           },
           required: true,
           pattern: /^[0-9]{5}$/,

@@ -24,7 +24,6 @@ export const passwordMatchingConfig = {
       props: {
         type: 'email',
         placeholder: 'Enter your email address',
-        appearance: 'outline',
       },
       required: true,
       email: true,
@@ -37,7 +36,6 @@ export const passwordMatchingConfig = {
       props: {
         type: 'password',
         placeholder: 'Enter a strong password',
-        appearance: 'outline',
       },
       required: true,
       minLength: 8,
@@ -50,7 +48,6 @@ export const passwordMatchingConfig = {
       props: {
         type: 'password',
         placeholder: 'Confirm your password',
-        appearance: 'outline',
       },
       required: true,
       minLength: 8,

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
@@ -6,6 +6,7 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-toggle',
@@ -16,9 +17,9 @@ import { AsyncPipe } from '@angular/common';
     <mat-slide-toggle
       [field]="f"
       [color]="props()?.color || 'primary'"
-      [labelPosition]="props()?.labelPosition || 'after'"
+      [labelPosition]="effectiveLabelPosition()"
       [hideIcon]="props()?.hideIcon || false"
-      [disableRipple]="props()?.disableRipple || false"
+      [disableRipple]="effectiveDisableRipple()"
       [attr.tabindex]="tabIndex()"
       class="toggle-container"
     >
@@ -52,6 +53,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatToggleFieldComponent implements MatToggleComponent {
+  private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -64,6 +67,11 @@ export default class MatToggleFieldComponent implements MatToggleComponent {
   readonly props = input<MatToggleProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  // Merged config with global defaults
+  readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
+
+  readonly effectiveLabelPosition = computed(() => this.props()?.labelPosition ?? this.materialConfig?.labelPosition ?? 'after');
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

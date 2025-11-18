@@ -12,6 +12,7 @@ import {
   resolveTokens,
 } from '@ng-forge/dynamic-form';
 import { PrimeButtonComponent, PrimeButtonProps } from './prime-button.type';
+import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 /**
  * PrimeNG button field component
@@ -27,11 +28,11 @@ import { PrimeButtonComponent, PrimeButtonProps } from './prime-button.type';
     <button
       pButton
       [type]="props()?.type || 'button'"
-      [severity]="props()?.severity || 'primary'"
-      [text]="props()?.text || false"
-      [outlined]="props()?.outlined || false"
-      [raised]="props()?.raised || false"
-      [rounded]="props()?.rounded || false"
+      [severity]="effectiveSeverity()"
+      [text]="effectiveText()"
+      [outlined]="effectiveOutlined()"
+      [raised]="effectiveRaised()"
+      [rounded]="effectiveRounded()"
       [class]="className() || ''"
       [disabled]="disabled() || false"
       [attr.data-testid]="buttonTestId()"
@@ -44,6 +45,7 @@ import { PrimeButtonComponent, PrimeButtonProps } from './prime-button.type';
 })
 export default class PrimeButtonFieldComponent<TEvent extends FormEvent> implements PrimeButtonComponent<TEvent> {
   private readonly eventBus = inject(EventBus);
+  private primengConfig = inject(PRIMENG_CONFIG, { optional: true });
 
   readonly key = input.required<string>();
   readonly label = input.required<DynamicText>();
@@ -58,6 +60,26 @@ export default class PrimeButtonFieldComponent<TEvent extends FormEvent> impleme
 
   // Array item context for token resolution (only set for add/remove array item buttons)
   readonly eventContext = input<ArrayItemContext>();
+
+  readonly effectiveSeverity = computed(() =>
+    this.props()?.severity ?? this.primengConfig?.buttonSeverity ?? 'primary'
+  );
+
+  readonly effectiveText = computed(() =>
+    this.props()?.text ?? this.primengConfig?.buttonText ?? false
+  );
+
+  readonly effectiveOutlined = computed(() =>
+    this.props()?.outlined ?? this.primengConfig?.buttonOutlined ?? false
+  );
+
+  readonly effectiveRaised = computed(() =>
+    this.props()?.raised ?? this.primengConfig?.buttonRaised ?? false
+  );
+
+  readonly effectiveRounded = computed(() =>
+    this.props()?.rounded ?? this.primengConfig?.buttonRounded ?? false
+  );
 
   buttonTestId = computed(() => `${this.props()?.type}-${this.key()}`);
 

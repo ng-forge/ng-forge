@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-form';
 import { BsToggleComponent, BsToggleProps } from './bs-toggle.type';
 import { AsyncPipe } from '@angular/common';
+import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 
 @Component({
   selector: 'df-bs-toggle',
@@ -15,8 +16,8 @@ import { AsyncPipe } from '@angular/common';
       class="form-check form-switch"
       [class.form-check-inline]="props()?.inline"
       [class.form-check-reverse]="props()?.reverse"
-      [class.form-switch-sm]="props()?.size === 'sm'"
-      [class.form-switch-lg]="props()?.size === 'lg'"
+      [class.form-switch-sm]="effectiveSize() === 'sm'"
+      [class.form-switch-lg]="effectiveSize() === 'lg'"
       [attr.hidden]="f().hidden() || null"
     >
       <input
@@ -75,6 +76,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsToggleFieldComponent implements BsToggleComponent {
+  private bootstrapConfig = inject(BOOTSTRAP_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -91,4 +94,8 @@ export default class BsToggleFieldComponent implements BsToggleComponent {
 
   // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  readonly effectiveSize = computed(() =>
+    this.props()?.size ?? this.bootstrapConfig?.size
+  );
 }

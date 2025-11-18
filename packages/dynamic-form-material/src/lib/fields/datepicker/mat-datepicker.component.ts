@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
@@ -7,6 +7,7 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
+import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-datepicker',
@@ -33,8 +34,8 @@ import { AsyncPipe } from '@angular/common';
     @let f = field();
 
     <mat-form-field
-      [appearance]="props()?.appearance || 'fill'"
-      [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'"
+      [appearance]="effectiveAppearance()"
+      [subscriptSizing]="effectiveSubscriptSizing()"
       [class]="className() || ''"
     >
       @if (label(); as label) {
@@ -50,7 +51,7 @@ import { AsyncPipe } from '@angular/common';
       />
 
       <mat-datepicker-toggle matIconSuffix [for]="$any(picker)" />
-      <mat-datepicker #picker [startAt]="startAt()" [startView]="props()?.startView || 'month'" [touchUi]="props()?.touchUi ?? false" />
+      <mat-datepicker #picker [startAt]="startAt()" [startView]="effectiveStartView()" [touchUi]="effectiveTouchUi()" />
 
       @if (props()?.hint; as hint) {
         <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
@@ -80,6 +81,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatDatepickerFieldComponent implements MatDatepickerComponent {
+  private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -95,6 +98,17 @@ export default class MatDatepickerFieldComponent implements MatDatepickerCompone
   readonly props = input<MatDatepickerProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  // Merged config with global defaults
+  readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'fill');
+
+  readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
+
+  readonly effectiveDisableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
+
+  readonly effectiveTouchUi = computed(() => this.props()?.touchUi ?? this.materialConfig?.datepickerTouchUi ?? false);
+
+  readonly effectiveStartView = computed(() => this.props()?.startView ?? this.materialConfig?.datepickerStartView ?? 'month');
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

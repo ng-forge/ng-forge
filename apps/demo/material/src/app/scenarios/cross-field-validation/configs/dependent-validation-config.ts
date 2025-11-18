@@ -28,7 +28,6 @@ export const dependentValidationConfig = {
       ],
       props: {
         placeholder: 'Select your country',
-        appearance: 'outline',
       },
       required: true,
       col: 4,
@@ -50,7 +49,6 @@ export const dependentValidationConfig = {
       ],
       props: {
         placeholder: 'Select state/province',
-        appearance: 'outline',
       },
       required: true,
       col: 4,
@@ -70,7 +68,6 @@ export const dependentValidationConfig = {
       label: 'City',
       props: {
         placeholder: 'Enter your city',
-        appearance: 'outline',
       },
       required: true,
       col: 4,
@@ -91,7 +88,6 @@ export const dependentValidationConfig = {
       props: {
         type: 'number',
         placeholder: 'Enter your age',
-        appearance: 'outline',
       },
       min: 1,
       max: 120,
@@ -129,7 +125,6 @@ export const dependentValidationConfig = {
       ],
       props: {
         placeholder: 'Select employment status',
-        appearance: 'outline',
       },
       required: true,
       col: 6,
@@ -149,7 +144,6 @@ export const dependentValidationConfig = {
       label: 'Company Name',
       props: {
         placeholder: 'Enter your company name',
-        appearance: 'outline',
       },
       required: true,
       col: 6,
@@ -171,7 +165,6 @@ export const dependentValidationConfig = {
       label: 'School Name',
       props: {
         placeholder: 'Enter your school name',
-        appearance: 'outline',
       },
       required: true,
       col: 6,

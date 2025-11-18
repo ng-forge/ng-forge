@@ -28,7 +28,6 @@ export const accountSetupConfig = {
           label: 'Username',
           props: {
             placeholder: 'Choose a unique username',
-            appearance: 'outline',
           },
           required: true,
           minLength: 3,
@@ -41,7 +40,6 @@ export const accountSetupConfig = {
           props: {
             type: 'password',
             placeholder: 'Create a strong password',
-            appearance: 'outline',
           },
           required: true,
           minLength: 8,
@@ -54,7 +52,6 @@ export const accountSetupConfig = {
           props: {
             type: 'password',
             placeholder: 'Confirm your password',
-            appearance: 'outline',
           },
           required: true,
           minLength: 8,
@@ -80,7 +77,6 @@ export const accountSetupConfig = {
           ],
           props: {
             placeholder: 'Choose a security question',
-            appearance: 'outline',
           },
           required: true,
           col: 6,
@@ -91,7 +87,6 @@ export const accountSetupConfig = {
           label: 'Answer',
           props: {
             placeholder: 'Enter your answer',
-            appearance: 'outline',
           },
           required: true,
           col: 6,
@@ -108,7 +103,6 @@ export const accountSetupConfig = {
           ],
           props: {
             placeholder: 'Choose another security question',
-            appearance: 'outline',
           },
           required: true,
           col: 6,
@@ -119,7 +113,6 @@ export const accountSetupConfig = {
           label: 'Answer',
           props: {
             placeholder: 'Enter your answer',
-            appearance: 'outline',
           },
           required: true,
           col: 6,
