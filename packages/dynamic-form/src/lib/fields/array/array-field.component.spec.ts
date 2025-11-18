@@ -143,8 +143,7 @@ describe('ArrayFieldComponent', () => {
     expect(component.fields()).toHaveLength(0);
   });
 
-  // TODO: Fix timing issue with async component loading in tests
-  it.skip('should create field instances for existing array items', async () => {
+  it('should create field instances for existing array items', async () => {
     const field: ArrayField<any> = {
       key: 'items',
       type: 'array',
@@ -156,11 +155,19 @@ describe('ArrayFieldComponent', () => {
       items: ['value1', 'value2', 'value3'],
     });
 
-    // Wait for all async operations (component loading) to complete
+    // Wait for all async operations to complete and allow multiple change detection cycles
+    // This is necessary because:
+    // 1. arrayFieldTrees computed needs to run
+    // 2. toObservable needs to emit
+    // 3. switchMap needs to load components asynchronously
+    // 4. toSignal needs to update with the results
     await fixture.whenStable();
     fixture.detectChanges();
 
-    // Wait one more cycle for the toSignal to update with the loaded components
+    // Give the toSignal time to process the observable emission
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    fixture.detectChanges();
+
     await fixture.whenStable();
     fixture.detectChanges();
 
