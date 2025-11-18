@@ -502,3 +502,122 @@ test.describe('Array Fields Tests', () => {
     });
   });
 });
+
+test.describe('Material Examples - Array Demo Page', () => {
+  test.beforeEach(async ({ page }) => {
+    // Navigate to material-examples app array demo
+    await page.goto('http://localhost:4201/examples/array');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test.describe('Tags (Flat Array)', () => {
+    test('should add and fill tag items', async ({ page }) => {
+      const addButton = page.locator('button:has-text("Add Tag")');
+      await addButton.click();
+      await page.waitForTimeout(200);
+
+      const tagInput = page.locator('#tags input').first();
+      await tagInput.fill('typescript');
+
+      expect(await tagInput.inputValue()).toBe('typescript');
+      await expect(page.locator('.example-result pre')).toContainText('typescript');
+    });
+
+    test('should remove tag items', async ({ page }) => {
+      const addButton = page.locator('button:has-text("Add Tag")');
+      await addButton.click();
+      await page.waitForTimeout(200);
+      await addButton.click();
+      await page.waitForTimeout(200);
+
+      expect(await page.locator('#tags input').count()).toBe(2);
+
+      await page.locator('.remove-tag-button').first().click();
+      await page.waitForTimeout(200);
+
+      expect(await page.locator('#tags input').count()).toBe(1);
+    });
+
+    test('should maintain tag values', async ({ page }) => {
+      const addButton = page.locator('button:has-text("Add Tag")');
+
+      await addButton.click();
+      await page.waitForTimeout(200);
+      await page.locator('#tags input').nth(0).fill('react');
+
+      await addButton.click();
+      await page.waitForTimeout(200);
+      await page.locator('#tags input').nth(1).fill('angular');
+
+      expect(await page.locator('#tags input').nth(0).inputValue()).toBe('react');
+      expect(await page.locator('#tags input').nth(1).inputValue()).toBe('angular');
+    });
+  });
+
+  test.describe('Contacts (Object Array)', () => {
+    test('should add and fill contact items', async ({ page }) => {
+      const addButton = page.locator('button:has-text("Add Contact")');
+      await addButton.click();
+      await page.waitForTimeout(300);
+
+      await page.locator('#contacts input').nth(0).fill('John Doe');
+      await page.locator('#contacts input[type="tel"]').first().fill('5551234567');
+      await page.locator('#contacts select').first().selectOption('family');
+
+      const formData = page.locator('.example-result pre');
+      await expect(formData).toContainText('John Doe');
+      await expect(formData).toContainText('5551234567');
+      await expect(formData).toContainText('family');
+    });
+
+    test('should remove contact items', async ({ page }) => {
+      const addButton = page.locator('button:has-text("Add Contact")');
+      await addButton.click();
+      await page.waitForTimeout(300);
+      await addButton.click();
+      await page.waitForTimeout(300);
+
+      const initialCount = await page.locator('#contacts input').count();
+
+      await page.locator('.remove-contact-button').first().click();
+      await page.waitForTimeout(300);
+
+      expect(await page.locator('#contacts input').count()).toBeLessThan(initialCount);
+    });
+
+    test('should validate required fields', async ({ page }) => {
+      const addButton = page.locator('button:has-text("Add Contact")');
+      await addButton.click();
+      await page.waitForTimeout(300);
+
+      const nameInput = page.locator('#contacts input').first();
+      const phoneInput = page.locator('#contacts input[type="tel"]').first();
+
+      expect(await nameInput.getAttribute('required')).not.toBeNull();
+      expect(await phoneInput.getAttribute('required')).not.toBeNull();
+    });
+  });
+
+  test.describe('Form Submission', () => {
+    test('should submit with array data', async ({ page }) => {
+      // Add tag
+      await page.locator('button:has-text("Add Tag")').click();
+      await page.waitForTimeout(200);
+      await page.locator('#tags input').first().fill('javascript');
+
+      // Add contact
+      await page.locator('button:has-text("Add Contact")').click();
+      await page.waitForTimeout(300);
+      await page.locator('#contacts input').first().fill('Emergency Contact');
+      await page.locator('#contacts input[type="tel"]').first().fill('5551234567');
+
+      // Submit
+      await page.locator('button:has-text("Save All")').click();
+      await page.waitForTimeout(200);
+
+      const formData = page.locator('.example-result pre');
+      await expect(formData).toContainText('javascript');
+      await expect(formData).toContainText('Emergency Contact');
+    });
+  });
+});

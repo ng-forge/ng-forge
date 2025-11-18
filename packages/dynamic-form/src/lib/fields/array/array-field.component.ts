@@ -7,21 +7,22 @@ import {
   inject,
   Injector,
   input,
-  linkedSignal,
+  inputBinding,
+  type Type,
   ViewContainerRef,
 } from '@angular/core';
-import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { form, FormUiControl } from '@angular/forms/signals';
+import { form, FormUiControl, FieldTree } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions';
-import { FieldSignalContext } from '../../mappers';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
-import { arrayItemFieldMapper } from '../../mappers/array-item/array-item-field-mapper';
-import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent, SubmitEvent } from '../../events';
+import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
+import { FieldSignalContext } from '../../mappers';
+import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 
 /**
  * Array field component that manages dynamic arrays of field values.
@@ -62,7 +63,7 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldRendererDirective],
 })
-export default class ArrayFieldComponent<T extends any[], TModel = Record<string, unknown>> {
+export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly vcr = inject(ViewContainerRef);
@@ -70,7 +71,7 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   private readonly eventBus = inject(EventBus);
 
   /** Field configuration input */
-  field = input.required<ArrayField<T>>();
+  field = input.required<ArrayField>();
   key = input.required<string>();
 
   // Parent form context inputs
@@ -78,74 +79,80 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   parentFieldSignalContext = input.required<FieldSignalContext<TModel>>();
 
   /**
-   * Store the field template in a linkedSignal for type enforcement.
-   * This template is cloned when adding new items dynamically.
+   * Get the field template from the array field definition.
+   * This template is used when adding new items dynamically.
    */
-  private readonly fieldTemplate = linkedSignal<FieldDef<unknown> | null>(() => {
+  private readonly fieldTemplate = computed<FieldDef<unknown> | null>(() => {
     const arrayField = this.field();
     // Array fields should have exactly one field as the template
     return arrayField.fields && arrayField.fields.length > 0 ? arrayField.fields[0] : null;
   });
 
   /**
-   * Track array item count dynamically.
-   * Starts with 0 items (empty array by default).
-   * Grows/shrinks based on AddArrayItemEvent/RemoveArrayItemEvent.
+   * Get the array of FieldTree objects from the parent form.
+   * Signal Forms automatically creates FieldTree for each array item.
+   *
+   * IMPORTANT: Only track array structure changes (add/remove), not individual item value changes.
+   * This prevents unnecessary re-rendering when typing in fields.
    */
-  private readonly arrayItemCount = linkedSignal(() => {
-    const parentValue = this.parentFieldSignalContext().value();
+  private readonly arrayFieldTrees = computed<readonly FieldTree<unknown>[]>(() => {
     const arrayKey = this.field().key;
-    const arrayValue = (parentValue as any)?.[arrayKey];
 
-    // Initialize with existing array length or 0
-    if (Array.isArray(arrayValue)) {
-      return arrayValue.length;
-    }
-    return 0;
+    // Get the parent form - this tracks when the form structure changes
+    const parentForm = this.parentForm()();
+
+    // Access the array FieldTree through the form's structure
+    const childrenMap = (parentForm as any).structure?.childrenMap?.();
+    if (!childrenMap) return [];
+
+    const arrayFieldTree = childrenMap.get(arrayKey);
+    if (!arrayFieldTree) return [];
+
+    // Get the array items from the array FieldTree's structure
+    const arrayItemsMap = arrayFieldTree.structure?.childrenMap?.();
+    if (!arrayItemsMap) return [];
+
+    // Return array of FieldTree objects (one per array item)
+    // This only re-runs when items are added/removed, not when values change
+    return Array.from(arrayItemsMap.values());
   });
 
-  /**
-   * Generate field instances for each array item.
-   * Uses structural sharing to reduce memory allocation.
-   */
-  private readonly fieldInstances = computed(() => {
-    const template = this.fieldTemplate();
-    const count = this.arrayItemCount();
-    const arrayKey = this.key();
+  // Track the current component refs to avoid recreating them
+  private currentComponents: ComponentRef<FormUiControl>[] = [];
 
-    if (!template || count === 0) {
-      return [];
-    }
+  // TODO: Eliminate flicker when adding/removing array items
+  // Current implementation clears all components and recreates them when array length changes,
+  // causing a brief visual flicker. Consider implementing:
+  // - Differential updates (only add/remove changed items)
+  // - Animation transitions for smoother add/remove operations
+  // - Reusing existing component instances when possible
 
-    // Cache the base properties that don't change per item
-    // Only key and index vary per item
-    const baseInstance = {
-      ...template,
-      _templateKey: template.key,
-    };
-
-    // Create instances with only the varying properties
-    return Array.from({ length: count }, (_, index) => ({
-      ...baseInstance,
-      key: `${arrayKey}[${index}]`,
-      _arrayIndex: index,
-    })) as FieldDef<unknown>[];
-  });
-
-  // Convert to observable for field mapping
-  fields$ = toObservable(this.fieldInstances);
-
-  // Create field components
+  // Create field components from FieldTree array
   fields = toSignal(
-    this.fields$.pipe(
-      switchMap((fields: FieldDef<unknown>[]) => {
-        if (!fields || fields.length === 0) {
-          return of([]);
+    toObservable(this.arrayFieldTrees).pipe(
+      switchMap((fieldTrees: readonly FieldTree<unknown>[]) => {
+        // Only clear and recreate if the array length changed
+        // This prevents re-rendering when individual field values change
+        if (fieldTrees.length !== this.currentComponents.length) {
+          this.vcr.clear();
+          this.currentComponents = [];
+
+          if (fieldTrees.length === 0) {
+            return of([]);
+          }
+
+          // Create new components
+          return forkJoin(this.mapFieldTrees(fieldTrees)).pipe(
+            map((components) => {
+              this.currentComponents = components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp);
+              return this.currentComponents;
+            }),
+          );
         }
 
-        return forkJoin(this.mapFields(fields));
+        // Return existing components (array length hasn't changed)
+        return of(this.currentComponents);
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
     ),
     { initialValue: [] },
   );
@@ -185,93 +192,86 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
       return;
     }
 
-    const currentCount = this.arrayItemCount();
-    const insertIndex = index !== undefined ? Math.min(index, currentCount) : currentCount;
-
-    // Get current parent value
     const context = this.parentFieldSignalContext();
-    const parentValue = context.value();
     const arrayKey = this.field().key;
-    const currentArray = (parentValue as any)?.[arrayKey] || [];
+    const currentArray = this.getArrayValue(context.value(), arrayKey);
+    const insertIndex = index !== undefined ? Math.min(index, currentArray.length) : currentArray.length;
 
-    // Create default value for new item using the template from the event
     const value = getFieldDefaultValue(fieldTemplate, this.fieldRegistry.raw);
-
-    // Insert new item at specified index
     const newArray = [...currentArray];
     newArray.splice(insertIndex, 0, value);
 
-    // Update parent form value by updating the entire value signal
-    context.value.set({ ...parentValue, [arrayKey]: newArray } as any);
-
-    // Update count
-    this.arrayItemCount.set(newArray.length);
+    context.value.update((current) => ({ ...current, [arrayKey]: newArray }) as TModel);
   }
 
   /**
    * Remove an item from the array
    */
   private removeItem(index?: number): void {
-    const currentCount = this.arrayItemCount();
-    if (currentCount === 0) return;
-
-    const removeIndex = index !== undefined ? Math.min(index, currentCount - 1) : currentCount - 1;
-
-    // Get current parent value
     const context = this.parentFieldSignalContext();
-    const parentValue = context.value();
     const arrayKey = this.field().key;
-    const currentArray = (parentValue as any)?.[arrayKey] || [];
 
-    // Remove item at specified index
-    const newArray = [...currentArray];
-    newArray.splice(removeIndex, 1);
+    context.value.update((current) => {
+      const currentArray = this.getArrayValue(current, arrayKey);
+      if (currentArray.length === 0) return current;
 
-    // Update parent form value by updating the entire value signal
-    context.value.set({ ...parentValue, [arrayKey]: newArray } as any);
+      const removeIndex = index !== undefined ? Math.min(index, currentArray.length - 1) : currentArray.length - 1;
+      const newArray = [...currentArray];
+      newArray.splice(removeIndex, 1);
 
-    // Update count
-    this.arrayItemCount.set(newArray.length);
+      return { ...current, [arrayKey]: newArray } as TModel;
+    });
   }
 
-  private mapFields(fields: FieldDef<unknown>[]): Promise<ComponentRef<FormUiControl>>[] {
-    return fields
-      .map((fieldDef) => this.mapSingleField(fieldDef))
+  /**
+   * Safely get array value from parent model
+   */
+  private getArrayValue(value: Partial<TModel> | undefined, key: string): unknown[] {
+    const arrayValue = (value as Record<string, unknown>)?.[key];
+    return Array.isArray(arrayValue) ? arrayValue : [];
+  }
+
+  /**
+   * Map FieldTree array to component references
+   */
+  private mapFieldTrees(fieldTrees: readonly FieldTree<unknown>[]): Promise<ComponentRef<FormUiControl>>[] {
+    return fieldTrees
+      .map((fieldTree, index) => this.mapSingleFieldTree(fieldTree, index))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
   }
 
-  private async mapSingleField(fieldDef: FieldDef<unknown>): Promise<ComponentRef<FormUiControl> | undefined> {
+  /**
+   * Create a component for a single FieldTree
+   */
+  private async mapSingleFieldTree(fieldTree: FieldTree<unknown>, index: number): Promise<ComponentRef<FormUiControl> | undefined> {
+    const template = this.fieldTemplate();
+    if (!template) {
+      return undefined;
+    }
+
+    const arrayKey = this.field().key;
+
     return this.fieldRegistry
-      .loadTypeComponent(fieldDef.type)
+      .loadTypeComponent(template.type)
       .then((componentType) => {
         if (this.destroyRef.destroyed) {
           return undefined;
         }
 
-        // For array items, use the parent's form context
-        // Each field will bind to the array index in the parent form
-        const arrayFieldSignalContext: FieldSignalContext<TModel> = {
-          injector: this.injector,
-          value: this.parentFieldSignalContext().value,
-          defaultValues: this.parentFieldSignalContext().defaultValues,
-          form: this.parentForm(),
-        };
+        const valueHandling = this.fieldRegistry.raw.get(template.type)?.valueHandling || 'include';
 
-        // Use custom array item mapper that handles array notation parsing
-        // This enables keys like 'tags[0]' to correctly access parentForm().tags[0]
-        const bindings = arrayItemFieldMapper(fieldDef, {
-          fieldSignalContext: arrayFieldSignalContext,
-          fieldRegistry: this.fieldRegistry.raw,
-        });
+        // Handle flatten types (row/page) differently
+        if (valueHandling === 'flatten' && 'fields' in template && template.fields) {
+          return this.createFlattenTypeComponent(componentType as Type<FormUiControl>, fieldTree, template, index);
+        }
 
-        return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
+        // For regular types (input, group, etc.), pass FieldTree directly
+        return this.createRegularComponent(componentType as Type<FormUiControl>, fieldTree, template, index);
       })
       .catch((error) => {
         if (!this.destroyRef.destroyed) {
-          const fieldKey = fieldDef.key || '<no key>';
-          const arrayKey = this.field().key;
           console.error(
-            `[ArrayField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            `[ArrayField] Failed to load component for field type '${template.type}' at index ${index} ` +
               `within array '${arrayKey}'. Ensure the field type is registered in your field registry.`,
             error,
           );
@@ -281,25 +281,84 @@ export default class ArrayFieldComponent<T extends any[], TModel = Record<string
   }
 
   /**
-   * Computed signal that accesses the array form field from the parent form.
-   * Consolidates the repeated pattern of accessing (parentForm as any)[arrayKey].
+   * Create component for regular field types (input, group, select, etc.)
+   * For value fields (input, select): pass the FieldTree directly
+   * For container fields (group): use mapFieldToBindings with parent context
    */
-  private readonly arrayFormField = computed(() => {
+  private createRegularComponent(
+    componentType: Type<FormUiControl>,
+    fieldTree: FieldTree<unknown>,
+    template: FieldDef<unknown>,
+    index: number,
+  ): ComponentRef<FormUiControl> {
     const arrayKey = this.field().key;
-    const parentForm = this.parentForm()();
-    return (parentForm as any)[arrayKey];
-  });
+    const valueHandling = this.fieldRegistry.raw.get(template.type)?.valueHandling || 'include';
 
-  readonly valid = computed(() => this.arrayFormField()?.valid() ?? true);
-  readonly invalid = computed(() => !this.valid());
-  readonly dirty = computed(() => this.arrayFormField()?.dirty() ?? false);
-  readonly touched = computed(() => this.arrayFormField()?.touched() ?? false);
-  readonly errors = computed(() => this.arrayFormField()?.errors() ?? null);
-  readonly disabled = computed(() => this.arrayFormField()?.disabled() ?? false);
+    // For group types inside arrays, use the flatten type approach
+    // This bypasses the group's form creation and uses the FieldTree directly
+    if (template.type === 'group' && valueHandling === 'include') {
+      return this.createFlattenTypeComponent(componentType, fieldTree, template, index);
+    }
 
-  readonly validityChange = outputFromObservable(toObservable(this.valid));
-  readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
-  readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit'));
+    // For value fields (input, select, checkbox, etc.), pass FieldTree directly
+    const key = template.key || `${arrayKey}[${index}]`;
+
+    const bindings = [
+      inputBinding('field', () => fieldTree),
+      inputBinding('key', () => key),
+      inputBinding('arrayContext', () => ({
+        arrayKey,
+        index,
+        formValue: this.parentFieldSignalContext().value(),
+      })),
+    ];
+
+    // Add optional bindings from template
+    if ('label' in template && template.label) {
+      bindings.push(inputBinding('label', () => template.label));
+    }
+    if ('placeholder' in template && template.placeholder) {
+      bindings.push(inputBinding('placeholder', () => template.placeholder));
+    }
+
+    return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
+  }
+
+  /**
+   * Create component for flatten types (row/page)
+   * These need special handling because they contain nested fields
+   */
+  private createFlattenTypeComponent(
+    componentType: Type<FormUiControl>,
+    fieldTree: FieldTree<unknown>,
+    template: FieldDef<unknown>,
+    index: number,
+  ): ComponentRef<FormUiControl> {
+    const arrayKey = this.field().key;
+
+    // For flatten types, create a custom FieldSignalContext that points to this array item's FieldTree
+    // This allows child fields to resolve themselves from the array item's structure
+    // The form property needs to be callable (wrapped in a function that returns the FieldTree)
+    const itemFieldSignalContext: FieldSignalContext<unknown> = {
+      injector: this.injector,
+      value: this.parentFieldSignalContext().value,
+      defaultValues: () => ({}),
+      form: (() => fieldTree) as ReturnType<typeof form<unknown>>,
+      defaultValidationMessages: this.parentFieldSignalContext().defaultValidationMessages,
+    };
+
+    const bindings = mapFieldToBindings(template, {
+      fieldSignalContext: itemFieldSignalContext,
+      fieldRegistry: this.fieldRegistry.raw,
+      arrayContext: {
+        arrayKey,
+        index,
+        formValue: this.parentFieldSignalContext().value(),
+      },
+    });
+
+    return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
+  }
 
   onFieldsInitialized(): void {
     this.eventBus.dispatch(ComponentInitializedEvent, 'array', this.field().key);

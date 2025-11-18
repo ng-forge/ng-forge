@@ -17,6 +17,6 @@ export function mapFieldToBindings<TModel = any>(fieldDef: FieldDef<any>, option
     return fieldType.mapper(fieldDef, options);
   }
 
-  // Fallback to base mapper
-  return baseFieldMapper(fieldDef);
+  // Fallback to base mapper with options
+  return baseFieldMapper(fieldDef, options);
 }

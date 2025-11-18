@@ -1,15 +1,12 @@
-import { computed } from '@angular/core';
-import { Binding, inputBinding } from '@angular/core';
-import { baseFieldMapper, NextPageEvent, PreviousPageEvent, SubmitEvent } from '@ng-forge/dynamic-form';
-import { FieldDef } from '@ng-forge/dynamic-form';
-import { FieldMapperOptions } from '@ng-forge/dynamic-form';
+import { Binding, computed, inputBinding } from '@angular/core';
+import { baseFieldMapper, FieldDef, FieldMapperOptions, NextPageEvent, PreviousPageEvent, SubmitEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Mapper for submit button - preconfigures SubmitEvent and disables when form is invalid
  */
 export function submitButtonFieldMapper(
   fieldDef: FieldDef<Record<string, unknown>>,
-  options?: Omit<FieldMapperOptions, 'fieldRegistry'>
+  options?: Omit<FieldMapperOptions, 'fieldRegistry'>,
 ): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
@@ -25,8 +22,8 @@ export function submitButtonFieldMapper(
           const explicitlyDisabled = fieldDef.disabled || false;
           const formInvalid = !form().valid();
           return explicitlyDisabled || formInvalid;
-        })()
-      )
+        })(),
+      ),
     );
   } else {
     // Fallback if no form context is available
@@ -40,6 +37,13 @@ export function submitButtonFieldMapper(
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
 
+  // Pass array context values if this button is rendered within an array
+  if (options?.arrayContext) {
+    bindings.push(inputBinding('arrayIndex', () => options.arrayContext!.index));
+    bindings.push(inputBinding('arrayKey', () => options.arrayContext!.arrayKey));
+    bindings.push(inputBinding('formValue', () => options.arrayContext!.formValue));
+  }
+
   return bindings;
 }
 
@@ -47,7 +51,10 @@ export function submitButtonFieldMapper(
  * Mapper for next page button - preconfigures NextPageEvent
  * Note: Does not auto-disable based on validation. Users can explicitly disable if needed.
  */
-export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
+export function nextButtonFieldMapper(
+  fieldDef: FieldDef<Record<string, unknown>>,
+  options?: Omit<FieldMapperOptions, 'fieldRegistry'>,
+): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Preconfigure the NextPageEvent
@@ -63,6 +70,13 @@ export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
 
+  // Pass array context values if this button is rendered within an array
+  if (options?.arrayContext) {
+    bindings.push(inputBinding('arrayIndex', () => options.arrayContext!.index));
+    bindings.push(inputBinding('arrayKey', () => options.arrayContext!.arrayKey));
+    bindings.push(inputBinding('formValue', () => options.arrayContext!.formValue));
+  }
+
   return bindings;
 }
 
@@ -70,7 +84,10 @@ export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>
  * Mapper for previous page button - preconfigures PreviousPageEvent
  * Note: Does not auto-disable based on validation. Users can explicitly disable if needed.
  */
-export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
+export function previousButtonFieldMapper(
+  fieldDef: FieldDef<Record<string, unknown>>,
+  options?: Omit<FieldMapperOptions, 'fieldRegistry'>,
+): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Preconfigure the PreviousPageEvent
@@ -84,6 +101,13 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
   // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
+  }
+
+  // Pass array context values if this button is rendered within an array
+  if (options?.arrayContext) {
+    bindings.push(inputBinding('arrayIndex', () => options.arrayContext!.index));
+    bindings.push(inputBinding('arrayKey', () => options.arrayContext!.arrayKey));
+    bindings.push(inputBinding('formValue', () => options.arrayContext!.formValue));
   }
 
   return bindings;

@@ -83,22 +83,6 @@ describe('GroupFieldComponent', () => {
     expect(component.field()).toEqual(field);
   });
 
-  it('should have form state properties', () => {
-    const field: GroupField<any> = {
-      key: 'testGroup',
-      type: 'group',
-      label: 'Test Group',
-      fields: [],
-    };
-
-    const { component } = setupGroupTest(field);
-
-    expect(typeof component.valid()).toBe('boolean');
-    expect(typeof component.invalid()).toBe('boolean');
-    expect(typeof component.dirty()).toBe('boolean');
-    expect(typeof component.touched()).toBe('boolean');
-  });
-
   it('should render with child fields', () => {
     const field: GroupField<any> = {
       key: 'testGroup',

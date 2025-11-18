@@ -27,16 +27,16 @@ export function arrayItemFieldMapper(fieldDef: FieldDef<any>, options: FieldMapp
     const [, arrayName, indexStr] = arrayMatch;
     const index = parseInt(indexStr, 10);
 
-    // Lazily access the field proxy using Angular Signal Forms' array indexing
+    // Lazily access the field proxy using the childrenMap
     // The factory function will be called when the component needs the field
     bindings.push(
       inputBinding('field', () => {
         const formRoot = options.fieldSignalContext.form();
-        // Access: parentForm().arrayName[index]
-        // This uses Angular Signal Forms' native array support
-        const arrayField = (formRoot as any)[arrayName];
-        return arrayField ? arrayField[index] : undefined;
-      })
+        const childrenMap = (formRoot as any).structure?.childrenMap?.();
+        const arrayField = childrenMap?.get(arrayName);
+        // Angular Signal Forms supports direct indexing on array field proxies
+        return arrayField?.fieldProxy?.[index];
+      }),
     );
   } else {
     // Standard field access for non-array keys
@@ -46,7 +46,7 @@ export function arrayItemFieldMapper(fieldDef: FieldDef<any>, options: FieldMapp
         const childrenMap = (formRoot as any).structure?.childrenMap?.();
         const formField = childrenMap?.get(fieldDef.key);
         return formField?.fieldProxy;
-      })
+      }),
     );
   }
 

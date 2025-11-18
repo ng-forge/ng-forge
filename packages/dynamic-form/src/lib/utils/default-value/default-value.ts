@@ -33,13 +33,36 @@ import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-t
 export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<string, FieldTypeDefinition>): unknown {
   const valueHandling = getFieldValueHandling(field.type, registry);
 
-  // Fields with 'exclude' or 'flatten' handling don't contribute direct values
+  // Fields with 'exclude' handling don't contribute values
   if (valueHandling === 'exclude') {
     return undefined;
   }
 
-  if (valueHandling === 'flatten' && 'fields' in field) {
-    // Flatten fields don't contribute values themselves - their children are processed separately
+  // Flatten fields (row/page) when used as array templates need special handling
+  if (valueHandling === 'flatten' && 'fields' in field && field.fields) {
+    const childFields = field.fields as readonly FieldDef<unknown>[];
+
+    // Collect only fields that contribute values (exclude buttons, text, etc.)
+    const valueFields: Array<{ key: string; value: unknown }> = [];
+    for (const childField of childFields) {
+      if ('key' in childField && childField.key) {
+        const childValue = getFieldDefaultValue(childField, registry);
+        if (childValue !== undefined) {
+          valueFields.push({ key: childField.key, value: childValue });
+        }
+      }
+    }
+
+    // For arrays, always create object structure (Signal Forms needs proper nesting)
+    if (valueFields.length >= 1) {
+      const defaults: Record<string, unknown> = {};
+      for (const valueField of valueFields) {
+        defaults[valueField.key] = valueField.value;
+      }
+      return defaults;
+    }
+
+    // No value fields found: return undefined (flatten fields used standalone don't contribute values)
     return undefined;
   }
 
@@ -60,6 +83,11 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
       }
     }
     return groupDefaults;
+  }
+
+  // Check for defaultValue first (used for reset/clear operations)
+  if ('defaultValue' in field && (field as any).defaultValue !== undefined && (field as any).defaultValue !== null) {
+    return (field as any).defaultValue;
   }
 
   // Use explicit value if provided, with type-specific handling for null

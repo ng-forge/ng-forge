@@ -56,18 +56,18 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   private readonly memoizedFlattenFields = memoize(
     (fields: FieldDef<any>[], registry: Map<string, any>) => flattenFields(fields, registry),
     (fields, registry) =>
-      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(',')
+      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(','),
   );
 
   private readonly memoizedKeyBy = memoize(
     <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
-    (fields) => fields.map((f) => f.key).join(',')
+    (fields) => fields.map((f) => f.key).join(','),
   );
 
   private readonly memoizedDefaultValues = memoize(
     <T extends FieldDef<any>>(fieldsById: Record<string, T>, registry: Map<string, any>) =>
       mapValues(fieldsById, (field) => getFieldDefaultValue(field, registry)),
-    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(',')
+    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(','),
   );
 
   /** Field configuration input */
@@ -77,7 +77,10 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   // Parent form context inputs
   parentForm = input.required<ReturnType<typeof form<TModel>>>();
   parentFieldSignalContext = input.required<FieldSignalContext<TModel>>();
+
+  readonly disabled = computed(() => this.field().disabled || false);
   defaultValidationMessages = input<Record<string, string>>();
+  arrayContext = input<{ arrayKey: string; index: number; formValue: unknown }>();
 
   private readonly formSetup = computed(() => {
     const groupField = this.field();
@@ -109,6 +112,16 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
 
   // Create reactive group value signal that extracts group-specific values from parent form
   private readonly entity = linkedSignal(() => {
+    // When inside an array, the parent form IS the FieldTree for this array item
+    // The FieldTree's value already contains the group's data directly
+    if (this.arrayContext()) {
+      const parentForm = this.parentForm();
+      // Call parentForm to get the FieldTree, then get its value
+      const fieldTreeValue = (parentForm as any)()?.value || {};
+      return fieldTreeValue;
+    }
+
+    // Normal case: extract group value from parent using group key
     const parentValue = this.parentFieldSignalContext().value();
     const groupKey = this.field().key;
     const defaults = this.defaultValues();
@@ -120,6 +133,12 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
 
   // Create nested form for this group
   private readonly form = computed(() => {
+    // When inside an array, use the parent form directly (it's the FieldTree)
+    if (this.arrayContext()) {
+      return this.parentForm();
+    }
+
+    // Normal case: create a new nested form
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
 
@@ -134,17 +153,6 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
 
   readonly formValue = computed(() => this.entity());
 
-  readonly valid = computed(() => this.form()().valid());
-  readonly invalid = computed(() => this.form()().invalid());
-  readonly dirty = computed(() => this.form()().dirty());
-  readonly touched = computed(() => this.form()().touched());
-  readonly errors = computed(() => this.form()().errors());
-  readonly disabled = computed(() => this.form()().disabled());
-
-  readonly validityChange = outputFromObservable(toObservable(this.valid));
-  readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
-  readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit'));
-
   // Convert field setup to observable for field mapping
   fields$ = toObservable(computed(() => this.formSetup().fields));
 
@@ -158,9 +166,9 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
     ),
-    { initialValue: [] }
+    { initialValue: [] },
   );
 
   private mapFields(fields: FieldDef<any>[]): Promise<ComponentRef<FormUiControl>>[] {
@@ -191,6 +199,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
         const bindings = mapFieldToBindings(fieldDef, {
           fieldSignalContext: groupFieldSignalContext,
           fieldRegistry: this.fieldRegistry.raw,
+          arrayContext: this.arrayContext(),
         });
 
         return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
@@ -203,7 +212,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
           console.error(
             `[GroupField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within group '${groupKey}'. Ensure the field type is registered in your field registry.`,
-            error
+            error,
           );
         }
         return undefined;
