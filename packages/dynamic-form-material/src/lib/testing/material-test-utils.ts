@@ -28,16 +28,20 @@ export interface MaterialFormTestConfig {
  * Result of creating a material dynamic form test
  */
 export interface MaterialFormTestResult {
-  component: DynamicForm;
-  fixture: ComponentFixture<DynamicForm>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  component: DynamicForm<any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fixture: ComponentFixture<DynamicForm<any, any>>;
 }
 
 /**
  * Fluent API for building material form configurations
  */
 export class MaterialFormConfigBuilder {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private fields: any[] = [];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field(field: any): MaterialFormConfigBuilder {
     this.fields.push(field);
     return this;
@@ -161,7 +165,8 @@ export class MaterialFormTestUtils {
   /**
    * Waits for the material dynamic form to initialize
    */
-  static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static async waitForInit(fixture: ComponentFixture<DynamicForm<any, any>>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
 
     // Flush effects critical for zoneless change detection

@@ -24,6 +24,14 @@ export interface PrimeTextareaProps extends TextareaProps {
    * Hint text displayed below the textarea.
    */
   hint?: DynamicText;
+  /**
+   * Size variant of the textarea.
+   */
+  size?: 'small' | 'large';
+  /**
+   * Visual variant of the textarea.
+   */
+  variant?: 'outlined' | 'filled';
 }
 
 /**

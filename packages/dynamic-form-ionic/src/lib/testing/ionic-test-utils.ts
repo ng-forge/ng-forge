@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { DynamicForm, FormConfig, FormEvent, provideDynamicForm, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormEvent, provideDynamicForm } from '@ng-forge/dynamic-form';
 import { delay } from './delay';
 import { waitForDFInit } from './wait-for-df';
 import { withIonicFields } from '../providers/ionic-providers';
@@ -31,16 +31,20 @@ export interface IonicFormTestConfig {
  * Result of creating an Ionic dynamic form test
  */
 export interface IonicFormTestResult {
-  component: DynamicForm;
-  fixture: ComponentFixture<DynamicForm<readonly RegisteredFieldTypes[]>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  component: DynamicForm<any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fixture: ComponentFixture<DynamicForm<any, any>>;
 }
 
 /**
  * Fluent API for building Ionic form configurations
  */
 export class IonicFormConfigBuilder {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private fields: any[] = [];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field(field: any): IonicFormConfigBuilder {
     this.fields.push(field);
     return this;
@@ -141,7 +145,7 @@ export class IonicFormTestUtils {
       providers: [provideAnimations(), provideDynamicForm(...withIonicFields()), ...(testConfig.providers || [])],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(DynamicForm<readonly RegisteredFieldTypes[]>);
+    const fixture = TestBed.createComponent(DynamicForm);
     const component = fixture.componentInstance;
 
     // Set up the component
@@ -164,7 +168,8 @@ export class IonicFormTestUtils {
   /**
    * Waits for the Ionic dynamic form to initialize
    */
-  static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static async waitForInit(fixture: ComponentFixture<DynamicForm<any, any>>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
 
     // Flush effects critical for zoneless change detection

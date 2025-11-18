@@ -28,6 +28,14 @@ export interface PrimeSelectProps extends SelectProps {
    * Hint text displayed below the select.
    */
   hint?: DynamicText;
+  /**
+   * Size variant of the select.
+   */
+  size?: 'small' | 'large';
+  /**
+   * Visual variant of the select.
+   */
+  variant?: 'outlined' | 'filled';
 }
 
 export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;
