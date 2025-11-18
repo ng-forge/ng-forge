@@ -155,21 +155,18 @@ describe('ArrayFieldComponent', () => {
       items: ['value1', 'value2', 'value3'],
     });
 
-    // Wait for all async operations to complete and allow multiple change detection cycles
-    // This is necessary because:
-    // 1. arrayFieldTrees computed needs to run
-    // 2. toObservable needs to emit
-    // 3. switchMap needs to load components asynchronously
-    // 4. toSignal needs to update with the results
-    await fixture.whenStable();
-    fixture.detectChanges();
+    // The component loads array items asynchronously via forkJoin in a switchMap
+    // Poll until the fields are loaded or timeout
+    const maxAttempts = 50; // 5 seconds max
+    let attempts = 0;
 
-    // Give the toSignal time to process the observable emission
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    fixture.detectChanges();
-
-    await fixture.whenStable();
-    fixture.detectChanges();
+    while (component.fields().length < 3 && attempts < maxAttempts) {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      TestBed.flushEffects();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
+    }
 
     expect(component.fields()).toHaveLength(3);
   });

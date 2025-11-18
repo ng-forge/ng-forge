@@ -24,6 +24,7 @@ export function mapFieldToBindings(fieldDef: FieldDef<any>, fieldRegistry: Map<s
     return fieldType.mapper(fieldDef);
   }
 
-  // Fallback to base mapper with options
-  return baseFieldMapper(fieldDef, options);
+  // Fallback to base mapper
+  // Mapper will inject FIELD_SIGNAL_CONTEXT internally
+  return baseFieldMapper(fieldDef);
 }
