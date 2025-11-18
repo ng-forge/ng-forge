@@ -4,7 +4,6 @@ export { FieldRendererDirective } from './directives/dynamic-form.directive';
 // Core interfaces and types - clean signal forms API
 export * from './models';
 export * from './definitions';
-export * from './types/common-props';
 
 // Provider system for dependency injection
 export * from './providers';
