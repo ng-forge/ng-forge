@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { AddArrayItemEvent, DynamicForm, type FormConfig, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
+import { AddArrayItemEvent, DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 import { JsonPipe } from '@angular/common';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,11 +24,9 @@ const tagTemplate = {
     },
     {
       key: 'removeTag',
-      type: 'button',
+      type: 'removeArrayItem',
       label: 'Remove',
       className: 'remove-tag-button',
-      event: RemoveArrayItemEvent,
-      eventArgs: ['$arrayKey', '$index'],
       props: {
         color: 'warn',
       },
@@ -93,11 +91,9 @@ const contactTemplate = {
     },
     {
       key: 'removeContact',
-      type: 'button',
+      type: 'removeArrayItem',
       label: 'Remove',
       className: 'remove-contact-button',
-      event: RemoveArrayItemEvent,
-      eventArgs: ['$arrayKey', '$index'],
       props: {
         color: 'warn',
       },
