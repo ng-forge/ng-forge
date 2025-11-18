@@ -801,7 +801,7 @@ describe('DynamicFormComponent', () => {
 
       // Update first name
       const firstNameInput = fixture.debugElement.queryAll(
-        (by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent
+        (by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent,
       )[0];
       const firstNameElement = firstNameInput.nativeElement.querySelector('input');
       firstNameElement.value = 'Jane';

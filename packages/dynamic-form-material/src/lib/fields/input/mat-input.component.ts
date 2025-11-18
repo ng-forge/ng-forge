@@ -17,29 +17,57 @@ import { AsyncPipe } from '@angular/common';
 
     <mat-form-field [appearance]="props()?.appearance ?? 'outline'" [subscriptSizing]="props()?.subscriptSizing ?? 'dynamic'">
       @if (label()) {
-      <mat-label>{{ label() | dynamicText | async }}</mat-label>
-      } @switch (props()?.type ?? 'text') { @case ('email') {
-      <input matInput type="email" [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
-      } @case ('password') {
-      <input
-        matInput
-        type="password"
-        [field]="f"
-        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="tabIndex()"
-      />
-      } @case ('number') {
-      <input matInput type="number" [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
-      } @case ('tel') {
-      <input matInput type="tel" [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
-      } @case ('url') {
-      <input matInput type="url" [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
-      } @default {
-      <input matInput type="text" [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
-      } } @if (props()?.hint; as hint) {
-      <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <mat-error>{{ error.message }}</mat-error>
+        <mat-label>{{ label() | dynamicText | async }}</mat-label>
+      }
+      @switch (props()?.type ?? 'text') {
+        @case ('email') {
+          <input
+            matInput
+            type="email"
+            [field]="f"
+            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+            [attr.tabindex]="tabIndex()"
+          />
+        }
+        @case ('password') {
+          <input
+            matInput
+            type="password"
+            [field]="f"
+            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+            [attr.tabindex]="tabIndex()"
+          />
+        }
+        @case ('number') {
+          <input
+            matInput
+            type="number"
+            [field]="f"
+            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+            [attr.tabindex]="tabIndex()"
+          />
+        }
+        @case ('tel') {
+          <input matInput type="tel" [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
+        }
+        @case ('url') {
+          <input matInput type="url" [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
+        }
+        @default {
+          <input
+            matInput
+            type="text"
+            [field]="f"
+            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+            [attr.tabindex]="tabIndex()"
+          />
+        }
+      }
+      @if (props()?.hint; as hint) {
+        <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <mat-error>{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,

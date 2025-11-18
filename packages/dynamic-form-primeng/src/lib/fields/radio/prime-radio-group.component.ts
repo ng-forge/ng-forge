@@ -22,18 +22,18 @@ export interface PrimeRadioGroupProps {
   template: `
     <div class="radio-group">
       @for (option of options(); track option.value; let i = $index) {
-      <div class="radio-option">
-        <p-radiobutton
-          [name]="name()"
-          [value]="option.value"
-          [ngModel]="value()"
-          (ngModelChange)="onRadioChange($event)"
-          [disabled]="disabled() || option.disabled || false"
-          [inputId]="name() + '_' + i"
-          [styleClass]="properties()?.styleClass"
-        />
-        <label [for]="name() + '_' + i" class="radio-option-label">{{ option.label | dynamicText | async }}</label>
-      </div>
+        <div class="radio-option">
+          <p-radiobutton
+            [name]="name()"
+            [value]="option.value"
+            [ngModel]="value()"
+            (ngModelChange)="onRadioChange($event)"
+            [disabled]="disabled() || option.disabled || false"
+            [inputId]="name() + '_' + i"
+            [styleClass]="properties()?.styleClass"
+          />
+          <label [for]="name() + '_' + i" class="radio-option-label">{{ option.label | dynamicText | async }}</label>
+        </div>
       }
     </div>
   `,

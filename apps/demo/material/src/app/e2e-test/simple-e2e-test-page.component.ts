@@ -23,19 +23,19 @@ import { getFieldDefaultValue, FieldDef, injectFieldRegistry, flattenFields } fr
       <h1>Simple E2E Test Environment</h1>
       <p>Basic testing page for automated tests</p>
 
-      @if (currentConfig()) {
-        <div class="e2e-test-container" [attr.data-testid]="currentTestId()">
-          @if (currentTitle()) {
-            <div class="form-header">
-              <h2 [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
-              @if (currentDescription()) {
-                <p class="description">{{ currentDescription() }}</p>
-              }
-            </div>
-          }
+      <div class="e2e-test-container" [attr.data-testid]="currentTestId()">
+        @if (currentTitle()) {
+          <div class="form-header">
+            <h2 [attr.data-testid]="currentTestId() + '-title'">{{ currentTitle() }}</h2>
+            @if (currentDescription()) {
+              <p class="description">{{ currentDescription() }}</p>
+            }
+          </div>
+        }
 
+        @if (currentConfig().fields && currentConfig().fields.length > 0) {
           <dynamic-form
-            [config]="currentConfig()!"
+            [config]="currentConfig()"
             [(value)]="formValue"
             (submitted)="onSubmitted($event)"
             (initialized)="onFormInitialized()"
@@ -62,16 +62,8 @@ import { getFieldDefaultValue, FieldDef, injectFieldRegistry, flattenFields } fr
               }
             </details>
           </div>
-        </div>
-      } @else {
-        <div class="no-scenario">
-          <h2>No Scenario Loaded</h2>
-          <p>Use JavaScript to load a test scenario:</p>
-          <pre><code>window.loadTestScenario(config);</code></pre>
-
-          <button (click)="loadBasicScenario()" class="load-basic-btn">Load Basic Test Scenario</button>
-        </div>
-      }
+        }
+      </div>
     </div>
   `,
   styles: [
@@ -187,12 +179,12 @@ import { getFieldDefaultValue, FieldDef, injectFieldRegistry, flattenFields } fr
 export class SimpleE2ETestPageComponent {
   private readonly fieldRegistry = injectFieldRegistry();
 
-  currentConfig = signal<FormConfig | null>(null);
+  currentConfig = signal<FormConfig>({ fields: [] });
   currentTestId = signal<string>('default');
   currentTitle = signal<string>('');
   currentDescription = signal<string>('');
 
-  formValue = model<Record<string, unknown>>({});
+  formValue = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);
   formInitialized = signal<boolean>(false);
 
@@ -238,69 +230,6 @@ export class SimpleE2ETestPageComponent {
     );
   }
 
-  loadBasicScenario(): void {
-    const basicConfig: FormConfig = {
-      fields: [
-        {
-          key: 'firstName',
-          type: 'input',
-          label: 'First Name',
-          props: {
-            placeholder: 'Enter your first name',
-          },
-          required: true,
-          col: 6,
-        },
-        {
-          key: 'lastName',
-          type: 'input',
-          label: 'Last Name',
-          props: {
-            placeholder: 'Enter your last name',
-          },
-          required: true,
-          col: 6,
-        },
-        {
-          key: 'email',
-          type: 'input',
-          label: 'Email',
-          props: {
-            type: 'email',
-            placeholder: 'Enter your email',
-          },
-          required: true,
-          email: true,
-        },
-        {
-          key: 'priority',
-          type: 'radio',
-          label: 'Priority Level',
-          options: [
-            { value: 'low', label: 'Low Priority' },
-            { value: 'medium', label: 'Medium Priority' },
-            { value: 'high', label: 'High Priority' },
-          ],
-          props: {
-            hint: 'Select task priority',
-          },
-          required: true,
-        },
-        {
-          key: 'submit',
-          type: 'submit',
-          label: 'Submit',
-        },
-      ],
-    };
-
-    this.currentConfig.set(basicConfig);
-    this.currentTestId.set('basic-test');
-    this.currentTitle.set('Basic Test Scenario');
-    this.currentDescription.set('Simple form for e2e testing');
-    this.formInitialized.set(false);
-  }
-
   /**
    * Extracts default values from a form configuration.
    * This mimics the behavior of DynamicForm's internal defaultValues computation.
@@ -344,20 +273,20 @@ export class SimpleE2ETestPageComponent {
         description?: string;
       },
     ) => {
+      // Reset form value to empty - let DynamicForm handle all initialization
+      this.formValue.set({});
+
+      // Set the config - DynamicForm will initialize formValue with its internal defaultValues
       this.currentConfig.set(config);
       this.currentTestId.set(options?.testId || 'default');
       this.currentTitle.set(options?.title || '');
       this.currentDescription.set(options?.description || '');
       this.formInitialized.set(false);
-
-      // Extract and set default values from config
-      const defaultValues = this.extractDefaultValues(config);
-      this.formValue.set(defaultValues);
     };
 
     // Helper function to clear current scenario
     (window as any).clearTestScenario = () => {
-      this.currentConfig.set(null);
+      this.currentConfig.set({ fields: [] });
       this.currentTestId.set('default');
       this.currentTitle.set('');
       this.currentDescription.set('');

@@ -47,7 +47,7 @@ function createConditionalLogic<TValue>(when: ConditionalExpression | undefined)
  * conditional type, but at runtime the value is always the correct type for our use case.
  */
 function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
-  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>
+  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>,
 ): SchemaPath<TValue, SchemaPathRules.Supported, TPathKind> {
   // The cast is safe because SchemaPathTree extends SchemaPath, and we constrain TValue
   // to exclude AbstractControl in our public APIs (we never pass reactive form controls)
@@ -138,7 +138,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
           // Pattern validator expects SchemaPath<string>
           pattern(
             fieldPath as SchemaPath<string, SchemaPathRules.Supported>,
-            dynamicPattern as LogicFn<string | undefined, RegExp | undefined>
+            dynamicPattern as LogicFn<string | undefined, RegExp | undefined>,
           );
         } else {
           pattern(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, regexPattern);
@@ -198,7 +198,7 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
  * Create a function-based validator using registered validator functions
  */
 function createFunctionValidator<TValue>(
-  config: CustomValidatorConfig
+  config: CustomValidatorConfig,
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const registry = inject(FunctionRegistryService);
   const validatorFn = registry.getValidator(config.functionName!);
@@ -206,7 +206,7 @@ function createFunctionValidator<TValue>(
   if (!validatorFn) {
     console.warn(
       `[DynamicForm] Custom validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using signalFormsConfig.validators or check the function name for typos.`
+        `Ensure it's registered using signalFormsConfig.validators or check the function name for typos.`,
     );
     return () => null;
   }
@@ -220,7 +220,7 @@ function createFunctionValidator<TValue>(
  * Create an expression-based validator using secure AST evaluation
  */
 function createExpressionValidator<TValue>(
-  config: CustomValidatorConfig
+  config: CustomValidatorConfig,
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
@@ -282,7 +282,7 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
   if (!validatorConfig) {
     console.warn(
       `[DynamicForm] Async validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using signalFormsConfig.asyncValidators or check the function name for typos.`
+        `Ensure it's registered using signalFormsConfig.asyncValidators or check the function name for typos.`,
     );
     return;
   }
@@ -334,7 +334,7 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
   if (!httpValidatorConfig) {
     console.warn(
       `[DynamicForm] HTTP validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using signalFormsConfig.httpValidators or check the function name for typos.`
+        `Ensure it's registered using signalFormsConfig.httpValidators or check the function name for typos.`,
     );
     return;
   }
