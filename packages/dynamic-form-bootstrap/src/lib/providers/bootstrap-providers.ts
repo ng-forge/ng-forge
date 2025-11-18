@@ -7,22 +7,19 @@ import { BOOTSTRAP_FIELD_TYPES } from '../config/bootstrap-field-config';
  *
  * @example
  * ```typescript
- * @Component({
- *   providers: [provideDynamicForm(...withBootstrapFields())],
- * })
- * export class MyFormComponent {
- *   config: DynamicFormConfig = {
- *     fields: [
- *       {
- *         key: 'email',
- *         type: 'input',
- *         label: 'Email',
- *         props: { type: 'email', size: 'lg' }
- *       }
- *     ]
- *   };
- * }
+ * // Application-level setup
+ * import { ApplicationConfig } from '@angular/core';
+ * import { provideDynamicForm } from '@ng-forge/dynamic-form';
+ * import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
+ *
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideDynamicForm(...withBootstrapFields())
+ *   ]
+ * };
  * ```
+ *
+ * @returns Array of field type definitions for Bootstrap components
  */
 export function withBootstrapFields(): FieldTypeDefinition[] {
   return BOOTSTRAP_FIELD_TYPES;
