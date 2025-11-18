@@ -25,6 +25,21 @@ export interface FieldSignalContext<TModel = any> {
 }
 
 /**
+ * Array context information for fields rendered within arrays.
+ *
+ * This metadata is passed as an input binding to components rendered inside array fields,
+ * providing context about their position and parent array.
+ */
+export interface ArrayContext {
+  /** The key of the parent array field */
+  arrayKey: string;
+  /** The index of this item within the array */
+  index: number;
+  /** The current form value for token resolution */
+  formValue: unknown;
+}
+
+/**
  * Mapper function type that converts a field definition to component bindings.
  *
  * Mappers run within an injection context and inject FIELD_SIGNAL_CONTEXT to
