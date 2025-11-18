@@ -1,4 +1,4 @@
-// Public exports for material field fields and types
+// Public exports for material field components and types
 
 export * from './checkbox';
 export * from './datepicker';

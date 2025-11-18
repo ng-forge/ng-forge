@@ -3,5 +3,6 @@
   "dest": "../../dist/packages/dynamic-form-ionic",
   "lib": {
     "entryFile": "src/index.ts"
-  }
+  },
+  "allowedNonPeerDependencies": ["@ng-forge/dynamic-form", "date-fns"]
 }
