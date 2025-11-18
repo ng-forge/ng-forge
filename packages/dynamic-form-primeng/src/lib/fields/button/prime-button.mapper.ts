@@ -2,17 +2,17 @@ import {
   baseFieldMapper,
   ArrayItemContext,
   FieldDef,
-  FieldMapperOptions,
   AddArrayItemEvent,
   RemoveArrayItemEvent,
+  ARRAY_CONTEXT,
 } from '@ng-forge/dynamic-form';
-import { Binding, inputBinding } from '@angular/core';
+import { Binding, inject, inputBinding } from '@angular/core';
 
-export function buttonFieldMapper(
-  fieldDef: FieldDef<Record<string, unknown>>,
-  options?: Omit<FieldMapperOptions, 'fieldRegistry'>,
-): Binding[] {
+export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
+
+  // Optionally inject array context if this button is rendered within an array
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
 
   // Add disabled binding since baseFieldMapper excludes it
   if (fieldDef.disabled !== undefined) {
@@ -41,10 +41,10 @@ export function buttonFieldMapper(
   const eventContext: ArrayItemContext = {
     key: fieldDef.key,
     ...(isArrayButton &&
-      options?.arrayContext && {
-        index: options.arrayContext.index,
-        arrayKey: options.arrayContext.arrayKey,
-        formValue: options.arrayContext.formValue,
+      arrayContext && {
+        index: arrayContext.index,
+        arrayKey: arrayContext.arrayKey,
+        formValue: arrayContext.formValue,
       }),
   };
 

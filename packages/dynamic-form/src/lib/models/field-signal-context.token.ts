@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import type { FieldSignalContext } from '../mappers/types';
+import type { FieldSignalContext, ArrayContext } from '../mappers/types';
 
 /**
  * Injection token for providing field signal context to mappers and components.
@@ -30,17 +30,35 @@ import type { FieldSignalContext } from '../mappers/types';
  * }
  * ```
  */
-export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>(
-  'FIELD_SIGNAL_CONTEXT',
-  {
-    providedIn: null, // Not provided at root - must be provided by DynamicForm
-    factory: () => {
-      throw new Error(
-        'FIELD_SIGNAL_CONTEXT was not provided. ' +
-          'This token must be provided by DynamicFormComponent or a container field component. ' +
-          'If you are calling a mapper function directly, ensure it runs within runInInjectionContext() ' +
-          'with an injector that provides FIELD_SIGNAL_CONTEXT.'
-      );
-    },
-  }
-);
+export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIELD_SIGNAL_CONTEXT', {
+  providedIn: null, // Not provided at root - must be provided by DynamicForm
+  factory: () => {
+    throw new Error(
+      'FIELD_SIGNAL_CONTEXT was not provided. ' +
+        'This token must be provided by DynamicFormComponent or a container field component. ' +
+        'If you are calling a mapper function directly, ensure it runs within runInInjectionContext() ' +
+        'with an injector that provides FIELD_SIGNAL_CONTEXT.',
+    );
+  },
+});
+
+/**
+ * Injection token for providing array context metadata to mappers and components.
+ *
+ * This token is optionally provided by ArrayFieldComponent when creating injectors
+ * for array items. It contains metadata about the array item's position and parent.
+ *
+ * Mappers can inject this token with {optional: true} to access array context:
+ *
+ * @example
+ * ```typescript
+ * // In a mapper function
+ * export function buttonMapper(fieldDef: FieldDef<any>): Binding[] {
+ *   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+ *   if (arrayContext) {
+ *     // Use arrayContext.index, arrayContext.arrayKey, etc.
+ *   }
+ * }
+ * ```
+ */
+export const ARRAY_CONTEXT = new InjectionToken<ArrayContext>('ARRAY_CONTEXT');

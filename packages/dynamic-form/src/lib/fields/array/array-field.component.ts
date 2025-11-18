@@ -22,9 +22,9 @@ import { FieldDef } from '../../definitions';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
-import { FieldSignalContext } from '../../mappers';
+import { ArrayContext, FieldSignalContext } from '../../mappers';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 
 /**
  * Array field component that manages dynamic arrays of field values.
@@ -345,12 +345,22 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     };
 
     // Create scoped child injector that provides the array item's context
+    const arrayContext: ArrayContext = {
+      arrayKey,
+      index,
+      formValue: this.parentFieldSignalContext.value(),
+    };
+
     const arrayItemInjector = Injector.create({
       parent: this.injector,
       providers: [
         {
           provide: FIELD_SIGNAL_CONTEXT,
           useValue: itemFieldSignalContext,
+        },
+        {
+          provide: ARRAY_CONTEXT,
+          useValue: arrayContext,
         },
       ],
     });
