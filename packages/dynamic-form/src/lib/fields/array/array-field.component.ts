@@ -282,8 +282,8 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
   /**
    * Create component for regular field types (input, group, select, etc.)
-   * For value fields (input, select): pass the FieldTree directly
-   * For container fields (group): use mapFieldToBindings with parent context
+   * Uses mapFieldToBindings for all bindings, then adds the field binding manually
+   * since we already have the FieldTree.
    */
   private createRegularComponent(
     componentType: Type<FormUiControl>,
@@ -300,26 +300,30 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
       return this.createFlattenTypeComponent(componentType, fieldTree, template, index);
     }
 
-    // For value fields (input, select, checkbox, etc.), pass FieldTree directly
-    const key = template.key || `${arrayKey}[${index}]`;
+    // Create array-indexed key (e.g., tags[0], tags[1])
+    const key = template.key || `${arrayKey}_${index}`;
 
-    const bindings = [
-      inputBinding('field', () => fieldTree),
-      inputBinding('key', () => key),
-      inputBinding('arrayContext', () => ({
+    // Create a FieldSignalContext that points to this array item's FieldTree
+    // This allows valueFieldMapper to find the field correctly
+    const itemFieldSignalContext: FieldSignalContext<unknown> = {
+      injector: this.injector,
+      value: this.parentFieldSignalContext().value,
+      defaultValues: () => ({}),
+      form: (() => fieldTree) as ReturnType<typeof form<unknown>>,
+      defaultValidationMessages: this.parentFieldSignalContext().defaultValidationMessages,
+    };
+
+    // Use mapFieldToBindings to get all bindings from mappers
+    // Pass arrayContext so buttonFieldMapper can use it for next/prev page buttons
+    const bindings = mapFieldToBindings(template, {
+      fieldSignalContext: itemFieldSignalContext,
+      fieldRegistry: this.fieldRegistry.raw,
+      arrayContext: {
         arrayKey,
         index,
         formValue: this.parentFieldSignalContext().value(),
-      })),
-    ];
-
-    // Add optional bindings from template
-    if ('label' in template && template.label) {
-      bindings.push(inputBinding('label', () => template.label));
-    }
-    if ('placeholder' in template && template.placeholder) {
-      bindings.push(inputBinding('placeholder', () => template.placeholder));
-    }
+      },
+    });
 
     return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
   }

@@ -23,23 +23,14 @@ export function valueFieldMapper(fieldDef: BaseValueField<any, any>, options: Va
   const formRoot = options.fieldSignalContext.form();
   const childrenMap = (formRoot as any).structure?.childrenMap?.();
 
-  // Check if this is an array item field (has array notation like tags[0])
-  const arrayMatch = fieldDef.key.match(/^(.+)\[(\d+)\]$/);
-
-  if (arrayMatch) {
-    // Parse array notation to extract array name and index
-    const [, arrayName, indexStr] = arrayMatch;
-    const index = parseInt(indexStr, 10);
-
-    // Access the array field node, then the element at the index
-    const arrayFieldNode = childrenMap?.get(arrayName);
-    const arrayItemFieldProxy = arrayFieldNode?.fieldProxy?.[index];
-
-    if (arrayItemFieldProxy) {
-      bindings.push(inputBinding('field', () => arrayItemFieldProxy));
+  if (!childrenMap) {
+    // No childrenMap means formRoot is a FieldTree itself (e.g., for array items)
+    // Access its fieldProxy just like we do for normal fields
+    if ((formRoot as any).fieldProxy) {
+      bindings.push(inputBinding('field', () => (formRoot as any).fieldProxy));
     }
   } else {
-    // Standard field access for non-array keys
+    // Standard field access for non-array keys via childrenMap lookup
     const formField = childrenMap?.get(fieldDef.key);
     if (formField?.fieldProxy) {
       bindings.push(inputBinding('field', () => formField.fieldProxy));
