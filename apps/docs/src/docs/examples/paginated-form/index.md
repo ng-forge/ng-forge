@@ -2,7 +2,7 @@ A comprehensive multi-step registration form demonstrating the `page` field type
 
 ## Live Demo
 
-{{ NgDocActions.demo("PaginatedFormDemoComponent", { container: false }) }}
+{{ NgDocActions.demo("PaginatedFormDemoComponent", { container: false, tabs: [] }) }}
 
 ## Overview
 
