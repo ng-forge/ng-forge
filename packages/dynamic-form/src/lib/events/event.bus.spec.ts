@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { EventBus } from './event.bus';
-import { FormEvent, FormEventConstructor } from './interfaces/form-event';
+import { FormEvent } from './interfaces/form-event';
 import { take, toArray } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 
@@ -12,7 +12,10 @@ class TestEvent implements FormEvent {
 
 class TestEventWithArgs implements FormEvent {
   readonly type = 'test-event-with-args' as const;
-  constructor(public payload: string, public count: number) {}
+  constructor(
+    public payload: string,
+    public count: number,
+  ) {}
 }
 
 class AnotherTestEvent implements FormEvent {
@@ -25,7 +28,10 @@ class ThirdTestEvent implements FormEvent {
 
 class EventWithOptionalArgs implements FormEvent {
   readonly type = 'event-with-optional-args' as const;
-  constructor(public required: string, public optional?: number) {}
+  constructor(
+    public required: string,
+    public optional?: number,
+  ) {}
 }
 
 describe('EventBus', () => {
@@ -494,7 +500,9 @@ describe('EventBus', () => {
 
       it('should receive events matching any type in array', async () => {
         const events = firstValueFrom(
-          eventBus.on<TestEvent | AnotherTestEvent | ThirdTestEvent>(['test-event', 'another-test-event', 'third-test-event']).pipe(take(3), toArray()),
+          eventBus
+            .on<TestEvent | AnotherTestEvent | ThirdTestEvent>(['test-event', 'another-test-event', 'third-test-event'])
+            .pipe(take(3), toArray()),
         );
 
         eventBus.dispatch(ThirdTestEvent);
@@ -526,7 +534,9 @@ describe('EventBus', () => {
       });
 
       it('should filter events correctly', async () => {
-        const events = firstValueFrom(eventBus.on<TestEvent | AnotherTestEvent>(['test-event', 'another-test-event']).pipe(take(4), toArray()));
+        const events = firstValueFrom(
+          eventBus.on<TestEvent | AnotherTestEvent>(['test-event', 'another-test-event']).pipe(take(4), toArray()),
+        );
 
         eventBus.dispatch(TestEvent);
         eventBus.dispatch(ThirdTestEvent);
@@ -570,7 +580,9 @@ describe('EventBus', () => {
 
       it('should handle large arrays of event types', async () => {
         const events = firstValueFrom(
-          eventBus.on<TestEvent | AnotherTestEvent | ThirdTestEvent>(['test-event', 'another-test-event', 'third-test-event']).pipe(take(6), toArray()),
+          eventBus
+            .on<TestEvent | AnotherTestEvent | ThirdTestEvent>(['test-event', 'another-test-event', 'third-test-event'])
+            .pipe(take(6), toArray()),
         );
 
         eventBus.dispatch(TestEvent);
@@ -734,14 +746,7 @@ describe('EventBus', () => {
 
     describe('Observable Behavior', () => {
       it('should handle RxJS operators (map, filter, etc.)', async () => {
-        const events = firstValueFrom(
-          eventBus
-            .on<TestEventWithArgs>('test-event-with-args')
-            .pipe(
-              take(2),
-              toArray(),
-            ),
-        );
+        const events = firstValueFrom(eventBus.on<TestEventWithArgs>('test-event-with-args').pipe(take(2), toArray()));
 
         eventBus.dispatch(TestEventWithArgs, 'first', 1);
         eventBus.dispatch(TestEventWithArgs, 'second', 2);

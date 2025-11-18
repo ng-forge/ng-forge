@@ -43,7 +43,7 @@ vi.mock('./expressions', async () => {
   const actual = await vi.importActual<typeof expressions>('./expressions');
   return {
     ...actual,
-    createLogicFunction: vi.fn((expr) => () => true),
+    createLogicFunction: vi.fn(() => () => true),
   };
 });
 
@@ -51,7 +51,7 @@ vi.mock('./values', async () => {
   const actual = await vi.importActual<typeof values>('./values');
   return {
     ...actual,
-    createTypePredicateFunction: vi.fn(() => (value: any) => true),
+    createTypePredicateFunction: vi.fn(() => () => true),
   };
 });
 
@@ -77,7 +77,9 @@ describe('schema-application', () => {
     vi.clearAllMocks();
 
     // Spy on console.error
-    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+      // Intentionally empty - we're just suppressing console output in tests
+    });
   });
 
   afterEach(() => {
@@ -136,9 +138,7 @@ describe('schema-application', () => {
           applySchema(config, mockFieldPath);
         });
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining("[Schema] Schema not found: 'nonexistent-schema'"),
-        );
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[Schema] Schema not found: 'nonexistent-schema'"));
       });
 
       it('should list available schemas in error message', () => {
@@ -154,9 +154,7 @@ describe('schema-application', () => {
           applySchema(config, mockFieldPath);
         });
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Available schemas: schema1, schema2'),
-        );
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Available schemas: schema1, schema2'));
       });
 
       it('should handle empty schema registry gracefully', () => {
@@ -169,9 +167,7 @@ describe('schema-application', () => {
           applySchema(config, mockFieldPath);
         });
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Available schemas: <none>'),
-        );
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Available schemas: <none>'));
       });
 
       it('should not throw when schema is missing', () => {
