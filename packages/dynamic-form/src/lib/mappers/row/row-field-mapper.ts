@@ -17,6 +17,11 @@ export function rowFieldMapper(fieldDef: RowField, options?: Omit<FieldMapperOpt
   if (options) {
     bindings.push(inputBinding('form', () => options.fieldSignalContext.form));
     bindings.push(inputBinding('fieldSignalContext', () => options.fieldSignalContext));
+
+    // Pass arrayContext if this row is rendered inside an array
+    if (options.arrayContext) {
+      bindings.push(inputBinding('arrayContext', () => options.arrayContext));
+    }
   }
 
   return bindings;

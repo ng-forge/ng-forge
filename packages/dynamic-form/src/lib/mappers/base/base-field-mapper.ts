@@ -1,8 +1,9 @@
 import { FieldDef } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
 import { getGridClassString } from '../../utils/grid-classes/grid-classes';
+import { FieldMapperOptions } from '../types';
 
-export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
+export function baseFieldMapper(fieldDef: FieldDef<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
   const { label, className, tabIndex, props } = fieldDef;
   const bindings: Binding[] = [];
 
@@ -53,6 +54,7 @@ export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
     'maxValue', // Handled by Field directive metadata (MAX)
     'step', // Passed via props instead
     'validationMessages', // Handled in value/checkbox mappers
+    'defaultValue', // Used for form reset/clear, not passed to components
   ]);
 
   for (const [key, value] of Object.entries(fieldDef)) {
