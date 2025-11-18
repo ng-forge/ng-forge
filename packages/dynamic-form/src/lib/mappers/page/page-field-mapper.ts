@@ -22,6 +22,11 @@ export function pageFieldMapper(fieldDef: PageField, options?: Omit<FieldMapperO
     // Pass through parent form context - page doesn't change form shape like row
     bindings.push(inputBinding('form', () => options.fieldSignalContext.form));
     bindings.push(inputBinding('fieldSignalContext', () => options.fieldSignalContext));
+
+    // Pass arrayContext if this page is rendered inside an array
+    if (options.arrayContext) {
+      bindings.push(inputBinding('arrayContext', () => options.arrayContext));
+    }
   }
 
   return bindings;

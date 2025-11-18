@@ -51,6 +51,7 @@ export default class RowFieldComponent {
   value = model<any>(undefined);
   form = input.required<any>(); // Parent form instance
   fieldSignalContext = input.required<FieldSignalContext<any>>();
+  arrayContext = input<{ arrayKey: string; index: number; formValue: unknown }>();
 
   readonly disabled = computed(() => this.field().disabled || false);
 
@@ -100,6 +101,7 @@ export default class RowFieldComponent {
         const bindings = mapFieldToBindings(fieldDef, {
           fieldSignalContext,
           fieldRegistry: this.fieldRegistry.raw,
+          arrayContext: this.arrayContext(),
         });
 
         return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;

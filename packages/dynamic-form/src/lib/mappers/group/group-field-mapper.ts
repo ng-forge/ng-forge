@@ -24,6 +24,11 @@ export function groupFieldMapper(fieldDef: GroupField, options?: Omit<FieldMappe
     if (defaultValidationMessages !== undefined) {
       bindings.push(inputBinding('defaultValidationMessages', () => defaultValidationMessages));
     }
+
+    // Pass arrayContext if this group is rendered inside an array
+    if (options.arrayContext) {
+      bindings.push(inputBinding('arrayContext', () => options.arrayContext));
+    }
   }
 
   return bindings;

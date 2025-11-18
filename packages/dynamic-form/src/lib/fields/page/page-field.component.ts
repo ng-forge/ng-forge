@@ -144,8 +144,10 @@ export default class PageFieldComponent {
         }
 
         // Pass through the parent form context - page doesn't change form shape like row
+        const fieldSignalContext = this.fieldSignalContext();
+
         const bindings = mapFieldToBindings(fieldDef, {
-          fieldSignalContext: this.fieldSignalContext(),
+          fieldSignalContext,
           fieldRegistry: this.fieldRegistry.raw,
         });
 
