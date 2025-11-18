@@ -2,7 +2,7 @@ Complete example of a user registration form with validation, conditional logic,
 
 ## Live Demo
 
-{{ NgDocActions.demo("UserRegistrationDemoComponent") }}
+{{ NgDocActions.demo("UserRegistrationDemoComponent", { tabs: [] }) }}
 
 ## Overview
 

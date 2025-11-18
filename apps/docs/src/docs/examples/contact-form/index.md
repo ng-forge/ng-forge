@@ -2,7 +2,7 @@ Simple contact form demonstrating basic form fields, validation, and user input.
 
 ## Live Demo
 
-{{ NgDocActions.demo("ContactFormDemoComponent") }}
+{{ NgDocActions.demo("ContactFormDemoComponent", { tabs: [] }) }}
 
 ## Overview
 

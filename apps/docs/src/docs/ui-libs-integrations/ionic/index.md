@@ -127,7 +127,7 @@ export class ContactFormComponent {
 
 Here's a full registration form showcasing multiple Ionic field types optimized for mobile:
 
-{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent", { tabs: [] }) }}
 
 This example demonstrates:
 
@@ -156,7 +156,7 @@ Text input field with mobile keyboard optimization and platform-adaptive styling
 
 **Live Demo:**
 
-{{ NgDocActions.demo("InputIframeDemoComponent") }}
+{{ NgDocActions.demo("InputIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
@@ -218,7 +218,7 @@ Multi-line text input field with auto-grow support for mobile devices.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("TextareaIframeDemoComponent") }}
+{{ NgDocActions.demo("TextareaIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
@@ -260,7 +260,7 @@ Dropdown selection field with native action sheets on mobile devices.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SelectIframeDemoComponent") }}
+{{ NgDocActions.demo("SelectIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
@@ -299,7 +299,7 @@ Radio button group for selecting a single option with mobile-friendly spacing.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("RadioIframeDemoComponent") }}
+{{ NgDocActions.demo("RadioIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
@@ -334,7 +334,7 @@ Boolean checkbox control optimized for touch interaction.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
+{{ NgDocActions.demo("CheckboxIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
@@ -364,7 +364,7 @@ Multiple checkbox selection field for choosing multiple options.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
@@ -406,7 +406,7 @@ Slide toggle switch for boolean on/off selections with smooth animations.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
+{{ NgDocActions.demo("ToggleIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
@@ -435,7 +435,7 @@ Range slider control with pin display and snap-to-tick support.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SliderIframeDemoComponent") }}
+{{ NgDocActions.demo("SliderIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
@@ -480,7 +480,7 @@ Date and time selection with native mobile pickers for iOS and Android.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
+{{ NgDocActions.demo("DatepickerIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
@@ -527,7 +527,7 @@ Form submission button that's automatically disabled when the form is invalid.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
+{{ NgDocActions.demo("ButtonIframeDemoComponent", { tabs: [] }) }}
 
 **Basic Usage:**
 
