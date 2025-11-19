@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
@@ -14,7 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     'class.dark': 'isDark()',
   },
 })
-export class App {
+export class App implements OnInit {
   readonly themeService = inject(NgDocThemeService);
 
   isDark = toSignal(
@@ -24,4 +24,8 @@ export class App {
     ),
     { requireSync: true },
   );
+
+  ngOnInit(): void {
+    this.themeService.set('auto');
+  }
 }
