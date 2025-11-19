@@ -1,694 +1,410 @@
-//
-// import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
-// import { E2EScenarioLoader } from './utils/e2e-form-helpers';
-// import { expect, test } from '@playwright/test';
-//
-// test.describe.skip('Multi-Page Navigation Tests', () => {
-//   test.beforeEach(async ({ page }) => {
-//     await page.goto('http://localhost:4200/test/multi-page-navigation');
-//   });
-//
-//   test('should test basic multi-page navigation with registration wizard', async ({ page }) => {
-//     // Load registration wizard scenario (3 pages)
-//     const loader = new E2EScenarioLoader(page);
-//     const registrationConfig = {
-//       fields: [
-//         // Page 1: Account Setup
-//         {
-//           key: 'accountPage',
-//           type: 'page',
-//           title: 'Account Setup',
-//           description: 'Create your account credentials',
-//           fields: [
-//             {
-//               key: 'username',
-//               type: 'input',
-//               label: 'Username',
-//               props: {
-//                 placeholder: 'Enter username',
-//               },
-//               required: true,
-//               minLength: 3,
-//               col: 6,
-//             },
-//             {
-//               key: 'email',
-//               type: 'input',
-//               label: 'Email Address',
-//               props: {
-//                 type: 'email',
-//                 placeholder: 'Enter email',
-//               },
-//               email: true,
-//               required: true,
-//               col: 6,
-//             },
-//             {
-//               key: 'password',
-//               type: 'input',
-//               label: 'Password',
-//               props: {
-//                 type: 'password',
-//                 placeholder: 'Enter password',
-//               },
-//               required: true,
-//               minLength: 8,
-//               col: 6,
-//             },
-//             {
-//               key: 'confirmPassword',
-//               type: 'input',
-//               label: 'Confirm Password',
-//               props: {
-//                 type: 'password',
-//                 placeholder: 'Confirm password',
-//               },
-//               required: true,
-//               col: 6,
-//             },
-//           ],
-//         },
-//         // Page 2: Personal Information
-//         {
-//           key: 'personalPage',
-//           type: 'page',
-//           title: 'Personal Information',
-//           description: 'Tell us about yourself',
-//           fields: [
-//             {
-//               key: 'firstName',
-//               type: 'input',
-//               label: 'First Name',
-//               props: {
-//                 placeholder: 'Enter first name',
-//               },
-//               required: true,
-//               col: 6,
-//             },
-//             {
-//               key: 'lastName',
-//               type: 'input',
-//               label: 'Last Name',
-//               props: {
-//                 placeholder: 'Enter last name',
-//               },
-//               required: true,
-//               col: 6,
-//             },
-//             {
-//               key: 'birthDate',
-//               type: 'input',
-//               label: 'Date of Birth',
-//               props: {
-//                 type: 'date',
-//               },
-//               required: true,
-//               col: 6,
-//             },
-//             {
-//               key: 'phoneNumber',
-//               type: 'input',
-//               label: 'Phone Number',
-//               props: {
-//                 type: 'tel',
-//                 placeholder: 'Enter phone number',
-//               },
-//               pattern: '^[+]?[0-9\\s\\-\\(\\)]+$',
-//               col: 6,
-//             },
-//           ],
-//         },
-//         // Page 3: Preferences
-//         {
-//           key: 'preferencesPage',
-//           type: 'page',
-//           title: 'Preferences',
-//           description: 'Customize your experience',
-//           fields: [
-//             {
-//               key: 'newsletter',
-//               type: 'checkbox',
-//               label: 'Subscribe to newsletter',
-//               col: 12,
-//             },
-//             {
-//               key: 'language',
-//               type: 'select',
-//               label: 'Preferred Language',
-//               options: [
-//                 { value: 'en', label: 'English' },
-//                 { value: 'es', label: 'Spanish' },
-//                 { value: 'fr', label: 'French' },
-//                 { value: 'de', label: 'German' },
-//               ],
-//               value: 'en',
-//               col: 6,
-//             },
-//             {
-//               key: 'timezone',
-//               type: 'select',
-//               label: 'Timezone',
-//               options: [
-//                 { value: 'UTC', label: 'UTC' },
-//                 { value: 'EST', label: 'Eastern Time' },
-//                 { value: 'PST', label: 'Pacific Time' },
-//                 { value: 'GMT', label: 'Greenwich Mean Time' },
-//               ],
-//               col: 6,
-//             },
-//             {
-//               key: 'terms',
-//               type: 'checkbox',
-//               label: 'I agree to the Terms of Service',
-//               required: true,
-//               col: 12,
-//             },
-//             {
-//               key: 'submitRegistration',
-//               type: 'submit',
-//               label: 'Complete Registration',
-//               col: 12,
-//             },
-//           ],
-//         },
-//       ],
-//     };
-//
-//     await loader.loadScenario(registrationConfig, {
-//       testId: 'multi-page-registration',
-//       title: 'Multi-Page Registration Wizard',
-//       description: 'Testing multi-page form navigation and validation',
-//     });
-//
-//     // Wait for page to be fully loaded
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//
-//     // Verify we start on page 1 (Account Setup) by checking for the username field
-//     await page.waitForSelector('#username input', { state: 'visible', timeout: 10000 });
-//     await expect(page.locator('#username input')).toBeVisible();
-//
-//     // Fill page 1 fields
-//     await page.fill('#username input', 'testuser123');
-//     await page.fill('#email input', 'test@example.com');
-//     await page.fill('#password input', 'securepassword123');
-//     await page.fill('#confirmPassword input', 'securepassword123');
-//
-//     // Navigate to page 2 (look for navigation buttons)
-//     const nextButton = page.locator('[data-testid="next-button"]');
-//     if (await nextButton.isVisible()) {
-//       await nextButton.click();
-//     } else {
-//       // If no navigation buttons, check if we auto-advance or need different approach
-//       console.log('No visible next button found, checking for alternative navigation');
-//     }
-//
-//     // Wait a moment for page transition
-//     await waitHelpers.waitForAngularStability();
-//
-//     // Verify we're on page 2 (Personal Information) - check if page 2 content is visible
-//     const personalPageVisible = await page.locator('text=Personal Information').isVisible();
-//     const firstNameVisible = await page.locator('#firstName input').isVisible();
-//
-//     if (personalPageVisible || firstNameVisible) {
-//       console.log('Successfully navigated to page 2');
-//
-//       // Fill page 2 fields
-//       await page.fill('#firstName input', 'John');
-//       await page.fill('#lastName input', 'Doe');
-//       await page.fill('#birthDate input', '1990-01-01');
-//       await page.fill('#phoneNumber input', '+1-555-123-4567');
-//
-//       // Navigate to page 3
-//       const nextButton2 = page.locator('[data-testid="next-button"]');
-//       if (await nextButton2.isVisible()) {
-//         await nextButton2.click();
-//         await waitHelpers.waitForAngularStability();
-//       }
-//
-//       // Verify we're on page 3 (Preferences)
-//       const preferencesPageVisible = await page.locator('text=Preferences').isVisible();
-//       const languageVisible = await page.locator('#language mat-select').isVisible();
-//
-//       if (preferencesPageVisible || languageVisible) {
-//         console.log('Successfully navigated to page 3');
-//
-//         // Fill page 3 fields
-//         await page.click('#newsletter mat-checkbox');
-//
-//         await page.click('#language mat-select');
-//         await page.click('mat-option[value="en"]');
-//
-//         await page.click('#timezone mat-select');
-//         await page.click('mat-option[value="EST"]');
-//
-//         await page.click('#terms mat-checkbox');
-//
-//         // Submit the complete form
-//         await page.click('#submitRegistration button');
-//
-//         // Verify submission contains data from all pages
-//         await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-//         const submissionText = await page.locator('[data-testid="submission-0"]').textContent();
-//
-//         expect(submissionText).toContain('testuser123'); // From page 1
-//         expect(submissionText).toContain('John'); // From page 2
-//         expect(submissionText).toContain('en'); // From page 3
-//       }
-//     }
-//
-//     // Test basic completion (form should be functional even if navigation differs)
-//     expect(true).toBe(true);
-//   });
-//
-//   test('should test page navigation with validation constraints', async ({ page }) => {
-//     // Load a simpler 2-page form with validation
-//     const loader = new E2EScenarioLoader(page);
-//     const validationConfig = {
-//       fields: [
-//         // Page 1: Required fields
-//         {
-//           key: 'page1',
-//           type: 'page',
-//           title: 'Required Information',
-//           fields: [
-//             {
-//               key: 'requiredField',
-//               type: 'input',
-//               label: 'Required Field',
-//               props: {
-//                 placeholder: 'This field is required',
-//               },
-//               required: true,
-//               col: 12,
-//             },
-//             {
-//               key: 'emailField',
-//               type: 'input',
-//               label: 'Email',
-//               props: {
-//                 type: 'email',
-//                 placeholder: 'Enter valid email',
-//               },
-//               email: true,
-//               required: true,
-//               col: 12,
-//             },
-//           ],
-//         },
-//         // Page 2: Optional fields
-//         {
-//           key: 'page2',
-//           type: 'page',
-//           title: 'Additional Details',
-//           fields: [
-//             {
-//               key: 'optionalField',
-//               type: 'input',
-//               label: 'Optional Field',
-//               props: {
-//                 placeholder: 'This field is optional',
-//               },
-//               col: 12,
-//             },
-//             {
-//               key: 'submitValidation',
-//               type: 'submit',
-//               label: 'Submit Form',
-//               col: 12,
-//             },
-//           ],
-//         },
-//       ],
-//     };
-//
-//     await loader.loadScenario(validationConfig, {
-//       testId: 'validation-navigation',
-//       title: 'Navigation with Validation',
-//       description: 'Testing page navigation with validation constraints',
-//     });
-//
-//     // Wait for page to be fully loaded
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     // Verify we start on page 1 by checking for the required field
-//     await page.waitForSelector('#requiredField input', { state: 'visible', timeout: 10000 });
-//
-//     // Try to navigate to page 2 without filling required fields
-//     const nextButton = page.locator('[data-testid="next-button"]');
-//     if (await nextButton.isVisible()) {
-//       await nextButton.click();
-//       await waitHelpers.waitForAngularStability();
-//       await waitHelpers.waitForPageTransition();
-//
-//       // Should still be on page 1 due to validation (or show validation errors)
-//       const stillOnPage1 = await page.locator('text=Required Information').isVisible();
-//       console.log('Still on page 1 after invalid navigation attempt:', stillOnPage1);
-//     }
-//
-//     // Fill required fields properly
-//     await page.fill('#requiredField input', 'Valid data');
-//     await page.fill('#emailField input', 'valid@example.com');
-//
-//     // Now try navigation again
-//     if (await nextButton.isVisible()) {
-//       await nextButton.click();
-//       await waitHelpers.waitForAngularStability();
-//       await waitHelpers.waitForPageTransition();
-//     }
-//
-//     // Check if we can access page 2 fields
-//     const page2Visible = await page.locator('text=Additional Details').isVisible();
-//     const optionalFieldVisible = await page.locator('#optionalField input').isVisible();
-//
-//     if (page2Visible || optionalFieldVisible) {
-//       console.log('Successfully navigated to page 2 after validation');
-//
-//       // Fill optional field and submit
-//       await page.fill('#optionalField input', 'Optional data');
-//       await page.click('#submitValidation button');
-//
-//       // Verify submission
-//       await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-//       const submissionText = await page.locator('[data-testid="submission-0"]').textContent();
-//       expect(submissionText).toContain('Valid data');
-//     }
-//   });
-//
-//   test('should test backward navigation and data persistence', async ({ page }) => {
-//     // Load 3-page form for backward navigation testing
-//     const loader = new E2EScenarioLoader(page);
-//     const backwardNavConfig = {
-//       fields: [
-//         {
-//           key: 'page1',
-//           type: 'page',
-//           title: 'Step 1',
-//           fields: [
-//             {
-//               key: 'field1',
-//               type: 'input',
-//               label: 'Field 1',
-//               props: {
-//                 placeholder: 'Enter data for step 1',
-//               },
-//               col: 12,
-//             },
-//           ],
-//         },
-//         {
-//           key: 'page2',
-//           type: 'page',
-//           title: 'Step 2',
-//           fields: [
-//             {
-//               key: 'field2',
-//               type: 'input',
-//               label: 'Field 2',
-//               props: {
-//                 placeholder: 'Enter data for step 2',
-//               },
-//               col: 12,
-//             },
-//           ],
-//         },
-//         {
-//           key: 'page3',
-//           type: 'page',
-//           title: 'Step 3',
-//           fields: [
-//             {
-//               key: 'field3',
-//               type: 'input',
-//               label: 'Field 3',
-//               props: {
-//                 placeholder: 'Enter data for step 3',
-//               },
-//               col: 12,
-//             },
-//             {
-//               key: 'submitBackward',
-//               type: 'submit',
-//               label: 'Submit',
-//               col: 12,
-//             },
-//           ],
-//         },
-//       ],
-//     };
-//
-//     await loader.loadScenario(backwardNavConfig, {
-//       testId: 'backward-navigation',
-//       title: 'Backward Navigation Test',
-//       description: 'Testing backward navigation and data persistence',
-//     });
-//
-//     // Wait for page to be fully loaded
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     // Fill and navigate forward through all pages
-//     await page.waitForSelector('#field1 input', { state: 'visible', timeout: 10000 });
-//     await page.fill('#field1 input', 'Data from step 1');
-//
-//     // Navigate to page 2
-//     const nextButton = page.locator('[data-testid="next-button"]');
-//     if (await nextButton.isVisible()) {
-//       await nextButton.click();
-//       await waitHelpers.waitForAngularStability();
-//       await waitHelpers.waitForPageTransition();
-//     }
-//
-//     const field2Visible = await page.locator('#field2 input').isVisible();
-//     if (field2Visible) {
-//       await page.fill('#field2 input', 'Data from step 2');
-//
-//       // Navigate to page 3
-//       if (await nextButton.isVisible()) {
-//         await nextButton.click();
-//         await waitHelpers.waitForAngularStability();
-//         await waitHelpers.waitForPageTransition();
-//       }
-//     }
-//
-//     const field3Visible = await page.locator('#field3 input').isVisible();
-//     if (field3Visible) {
-//       await page.fill('#field3 input', 'Data from step 3');
-//
-//       // Now test backward navigation
-//       const backButton = page.locator('[data-testid="previous-button"]');
-//       if (await backButton.isVisible()) {
-//         await backButton.click();
-//         await waitHelpers.waitForAngularStability();
-//
-//         // Verify we're back on page 2 and data is preserved
-//         const field2Value = await page.inputValue('#field2 input').catch(() => '');
-//         expect(field2Value).toBe('Data from step 2');
-//
-//         // Go back one more time
-//         if (await backButton.isVisible()) {
-//           await backButton.click();
-//           await waitHelpers.waitForAngularStability();
-//
-//           // Verify we're back on page 1 and data is preserved
-//           const field1Value = await page.inputValue('#field1 input').catch(() => '');
-//           expect(field1Value).toBe('Data from step 1');
-//         }
-//       }
-//     }
-//
-//     // Test passed if we didn't encounter errors
-//     expect(true).toBe(true);
-//   });
-//
-//   test('should test direct page navigation and URL routing', async ({ page }) => {
-//     // Load multi-page form and test direct navigation if supported
-//     const loader = new E2EScenarioLoader(page);
-//     const directNavConfig = {
-//       fields: [
-//         {
-//           key: 'intro',
-//           type: 'page',
-//           title: 'Introduction',
-//           fields: [
-//             {
-//               key: 'introText',
-//               type: 'input',
-//               label: 'Introduction',
-//               props: {
-//                 placeholder: 'Introduction text',
-//               },
-//               col: 12,
-//             },
-//           ],
-//         },
-//         {
-//           key: 'details',
-//           type: 'page',
-//           title: 'Details',
-//           fields: [
-//             {
-//               key: 'detailText',
-//               type: 'input',
-//               label: 'Details',
-//               props: {
-//                 placeholder: 'Detail text',
-//               },
-//               col: 12,
-//             },
-//           ],
-//         },
-//         {
-//           key: 'summary',
-//           type: 'page',
-//           title: 'Summary',
-//           fields: [
-//             {
-//               key: 'summaryText',
-//               type: 'input',
-//               label: 'Summary',
-//               props: {
-//                 placeholder: 'Summary text',
-//               },
-//               col: 12,
-//             },
-//             {
-//               key: 'submitDirect',
-//               type: 'submit',
-//               label: 'Submit',
-//               col: 12,
-//             },
-//           ],
-//         },
-//       ],
-//     };
-//
-//     await loader.loadScenario(directNavConfig, {
-//       testId: 'direct-navigation',
-//       title: 'Direct Page Navigation',
-//       description: 'Testing direct page navigation and URL routing',
-//     });
-//
-//     // Wait for page to be fully loaded
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     // Check for page indicators or direct navigation elements
-//     const pageIndicators = await page.locator('.page-indicator, .step-indicator, .breadcrumb').count();
-//
-//     if (pageIndicators > 0) {
-//       console.log('Found page indicators, testing direct navigation');
-//
-//       // Try clicking on page indicator for page 3 (if available)
-//       const page3Indicator = page.locator('.page-indicator').nth(2).or(page.locator('[data-page="2"]'));
-//       if (await page3Indicator.isVisible()) {
-//         await page3Indicator.click();
-//         await waitHelpers.waitForAngularStability();
-//         await waitHelpers.waitForAngularStability();
-//
-//         // Verify we jumped to page 3
-//         const summaryVisible = await page.locator('text=Summary').isVisible();
-//         if (summaryVisible) {
-//           console.log('Direct navigation to page 3 successful');
-//         }
-//       }
-//     }
-//
-//     // Test form state inspection regardless of navigation method
-//     await page.click('.form-state summary');
-//     const formStateVisible = await page.locator('[data-testid="form-value-direct-navigation"]').isVisible();
-//     expect(formStateVisible).toBe(true);
-//   });
-//
-//   test('should test page transitions and loading states', async ({ page }) => {
-//     // Load form and test transition behaviors
-//     const loader = new E2EScenarioLoader(page);
-//     const transitionConfig = {
-//       fields: [
-//         {
-//           key: 'loadingPage1',
-//           type: 'page',
-//           title: 'Page 1',
-//           fields: [
-//             {
-//               key: 'data1',
-//               type: 'textarea',
-//               label: 'Large Data Field',
-//               props: {
-//                 placeholder: 'Enter large amount of data',
-//                 rows: 5,
-//               },
-//               col: 12,
-//             },
-//           ],
-//         },
-//         {
-//           key: 'loadingPage2',
-//           type: 'page',
-//           title: 'Page 2',
-//           fields: [
-//             {
-//               key: 'data2',
-//               type: 'textarea',
-//               label: 'More Data',
-//               props: {
-//                 placeholder: 'Enter more data',
-//                 rows: 5,
-//               },
-//               col: 12,
-//             },
-//             {
-//               key: 'submitTransition',
-//               type: 'submit',
-//               label: 'Submit',
-//               col: 12,
-//             },
-//           ],
-//         },
-//       ],
-//     };
-//
-//     await loader.loadScenario(transitionConfig, {
-//       testId: 'page-transitions',
-//       title: 'Page Transition Testing',
-//       description: 'Testing page transitions and loading behaviors',
-//     });
-//
-//     // Wait for page to be fully loaded
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     // Fill data and test smooth transitions
-//     const data1Field = page.locator('#data1 textarea');
-//     if (await data1Field.isVisible()) {
-//       await data1Field.fill('Large amount of data that might cause loading delays when transitioning between pages');
-//
-//       // Navigate to next page and monitor for loading states
-//       const nextButton = page.locator('[data-testid="next-button"]');
-//       if (await nextButton.isVisible()) {
-//         await nextButton.click();
-//
-//         // Check for loading indicators or transitions
-//         const loadingIndicator = page.locator('.loading, .spinner, [aria-busy="true"]');
-//         if (await loadingIndicator.isVisible()) {
-//           console.log('Loading indicator found during transition');
-//           await loadingIndicator.waitFor({ state: 'hidden', timeout: 5000 });
-//         }
-//
-//         await waitHelpers.waitForAngularStability();
-//         await waitHelpers.waitForAngularStability();
-//
-//         // Verify page 2 is accessible
-//         const data2Field = page.locator('#data2 textarea');
-//         if (await data2Field.isVisible()) {
-//           await data2Field.fill('Additional data for page 2');
-//           await page.click('#submitTransition button');
-//
-//           // Verify submission
-//           const submissionExists = await page.locator('[data-testid="submission-0"]').isVisible();
-//           expect(submissionExists).toBe(true);
-//         }
-//       }
-//     }
-//   });
-// });
+import { expect, test } from '@playwright/test';
+
+test.describe('Multi-Page Navigation Tests', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('http://localhost:4200/test/multi-page-navigation');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test.describe('Multi-Page Registration Wizard', () => {
+    test('should complete full 3-page registration workflow', async ({ page }) => {
+      // Navigate to the multi-page registration component
+      await page.goto('http://localhost:4200/test/multi-page-navigation/multi-page-registration');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the test scenario
+      const scenario = page.locator('[data-testid="multi-page-registration"]');
+      await expect(scenario).toBeVisible();
+
+      // PAGE 1: Account Setup
+      // Verify we're on page 1 by checking for username field
+      await expect(scenario.locator('#username input')).toBeVisible();
+
+      // Fill page 1 fields
+      await scenario.locator('#username input').fill('testuser123');
+      await scenario.locator('#email input').fill('test@example.com');
+      await scenario.locator('#password input').fill('securepassword123');
+      await scenario.locator('#confirmPassword input').fill('securepassword123');
+
+      // Navigate to page 2
+      const nextButton = scenario.locator('button:has-text("Next")');
+      await expect(nextButton).toBeVisible();
+      await nextButton.click();
+      await page.waitForTimeout(500);
+
+      // PAGE 2: Personal Information
+      // Verify we're on page 2 by checking for firstName field
+      await expect(scenario.locator('#firstName input')).toBeVisible();
+
+      // Fill page 2 fields
+      await scenario.locator('#firstName input').fill('John');
+      await scenario.locator('#lastName input').fill('Doe');
+
+      // Handle datepicker for birthDate
+      const birthDateInput = scenario.locator('#birthDate input');
+      await birthDateInput.click();
+      await birthDateInput.fill('1/1/1990');
+      await page.keyboard.press('Escape'); // Close datepicker
+
+      await scenario.locator('#phoneNumber input').fill('+1-555-123-4567');
+
+      // Navigate to page 3
+      await nextButton.click();
+      await page.waitForTimeout(500);
+
+      // PAGE 3: Preferences
+      // Verify we're on page 3 by checking for newsletter checkbox
+      await expect(scenario.locator('#newsletter mat-checkbox')).toBeVisible();
+
+      // Fill page 3 fields
+      await scenario.locator('#newsletter mat-checkbox').click();
+      await page.waitForTimeout(200);
+
+      // Select language (already defaulted to 'en')
+      await scenario.locator('#language mat-select').click();
+      await page.locator('mat-option:has-text("English")').click();
+      await page.waitForTimeout(200);
+
+      // Select timezone
+      await scenario.locator('#timezone mat-select').click();
+      await page.locator('mat-option:has-text("Eastern Time")').click();
+      await page.waitForTimeout(200);
+
+      // Agree to terms (required)
+      await scenario.locator('#terms mat-checkbox').click();
+      await page.waitForTimeout(200);
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit the complete form
+      const submitButton = scenario.locator('#submitRegistration button');
+      await expect(submitButton).toBeEnabled();
+      await submitButton.click();
+
+      // Wait for formSubmitted event
+      const submittedData = await submittedDataPromise;
+
+      // Verify submitted data contains information from all pages
+      expect(submittedData).toMatchObject({
+        username: 'testuser123', // From page 1
+        email: 'test@example.com', // From page 1
+        firstName: 'John', // From page 2
+        lastName: 'Doe', // From page 2
+        newsletter: true, // From page 3
+        language: 'en', // From page 3
+        timezone: 'EST', // From page 3
+        terms: true, // From page 3
+      });
+    });
+  });
+
+  test.describe('Validation-Based Navigation', () => {
+    test('should prevent navigation with invalid required fields', async ({ page }) => {
+      // Navigate to the validation navigation component
+      await page.goto('http://localhost:4200/test/multi-page-navigation/validation-navigation');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the test scenario
+      const scenario = page.locator('[data-testid="validation-navigation"]');
+      await expect(scenario).toBeVisible();
+
+      // Verify we start on page 1 (Required Information)
+      await expect(scenario.locator('#requiredField input')).toBeVisible();
+
+      // Try to navigate to page 2 without filling required fields
+      const nextButton = scenario.locator('button:has-text("Next")');
+
+      // Next button should be disabled or navigation should fail
+      if (await nextButton.isEnabled()) {
+        await nextButton.click();
+        await page.waitForTimeout(300);
+
+        // Should still be on page 1 (requiredField should still be visible)
+        await expect(scenario.locator('#requiredField input')).toBeVisible();
+      } else {
+        // Button is disabled as expected
+        await expect(nextButton).toBeDisabled();
+      }
+
+      // Fill required fields properly
+      await scenario.locator('#requiredField input').fill('Valid data');
+      await scenario.locator('#emailField input').fill('valid@example.com');
+      await page.waitForTimeout(200);
+
+      // Now navigation should work
+      await expect(nextButton).toBeEnabled();
+      await nextButton.click();
+      await page.waitForTimeout(500);
+
+      // Verify we're on page 2 (Additional Details)
+      await expect(scenario.locator('#optionalField input')).toBeVisible();
+
+      // Fill optional field and submit
+      await scenario.locator('#optionalField input').fill('Optional data');
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      const submitButton = scenario.locator('#submitValidation button');
+      await submitButton.click();
+
+      // Wait for formSubmitted event
+      const submittedData = await submittedDataPromise;
+
+      // Verify submission contains data from both pages
+      expect(submittedData).toMatchObject({
+        requiredField: 'Valid data',
+        emailField: 'valid@example.com',
+        optionalField: 'Optional data',
+      });
+    });
+  });
+
+  test.describe('Backward Navigation and Data Persistence', () => {
+    test('should navigate backward and preserve data', async ({ page }) => {
+      // Navigate to the backward navigation component
+      await page.goto('http://localhost:4200/test/multi-page-navigation/backward-navigation');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the test scenario
+      const scenario = page.locator('[data-testid="backward-navigation"]');
+      await expect(scenario).toBeVisible();
+
+      // PAGE 1: Fill and navigate forward
+      await expect(scenario.locator('#field1 input')).toBeVisible();
+      await scenario.locator('#field1 input').fill('Data from step 1');
+
+      const nextButton = scenario.locator('button:has-text("Next")');
+      await nextButton.click();
+      await page.waitForTimeout(500);
+
+      // PAGE 2: Fill and navigate forward
+      await expect(scenario.locator('#field2 input')).toBeVisible();
+      await scenario.locator('#field2 input').fill('Data from step 2');
+
+      await nextButton.click();
+      await page.waitForTimeout(500);
+
+      // PAGE 3: Fill field
+      await expect(scenario.locator('#field3 input')).toBeVisible();
+      await scenario.locator('#field3 input').fill('Data from step 3');
+
+      // Test backward navigation
+      const backButton = scenario.locator('button:has-text("Back"), button:has-text("Previous")');
+      await expect(backButton).toBeVisible();
+      await backButton.click();
+      await page.waitForTimeout(500);
+
+      // Verify we're back on page 2 and data is preserved
+      await expect(scenario.locator('#field2 input')).toBeVisible();
+      expect(await scenario.locator('#field2 input').inputValue()).toBe('Data from step 2');
+
+      // Go back one more time
+      await backButton.click();
+      await page.waitForTimeout(500);
+
+      // Verify we're back on page 1 and data is preserved
+      await expect(scenario.locator('#field1 input')).toBeVisible();
+      expect(await scenario.locator('#field1 input').inputValue()).toBe('Data from step 1');
+
+      // Navigate forward again to verify data persists
+      await nextButton.click();
+      await page.waitForTimeout(500);
+      expect(await scenario.locator('#field2 input').inputValue()).toBe('Data from step 2');
+
+      await nextButton.click();
+      await page.waitForTimeout(500);
+      expect(await scenario.locator('#field3 input').inputValue()).toBe('Data from step 3');
+
+      // Submit and verify all data is present
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      const submitButton = scenario.locator('#submitBackward button');
+      await submitButton.click();
+
+      const submittedData = await submittedDataPromise;
+
+      expect(submittedData).toMatchObject({
+        field1: 'Data from step 1',
+        field2: 'Data from step 2',
+        field3: 'Data from step 3',
+      });
+    });
+  });
+
+  test.describe('Direct Page Navigation', () => {
+    test('should allow direct navigation to specific pages', async ({ page }) => {
+      // Navigate to the direct navigation component
+      await page.goto('http://localhost:4200/test/multi-page-navigation/direct-navigation');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the test scenario
+      const scenario = page.locator('[data-testid="direct-navigation"]');
+      await expect(scenario).toBeVisible();
+
+      // Verify we start on page 1 (Introduction)
+      await expect(scenario.locator('#introText input')).toBeVisible();
+
+      // Fill intro text
+      await scenario.locator('#introText input').fill('Introduction text');
+
+      // Look for page indicators or step navigation
+      const pageIndicators = scenario.locator('.page-indicator, .step-indicator, [data-page]');
+      const pageIndicatorCount = await pageIndicators.count();
+
+      if (pageIndicatorCount > 0) {
+        // Try to jump directly to page 3 (Summary)
+        const page3Indicator = pageIndicators.nth(2);
+        if (await page3Indicator.isVisible()) {
+          await page3Indicator.click();
+          await page.waitForTimeout(500);
+
+          // Verify we jumped to page 3
+          await expect(scenario.locator('#summaryText input')).toBeVisible();
+
+          // Jump back to page 2
+          const page2Indicator = pageIndicators.nth(1);
+          await page2Indicator.click();
+          await page.waitForTimeout(500);
+
+          // Verify we're on page 2
+          await expect(scenario.locator('#detailText input')).toBeVisible();
+        }
+      } else {
+        // If no page indicators, navigate sequentially
+        const nextButton = scenario.locator('button:has-text("Next")');
+
+        await nextButton.click();
+        await page.waitForTimeout(500);
+        await expect(scenario.locator('#detailText input')).toBeVisible();
+        await scenario.locator('#detailText input').fill('Detail text');
+
+        await nextButton.click();
+        await page.waitForTimeout(500);
+        await expect(scenario.locator('#summaryText input')).toBeVisible();
+      }
+
+      // Fill summary and submit
+      await scenario.locator('#summaryText input').fill('Summary text');
+
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      const submitButton = scenario.locator('#submitDirect button');
+      await submitButton.click();
+
+      const submittedData = await submittedDataPromise;
+
+      expect(submittedData).toMatchObject({
+        summaryText: 'Summary text',
+      });
+    });
+  });
+
+  test.describe('Page Transitions and Loading States', () => {
+    test('should handle smooth page transitions with large data', async ({ page }) => {
+      // Navigate to the page transitions component
+      await page.goto('http://localhost:4200/test/multi-page-navigation/page-transitions');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the test scenario
+      const scenario = page.locator('[data-testid="page-transitions"]');
+      await expect(scenario).toBeVisible();
+
+      // Verify we're on page 1
+      const data1Field = scenario.locator('#data1 textarea');
+      await expect(data1Field).toBeVisible();
+
+      // Fill with large amount of data
+      await data1Field.fill('Large amount of data that might cause loading delays when transitioning between pages. '.repeat(10));
+
+      // Navigate to next page and monitor for loading states
+      const nextButton = scenario.locator('button:has-text("Next")');
+      await nextButton.click();
+
+      // Check for loading indicators (if any)
+      const loadingIndicator = scenario.locator('.loading, .spinner, [aria-busy="true"]');
+      if (await loadingIndicator.isVisible({ timeout: 1000 }).catch(() => false)) {
+        // Wait for loading to complete
+        await loadingIndicator.waitFor({ state: 'hidden', timeout: 5000 });
+      }
+
+      await page.waitForTimeout(500);
+
+      // Verify page 2 is accessible
+      const data2Field = scenario.locator('#data2 textarea');
+      await expect(data2Field).toBeVisible();
+
+      await data2Field.fill('Additional data for page 2');
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      const submitButton = scenario.locator('#submitTransition button');
+      await submitButton.click();
+
+      // Wait for formSubmitted event
+      const submittedData = await submittedDataPromise;
+
+      // Verify submission contains data from both pages
+      expect(submittedData).toHaveProperty('data1');
+      expect(submittedData).toHaveProperty('data2');
+      expect((submittedData as any).data2).toBe('Additional data for page 2');
+    });
+  });
+});

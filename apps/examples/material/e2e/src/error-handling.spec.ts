@@ -1,365 +1,255 @@
-//
-// import { DeterministicWaitHelpers } from './utils/deterministic-wait-helpers';
-// import { E2EScenarioLoader } from './utils/e2e-form-helpers';
-// import { expect, test } from '@playwright/test';
-//
-// test.describe.skip('Error Handling and Edge Cases', () => {
-//   test.beforeEach(async ({ page }) => {
-//     await page.goto('http://localhost:4200/test/error-handling');
-//   });
-//
-//   test('should handle invalid field configurations gracefully', async ({ page }) => {
-//     // Load scenario with potentially invalid configurations
-//     const loader = new E2EScenarioLoader(page);
-//     const invalidConfig = {
-//       fields: [
-//         // Field with missing required properties
-//         {
-//           key: 'missingType',
-//           label: 'Field without type',
-//           // type property is missing
-//         },
-//         // Field with invalid type
-//         {
-//           key: 'invalidType',
-//           type: 'nonexistent-field-type',
-//           label: 'Invalid Field Type',
-//         },
-//         // Valid field for comparison
-//         {
-//           key: 'validField',
-//           type: 'input',
-//           label: 'Valid Field',
-//           props: {
-//             placeholder: 'This should work',
-//           },
-//         },
-//         {
-//           key: 'submitInvalid',
-//           type: 'submit',
-//           label: 'Submit Invalid Config',
-//         },
-//       ],
-//     };
-//
-//     await loader.loadScenario(invalidConfig, {
-//       testId: 'invalid-config',
-//       title: 'Invalid Configuration Test',
-//       description: 'Testing form behavior with invalid field configurations',
-//     });
-//
-//     // Wait a moment for any rendering to complete
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     // Verify that valid fields still render even if invalid ones fail
-//     const validFieldExists = await page.locator('#validField').isVisible();
-//
-//     if (validFieldExists) {
-//       await page.fill('#validField input', 'Test data');
-//       await page.click('#submitInvalid button');
-//
-//       // Should be able to submit with valid fields
-//       const submitButton = page.locator('#submitInvalid button');
-//       await expect(submitButton).toBeVisible();
-//     }
-//
-//     // Verify form doesn't completely break
-//     const pageContent = await page.textContent('body');
-//     expect(pageContent).toContain('Invalid Configuration Test');
-//   });
-//
-//   test('should handle network interruptions during form submission', async ({ page }) => {
-//     // Load basic scenario
-//     await page.click('.load-basic-btn');
-//
-//     // Wait for form to load
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     // Check if form loaded successfully
-//     const formExists = await page.locator('dynamic-form').isVisible();
-//
-//     if (formExists) {
-//       // Fill form with valid data
-//       const firstNameExists = await page.locator('#firstName input').isVisible();
-//       if (firstNameExists) {
-//         await page.fill('#firstName input', 'John');
-//         await page.fill('#lastName input', 'Doe');
-//         await page.fill('#email input', 'john.doe@example.com');
-//
-//         // Select radio option if it exists
-//         const radioExists = await page.locator('#priority mat-radio-button').count();
-//         if (radioExists > 0) {
-//           await page.click('#priority mat-radio-button:first-child');
-//         }
-//
-//         // Try to submit
-//         await page.click('#submit button');
-//
-//         // Check if submission was processed
-//         const waitHelpers = new DeterministicWaitHelpers(page);
-//         await waitHelpers.waitForAngularStability();
-//
-//         // Verify form state
-//         const formValue = await page.evaluate(() => {
-//           const debugElement = document.querySelector('[data-testid="form-value-basic-test"]');
-//           return debugElement ? debugElement.textContent : 'No form value found';
-//         });
-//
-//         console.log('Form submission result:', formValue);
-//       }
-//     }
-//
-//     // Test should complete without throwing unhandled errors
-//     expect(true).toBe(true); // Basic completion test
-//   });
-//
-//   test('should maintain form state during browser navigation', async ({ page }) => {
-//     // Load basic scenario
-//     await page.click('.load-basic-btn');
-//
-//     // Wait for form initialization
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     const formExists = await page.locator('dynamic-form').isVisible();
-//
-//     if (formExists) {
-//       // Fill some form data
-//       const firstNameExists = await page.locator('#firstName input').isVisible();
-//       if (firstNameExists) {
-//         await page.fill('#firstName input', 'Persistent');
-//         await page.fill('#lastName input', 'Data');
-//
-//         // Navigate away and back
-//         await page.goto('http://localhost:4200/');
-//         const waitHelpers = new DeterministicWaitHelpers(page);
-//         await waitHelpers.waitForAngularStability();
-//         await page.goto('http://localhost:4200/test/error-handling');
-//
-//         // Reload the scenario
-//         await page.click('.load-basic-btn');
-//         await waitHelpers.waitForAngularStability();
-//
-//         // Form should be fresh (not persisted in this case)
-//         const newFormExists = await page.locator('dynamic-form').isVisible();
-//         expect(newFormExists || !newFormExists).toBeDefined(); // Either state is valid
-//       }
-//     }
-//   });
-//
-//   test('should handle rapid form interactions without errors', async ({ page }) => {
-//     // Load basic scenario
-//     await page.click('.load-basic-btn');
-//
-//     // Wait for form to load
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     const formExists = await page.locator('dynamic-form').isVisible();
-//
-//     if (formExists) {
-//       // Rapid interactions test
-//       for (let i = 0; i < 5; i++) {
-//         const firstNameExists = await page.locator('#firstName input').isVisible();
-//         if (firstNameExists) {
-//           await page.fill('#firstName input', `Rapid${i}`);
-//           await page.fill('#lastName input', `Test${i}`);
-//           await page.fill('#email input', `test${i}@example.com`);
-//
-//           // Quick radio selection if available
-//           const radioCount = await page.locator('#priority mat-radio-button').count();
-//           if (radioCount > 0) {
-//             const radioIndex = i % radioCount;
-//             await page.click(`#priority mat-radio-button:nth-child(${radioIndex + 1})`);
-//           }
-//         }
-//
-//         // Small delay between iterations
-//         // Removed non-deterministic short delay - relying on auto-waiting
-//       }
-//
-//       // Final submission
-//       await page.click('#submit button');
-//       const waitHelpers = new DeterministicWaitHelpers(page);
-//       await waitHelpers.waitForAngularStability();
-//
-//       // Verify no JavaScript errors occurred
-//       const errors = await page.evaluate(() => {
-//         return (window as any).lastJSError || null;
-//       });
-//
-//       expect(errors).toBeNull();
-//     }
-//   });
-//
-//   test('should handle accessibility interactions', async ({ page }) => {
-//     // Load basic scenario
-//     await page.click('.load-basic-btn');
-//
-//     // Wait for form to load
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     const formExists = await page.locator('dynamic-form').isVisible();
-//
-//     if (formExists) {
-//       // Test keyboard navigation
-//       await page.keyboard.press('Tab');
-//       await page.keyboard.press('Tab');
-//
-//       // Test with screen reader-like navigation
-//       const firstNameField = page.locator('#firstName input');
-//       const firstNameExists = await firstNameField.isVisible();
-//
-//       if (firstNameExists) {
-//         await firstNameField.focus();
-//         await page.keyboard.type('Accessibility');
-//
-//         // Tab to next field
-//         await page.keyboard.press('Tab');
-//         await page.keyboard.type('Test');
-//
-//         // Check aria attributes exist
-//         const ariaLabel = await firstNameField.getAttribute('aria-label');
-//         const ariaDescribedBy = await firstNameField.getAttribute('aria-describedby');
-//
-//         console.log('Accessibility attributes:', { ariaLabel, ariaDescribedBy });
-//
-//         // Basic accessibility check passed if no errors thrown
-//         expect(true).toBe(true);
-//       }
-//     }
-//   });
-//
-//   test('should handle form reset and clear operations', async ({ page }) => {
-//     // Load basic scenario
-//     await page.click('.load-basic-btn');
-//
-//     // Wait for form to load
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     const formExists = await page.locator('dynamic-form').isVisible();
-//
-//     if (formExists) {
-//       // Fill form with data
-//       const firstNameExists = await page.locator('#firstName input').isVisible();
-//       if (firstNameExists) {
-//         await page.fill('#firstName input', 'Reset');
-//         await page.fill('#lastName input', 'Test');
-//         await page.fill('#email input', 'reset@example.com');
-//
-//         // Verify data is filled
-//         const firstName = await page.inputValue('#firstName input');
-//         expect(firstName).toBe('Reset');
-//
-//         // Clear the scenario
-//         await page.evaluate(() => {
-//           (window as any).clearTestScenario();
-//         });
-//
-//         // Wait for clear to complete
-//         await waitHelpers.waitForAngularStability();
-//
-//         // Verify form is cleared
-//         const noScenario = await page.locator('.no-scenario').isVisible();
-//         expect(noScenario).toBe(true);
-//
-//         // Reload and verify fresh state
-//         await page.click('.load-basic-btn');
-//         await waitHelpers.waitForAngularStability();
-//
-//         const newFirstNameValue = await page.inputValue('#firstName input').catch(() => '');
-//         expect(newFirstNameValue).toBe('');
-//       }
-//     }
-//   });
-//
-//   test('should handle concurrent form submissions', async ({ page }) => {
-//     // Load basic scenario
-//     await page.click('.load-basic-btn');
-//
-//     // Wait for form to load
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     const formExists = await page.locator('dynamic-form').isVisible();
-//
-//     if (formExists) {
-//       const firstNameExists = await page.locator('#firstName input').isVisible();
-//       if (firstNameExists) {
-//         // Fill form
-//         await page.fill('#firstName input', 'Concurrent');
-//         await page.fill('#lastName input', 'Test');
-//         await page.fill('#email input', 'concurrent@example.com');
-//
-//         // Radio selection if available
-//         const radioCount = await page.locator('#priority mat-radio-button').count();
-//         if (radioCount > 0) {
-//           await page.click('#priority mat-radio-button:first-child');
-//         }
-//
-//         // Attempt multiple rapid submissions
-//         const submitPromises = [];
-//         for (let i = 0; i < 3; i++) {
-//           submitPromises.push(page.click('#submit button'));
-//         }
-//
-//         // Wait for all submissions to complete
-//         await Promise.all(submitPromises);
-//         const waitHelpers = new DeterministicWaitHelpers(page);
-//         await waitHelpers.waitForAngularStability();
-//
-//         // Check how many submissions were recorded
-//         const submissionCount = await page.locator('[data-testid^="submission-"]').count();
-//         console.log('Concurrent submissions recorded:', submissionCount);
-//
-//         // Should handle gracefully (at least one submission, no crashes)
-//         expect(submissionCount).toBeGreaterThanOrEqual(1);
-//       }
-//     }
-//   });
-//
-//   test('should handle memory cleanup during repeated operations', async ({ page }) => {
-//     // Perform repeated scenario loading/clearing to test memory cleanup
-//     for (let i = 0; i < 3; i++) {
-//       // Load scenario
-//       await page.click('.load-basic-btn');
-//       const waitHelpers = new DeterministicWaitHelpers(page);
-//       await waitHelpers.waitForAngularStability();
-//
-//       // Fill some data if form exists
-//       const formExists = await page.locator('dynamic-form').isVisible();
-//       if (formExists) {
-//         const firstNameExists = await page.locator('#firstName input').isVisible();
-//         if (firstNameExists) {
-//           await page.fill('#firstName input', `Memory${i}`);
-//           await page.fill('#lastName input', `Test${i}`);
-//         }
-//       }
-//
-//       // Clear scenario
-//       await page.evaluate(() => {
-//         (window as any).clearTestScenario();
-//       });
-//       await waitHelpers.waitForAngularStability();
-//
-//       // Verify clean state
-//       const noScenario = await page.locator('.no-scenario').isVisible();
-//       expect(noScenario).toBe(true);
-//     }
-//
-//     // Final load to ensure everything still works
-//     await page.click('.load-basic-btn');
-//     const waitHelpers = new DeterministicWaitHelpers(page);
-//     await waitHelpers.waitForAngularStability();
-//
-//     const finalFormExists = await page.locator('dynamic-form').isVisible();
-//     console.log('Final form exists after memory test:', finalFormExists);
-//
-//     // Test completed without memory-related crashes
-//     expect(true).toBe(true);
-//   });
-// });
+import { expect, test } from '@playwright/test';
+
+test.describe('Error Handling and Edge Cases', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('http://localhost:4200/test/error-handling');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test.describe('Invalid Configuration Handling', () => {
+    test('should handle invalid field configurations gracefully', async ({ page }) => {
+      // Navigate to invalid config test
+      await page.goto('http://localhost:4200/test/error-handling/invalid-config');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="invalid-config"]');
+      await expect(scenario).toBeVisible();
+
+      // Verify that valid fields still render even if invalid ones fail
+      const validField = scenario.locator('#validField input');
+      await expect(validField).toBeVisible();
+
+      // Interact with valid field
+      await validField.fill('Test data');
+
+      // Submit button should be visible and clickable
+      const submitButton = scenario.locator('#submitInvalid button');
+      await expect(submitButton).toBeVisible();
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit the form
+      await submitButton.click();
+
+      // Wait for formSubmitted event
+      const submittedData = await submittedDataPromise;
+
+      // Verify submitted data contains valid field
+      expect(submittedData).toHaveProperty('validField', 'Test data');
+
+      // Verify page title is correct
+      const pageTitle = await scenario.locator('h2').textContent();
+      expect(pageTitle).toBe('Invalid Configuration Test');
+    });
+  });
+
+  test.describe('Basic Form Functionality', () => {
+    test('should handle form submission without errors', async ({ page }) => {
+      // Navigate to basic test
+      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="basic-test"]');
+      await expect(scenario).toBeVisible();
+
+      // Submit button should be disabled initially (form invalid)
+      const submitButton = scenario.locator('#submit button');
+      await expect(submitButton).toBeDisabled();
+
+      // Fill form with valid data
+      await scenario.locator('#firstName input').fill('John');
+      await scenario.locator('#lastName input').fill('Doe');
+      await scenario.locator('#email input').fill('john.doe@example.com');
+
+      // Select radio option
+      await scenario.locator('#priority mat-radio-button').first().click();
+      await page.waitForTimeout(200);
+
+      // Submit button should now be enabled
+      await expect(submitButton).toBeEnabled();
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit the form
+      await submitButton.click();
+
+      // Wait for formSubmitted event
+      const submittedData = await submittedDataPromise;
+
+      // Verify submitted data
+      expect(submittedData).toMatchObject({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+      });
+
+      // Verify form value was updated in debug output
+      const formValue = await page.evaluate(() => {
+        const pre = document.querySelector('[data-testid="form-value-basic-test"]');
+        return pre ? JSON.parse(pre.textContent || '{}') : null;
+      });
+
+      expect(formValue).toMatchObject({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+      });
+    });
+
+    test('should handle rapid form interactions without errors', async ({ page }) => {
+      // Navigate to basic test
+      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="basic-test"]');
+      await expect(scenario).toBeVisible();
+
+      const firstNameInput = scenario.locator('#firstName input');
+      const lastNameInput = scenario.locator('#lastName input');
+      const emailInput = scenario.locator('#email input');
+
+      // Rapid interactions test
+      for (let i = 0; i < 5; i++) {
+        await firstNameInput.fill(`Rapid${i}`);
+        await lastNameInput.fill(`Test${i}`);
+        await emailInput.fill(`test${i}@example.com`);
+
+        // Quick radio selection
+        const radioButtons = scenario.locator('#priority mat-radio-button');
+        const radioCount = await radioButtons.count();
+        if (radioCount > 0) {
+          const radioIndex = i % radioCount;
+          await radioButtons.nth(radioIndex).click();
+        }
+      }
+
+      // Verify no JavaScript errors occurred and form is still functional
+      await expect(firstNameInput).toBeVisible();
+      expect(await firstNameInput.inputValue()).toBe('Rapid4');
+      expect(await lastNameInput.inputValue()).toBe('Test4');
+      expect(await emailInput.inputValue()).toBe('test4@example.com');
+    });
+
+    test('should handle accessibility interactions', async ({ page }) => {
+      // Navigate to basic test
+      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="basic-test"]');
+      await expect(scenario).toBeVisible();
+
+      const firstNameField = scenario.locator('#firstName input');
+
+      // Test keyboard navigation
+      await firstNameField.focus();
+      await page.keyboard.type('Accessibility');
+
+      // Tab to next field
+      await page.keyboard.press('Tab');
+      await page.keyboard.type('Test');
+
+      // Verify values were entered via keyboard
+      expect(await firstNameField.inputValue()).toBe('Accessibility');
+      const lastNameField = scenario.locator('#lastName input');
+      expect(await lastNameField.inputValue()).toBe('Test');
+
+      // Verify field is accessible (has proper attributes)
+      const ariaLabel = await firstNameField.getAttribute('aria-label');
+      const id = await firstNameField.getAttribute('id');
+
+      // At least one accessibility attribute should exist
+      expect(ariaLabel || id).toBeTruthy();
+    });
+  });
+
+  test.describe('Form State Management', () => {
+    test('should maintain form state during browser navigation', async ({ page }) => {
+      // Navigate to basic test
+      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="basic-test"]');
+      await expect(scenario).toBeVisible();
+
+      // Fill some form data
+      await scenario.locator('#firstName input').fill('Persistent');
+      await scenario.locator('#lastName input').fill('Data');
+
+      // Verify data is filled
+      expect(await scenario.locator('#firstName input').inputValue()).toBe('Persistent');
+
+      // Navigate away and back
+      await page.goto('http://localhost:4200/');
+      await page.waitForLoadState('networkidle');
+      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.waitForLoadState('networkidle');
+
+      // Form should be fresh (not persisted in this case)
+      const newScenario = page.locator('[data-testid="basic-test"]');
+      await expect(newScenario).toBeVisible();
+
+      const newFirstNameValue = await newScenario.locator('#firstName input').inputValue();
+      expect(newFirstNameValue).toBe('');
+    });
+
+    test('should handle multiple form reloads without memory issues', async ({ page }) => {
+      // Perform repeated navigation to test memory cleanup
+      for (let i = 0; i < 3; i++) {
+        // Navigate to basic test
+        await page.goto('http://localhost:4200/test/error-handling/basic-test');
+        await page.waitForLoadState('networkidle');
+
+        // Locate the scenario
+        const scenario = page.locator('[data-testid="basic-test"]');
+        await expect(scenario).toBeVisible();
+
+        // Fill some data
+        await scenario.locator('#firstName input').fill(`Memory${i}`);
+        await scenario.locator('#lastName input').fill(`Test${i}`);
+
+        // Verify data is filled
+        expect(await scenario.locator('#firstName input').inputValue()).toBe(`Memory${i}`);
+      }
+
+      // Final load to ensure everything still works
+      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.waitForLoadState('networkidle');
+
+      const finalScenario = page.locator('[data-testid="basic-test"]');
+      await expect(finalScenario).toBeVisible();
+
+      // Form should be functional
+      await finalScenario.locator('#firstName input').fill('Final');
+      expect(await finalScenario.locator('#firstName input').inputValue()).toBe('Final');
+    });
+  });
+});

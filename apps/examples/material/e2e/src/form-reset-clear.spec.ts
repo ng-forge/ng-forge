@@ -1,60 +1,19 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Form Reset and Clear Events Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4201/test/form-reset-clear');
-  });
-
   test.describe('Form Reset Functionality', () => {
     test('should reset form to default values', async ({ page }) => {
-      // Load config in browser context to access window.FormResetEvent
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'firstName',
-                type: 'input',
-                label: 'First Name',
-                value: 'John',
-                col: 6,
-              },
-              {
-                key: 'lastName',
-                type: 'input',
-                label: 'Last Name',
-                value: 'Doe',
-                col: 6,
-              },
-              {
-                key: 'email',
-                type: 'input',
-                label: 'Email',
-                value: 'john.doe@example.com',
-                props: {
-                  type: 'email',
-                },
-              },
-              {
-                key: 'reset-button',
-                type: 'button',
-                label: 'Reset to Defaults',
-                event: (window as any).FormResetEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'reset-defaults' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/reset-defaults');
       await page.waitForLoadState('networkidle');
 
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="reset-defaults"]');
+      await expect(scenario).toBeVisible();
+
       // Verify default values are set
-      const firstNameInput = page.locator('#firstName input');
-      const lastNameInput = page.locator('#lastName input');
-      const emailInput = page.locator('#email input');
+      const firstNameInput = scenario.locator('#firstName input');
+      const lastNameInput = scenario.locator('#lastName input');
+      const emailInput = scenario.locator('#email input');
 
       expect(await firstNameInput.inputValue()).toBe('John');
       expect(await lastNameInput.inputValue()).toBe('Doe');
@@ -71,7 +30,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await emailInput.inputValue()).toBe('jane.smith@example.com');
 
       // Click reset button
-      const resetButton = page.locator('#reset-button button');
+      const resetButton = scenario.locator('#reset-button button');
       await resetButton.click();
       await page.waitForTimeout(300);
 
@@ -82,91 +41,42 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should reset select fields to default values', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'country',
-                type: 'select',
-                label: 'Country',
-                value: 'us',
-                options: [
-                  { value: 'us', label: 'United States' },
-                  { value: 'uk', label: 'United Kingdom' },
-                  { value: 'ca', label: 'Canada' },
-                ],
-              },
-              {
-                key: 'reset-button',
-                type: 'button',
-                label: 'Reset',
-                event: (window as any).FormResetEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'reset-select' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/reset-select');
       await page.waitForLoadState('networkidle');
 
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="reset-select"]');
+      await expect(scenario).toBeVisible();
+
       // Verify default value is set (US)
-      await expect(page.locator('#country mat-select')).toContainText('United States');
+      await expect(scenario.locator('#country mat-select')).toContainText('United States');
 
       // Change to UK
-      await page.click('#country mat-select');
+      await scenario.locator('#country mat-select').click();
       await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'United Kingdom' }).click();
       await page.waitForTimeout(200);
 
       // Verify changed value
-      await expect(page.locator('#country mat-select')).toContainText('United Kingdom');
+      await expect(scenario.locator('#country mat-select')).toContainText('United Kingdom');
 
       // Reset
-      await page.locator('#reset-button button').click();
+      await scenario.locator('#reset-button button').click();
       await page.waitForTimeout(300);
 
       // Verify reset to default (US)
-      await expect(page.locator('#country mat-select')).toContainText('United States');
+      await expect(scenario.locator('#country mat-select')).toContainText('United States');
     });
 
     test('should reset checkbox fields to default values', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'subscribe',
-                type: 'checkbox',
-                label: 'Subscribe to newsletter',
-                value: true,
-              },
-              {
-                key: 'terms',
-                type: 'checkbox',
-                label: 'Accept terms',
-                value: false,
-              },
-              {
-                key: 'reset-button',
-                type: 'button',
-                label: 'Reset',
-                event: (window as any).FormResetEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'reset-checkbox' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/reset-checkbox');
       await page.waitForLoadState('networkidle');
 
-      const subscribeCheckbox = page.locator('#subscribe mat-checkbox');
-      const termsCheckbox = page.locator('#terms mat-checkbox');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="reset-checkbox"]');
+      await expect(scenario).toBeVisible();
+
+      const subscribeCheckbox = scenario.locator('#subscribe mat-checkbox');
+      const termsCheckbox = scenario.locator('#terms mat-checkbox');
 
       // Verify default states
       await expect(subscribeCheckbox).toHaveClass(/mat-mdc-checkbox-checked/);
@@ -182,7 +92,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
       await expect(termsCheckbox).toHaveClass(/mat-mdc-checkbox-checked/);
 
       // Reset
-      await page.locator('#reset-button button').click();
+      await scenario.locator('#reset-button button').click();
       await page.waitForTimeout(300);
 
       // Verify reset to defaults
@@ -191,38 +101,14 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should reset form validation state', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'email',
-                type: 'input',
-                label: 'Email',
-                value: 'valid@example.com',
-                required: true,
-                email: true,
-                props: {
-                  type: 'email',
-                },
-              },
-              {
-                key: 'reset-button',
-                type: 'button',
-                label: 'Reset',
-                event: (window as any).FormResetEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'reset-validation' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/reset-validation');
       await page.waitForLoadState('networkidle');
 
-      const emailInput = page.locator('#email input');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="reset-validation"]');
+      await expect(scenario).toBeVisible();
+
+      const emailInput = scenario.locator('#email input');
 
       // Verify default valid value
       expect(await emailInput.inputValue()).toBe('valid@example.com');
@@ -236,7 +122,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await emailInput.inputValue()).toBe('invalid-email');
 
       // Reset form
-      await page.locator('#reset-button button').click();
+      await scenario.locator('#reset-button button').click();
       await page.waitForTimeout(300);
 
       // Verify reset to valid default
@@ -246,50 +132,16 @@ test.describe('Form Reset and Clear Events Tests', () => {
 
   test.describe('Form Clear Functionality', () => {
     test('should clear all form fields', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'firstName',
-                type: 'input',
-                label: 'First Name',
-                // No default value - user must fill it
-              },
-              {
-                key: 'lastName',
-                type: 'input',
-                label: 'Last Name',
-                // No default value - user must fill it
-              },
-              {
-                key: 'email',
-                type: 'input',
-                label: 'Email',
-                props: {
-                  type: 'email',
-                },
-                // No default value - user must fill it
-              },
-              {
-                key: 'clear-button',
-                type: 'button',
-                label: 'Clear All',
-                event: (window as any).FormClearEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'clear-all' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/clear-all');
       await page.waitForLoadState('networkidle');
 
-      const firstNameInput = page.locator('#firstName input');
-      const lastNameInput = page.locator('#lastName input');
-      const emailInput = page.locator('#email input');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="clear-all"]');
+      await expect(scenario).toBeVisible();
+
+      const firstNameInput = scenario.locator('#firstName input');
+      const lastNameInput = scenario.locator('#lastName input');
+      const emailInput = scenario.locator('#email input');
 
       // Fill in the fields (no defaults, so they start empty)
       await firstNameInput.fill('John');
@@ -302,7 +154,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await emailInput.inputValue()).toBe('john@example.com');
 
       // Clear form
-      await page.locator('#clear-button button').click();
+      await scenario.locator('#clear-button button').click();
       await page.waitForTimeout(300);
 
       // Verify all fields are empty
@@ -312,83 +164,40 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should clear select fields', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'language',
-                type: 'select',
-                label: 'Preferred Language',
-                options: [
-                  { value: 'en', label: 'English' },
-                  { value: 'es', label: 'Spanish' },
-                  { value: 'fr', label: 'French' },
-                ],
-                // No default value
-              },
-              {
-                key: 'clear-button',
-                type: 'button',
-                label: 'Clear',
-                event: (window as any).FormClearEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'clear-select' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/clear-select');
       await page.waitForLoadState('networkidle');
 
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="clear-select"]');
+      await expect(scenario).toBeVisible();
+
       // Select Spanish
-      await page.click('#language mat-select');
+      await scenario.locator('#language mat-select').click();
       await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Spanish' }).click();
       await page.waitForTimeout(200);
 
       // Verify selected value
-      await expect(page.locator('#language mat-select')).toContainText('Spanish');
+      await expect(scenario.locator('#language mat-select')).toContainText('Spanish');
 
       // Clear form
-      await page.locator('#clear-button button').click();
+      await scenario.locator('#clear-button button').click();
       await page.waitForTimeout(300);
 
       // Verify select is cleared (should show placeholder or be empty)
-      const selectText = await page.locator('#language mat-select').textContent();
+      const selectText = await scenario.locator('#language mat-select').textContent();
       // After clear, should not contain the previous value
       expect(selectText?.trim()).not.toBe('Spanish');
     });
 
     test('should clear checkbox fields', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'subscribe',
-                type: 'checkbox',
-                label: 'Subscribe',
-                // No default value - starts unchecked
-              },
-              {
-                key: 'clear-button',
-                type: 'button',
-                label: 'Clear',
-                event: (window as any).FormClearEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'clear-checkbox' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/clear-checkbox');
       await page.waitForLoadState('networkidle');
 
-      const checkbox = page.locator('#subscribe mat-checkbox');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="clear-checkbox"]');
+      await expect(scenario).toBeVisible();
+
+      const checkbox = scenario.locator('#subscribe mat-checkbox');
 
       // Check the checkbox
       await checkbox.click();
@@ -398,7 +207,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
       await expect(checkbox).toHaveClass(/mat-mdc-checkbox-checked/);
 
       // Clear form
-      await page.locator('#clear-button button').click();
+      await scenario.locator('#clear-button button').click();
       await page.waitForTimeout(300);
 
       // Verify checkbox is unchecked after clear
@@ -408,52 +217,15 @@ test.describe('Form Reset and Clear Events Tests', () => {
 
   test.describe('Reset vs Clear Behavior', () => {
     test('should differentiate between reset and clear actions', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'name',
-                type: 'input',
-                label: 'Name',
-                value: 'Default Name',
-              },
-              {
-                key: 'email',
-                type: 'input',
-                label: 'Email (no default)',
-                props: {
-                  type: 'email',
-                },
-                // No default value
-              },
-              {
-                key: 'reset-button',
-                type: 'button',
-                label: 'Reset',
-                event: (window as any).FormResetEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-              {
-                key: 'clear-button',
-                type: 'button',
-                label: 'Clear',
-                event: (window as any).FormClearEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'reset-vs-clear' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/reset-vs-clear');
       await page.waitForLoadState('networkidle');
 
-      const nameInput = page.locator('#name input');
-      const emailInput = page.locator('#email input');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="reset-vs-clear"]');
+      await expect(scenario).toBeVisible();
+
+      const nameInput = scenario.locator('#name input');
+      const emailInput = scenario.locator('#email input');
 
       // Verify default values
       expect(await nameInput.inputValue()).toBe('Default Name');
@@ -466,7 +238,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await emailInput.inputValue()).toBe('test@example.com');
 
       // Test Reset - should restore defaults (name has default, email doesn't)
-      await page.locator('#reset-button button').click();
+      await scenario.locator('#reset-button button').click();
       await page.waitForTimeout(300);
       expect(await nameInput.inputValue()).toBe('Default Name');
       expect(await emailInput.inputValue()).toBe('');
@@ -476,55 +248,21 @@ test.describe('Form Reset and Clear Events Tests', () => {
       await emailInput.fill('another@example.com');
 
       // Test Clear - clears form value to {}, so name falls back to its default, email has none
-      await page.locator('#clear-button button').click();
+      await scenario.locator('#clear-button button').click();
       await page.waitForTimeout(300);
       expect(await nameInput.inputValue()).toBe('Default Name'); // Falls back to config default
       expect(await emailInput.inputValue()).toBe(''); // No default, so empty
     });
 
     test('should handle reset and clear with required fields', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'requiredField',
-                type: 'input',
-                label: 'Required Field',
-                value: 'Initial Value',
-                required: true,
-              },
-              {
-                key: 'reset-button',
-                type: 'button',
-                label: 'Reset',
-                event: (window as any).FormResetEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-              {
-                key: 'clear-button',
-                type: 'button',
-                label: 'Clear',
-                event: (window as any).FormClearEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-              {
-                key: 'submit',
-                type: 'submit',
-                label: 'Submit',
-              },
-            ],
-          },
-          { testId: 'required-reset-clear' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/required-reset-clear');
       await page.waitForLoadState('networkidle');
 
-      const input = page.locator('#requiredField input');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="required-reset-clear"]');
+      await expect(scenario).toBeVisible();
+
+      const input = scenario.locator('#requiredField input');
 
       // Verify initial state - should be valid with default value
       expect(await input.inputValue()).toBe('Initial Value');
@@ -535,12 +273,12 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await input.inputValue()).toBe('Modified Value');
 
       // Clear the form - field falls back to config default since it has one
-      await page.locator('#clear-button button').click();
+      await scenario.locator('#clear-button button').click();
       await page.waitForTimeout(300);
       expect(await input.inputValue()).toBe('Initial Value'); // Falls back to config default
 
       // Reset should restore valid state
-      await page.locator('#reset-button button').click();
+      await scenario.locator('#reset-button button').click();
       await page.waitForTimeout(300);
       expect(await input.inputValue()).toBe('Initial Value');
     });
@@ -548,47 +286,15 @@ test.describe('Form Reset and Clear Events Tests', () => {
 
   test.describe('Complex Reset/Clear Scenarios', () => {
     test('should reset nested group fields', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'userInfo',
-                type: 'group',
-                label: 'User Information',
-                fields: [
-                  {
-                    key: 'firstName',
-                    type: 'input',
-                    label: 'First Name',
-                    value: 'John',
-                  },
-                  {
-                    key: 'lastName',
-                    type: 'input',
-                    label: 'Last Name',
-                    value: 'Doe',
-                  },
-                ],
-              },
-              {
-                key: 'reset-button',
-                type: 'button',
-                label: 'Reset',
-                event: (window as any).FormResetEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'reset-nested' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/reset-nested');
       await page.waitForLoadState('networkidle');
 
-      const firstNameInput = page.locator('#firstName input');
-      const lastNameInput = page.locator('#lastName input');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="reset-nested"]');
+      await expect(scenario).toBeVisible();
+
+      const firstNameInput = scenario.locator('#firstName input');
+      const lastNameInput = scenario.locator('#lastName input');
 
       // Verify defaults
       expect(await firstNameInput.inputValue()).toBe('John');
@@ -599,7 +305,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
       await lastNameInput.fill('Smith');
 
       // Reset
-      await page.locator('#reset-button button').click();
+      await scenario.locator('#reset-button button').click();
       await page.waitForTimeout(300);
 
       // Verify reset
@@ -608,73 +314,45 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should handle multiple reset/clear cycles', async ({ page }) => {
-      await page.evaluate(() => {
-        (window as any).loadTestScenario(
-          {
-            fields: [
-              {
-                key: 'field',
-                type: 'input',
-                label: 'Field',
-                value: 'Default',
-              },
-              {
-                key: 'reset-button',
-                type: 'button',
-                label: 'Reset',
-                event: (window as any).FormResetEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-              {
-                key: 'clear-button',
-                type: 'button',
-                label: 'Clear',
-                event: (window as any).FormClearEvent,
-                props: {
-                  type: 'button',
-                },
-              },
-            ],
-          },
-          { testId: 'multiple-cycles' },
-        );
-      });
+      await page.goto('http://localhost:4201/test/form-reset-clear/multiple-cycles');
       await page.waitForLoadState('networkidle');
 
-      const input = page.locator('#field input');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="multiple-cycles"]');
+      await expect(scenario).toBeVisible();
+
+      const input = scenario.locator('#field input');
 
       // Verify default
       expect(await input.inputValue()).toBe('Default');
 
       // Cycle 1: Modify -> Reset
       await input.fill('Value 1');
-      await page.locator('#reset-button button').click();
+      await scenario.locator('#reset-button button').click();
       await page.waitForTimeout(200);
       expect(await input.inputValue()).toBe('Default');
 
       // Cycle 2: Modify -> Clear (clears form value, field falls back to config default)
       await input.fill('Value 2');
-      await page.locator('#clear-button button').click();
+      await scenario.locator('#clear-button button').click();
       await page.waitForTimeout(200);
       expect(await input.inputValue()).toBe('Default'); // Falls back to config default
 
       // Cycle 3: Reset from empty (should restore default)
-      await page.locator('#reset-button button').click();
+      await scenario.locator('#reset-button button').click();
       await page.waitForTimeout(200);
       expect(await input.inputValue()).toBe('Default');
 
       // Cycle 4: Clear -> Reset -> Clear (all show default since field has config default)
-      await page.locator('#clear-button button').click();
+      await scenario.locator('#clear-button button').click();
       await page.waitForTimeout(200);
       expect(await input.inputValue()).toBe('Default'); // Falls back to config default
 
-      await page.locator('#reset-button button').click();
+      await scenario.locator('#reset-button button').click();
       await page.waitForTimeout(200);
       expect(await input.inputValue()).toBe('Default'); // Restores config default
 
-      await page.locator('#clear-button button').click();
+      await scenario.locator('#clear-button button').click();
       await page.waitForTimeout(200);
       expect(await input.inputValue()).toBe('Default'); // Falls back to config default
     });

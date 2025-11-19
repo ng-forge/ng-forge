@@ -1,181 +1,355 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('Demo Scenarios Functionality', () => {
+test.describe('Demo Scenarios E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/scenarios');
+    await page.goto('http://localhost:4200/test/demo-scenarios');
+    await page.waitForLoadState('networkidle');
   });
 
   test.describe('Cross-Field Validation', () => {
-    test('should load cross-field validation scenario', async ({ page }) => {
-      // Click on Cross-Field Validation scenario (it's a link)
-      await page.getByRole('link', { name: 'Cross-Field Validation' }).click();
+    test('should validate email and password fields', async ({ page }) => {
+      // Navigate to cross-field validation scenario
+      await page.goto('http://localhost:4200/test/demo-scenarios/cross-field-validation');
+      await page.waitForLoadState('networkidle');
 
-      // Wait for the demo page to load
-      await page.waitForURL('**/cross-field-validation');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="cross-field-validation"]');
+      await expect(scenario).toBeVisible();
 
-      // Check that all three scenario buttons are visible
-      await expect(page.getByRole('button', { name: 'Password Matching' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Conditional Fields' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Dependent Validation' })).toBeVisible();
+      // Submit button should be disabled initially (form invalid)
+      const submitButton = scenario.locator('#submit button');
+      await expect(submitButton).toBeDisabled();
+
+      // Fill in the form fields
+      await scenario.locator('#email input').fill('test@example.com');
+      await scenario.locator('#password input').fill('SecurePass123');
+      await scenario.locator('#confirmPassword input').fill('SecurePass123');
+
+      await page.waitForTimeout(200);
+
+      // Submit button should now be enabled
+      await expect(submitButton).toBeEnabled();
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit the form
+      await submitButton.click();
+
+      // Wait for formSubmitted event
+      const submittedData = await submittedDataPromise;
+
+      // Verify submitted data
+      expect(submittedData).toMatchObject({
+        email: 'test@example.com',
+        password: 'SecurePass123',
+        confirmPassword: 'SecurePass123',
+      });
     });
 
-    test('should have password matching form', async ({ page }) => {
-      await page.goto('http://localhost:4200/cross-field-validation');
+    test('should enforce password minimum length validation', async ({ page }) => {
+      // Navigate to cross-field validation scenario
+      await page.goto('http://localhost:4200/test/demo-scenarios/cross-field-validation');
+      await page.waitForLoadState('networkidle');
 
-      // Password Matching is the default tab
-      await expect(page.getByRole('button', { name: 'Password Matching' })).toHaveClass(/active/);
+      const scenario = page.locator('[data-testid="cross-field-validation"]');
+      const submitButton = scenario.locator('#submit button');
 
-      // Check that form fields are visible - use first() to avoid strict mode
-      await expect(page.getByLabel('Email Address')).toBeVisible();
-      const passwordFields = page.getByLabel('Password');
-      await expect(passwordFields.first()).toBeVisible();
-      await expect(page.getByLabel('Confirm Password')).toBeVisible();
-    });
+      // Fill with valid email but short password
+      await scenario.locator('#email input').fill('test@example.com');
+      await scenario.locator('#password input').fill('short');
+      await scenario.locator('#confirmPassword input').fill('short');
 
-    test('should show/hide conditional fields', async ({ page }) => {
-      await page.goto('http://localhost:4200/cross-field-validation');
+      await page.waitForTimeout(200);
 
-      // Click on Dependent Validation tab (has age/guardian consent)
-      await page.getByRole('button', { name: 'Dependent Validation' }).click();
+      // Form should still be invalid due to password length
+      await expect(submitButton).toBeDisabled();
 
-      // Wait for tab to load
-      await page.waitForTimeout(300);
+      // Fix password length
+      await scenario.locator('#password input').fill('LongEnoughPass123');
+      await scenario.locator('#confirmPassword input').fill('LongEnoughPass123');
 
-      // Enter age under 18
-      await page.getByLabel('Age').fill('16');
+      await page.waitForTimeout(200);
 
-      // Guardian consent should be visible
-      await expect(page.getByLabel('Guardian Consent Required')).toBeVisible();
-
-      // Change age to over 18
-      await page.getByLabel('Age').clear();
-      await page.getByLabel('Age').fill('25');
-
-      // Guardian consent should be hidden
-      await expect(page.getByLabel('Guardian Consent Required')).not.toBeVisible();
-    });
-
-    test('should handle cascading dropdowns', async ({ page }) => {
-      await page.goto('http://localhost:4200/cross-field-validation');
-
-      // Click on Dependent Validation tab
-      await page.getByRole('button', { name: 'Dependent Validation' }).click();
-
-      // Wait for tab to load
-      await page.waitForTimeout(300);
-
-      // State should be disabled initially
-      await expect(page.getByLabel('State/Province')).toBeDisabled();
-
-      // Select a country (Material select requires clicking the select then clicking the option)
-      await page.getByLabel('Country').click();
-      await page.getByRole('option', { name: 'United States' }).click();
-
-      // State should be enabled
-      await expect(page.getByLabel('State/Province')).toBeEnabled();
-
-      // Select a state
-      await page.getByLabel('State/Province').click();
-      await page.getByRole('option', { name: 'California' }).click();
-
-      // City should be enabled
-      await expect(page.getByLabel('City')).toBeEnabled();
+      // Now form should be valid
+      await expect(submitButton).toBeEnabled();
     });
   });
 
   test.describe('User Registration', () => {
-    test('should load user registration scenario', async ({ page }) => {
-      // Click on User Registration scenario (it's a link)
-      await page.getByRole('link', { name: 'User Registration Flow' }).click();
+    test('should complete user registration form', async ({ page }) => {
+      // Navigate to user registration scenario
+      await page.goto('http://localhost:4200/test/demo-scenarios/user-registration');
+      await page.waitForLoadState('networkidle');
 
-      await page.waitForURL('**/user-registration');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="user-registration"]');
+      await expect(scenario).toBeVisible();
 
-      // Check the page heading is visible
-      await expect(page.getByRole('heading', { name: /User Registration/i })).toBeVisible();
+      // Submit button should be disabled initially
+      const submitButton = scenario.locator('#submit button');
+      await expect(submitButton).toBeDisabled();
 
-      // Check that all three scenario buttons are visible
-      await expect(page.getByRole('button', { name: 'Personal Information' }).first()).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Account Setup' }).first()).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Review & Confirmation' }).first()).toBeVisible();
+      // Fill in registration form
+      await scenario.locator('#firstName input').fill('John');
+      await scenario.locator('#lastName input').fill('Doe');
+      await scenario.locator('#email input').fill('john.doe@example.com');
+      await scenario.locator('#age input').fill('25');
+
+      // Select country
+      await scenario.locator('#country mat-select').click();
+      await page.getByRole('option', { name: 'United States' }).click();
+
+      await page.waitForTimeout(200);
+
+      // Submit button should now be enabled
+      await expect(submitButton).toBeEnabled();
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit the form
+      await submitButton.click();
+
+      // Wait for formSubmitted event
+      const submittedData = await submittedDataPromise;
+
+      // Verify submitted data
+      expect(submittedData).toMatchObject({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+        age: 25,
+        country: 'us',
+      });
     });
 
-    test('should have personal information form', async ({ page }) => {
-      await page.goto('http://localhost:4200/user-registration');
+    test('should enforce minimum age validation', async ({ page }) => {
+      // Navigate to user registration scenario
+      await page.goto('http://localhost:4200/test/demo-scenarios/user-registration');
+      await page.waitForLoadState('networkidle');
 
-      // Personal Information is the default tab
-      await expect(page.getByRole('button', { name: 'Personal Information' })).toHaveClass(/active/);
+      const scenario = page.locator('[data-testid="user-registration"]');
+      const submitButton = scenario.locator('#submit button');
 
-      // Check that form fields are visible
-      await expect(page.getByLabel('First Name')).toBeVisible();
-      await expect(page.getByLabel('Last Name')).toBeVisible();
-      await expect(page.getByLabel('Email Address')).toBeVisible();
+      // Fill in all fields with age below minimum
+      await scenario.locator('#firstName input').fill('Jane');
+      await scenario.locator('#lastName input').fill('Smith');
+      await scenario.locator('#email input').fill('jane@example.com');
+      await scenario.locator('#age input').fill('16');
+
+      // Select country
+      await scenario.locator('#country mat-select').click();
+      await page.getByRole('option', { name: 'Canada' }).click();
+
+      await page.waitForTimeout(200);
+
+      // Form should be invalid due to age requirement
+      await expect(submitButton).toBeDisabled();
+
+      // Fix age
+      await scenario.locator('#age input').fill('20');
+
+      await page.waitForTimeout(200);
+
+      // Now form should be valid
+      await expect(submitButton).toBeEnabled();
     });
   });
 
   test.describe('Profile Management', () => {
-    test('should load profile management scenario', async ({ page }) => {
-      // Click on Profile Management scenario (it's a link)
-      await page.getByRole('link', { name: 'Profile Management' }).click();
+    test('should update profile information', async ({ page }) => {
+      // Navigate to profile management scenario
+      await page.goto('http://localhost:4200/test/demo-scenarios/profile-management');
+      await page.waitForLoadState('networkidle');
 
-      await page.waitForURL('**/profile-management');
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="profile-management"]');
+      await expect(scenario).toBeVisible();
 
-      // Check the page heading is visible
-      await expect(page.getByRole('heading', { name: /Profile Management/i })).toBeVisible();
+      const submitButton = scenario.locator('#submit button');
 
-      // Check that all three scenario buttons are visible
-      await expect(page.getByRole('button', { name: 'Profile Editing' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Account Settings' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Preferences' })).toBeVisible();
+      // Fill in profile form (only required field is username)
+      await scenario.locator('#username input').fill('johndoe');
+      await scenario.locator('#bio textarea').fill('Software engineer passionate about web development');
+
+      await page.waitForTimeout(200);
+
+      // Submit button should be enabled
+      await expect(submitButton).toBeEnabled();
+
+      // Submit the form
+      await submitButton.click();
+      await page.waitForTimeout(500);
+
+      // Verify form value was updated
+      const formValue = await page.evaluate(() => {
+        const pre = document.querySelector('[data-testid="form-value-profile-management"]');
+        return pre ? JSON.parse(pre.textContent || '{}') : null;
+      });
+
+      expect(formValue).toMatchObject({
+        username: 'johndoe',
+        bio: 'Software engineer passionate about web development',
+      });
     });
 
-    test('should have profile edit form', async ({ page }) => {
-      await page.goto('http://localhost:4200/profile-management');
+    test('should validate password fields', async ({ page }) => {
+      // Navigate to profile management scenario
+      await page.goto('http://localhost:4200/test/demo-scenarios/profile-management');
+      await page.waitForLoadState('networkidle');
 
-      // Profile Editing is the default tab
-      await expect(page.getByRole('button', { name: 'Profile Editing' })).toHaveClass(/active/);
+      const scenario = page.locator('[data-testid="profile-management"]');
+      const submitButton = scenario.locator('#submit button');
 
-      // Check that the dynamic form is loaded
-      await expect(page.locator('dynamic-form')).toBeVisible({ timeout: 10000 });
+      // Fill required field
+      await scenario.locator('#username input').fill('testuser');
+
+      // Fill new password with less than minimum length
+      await scenario.locator('#newPassword input').fill('short');
+
+      await page.waitForTimeout(200);
+
+      // Form should be invalid due to password length
+      await expect(submitButton).toBeDisabled();
+
+      // Fix password length
+      await scenario.locator('#newPassword input').fill('ValidPass123');
+
+      await page.waitForTimeout(200);
+
+      // Now form should be valid
+      await expect(submitButton).toBeEnabled();
     });
 
-    test('should have settings form with password fields', async ({ page }) => {
-      await page.goto('http://localhost:4200/profile-management');
+    test('should handle optional newsletter subscription', async ({ page }) => {
+      // Navigate to profile management scenario
+      await page.goto('http://localhost:4200/test/demo-scenarios/profile-management');
+      await page.waitForLoadState('networkidle');
 
-      // Click on Account Settings tab
-      await page.getByRole('button', { name: 'Account Settings' }).click();
+      const scenario = page.locator('[data-testid="profile-management"]');
 
-      // Wait for tab to load
-      await page.waitForTimeout(300);
+      // Fill required field
+      await scenario.locator('#username input').fill('subscriber');
 
-      // Check that password fields are visible
-      await expect(page.getByLabel('Current Password')).toBeVisible();
-      await expect(page.getByLabel('New Password').first()).toBeVisible();
-      await expect(page.getByLabel('Confirm New Password')).toBeVisible();
+      // Check newsletter checkbox
+      await scenario.locator('#newsletter mat-checkbox').click();
+
+      await page.waitForTimeout(200);
+
+      // Submit the form
+      await scenario.locator('#submit button').click();
+      await page.waitForTimeout(500);
+
+      // Verify form value includes newsletter subscription
+      const formValue = await page.evaluate(() => {
+        const pre = document.querySelector('[data-testid="form-value-profile-management"]');
+        return pre ? JSON.parse(pre.textContent || '{}') : null;
+      });
+
+      expect(formValue).toMatchObject({
+        username: 'subscriber',
+        newsletter: true,
+      });
     });
   });
 
-  test('should not have console errors', async ({ page, browserName }) => {
-    const consoleErrors: string[] = [];
+  test.describe('Conditional Fields', () => {
+    test('should handle conditional field logic', async ({ page }) => {
+      // Navigate to conditional fields scenario
+      await page.goto('http://localhost:4200/test/demo-scenarios/conditional-fields');
+      await page.waitForLoadState('networkidle');
 
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        consoleErrors.push(msg.text());
-      }
+      // Locate the specific test scenario
+      const scenario = page.locator('[data-testid="conditional-fields"]');
+      await expect(scenario).toBeVisible();
+
+      // Fill in age and country
+      await scenario.locator('#age input').fill('25');
+
+      // Select country
+      await scenario.locator('#country mat-select').click();
+      await page.getByRole('option', { name: 'United States' }).click();
+
+      await page.waitForTimeout(200);
+
+      // Submit form
+      await scenario.locator('#submit button').click();
+      await page.waitForTimeout(500);
+
+      // Verify form submission
+      const formValue = await page.evaluate(() => {
+        const pre = document.querySelector('[data-testid="form-value-conditional-fields"]');
+        return pre ? JSON.parse(pre.textContent || '{}') : null;
+      });
+
+      expect(formValue).toMatchObject({
+        age: 25,
+        country: 'us',
+      });
     });
 
-    // Visit all three scenarios and wait for them to load
-    await page.goto('http://localhost:4200/cross-field-validation', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(500); // Allow Angular to stabilize
+    test('should submit form with cascading dropdowns', async ({ page }) => {
+      // Navigate to conditional fields scenario
+      await page.goto('http://localhost:4200/test/demo-scenarios/conditional-fields');
+      await page.waitForLoadState('networkidle');
 
-    await page.goto('http://localhost:4200/user-registration', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(500);
+      const scenario = page.locator('[data-testid="conditional-fields"]');
 
-    await page.goto('http://localhost:4200/profile-management', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(500);
+      // Fill in required fields
+      await scenario.locator('#age input').fill('30');
 
-    // Check for console errors
-    // Note: Webkit has module import issues that are browser-specific, so we filter those out
-    const relevantErrors = consoleErrors.filter((error) => !error.includes('Importing a module script failed'));
-    expect(relevantErrors).toHaveLength(0);
+      // Select country
+      await scenario.locator('#country mat-select').click();
+      await page.getByRole('option', { name: 'Canada' }).click();
+
+      // Select state
+      await scenario.locator('#state mat-select').click();
+      await page.getByRole('option', { name: 'California' }).click();
+
+      // Fill city
+      await scenario.locator('#city input').fill('San Francisco');
+
+      await page.waitForTimeout(200);
+
+      // Submit form
+      await scenario.locator('#submit button').click();
+      await page.waitForTimeout(500);
+
+      // Verify form submission
+      const formValue = await page.evaluate(() => {
+        const pre = document.querySelector('[data-testid="form-value-conditional-fields"]');
+        return pre ? JSON.parse(pre.textContent || '{}') : null;
+      });
+
+      expect(formValue).toMatchObject({
+        age: 30,
+        country: 'ca',
+        state: 'ca',
+        city: 'San Francisco',
+      });
+    });
   });
 });
