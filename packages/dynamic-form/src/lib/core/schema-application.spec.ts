@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { runInInjectionContext } from '@angular/core';
+import { runInInjectionContext, Injector } from '@angular/core';
 import { applySchema, createSchemaFunction } from './schema-application';
 import { SchemaRegistryService } from './registry/schema-registry.service';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models';
@@ -57,6 +57,7 @@ vi.mock('./values', async () => {
 
 describe('schema-application', () => {
   let schemaRegistry: SchemaRegistryService;
+  let injector: Injector;
   let mockFieldPath: any;
   let consoleSpy: ReturnType<typeof vi.spyOn>;
 
@@ -65,6 +66,7 @@ describe('schema-application', () => {
       providers: [SchemaRegistryService],
     });
 
+    injector = TestBed.inject(Injector);
     schemaRegistry = TestBed.inject(SchemaRegistryService);
 
     // Create mock field path
@@ -103,7 +105,7 @@ describe('schema-application', () => {
           schema: 'test-schema',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -121,7 +123,7 @@ describe('schema-application', () => {
           schema: schema,
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -134,7 +136,7 @@ describe('schema-application', () => {
           schema: 'nonexistent-schema',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -150,7 +152,7 @@ describe('schema-application', () => {
           schema: 'missing',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -163,7 +165,7 @@ describe('schema-application', () => {
           schema: 'any-schema',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -177,7 +179,7 @@ describe('schema-application', () => {
         };
 
         expect(() => {
-          runInInjectionContext(TestBed, () => {
+          runInInjectionContext(injector, () => {
             applySchema(config, mockFieldPath);
           });
         }).not.toThrow();
@@ -199,7 +201,7 @@ describe('schema-application', () => {
           schema: 'test-schema',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -217,7 +219,7 @@ describe('schema-application', () => {
           schema: schema,
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -236,7 +238,7 @@ describe('schema-application', () => {
           schema: schema,
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -256,7 +258,7 @@ describe('schema-application', () => {
 
         const mockPathTree = { ...mockFieldPath };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockPathTree);
         });
 
@@ -278,7 +280,7 @@ describe('schema-application', () => {
           condition: { type: 'expression', expression: 'age > 18' },
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -298,7 +300,7 @@ describe('schema-application', () => {
           condition: { type: 'expression', expression: 'isActive' },
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -317,7 +319,7 @@ describe('schema-application', () => {
           condition: { type: 'expression', expression: 'true' },
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -335,7 +337,7 @@ describe('schema-application', () => {
           schema: schema,
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -354,7 +356,7 @@ describe('schema-application', () => {
           condition: { type: 'expression', expression: 'age > 18 && country === "US"' },
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -377,7 +379,7 @@ describe('schema-application', () => {
           typePredicate: 'string',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -397,7 +399,7 @@ describe('schema-application', () => {
           typePredicate: 'number',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -416,7 +418,7 @@ describe('schema-application', () => {
           typePredicate: 'string',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -434,7 +436,7 @@ describe('schema-application', () => {
           schema: schema,
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -453,7 +455,7 @@ describe('schema-application', () => {
           typePredicate: 'boolean',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -474,7 +476,7 @@ describe('schema-application', () => {
           schema: schema,
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -492,7 +494,7 @@ describe('schema-application', () => {
           schema: schema,
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -510,7 +512,7 @@ describe('schema-application', () => {
           schema: schema,
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -532,7 +534,7 @@ describe('schema-application', () => {
         };
 
         expect(() => {
-          runInInjectionContext(TestBed, () => {
+          runInInjectionContext(injector, () => {
             applySchema(config, mockFieldPath);
           });
         }).not.toThrow();
@@ -544,7 +546,7 @@ describe('schema-application', () => {
           schema: 'missing-schema',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -557,7 +559,7 @@ describe('schema-application', () => {
         } as any;
 
         expect(() => {
-          runInInjectionContext(TestBed, () => {
+          runInInjectionContext(injector, () => {
             applySchema(config, mockFieldPath);
           });
         }).not.toThrow();
@@ -579,7 +581,7 @@ describe('schema-application', () => {
           schema: 'registry-test',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -599,7 +601,7 @@ describe('schema-application', () => {
           schema: schema,
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -612,7 +614,7 @@ describe('schema-application', () => {
           schema: 'unregistered',
         };
 
-        runInInjectionContext(TestBed, () => {
+        runInInjectionContext(injector, () => {
           applySchema(config, mockFieldPath);
         });
 
@@ -776,7 +778,10 @@ describe('schema-application', () => {
         const applySchemaOriginal = vi.fn();
         vi.mocked(applySchemaOriginal);
 
-        const schemaFn = createSchemaFunction(schema);
+        let schemaFn: any;
+        runInInjectionContext(injector, () => {
+          schemaFn = createSchemaFunction(schema);
+        });
         schemaFn(mockFieldPath);
 
         // Sub-schemas will attempt to call applySchema (through the actual implementation)
@@ -794,7 +799,10 @@ describe('schema-application', () => {
           ],
         };
 
-        const schemaFn = createSchemaFunction(schema);
+        let schemaFn: any;
+        runInInjectionContext(injector, () => {
+          schemaFn = createSchemaFunction(schema);
+        });
         schemaFn(mockFieldPath);
 
         expect(schema.subSchemas).toHaveLength(3);
@@ -819,7 +827,10 @@ describe('schema-application', () => {
         };
 
         const mockPathTree = { ...mockFieldPath };
-        const schemaFn = createSchemaFunction(schema);
+        let schemaFn: any;
+        runInInjectionContext(injector, () => {
+          schemaFn = createSchemaFunction(schema);
+        });
 
         expect(() => {
           schemaFn(mockPathTree);
@@ -840,7 +851,10 @@ describe('schema-application', () => {
           ],
         };
 
-        const schemaFn = createSchemaFunction(schema);
+        let schemaFn: any;
+        runInInjectionContext(injector, () => {
+          schemaFn = createSchemaFunction(schema);
+        });
 
         expect(() => {
           schemaFn(mockFieldPath);
@@ -858,7 +872,10 @@ describe('schema-application', () => {
           subSchemas: [{ type: 'apply', schema: 'child' }],
         };
 
-        const schemaFn = createSchemaFunction(schema);
+        let schemaFn: any;
+        runInInjectionContext(injector, () => {
+          schemaFn = createSchemaFunction(schema);
+        });
         schemaFn(mockFieldPath);
 
         expect(vi.mocked(validation.applyValidator)).toHaveBeenCalled();
@@ -912,7 +929,10 @@ describe('schema-application', () => {
           subSchemas: [{ type: 'apply', schema: 'additional-validation' }],
         };
 
-        const schemaFn = createSchemaFunction(schema);
+        let schemaFn: any;
+        runInInjectionContext(injector, () => {
+          schemaFn = createSchemaFunction(schema);
+        });
         schemaFn(mockFieldPath);
 
         expect(vi.mocked(validation.applyValidator)).toHaveBeenCalledTimes(3);

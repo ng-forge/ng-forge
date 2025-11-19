@@ -1,4 +1,4 @@
-import { inject } from '@angular/core';
+import { inject, Injector, runInInjectionContext } from '@angular/core';
 import { apply, applyEach, applyWhen, applyWhenValue, SchemaOrSchemaFn } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
@@ -69,6 +69,14 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
  * accept SchemaPath | SchemaPathTree, so we can pass the path directly.
  */
 export function createSchemaFunction<T = unknown>(schema: SchemaDefinition): SchemaOrSchemaFn<T> {
+  // Capture the injector if we're in an injection context (for sub-schema support)
+  let capturedInjector: Injector | null = null;
+  try {
+    capturedInjector = inject(Injector, { optional: true });
+  } catch {
+    // Not in injection context - sub-schemas won't work but that's OK for testing
+  }
+
   return (path: SchemaPathTree<T>) => {
     // Apply validators - path is SchemaPathTree which is accepted by applyValidator
     schema.validators?.forEach((validatorConfig) => {
@@ -81,8 +89,16 @@ export function createSchemaFunction<T = unknown>(schema: SchemaDefinition): Sch
     });
 
     // Apply sub-schemas - path is SchemaPathTree which is accepted by applySchema
+    // Sub-schema application requires injection context
     schema.subSchemas?.forEach((subSchemaConfig) => {
-      applySchema(subSchemaConfig, path);
+      if (capturedInjector) {
+        runInInjectionContext(capturedInjector, () => {
+          applySchema(subSchemaConfig, path);
+        });
+      } else {
+        // No injector available - try direct call (will fail if applySchema needs injection)
+        applySchema(subSchemaConfig, path);
+      }
     });
   };
 }

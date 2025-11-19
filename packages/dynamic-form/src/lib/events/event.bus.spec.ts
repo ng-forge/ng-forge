@@ -353,21 +353,25 @@ describe('EventBus', () => {
 
       it('should maintain independent subscriptions', async () => {
         let subscriber1Count = 0;
-        const subscriber2Count = 0;
+        let subscriber2Count = 0;
 
         const sub1 = eventBus.on<TestEvent>('test-event').subscribe(() => {
           subscriber1Count++;
         });
 
-        const sub2Promise = firstValueFrom(eventBus.on<TestEvent>('test-event').pipe(take(2), toArray()));
+        const sub2 = eventBus.on<TestEvent>('test-event').subscribe(() => {
+          subscriber2Count++;
+        });
 
         eventBus.dispatch(TestEvent);
         sub1.unsubscribe();
         eventBus.dispatch(TestEvent);
 
-        await sub2Promise;
+        await new Promise((resolve) => setTimeout(resolve, 10));
         expect(subscriber1Count).toBe(1);
         expect(subscriber2Count).toBe(2);
+
+        sub2.unsubscribe();
       });
     });
 
