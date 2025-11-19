@@ -3,7 +3,7 @@ import { DynamicForm } from '../dynamic-form.component';
 import { delay } from './delay';
 import { FieldDef } from '../definitions';
 import { provideDynamicForm } from '../providers/dynamic-form-providers';
-import { Component, Injector, runInInjectionContext, signal, Type } from '@angular/core';
+import { Component, Injector, input, runInInjectionContext, signal, Type } from '@angular/core';
 import { FIELD_REGISTRY, FieldTypeDefinition, FIELD_SIGNAL_CONTEXT } from '../models';
 import { EventBus } from '../events/event.bus';
 import { form } from '@angular/forms/signals';
@@ -164,10 +164,15 @@ export class SimpleTestUtils {
 // Mock field component for testing
 @Component({
   selector: 'df-test-field',
-  template: '<div>Test Field: {{ value() }}</div>',
+  template: '<div>Test Field: {{ key() }}</div>',
+  standalone: true,
 })
 export class TestFieldComponent {
-  value = signal('test');
+  field = input<any>({});
+  key = input<string>('test');
+  arrayContext = input<any>(undefined);
+  label = input<string | undefined>(undefined);
+  placeholder = input<string | undefined>(undefined);
 }
 
 /**
