@@ -301,15 +301,7 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     // For value fields (input, select, checkbox, etc.), pass FieldTree directly
     const key = template.key || `${arrayKey}[${index}]`;
 
-    const bindings = [
-      inputBinding('field', () => fieldTree),
-      inputBinding('key', () => key),
-      inputBinding('arrayContext', () => ({
-        arrayKey,
-        index,
-        formValue: this.parentFieldSignalContext.value(),
-      })),
-    ];
+    const bindings = [inputBinding('field', () => fieldTree), inputBinding('key', () => key)];
 
     // Add optional bindings from template
     if ('label' in template && template.label) {

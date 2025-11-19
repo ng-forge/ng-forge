@@ -170,7 +170,6 @@ export class SimpleTestUtils {
 export class TestFieldComponent {
   field = input<any>({});
   key = input<string>('test');
-  arrayContext = input<any>(undefined);
   label = input<string | undefined>(undefined);
   placeholder = input<string | undefined>(undefined);
 }
