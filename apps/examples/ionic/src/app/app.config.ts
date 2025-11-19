@@ -4,7 +4,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { appRoutes } from './app.routes';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withIonicFields, withIonicConfig } from '@ng-forge/dynamic-form-ionic';
+import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,7 +15,6 @@ export const appConfig: ApplicationConfig = {
     provideIonicAngular({
       mode: 'md',
     }),
-    provideDynamicForm(...withIonicFields()),
-    ...withIonicConfig({ fill: 'outline', labelPlacement: 'floating' }),
+    provideDynamicForm(...withIonicFields({ fill: 'outline', labelPlacement: 'floating' })),
   ],
 };

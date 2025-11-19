@@ -1,5 +1,4 @@
-import type { FieldTypeDefinition } from '@ng-forge/dynamic-form';
-import type { Provider } from '@angular/core';
+import type { FieldTypeDefinition, FieldTypeDefinitionWithConfig } from '@ng-forge/dynamic-form';
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
 import {
   IonicButtonField,
@@ -21,26 +20,65 @@ import { IONIC_CONFIG } from '../models/ionic-config.token';
 
 /**
  * Configure dynamic forms with Ionic field types.
- * Provides all Ionic field types for use with provideDynamicForm.
+ *
+ * This function provides all Ionic field types for use with provideDynamicForm.
+ * Optionally accepts a global configuration object to set defaults for all Ionic fields.
+ *
+ * @param config - Optional global Ionic configuration
+ * @returns Array of field type definitions
  *
  * @example
  * ```typescript
- * // Application-level setup
- * import { ApplicationConfig } from '@angular/core';
- * import { provideDynamicForm } from '@ng-forge/dynamic-form';
- * import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
- *
- * export const appConfig: ApplicationConfig = {
+ * // Basic usage without config
+ * bootstrapApplication(AppComponent, {
  *   providers: [
  *     provideDynamicForm(...withIonicFields())
  *   ]
- * };
+ * });
  * ```
  *
- * @returns Array of field type definitions for Ionic components
+ * @example
+ * ```typescript
+ * // With global Ionic config
+ * bootstrapApplication(AppComponent, {
+ *   providers: [
+ *     provideDynamicForm(...withIonicFields({ fill: 'outline', shape: 'round' }))
+ *   ]
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Component-level setup with comprehensive config
+ * @Component({
+ *   providers: [
+ *     provideDynamicForm(...withIonicFields({
+ *       fill: 'outline',
+ *       shape: 'round',
+ *       labelPlacement: 'floating',
+ *       buttonSize: 'default',
+ *       buttonExpand: 'block'
+ *     }))
+ *   ]
+ * })
+ * export class MyFormComponent { }
+ * ```
+ *
+ * @public
  */
-export function withIonicFields(): FieldTypeDefinition[] {
-  return IONIC_FIELD_TYPES;
+export function withIonicFields(config?: IonicConfig): FieldTypeDefinition[] | FieldTypeDefinitionWithConfig {
+  const fields = [...IONIC_FIELD_TYPES] as FieldTypeDefinitionWithConfig;
+
+  if (config) {
+    fields.__configProviders = [
+      {
+        provide: IONIC_CONFIG,
+        useValue: config,
+      },
+    ];
+  }
+
+  return fields;
 }
 
 /**

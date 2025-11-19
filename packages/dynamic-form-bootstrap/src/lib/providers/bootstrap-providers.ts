@@ -1,60 +1,76 @@
-import { FieldTypeDefinition } from '@ng-forge/dynamic-form';
-import type { Provider } from '@angular/core';
+import { FieldTypeDefinition, FieldTypeDefinitionWithConfig } from '@ng-forge/dynamic-form';
 import { BOOTSTRAP_FIELD_TYPES } from '../config/bootstrap-field-config';
 import { BootstrapConfig } from '../models/bootstrap-config';
 import { BOOTSTRAP_CONFIG } from '../models/bootstrap-config.token';
 
 /**
- * Provides Bootstrap field types for the dynamic form system.
- * Use with provideDynamicForm(...withBootstrapFields())
+ * Configure dynamic forms with Bootstrap field types.
+ *
+ * This function provides all Bootstrap field types for use with provideDynamicForm.
+ * Optionally accepts a global configuration object to set defaults for all Bootstrap fields.
+ *
+ * @param config - Optional global Bootstrap configuration
+ * @returns Array of field type definitions
  *
  * @example
  * ```typescript
- * // Application-level setup
- * import { ApplicationConfig } from '@angular/core';
- * import { provideDynamicForm } from '@ng-forge/dynamic-form';
- * import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
- *
- * export const appConfig: ApplicationConfig = {
- *   providers: [
- *     provideDynamicForm(...withBootstrapFields())
- *   ]
- * };
+ * // Basic usage without config
+ * @Component({
+ *   providers: [provideDynamicForm(...withBootstrapFields())],
+ * })
+ * export class MyFormComponent {
+ *   config: DynamicFormConfig = {
+ *     fields: [
+ *       {
+ *         key: 'email',
+ *         type: 'input',
+ *         label: 'Email',
+ *         props: { type: 'email', size: 'lg' }
+ *       }
+ *     ]
+ *   };
+ * }
  * ```
  *
- * @returns Array of field type definitions for Bootstrap components
- */
-export function withBootstrapFields(): FieldTypeDefinition[] {
-  return BOOTSTRAP_FIELD_TYPES;
-}
-
-/**
- * Configure global defaults for Bootstrap fields.
- *
- * This function provides global configuration that applies to all Bootstrap fields
- * in the form. Field-level props will override these global defaults.
- *
- * @param config - Global Bootstrap configuration
- * @returns Array of Angular providers
- *
  * @example
  * ```typescript
- * // Application-level setup with global Bootstrap config
+ * // With global Bootstrap config
  * bootstrapApplication(AppComponent, {
  *   providers: [
- *     provideDynamicForm(...withBootstrapFields()),
- *     ...withBootstrapConfig({ size: 'lg', floatingLabel: true })
+ *     provideDynamicForm(...withBootstrapFields({ size: 'lg', floatingLabel: true }))
  *   ]
  * });
  * ```
  *
+ * @example
+ * ```typescript
+ * // Component-level setup with comprehensive config
+ * @Component({
+ *   providers: [
+ *     provideDynamicForm(...withBootstrapFields({
+ *       size: 'lg',
+ *       floatingLabel: true,
+ *       switchStyle: true,
+ *       buttonVariant: 'primary'
+ *     }))
+ *   ]
+ * })
+ * export class MyFormComponent { }
+ * ```
+ *
  * @public
  */
-export function withBootstrapConfig(config: BootstrapConfig): Provider[] {
-  return [
-    {
-      provide: BOOTSTRAP_CONFIG,
-      useValue: config,
-    },
-  ];
+export function withBootstrapFields(config?: BootstrapConfig): FieldTypeDefinition[] | FieldTypeDefinitionWithConfig {
+  const fields = [...BOOTSTRAP_FIELD_TYPES] as FieldTypeDefinitionWithConfig;
+
+  if (config) {
+    fields.__configProviders = [
+      {
+        provide: BOOTSTRAP_CONFIG,
+        useValue: config,
+      },
+    ];
+  }
+
+  return fields;
 }

@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
-import { withBootstrapConfig } from '@ng-forge/dynamic-form-bootstrap';
+import { DynamicForm, provideDynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
 
 @Component({
   selector: 'bs-example-complete-form-demo',
   imports: [DynamicForm, JsonPipe],
-  providers: [...withBootstrapConfig({ floatingLabel: true })],
+  providers: [provideDynamicForm(...withBootstrapFields({ floatingLabel: true }))],
   template: `
     <dynamic-form [config]="config" [(value)]="formValue" />
     <div class="example-result">

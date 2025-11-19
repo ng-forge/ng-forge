@@ -1,5 +1,4 @@
-import type { FieldTypeDefinition } from '@ng-forge/dynamic-form';
-import type { Provider } from '@angular/core';
+import type { FieldTypeDefinition, FieldTypeDefinitionWithConfig } from '@ng-forge/dynamic-form';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
 import {
   MatButtonField,
@@ -21,44 +20,29 @@ import { MATERIAL_CONFIG } from '../models/material-config.token';
 
 /**
  * Configure dynamic forms with Material Design field types.
- * Provides all Material Design field types for use with provideDynamicForm.
+ *
+ * This function provides all Material Design field types for use with provideDynamicForm.
+ * Optionally accepts a global configuration object to set defaults for all Material fields.
+ *
+ * @param config - Optional global Material configuration
+ * @returns Array of field type definitions
  *
  * @example
  * ```typescript
- * // Application-level setup
- * import { ApplicationConfig } from '@angular/core';
- * import { provideDynamicForm } from '@ng-forge/dynamic-form';
- * import { withMaterialFields } from '@ng-forge/dynamic-form-material';
- *
- * export const appConfig: ApplicationConfig = {
+ * // Basic usage without config
+ * bootstrapApplication(AppComponent, {
  *   providers: [
  *     provideDynamicForm(...withMaterialFields())
  *   ]
- * };
+ * });
  * ```
- *
- * @returns Array of field type definitions for Material Design components
- */
-export function withMaterialFields(): FieldTypeDefinition[] {
-  return MATERIAL_FIELD_TYPES;
-}
-
-/**
- * Configure global defaults for Material Design fields.
- *
- * This function provides global configuration that applies to all Material fields
- * in the form. Field-level props will override these global defaults.
- *
- * @param config - Global Material configuration
- * @returns Array of Angular providers
  *
  * @example
  * ```typescript
- * // Application-level setup with global Material config
+ * // With global Material config
  * bootstrapApplication(AppComponent, {
  *   providers: [
- *     provideDynamicForm(...withMaterialFields()),
- *     ...withMaterialConfig({ appearance: 'fill' })
+ *     provideDynamicForm(...withMaterialFields({ appearance: 'fill' }))
  *   ]
  * });
  * ```
@@ -68,14 +52,13 @@ export function withMaterialFields(): FieldTypeDefinition[] {
  * // Component-level setup with comprehensive config
  * @Component({
  *   providers: [
- *     provideDynamicForm(...withMaterialFields()),
- *     ...withMaterialConfig({
+ *     provideDynamicForm(...withMaterialFields({
  *       appearance: 'fill',
  *       subscriptSizing: 'fixed',
  *       disableRipple: true,
  *       labelPosition: 'before',
  *       datepickerTouchUi: true
- *     })
+ *     }))
  *   ]
  * })
  * export class MyFormComponent { }
@@ -83,13 +66,19 @@ export function withMaterialFields(): FieldTypeDefinition[] {
  *
  * @public
  */
-export function withMaterialConfig(config: MaterialConfig): Provider[] {
-  return [
-    {
-      provide: MATERIAL_CONFIG,
-      useValue: config,
-    },
-  ];
+export function withMaterialFields(config?: MaterialConfig): FieldTypeDefinition[] | FieldTypeDefinitionWithConfig {
+  const fields = [...MATERIAL_FIELD_TYPES] as FieldTypeDefinitionWithConfig;
+
+  if (config) {
+    fields.__configProviders = [
+      {
+        provide: MATERIAL_CONFIG,
+        useValue: config,
+      },
+    ];
+  }
+
+  return fields;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
+import { EnvironmentProviders, makeEnvironmentProviders, Provider } from '@angular/core';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
 import { FieldDef } from '../definitions/base';
@@ -33,6 +33,14 @@ type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProv
 };
 
 /**
+ * Enhanced field type array that can carry config providers
+ * @internal
+ */
+export type FieldTypeDefinitionWithConfig = FieldTypeDefinition[] & {
+  __configProviders?: Provider[];
+};
+
+/**
  * Provider function to configure the dynamic form system with field types and options.
  *
  * This function creates environment providers that can be used at application or route level
@@ -53,14 +61,23 @@ type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProv
  *
  * @example
  * ```typescript
- * // Route-level setup
- * const routes: Routes = [
- *   {
- *     path: 'form',
- *     component: FormComponent,
- *     providers: [provideDynamicForm(...withMaterialFields())]
- *   }
- * ];
+ * // With inline configuration (Material example)
+ * bootstrapApplication(AppComponent, {
+ *   providers: [
+ *     provideDynamicForm(...withMaterialFields({ appearance: 'fill' }))
+ *   ]
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Component-level setup (isolated providers)
+ * @Component({
+ *   selector: 'my-form',
+ *   providers: [provideDynamicForm(...withMaterialFields())],
+ *   template: '<dynamic-form [config]="config" />'
+ * })
+ * export class MyFormComponent { }
  * ```
  *
  * @example
@@ -82,6 +99,15 @@ type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProv
 export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fieldTypes: T): ProvideDynamicFormResult<T> {
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
 
+  // Extract config providers if attached to field types (from withXxxFields({ config }))
+  const configProviders: Provider[] = [];
+  for (const fieldType of fieldTypes) {
+    const enhancedArray = fieldType as unknown as FieldTypeDefinitionWithConfig;
+    if (enhancedArray.__configProviders) {
+      configProviders.push(...enhancedArray.__configProviders);
+    }
+  }
+
   return makeEnvironmentProviders([
     {
       provide: FIELD_REGISTRY,
@@ -97,6 +123,7 @@ export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fie
         return registry;
       },
     },
+    ...configProviders,
   ]) as ProvideDynamicFormResult<T>;
 }
 

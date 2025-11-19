@@ -1,50 +1,40 @@
-import { FieldTypeDefinition } from '@ng-forge/dynamic-form';
-import type { Provider } from '@angular/core';
+import { FieldTypeDefinition, FieldTypeDefinitionWithConfig } from '@ng-forge/dynamic-form';
 import { PRIMENG_FIELD_TYPES } from '../config/primeng-field-config';
 import { PrimeNGConfig } from '../models/primeng-config';
 import { PRIMENG_CONFIG } from '../models/primeng-config.token';
 
 /**
- * Provides PrimeNG field type definitions for the dynamic form system.
+ * Configure dynamic forms with PrimeNG field types.
  *
- * Use this function in your application providers to register PrimeNG field components.
+ * This function provides all PrimeNG field types for use with provideDynamicForm.
+ * Optionally accepts a global configuration object to set defaults for all PrimeNG fields.
+ *
+ * @param config - Optional global PrimeNG configuration
+ * @returns Array of field type definitions
  *
  * @example
  * ```typescript
- * // Application-level setup
- * import { ApplicationConfig } from '@angular/core';
- * import { provideDynamicForm } from '@ng-forge/dynamic-form';
- * import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
- *
- * export const appConfig: ApplicationConfig = {
+ * // Basic usage without config
+ * @Component({
  *   providers: [
  *     provideDynamicForm(...withPrimeNGFields())
  *   ]
- * };
+ * })
+ * export class MyFormComponent {
+ *   config = {
+ *     fields: [
+ *       { key: 'email', type: 'input', props: { type: 'email' } }
+ *     ]
+ *   };
+ * }
  * ```
- *
- * @returns Array of field type definitions for PrimeNG components
- */
-export function withPrimeNGFields(): FieldTypeDefinition[] {
-  return PRIMENG_FIELD_TYPES;
-}
-
-/**
- * Configure global defaults for PrimeNG fields.
- *
- * This function provides global configuration that applies to all PrimeNG fields
- * in the form. Field-level props will override these global defaults.
- *
- * @param config - Global PrimeNG configuration
- * @returns Array of Angular providers
  *
  * @example
  * ```typescript
- * // Application-level setup with global PrimeNG config
+ * // With global PrimeNG config
  * bootstrapApplication(AppComponent, {
  *   providers: [
- *     provideDynamicForm(...withPrimeNGFields()),
- *     ...withPrimeNGConfig({ variant: 'filled', size: 'large' })
+ *     provideDynamicForm(...withPrimeNGFields({ variant: 'filled', size: 'large' }))
  *   ]
  * });
  * ```
@@ -54,14 +44,13 @@ export function withPrimeNGFields(): FieldTypeDefinition[] {
  * // Component-level setup with comprehensive config
  * @Component({
  *   providers: [
- *     provideDynamicForm(...withPrimeNGFields()),
- *     ...withPrimeNGConfig({
+ *     provideDynamicForm(...withPrimeNGFields({
  *       variant: 'filled',
  *       size: 'small',
  *       styleClass: 'my-custom-theme',
  *       buttonSeverity: 'success',
  *       buttonRounded: true
- *     })
+ *     }))
  *   ]
  * })
  * export class MyFormComponent { }
@@ -69,11 +58,17 @@ export function withPrimeNGFields(): FieldTypeDefinition[] {
  *
  * @public
  */
-export function withPrimeNGConfig(config: PrimeNGConfig): Provider[] {
-  return [
-    {
-      provide: PRIMENG_CONFIG,
-      useValue: config,
-    },
-  ];
+export function withPrimeNGFields(config?: PrimeNGConfig): FieldTypeDefinition[] | FieldTypeDefinitionWithConfig {
+  const fields = [...PRIMENG_FIELD_TYPES] as FieldTypeDefinitionWithConfig;
+
+  if (config) {
+    fields.__configProviders = [
+      {
+        provide: PRIMENG_CONFIG,
+        useValue: config,
+      },
+    ];
+  }
+
+  return fields;
 }
