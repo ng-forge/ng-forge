@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('User Journey Flow Tests', () => {
   test.describe('Registration Journey', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4200/test/user-journey-flows/registration-journey');
+      await page.goto('http://localhost:4200/#/test/user-journey-flows/registration-journey');
       await page.waitForLoadState('networkidle');
     });
 
@@ -128,7 +128,7 @@ test.describe('User Journey Flow Tests', () => {
 
   test.describe('Checkout Journey', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4200/test/user-journey-flows/checkout-journey');
+      await page.goto('http://localhost:4200/#/test/user-journey-flows/checkout-journey');
       await page.waitForLoadState('networkidle');
     });
 
@@ -249,7 +249,7 @@ test.describe('User Journey Flow Tests', () => {
 
   test.describe('Survey Journey', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4200/test/user-journey-flows/survey-journey');
+      await page.goto('http://localhost:4200/#/test/user-journey-flows/survey-journey');
       await page.waitForLoadState('networkidle');
     });
 

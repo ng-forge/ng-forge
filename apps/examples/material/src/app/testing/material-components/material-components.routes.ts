@@ -2,6 +2,10 @@ import { Route } from '@angular/router';
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./material-components-index.component').then((m) => m.MaterialComponentsIndexComponent),
+  },
+  {
     path: 'datepicker-basic',
     loadComponent: () => import('./datepicker-basic.component').then((m) => m.DatepickerBasicComponent),
   },

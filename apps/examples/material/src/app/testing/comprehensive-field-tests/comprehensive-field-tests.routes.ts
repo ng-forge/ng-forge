@@ -5,6 +5,10 @@ import { StateManagementTestComponent } from './state-management-test.component'
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./comprehensive-field-tests-index.component').then((m) => m.ComprehensiveFieldTestsIndexComponent),
+  },
+  {
     path: 'comprehensive-fields',
     component: ComprehensiveFieldsTestComponent,
   },

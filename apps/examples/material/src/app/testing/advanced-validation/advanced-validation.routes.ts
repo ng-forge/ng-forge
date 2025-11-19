@@ -1,5 +1,9 @@
 export default [
   {
+    path: '',
+    loadComponent: () => import('./advanced-validation-index.component').then((m) => m.AdvancedValidationIndexComponent),
+  },
+  {
     path: 'custom-validator',
     loadComponent: () => import('./custom-validator-test.component').then((m) => m.CustomValidatorTestComponent),
     data: { title: 'Custom Validator Test' },

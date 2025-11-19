@@ -6,6 +6,10 @@ import { ProfileManagementScenarioComponent } from './profile-management-scenari
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./scenario-list-index.component').then((m) => m.ScenarioListIndexComponent),
+  },
+  {
     path: 'single-page',
     component: SinglePageScenarioComponent,
   },

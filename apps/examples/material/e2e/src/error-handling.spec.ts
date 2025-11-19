@@ -2,14 +2,14 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Error Handling and Edge Cases', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/test/error-handling');
+    await page.goto('http://localhost:4200/#/test/error-handling');
     await page.waitForLoadState('networkidle');
   });
 
   test.describe('Invalid Configuration Handling', () => {
     test('should handle invalid field configurations gracefully', async ({ page }) => {
       // Navigate to invalid config test
-      await page.goto('http://localhost:4200/test/error-handling/invalid-config');
+      await page.goto('http://localhost:4200/#/test/error-handling/invalid-config');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -59,7 +59,7 @@ test.describe('Error Handling and Edge Cases', () => {
   test.describe('Basic Form Functionality', () => {
     test('should handle form submission without errors', async ({ page }) => {
       // Navigate to basic test
-      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.goto('http://localhost:4200/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -124,7 +124,7 @@ test.describe('Error Handling and Edge Cases', () => {
 
     test('should handle rapid form interactions without errors', async ({ page }) => {
       // Navigate to basic test
-      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.goto('http://localhost:4200/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -159,7 +159,7 @@ test.describe('Error Handling and Edge Cases', () => {
 
     test('should handle accessibility interactions', async ({ page }) => {
       // Navigate to basic test
-      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.goto('http://localhost:4200/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -193,7 +193,7 @@ test.describe('Error Handling and Edge Cases', () => {
   test.describe('Form State Management', () => {
     test('should maintain form state during browser navigation', async ({ page }) => {
       // Navigate to basic test
-      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.goto('http://localhost:4200/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -210,7 +210,7 @@ test.describe('Error Handling and Edge Cases', () => {
       // Navigate away and back
       await page.goto('http://localhost:4200/');
       await page.waitForLoadState('networkidle');
-      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.goto('http://localhost:4200/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Form should be fresh (not persisted in this case)
@@ -225,7 +225,7 @@ test.describe('Error Handling and Edge Cases', () => {
       // Perform repeated navigation to test memory cleanup
       for (let i = 0; i < 3; i++) {
         // Navigate to basic test
-        await page.goto('http://localhost:4200/test/error-handling/basic-test');
+        await page.goto('http://localhost:4200/#/test/error-handling/basic-test');
         await page.waitForLoadState('networkidle');
 
         // Locate the scenario
@@ -241,7 +241,7 @@ test.describe('Error Handling and Edge Cases', () => {
       }
 
       // Final load to ensure everything still works
-      await page.goto('http://localhost:4200/test/error-handling/basic-test');
+      await page.goto('http://localhost:4200/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       const finalScenario = page.locator('[data-testid="basic-test"]');

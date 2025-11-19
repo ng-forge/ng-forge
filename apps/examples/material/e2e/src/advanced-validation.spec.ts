@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Advanced Validation E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4201/test/advanced-validation');
+    await page.goto('http://localhost:4200/#/test/advanced-validation');
     await page.waitForLoadState('networkidle');
   });
 

@@ -9,6 +9,10 @@ import { ProfileManagementScenarioComponent } from './profile-management.compone
  */
 export default [
   {
+    path: '',
+    loadComponent: () => import('./demo-scenarios-index.component').then((m) => m.DemoScenariosIndexComponent),
+  },
+  {
     path: 'cross-field-validation',
     component: CrossFieldValidationScenarioComponent,
   },

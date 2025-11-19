@@ -7,6 +7,10 @@ import { DestructionTestComponent } from './destruction-test.component';
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./navigation-edge-cases-index.component').then((m) => m.NavigationEdgeCasesIndexComponent),
+  },
+  {
     path: 'browser-navigation',
     component: BrowserNavigationTestComponent,
   },

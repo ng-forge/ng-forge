@@ -4,6 +4,10 @@ import { MultiPageNavigationTestComponent } from './multi-page-navigation.compon
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./essential-tests-index.component').then((m) => m.EssentialTestsIndexComponent),
+  },
+  {
     path: 'basic-form',
     component: BasicFormTestComponent,
   },

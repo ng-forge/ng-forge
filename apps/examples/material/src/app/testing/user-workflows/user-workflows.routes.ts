@@ -6,6 +6,10 @@ import { ContactFormWorkflowComponent } from './contact-form-workflow.component'
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./user-workflows-index.component').then((m) => m.UserWorkflowsIndexComponent),
+  },
+  {
     path: 'registration',
     component: RegistrationWorkflowComponent,
   },

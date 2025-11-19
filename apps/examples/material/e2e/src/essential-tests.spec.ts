@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Essential Tests - Quick Validation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/test/essential-tests/basic-form');
+    await page.goto('http://localhost:4200/#/test/essential-tests/basic-form');
     await page.waitForLoadState('networkidle');
   });
 
@@ -61,7 +61,7 @@ test.describe('Essential Tests - Quick Validation', () => {
 
   test('age-based logic works correctly', async ({ page }) => {
     // Navigate to age-based logic test
-    await page.goto('http://localhost:4200/test/essential-tests/age-based-logic');
+    await page.goto('http://localhost:4200/#/test/essential-tests/age-based-logic');
     await page.waitForLoadState('networkidle');
 
     // Locate the specific test scenario
@@ -99,7 +99,7 @@ test.describe('Essential Tests - Quick Validation', () => {
 
   test('multi-page navigation works', async ({ page }) => {
     // Navigate to multi-page navigation test
-    await page.goto('http://localhost:4200/test/essential-tests/multi-page-navigation');
+    await page.goto('http://localhost:4200/#/test/essential-tests/multi-page-navigation');
     await page.waitForLoadState('networkidle');
 
     // Locate the specific test scenario

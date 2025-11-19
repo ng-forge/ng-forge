@@ -2,14 +2,14 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Demo Scenarios E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/test/demo-scenarios');
+    await page.goto('http://localhost:4200/#/test/demo-scenarios');
     await page.waitForLoadState('networkidle');
   });
 
   test.describe('Cross-Field Validation', () => {
     test('should validate email and password fields', async ({ page }) => {
       // Navigate to cross-field validation scenario
-      await page.goto('http://localhost:4200/test/demo-scenarios/cross-field-validation');
+      await page.goto('http://localhost:4200/#/test/demo-scenarios/cross-field-validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -60,7 +60,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
 
     test('should enforce password minimum length validation', async ({ page }) => {
       // Navigate to cross-field validation scenario
-      await page.goto('http://localhost:4200/test/demo-scenarios/cross-field-validation');
+      await page.goto('http://localhost:4200/#/test/demo-scenarios/cross-field-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="cross-field-validation"]');
@@ -90,7 +90,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
   test.describe('User Registration', () => {
     test('should complete user registration form', async ({ page }) => {
       // Navigate to user registration scenario
-      await page.goto('http://localhost:4200/test/demo-scenarios/user-registration');
+      await page.goto('http://localhost:4200/#/test/demo-scenarios/user-registration');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -148,7 +148,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
 
     test('should enforce minimum age validation', async ({ page }) => {
       // Navigate to user registration scenario
-      await page.goto('http://localhost:4200/test/demo-scenarios/user-registration');
+      await page.goto('http://localhost:4200/#/test/demo-scenarios/user-registration');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="user-registration"]');
@@ -182,7 +182,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
   test.describe('Profile Management', () => {
     test('should update profile information', async ({ page }) => {
       // Navigate to profile management scenario
-      await page.goto('http://localhost:4200/test/demo-scenarios/profile-management');
+      await page.goto('http://localhost:4200/#/test/demo-scenarios/profile-management');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -218,7 +218,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
 
     test('should validate password fields', async ({ page }) => {
       // Navigate to profile management scenario
-      await page.goto('http://localhost:4200/test/demo-scenarios/profile-management');
+      await page.goto('http://localhost:4200/#/test/demo-scenarios/profile-management');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="profile-management"]');
@@ -246,7 +246,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
 
     test('should handle optional newsletter subscription', async ({ page }) => {
       // Navigate to profile management scenario
-      await page.goto('http://localhost:4200/test/demo-scenarios/profile-management');
+      await page.goto('http://localhost:4200/#/test/demo-scenarios/profile-management');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="profile-management"]');
@@ -279,7 +279,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
   test.describe('Conditional Fields', () => {
     test('should handle conditional field logic', async ({ page }) => {
       // Navigate to conditional fields scenario
-      await page.goto('http://localhost:4200/test/demo-scenarios/conditional-fields');
+      await page.goto('http://localhost:4200/#/test/demo-scenarios/conditional-fields');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -313,7 +313,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
 
     test('should submit form with cascading dropdowns', async ({ page }) => {
       // Navigate to conditional fields scenario
-      await page.goto('http://localhost:4200/test/demo-scenarios/conditional-fields');
+      await page.goto('http://localhost:4200/#/test/demo-scenarios/conditional-fields');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="conditional-fields"]');

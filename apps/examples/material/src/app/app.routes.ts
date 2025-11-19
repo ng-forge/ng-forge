@@ -92,4 +92,8 @@ export default [
       },
     ],
   },
+  {
+    path: 'test',
+    loadChildren: () => import('./testing/testing-routes'),
+  },
 ] satisfies Route[];

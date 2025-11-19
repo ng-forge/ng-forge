@@ -1,5 +1,9 @@
 export default [
   {
+    path: '',
+    loadComponent: () => import('./array-fields-index.component').then((m) => m.ArrayFieldsIndexComponent),
+  },
+  {
     path: 'array-add',
     loadComponent: () => import('./array-add-test.component').then((m) => m.ArrayAddTestComponent),
     data: { title: 'Array Add Test' },

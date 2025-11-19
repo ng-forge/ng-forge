@@ -2,13 +2,13 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Navigation Edge Cases and Error Handling Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/test/navigation-edge-cases');
+    await page.goto('http://localhost:4200/#/test/navigation-edge-cases');
     await page.waitForLoadState('networkidle');
   });
 
   test.describe('Browser Navigation', () => {
     test('should handle browser back/forward button navigation in multi-page forms', async ({ page }) => {
-      await page.goto('http://localhost:4200/test/navigation-edge-cases/browser-navigation');
+      await page.goto('http://localhost:4200/#/test/navigation-edge-cases/browser-navigation');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="browser-navigation"]');
@@ -90,7 +90,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
 
   test.describe('Page Refresh', () => {
     test('should handle page refresh during multi-page form completion', async ({ page }) => {
-      await page.goto('http://localhost:4200/test/navigation-edge-cases/refresh-test');
+      await page.goto('http://localhost:4200/#/test/navigation-edge-cases/refresh-test');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="refresh-test"]');
@@ -129,7 +129,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
 
   test.describe('Rapid Navigation', () => {
     test('should handle rapid navigation clicks and prevent race conditions', async ({ page }) => {
-      await page.goto('http://localhost:4200/test/navigation-edge-cases/rapid-navigation');
+      await page.goto('http://localhost:4200/#/test/navigation-edge-cases/rapid-navigation');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="rapid-navigation"]');
@@ -185,7 +185,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
 
   test.describe('Network Interruption', () => {
     test('should handle network interruptions during page transitions', async ({ page }) => {
-      await page.goto('http://localhost:4200/test/navigation-edge-cases/network-interruption');
+      await page.goto('http://localhost:4200/#/test/navigation-edge-cases/network-interruption');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="network-interruption"]');
@@ -244,7 +244,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
 
   test.describe('Invalid Navigation', () => {
     test('should handle invalid page navigation attempts', async ({ page }) => {
-      await page.goto('http://localhost:4200/test/navigation-edge-cases/invalid-navigation');
+      await page.goto('http://localhost:4200/#/test/navigation-edge-cases/invalid-navigation');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="invalid-navigation"]');
@@ -294,7 +294,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
 
   test.describe('Form Destruction', () => {
     test('should handle form destruction and reconstruction during navigation', async ({ page }) => {
-      await page.goto('http://localhost:4200/test/navigation-edge-cases/destruction-test');
+      await page.goto('http://localhost:4200/#/test/navigation-edge-cases/destruction-test');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="destruction-test"]');

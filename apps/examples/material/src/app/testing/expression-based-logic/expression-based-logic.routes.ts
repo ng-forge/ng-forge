@@ -2,6 +2,10 @@ import { Route } from '@angular/router';
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./expression-based-logic-index.component').then((m) => m.ExpressionBasedLogicIndexComponent),
+  },
+  {
     path: 'hidden-logic',
     loadComponent: () => import('./hidden-logic-test.component').then((m) => m.HiddenLogicTestComponent),
   },

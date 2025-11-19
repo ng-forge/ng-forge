@@ -5,6 +5,10 @@ import { EnableDisableTestComponent } from './enable-disable.component';
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./cross-field-validation-index.component').then((m) => m.CrossFieldValidationIndexComponent),
+  },
+  {
     path: 'password-validation',
     component: PasswordValidationTestComponent,
     data: { testId: 'password-validation' },

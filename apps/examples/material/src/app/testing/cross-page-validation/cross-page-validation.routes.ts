@@ -6,6 +6,10 @@ import { ProgressiveValidationComponent } from './progressive-validation.compone
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./cross-page-validation-index.component').then((m) => m.CrossPageValidationIndexComponent),
+  },
+  {
     path: 'email-verification',
     component: EmailVerificationComponent,
     data: { testId: 'cross-page-email-verification' },

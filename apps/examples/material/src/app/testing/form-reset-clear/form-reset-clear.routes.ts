@@ -12,6 +12,10 @@ import { MultipleCyclesTestComponent } from './multiple-cycles-test.component';
 
 export default [
   {
+    path: '',
+    loadComponent: () => import('./form-reset-clear-index.component').then((m) => m.FormResetClearIndexComponent),
+  },
+  {
     path: 'reset-defaults',
     component: ResetDefaultsTestComponent,
   },

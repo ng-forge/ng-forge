@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Conditional Fields E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/test/cross-field-validation/conditional-fields');
+    await page.goto('http://localhost:4200/#/test/cross-field-validation/conditional-fields');
     await page.waitForLoadState('networkidle');
   });
 
