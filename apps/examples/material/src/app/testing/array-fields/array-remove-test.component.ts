@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
 
 class RemovePhonesEvent extends RemoveArrayItemEvent {
   constructor() {
@@ -57,7 +57,7 @@ export class ArrayRemoveTestComponent {
         event: RemovePhonesEvent,
       },
     ],
-  };
+  } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
     phones: [{ phone: '555-0001' }, { phone: '555-0002' }],
   });

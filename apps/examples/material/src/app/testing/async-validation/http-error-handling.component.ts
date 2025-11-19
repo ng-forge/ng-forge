@@ -1,14 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig, HttpCustomValidator } from '@ng-forge/dynamic-form';
-import type { FieldContext } from '@angular/forms/signals';
 
-const checkUsernameAvailability: HttpCustomValidator = {
-  request: (ctx: FieldContext<string>) => `/api/users/check-username?username=${encodeURIComponent(ctx.value() as string)}`,
-  onSuccess: (response: { available: boolean }, ctx: FieldContext<string>) => {
-    return response.available ? null : { kind: 'usernameTaken' };
+const checkUsernameAvailability: HttpCustomValidator<string, string> = {
+  request: (ctx) => `/api/users/check-username?username=${encodeURIComponent(ctx.value())}`,
+  onSuccess: (response: unknown) => {
+    const result = response as { available: boolean };
+    return result.available ? null : { kind: 'usernameTaken' };
   },
-  onError: (error: any, ctx: FieldContext<string>) => null, // Don't block form on network errors
+  onError: () => null, // Don't block form on network errors
 };
 
 /**
@@ -43,12 +43,12 @@ export class HttpErrorHandlingTestComponent {
     fields: [
       {
         key: 'username',
-        type: 'input' as const,
+        type: 'input',
         label: 'Username',
         required: true,
         validators: [
           {
-            type: 'customHttp' as const,
+            type: 'customHttp',
             functionName: 'checkUsernameAvailability',
           },
         ],
@@ -59,7 +59,7 @@ export class HttpErrorHandlingTestComponent {
       },
       {
         key: 'submit',
-        type: 'submit' as const,
+        type: 'submit',
         label: 'Submit',
         col: 12,
       },

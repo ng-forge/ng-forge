@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Form Destruction Test Component
@@ -36,8 +36,8 @@ export class DestructionTestComponent {
       {
         key: 'destructPage1',
         type: 'page',
-        title: 'Destruction Test Page 1',
         fields: [
+          { key: 'page-1-title', type: 'text', label: 'Page 1 title' },
           {
             key: 'destructData1',
             type: 'input',
@@ -49,8 +49,8 @@ export class DestructionTestComponent {
       {
         key: 'destructPage2',
         type: 'page',
-        title: 'Destruction Test Page 2',
         fields: [
+          { key: 'page-2-title', type: 'text', label: 'Page 2 title' },
           {
             key: 'destructData2',
             type: 'input',
@@ -66,7 +66,7 @@ export class DestructionTestComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

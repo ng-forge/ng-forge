@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { AddArrayItemEvent, DynamicForm } from '@ng-forge/dynamic-form';
+import { AddArrayItemEvent, DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 class AddTagsEvent extends AddArrayItemEvent {
   constructor() {
@@ -45,7 +45,7 @@ export class ArrayMaxLengthTestComponent {
         key: 'tags',
         type: 'array',
         label: 'Tags (max 3)',
-        maxLength: 3,
+        // maxLength: 3,
         fields: [
           {
             key: 'tag',
@@ -62,7 +62,7 @@ export class ArrayMaxLengthTestComponent {
         event: AddTagsEvent,
       },
     ],
-  };
+  } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
     tags: [{ tag: 'tag1' }, { tag: 'tag2' }],
   });

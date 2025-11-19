@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Rapid Navigation Test Component
@@ -36,8 +36,8 @@ export class RapidNavigationTestComponent {
       {
         key: 'rapidPage1',
         type: 'page',
-        title: 'Rapid Navigation Page 1',
         fields: [
+          { key: 'page-1-title', type: 'text', label: 'Page 1 title' },
           {
             key: 'rapidData1',
             type: 'input',
@@ -49,8 +49,8 @@ export class RapidNavigationTestComponent {
       {
         key: 'rapidPage2',
         type: 'page',
-        title: 'Rapid Navigation Page 2',
         fields: [
+          { key: 'page-2-title', type: 'text', label: 'Page 2 title' },
           {
             key: 'rapidData2',
             type: 'input',
@@ -62,8 +62,8 @@ export class RapidNavigationTestComponent {
       {
         key: 'rapidPage3',
         type: 'page',
-        title: 'Rapid Navigation Page 3',
         fields: [
+          { key: 'page-3-title', type: 'text', label: 'Page 3 title' },
           {
             key: 'rapidData3',
             type: 'input',
@@ -79,7 +79,7 @@ export class RapidNavigationTestComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

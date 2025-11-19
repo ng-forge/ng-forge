@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { AddArrayItemEvent, DynamicForm, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
+import { AddArrayItemEvent, DynamicForm, FormConfig, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
 
 class AddNotesEvent extends AddArrayItemEvent {
   constructor() {
@@ -74,7 +74,7 @@ export class ArrayMultipleOpsTestComponent {
         event: RemoveNotesEvent,
       },
     ],
-  };
+  } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
     notes: [{ note: 'First note' }, { note: 'Second note' }],
   });

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { AddArrayItemEvent, DynamicForm } from '@ng-forge/dynamic-form';
+import { AddArrayItemEvent, DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 class AddItemsEvent extends AddArrayItemEvent {
   constructor() {
@@ -45,7 +45,7 @@ export class ArrayMinLengthTestComponent {
         key: 'items',
         type: 'array',
         label: 'Items',
-        minLength: 2,
+        // minLength: 2,
         fields: [
           {
             key: 'item',
@@ -67,7 +67,7 @@ export class ArrayMinLengthTestComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 

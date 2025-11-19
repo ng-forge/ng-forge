@@ -1,20 +1,20 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { DynamicForm, FormConfig, HttpCustomValidator } from '@ng-forge/dynamic-form';
-import type { FieldContext } from '@angular/forms/signals';
 
-const validateEmail: HttpCustomValidator = {
-  request: (ctx: FieldContext<string>) => ({
+const validateEmail: HttpCustomValidator<string, string> = {
+  request: (ctx) => ({
     url: '/api/users/validate-email',
-    method: 'POST',
+    method: 'POST' as const,
     body: {
       email: ctx.value(),
     },
   }),
-  onSuccess: (response: { valid: boolean }, ctx: FieldContext<string>) => {
-    return response.valid ? null : { kind: 'invalidEmail' };
+  onSuccess: (response: unknown) => {
+    const result = response as { valid: boolean };
+    return result.valid ? null : { kind: 'invalidEmail' };
   },
-  onError: (error: any, ctx: FieldContext<string>) => null,
+  onError: () => null,
 };
 
 /**
@@ -49,7 +49,7 @@ export class HttpPostValidatorTestComponent {
     fields: [
       {
         key: 'email',
-        type: 'input' as const,
+        type: 'input',
         label: 'Email',
         props: {
           type: 'email',
@@ -57,7 +57,7 @@ export class HttpPostValidatorTestComponent {
         required: true,
         validators: [
           {
-            type: 'customHttp' as const,
+            type: 'customHttp',
             functionName: 'validateEmail',
           },
         ],
@@ -68,7 +68,7 @@ export class HttpPostValidatorTestComponent {
       },
       {
         key: 'submit',
-        type: 'submit' as const,
+        type: 'submit',
         label: 'Submit',
         col: 12,
       },

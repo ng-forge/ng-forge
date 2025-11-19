@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { AddArrayItemEvent, DynamicForm } from '@ng-forge/dynamic-form';
+import { AddArrayItemEvent, DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 class AddTasksEvent extends AddArrayItemEvent {
   constructor() {
@@ -62,7 +62,7 @@ export class ArrayValuesTestComponent {
         props: { color: 'primary' },
       },
     ],
-  };
+  } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 

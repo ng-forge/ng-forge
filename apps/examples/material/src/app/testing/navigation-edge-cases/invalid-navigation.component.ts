@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Invalid Navigation Test Component
@@ -36,8 +36,8 @@ export class InvalidNavigationTestComponent {
       {
         key: 'validPage1',
         type: 'page',
-        title: 'Valid Page 1',
         fields: [
+          { key: 'page-1-title', type: 'text', label: 'Page 1 title' },
           {
             key: 'requiredField',
             type: 'input',
@@ -50,8 +50,8 @@ export class InvalidNavigationTestComponent {
       {
         key: 'validPage2',
         type: 'page',
-        title: 'Valid Page 2',
         fields: [
+          { key: 'page-2-title', type: 'text', label: 'Page 2 title' },
           {
             key: 'optionalField',
             type: 'input',
@@ -67,7 +67,7 @@ export class InvalidNavigationTestComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

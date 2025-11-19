@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Network Interruption Test Component
@@ -36,8 +36,8 @@ export class NetworkInterruptionTestComponent {
       {
         key: 'networkPage1',
         type: 'page',
-        title: 'Network Test Page 1',
         fields: [
+          { key: 'page-1-title', type: 'text', label: 'Page 1 title' },
           {
             key: 'networkData1',
             type: 'textarea',
@@ -53,8 +53,8 @@ export class NetworkInterruptionTestComponent {
       {
         key: 'networkPage2',
         type: 'page',
-        title: 'Network Test Page 2',
         fields: [
+          { key: 'page-2-title', type: 'text', label: 'Page 2 title' },
           {
             key: 'networkData2',
             type: 'textarea',
@@ -74,7 +74,7 @@ export class NetworkInterruptionTestComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

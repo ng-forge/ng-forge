@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Browser Navigation Edge Case Test Component
@@ -37,9 +37,9 @@ export class BrowserNavigationTestComponent {
       {
         key: 'page1',
         type: 'page',
-        title: 'Step 1 - Browser Navigation Test',
-        description: 'Testing browser navigation behavior',
         fields: [
+          { key: 'page-1-title', type: 'text', label: 'Page 1 title' },
+          { key: 'page-1-description', type: 'text', label: 'Testing browser navigation behavior' },
           {
             key: 'step1Data',
             type: 'input',
@@ -55,8 +55,8 @@ export class BrowserNavigationTestComponent {
       {
         key: 'page2',
         type: 'page',
-        title: 'Step 2 - Browser Navigation Test',
         fields: [
+          { key: 'page-2-title', type: 'text', label: 'Page 2 title' },
           {
             key: 'step2Data',
             type: 'input',
@@ -72,8 +72,8 @@ export class BrowserNavigationTestComponent {
       {
         key: 'page3',
         type: 'page',
-        title: 'Step 3 - Browser Navigation Test',
         fields: [
+          { key: 'page-3-title', type: 'text', label: 'Page 3 title' },
           {
             key: 'step3Data',
             type: 'input',
@@ -92,7 +92,7 @@ export class BrowserNavigationTestComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

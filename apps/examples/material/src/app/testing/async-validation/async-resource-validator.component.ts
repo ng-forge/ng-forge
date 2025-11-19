@@ -1,37 +1,37 @@
-import { Component, resource, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig, HttpCustomValidator } from '@ng-forge/dynamic-form';
-import type { FieldContext } from '@angular/forms/signals';
-import { firstValueFrom, of } from 'rxjs';
+import { AsyncCustomValidator, DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 
 // Mock database of taken product codes
 const TAKEN_PRODUCT_CODES = ['PROD-001', 'PROD-002', 'PROD-123'];
 
 // Resource-based async validator (simulates database lookup)
-const checkProductCode: HttpCustomValidator = {
-  params: (ctx: FieldContext<string>) => ({ productCode: ctx.value() }),
-  factory: (params: any) => {
-    return resource({
-      loader: async () => {
-        const paramsValue = params();
-        if (!paramsValue?.productCode) return false;
-        // Simulate async database lookup with 500ms delay
+const checkProductCode: AsyncCustomValidator<string, string, boolean | undefined> = {
+  params: (ctx) => ctx.value(),
+  factory: (params) => {
+    return rxResource({
+      stream: () => {
+        const currentParams = params();
 
-        return await firstValueFrom(
-          of(paramsValue.productCode).pipe(
-            delay(500),
-            map((code) => TAKEN_PRODUCT_CODES.includes(code)),
-          ),
+        if (!currentParams) {
+          return of(false);
+        }
+        // Simulate async database lookup with 500ms delay
+        return of(currentParams).pipe(
+          delay(500),
+          map((code) => TAKEN_PRODUCT_CODES.includes(code)),
         );
       },
     });
   },
-  onSuccess: (result: any, ctx: FieldContext<string>) => {
+  onSuccess: (result: unknown) => {
     // If product code is found in the taken list, return error
     return result ? { kind: 'productCodeTaken' } : null;
   },
-  onError: (error: any, ctx: FieldContext<string>) => {
+  onError: (error: unknown) => {
     console.error('Product code check failed:', error);
     return null; // Don't block form on errors
   },

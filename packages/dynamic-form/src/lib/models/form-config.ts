@@ -311,7 +311,8 @@ export interface SignalFormsConfig {
    * }
    * ```
    */
-  asyncValidators?: Record<string, AsyncCustomValidator>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  asyncValidators?: Record<string, AsyncCustomValidator<any, any, any>>;
 
   /**
    * HTTP validators using Angular's validateHttp() API
@@ -380,7 +381,8 @@ export interface SignalFormsConfig {
    * }
    * ```
    */
-  httpValidators?: Record<string, HttpCustomValidator>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  httpValidators?: Record<string, HttpCustomValidator<any, any>>;
 
   /**
    * Strict mode for expression evaluation.
