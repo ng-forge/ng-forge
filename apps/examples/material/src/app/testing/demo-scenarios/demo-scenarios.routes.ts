@@ -1,0 +1,28 @@
+import { Routes } from '@angular/router';
+import { CrossFieldValidationScenarioComponent } from './cross-field-validation.component';
+import { ConditionalFieldsScenarioComponent } from './conditional-fields.component';
+import { UserRegistrationScenarioComponent } from './user-registration.component';
+import { ProfileManagementScenarioComponent } from './profile-management.component';
+
+/**
+ * Demo Scenarios Routes
+ * Individual routes for each demo scenario test component
+ */
+export const DEMO_SCENARIOS_ROUTES: Routes = [
+  {
+    path: 'cross-field-validation',
+    component: CrossFieldValidationScenarioComponent,
+  },
+  {
+    path: 'conditional-fields',
+    component: ConditionalFieldsScenarioComponent,
+  },
+  {
+    path: 'user-registration',
+    component: UserRegistrationScenarioComponent,
+  },
+  {
+    path: 'profile-management',
+    component: ProfileManagementScenarioComponent,
+  },
+];

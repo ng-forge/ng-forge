@@ -1,0 +1,22 @@
+<div class="test-page">
+  <h1>{{ title }}</h1>
+
+  <!-- Form Scenario -->
+  <section class="test-scenario" [attr.data-testid]="testId">
+    <h2>{{ title }}</h2>
+    <dynamic-form [config]="config" [(value)]="value" (submitted)="onSubmitted($event)" />
+
+    <details class="debug-output">
+      <summary>Debug Output</summary>
+      <pre [attr.data-testid]="'form-value-' + testId">{{ value() | json }}</pre>
+      @if (getScenarioSubmissions().length > 0) {
+      <div class="submissions">
+        <strong>Submissions:</strong>
+        @for (sub of getScenarioSubmissions(); track $index) {
+        <div [attr.data-testid]="'submission-' + $index">{{ sub.timestamp }}: {{ sub.data | json }}</div>
+        }
+      </div>
+      }
+    </details>
+  </section>
+</div>
