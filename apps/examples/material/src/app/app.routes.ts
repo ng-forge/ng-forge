@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 
-export const appRoutes: Route[] = [
+export default [
   {
     path: '',
     redirectTo: '/examples',
@@ -92,4 +92,4 @@ export const appRoutes: Route[] = [
       },
     ],
   },
-];
+] satisfies Route[];

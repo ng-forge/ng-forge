@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Hide Fields Using AND Conditional Logic
  */
 @Component({
-  selector: 'app-and-logic-test',
+  selector: 'example-and-logic-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class AndLogicTestComponent {
   config = {
@@ -69,7 +69,7 @@ export class AndLogicTestComponent {
       },
       {
         key: 'submit',
-        type: 'button',
+        type: 'submit',
         label: 'Submit',
         props: {
           type: 'submit',
@@ -78,7 +78,7 @@ export class AndLogicTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

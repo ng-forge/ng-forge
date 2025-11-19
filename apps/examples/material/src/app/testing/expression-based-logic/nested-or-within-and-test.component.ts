@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Handle Nested OR within AND Conditions
  */
 @Component({
-  selector: 'app-nested-or-within-and-test',
+  selector: 'example-nested-or-within-and-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class NestedOrWithinAndTestComponent {
   config = {
@@ -103,7 +103,7 @@ export class NestedOrWithinAndTestComponent {
       },
       {
         key: 'submit',
-        type: 'button',
+        type: 'submit',
         label: 'Submit',
         props: {
           type: 'submit',
@@ -112,7 +112,7 @@ export class NestedOrWithinAndTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

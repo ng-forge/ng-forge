@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Contact Form Workflow Test Component
  * Tests complex form with multiple field types
  */
 @Component({
-  selector: 'app-contact-form-workflow',
+  selector: 'example-contact-form-workflow',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -23,7 +23,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ContactFormWorkflowComponent {
   config = {
@@ -60,7 +60,7 @@ export class ContactFormWorkflowComponent {
         label: 'Send Message',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

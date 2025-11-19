@@ -7,7 +7,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
  * Tests error handling for invalid field configurations
  */
 @Component({
-  selector: 'app-invalid-config',
+  selector: 'example-invalid-config',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -24,7 +24,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class InvalidConfigComponent {
   testId = 'invalid-config';
@@ -59,7 +59,7 @@ export class InvalidConfigComponent {
         label: 'Submit Invalid Config',
       },
     ],
-  };
+  } as any;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

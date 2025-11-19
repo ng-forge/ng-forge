@@ -2,7 +2,7 @@ import { Route } from '@angular/router';
 import { InvalidConfigComponent } from './invalid-config.component';
 import { BasicTestComponent } from './basic-test.component';
 
-export const ERROR_HANDLING_ROUTES: Route[] = [
+export default [
   {
     path: 'invalid-config',
     component: InvalidConfigComponent,
@@ -16,4 +16,4 @@ export const ERROR_HANDLING_ROUTES: Route[] = [
     redirectTo: 'invalid-config',
     pathMatch: 'full',
   },
-];
+] satisfies Route[];

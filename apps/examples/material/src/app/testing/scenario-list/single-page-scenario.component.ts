@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Single Page Scenario Component
  * Test scenario for a basic single-page form
  */
 @Component({
-  selector: 'app-single-page-scenario',
+  selector: 'example-single-page-scenario',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </details>
     </section>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class SinglePageScenarioComponent {
   testId = 'single-page-scenario';
@@ -46,7 +46,9 @@ export class SinglePageScenarioComponent {
         key: 'description',
         type: 'textarea',
         label: 'Description',
-        rows: 4,
+        props: {
+          rows: 4,
+        },
       },
       {
         key: 'submit',
@@ -54,7 +56,7 @@ export class SinglePageScenarioComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

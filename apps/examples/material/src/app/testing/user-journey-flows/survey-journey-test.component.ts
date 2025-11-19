@@ -1,16 +1,30 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Survey Journey Test Component
  * Tests customer satisfaction survey flow across 4 pages
  */
 @Component({
-  selector: 'app-survey-journey-test',
+  selector: 'example-survey-journey-test',
   imports: [DynamicForm, JsonPipe],
-  templateUrl: '../test-component.html',
-  styleUrl: '../test-component.styles.scss',
+  template: `
+    <div class="test-page">
+      <h1>{{ title }}</h1>
+
+      <section class="test-scenario" [attr.data-testid]="testId">
+        <h2>{{ title }}</h2>
+        <dynamic-form [config]="config" [(value)]="value" (submitted)="onSubmitted($event)" />
+
+        <details class="debug-output">
+          <summary>Debug Output</summary>
+          <pre [attr.data-testid]="'form-value-' + testId">{{ value() | json }}</pre>
+        </details>
+      </section>
+    </div>
+  `,
+  styleUrl: '../test-styles.scss',
 })
 export class SurveyJourneyTestComponent {
   testId = 'survey-journey';
@@ -22,9 +36,19 @@ export class SurveyJourneyTestComponent {
       {
         key: 'introPage',
         type: 'page',
-        title: 'Customer Satisfaction Survey',
-        description: 'Help us improve by sharing your feedback',
         fields: [
+          {
+            key: 'intro-page-title',
+            type: 'text',
+            label: 'Customer Satisfaction Survey',
+            col: 12,
+          },
+          {
+            key: 'intro-page-description',
+            type: 'text',
+            label: 'Help us improve by sharing your feedback',
+            col: 12,
+          },
           {
             key: 'participantType',
             type: 'radio',
@@ -72,9 +96,19 @@ export class SurveyJourneyTestComponent {
       {
         key: 'experiencePage',
         type: 'page',
-        title: 'Your Experience',
-        description: 'Tell us about your experience with our products/services',
         fields: [
+          {
+            key: 'experience-page-title',
+            type: 'text',
+            label: 'Your Experience',
+            col: 12,
+          },
+          {
+            key: 'experience-page-description',
+            type: 'text',
+            label: 'Tell us about your experience with our products/services',
+            col: 12,
+          },
           {
             key: 'overallSatisfaction',
             type: 'radio',
@@ -136,9 +170,19 @@ export class SurveyJourneyTestComponent {
       {
         key: 'feedbackPage',
         type: 'page',
-        title: 'Feedback & Suggestions',
-        description: 'Share your thoughts and suggestions',
         fields: [
+          {
+            key: 'feedback-page-title',
+            type: 'text',
+            label: 'Feedback & Suggestions',
+            col: 12,
+          },
+          {
+            key: 'feedback-page-description',
+            type: 'text',
+            label: 'Share your thoughts and suggestions',
+            col: 12,
+          },
           {
             key: 'improvements',
             type: 'textarea',
@@ -181,7 +225,7 @@ export class SurveyJourneyTestComponent {
           },
           {
             key: 'futureInterest',
-            type: 'checkbox',
+            type: 'multi-checkbox',
             label: 'Future interests (select all that apply)',
             options: [
               { value: 'new_products', label: 'Information about new products' },
@@ -197,9 +241,19 @@ export class SurveyJourneyTestComponent {
       {
         key: 'completionPage',
         type: 'page',
-        title: 'Complete Survey',
-        description: 'Final details and survey completion',
         fields: [
+          {
+            key: 'completion-page-title',
+            type: 'text',
+            label: 'Complete Survey',
+            col: 12,
+          },
+          {
+            key: 'completion-page-description',
+            type: 'text',
+            label: 'Final details and survey completion',
+            col: 12,
+          },
           {
             key: 'followUpContact',
             type: 'checkbox',
@@ -243,7 +297,7 @@ export class SurveyJourneyTestComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

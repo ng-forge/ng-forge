@@ -1,6 +1,4 @@
-import { Routes } from '@angular/router';
-
-export const ADVANCED_VALIDATION_ROUTES: Routes = [
+export default [
   {
     path: 'custom-validator',
     loadComponent: () => import('./custom-validator-test.component').then((m) => m.CustomValidatorTestComponent),

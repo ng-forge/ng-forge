@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Profile Edit Workflow Test Component
  * Tests profile editing with pre-filled values
  */
 @Component({
-  selector: 'app-profile-edit-workflow',
+  selector: 'example-profile-edit-workflow',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -23,7 +23,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ProfileEditWorkflowComponent {
   config = {
@@ -70,7 +70,7 @@ export class ProfileEditWorkflowComponent {
         label: 'Save Changes',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

@@ -9,8 +9,22 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'example-destruction-test',
   imports: [DynamicForm, JsonPipe],
-  templateUrl: '../test-component.template.html',
-  styleUrl: '../test-component.styles.scss',
+  template: `
+    <div class="test-page">
+      <h1>{{ title }}</h1>
+
+      <section class="test-scenario" [attr.data-testid]="testId">
+        <h2>{{ title }}</h2>
+        <dynamic-form [config]="config" [(value)]="value" (submitted)="onSubmitted($event)" />
+
+        <details class="debug-output">
+          <summary>Debug Output</summary>
+          <pre [attr.data-testid]="'form-value-' + testId">{{ value() | json }}</pre>
+        </details>
+      </section>
+    </div>
+  `,
+  styleUrl: '../test-styles.scss',
 })
 export class DestructionTestComponent {
   testId = 'destruction-test';

@@ -7,7 +7,7 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
  * Tests validation across multiple fields (email/password/confirmPassword)
  */
 @Component({
-  selector: 'app-cross-field-validation-scenario',
+  selector: 'example-cross-field-validation-scenario',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -30,13 +30,13 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class CrossFieldValidationScenarioComponent {
   testId = 'cross-field-validation';
   title = 'Cross-Field Validation';
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'email',
@@ -76,7 +76,7 @@ export class CrossFieldValidationScenarioComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissions = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

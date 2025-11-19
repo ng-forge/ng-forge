@@ -1,4 +1,3 @@
-import { Routes } from '@angular/router';
 import { BrowserNavigationTestComponent } from './browser-navigation.component';
 import { RefreshTestComponent } from './refresh-test.component';
 import { RapidNavigationTestComponent } from './rapid-navigation.component';
@@ -6,7 +5,7 @@ import { NetworkInterruptionTestComponent } from './network-interruption.compone
 import { InvalidNavigationTestComponent } from './invalid-navigation.component';
 import { DestructionTestComponent } from './destruction-test.component';
 
-export const NAVIGATION_EDGE_CASES_ROUTES: Routes = [
+export default [
   {
     path: 'browser-navigation',
     component: BrowserNavigationTestComponent,

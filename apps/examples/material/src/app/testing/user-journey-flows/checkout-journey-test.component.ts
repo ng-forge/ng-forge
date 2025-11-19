@@ -1,16 +1,30 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Checkout Journey Test Component
  * Tests e-commerce checkout flow across 4 pages
  */
 @Component({
-  selector: 'app-checkout-journey-test',
+  selector: 'example-checkout-journey-test',
   imports: [DynamicForm, JsonPipe],
-  templateUrl: '../test-component.html',
-  styleUrl: '../test-component.styles.scss',
+  template: `
+    <div class="test-page">
+      <h1>{{ title }}</h1>
+
+      <section class="test-scenario" [attr.data-testid]="testId">
+        <h2>{{ title }}</h2>
+        <dynamic-form [config]="config" [(value)]="value" (submitted)="onSubmitted($event)" />
+
+        <details class="debug-output">
+          <summary>Debug Output</summary>
+          <pre [attr.data-testid]="'form-value-' + testId">{{ value() | json }}</pre>
+        </details>
+      </section>
+    </div>
+  `,
+  styleUrl: '../test-styles.scss',
 })
 export class CheckoutJourneyTestComponent {
   testId = 'checkout-journey';
@@ -22,9 +36,17 @@ export class CheckoutJourneyTestComponent {
       {
         key: 'cartPage',
         type: 'page',
-        title: 'Review Your Cart',
-        description: 'Review items and quantities before checkout',
         fields: [
+          {
+            key: 'cart-page-title',
+            type: 'text',
+            label: 'Review Your Cart',
+          },
+          {
+            key: 'cart-page-description',
+            type: 'text',
+            label: 'Review items and quantities before checkout',
+          },
           {
             key: 'itemQuantity1',
             type: 'input',
@@ -34,7 +56,8 @@ export class CheckoutJourneyTestComponent {
             },
             min: 0,
             max: 10,
-            value: 1,
+            // TODO: fix number inference for inputs
+            value: '1',
             required: true,
             col: 6,
           },
@@ -47,7 +70,7 @@ export class CheckoutJourneyTestComponent {
             },
             min: 0,
             max: 10,
-            value: 2,
+            value: '2',
             col: 6,
           },
           {
@@ -71,9 +94,18 @@ export class CheckoutJourneyTestComponent {
       {
         key: 'shippingPage',
         type: 'page',
-        title: 'Shipping Information',
-        description: 'Where should we send your order?',
+
         fields: [
+          {
+            key: 'shipping-page-title',
+            type: 'text',
+            label: 'Shipping Information',
+          },
+          {
+            key: 'shipping-page-description',
+            type: 'text',
+            label: 'Where should we send your order?',
+          },
           {
             key: 'shippingFirstName',
             type: 'input',
@@ -134,9 +166,18 @@ export class CheckoutJourneyTestComponent {
       {
         key: 'billingPage',
         type: 'page',
-        title: 'Billing & Payment',
-        description: 'Payment information and billing address',
+
         fields: [
+          {
+            key: 'billing-page-title',
+            type: 'text',
+            label: 'Billing & Payment',
+          },
+          {
+            key: 'billing-page-description',
+            type: 'text',
+            label: 'Payment information and billing address',
+          },
           {
             key: 'sameAsShipping',
             type: 'checkbox',
@@ -191,8 +232,8 @@ export class CheckoutJourneyTestComponent {
             label: 'CVV',
             props: {
               placeholder: '123',
-              maxLength: '4',
             },
+            maxLength: 4,
             pattern: '^[0-9]{3,4}$',
             required: true,
             col: 4,
@@ -209,9 +250,17 @@ export class CheckoutJourneyTestComponent {
       {
         key: 'confirmationPage',
         type: 'page',
-        title: 'Order Confirmation',
-        description: 'Review your complete order before placing',
         fields: [
+          {
+            key: 'confirmation-page-title',
+            type: 'text',
+            label: 'Order Confirmation',
+          },
+          {
+            key: 'confirmation-page-description',
+            type: 'text',
+            label: 'Review your complete order before placing',
+          },
           {
             key: 'orderNotes',
             type: 'textarea',
@@ -251,7 +300,7 @@ export class CheckoutJourneyTestComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 
-export const expressionBasedLogicRoutes: Route[] = [
+export default [
   {
     path: 'hidden-logic',
     loadComponent: () => import('./hidden-logic-test.component').then((m) => m.HiddenLogicTestComponent),
@@ -29,4 +29,4 @@ export const expressionBasedLogicRoutes: Route[] = [
     path: 'nested-or-within-and',
     loadComponent: () => import('./nested-or-within-and-test.component').then((m) => m.NestedOrWithinAndTestComponent),
   },
-];
+] satisfies Route[];

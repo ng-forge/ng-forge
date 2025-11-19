@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
-  selector: 'app-datepicker-basic',
+  selector: 'example-datepicker-basic',
   imports: [DynamicForm, JsonPipe],
   template: `
     <section class="test-scenario" data-testid="datepicker-basic">
@@ -16,7 +16,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </details>
     </section>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class DatepickerBasicComponent {
   config = {
@@ -28,7 +28,7 @@ export class DatepickerBasicComponent {
         required: true,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

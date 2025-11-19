@@ -1,11 +1,10 @@
-import { Routes } from '@angular/router';
 import { HttpGetValidatorTestComponent } from './http-get-validator.component';
 import { HttpPostValidatorTestComponent } from './http-post-validator.component';
 import { AsyncResourceValidatorTestComponent } from './async-resource-validator.component';
 import { HttpErrorHandlingTestComponent } from './http-error-handling.component';
 import { MultipleValidatorsTestComponent } from './multiple-validators.component';
 
-export const ASYNC_VALIDATION_ROUTES: Routes = [
+export default [
   {
     path: 'http-get-validator',
     component: HttpGetValidatorTestComponent,

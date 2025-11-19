@@ -1,27 +1,40 @@
-import { Component, signal } from '@angular/core';
+import { Component, resource, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import type { AsyncCustomValidator } from '@ng-forge/dynamic-form';
-import { DynamicForm } from '@ng-forge/dynamic-form';
-import { of } from 'rxjs';
+import { DynamicForm, FormConfig, HttpCustomValidator } from '@ng-forge/dynamic-form';
+import type { FieldContext } from '@angular/forms/signals';
+import { firstValueFrom, of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 
 // Mock database of taken product codes
 const TAKEN_PRODUCT_CODES = ['PROD-001', 'PROD-002', 'PROD-123'];
 
 // Resource-based async validator (simulates database lookup)
-const checkProductCode: AsyncCustomValidator = (ctx) => {
-  const productCode = ctx.value() as string;
+const checkProductCode: HttpCustomValidator = {
+  params: (ctx: FieldContext<string>) => ({ productCode: ctx.value() }),
+  factory: (params: any) => {
+    return resource({
+      loader: async () => {
+        const paramsValue = params();
+        if (!paramsValue?.productCode) return false;
+        // Simulate async database lookup with 500ms delay
 
-  // Simulate async database lookup with 500ms delay
-  return of(productCode).pipe(
-    delay(500),
-    map((code) => {
-      if (TAKEN_PRODUCT_CODES.includes(code)) {
-        return { kind: 'productCodeTaken' };
-      }
-      return null;
-    }),
-  );
+        return await firstValueFrom(
+          of(paramsValue.productCode).pipe(
+            delay(500),
+            map((code) => TAKEN_PRODUCT_CODES.includes(code)),
+          ),
+        );
+      },
+    });
+  },
+  onSuccess: (result: any, ctx: FieldContext<string>) => {
+    // If product code is found in the taken list, return error
+    return result ? { kind: 'productCodeTaken' } : null;
+  },
+  onError: (error: any, ctx: FieldContext<string>) => {
+    console.error('Product code check failed:', error);
+    return null; // Don't block form on errors
+  },
 };
 
 /**
@@ -29,7 +42,7 @@ const checkProductCode: AsyncCustomValidator = (ctx) => {
  * Tests async validation using resource-based validators (e.g., database lookups)
  */
 @Component({
-  selector: 'app-async-resource-validator-test',
+  selector: 'example-async-resource-validator-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -47,7 +60,7 @@ const checkProductCode: AsyncCustomValidator = (ctx) => {
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class AsyncResourceValidatorTestComponent {
   formValue = signal<Record<string, unknown>>({});
@@ -82,7 +95,7 @@ export class AsyncResourceValidatorTestComponent {
         checkProductCode,
       },
     },
-  };
+  } as const satisfies FormConfig;
 
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 

@@ -7,7 +7,7 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
  * Tests a standard user registration form with multiple field types
  */
 @Component({
-  selector: 'app-user-registration-scenario',
+  selector: 'example-user-registration-scenario',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -30,13 +30,13 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class UserRegistrationScenarioComponent {
   testId = 'user-registration';
   title = 'User Registration';
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'firstName',
@@ -95,7 +95,7 @@ export class UserRegistrationScenarioComponent {
         label: 'Create Account',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissions = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

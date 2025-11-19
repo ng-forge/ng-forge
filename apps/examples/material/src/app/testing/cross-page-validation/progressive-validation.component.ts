@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Progressive Cross-Page Validation Scenario
  * Tests increasing validation requirements across multiple pages
  */
 @Component({
-  selector: 'app-progressive-validation',
+  selector: 'example-progressive-validation',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -24,7 +24,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ProgressiveValidationComponent {
   value = signal<Record<string, unknown>>({});
@@ -35,8 +35,12 @@ export class ProgressiveValidationComponent {
       {
         key: 'basicPage',
         type: 'page',
-        title: 'Basic Information',
         fields: [
+          {
+            key: 'basic-page-title',
+            type: 'text',
+            label: 'Basic Information',
+          },
           {
             key: 'username',
             type: 'input',
@@ -54,8 +58,12 @@ export class ProgressiveValidationComponent {
       {
         key: 'enhancedPage',
         type: 'page',
-        title: 'Enhanced Security',
         fields: [
+          {
+            key: 'enhanced-page-title',
+            type: 'text',
+            label: 'Enhanced Security',
+          },
           {
             key: 'password',
             type: 'input',
@@ -97,8 +105,12 @@ export class ProgressiveValidationComponent {
       {
         key: 'finalValidationPage',
         type: 'page',
-        title: 'Final Verification',
         fields: [
+          {
+            key: 'final-page-title',
+            type: 'text',
+            label: 'Final Verification',
+          },
           {
             key: 'confirmUsername',
             type: 'input',
@@ -129,7 +141,7 @@ export class ProgressiveValidationComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

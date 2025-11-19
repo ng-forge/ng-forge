@@ -22,7 +22,7 @@ class AddEmailsEvent extends AddArrayItemEvent {
 @Component({
   selector: 'example-array-add-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Add Array Items</h1>

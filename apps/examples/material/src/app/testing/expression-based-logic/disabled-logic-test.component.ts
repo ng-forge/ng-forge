@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Disable Fields Using JavaScript Expressions
  */
 @Component({
-  selector: 'app-disabled-logic-test',
+  selector: 'example-disabled-logic-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class DisabledLogicTestComponent {
   config = {
@@ -49,7 +49,7 @@ export class DisabledLogicTestComponent {
       },
       {
         key: 'submit',
-        type: 'button',
+        type: 'submit',
         label: 'Submit',
         props: {
           type: 'submit',
@@ -58,7 +58,7 @@ export class DisabledLogicTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Profile Management Scenario Component
  * Test scenario for a complex profile management form with multiple sections
  */
 @Component({
-  selector: 'app-profile-management-scenario',
+  selector: 'example-profile-management-scenario',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </details>
     </section>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ProfileManagementScenarioComponent {
   testId = 'profile-management-scenario';
@@ -48,9 +48,8 @@ export class ProfileManagementScenarioComponent {
           },
           {
             key: 'dateOfBirth',
-            type: 'input',
+            type: 'datepicker',
             label: 'Date of Birth',
-            props: { type: 'date' },
           },
         ],
       },
@@ -76,7 +75,9 @@ export class ProfileManagementScenarioComponent {
             key: 'address',
             type: 'textarea',
             label: 'Address',
-            rows: 3,
+            props: {
+              rows: 3,
+            },
           },
         ],
       },
@@ -103,7 +104,7 @@ export class ProfileManagementScenarioComponent {
         label: 'Save Profile',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

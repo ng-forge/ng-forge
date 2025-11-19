@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormClearEvent, FormResetEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormClearEvent, FormConfig, FormResetEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Multiple Cycles Test Component
  * Tests multiple reset and clear cycles
  */
 @Component({
-  selector: 'app-multiple-cycles-test',
+  selector: 'example-multiple-cycles-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="multiple-cycles">
@@ -20,20 +20,20 @@ import { DynamicForm, FormClearEvent, FormResetEvent } from '@ng-forge/dynamic-f
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class MultipleCyclesTestComponent {
   config = {
     fields: [
       {
         key: 'field',
-        type: 'input' as const,
+        type: 'input',
         label: 'Field',
         value: 'Default',
       },
       {
         key: 'reset-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Reset',
         event: FormResetEvent,
         props: {
@@ -42,7 +42,7 @@ export class MultipleCyclesTestComponent {
       },
       {
         key: 'clear-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Clear',
         event: FormClearEvent,
         props: {
@@ -50,7 +50,7 @@ export class MultipleCyclesTestComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

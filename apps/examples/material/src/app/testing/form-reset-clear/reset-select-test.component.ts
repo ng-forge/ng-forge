@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormResetEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Reset Select Test Component
  * Tests resetting select fields to their default values
  */
 @Component({
-  selector: 'app-reset-select-test',
+  selector: 'example-reset-select-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="reset-select">
@@ -20,14 +20,14 @@ import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ResetSelectTestComponent {
   config = {
     fields: [
       {
         key: 'country',
-        type: 'select' as const,
+        type: 'select',
         label: 'Country',
         value: 'us',
         options: [
@@ -38,7 +38,7 @@ export class ResetSelectTestComponent {
       },
       {
         key: 'reset-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Reset',
         event: FormResetEvent,
         props: {
@@ -46,7 +46,7 @@ export class ResetSelectTestComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

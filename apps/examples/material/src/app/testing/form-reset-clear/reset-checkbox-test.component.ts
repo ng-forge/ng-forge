@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormResetEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Reset Checkbox Test Component
  * Tests resetting checkbox fields to their default values
  */
 @Component({
-  selector: 'app-reset-checkbox-test',
+  selector: 'example-reset-checkbox-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="reset-checkbox">
@@ -20,26 +20,26 @@ import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ResetCheckboxTestComponent {
   config = {
     fields: [
       {
         key: 'subscribe',
-        type: 'checkbox' as const,
+        type: 'checkbox',
         label: 'Subscribe to newsletter',
         value: true,
       },
       {
         key: 'terms',
-        type: 'checkbox' as const,
+        type: 'checkbox',
         label: 'Accept terms',
         value: false,
       },
       {
         key: 'reset-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Reset',
         event: FormResetEvent,
         props: {
@@ -47,7 +47,7 @@ export class ResetCheckboxTestComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

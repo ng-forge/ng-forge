@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Hide/Show Fields Based on fieldValue Condition
  */
 @Component({
-  selector: 'app-hidden-logic-test',
+  selector: 'example-hidden-logic-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class HiddenLogicTestComponent {
   config = {
@@ -57,7 +57,7 @@ export class HiddenLogicTestComponent {
       },
       {
         key: 'submit',
-        type: 'button',
+        type: 'submit',
         label: 'Submit',
         props: {
           type: 'submit',
@@ -66,7 +66,7 @@ export class HiddenLogicTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

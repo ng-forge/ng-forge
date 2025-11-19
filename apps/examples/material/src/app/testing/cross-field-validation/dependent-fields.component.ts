@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Dependent Field Testing Component
  * Tests dependent fields that change based on category selection
  */
 @Component({
-  selector: 'app-dependent-fields-test',
+  selector: 'example-dependent-fields-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -31,7 +31,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </div>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class DependentFieldsTestComponent {
   value = signal<Record<string, unknown>>({});
@@ -41,7 +41,7 @@ export class DependentFieldsTestComponent {
     fields: [
       {
         key: 'category',
-        type: 'select' as const,
+        type: 'select',
         label: 'Product Category',
         options: [
           { value: 'electronics', label: 'Electronics' },
@@ -53,7 +53,7 @@ export class DependentFieldsTestComponent {
       },
       {
         key: 'subcategory',
-        type: 'select' as const,
+        type: 'select',
         label: 'Subcategory',
         options: [
           { value: 'laptop', label: 'Laptop' },
@@ -70,7 +70,7 @@ export class DependentFieldsTestComponent {
       },
       {
         key: 'productName',
-        type: 'input' as const,
+        type: 'input',
         label: 'Product Name',
         props: {
           placeholder: 'Enter product name',
@@ -80,12 +80,11 @@ export class DependentFieldsTestComponent {
       },
       {
         key: 'price',
-        type: 'input' as const,
+        type: 'input',
         label: 'Price',
         props: {
           type: 'number',
           placeholder: 'Enter price',
-          step: '0.01',
         },
         min: 0,
         required: true,
@@ -93,7 +92,7 @@ export class DependentFieldsTestComponent {
       },
       {
         key: 'currency',
-        type: 'select' as const,
+        type: 'select',
         label: 'Currency',
         options: [
           { value: 'usd', label: 'USD' },
@@ -106,12 +105,12 @@ export class DependentFieldsTestComponent {
       },
       {
         key: 'submitDependent',
-        type: 'submit' as const,
+        type: 'submit',
         label: 'Add Product',
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

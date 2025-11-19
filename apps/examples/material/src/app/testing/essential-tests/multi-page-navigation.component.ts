@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Multi-Page Navigation Test Component
  * Tests form submission with multiple input fields
  */
 @Component({
-  selector: 'app-multi-page-navigation-test',
+  selector: 'example-multi-page-navigation-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -24,7 +24,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class MultiPageNavigationTestComponent {
   config = {
@@ -57,7 +57,7 @@ export class MultiPageNavigationTestComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   formValue = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

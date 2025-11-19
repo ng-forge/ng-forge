@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormResetEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Reset Workflow Test Component
  * Tests form reset functionality
  */
 @Component({
-  selector: 'app-reset-workflow',
+  selector: 'example-reset-workflow',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -23,7 +23,7 @@ import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ResetWorkflowComponent {
   config = {
@@ -61,7 +61,7 @@ export class ResetWorkflowComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 
-export const exampleRoutes: Route[] = [
+export default [
   {
     path: '',
     loadComponent: () => import('./index/index.component').then((m) => m.IndexComponent),
@@ -81,4 +81,4 @@ export const exampleRoutes: Route[] = [
     path: 'expression-validators-demo',
     loadComponent: () => import('./expression-validators-demo.component').then((m) => m.ExpressionValidatorsDemoComponent),
   },
-];
+] satisfies Route[];

@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Cross-Page Cascade Dependencies Scenario
  * Tests dependencies across multiple pages (region -> address -> payment)
  */
 @Component({
-  selector: 'app-cascade-dependencies',
+  selector: 'example-cascade-dependencies',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -24,7 +24,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class CascadeDependenciesComponent {
   value = signal<Record<string, unknown>>({});
@@ -35,9 +35,17 @@ export class CascadeDependenciesComponent {
       {
         key: 'regionPage',
         type: 'page',
-        title: 'Region Selection',
-        description: 'Select your region and preferences',
         fields: [
+          {
+            key: 'region-selection-title',
+            type: 'text',
+            label: 'Region Selection',
+          },
+          {
+            key: 'region-selection-description',
+            type: 'text',
+            label: 'Select your region and preferences',
+          },
           {
             key: 'country',
             type: 'select',
@@ -83,9 +91,18 @@ export class CascadeDependenciesComponent {
       {
         key: 'addressPage',
         type: 'page',
-        title: 'Address Information',
-        description: 'Provide your address details',
+
         fields: [
+          {
+            key: 'address-title',
+            type: 'text',
+            label: 'Address Information',
+          },
+          {
+            key: 'address-description',
+            type: 'text',
+            label: 'Provide your address details',
+          },
           {
             key: 'streetAddress',
             type: 'input',
@@ -136,9 +153,17 @@ export class CascadeDependenciesComponent {
       {
         key: 'paymentPage',
         type: 'page',
-        title: 'Payment Information',
-        description: 'Set up your payment preferences',
         fields: [
+          {
+            key: 'payment-title',
+            type: 'text',
+            label: 'Payment Information',
+          },
+          {
+            key: 'payment-description',
+            type: 'text',
+            label: 'Set up your payment preferences',
+          },
           {
             key: 'paymentMethod',
             type: 'radio',
@@ -173,7 +198,7 @@ export class CascadeDependenciesComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

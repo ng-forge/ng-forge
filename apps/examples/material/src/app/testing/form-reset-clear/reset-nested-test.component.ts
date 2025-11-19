@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormResetEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Reset Nested Test Component
  * Tests resetting nested group fields
  */
 @Component({
-  selector: 'app-reset-nested-test',
+  selector: 'example-reset-nested-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="reset-nested">
@@ -20,25 +20,25 @@ import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ResetNestedTestComponent {
   config = {
     fields: [
       {
         key: 'userInfo',
-        type: 'group' as const,
+        type: 'group',
         label: 'User Information',
         fields: [
           {
             key: 'firstName',
-            type: 'input' as const,
+            type: 'input',
             label: 'First Name',
             value: 'John',
           },
           {
             key: 'lastName',
-            type: 'input' as const,
+            type: 'input',
             label: 'Last Name',
             value: 'Doe',
           },
@@ -46,7 +46,7 @@ export class ResetNestedTestComponent {
       },
       {
         key: 'reset-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Reset',
         event: FormResetEvent,
         props: {
@@ -54,7 +54,7 @@ export class ResetNestedTestComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

@@ -1,16 +1,30 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Registration Journey Test Component
  * Tests complete user registration flow across 5 pages
  */
 @Component({
-  selector: 'app-registration-journey-test',
+  selector: 'example-registration-journey-test',
   imports: [DynamicForm, JsonPipe],
-  templateUrl: '../test-component.html',
-  styleUrl: '../test-component.styles.scss',
+  template: `
+    <div class="test-page">
+      <h1>{{ title }}</h1>
+
+      <section class="test-scenario" [attr.data-testid]="testId">
+        <h2>{{ title }}</h2>
+        <dynamic-form [config]="config" [(value)]="value" (submitted)="onSubmitted($event)" />
+
+        <details class="debug-output">
+          <summary>Debug Output</summary>
+          <pre [attr.data-testid]="'form-value-' + testId">{{ value() | json }}</pre>
+        </details>
+      </section>
+    </div>
+  `,
+  styleUrl: '../test-styles.scss',
 })
 export class RegistrationJourneyTestComponent {
   testId = 'registration-journey';
@@ -22,9 +36,19 @@ export class RegistrationJourneyTestComponent {
       {
         key: 'welcomePage',
         type: 'page',
-        title: 'Welcome to Our Platform',
-        description: "Let's get you started with creating your account",
         fields: [
+          {
+            key: 'welcome-page-title',
+            type: 'text',
+            label: 'Welcome to Our Platform',
+            col: 12,
+          },
+          {
+            key: 'welcome-page-description',
+            type: 'text',
+            label: "Let's get you started with creating your account",
+            col: 12,
+          },
           {
             key: 'accountPurpose',
             type: 'radio',
@@ -57,9 +81,19 @@ export class RegistrationJourneyTestComponent {
       {
         key: 'personalInfoPage',
         type: 'page',
-        title: 'Personal Information',
-        description: 'Please provide your personal details',
         fields: [
+          {
+            key: 'personal-info-page-title',
+            type: 'text',
+            label: 'Personal Information',
+            col: 12,
+          },
+          {
+            key: 'personal-info-page-description',
+            type: 'text',
+            label: 'Please provide your personal details',
+            col: 12,
+          },
           {
             key: 'firstName',
             type: 'input',
@@ -105,11 +139,8 @@ export class RegistrationJourneyTestComponent {
           },
           {
             key: 'birthDate',
-            type: 'input',
+            type: 'datepicker',
             label: 'Date of Birth',
-            props: {
-              type: 'date',
-            },
             required: true,
             col: 6,
           },
@@ -119,9 +150,19 @@ export class RegistrationJourneyTestComponent {
       {
         key: 'addressPage',
         type: 'page',
-        title: 'Address Information',
-        description: 'Where can we reach you?',
         fields: [
+          {
+            key: 'address-page-title',
+            type: 'text',
+            label: 'Address Information',
+            col: 12,
+          },
+          {
+            key: 'address-page-description',
+            type: 'text',
+            label: 'Where can we reach you?',
+            col: 12,
+          },
           {
             key: 'streetAddress',
             type: 'input',
@@ -187,9 +228,19 @@ export class RegistrationJourneyTestComponent {
       {
         key: 'securityPage',
         type: 'page',
-        title: 'Security & Preferences',
-        description: 'Secure your account and set preferences',
         fields: [
+          {
+            key: 'security-page-title',
+            type: 'text',
+            label: 'Security & Preferences',
+            col: 12,
+          },
+          {
+            key: 'security-page-description',
+            type: 'text',
+            label: 'Secure your account and set preferences',
+            col: 12,
+          },
           {
             key: 'password',
             type: 'input',
@@ -260,9 +311,19 @@ export class RegistrationJourneyTestComponent {
       {
         key: 'reviewPage',
         type: 'page',
-        title: 'Review & Submit',
-        description: 'Please review your information and complete registration',
         fields: [
+          {
+            key: 'review-page-title',
+            type: 'text',
+            label: 'Review & Submit',
+            col: 12,
+          },
+          {
+            key: 'review-page-description',
+            type: 'text',
+            label: 'Please review your information and complete registration',
+            col: 12,
+          },
           {
             key: 'dataAccuracy',
             type: 'checkbox',
@@ -293,7 +354,7 @@ export class RegistrationJourneyTestComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

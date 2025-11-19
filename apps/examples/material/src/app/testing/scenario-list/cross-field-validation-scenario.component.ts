@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Cross-Field Validation Scenario Component
  * Test scenario for validating fields in relation to other fields
  */
 @Component({
-  selector: 'app-cross-field-validation-scenario',
+  selector: 'example-cross-field-validation-scenario',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </details>
     </section>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class CrossFieldValidationScenarioComponent {
   testId = 'cross-field-validation-scenario';
@@ -50,7 +50,7 @@ export class CrossFieldValidationScenarioComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

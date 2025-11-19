@@ -1,11 +1,10 @@
-import { Routes } from '@angular/router';
 import { EmailVerificationComponent } from './email-verification.component';
 import { ConditionalPagesComponent } from './conditional-pages.component';
 import { BusinessFlowComponent } from './business-flow.component';
 import { CascadeDependenciesComponent } from './cascade-dependencies.component';
 import { ProgressiveValidationComponent } from './progressive-validation.component';
 
-export const CROSS_PAGE_VALIDATION_ROUTES: Routes = [
+export default [
   {
     path: 'email-verification',
     component: EmailVerificationComponent,

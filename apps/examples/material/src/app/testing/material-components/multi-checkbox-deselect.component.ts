@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 @Component({
-  selector: 'app-multi-checkbox-deselect',
+  selector: 'example-multi-checkbox-deselect',
   imports: [DynamicForm, JsonPipe],
   template: `
     <section class="test-scenario" data-testid="multi-checkbox-deselect">
@@ -16,7 +16,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </details>
     </section>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class MultiCheckboxDeselectComponent {
   config = {
@@ -33,7 +33,7 @@ export class MultiCheckboxDeselectComponent {
         value: ['read', 'write'],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({
     permissions: ['read', 'write'],

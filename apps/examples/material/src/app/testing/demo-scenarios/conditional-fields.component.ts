@@ -7,7 +7,7 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
  * Tests conditional field visibility and state management based on form inputs
  */
 @Component({
-  selector: 'app-conditional-fields-scenario',
+  selector: 'example-conditional-fields-scenario',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -30,13 +30,13 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ConditionalFieldsScenarioComponent {
   testId = 'conditional-fields';
   title = 'Conditional Fields';
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'age',
@@ -89,7 +89,7 @@ export class ConditionalFieldsScenarioComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissions = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

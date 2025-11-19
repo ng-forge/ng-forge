@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Business Account Flow Scenario
  * Tests business account creation workflow with multiple pages
  */
 @Component({
-  selector: 'app-business-flow',
+  selector: 'example-business-flow',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -24,7 +24,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class BusinessFlowComponent {
   value = signal<Record<string, unknown>>({});
@@ -34,8 +34,12 @@ export class BusinessFlowComponent {
       {
         key: 'accountTypePage',
         type: 'page',
-        title: 'Account Type',
         fields: [
+          {
+            key: 'account-type-title',
+            type: 'text',
+            label: 'Account Type',
+          },
           {
             key: 'accountType',
             type: 'radio',
@@ -53,8 +57,12 @@ export class BusinessFlowComponent {
       {
         key: 'businessPage',
         type: 'page',
-        title: 'Business Information',
         fields: [
+          {
+            key: 'business-information-page',
+            type: 'text',
+            label: 'Business Information',
+          },
           {
             key: 'businessName',
             type: 'input',
@@ -81,8 +89,12 @@ export class BusinessFlowComponent {
       {
         key: 'finalPage',
         type: 'page',
-        title: 'Final Confirmation',
         fields: [
+          {
+            key: 'final-page-title',
+            type: 'text',
+            label: 'Final Confirmation',
+          },
           {
             key: 'submitBusiness',
             type: 'submit',
@@ -92,7 +104,7 @@ export class BusinessFlowComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

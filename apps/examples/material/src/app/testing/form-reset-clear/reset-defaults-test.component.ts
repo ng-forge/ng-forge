@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormResetEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Reset Defaults Test Component
  * Tests resetting form fields to their default values
  */
 @Component({
-  selector: 'app-reset-defaults-test',
+  selector: 'example-reset-defaults-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="reset-defaults">
@@ -20,28 +20,28 @@ import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ResetDefaultsTestComponent {
   config = {
     fields: [
       {
         key: 'firstName',
-        type: 'input' as const,
+        type: 'input',
         label: 'First Name',
         value: 'John',
         col: 6,
       },
       {
         key: 'lastName',
-        type: 'input' as const,
+        type: 'input',
         label: 'Last Name',
         value: 'Doe',
         col: 6,
       },
       {
         key: 'email',
-        type: 'input' as const,
+        type: 'input',
         label: 'Email',
         value: 'john.doe@example.com',
         props: {
@@ -50,7 +50,7 @@ export class ResetDefaultsTestComponent {
       },
       {
         key: 'reset-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Reset to Defaults',
         event: FormResetEvent,
         props: {
@@ -58,7 +58,7 @@ export class ResetDefaultsTestComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

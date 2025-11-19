@@ -1,11 +1,10 @@
-import { Routes } from '@angular/router';
 import { SinglePageScenarioComponent } from './single-page-scenario.component';
 import { MultiPageScenarioComponent } from './multi-page-scenario.component';
 import { CrossFieldValidationScenarioComponent } from './cross-field-validation-scenario.component';
 import { UserRegistrationScenarioComponent } from './user-registration-scenario.component';
 import { ProfileManagementScenarioComponent } from './profile-management-scenario.component';
 
-export const scenarioListRoutes: Routes = [
+export default [
   {
     path: 'single-page',
     component: SinglePageScenarioComponent,

@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Password Confirmation Validation Test Component
  * Tests cross-field validation with password matching
  */
 @Component({
-  selector: 'app-password-validation-test',
+  selector: 'example-password-validation-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -31,7 +31,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </div>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class PasswordValidationTestComponent {
   value = signal<Record<string, unknown>>({});
@@ -41,7 +41,7 @@ export class PasswordValidationTestComponent {
     fields: [
       {
         key: 'password',
-        type: 'input' as const,
+        type: 'input',
         label: 'Password',
         props: {
           type: 'password',
@@ -53,7 +53,7 @@ export class PasswordValidationTestComponent {
       },
       {
         key: 'confirmPassword',
-        type: 'input' as const,
+        type: 'input',
         label: 'Confirm Password',
         props: {
           type: 'password',
@@ -63,15 +63,17 @@ export class PasswordValidationTestComponent {
         col: 6,
         validators: [
           {
-            type: 'custom' as const,
-            name: 'passwordMatch',
-            message: 'Passwords must match',
+            type: 'custom',
+            functionName: 'passwordMatch',
           },
         ],
+        validationMessages: {
+          custom: 'Passwords must match',
+        },
       },
       {
         key: 'email',
-        type: 'input' as const,
+        type: 'input',
         label: 'Email',
         props: {
           type: 'email',
@@ -83,12 +85,12 @@ export class PasswordValidationTestComponent {
       },
       {
         key: 'submitPassword',
-        type: 'submit' as const,
+        type: 'submit',
         label: 'Create Account',
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Array Initial Values Test Component
@@ -9,7 +9,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'example-array-initial-values-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Initial Values</h1>
@@ -50,11 +50,11 @@ export class ArrayInitialValuesTestComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
     contacts: [
-      { name: 'Alice', email: 'alice@example.com' },
-      { name: 'Bob', email: 'bob@example.com' },
+      { functionName: 'Alice', email: 'alice@example.com' },
+      { functionName: 'Bob', email: 'bob@example.com' },
     ],
   });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

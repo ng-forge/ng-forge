@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * User Registration Scenario Component
  * Test scenario for a user registration form
  */
 @Component({
-  selector: 'app-user-registration-scenario',
+  selector: 'example-user-registration-scenario',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </details>
     </section>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class UserRegistrationScenarioComponent {
   testId = 'user-registration-scenario';
@@ -64,7 +64,7 @@ export class UserRegistrationScenarioComponent {
         label: 'Register',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

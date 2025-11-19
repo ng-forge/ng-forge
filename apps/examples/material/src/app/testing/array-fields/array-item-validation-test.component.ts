@@ -33,7 +33,7 @@ class AddMembersEvent extends AddArrayItemEvent {
 @Component({
   selector: 'example-array-item-validation-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Item Validation</h1>

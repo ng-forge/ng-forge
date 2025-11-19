@@ -1,15 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import type { HttpCustomValidator } from '@ng-forge/dynamic-form';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, HttpCustomValidator } from '@ng-forge/dynamic-form';
+import type { FieldContext } from '@angular/forms/signals';
 
 const checkUsernameAvailability: HttpCustomValidator = {
-  url: (ctx) => `/api/users/check-username?username=${encodeURIComponent(ctx.value() as string)}`,
-  method: 'GET',
-  mapResponse: (response) => {
+  request: (ctx: FieldContext<string>) => `/api/users/check-username?username=${encodeURIComponent(ctx.value() as string)}`,
+  onSuccess: (response: { available: boolean }, ctx: FieldContext<string>) => {
     return response.available ? null : { kind: 'usernameTaken' };
   },
-  onError: () => null, // Don't block form on network errors
+  onError: (error: any, ctx: FieldContext<string>) => null, // Don't block form on network errors
 };
 
 /**
@@ -17,7 +16,7 @@ const checkUsernameAvailability: HttpCustomValidator = {
  * Tests async validation using HTTP GET requests
  */
 @Component({
-  selector: 'app-http-get-validator-test',
+  selector: 'example-http-get-validator-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -35,7 +34,7 @@ const checkUsernameAvailability: HttpCustomValidator = {
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class HttpGetValidatorTestComponent {
   formValue = signal<Record<string, unknown>>({});
@@ -44,12 +43,12 @@ export class HttpGetValidatorTestComponent {
     fields: [
       {
         key: 'username',
-        type: 'input',
+        type: 'input' as const,
         label: 'Username',
         required: true,
         validators: [
           {
-            type: 'customHttp',
+            type: 'customHttp' as const,
             functionName: 'checkUsernameAvailability',
           },
         ],
@@ -60,7 +59,7 @@ export class HttpGetValidatorTestComponent {
       },
       {
         key: 'submit',
-        type: 'submit',
+        type: 'submit' as const,
         label: 'Submit',
         col: 12,
       },
@@ -70,7 +69,7 @@ export class HttpGetValidatorTestComponent {
         checkUsernameAvailability,
       },
     },
-  };
+  } as const satisfies FormConfig;
 
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 

@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormClearEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormClearEvent, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Clear All Test Component
  * Tests clearing all form fields
  */
 @Component({
-  selector: 'app-clear-all-test',
+  selector: 'example-clear-all-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="clear-all">
@@ -20,26 +20,26 @@ import { DynamicForm, FormClearEvent } from '@ng-forge/dynamic-form';
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ClearAllTestComponent {
   config = {
     fields: [
       {
         key: 'firstName',
-        type: 'input' as const,
+        type: 'input',
         label: 'First Name',
         // No default value - user must fill it
       },
       {
         key: 'lastName',
-        type: 'input' as const,
+        type: 'input',
         label: 'Last Name',
         // No default value - user must fill it
       },
       {
         key: 'email',
-        type: 'input' as const,
+        type: 'input',
         label: 'Email',
         props: {
           type: 'email',
@@ -48,7 +48,7 @@ export class ClearAllTestComponent {
       },
       {
         key: 'clear-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Clear All',
         event: FormClearEvent,
         props: {
@@ -56,7 +56,7 @@ export class ClearAllTestComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

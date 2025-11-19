@@ -1,18 +1,20 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import type { HttpCustomValidator } from '@ng-forge/dynamic-form';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, HttpCustomValidator } from '@ng-forge/dynamic-form';
+import type { FieldContext } from '@angular/forms/signals';
 
 const validateEmail: HttpCustomValidator = {
-  url: '/api/users/validate-email',
-  method: 'POST',
-  body: (ctx) => ({
-    email: ctx.value(),
+  request: (ctx: FieldContext<string>) => ({
+    url: '/api/users/validate-email',
+    method: 'POST',
+    body: {
+      email: ctx.value(),
+    },
   }),
-  mapResponse: (response) => {
+  onSuccess: (response: { valid: boolean }, ctx: FieldContext<string>) => {
     return response.valid ? null : { kind: 'invalidEmail' };
   },
-  onError: () => null,
+  onError: (error: any, ctx: FieldContext<string>) => null,
 };
 
 /**
@@ -20,7 +22,7 @@ const validateEmail: HttpCustomValidator = {
  * Tests async validation using HTTP POST requests
  */
 @Component({
-  selector: 'app-http-post-validator-test',
+  selector: 'example-http-post-validator-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -38,7 +40,7 @@ const validateEmail: HttpCustomValidator = {
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class HttpPostValidatorTestComponent {
   formValue = signal<Record<string, unknown>>({});
@@ -47,7 +49,7 @@ export class HttpPostValidatorTestComponent {
     fields: [
       {
         key: 'email',
-        type: 'input',
+        type: 'input' as const,
         label: 'Email',
         props: {
           type: 'email',
@@ -55,7 +57,7 @@ export class HttpPostValidatorTestComponent {
         required: true,
         validators: [
           {
-            type: 'customHttp',
+            type: 'customHttp' as const,
             functionName: 'validateEmail',
           },
         ],
@@ -66,7 +68,7 @@ export class HttpPostValidatorTestComponent {
       },
       {
         key: 'submit',
-        type: 'submit',
+        type: 'submit' as const,
         label: 'Submit',
         col: 12,
       },
@@ -76,7 +78,7 @@ export class HttpPostValidatorTestComponent {
         validateEmail,
       },
     },
-  };
+  } as const satisfies FormConfig;
 
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 

@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormClearEvent, FormResetEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormClearEvent, FormConfig, FormResetEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Required Reset Clear Test Component
  * Tests reset and clear behavior with required form fields
  */
 @Component({
-  selector: 'app-required-reset-clear-test',
+  selector: 'example-required-reset-clear-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="required-reset-clear">
@@ -20,21 +20,21 @@ import { DynamicForm, FormClearEvent, FormResetEvent } from '@ng-forge/dynamic-f
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class RequiredResetClearTestComponent {
   config = {
     fields: [
       {
         key: 'requiredField',
-        type: 'input' as const,
+        type: 'input',
         label: 'Required Field',
         value: 'Initial Value',
         required: true,
       },
       {
         key: 'reset-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Reset',
         event: FormResetEvent,
         props: {
@@ -43,7 +43,7 @@ export class RequiredResetClearTestComponent {
       },
       {
         key: 'clear-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Clear',
         event: FormClearEvent,
         props: {
@@ -52,11 +52,11 @@ export class RequiredResetClearTestComponent {
       },
       {
         key: 'submit',
-        type: 'submit' as const,
+        type: 'submit',
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

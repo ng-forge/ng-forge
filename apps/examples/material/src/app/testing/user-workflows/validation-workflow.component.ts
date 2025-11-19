@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Validation Workflow Test Component
  * Tests multi-field validation with various constraints
  */
 @Component({
-  selector: 'app-validation-workflow',
+  selector: 'example-validation-workflow',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -23,7 +23,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ValidationWorkflowComponent {
   config = {
@@ -62,7 +62,7 @@ export class ValidationWorkflowComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

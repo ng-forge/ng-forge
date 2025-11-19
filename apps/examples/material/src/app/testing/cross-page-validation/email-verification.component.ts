@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Cross-Page Email Verification Scenario
  * Tests email collection, personal info, and confirmation across multiple pages
  */
 @Component({
-  selector: 'app-email-verification',
+  selector: 'example-email-verification',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -24,7 +24,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class EmailVerificationComponent {
   value = signal<Record<string, unknown>>({});
@@ -184,7 +184,7 @@ export class EmailVerificationComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

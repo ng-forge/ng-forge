@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormClearEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormClearEvent, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Clear Select Test Component
  * Tests clearing select fields
  */
 @Component({
-  selector: 'app-clear-select-test',
+  selector: 'example-clear-select-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="clear-select">
@@ -20,14 +20,14 @@ import { DynamicForm, FormClearEvent } from '@ng-forge/dynamic-form';
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ClearSelectTestComponent {
   config = {
     fields: [
       {
         key: 'language',
-        type: 'select' as const,
+        type: 'select',
         label: 'Preferred Language',
         options: [
           { value: 'en', label: 'English' },
@@ -38,7 +38,7 @@ export class ClearSelectTestComponent {
       },
       {
         key: 'clear-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Clear',
         event: FormClearEvent,
         props: {
@@ -46,7 +46,7 @@ export class ClearSelectTestComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

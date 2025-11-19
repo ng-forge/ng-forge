@@ -1,10 +1,9 @@
-import { Routes } from '@angular/router';
 import { PasswordValidationTestComponent } from './password-validation.component';
 import { ConditionalFieldsTestComponent } from './conditional-fields.component';
 import { DependentFieldsTestComponent } from './dependent-fields.component';
 import { EnableDisableTestComponent } from './enable-disable.component';
 
-export const CROSS_FIELD_VALIDATION_ROUTES: Routes = [
+export default [
   {
     path: 'password-validation',
     component: PasswordValidationTestComponent,

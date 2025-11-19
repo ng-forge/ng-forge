@@ -3,7 +3,7 @@ import { RegistrationJourneyTestComponent } from './registration-journey-test.co
 import { CheckoutJourneyTestComponent } from './checkout-journey-test.component';
 import { SurveyJourneyTestComponent } from './survey-journey-test.component';
 
-export const USER_JOURNEY_FLOWS_ROUTES: Route[] = [
+export default [
   {
     path: 'registration-journey',
     component: RegistrationJourneyTestComponent,
@@ -21,4 +21,4 @@ export const USER_JOURNEY_FLOWS_ROUTES: Route[] = [
     redirectTo: 'registration-journey',
     pathMatch: 'full',
   },
-];
+] satisfies Route[];

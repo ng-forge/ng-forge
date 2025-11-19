@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Conditional Field Validation Test Component
  * Tests conditional field requirements based on checkbox selection
  */
 @Component({
-  selector: 'app-conditional-fields-test',
+  selector: 'example-conditional-fields-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -31,7 +31,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </div>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ConditionalFieldsTestComponent {
   value = signal<Record<string, unknown>>({});
@@ -41,13 +41,13 @@ export class ConditionalFieldsTestComponent {
     fields: [
       {
         key: 'hasAddress',
-        type: 'checkbox' as const,
+        type: 'checkbox',
         label: 'I have a different billing address',
         col: 12,
       },
       {
         key: 'streetAddress',
-        type: 'input' as const,
+        type: 'input',
         label: 'Street Address',
         props: {
           placeholder: 'Enter street address',
@@ -56,7 +56,7 @@ export class ConditionalFieldsTestComponent {
       },
       {
         key: 'city',
-        type: 'input' as const,
+        type: 'input',
         label: 'City',
         props: {
           placeholder: 'Enter city',
@@ -65,7 +65,7 @@ export class ConditionalFieldsTestComponent {
       },
       {
         key: 'zipCode',
-        type: 'input' as const,
+        type: 'input',
         label: 'ZIP Code',
         props: {
           placeholder: 'Enter ZIP code',
@@ -75,7 +75,7 @@ export class ConditionalFieldsTestComponent {
       },
       {
         key: 'country',
-        type: 'select' as const,
+        type: 'select',
         label: 'Country',
         options: [
           { value: 'us', label: 'United States' },
@@ -87,12 +87,12 @@ export class ConditionalFieldsTestComponent {
       },
       {
         key: 'submitConditional',
-        type: 'submit' as const,
+        type: 'submit',
         label: 'Submit Address',
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

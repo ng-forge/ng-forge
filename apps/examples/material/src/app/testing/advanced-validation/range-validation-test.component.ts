@@ -9,7 +9,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'example-range-validation-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Range Validation Test</h1>
@@ -30,7 +30,7 @@ export class RangeValidationTestComponent {
   title = 'Range Validation Test';
   description = 'Maximum value must be greater than minimum value';
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'minValue',
@@ -53,8 +53,8 @@ export class RangeValidationTestComponent {
         validators: [
           {
             type: 'custom',
-            name: 'greaterThanMin',
-            message: 'Maximum must be greater than minimum',
+            functionName: 'greaterThanMin',
+            errorMessage: 'Maximum must be greater than minimum',
           },
         ],
         col: 6,
@@ -66,7 +66,7 @@ export class RangeValidationTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

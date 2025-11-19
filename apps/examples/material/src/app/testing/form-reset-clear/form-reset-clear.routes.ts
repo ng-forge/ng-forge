@@ -1,4 +1,3 @@
-import { Routes } from '@angular/router';
 import { ResetDefaultsTestComponent } from './reset-defaults-test.component';
 import { ResetSelectTestComponent } from './reset-select-test.component';
 import { ResetCheckboxTestComponent } from './reset-checkbox-test.component';
@@ -11,7 +10,7 @@ import { RequiredResetClearTestComponent } from './required-reset-clear-test.com
 import { ResetNestedTestComponent } from './reset-nested-test.component';
 import { MultipleCyclesTestComponent } from './multiple-cycles-test.component';
 
-export const formResetClearRoutes: Routes = [
+export default [
   {
     path: 'reset-defaults',
     component: ResetDefaultsTestComponent,

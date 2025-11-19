@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Make Fields Readonly Using Conditional Logic
  */
 @Component({
-  selector: 'app-readonly-logic-test',
+  selector: 'example-readonly-logic-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ReadonlyLogicTestComponent {
   config = {
@@ -50,7 +50,7 @@ export class ReadonlyLogicTestComponent {
       },
       {
         key: 'submit',
-        type: 'button',
+        type: 'submit',
         label: 'Submit',
         props: {
           type: 'submit',
@@ -59,7 +59,7 @@ export class ReadonlyLogicTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

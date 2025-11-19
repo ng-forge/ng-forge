@@ -7,7 +7,7 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
  * Tests a profile management form with password change and optional fields
  */
 @Component({
-  selector: 'app-profile-management-scenario',
+  selector: 'example-profile-management-scenario',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -30,13 +30,13 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ProfileManagementScenarioComponent {
   testId = 'profile-management';
   title = 'Profile Management';
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'username',
@@ -95,7 +95,7 @@ export class ProfileManagementScenarioComponent {
         label: 'Update Profile',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissions = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

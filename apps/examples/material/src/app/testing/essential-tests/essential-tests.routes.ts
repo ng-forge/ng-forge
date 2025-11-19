@@ -1,9 +1,8 @@
-import { Routes } from '@angular/router';
 import { BasicFormTestComponent } from './basic-form.component';
 import { AgeBasedLogicTestComponent } from './age-based-logic.component';
 import { MultiPageNavigationTestComponent } from './multi-page-navigation.component';
 
-export const ESSENTIAL_TESTS_ROUTES: Routes = [
+export default [
   {
     path: 'basic-form',
     component: BasicFormTestComponent,

@@ -9,7 +9,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'example-multiple-validators-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Multiple Validators Test</h1>
@@ -30,7 +30,7 @@ export class MultipleValidatorsTestComponent {
   title = 'Multiple Validators Test';
   description = 'Username must be 3-20 characters, alphanumeric with underscores, and not "admin" or "root"';
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'username',
@@ -43,8 +43,8 @@ export class MultipleValidatorsTestComponent {
         validators: [
           {
             type: 'custom',
-            name: 'noReservedWords',
-            message: 'Username cannot be "admin" or "root"',
+            functionName: 'noReservedWords',
+            errorMessage: 'Username cannot be "admin" or "root"',
           },
         ],
         col: 12,
@@ -56,7 +56,7 @@ export class MultipleValidatorsTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

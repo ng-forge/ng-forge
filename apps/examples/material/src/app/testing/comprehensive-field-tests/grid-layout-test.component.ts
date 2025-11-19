@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Grid Layout Testing Component
  * Tests responsive grid system with various column configurations
  */
 @Component({
-  selector: 'app-grid-layout-test',
+  selector: 'example-grid-layout-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -33,7 +33,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class GridLayoutTestComponent {
   value = signal<Record<string, unknown>>({});
@@ -138,7 +138,7 @@ export class GridLayoutTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Registration Workflow Test Component
  * Tests user registration form with validation
  */
 @Component({
-  selector: 'app-registration-workflow',
+  selector: 'example-registration-workflow',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -23,7 +23,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class RegistrationWorkflowComponent {
   config = {
@@ -86,7 +86,7 @@ export class RegistrationWorkflowComponent {
         label: 'Register',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

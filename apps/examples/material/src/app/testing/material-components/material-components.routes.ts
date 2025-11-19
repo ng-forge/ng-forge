@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 
-export const materialComponentsRoutes: Route[] = [
+export default [
   {
     path: 'datepicker-basic',
     loadComponent: () => import('./datepicker-basic.component').then((m) => m.DatepickerBasicComponent),
@@ -81,4 +81,4 @@ export const materialComponentsRoutes: Route[] = [
     path: 'multi-checkbox-validation',
     loadComponent: () => import('./multi-checkbox-validation.component').then((m) => m.MultiCheckboxValidationComponent),
   },
-];
+] satisfies Route[];

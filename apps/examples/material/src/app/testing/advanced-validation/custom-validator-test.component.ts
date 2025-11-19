@@ -9,7 +9,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'example-custom-validator-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Custom Validator Test</h1>
@@ -30,7 +30,7 @@ export class CustomValidatorTestComponent {
   title = 'Custom Validator Test';
   description = 'Password must contain uppercase, lowercase, number and special character';
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'password',
@@ -44,8 +44,8 @@ export class CustomValidatorTestComponent {
         validators: [
           {
             type: 'custom',
-            name: 'strongPassword',
-            message: 'Password must contain uppercase, lowercase, number and special character',
+            functionName: 'strongPassword',
+            errorMessage: 'Password must contain uppercase, lowercase, number and special character',
           },
         ],
         col: 12,
@@ -57,7 +57,7 @@ export class CustomValidatorTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

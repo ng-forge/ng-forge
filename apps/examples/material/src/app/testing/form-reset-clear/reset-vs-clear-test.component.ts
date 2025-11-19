@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormClearEvent, FormResetEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormClearEvent, FormConfig, FormResetEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Reset vs Clear Test Component
  * Tests the differences in behavior between reset and clear operations
  */
 @Component({
-  selector: 'app-reset-vs-clear-test',
+  selector: 'example-reset-vs-clear-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="reset-vs-clear">
@@ -20,20 +20,20 @@ import { DynamicForm, FormClearEvent, FormResetEvent } from '@ng-forge/dynamic-f
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ResetVsClearTestComponent {
   config = {
     fields: [
       {
         key: 'name',
-        type: 'input' as const,
+        type: 'input',
         label: 'Name',
         value: 'Default Name',
       },
       {
         key: 'email',
-        type: 'input' as const,
+        type: 'input',
         label: 'Email (no default)',
         props: {
           type: 'email',
@@ -42,7 +42,7 @@ export class ResetVsClearTestComponent {
       },
       {
         key: 'reset-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Reset',
         event: FormResetEvent,
         props: {
@@ -51,7 +51,7 @@ export class ResetVsClearTestComponent {
       },
       {
         key: 'clear-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Clear',
         event: FormClearEvent,
         props: {
@@ -59,7 +59,7 @@ export class ResetVsClearTestComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

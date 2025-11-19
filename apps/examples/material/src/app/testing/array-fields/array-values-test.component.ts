@@ -19,7 +19,7 @@ class AddTasksEvent extends AddArrayItemEvent {
 @Component({
   selector: 'example-array-values-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Maintain Values</h1>

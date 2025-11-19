@@ -25,7 +25,7 @@ class RemoveNotesEvent extends RemoveArrayItemEvent {
 @Component({
   selector: 'example-array-multiple-ops-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Multiple Operations</h1>

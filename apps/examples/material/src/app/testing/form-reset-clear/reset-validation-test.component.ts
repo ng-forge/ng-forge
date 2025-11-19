@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, FormResetEvent } from '@ng-forge/dynamic-form';
 
 /**
  * Reset Validation Test Component
  * Tests resetting validation state of form fields
  */
 @Component({
-  selector: 'app-reset-validation-test',
+  selector: 'example-reset-validation-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-scenario" data-testid="reset-validation">
@@ -20,14 +20,14 @@ import { DynamicForm, FormResetEvent } from '@ng-forge/dynamic-form';
       </details>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ResetValidationTestComponent {
   config = {
     fields: [
       {
         key: 'email',
-        type: 'input' as const,
+        type: 'input',
         label: 'Email',
         value: 'valid@example.com',
         required: true,
@@ -38,7 +38,7 @@ export class ResetValidationTestComponent {
       },
       {
         key: 'reset-button',
-        type: 'button' as const,
+        type: 'button',
         label: 'Reset',
         event: FormResetEvent,
         props: {
@@ -46,7 +46,7 @@ export class ResetValidationTestComponent {
         },
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

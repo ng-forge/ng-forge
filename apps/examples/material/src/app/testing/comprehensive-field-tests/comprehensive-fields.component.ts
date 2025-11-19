@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Comprehensive Field Testing Component
  * Tests all available Material Design field types
  */
 @Component({
-  selector: 'app-comprehensive-fields-test',
+  selector: 'example-comprehensive-fields-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -33,7 +33,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ComprehensiveFieldsTestComponent {
   value = signal<Record<string, unknown>>({});
@@ -153,9 +153,6 @@ export class ComprehensiveFieldsTestComponent {
         key: 'toggleField',
         type: 'toggle',
         label: 'Toggle Field',
-        props: {
-          id: 'toggleField',
-        },
         col: 6,
       },
       // Multi-Checkbox Field
@@ -182,11 +179,9 @@ export class ComprehensiveFieldsTestComponent {
         key: 'sliderField',
         type: 'slider',
         label: 'Slider Field',
-        props: {
-          min: 0,
-          max: 100,
-          step: 10,
-        },
+        min: 0,
+        max: 100,
+        step: 10,
         col: 6,
       },
       // Submit Button
@@ -197,7 +192,7 @@ export class ComprehensiveFieldsTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

@@ -9,7 +9,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 @Component({
   selector: 'example-cross-field-validator-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Cross-Field Validation Test</h1>
@@ -30,7 +30,7 @@ export class CrossFieldValidatorTestComponent {
   title = 'Cross-Field Validation Test';
   description = 'Passwords must match between password and confirm password fields';
 
-  config: FormConfig = {
+  config = {
     fields: [
       {
         key: 'password',
@@ -54,8 +54,8 @@ export class CrossFieldValidatorTestComponent {
         validators: [
           {
             type: 'custom',
-            name: 'passwordMatch',
-            message: 'Passwords must match',
+            functionName: 'passwordMatch',
+            errorMessage: 'Passwords must match',
           },
         ],
         col: 6,
@@ -67,7 +67,7 @@ export class CrossFieldValidatorTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

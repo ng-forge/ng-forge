@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Conditional Page Visibility Scenario
  * Tests showing/hiding pages based on account type selection
  */
 @Component({
-  selector: 'app-conditional-pages',
+  selector: 'example-conditional-pages',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -24,7 +24,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ConditionalPagesComponent {
   value = signal<Record<string, unknown>>({});
@@ -35,9 +35,18 @@ export class ConditionalPagesComponent {
       {
         key: 'accountTypePage',
         type: 'page',
-        title: 'Account Type',
-        description: 'Select your account type',
+
         fields: [
+          {
+            key: 'account-type-title',
+            type: 'text',
+            label: 'Account Type',
+          },
+          {
+            key: 'account-type-description',
+            type: 'text',
+            label: 'Select your account type',
+          },
           {
             key: 'accountType',
             type: 'radio',
@@ -69,9 +78,17 @@ export class ConditionalPagesComponent {
       {
         key: 'individualPage',
         type: 'page',
-        title: 'Individual Information',
-        description: 'Personal account details',
         fields: [
+          {
+            key: 'individual-title',
+            type: 'text',
+            label: 'Individual Information',
+          },
+          {
+            key: 'individual-description',
+            type: 'text',
+            label: 'Personal account details',
+          },
           {
             key: 'firstName',
             type: 'input',
@@ -94,11 +111,8 @@ export class ConditionalPagesComponent {
           },
           {
             key: 'birthDate',
-            type: 'input',
+            type: 'datepicker',
             label: 'Date of Birth',
-            props: {
-              type: 'date',
-            },
             required: true,
             col: 12,
           },
@@ -108,9 +122,17 @@ export class ConditionalPagesComponent {
       {
         key: 'businessPage',
         type: 'page',
-        title: 'Business Information',
-        description: 'Business account details',
         fields: [
+          {
+            key: 'business-page-title',
+            type: 'text',
+            label: 'Business Information',
+          },
+          {
+            key: 'business-page-description',
+            type: 'text',
+            label: 'Business account details',
+          },
           {
             key: 'businessName',
             type: 'input',
@@ -151,9 +173,17 @@ export class ConditionalPagesComponent {
       {
         key: 'finalPage',
         type: 'page',
-        title: 'Final Confirmation',
-        description: 'Review and submit your information',
         fields: [
+          {
+            key: 'final-page-title',
+            type: 'text',
+            label: 'Final Confirmation',
+          },
+          {
+            key: 'final-page-description',
+            type: 'text',
+            label: 'Review and submit your information',
+          },
           {
             key: 'confirmationCode',
             type: 'input',
@@ -181,7 +211,7 @@ export class ConditionalPagesComponent {
         ],
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

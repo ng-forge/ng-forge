@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Field Enable/Disable Testing Component
  * Tests enabling/disabling fields based on radio selection
  */
 @Component({
-  selector: 'app-enable-disable-test',
+  selector: 'example-enable-disable-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -31,7 +31,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </div>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class EnableDisableTestComponent {
   value = signal<Record<string, unknown>>({});
@@ -41,7 +41,7 @@ export class EnableDisableTestComponent {
     fields: [
       {
         key: 'shippingMethod',
-        type: 'radio' as const,
+        type: 'radio',
         label: 'Shipping Method',
         options: [
           { value: 'standard', label: 'Standard (5-7 days)' },
@@ -54,7 +54,7 @@ export class EnableDisableTestComponent {
       },
       {
         key: 'shippingAddress',
-        type: 'textarea' as const,
+        type: 'textarea',
         label: 'Shipping Address',
         props: {
           placeholder: 'Enter shipping address',
@@ -64,7 +64,7 @@ export class EnableDisableTestComponent {
       },
       {
         key: 'expressInstructions',
-        type: 'textarea' as const,
+        type: 'textarea',
         label: 'Special Delivery Instructions',
         props: {
           placeholder: 'Special instructions for express/overnight delivery',
@@ -74,7 +74,7 @@ export class EnableDisableTestComponent {
       },
       {
         key: 'storeLocation',
-        type: 'select' as const,
+        type: 'select',
         label: 'Store Pickup Location',
         options: [
           { value: 'downtown', label: 'Downtown Store' },
@@ -85,12 +85,12 @@ export class EnableDisableTestComponent {
       },
       {
         key: 'submitEnableDisable',
-        type: 'submit' as const,
+        type: 'submit',
         label: 'Complete Order',
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

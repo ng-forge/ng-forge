@@ -15,7 +15,7 @@ class RemovePhonesEvent extends RemoveArrayItemEvent {
 @Component({
   selector: 'example-array-remove-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Remove Array Items</h1>

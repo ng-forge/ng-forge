@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Validation Testing Component
  * Tests various field validations and error handling
  */
 @Component({
-  selector: 'app-validation-test',
+  selector: 'example-validation-test',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -33,7 +33,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class ValidationTestComponent {
   value = signal<Record<string, unknown>>({});
@@ -100,7 +100,7 @@ export class ValidationTestComponent {
         col: 12,
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;

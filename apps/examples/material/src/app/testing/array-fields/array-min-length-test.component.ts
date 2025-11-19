@@ -19,7 +19,7 @@ class AddItemsEvent extends AddArrayItemEvent {
 @Component({
   selector: 'example-array-min-length-test',
   imports: [DynamicForm, JsonPipe],
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
   template: `
     <div class="test-page">
       <h1>Minimum Length</h1>

@@ -5,7 +5,7 @@ import { BackwardNavigationComponent } from './backward-navigation.component';
 import { DirectNavigationComponent } from './direct-navigation.component';
 import { PageTransitionsComponent } from './page-transitions.component';
 
-export const MULTI_PAGE_NAVIGATION_ROUTES: Route[] = [
+export default [
   {
     path: '',
     children: [
@@ -31,4 +31,4 @@ export const MULTI_PAGE_NAVIGATION_ROUTES: Route[] = [
       },
     ],
   },
-];
+] satisfies Route[];

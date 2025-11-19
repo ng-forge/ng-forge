@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Age-Based Logic Test Component
  * Tests conditional field visibility based on age value
  */
 @Component({
-  selector: 'app-age-based-logic-test',
+  selector: 'example-age-based-logic-test',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
@@ -24,7 +24,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </section>
     </div>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class AgeBasedLogicTestComponent {
   config = {
@@ -42,9 +42,17 @@ export class AgeBasedLogicTestComponent {
         key: 'guardianConsent',
         type: 'checkbox',
         label: 'Guardian Consent Required',
-        expressions: {
-          hide: 'model.age >= 18',
-        },
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'age',
+              operator: 'greaterOrEqual',
+              value: 18,
+            },
+          },
+        ],
       },
       {
         key: 'submit',
@@ -52,7 +60,7 @@ export class AgeBasedLogicTestComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   formValue = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);

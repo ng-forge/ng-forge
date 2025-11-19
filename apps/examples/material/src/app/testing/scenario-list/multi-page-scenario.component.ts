@@ -1,13 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 
 /**
  * Multi-Page Scenario Component
  * Test scenario for a multi-page form with groups
  */
 @Component({
-  selector: 'app-multi-page-scenario',
+  selector: 'example-multi-page-scenario',
   standalone: true,
   imports: [DynamicForm, JsonPipe],
   template: `
@@ -21,7 +21,7 @@ import { DynamicForm } from '@ng-forge/dynamic-form';
       </details>
     </section>
   `,
-  styleUrl: '../test-component.styles.scss',
+  styleUrl: '../test-styles.scss',
 })
 export class MultiPageScenarioComponent {
   testId = 'multi-page-scenario';
@@ -32,8 +32,12 @@ export class MultiPageScenarioComponent {
       {
         key: 'page1',
         type: 'group',
-        label: 'Page 1: Basic Info',
         fields: [
+          {
+            key: 'page-1-title',
+            type: 'text',
+            label: 'Page 1: Basic Info',
+          },
           {
             key: 'firstName',
             type: 'input',
@@ -51,8 +55,12 @@ export class MultiPageScenarioComponent {
       {
         key: 'page2',
         type: 'group',
-        label: 'Page 2: Contact Info',
         fields: [
+          {
+            key: 'page-2-title',
+            type: 'text',
+            label: 'Page 2: Contact Info',
+          },
           {
             key: 'email',
             type: 'input',
@@ -74,7 +82,7 @@ export class MultiPageScenarioComponent {
         label: 'Submit',
       },
     ],
-  };
+  } as const satisfies FormConfig;
 
   value = signal<Record<string, unknown>>({});
 

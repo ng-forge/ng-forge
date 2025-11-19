@@ -1,6 +1,4 @@
-import { Routes } from '@angular/router';
-
-export const ARRAY_FIELDS_ROUTES: Routes = [
+export default [
   {
     path: 'array-add',
     loadComponent: () => import('./array-add-test.component').then((m) => m.ArrayAddTestComponent),
