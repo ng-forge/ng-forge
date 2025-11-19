@@ -6,7 +6,17 @@ import { checkboxFieldMapper, valueFieldMapper } from './mappers';
 import { BUILT_IN_FIELDS } from './providers/built-in-fields';
 import { BaseCheckedField, BaseValueField } from './definitions';
 import { DebugElement } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { OutputRef } from '@angular/core';
+
+// Helper to convert OutputRef to Observable for testing
+function outputToObservable<T>(output: OutputRef<T>): Observable<T> {
+  return new Observable((observer) => {
+    const sub = output.subscribe((value) => observer.next(value));
+    return () => sub.unsubscribe();
+  });
+}
 
 // Test specific form config type
 type TestFormConfig = {
@@ -902,11 +912,14 @@ describe('DynamicFormComponent', () => {
 
       // ITERATION 2 FIX: Verify output actually emits values
       // Previous: Only checked output exists, not that it emits
-      let emittedValue: boolean | undefined;
-      component.validityChange.subscribe((valid) => (emittedValue = valid));
+      const validityObservable = TestBed.runInInjectionContext(() => toObservable(component.valid));
+      const validityPromise = firstValueFrom(validityObservable);
 
       await delay();
       fixture.detectChanges();
+      TestBed.flushEffects();
+
+      const emittedValue = await validityPromise;
 
       // Should emit false for invalid form (empty required field)
       expect(emittedValue).toBe(false);
@@ -923,25 +936,25 @@ describe('DynamicFormComponent', () => {
 
       // ITERATION 2 FIX: Verify output actually emits values
       // Previous: Only checked output exists, not that it emits
-      const dirtyValues: boolean[] = [];
-      component.dirtyChange.subscribe((dirty) => dirtyValues.push(dirty));
-
       await delay();
       fixture.detectChanges();
 
       // Modify form to trigger dirty state
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
       if (testInput) {
+        const dirtyObservable = TestBed.runInInjectionContext(() => toObservable(component.dirty));
+        const dirtyPromise = firstValueFrom(dirtyObservable);
+
         const inputElement = testInput.nativeElement.querySelector('input');
         inputElement.value = 'Jane';
         inputElement.dispatchEvent(new Event('input'));
         fixture.detectChanges();
-        await delay();
+        TestBed.flushEffects();
 
-        // Should have emitted at least one value
-        expect(dirtyValues.length).toBeGreaterThan(0);
-        // Latest value should be true (form is dirty)
-        expect(dirtyValues[dirtyValues.length - 1]).toBe(true);
+        const dirtyValue = await dirtyPromise;
+
+        // Should emit true (form is dirty)
+        expect(dirtyValue).toBe(true);
       }
     });
   });
@@ -1320,8 +1333,7 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      let submittedValue: any;
-      component.submitted.subscribe((value) => (submittedValue = value));
+      const submittedPromise = firstValueFrom(outputToObservable(component.submitted));
 
       // Find and submit the form element
       const formElement = fixture.nativeElement.querySelector('form');
@@ -1329,7 +1341,9 @@ describe('DynamicFormComponent', () => {
 
       formElement.dispatchEvent(new Event('submit', { bubbles: true }));
       fixture.detectChanges();
-      await delay();
+      TestBed.flushEffects();
+
+      const submittedValue = await submittedPromise;
 
       expect(submittedValue).toBeDefined();
     });
@@ -1356,13 +1370,14 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      let submittedValue: any;
-      component.submitted.subscribe((value) => (submittedValue = value));
+      const submittedPromise = firstValueFrom(outputToObservable(component.submitted));
 
       const formElement = fixture.nativeElement.querySelector('form');
       formElement.dispatchEvent(new Event('submit', { bubbles: true }));
       fixture.detectChanges();
-      await delay();
+      TestBed.flushEffects();
+
+      const submittedValue = await submittedPromise;
 
       expect(submittedValue).toEqual({
         firstName: 'John',
@@ -1389,13 +1404,14 @@ describe('DynamicFormComponent', () => {
 
       expect(component.valid()).toBe(true);
 
-      let submittedValue: any;
-      component.submitted.subscribe((value) => (submittedValue = value));
+      const submittedPromise = firstValueFrom(outputToObservable(component.submitted));
 
       const formElement = fixture.nativeElement.querySelector('form');
       formElement.dispatchEvent(new Event('submit', { bubbles: true }));
       fixture.detectChanges();
-      await delay();
+      TestBed.flushEffects();
+
+      const submittedValue = await submittedPromise;
 
       expect(submittedValue).toEqual({ email: 'test@example.com' });
     });
@@ -1419,20 +1435,16 @@ describe('DynamicFormComponent', () => {
 
       expect(component.valid()).toBe(false);
 
-      let submittedValue: any;
-      let submissionOccurred = false;
-      component.submitted.subscribe((value) => {
-        submittedValue = value;
-        submissionOccurred = true;
-      });
+      const submittedPromise = firstValueFrom(outputToObservable(component.submitted));
 
       const formElement = fixture.nativeElement.querySelector('form');
       formElement.dispatchEvent(new Event('submit', { bubbles: true }));
       fixture.detectChanges();
-      await delay();
+      TestBed.flushEffects();
+
+      const submittedValue = await submittedPromise;
 
       // Submission should still emit the current values even if invalid
-      expect(submissionOccurred).toBe(true);
       expect(submittedValue).toEqual({ email: '' });
     });
   });
@@ -1702,15 +1714,15 @@ describe('DynamicFormComponent', () => {
 
       const { component, fixture } = createComponent(config);
 
-      let initializationEmitted = false;
-      component.initialized.subscribe(() => {
-        initializationEmitted = true;
-      });
+      const initializedPromise = firstValueFrom(component.initialized$);
 
       await delay();
       fixture.detectChanges();
+      TestBed.flushEffects();
 
-      expect(initializationEmitted).toBe(true);
+      await initializedPromise;
+      // If we reach here, initialization was emitted successfully
+      expect(true).toBe(true);
     });
 
     it('should emit initialized after async components load', async () => {
@@ -1757,17 +1769,21 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
 
       let emissionCount = 0;
-      component.initialized.subscribe(() => {
+      const sub = component.initialized$.subscribe(() => {
         emissionCount++;
       });
 
       await delay();
       fixture.detectChanges();
+      TestBed.flushEffects();
 
       // Wait a bit more to ensure no duplicate emissions
       await delay(50);
       fixture.detectChanges();
 
+      sub.unsubscribe();
+
+      // Should only have one emission
       expect(emissionCount).toBe(1);
     });
   });

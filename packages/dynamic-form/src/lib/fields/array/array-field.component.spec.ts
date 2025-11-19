@@ -164,7 +164,6 @@ describe('ArrayFieldComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
       TestBed.flushEffects();
-      await new Promise((resolve) => setTimeout(resolve, 100));
       attempts++;
     }
 

@@ -257,21 +257,19 @@ describe('PageOrchestratorComponent', () => {
         expect(component.state().currentPageIndex).toBe(2);
       });
 
-      it('should not dispatch event when on last page', async () => {
+      it('should not dispatch event when on last page', () => {
         component.navigateToPage(2);
 
-        let eventDispatched = false;
-        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
-          eventDispatched = true;
-        });
+        const dispatchSpy = vi.spyOn(eventBus, 'dispatch');
+        dispatchSpy.mockClear(); // Clear any previous dispatch calls
 
         component.navigateToNextPage();
+        TestBed.flushEffects();
+        fixture.detectChanges();
 
-        // Wait to ensure no events are dispatched
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        expect(eventDispatched).toBe(false);
-
-        subscription.unsubscribe();
+        // Filter calls to only PageChangeEvent
+        const pageChangeEventCalls = dispatchSpy.mock.calls.filter((call) => call[0] === PageChangeEvent);
+        expect(pageChangeEventCalls).toHaveLength(0);
       });
     });
 
@@ -303,19 +301,17 @@ describe('PageOrchestratorComponent', () => {
         expect(component.state().currentPageIndex).toBe(initialIndex);
       });
 
-      it('should not dispatch event when disabled', async () => {
-        let eventDispatched = false;
-        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
-          eventDispatched = true;
-        });
+      it('should not dispatch event when disabled', () => {
+        const dispatchSpy = vi.spyOn(eventBus, 'dispatch');
+        dispatchSpy.mockClear(); // Clear any previous dispatch calls
 
         component.navigateToNextPage();
+        TestBed.flushEffects();
+        fixture.detectChanges();
 
-        // Wait to ensure no events are dispatched
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        expect(eventDispatched).toBe(false);
-
-        subscription.unsubscribe();
+        // Filter calls to only PageChangeEvent
+        const pageChangeEventCalls = dispatchSpy.mock.calls.filter((call) => call[0] === PageChangeEvent);
+        expect(pageChangeEventCalls).toHaveLength(0);
       });
     });
   });
@@ -401,19 +397,17 @@ describe('PageOrchestratorComponent', () => {
         expect(component.state().currentPageIndex).toBe(0);
       });
 
-      it('should not dispatch event when on first page', async () => {
-        let eventDispatched = false;
-        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
-          eventDispatched = true;
-        });
+      it('should not dispatch event when on first page', () => {
+        const dispatchSpy = vi.spyOn(eventBus, 'dispatch');
+        dispatchSpy.mockClear(); // Clear any previous dispatch calls
 
         component.navigateToPreviousPage();
+        TestBed.flushEffects();
+        fixture.detectChanges();
 
-        // Wait to ensure no events are dispatched
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        expect(eventDispatched).toBe(false);
-
-        subscription.unsubscribe();
+        // Filter calls to only PageChangeEvent
+        const pageChangeEventCalls = dispatchSpy.mock.calls.filter((call) => call[0] === PageChangeEvent);
+        expect(pageChangeEventCalls).toHaveLength(0);
       });
     });
 
@@ -534,19 +528,17 @@ describe('PageOrchestratorComponent', () => {
         expect(component.state().currentPageIndex).toBe(initialIndex);
       });
 
-      it('should not dispatch event for invalid input', async () => {
-        let eventDispatched = false;
-        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
-          eventDispatched = true;
-        });
+      it('should not dispatch event for invalid input', () => {
+        const dispatchSpy = vi.spyOn(eventBus, 'dispatch');
+        dispatchSpy.mockClear(); // Clear any previous dispatch calls
 
         component.navigateToPage(100);
+        TestBed.flushEffects();
+        fixture.detectChanges();
 
-        // Wait to ensure no events are dispatched
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        expect(eventDispatched).toBe(false);
-
-        subscription.unsubscribe();
+        // Filter calls to only PageChangeEvent
+        const pageChangeEventCalls = dispatchSpy.mock.calls.filter((call) => call[0] === PageChangeEvent);
+        expect(pageChangeEventCalls).toHaveLength(0);
       });
     });
 
@@ -558,21 +550,19 @@ describe('PageOrchestratorComponent', () => {
         expect(result.success).toBe(true);
       });
 
-      it('should not dispatch event when already on target page', async () => {
+      it('should not dispatch event when already on target page', () => {
         component.navigateToPage(1);
 
-        let eventCount = 0;
-        const subscription = eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
-          eventCount++;
-        });
+        const dispatchSpy = vi.spyOn(eventBus, 'dispatch');
+        dispatchSpy.mockClear(); // Clear any previous dispatch calls
 
         component.navigateToPage(1);
+        TestBed.flushEffects();
+        fixture.detectChanges();
 
-        // Wait to ensure no events are dispatched
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        expect(eventCount).toBe(0); // No new event
-
-        subscription.unsubscribe();
+        // Filter calls to only PageChangeEvent
+        const pageChangeEventCalls = dispatchSpy.mock.calls.filter((call) => call[0] === PageChangeEvent);
+        expect(pageChangeEventCalls).toHaveLength(0);
       });
 
       it('should return current page as newPageIndex', () => {

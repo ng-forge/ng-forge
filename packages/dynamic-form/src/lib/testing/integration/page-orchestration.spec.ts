@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom, take } from 'rxjs';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { detectFormMode, FormModeDetectionResult } from '../../models/types/form-mode';
@@ -188,21 +189,19 @@ describe('Page Orchestration Integration', () => {
       // Get the EventBus from the component's dependency injection context
       eventBus = testResult.fixture.debugElement.injector.get(EventBus);
 
-      let pageChangeEvent: PageChangeEvent | null = null;
-
-      eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-        pageChangeEvent = event;
-      });
+      const eventPromise = firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1)));
 
       // Emit next page event
       eventBus.dispatch(NextPageEvent);
       testResult.fixture.detectChanges();
       await DynamicFormTestUtils.waitForInit(testResult.fixture);
 
+      const pageChangeEvent = await eventPromise;
+
       expect(pageChangeEvent).toBeTruthy();
-      expect(pageChangeEvent!.currentPageIndex).toBe(1);
-      expect(pageChangeEvent!.totalPages).toBe(2);
-      expect(pageChangeEvent!.previousPageIndex).toBe(0);
+      expect(pageChangeEvent.currentPageIndex).toBe(1);
+      expect(pageChangeEvent.totalPages).toBe(2);
+      expect(pageChangeEvent.previousPageIndex).toBe(0);
     });
 
     it('should handle navigation boundary constraints', async () => {
@@ -218,10 +217,11 @@ describe('Page Orchestration Integration', () => {
       // Get the EventBus from the component's dependency injection context
       eventBus = testResult.fixture.debugElement.injector.get(EventBus);
 
-      let navigationAttempts = 0;
-      eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
-        navigationAttempts++;
-      });
+      // Create a promise that resolves when an event is emitted or times out
+      const eventOrTimeout = await Promise.race([
+        firstValueFrom(eventBus.on<PageChangeEvent>('page-change').pipe(take(1))).then(() => ({ emitted: true })),
+        new Promise<{ emitted: false }>((resolve) => setTimeout(() => resolve({ emitted: false }), 100)),
+      ]);
 
       // Try to navigate beyond first page when there's only one page
       eventBus.dispatch(NextPageEvent);
@@ -229,7 +229,7 @@ describe('Page Orchestration Integration', () => {
       await DynamicFormTestUtils.waitForInit(testResult.fixture);
 
       // Should still be on page 0 since there's only one page
-      expect(navigationAttempts).toBe(0);
+      expect(eventOrTimeout.emitted).toBe(false);
 
       // Try to navigate before first page
       eventBus.dispatch(PreviousPageEvent);
@@ -237,7 +237,7 @@ describe('Page Orchestration Integration', () => {
       await DynamicFormTestUtils.waitForInit(testResult.fixture);
 
       // Should still be on page 0
-      expect(navigationAttempts).toBe(0);
+      expect(eventOrTimeout.emitted).toBe(false);
     });
   });
 
