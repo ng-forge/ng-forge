@@ -141,19 +141,19 @@ export class PageOrchestratorComponent {
   navigateToNextPage(): NavigationResult {
     const currentState = this.state();
 
-    if (currentState.isLastPage) {
-      return {
-        success: false,
-        newPageIndex: currentState.currentPageIndex,
-        error: 'Already on the last page',
-      };
-    }
-
     if (currentState.navigationDisabled) {
       return {
         success: false,
         newPageIndex: currentState.currentPageIndex,
         error: 'Navigation is currently disabled',
+      };
+    }
+
+    if (currentState.isLastPage) {
+      return {
+        success: false,
+        newPageIndex: currentState.currentPageIndex,
+        error: 'Already on the last page',
       };
     }
 
@@ -168,19 +168,19 @@ export class PageOrchestratorComponent {
   navigateToPreviousPage(): NavigationResult {
     const currentState = this.state();
 
-    if (currentState.isFirstPage) {
-      return {
-        success: false,
-        newPageIndex: currentState.currentPageIndex,
-        error: 'Already on the first page',
-      };
-    }
-
     if (currentState.navigationDisabled) {
       return {
         success: false,
         newPageIndex: currentState.currentPageIndex,
         error: 'Navigation is currently disabled',
+      };
+    }
+
+    if (currentState.isFirstPage) {
+      return {
+        success: false,
+        newPageIndex: currentState.currentPageIndex,
+        error: 'Already on the first page',
       };
     }
 

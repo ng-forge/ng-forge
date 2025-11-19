@@ -64,6 +64,13 @@ export function fieldsToDefaultValues<TModel = unknown>(fields: FieldDef<any>[],
   for (const field of fields) {
     if (!field.key) continue;
 
+    const valueHandling = getFieldValueHandling(field.type, registry);
+
+    // Skip fields that don't contribute to default values
+    if (valueHandling === 'exclude' || valueHandling === 'flatten') {
+      continue;
+    }
+
     const value = getFieldDefaultValue(field, registry);
     if (value !== undefined) {
       defaultValues[field.key] = value;
