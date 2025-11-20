@@ -90,6 +90,12 @@ export class SurveyJourneyTestComponent {
             required: true,
             col: 6,
           },
+          {
+            key: 'nextToExperiencePage',
+            type: 'next',
+            label: 'Next',
+            col: 12,
+          },
         ],
       },
       // Page 2: Product/Service Experience
@@ -164,6 +170,18 @@ export class SurveyJourneyTestComponent {
             ],
             col: 12,
           },
+          {
+            key: 'previousToIntroPage',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToFeedbackPage',
+            type: 'next',
+            label: 'Next',
+            col: 6,
+          },
         ],
       },
       // Page 3: Feedback & Suggestions
@@ -235,6 +253,18 @@ export class SurveyJourneyTestComponent {
             ],
             col: 12,
           },
+          {
+            key: 'previousToExperiencePage',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToCompletionPage',
+            type: 'next',
+            label: 'Next',
+            col: 6,
+          },
         ],
       },
       // Page 4: Contact & Completion
@@ -289,10 +319,16 @@ export class SurveyJourneyTestComponent {
             col: 12,
           },
           {
+            key: 'previousToFeedbackPage',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
             key: 'submitSurvey',
             type: 'submit',
             label: 'Submit Survey',
-            col: 12,
+            col: 6,
           },
         ],
       },

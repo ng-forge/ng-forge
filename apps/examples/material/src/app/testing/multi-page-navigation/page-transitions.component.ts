@@ -51,6 +51,12 @@ export class PageTransitionsComponent {
             },
             col: 12,
           },
+          {
+            key: 'nextToPage2',
+            type: 'next',
+            label: 'Next',
+            col: 12,
+          },
         ],
       },
       {
@@ -74,10 +80,16 @@ export class PageTransitionsComponent {
             col: 12,
           },
           {
+            key: 'previousToPage1',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
             key: 'submitTransition',
             type: 'submit',
             label: 'Submit',
-            col: 12,
+            col: 6,
           },
         ],
       },

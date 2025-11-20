@@ -90,11 +90,6 @@ export class AsyncResourceValidatorTestComponent {
         col: 12,
       },
     ],
-    signalFormsConfig: {
-      asyncValidators: {
-        checkProductCode,
-      },
-    },
   } as const satisfies FormConfig;
 
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

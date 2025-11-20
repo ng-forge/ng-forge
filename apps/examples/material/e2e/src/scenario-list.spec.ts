@@ -11,7 +11,7 @@ test.describe('Material Demo App - Scenario List', () => {
   });
 
   test('should navigate to scenarios page by default', async ({ page }) => {
-    await expect(page).toHaveURL('http://localhost:4200/scenarios');
+    await expect(page).toHaveURL('http://localhost:4200/#/scenarios');
     await expect(page.locator('h2')).toContainText('E2E Testing Scenarios');
   });
 
@@ -49,7 +49,7 @@ test.describe('Material Demo App - Scenario List', () => {
     await expect(multiPageCard).toHaveClass(/scenario-card/);
 
     // Multi-page card should be clickable and ready - the card itself is the link
-    await expect(multiPageCard).toHaveAttribute('href', '/multi-page');
+    await expect(multiPageCard).toHaveAttribute('href', '#/scenarios/multi-page');
   });
 
   test('should display scenario descriptions', async ({ page }) => {
@@ -65,7 +65,7 @@ test.describe('Material Demo App - Scenario List', () => {
     await page.locator('[data-testid="multi-page-scenario"]').click();
 
     // Should navigate to multi-page route
-    await expect(page).toHaveURL('http://localhost:4200/multi-page');
+    await expect(page).toHaveURL('http://localhost:4200/#/scenarios/multi-page');
 
     // Should display multi-page demo content - use getByRole to get the specific heading
     await expect(page.getByRole('heading', { name: 'Multi-Page Form Demo' })).toBeVisible();

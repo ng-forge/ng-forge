@@ -23,7 +23,7 @@ import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs'
 import { isEqual, memoize } from 'lodash-es';
 import { keyBy } from './utils/object-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
-import { FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes, FIELD_SIGNAL_CONTEXT } from './models';
+import { FIELD_SIGNAL_CONTEXT, FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
@@ -301,31 +301,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
 
-    this.registerValidatorsFromConfig(config);
-
     if (config.fields && config.fields.length > 0) {
       return this.createFormSetupFromConfig(config.fields, modeDetection.mode, registry);
     }
 
     return this.createEmptyFormSetup(registry);
   });
-
-  private registerValidatorsFromConfig(config: FormConfig<TFields>): void {
-    const signalFormsConfig = config.signalFormsConfig;
-    if (!signalFormsConfig) return;
-
-    // Register custom functions
-    if (signalFormsConfig.customFunctions) {
-      Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
-        this.functionRegistry.registerCustomFunction(name, fn);
-      });
-    }
-
-    // Set all validators from config - change detection is inside set methods
-    this.functionRegistry.setValidators(signalFormsConfig.validators);
-    this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
-    this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
-  }
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: 'paged' | 'non-paged', registry: Map<string, FieldTypeDefinition>) {
     // Use memoized functions for expensive operations with registry

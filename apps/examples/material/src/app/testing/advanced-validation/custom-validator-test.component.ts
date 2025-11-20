@@ -44,7 +44,9 @@ export class CustomValidatorTestComponent {
         validators: [
           {
             type: 'custom',
-            functionName: 'strongPassword',
+            expression:
+              'fieldValue && /[A-Z]/.test(fieldValue) && /[a-z]/.test(fieldValue) && /[0-9]/.test(fieldValue) && /[!@#$%^&*(),.?":{}|<>]/.test(fieldValue)',
+            kind: 'strongPassword',
             errorMessage: 'Password must contain uppercase, lowercase, number and special character',
           },
         ],

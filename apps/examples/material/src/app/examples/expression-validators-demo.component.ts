@@ -196,7 +196,8 @@ export class ExpressionValidatorsDemoComponent {
             validators: [
               {
                 type: 'custom',
-                functionName: 'noSpaces',
+                expression: 'typeof fieldValue === "string" && !fieldValue.includes(" ")',
+                kind: 'noSpaces',
               },
             ],
             validationMessages: {
@@ -214,11 +215,6 @@ export class ExpressionValidatorsDemoComponent {
         },
       },
     ],
-    signalFormsConfig: {
-      validators: {
-        noSpaces, // Register function-based validator
-      },
-    },
   };
 
   onSubmit(value: unknown) {

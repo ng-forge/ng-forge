@@ -64,6 +64,12 @@ export class ValidationNavigationComponent {
             required: true,
             col: 12,
           },
+          {
+            key: 'nextToPage2',
+            type: 'next',
+            label: 'Next',
+            col: 12,
+          },
         ],
       },
       // Page 2: Optional fields
@@ -87,10 +93,16 @@ export class ValidationNavigationComponent {
             col: 12,
           },
           {
+            key: 'previousToPage1',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
             key: 'submitValidation',
             type: 'submit',
             label: 'Submit Form',
-            col: 12,
+            col: 6,
           },
         ],
       },

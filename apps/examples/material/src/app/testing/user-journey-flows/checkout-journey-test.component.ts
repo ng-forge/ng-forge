@@ -88,6 +88,12 @@ export class CheckoutJourneyTestComponent {
             label: 'Add gift wrapping (+$5.00)',
             col: 12,
           },
+          {
+            key: 'nextToShippingPage',
+            type: 'next',
+            label: 'Next',
+            col: 12,
+          },
         ],
       },
       // Page 2: Shipping Information
@@ -159,6 +165,18 @@ export class CheckoutJourneyTestComponent {
               rows: 2,
             },
             col: 12,
+          },
+          {
+            key: 'previousToCartPage',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToBillingPage',
+            type: 'next',
+            label: 'Next',
+            col: 6,
           },
         ],
       },
@@ -244,6 +262,18 @@ export class CheckoutJourneyTestComponent {
             label: 'Save payment method for future purchases',
             col: 12,
           },
+          {
+            key: 'previousToShippingPage',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToConfirmationPage',
+            type: 'next',
+            label: 'Next',
+            col: 6,
+          },
         ],
       },
       // Page 4: Order Confirmation
@@ -292,10 +322,16 @@ export class CheckoutJourneyTestComponent {
             col: 12,
           },
           {
+            key: 'previousToBillingPage',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
             key: 'placeOrder',
             type: 'submit',
             label: 'Place Order',
-            col: 12,
+            col: 6,
           },
         ],
       },

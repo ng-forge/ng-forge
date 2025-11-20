@@ -3,8 +3,12 @@ import { Route } from '@angular/router';
 export default [
   {
     path: '',
-    redirectTo: '/examples',
+    redirectTo: '/scenarios',
     pathMatch: 'full',
+  },
+  {
+    path: 'scenarios',
+    loadChildren: () => import('./testing/scenario-list/scenario-list.routes'),
   },
   {
     path: 'examples',

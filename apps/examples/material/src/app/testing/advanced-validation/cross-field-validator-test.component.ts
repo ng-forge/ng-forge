@@ -54,7 +54,8 @@ export class CrossFieldValidatorTestComponent {
         validators: [
           {
             type: 'custom',
-            functionName: 'passwordMatch',
+            expression: 'fieldValue === formValue.password',
+            kind: 'passwordMatch',
             errorMessage: 'Passwords must match',
           },
         ],

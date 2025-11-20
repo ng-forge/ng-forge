@@ -66,11 +66,6 @@ export class MultipleValidatorsTestComponent {
         col: 12,
       },
     ],
-    signalFormsConfig: {
-      httpValidators: {
-        checkUsernameAvailability,
-      },
-    },
   } as const satisfies FormConfig;
 
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

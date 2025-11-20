@@ -73,11 +73,6 @@ export class HttpPostValidatorTestComponent {
         col: 12,
       },
     ],
-    signalFormsConfig: {
-      httpValidators: {
-        validateEmail,
-      },
-    },
   } as const satisfies FormConfig;
 
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

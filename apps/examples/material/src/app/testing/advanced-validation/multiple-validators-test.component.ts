@@ -43,7 +43,8 @@ export class MultipleValidatorsTestComponent {
         validators: [
           {
             type: 'custom',
-            functionName: 'noReservedWords',
+            expression: 'fieldValue !== "admin" && fieldValue !== "root"',
+            kind: 'noReservedWords',
             errorMessage: 'Username cannot be "admin" or "root"',
           },
         ],
