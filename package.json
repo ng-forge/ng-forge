@@ -17,7 +17,7 @@
     "deploy:prep": "pnpm run build:all:prod && pnpm run prepare:deploy",
     "serve:all": "bash scripts/serve-with-examples.sh",
     "test": "nx run-many -t test",
-    "test:ci": "nx run-many -t test --configuration=ci --coverage",
+    "test:ci": "nx run-many -t test --configuration=ci",
     "test:watch": "nx run-many -t test --watch",
     "lint": "nx run-many -t lint",
     "lint:fix": "nx run-many -t lint --fix",
