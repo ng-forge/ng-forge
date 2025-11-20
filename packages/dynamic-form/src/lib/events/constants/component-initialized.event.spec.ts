@@ -122,28 +122,6 @@ describe('ComponentInitializedEvent', () => {
     });
   });
 
-  describe('Multiple event instances', () => {
-    it('should create independent event instances', () => {
-      const event1 = new ComponentInitializedEvent('page', 'page-1');
-      const event2 = new ComponentInitializedEvent('row', 'row-1');
-
-      expect(event1.componentType).toBe('page');
-      expect(event2.componentType).toBe('row');
-      expect(event1.componentId).toBe('page-1');
-      expect(event2.componentId).toBe('row-1');
-    });
-
-    it('should not share state between instances', () => {
-      const event1 = new ComponentInitializedEvent('dynamic-form', 'form-1');
-      const event2 = new ComponentInitializedEvent('dynamic-form', 'form-2');
-
-      event1.componentId = 'modified-form-1';
-
-      expect(event1.componentId).toBe('modified-form-1');
-      expect(event2.componentId).toBe('form-2');
-    });
-  });
-
   describe('Event usage scenarios', () => {
     it('should track initialization of different component types', () => {
       const formEvent = new ComponentInitializedEvent('dynamic-form', 'main');

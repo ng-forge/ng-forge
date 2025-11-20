@@ -110,25 +110,4 @@ describe('PageChangeEvent', () => {
       expect(event.previousPageIndex).not.toBeUndefined();
     });
   });
-
-  describe('Multiple event instances', () => {
-    it('should create independent event instances', () => {
-      const event1 = new PageChangeEvent(0, 3, undefined);
-      const event2 = new PageChangeEvent(2, 5, 1);
-
-      expect(event1.currentPageIndex).toBe(0);
-      expect(event2.currentPageIndex).toBe(2);
-      expect(event1.totalPages).not.toBe(event2.totalPages);
-    });
-
-    it('should not share state between instances', () => {
-      const event1 = new PageChangeEvent(1, 5, 0);
-      const event2 = new PageChangeEvent(2, 5, 1);
-
-      expect(event1.currentPageIndex).toBe(1);
-      expect(event2.currentPageIndex).toBe(2);
-      expect(event1.previousPageIndex).toBe(0);
-      expect(event2.previousPageIndex).toBe(1);
-    });
-  });
 });

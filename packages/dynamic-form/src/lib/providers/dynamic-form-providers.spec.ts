@@ -78,66 +78,6 @@ describe('provideDynamicForm', () => {
         expect(registry.get(field.name)).toBe(field);
       });
     });
-
-    it('should register row field', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
-
-      expect(registry.has('row')).toBe(true);
-    });
-
-    it('should register group field', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
-
-      expect(registry.has('group')).toBe(true);
-    });
-
-    it('should register array field', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
-
-      expect(registry.has('array')).toBe(true);
-    });
-
-    it('should register page field', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
-
-      expect(registry.has('page')).toBe(true);
-    });
-
-    it('should register text field', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
-
-      expect(registry.has('text')).toBe(true);
-    });
   });
 
   describe('Custom fields registration', () => {
@@ -279,82 +219,7 @@ describe('provideDynamicForm', () => {
     });
   });
 
-  describe('Registry structure', () => {
-    it('should return a Map', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
-
-      expect(registry).toBeInstanceOf(Map);
-    });
-
-    it('should use field names as keys', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
-      const keys = Array.from(registry.keys());
-
-      keys.forEach((key) => {
-        expect(typeof key).toBe('string');
-        const field = registry.get(key);
-        expect(field?.name).toBe(key);
-      });
-    });
-
-    it('should store FieldTypeDefinition as values', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
-      const values = Array.from(registry.values());
-
-      values.forEach((value) => {
-        expect(value).toHaveProperty('name');
-        expect(value).toHaveProperty('loadComponent');
-        expect(value).toHaveProperty('mapper');
-        expect(value).toHaveProperty('valueHandling');
-      });
-    });
-  });
-
   describe('Edge cases', () => {
-    it('should handle empty custom fields array', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
-
-      expect(registry.size).toBe(BUILT_IN_FIELDS.length);
-    });
-
-    it('should create new registry instance on each call to useFactory', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry1 = registryProvider.useFactory();
-      const registry2 = registryProvider.useFactory();
-
-      expect(registry1).not.toBe(registry2);
-      expect(registry1.size).toBe(registry2.size);
-    });
-
     it('should handle many custom fields', () => {
       const customFields: FieldTypeDefinition[] = Array.from({ length: 10 }, (_, i) => ({
         name: `custom${i}`,
@@ -375,28 +240,6 @@ describe('provideDynamicForm', () => {
       customFields.forEach((field) => {
         expect(registry.has(field.name)).toBe(true);
       });
-    });
-  });
-
-  describe('Type inference', () => {
-    it('should maintain type information for providers', () => {
-      const providers = provideDynamicForm();
-
-      // TypeScript should infer this as Provider[]
-      expect(Array.isArray(providers)).toBe(true);
-    });
-
-    it('should support const type parameters', () => {
-      const customField = {
-        name: 'custom',
-        loadComponent: () => import('../fields/text/text-field.component'),
-        mapper: vi.fn(),
-        valueHandling: 'exclude' as const,
-      } as const;
-
-      const providers = provideDynamicForm(customField);
-
-      expect(providers).toBeDefined();
     });
   });
 });

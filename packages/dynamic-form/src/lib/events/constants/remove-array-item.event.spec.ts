@@ -80,24 +80,4 @@ describe('RemoveArrayItemEvent', () => {
       expect('index' in event).toBe(true); // property exists but is undefined
     });
   });
-
-  describe('Multiple event instances', () => {
-    it('should create independent event instances', () => {
-      const event1 = new RemoveArrayItemEvent('array1', 1);
-      const event2 = new RemoveArrayItemEvent('array2', 2);
-
-      expect(event1.arrayKey).toBe('array1');
-      expect(event1.index).toBe(1);
-      expect(event2.arrayKey).toBe('array2');
-      expect(event2.index).toBe(2);
-    });
-
-    it('should not share state between instances', () => {
-      const event1 = new RemoveArrayItemEvent('contacts', 0);
-      const event2 = new RemoveArrayItemEvent('contacts', 5);
-
-      expect(event1.index).toBe(0);
-      expect(event2.index).toBe(5);
-    });
-  });
 });

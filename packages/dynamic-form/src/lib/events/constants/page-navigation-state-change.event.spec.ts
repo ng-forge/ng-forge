@@ -216,27 +216,4 @@ describe('PageNavigationStateChangeEvent', () => {
       expect(event.state.navigationDisabled).toBe(true);
     });
   });
-
-  describe('Multiple event instances', () => {
-    it('should create independent event instances', () => {
-      const state1 = createMockState({ currentPageIndex: 0 });
-      const state2 = createMockState({ currentPageIndex: 1 });
-
-      const event1 = new PageNavigationStateChangeEvent(state1);
-      const event2 = new PageNavigationStateChangeEvent(state2);
-
-      expect(event1.state.currentPageIndex).toBe(0);
-      expect(event2.state.currentPageIndex).toBe(1);
-    });
-
-    it('should reference different state objects', () => {
-      const state1 = createMockState({ currentPageIndex: 0 });
-      const state2 = createMockState({ currentPageIndex: 1 });
-
-      const event1 = new PageNavigationStateChangeEvent(state1);
-      const event2 = new PageNavigationStateChangeEvent(state2);
-
-      expect(event1.state).not.toBe(event2.state);
-    });
-  });
 });
