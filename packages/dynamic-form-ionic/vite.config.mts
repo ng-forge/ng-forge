@@ -26,6 +26,9 @@ export default defineConfig(() => {
     // worker: {
     //  plugins: [ nxViteTsPaths() ],
     // },
+    optimizeDeps: {
+      include: ['@vitest/coverage-istanbul'],
+    },
     test: {
       name: 'dynamic-form-ionic',
       watch: false,
@@ -50,7 +53,7 @@ export default defineConfig(() => {
       setupFiles: ['src/test-setup.ts'],
       reporters: ['default'],
       coverage: {
-        enabled: false, // Browser mode doesn't support coverage - use jsdom for coverage
+        enabled: true,
         reportsDirectory: '../../coverage/packages/dynamic-form-ionic',
         provider: 'istanbul' as const,
         reporter: ['text', 'html', 'lcov'],
