@@ -24,7 +24,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await scenario.locator('[data-testid="emailType"] mat-radio-button:has-text("Business Email")').click();
 
       // Navigate to page 2
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Personal Information
@@ -35,7 +35,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await scenario.locator('[data-testid="phoneNumber"] input').fill('+1-555-123-4567');
 
       // Navigate to page 3
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Confirmation
@@ -89,13 +89,13 @@ test.describe('Cross-Page Validation Tests', () => {
       // Page 1: Fill email
       await scenario.locator('[data-testid="primaryEmail"] input').fill('user@example.com');
       await scenario.locator('[data-testid="emailType"] mat-radio-button:has-text("Personal Email")').click();
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Fill personal info
       await scenario.locator('[data-testid="fullName"] input').fill('Jane Doe');
       await scenario.locator('[data-testid="phoneNumber"] input').fill('+1-555-987-6543');
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Enter mismatched email confirmation
@@ -129,7 +129,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Navigate to next page
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Individual Information
@@ -141,7 +141,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Navigate to final page
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Final Confirmation (should skip business page)
@@ -198,7 +198,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.locator('mat-option:has-text("Professional Use")').click();
       await page.waitForTimeout(200);
 
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Business Information (should skip individual page)
@@ -210,7 +210,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.locator('mat-option:has-text("LLC")').click();
       await page.waitForTimeout(200);
 
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Final Confirmation
@@ -261,7 +261,7 @@ test.describe('Cross-Page Validation Tests', () => {
 
       // Page 1: Select business account
       await scenario.locator('[data-testid="accountType"] mat-radio-button:has-text("Business Account")').click();
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Business Information
@@ -278,7 +278,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Try to navigate (pattern validation should prevent)
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Should still be on business page due to validation
@@ -289,7 +289,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Navigate to final page
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Final Confirmation
@@ -343,7 +343,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Navigate to page 2
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Address Information
@@ -358,7 +358,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Navigate to page 3
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Payment Information
@@ -420,7 +420,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Try to navigate (should fail validation)
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Should still be on page 1
@@ -431,7 +431,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Navigate to page 2
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Enhanced Security
@@ -449,7 +449,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Try to navigate (should fail due to password)
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Should still be on page 2
@@ -460,7 +460,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(200);
 
       // Navigate to page 3
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Final Verification
@@ -505,7 +505,7 @@ test.describe('Cross-Page Validation Tests', () => {
 
       // Page 1: Enter username
       await scenario.locator('[data-testid="username"] input').fill('testuser');
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Enter security info
@@ -513,7 +513,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await scenario.locator('[data-testid="securityQuestion"]').click();
       await page.locator('mat-option:has-text("What was your first school?")').click();
       await scenario.locator('[data-testid="securityAnswer"] input').fill('Elementary');
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Enter mismatched username confirmation

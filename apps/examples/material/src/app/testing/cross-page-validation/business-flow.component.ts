@@ -36,11 +36,6 @@ export class BusinessFlowComponent {
         type: 'page',
         fields: [
           {
-            key: 'account-type-title',
-            type: 'text',
-            label: 'Account Type',
-          },
-          {
             key: 'accountType',
             type: 'radio',
             label: 'Account Type',
@@ -50,6 +45,12 @@ export class BusinessFlowComponent {
               { value: 'nonprofit', label: 'Non-Profit Organization' },
             ],
             required: true,
+            col: 12,
+          },
+          {
+            key: 'nextToPage2',
+            type: 'next',
+            label: 'Next',
             col: 12,
           },
         ],
@@ -84,6 +85,18 @@ export class BusinessFlowComponent {
             required: true,
             col: 12,
           },
+          {
+            key: 'previousToPage1',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToPage3',
+            type: 'next',
+            label: 'Next',
+            col: 6,
+          },
         ],
       },
       {
@@ -96,10 +109,16 @@ export class BusinessFlowComponent {
             label: 'Final Confirmation',
           },
           {
+            key: 'previousToPage2',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
             key: 'submitBusiness',
             type: 'submit',
             label: 'Create Business Account',
-            col: 12,
+            col: 6,
           },
         ],
       },

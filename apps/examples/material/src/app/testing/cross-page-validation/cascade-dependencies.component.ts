@@ -85,6 +85,12 @@ export class CascadeDependenciesComponent {
             required: true,
             col: 12,
           },
+          {
+            key: 'nextToPage2',
+            type: 'next',
+            label: 'Next',
+            col: 12,
+          },
         ],
       },
       // Page 2: Address Information
@@ -147,6 +153,18 @@ export class CascadeDependenciesComponent {
             required: true,
             col: 12,
           },
+          {
+            key: 'previousToPage1',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToPage3',
+            type: 'next',
+            label: 'Next',
+            col: 6,
+          },
         ],
       },
       // Page 3: Payment Information
@@ -190,10 +208,16 @@ export class CascadeDependenciesComponent {
             col: 12,
           },
           {
+            key: 'previousToPage2',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
             key: 'submitCascade',
             type: 'submit',
             label: 'Complete Setup',
-            col: 12,
+            col: 6,
           },
         ],
       },

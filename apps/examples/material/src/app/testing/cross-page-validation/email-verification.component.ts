@@ -75,6 +75,12 @@ export class EmailVerificationComponent {
             required: true,
             col: 12,
           },
+          {
+            key: 'nextToPage2',
+            type: 'next',
+            label: 'Next',
+            col: 12,
+          },
         ],
       },
       // Page 2: Personal Information
@@ -128,6 +134,18 @@ export class EmailVerificationComponent {
             required: true,
             col: 12,
           },
+          {
+            key: 'previousToPage1',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToPage3',
+            type: 'next',
+            label: 'Next',
+            col: 6,
+          },
         ],
       },
       // Page 3: Confirmation
@@ -176,10 +194,16 @@ export class EmailVerificationComponent {
             col: 12,
           },
           {
+            key: 'previousToPage2',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
             key: 'submitEmailVerification',
             type: 'submit',
             label: 'Complete Registration',
-            col: 12,
+            col: 6,
           },
         ],
       },

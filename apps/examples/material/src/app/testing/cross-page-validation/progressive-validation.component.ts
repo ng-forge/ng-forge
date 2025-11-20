@@ -52,6 +52,12 @@ export class ProgressiveValidationComponent {
             minLength: 3,
             col: 12,
           },
+          {
+            key: 'nextToPage2',
+            type: 'next',
+            label: 'Next',
+            col: 12,
+          },
         ],
       },
       // Page 2: Enhanced validation
@@ -99,6 +105,18 @@ export class ProgressiveValidationComponent {
             minLength: 2,
             col: 12,
           },
+          {
+            key: 'previousToPage1',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToPage3',
+            type: 'next',
+            label: 'Next',
+            col: 6,
+          },
         ],
       },
       // Page 3: Final validation
@@ -133,10 +151,16 @@ export class ProgressiveValidationComponent {
             col: 12,
           },
           {
+            key: 'previousToPage2',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
             key: 'submitProgressive',
             type: 'submit',
             label: 'Complete Verification',
-            col: 12,
+            col: 6,
           },
         ],
       },

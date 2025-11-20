@@ -25,7 +25,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
 })
 export class MultiPageScenarioComponent {
   testId = 'multi-page-scenario';
-  title = 'Multi-Page Form';
+  title = 'Multi-Page Form Demo';
 
   config = {
     fields: [

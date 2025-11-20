@@ -45,7 +45,7 @@ export default [
 
   // Demo Scenarios Tests - Refactored into folder structure
   {
-    path: 'demo-scenarios-test',
+    path: 'demo-scenarios',
     loadChildren: () => import('./demo-scenarios/demo-scenarios.routes'),
   },
 
@@ -93,7 +93,7 @@ export default [
 
   // Scenario List Tests - Refactored into folder structure
   {
-    path: 'scenario-list',
+    path: 'scenarios',
     loadChildren: () => import('./scenario-list/scenario-list.routes'),
   },
 

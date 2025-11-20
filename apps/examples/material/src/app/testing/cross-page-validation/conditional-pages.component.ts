@@ -38,11 +38,6 @@ export class ConditionalPagesComponent {
 
         fields: [
           {
-            key: 'account-type-title',
-            type: 'text',
-            label: 'Account Type',
-          },
-          {
             key: 'account-type-description',
             type: 'text',
             label: 'Select your account type',
@@ -72,6 +67,12 @@ export class ConditionalPagesComponent {
             required: true,
             col: 12,
           },
+          {
+            key: 'nextToPage2',
+            type: 'next',
+            label: 'Next',
+            col: 12,
+          },
         ],
       },
       // Page 2: Individual Information
@@ -79,11 +80,6 @@ export class ConditionalPagesComponent {
         key: 'individualPage',
         type: 'page',
         fields: [
-          {
-            key: 'individual-title',
-            type: 'text',
-            label: 'Individual Information',
-          },
           {
             key: 'individual-description',
             type: 'text',
@@ -116,6 +112,18 @@ export class ConditionalPagesComponent {
             required: true,
             col: 12,
           },
+          {
+            key: 'previousToPage1',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToPage3',
+            type: 'next',
+            label: 'Next',
+            col: 6,
+          },
         ],
       },
       // Page 3: Business Information
@@ -123,11 +131,6 @@ export class ConditionalPagesComponent {
         key: 'businessPage',
         type: 'page',
         fields: [
-          {
-            key: 'business-page-title',
-            type: 'text',
-            label: 'Business Information',
-          },
           {
             key: 'business-page-description',
             type: 'text',
@@ -167,6 +170,18 @@ export class ConditionalPagesComponent {
             required: true,
             col: 6,
           },
+          {
+            key: 'previousToPage2',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
+            key: 'nextToPage4',
+            type: 'next',
+            label: 'Next',
+            col: 6,
+          },
         ],
       },
       // Page 4: Final Confirmation
@@ -174,11 +189,6 @@ export class ConditionalPagesComponent {
         key: 'finalPage',
         type: 'page',
         fields: [
-          {
-            key: 'final-page-title',
-            type: 'text',
-            label: 'Final Confirmation',
-          },
           {
             key: 'final-page-description',
             type: 'text',
@@ -203,10 +213,16 @@ export class ConditionalPagesComponent {
             col: 12,
           },
           {
+            key: 'previousToPage3',
+            type: 'previous',
+            label: 'Previous',
+            col: 6,
+          },
+          {
             key: 'submitConditional',
             type: 'submit',
             label: 'Create Account',
-            col: 12,
+            col: 6,
           },
         ],
       },

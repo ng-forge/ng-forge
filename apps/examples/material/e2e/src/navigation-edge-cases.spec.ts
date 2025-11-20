@@ -17,7 +17,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       // Fill page 1 and navigate to page 2
       await scenario.locator('#step1Data input').fill('Page 1 data');
 
-      const nextButton = scenario.locator('button:has-text("Next")');
+      const nextButton = scenario.locator('button:has-text("Next"):visible');
       await nextButton.click();
       await page.waitForTimeout(300);
 
@@ -100,7 +100,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       await scenario.locator('#refreshData1 input').fill('Data before refresh');
 
       // Navigate to page 2
-      const nextButton = scenario.locator('button:has-text("Next")');
+      const nextButton = scenario.locator('button:has-text("Next"):visible');
       await nextButton.click();
       await page.waitForTimeout(300);
 
@@ -136,7 +136,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       await expect(scenario).toBeVisible();
 
       // Test rapid navigation clicks
-      const nextButton = scenario.locator('button:has-text("Next")');
+      const nextButton = scenario.locator('button:has-text("Next"):visible');
 
       // Rapid clicks (should not cause race conditions)
       for (let i = 0; i < 5; i++) {
@@ -203,7 +203,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       });
 
       // Navigate to next page
-      const nextButton = scenario.locator('button:has-text("Next")');
+      const nextButton = scenario.locator('button:has-text("Next"):visible');
       await nextButton.click();
 
       // Wait longer due to simulated network delay
@@ -250,7 +250,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       const scenario = page.locator('[data-testid="invalid-navigation"]');
       await expect(scenario).toBeVisible();
 
-      const nextButton = scenario.locator('button:has-text("Next")');
+      const nextButton = scenario.locator('button:has-text("Next"):visible');
 
       // Try to navigate without filling required field
       await nextButton.click();
@@ -308,7 +308,7 @@ test.describe('Navigation Edge Cases and Error Handling Tests', () => {
       expect(destructData1Value).toBe('Data before destruction');
 
       // Navigate to page 2
-      const nextButton = scenario.locator('button:has-text("Next")');
+      const nextButton = scenario.locator('button:has-text("Next"):visible');
       await nextButton.click();
       await page.waitForTimeout(300);
 
