@@ -78,7 +78,15 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
       if ('key' in childField && childField.key) {
         const childValue = getFieldDefaultValue(childField, registry);
         if (childValue !== undefined) {
-          groupDefaults[childField.key] = childValue;
+          // Check if child field is a flatten type (row/page) - spread its children into parent
+          const childValueHandling = getFieldValueHandling(childField.type, registry);
+          if (childValueHandling === 'flatten' && typeof childValue === 'object' && childValue !== null && !Array.isArray(childValue)) {
+            // Spread flatten field's children into the group defaults
+            Object.assign(groupDefaults, childValue);
+          } else {
+            // Regular field - nest under its key
+            groupDefaults[childField.key] = childValue;
+          }
         }
       }
     }
