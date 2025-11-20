@@ -5,7 +5,21 @@ import { BootstrapConfig } from './bootstrap-config';
  * Injection token for providing global Bootstrap configuration.
  *
  * This token is used to inject the global Bootstrap configuration into components.
- * It should be provided using the `withBootstrapConfig()` function.
+ * It should be provided using the `withBootstrapFields()` function with config parameter.
+ *
+ * @example
+ * ```typescript
+ * // In your app configuration
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideDynamicForm(...withBootstrapFields({
+ *       floatingLabel: true,
+ *       size: 'lg',
+ *       variant: 'primary',
+ *     }))
+ *   ],
+ * };
+ * ```
  *
  * @public
  */

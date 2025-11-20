@@ -5,10 +5,20 @@ import { MaterialConfig } from './material-config';
  * Injection token for providing global Material Design configuration.
  *
  * This token is used to inject the global Material configuration into components.
- * It should be provided using the `withMaterialConfig()` function.
+ * It should be provided using the `withMaterialFields()` function with config parameter.
  *
  * @example
  * ```typescript
+ * // In your app configuration
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideDynamicForm(...withMaterialFields({
+ *       appearance: 'outline',
+ *       subscriptSizing: 'fixed',
+ *     }))
+ *   ],
+ * };
+ *
  * // In a component that needs to access global config
  * export class MatInputFieldComponent {
  *   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });

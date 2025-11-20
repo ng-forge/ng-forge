@@ -112,16 +112,15 @@ export class MyFormComponent {
 Configure default props for all Bootstrap fields at the application or component level:
 
 ```typescript
-import { withBootstrapConfig } from '@ng-forge/dynamic-form-bootstrap';
-
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideDynamicForm(...withBootstrapFields()),
-    ...withBootstrapConfig({
-      floatingLabel: true,
-      size: 'lg',
-      variant: 'primary',
-    }),
+    provideDynamicForm(
+      ...withBootstrapFields({
+        floatingLabel: true,
+        size: 'lg',
+        variant: 'primary',
+      }),
+    ),
   ],
 };
 ```

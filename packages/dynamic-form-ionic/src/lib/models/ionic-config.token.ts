@@ -5,7 +5,21 @@ import { IonicConfig } from './ionic-config';
  * Injection token for providing global Ionic configuration.
  *
  * This token is used to inject the global Ionic configuration into components.
- * It should be provided using the `withIonicConfig()` function.
+ * It should be provided using the `withIonicFields()` function with config parameter.
+ *
+ * @example
+ * ```typescript
+ * // In your app configuration
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideDynamicForm(...withIonicFields({
+ *       fill: 'outline',
+ *       labelPlacement: 'floating',
+ *       color: 'primary',
+ *     }))
+ *   ],
+ * };
+ * ```
  *
  * @public
  */

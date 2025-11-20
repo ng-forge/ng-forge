@@ -5,10 +5,21 @@ import { PrimeNGConfig } from './primeng-config';
  * Injection token for providing global PrimeNG configuration.
  *
  * This token is used to inject the global PrimeNG configuration into components.
- * It should be provided using the `withPrimeNGConfig()` function.
+ * It should be provided using the `withPrimeNGFields()` function with config parameter.
  *
  * @example
  * ```typescript
+ * // In your app configuration
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideDynamicForm(...withPrimeNGFields({
+ *       variant: 'outlined',
+ *       size: 'large',
+ *       severity: 'primary',
+ *     }))
+ *   ],
+ * };
+ *
  * // In a component that needs to access global config
  * export class PrimeInputFieldComponent {
  *   private primengConfig = inject(PRIMENG_CONFIG, { optional: true });

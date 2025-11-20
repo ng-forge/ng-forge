@@ -100,16 +100,15 @@ export class ContactFormComponent {
 Configure default props for all PrimeNG fields at the application or component level:
 
 ```typescript
-import { withPrimeNGConfig } from '@ng-forge/dynamic-form-primeng';
-
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideDynamicForm(...withPrimeNGFields()),
-    ...withPrimeNGConfig({
-      variant: 'outlined',
-      size: 'large',
-      severity: 'primary',
-    }),
+    provideDynamicForm(
+      ...withPrimeNGFields({
+        variant: 'outlined',
+        size: 'large',
+        severity: 'primary',
+      }),
+    ),
   ],
 };
 ```

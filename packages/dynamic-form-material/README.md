@@ -56,16 +56,15 @@ export const appConfig: ApplicationConfig = {
 Configure default props for all Material fields:
 
 ```typescript
-import { withMaterialConfig } from '@ng-forge/dynamic-form-material';
-
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideDynamicForm(...withMaterialFields()),
-    ...withMaterialConfig({
-      appearance: 'outline',
-      subscriptSizing: 'fixed',
-      color: 'primary',
-    }),
+    provideDynamicForm(
+      ...withMaterialFields({
+        appearance: 'outline',
+        subscriptSizing: 'fixed',
+        color: 'primary',
+      }),
+    ),
   ],
 };
 ```

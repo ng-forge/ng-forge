@@ -144,16 +144,15 @@ export class ContactFormComponent {
 Configure default props for all Ionic fields at the application or component level:
 
 ```typescript
-import { withIonicConfig } from '@ng-forge/dynamic-form-ionic';
-
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideDynamicForm(...withIonicFields()),
-    ...withIonicConfig({
-      fill: 'outline',
-      labelPlacement: 'floating',
-      color: 'primary',
-    }),
+    provideDynamicForm(
+      ...withIonicFields({
+        fill: 'outline',
+        labelPlacement: 'floating',
+        color: 'primary',
+      }),
+    ),
   ],
 };
 ```
