@@ -3,6 +3,11 @@ import { provideDynamicForm } from './dynamic-form-providers';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
 
+// Helper to extract providers from EnvironmentProviders
+function getProviders(envProviders: any) {
+  return envProviders.ɵproviders || [];
+}
+
 describe('provideDynamicForm', () => {
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
@@ -14,21 +19,22 @@ describe('provideDynamicForm', () => {
     consoleWarnSpy.mockRestore();
   });
 
-  describe('Provider array structure', () => {
-    it('should return an array of providers', () => {
-      const providers = provideDynamicForm();
+  describe('Provider structure', () => {
+    it('should return EnvironmentProviders', () => {
+      const result = provideDynamicForm();
 
-      expect(Array.isArray(providers)).toBe(true);
-      expect(providers.length).toBeGreaterThan(0);
+      expect(result).toBeDefined();
+      expect(typeof result).toBe('object');
     });
 
-    it('should return providers array with no custom fields', () => {
-      const providers = provideDynamicForm();
+    it('should contain providers for no custom fields', () => {
+      const envProviders = provideDynamicForm();
+      const providers = getProviders(envProviders);
 
       expect(providers).toHaveLength(1);
     });
 
-    it('should return providers array with custom fields', () => {
+    it('should contain providers for custom fields', () => {
       const customField: FieldTypeDefinition = {
         name: 'custom',
         loadComponent: () => import('../fields/text/text-field.component'),
@@ -36,7 +42,8 @@ describe('provideDynamicForm', () => {
         valueHandling: 'exclude',
       };
 
-      const providers = provideDynamicForm(customField);
+      const envProviders = provideDynamicForm(customField);
+      const providers = getProviders(envProviders);
 
       expect(providers).toHaveLength(1);
     });
@@ -44,15 +51,17 @@ describe('provideDynamicForm', () => {
 
   describe('FIELD_REGISTRY provider', () => {
     it('should include FIELD_REGISTRY provider', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY);
+      const envProviders = provideDynamicForm();
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY);
 
       expect(registryProvider).toBeDefined();
     });
 
     it('should have useFactory for FIELD_REGISTRY', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
+      const envProviders = provideDynamicForm();
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
         provide: unknown;
         useFactory: () => Map<string, FieldTypeDefinition>;
       };
@@ -64,8 +73,9 @@ describe('provideDynamicForm', () => {
 
   describe('Built-in fields registration', () => {
     it('should register all built-in fields', () => {
-      const providers = provideDynamicForm();
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
+      const envProviders = provideDynamicForm();
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
         provide: unknown;
         useFactory: () => Map<string, FieldTypeDefinition>;
       };
@@ -89,8 +99,9 @@ describe('provideDynamicForm', () => {
         valueHandling: 'exclude',
       };
 
-      const providers = provideDynamicForm(customField);
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
+      const envProviders = provideDynamicForm(customField);
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
         provide: unknown;
         useFactory: () => Map<string, FieldTypeDefinition>;
       };
@@ -116,8 +127,9 @@ describe('provideDynamicForm', () => {
         valueHandling: 'include',
       };
 
-      const providers = provideDynamicForm(customField1, customField2);
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
+      const envProviders = provideDynamicForm(customField1, customField2);
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
         provide: unknown;
         useFactory: () => Map<string, FieldTypeDefinition>;
       };
@@ -138,8 +150,9 @@ describe('provideDynamicForm', () => {
         valueHandling: 'exclude',
       };
 
-      const providers = provideDynamicForm(customField);
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
+      const envProviders = provideDynamicForm(customField);
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
         provide: unknown;
         useFactory: () => Map<string, FieldTypeDefinition>;
       };
@@ -161,8 +174,9 @@ describe('provideDynamicForm', () => {
         valueHandling: 'exclude',
       };
 
-      const providers = provideDynamicForm(customRow);
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
+      const envProviders = provideDynamicForm(customRow);
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
         provide: unknown;
         useFactory: () => Map<string, FieldTypeDefinition>;
       };
@@ -180,8 +194,9 @@ describe('provideDynamicForm', () => {
         valueHandling: 'exclude',
       };
 
-      const providers = provideDynamicForm(customRow);
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
+      const envProviders = provideDynamicForm(customRow);
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
         provide: unknown;
         useFactory: () => Map<string, FieldTypeDefinition>;
       };
@@ -207,8 +222,9 @@ describe('provideDynamicForm', () => {
         valueHandling: 'include',
       };
 
-      const providers = provideDynamicForm(customField1, customField2);
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
+      const envProviders = provideDynamicForm(customField1, customField2);
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
         provide: unknown;
         useFactory: () => Map<string, FieldTypeDefinition>;
       };
@@ -228,8 +244,9 @@ describe('provideDynamicForm', () => {
         valueHandling: 'exclude' as const,
       }));
 
-      const providers = provideDynamicForm(...customFields);
-      const registryProvider = providers.find((p) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
+      const envProviders = provideDynamicForm(...customFields);
+      const providers = getProviders(envProviders);
+      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
         provide: unknown;
         useFactory: () => Map<string, FieldTypeDefinition>;
       };

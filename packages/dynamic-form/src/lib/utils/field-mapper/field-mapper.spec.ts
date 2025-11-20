@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mapFieldToBindings } from './field-mapper';
 import { FieldDef } from '../../definitions/base';
 import { FieldTypeDefinition } from '../../models/field-type';
@@ -15,6 +15,10 @@ describe('mapFieldToBindings', () => {
     baseMapperSpy.mockReturnValue([{ provide: 'test', useValue: 'base' }] as Binding[]);
 
     registry = new Map<string, FieldTypeDefinition>();
+  });
+
+  afterEach(() => {
+    baseMapperSpy.mockRestore();
   });
 
   describe('custom mapper', () => {

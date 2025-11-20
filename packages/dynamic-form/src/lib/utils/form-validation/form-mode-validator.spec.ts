@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { FormModeValidator, isValidFormConfiguration } from './form-mode-validator';
 import * as formMode from '../../models/types/form-mode';
 import * as pageField from '../../definitions/default/page-field';
@@ -42,6 +42,10 @@ describe('form-mode-validator', () => {
     });
 
     describe('paged forms', () => {
+      afterEach(() => {
+        vi.restoreAllMocks();
+      });
+
       it('should validate paged form as valid', () => {
         const fields = [
           { type: 'page', key: 'page1', fields: [{ type: 'input', key: 'name' }] },

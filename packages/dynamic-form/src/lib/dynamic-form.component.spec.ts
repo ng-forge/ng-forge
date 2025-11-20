@@ -871,12 +871,20 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await delay();
       fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
 
       // Initial value
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
       // Simulate user input
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+
+      // Verify element exists and has correct structure
+      expect(testInput).not.toBeNull();
+      expect(testInput.componentInstance).toBeInstanceOf(TestInputHarnessComponent);
+      expect(testInput.nativeElement.querySelector('input')).not.toBeNull();
+
       const inputElement = testInput.nativeElement.querySelector('input');
       inputElement.value = 'Jane';
       inputElement.dispatchEvent(new Event('input'));
@@ -1297,6 +1305,12 @@ describe('DynamicFormComponent', () => {
       fixture.detectChanges();
 
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+
+      // Verify element exists and has correct structure
+      expect(testInput).not.toBeNull();
+      expect(testInput.componentInstance).toBeInstanceOf(TestInputHarnessComponent);
+      expect(testInput.nativeElement.querySelector('input')).not.toBeNull();
+
       const inputElement = testInput.nativeElement.querySelector('input');
 
       // Rapid changes
@@ -1489,6 +1503,12 @@ describe('DynamicFormComponent', () => {
 
       // Find and interact with the input
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+
+      // Verify element exists and has correct structure
+      expect(testInput).not.toBeNull();
+      expect(testInput.componentInstance).toBeInstanceOf(TestInputHarnessComponent);
+      expect(testInput.nativeElement.querySelector('input')).not.toBeNull();
+
       const inputElement = testInput.nativeElement.querySelector('input');
 
       // Simulate user interaction
@@ -1559,6 +1579,12 @@ describe('DynamicFormComponent', () => {
       expect(component.touched()).toBe(false);
 
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+
+      // Verify element exists and has correct structure
+      expect(testInput).not.toBeNull();
+      expect(testInput.componentInstance).toBeInstanceOf(TestInputHarnessComponent);
+      expect(testInput.nativeElement.querySelector('input')).not.toBeNull();
+
       const inputElement = testInput.nativeElement.querySelector('input');
 
       // Focus then blur without changing value
@@ -1652,6 +1678,12 @@ describe('DynamicFormComponent', () => {
 
       // Try to interact with the field
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+
+      // Verify element exists and has correct structure
+      expect(testInput).not.toBeNull();
+      expect(testInput.componentInstance).toBeInstanceOf(TestInputHarnessComponent);
+      expect(testInput.nativeElement.querySelector('input')).not.toBeNull();
+
       const inputElement = testInput.nativeElement.querySelector('input');
 
       const originalValue = component.formValue().firstName;
@@ -1906,6 +1938,12 @@ describe('DynamicFormComponent', () => {
 
       // Change firstName value
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+
+      // Verify element exists and has correct structure
+      expect(testInput).not.toBeNull();
+      expect(testInput.componentInstance).toBeInstanceOf(TestInputHarnessComponent);
+      expect(testInput.nativeElement.querySelector('input')).not.toBeNull();
+
       const inputElement = testInput.nativeElement.querySelector('input');
       inputElement.value = 'Jane';
       inputElement.dispatchEvent(new Event('input'));

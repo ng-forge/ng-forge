@@ -31,8 +31,9 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       setupFiles: ['src/test-setup.ts'],
+      environment: 'jsdom',
       browser: {
-        enabled: true,
+        enabled: false, // Temporarily disabled - Playwright needs proper browser install
         instances: [
           {
             browser: 'chromium',
