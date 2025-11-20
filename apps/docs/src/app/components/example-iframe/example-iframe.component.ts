@@ -3,6 +3,7 @@ import { ENVIRONMENT } from '../../config/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'example-iframe',
@@ -178,7 +179,7 @@ export class ExampleIframeComponent {
     // Sync theme changes to iframe using RxJS observable
     this.themeService
       .themeChanges()
-      .pipe(takeUntilDestroyed())
+      .pipe(filter(Boolean), takeUntilDestroyed())
       .subscribe((theme) => {
         const iframe = this.iframeElement()?.nativeElement;
         if (iframe && iframe.contentWindow && !this.loading()) {
@@ -192,7 +193,7 @@ export class ExampleIframeComponent {
 
     // Send initial theme to iframe once loaded
     const iframe = this.iframeElement()?.nativeElement;
-    if (iframe) {
+    if (iframe && this.themeService.currentTheme) {
       this.sendThemeToIframe(iframe, this.themeService.currentTheme);
     }
   }
@@ -204,7 +205,7 @@ export class ExampleIframeComponent {
           type: 'THEME_CHANGE',
           theme: theme,
         },
-        '*'
+        '*',
       );
     } catch (error) {
       console.warn('Failed to send theme to iframe:', error);
