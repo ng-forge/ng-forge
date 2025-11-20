@@ -13,4 +13,4 @@ export { MatField, type MatFieldType } from './types/types';
 import './types/registry-augmentation';
 
 // Providers
-export { withMaterialFields, withMaterialConfig } from './providers/material-providers';
+export { withMaterialFields } from './providers/material-providers';

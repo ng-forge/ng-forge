@@ -13,7 +13,7 @@ export { PrimeField, type PrimeFieldType } from './types/types';
 import './types/registry-augmentation';
 
 // Providers
-export { withPrimeNGFields, withPrimeNGConfig } from './providers/primeng-providers';
+export { withPrimeNGFields } from './providers/primeng-providers';
 
 // Testing utilities
 export * from './testing';

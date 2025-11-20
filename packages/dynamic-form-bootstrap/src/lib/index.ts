@@ -13,4 +13,4 @@ export { BsField, type BsFieldType } from './types/types';
 import './types/registry-augmentation';
 
 // Providers
-export { withBootstrapFields, withBootstrapConfig } from './providers/bootstrap-providers';
+export { withBootstrapFields } from './providers/bootstrap-providers';

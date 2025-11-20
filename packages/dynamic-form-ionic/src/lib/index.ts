@@ -13,4 +13,4 @@ export { IonicField, type IonicFieldType } from './types/types';
 import './types/registry-augmentation';
 
 // Providers
-export { withIonicFields, withIonicConfig } from './providers/ionic-providers';
+export { withIonicFields } from './providers/ionic-providers';

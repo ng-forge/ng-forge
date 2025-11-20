@@ -82,37 +82,6 @@ export function withIonicFields(config?: IonicConfig): FieldTypeDefinition[] | F
 }
 
 /**
- * Configure global defaults for Ionic fields.
- *
- * This function provides global configuration that applies to all Ionic fields
- * in the form. Field-level props will override these global defaults.
- *
- * @param config - Global Ionic configuration
- * @returns Array of Angular providers
- *
- * @example
- * ```typescript
- * // Application-level setup with global Ionic config
- * bootstrapApplication(AppComponent, {
- *   providers: [
- *     provideDynamicForm(...withIonicFields()),
- *     ...withIonicConfig({ fill: 'outline', shape: 'round' })
- *   ]
- * });
- * ```
- *
- * @public
- */
-export function withIonicConfig(config: IonicConfig): Provider[] {
-  return [
-    {
-      provide: IONIC_CONFIG,
-      useValue: config,
-    },
-  ];
-}
-
-/**
  * Module augmentation to extend the global DynamicFormFieldRegistry
  * with Ionic field types
  */
