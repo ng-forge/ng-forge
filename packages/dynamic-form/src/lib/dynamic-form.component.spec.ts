@@ -805,6 +805,8 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await delay();
       fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
 
       // Initial values
       expect(component.formValue()).toEqual({
@@ -814,9 +816,10 @@ describe('DynamicFormComponent', () => {
       });
 
       // Update first name
-      const firstNameInput = fixture.debugElement.queryAll(
-        (by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent,
-      )[0];
+      const inputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(inputs.length).toBeGreaterThan(0);
+      const firstNameInput = inputs[0];
+      expect(firstNameInput).toBeDefined();
       const firstNameElement = firstNameInput.nativeElement.querySelector('input');
       firstNameElement.value = 'Jane';
       firstNameElement.dispatchEvent(new Event('input'));
@@ -1581,6 +1584,8 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await delay();
       fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
 
       expect(component.touched()).toBe(false);
 
@@ -1674,6 +1679,8 @@ describe('DynamicFormComponent', () => {
 
       const { component, fixture } = createComponent(config);
       await delay();
+      fixture.detectChanges();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       fixture.componentRef.setInput('formOptions', { disabled: true });
