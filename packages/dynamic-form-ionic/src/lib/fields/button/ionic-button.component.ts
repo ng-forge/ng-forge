@@ -25,6 +25,7 @@ import { AsyncPipe } from '@angular/common';
   },
   template: `
     <ion-button
+      [type]="props()?.type || 'button'"
       [expand]="props()?.expand"
       [fill]="props()?.fill || 'solid'"
       [shape]="props()?.shape"
@@ -58,7 +59,7 @@ export default class IonicButtonFieldComponent<TEvent extends FormEvent> impleme
   // Array item context for token resolution (only set for add/remove array item buttons)
   readonly eventContext = input<ArrayItemContext>();
 
-  buttonTestId = computed(() => `button-${this.key()}`);
+  buttonTestId = computed(() => `${this.props()?.type || 'button'}-${this.key()}`);
 
   triggerEvent(): void {
     const args = this.eventArgs();

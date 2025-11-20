@@ -11,7 +11,6 @@ import {
   ValidationMessages,
   ValueType,
 } from '@ng-forge/dynamic-form';
-import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from 'lodash-es';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PrimeMultiCheckboxComponent, PrimeMultiCheckboxProps } from './prime-multi-checkbox.type';
@@ -71,7 +70,6 @@ import { AsyncPipe } from '@angular/common';
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
-  providers: [ValueInArrayPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> implements PrimeMultiCheckboxComponent<T> {

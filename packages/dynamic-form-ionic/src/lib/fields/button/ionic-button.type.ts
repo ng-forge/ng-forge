@@ -7,6 +7,7 @@ export interface IonicButtonProps {
   size?: 'small' | 'default' | 'large';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
   strong?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export type IonicButtonField<TEvent extends FormEvent> = ButtonField<IonicButtonProps, TEvent>;

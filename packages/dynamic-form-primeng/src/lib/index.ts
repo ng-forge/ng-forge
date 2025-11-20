@@ -5,7 +5,7 @@ export * from './fields';
 export { PRIMENG_FIELD_TYPES } from './config/primeng-field-config';
 
 // Types and constants
-export { PrimeField } from './types/types';
+export { PrimeField, type PrimeFieldType } from './types/types';
 
 // Module augmentation for global types
 import './types/registry-augmentation';

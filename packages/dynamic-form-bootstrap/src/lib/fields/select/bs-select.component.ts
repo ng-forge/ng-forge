@@ -66,7 +66,7 @@ import { AsyncPipe } from '@angular/common';
     `,
   ],
 })
-export default class BsSelectFieldComponent<T extends string> implements BsSelectComponent<T> {
+export default class BsSelectFieldComponent<T extends string = string> implements BsSelectComponent<T> {
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 

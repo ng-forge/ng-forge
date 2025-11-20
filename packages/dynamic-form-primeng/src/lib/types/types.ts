@@ -17,3 +17,5 @@ export enum PrimeField {
   Slider = 'slider',
   Toggle = 'toggle',
 }
+
+export type PrimeFieldType = `${PrimeField}`;

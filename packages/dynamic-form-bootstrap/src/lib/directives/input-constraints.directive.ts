@@ -1,3 +1,4 @@
+/* eslint-disable @angular-eslint/directive-selector */
 import { Directive, ElementRef, inject, input } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
@@ -5,7 +6,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
  * Directive to set min, max, and step attributes on form inputs
  */
 @Directive({
-  selector: 'input[dfBsInputConstraints]',
+  selector: '[dfBsInputConstraints]',
 })
 export class InputConstraintsDirective {
   readonly dfMin = input<number | string | null | undefined>();
