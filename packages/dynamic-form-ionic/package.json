@@ -14,7 +14,8 @@
     "ngxtension": "^6.0.0",
     "vite": "^7.1.11",
     "@analogjs/vite-plugin-angular": "^1.21.3",
-    "@nx/vite": "22.1.0"
+    "@nx/vite": "22.1.0",
+    "@vitest/browser-playwright": "4.0.10"
   },
   "sideEffects": [
     "src/index.ts",
