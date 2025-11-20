@@ -1,12 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { DynamicForm, provideDynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
-import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'bs-example-user-registration-demo',
   imports: [DynamicForm, JsonPipe],
-  providers: [provideDynamicForm(...withBootstrapFields({ floatingLabel: true }))],
   host: {
     class: 'example-container',
   },

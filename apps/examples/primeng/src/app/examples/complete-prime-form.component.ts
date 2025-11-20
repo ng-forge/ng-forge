@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, provideDynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
-import { submitButton, withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { submitButton } from '@ng-forge/dynamic-form-primeng';
 
 @Component({
   selector: 'app-complete-prime-form',
   imports: [DynamicForm, JsonPipe],
-  providers: [provideDynamicForm(...withPrimeNGFields({ variant: 'outlined' }))],
   template: `
     <dynamic-form [config]="config" [(value)]="formValue" />
     <div class="example-result">

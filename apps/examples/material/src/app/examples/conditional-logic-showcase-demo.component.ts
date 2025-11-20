@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { DynamicForm, provideDynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 import { JsonPipe } from '@angular/common';
 
 @Component({
@@ -28,7 +27,6 @@ import { JsonPipe } from '@angular/common';
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideDynamicForm(...withMaterialFields({ appearance: 'outline' }))],
 })
 export class ConditionalLogicShowcaseDemoComponent {
   formValue = signal({
