@@ -18,7 +18,7 @@ import {
 } from '@angular/core';
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
-import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs';
 import { isEqual, memoize } from 'lodash-es';
 import { keyBy } from './utils/object-utils';
@@ -95,7 +95,6 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
       [class.disabled]="effectiveFormOptions().disabled"
       [class.df-form-paged]="formModeDetection().mode === 'paged'"
       [class.df-form-non-paged]="formModeDetection().mode === 'non-paged'"
-      (submit)="onSubmit($event)"
     >
       @if (formModeDetection().mode === 'paged') {
         <!-- Paged form: Use page orchestrator with page field definitions -->
@@ -130,7 +129,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
-  private readonly functionRegistry = inject(FunctionRegistryService);
 
   /**
    * Signal tracking field loading errors for error boundary pattern.
@@ -571,14 +569,20 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     });
 
     // Listen for form reset events
-    this.eventBus.on<FormResetEvent>('form-reset').subscribe(() => {
-      this.onFormReset();
-    });
+    this.eventBus
+      .on<FormResetEvent>('form-reset')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.onFormReset();
+      });
 
     // Listen for form clear events
-    this.eventBus.on<FormClearEvent>('form-clear').subscribe(() => {
-      this.onFormClear();
-    });
+    this.eventBus
+      .on<FormClearEvent>('form-clear')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.onFormClear();
+      });
   }
 
   /**
@@ -669,15 +673,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   protected onFieldsInitialized(): void {
     this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
-  }
-
-  /**
-   * Handles form submission. Prevents default form submission behavior
-   * and emits the submit event through the event bus.
-   */
-  protected onSubmit(event: Event): void {
-    event.preventDefault();
-    this.eventBus.dispatch(SubmitEvent, this.value());
   }
 
   /**
