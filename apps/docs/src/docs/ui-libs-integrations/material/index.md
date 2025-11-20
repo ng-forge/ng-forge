@@ -129,121 +129,71 @@ export class ContactFormComponent {
 
 ## Global Configuration
 
-You can configure default values for all Material fields using the `withMaterialConfig()` provider function. This allows you to set consistent defaults across your entire application or specific components without repeating props on every field.
+You can configure default values for all Material fields by passing a config object to `withMaterialFields()`. This allows you to set consistent defaults across your entire application or specific components without repeating props on every field.
 
-### Basic Usage
+### Application-Level Configuration
 
 ```typescript
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields, withMaterialConfig } from '@ng-forge/dynamic-form-material';
+import { withMaterialFields } from '@ng-forge/dynamic-form-material';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
-    provideDynamicForm(...withMaterialFields()),
-    ...withMaterialConfig({
-      appearance: 'outline',
-      subscriptSizing: 'fixed',
-      color: 'primary',
-    }),
+    provideDynamicForm(
+      ...withMaterialFields({
+        appearance: 'outline',
+        subscriptSizing: 'fixed',
+      }),
+    ),
   ],
 };
 ```
 
-### Component-Level Configuration
-
-You can also apply global configuration at the component level for specific forms:
-
-```typescript
-import { Component, signal } from '@angular/core';
-import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields, withMaterialConfig } from '@ng-forge/dynamic-form-material';
-
-@Component({
-  selector: 'app-settings-form',
-  imports: [DynamicForm],
-  providers: [
-    provideDynamicForm(...withMaterialFields()),
-    ...withMaterialConfig({
-      appearance: 'fill',
-      subscriptSizing: 'dynamic',
-    }),
-  ],
-  template: `<dynamic-form [config]="config" [(value)]="formValue" />`,
-})
-export class SettingsFormComponent {
-  formValue = signal({});
-  config = {
-    fields: [
-      // All fields will use 'fill' appearance by default
-      { key: 'username', type: 'input', label: 'Username', value: '' },
-    ],
-  } as const satisfies FormConfig;
-}
-```
+Now all Material fields in your application will use `outline` appearance and `fixed` subscript sizing by default.
 
 ### Available Configuration Options
 
-| Option                  | Type                                | Default     | Description                                |
-| ----------------------- | ----------------------------------- | ----------- | ------------------------------------------ |
-| `appearance`            | `'fill' \| 'outline'`               | `'fill'`    | Form field appearance style                |
-| `subscriptSizing`       | `'fixed' \| 'dynamic'`              | `'fixed'`   | Error message and hint sizing behavior     |
-| `color`                 | `'primary' \| 'accent' \| 'warn'`   | `'primary'` | Theme color for interactive components     |
-| `labelPosition`         | `'before' \| 'after'`               | `'after'`   | Label position for checkboxes and radios   |
-| `datepickerTouchUi`     | `boolean`                           | `false`     | Use touch-optimized datepicker UI          |
-| `datepickerStartView`   | `'month' \| 'year' \| 'multi-year'` | `'month'`   | Default calendar view for datepickers      |
-| `sliderShowThumbLabel`  | `boolean`                           | `false`     | Show value label on slider thumb           |
-| `selectMultiple`        | `boolean`                           | `false`     | Enable multi-select for select fields      |
-| `disableRipple`         | `boolean`                           | `false`     | Disable Material ripple effects globally   |
+| Option                 | Type                                | Default     | Description                              |
+| ---------------------- | ----------------------------------- | ----------- | ---------------------------------------- |
+| `appearance`           | `'fill' \| 'outline'`               | `'fill'`    | Form field appearance style              |
+| `subscriptSizing`      | `'fixed' \| 'dynamic'`              | `'fixed'`   | Error message and hint sizing behavior   |
+| `color`                | `'primary' \| 'accent' \| 'warn'`   | `'primary'` | Theme color for interactive components   |
+| `labelPosition`        | `'before' \| 'after'`               | `'after'`   | Label position for checkboxes and radios |
+| `datepickerTouchUi`    | `boolean`                           | `false`     | Use touch-optimized datepicker UI        |
+| `datepickerStartView`  | `'month' \| 'year' \| 'multi-year'` | `'month'`   | Default calendar view for datepickers    |
+| `sliderShowThumbLabel` | `boolean`                           | `false`     | Show value label on slider thumb         |
+| `selectMultiple`       | `boolean`                           | `false`     | Enable multi-select for select fields    |
+| `disableRipple`        | `boolean`                           | `false`     | Disable Material ripple effects globally |
 
 ### Field-Level Overrides
 
 Field-level props always take precedence over global configuration. This allows you to set sensible defaults while customizing specific fields:
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields, withMaterialConfig } from '@ng-forge/dynamic-form-material';
-
-@Component({
-  selector: 'app-user-form',
-  imports: [DynamicForm],
-  providers: [
-    provideDynamicForm(...withMaterialFields()),
-    ...withMaterialConfig({
-      appearance: 'outline', // Global default
-      subscriptSizing: 'fixed',
-    }),
+// With global config set to { appearance: 'outline' }
+const config = {
+  fields: [
+    {
+      key: 'email',
+      type: 'input',
+      label: 'Email',
+      // Uses global 'outline' appearance
+    },
+    {
+      key: 'bio',
+      type: 'textarea',
+      label: 'Bio',
+      props: {
+        appearance: 'fill', // Overrides global 'outline'
+        rows: 4,
+      },
+    },
   ],
-  template: `<dynamic-form [config]="config" [(value)]="formValue" />`,
-})
-export class UserFormComponent {
-  formValue = signal({});
-  config = {
-    fields: [
-      {
-        key: 'email',
-        type: 'input',
-        label: 'Email',
-        value: '',
-        // Uses global 'outline' appearance
-      },
-      {
-        key: 'bio',
-        type: 'textarea',
-        label: 'Bio',
-        value: '',
-        props: {
-          appearance: 'fill', // Overrides global 'outline'
-          rows: 4,
-        },
-      },
-    ],
-  } as const satisfies FormConfig;
-}
+} as const satisfies FormConfig;
 ```
 
 ### Configuration Priority
@@ -251,10 +201,10 @@ export class UserFormComponent {
 The configuration system follows this priority order (highest to lowest):
 
 1. **Field-level props** - Props defined directly on the field
-2. **Global configuration** - Values from `withMaterialConfig()`
+2. **Global configuration** - Values passed to `withMaterialFields()` at app level
 3. **Default values** - Built-in defaults from the library
 
-This means you can set application-wide defaults with `withMaterialConfig()`, override them for specific components, and further customize individual fields as needed.
+This means you can set application-wide defaults with `withMaterialFields({ ... })` and override them for specific fields as needed.
 
 ---
 

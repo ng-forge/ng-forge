@@ -130,7 +130,7 @@ export class ContactFormComponent {
 
 ## Global Configuration
 
-You can configure default values for all Bootstrap fields using the `withBootstrapConfig()` provider function. This allows you to set consistent defaults across your entire application or specific components without repeating props on every field.
+You can configure default values for all Bootstrap fields by passing a config object to `withBootstrapFields()`. This allows you to set consistent defaults across your entire application or specific components without repeating props on every field.
 
 ### Basic Usage
 
@@ -138,38 +138,39 @@ You can configure default values for all Bootstrap fields using the `withBootstr
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withBootstrapFields, withBootstrapConfig } from '@ng-forge/dynamic-form-bootstrap';
+import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideDynamicForm(...withBootstrapFields()),
-    ...withBootstrapConfig({
-      floatingLabel: true,
-      size: 'lg',
-      variant: 'primary',
-    }),
+    provideDynamicForm(
+      ...withBootstrapFields({
+        floatingLabel: true,
+        size: 'lg',
+      }),
+    ),
   ],
 };
 ```
 
 ### Component-Level Configuration
 
-You can also apply global configuration at the component level for specific forms:
+You can also apply configuration at the component level for specific forms:
 
 ```typescript
 import { Component, signal } from '@angular/core';
 import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withBootstrapFields, withBootstrapConfig } from '@ng-forge/dynamic-form-bootstrap';
+import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
 
 @Component({
   selector: 'app-settings-form',
   imports: [DynamicForm],
   providers: [
-    provideDynamicForm(...withBootstrapFields()),
-    ...withBootstrapConfig({
-      floatingLabel: true,
-      showValue: true, // For sliders
-    }),
+    provideDynamicForm(
+      ...withBootstrapFields({
+        floatingLabel: true,
+        showValue: true, // For sliders
+      }),
+    ),
   ],
   template: `<dynamic-form [config]="config" [(value)]="formValue" />`,
 })
@@ -186,20 +187,20 @@ export class SettingsFormComponent {
 
 ### Available Configuration Options
 
-| Option              | Type                                                                                                | Default     | Description                                    |
-| ------------------- | --------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------- |
-| `size`              | `'sm' \| 'lg'`                                                                                      | -           | Bootstrap size class for inputs and buttons    |
-| `floatingLabel`     | `boolean`                                                                                           | `false`     | Enable floating label design for inputs        |
-| `variant`           | `'primary' \| 'secondary' \| 'success' \| 'danger' \| 'warning' \| 'info' \| 'light' \| 'dark'`     | `'primary'` | Bootstrap button color variant                 |
-| `outline`           | `boolean`                                                                                           | `false`     | Use outline variant for buttons                |
-| `buttonBlock`       | `boolean`                                                                                           | `false`     | Make buttons full-width                        |
-| `inline`            | `boolean`                                                                                           | `false`     | Display checkboxes/radios inline              |
-| `reverse`           | `boolean`                                                                                           | `false`     | Reverse label and input position               |
-| `switch`            | `boolean`                                                                                           | `false`     | Render checkboxes as switches                  |
-| `buttonGroup`       | `boolean`                                                                                           | `false`     | Render radio buttons as button group           |
-| `buttonSize`        | `'sm' \| 'lg'`                                                                                      | -           | Button size for radio button groups            |
-| `showValue`         | `boolean`                                                                                           | `false`     | Display current value for sliders              |
-| `plaintext`         | `boolean`                                                                                           | `false`     | Render inputs as plaintext                     |
+| Option          | Type                                                                                            | Default     | Description                                 |
+| --------------- | ----------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------- |
+| `size`          | `'sm' \| 'lg'`                                                                                  | -           | Bootstrap size class for inputs and buttons |
+| `floatingLabel` | `boolean`                                                                                       | `false`     | Enable floating label design for inputs     |
+| `variant`       | `'primary' \| 'secondary' \| 'success' \| 'danger' \| 'warning' \| 'info' \| 'light' \| 'dark'` | `'primary'` | Bootstrap button color variant              |
+| `outline`       | `boolean`                                                                                       | `false`     | Use outline variant for buttons             |
+| `buttonBlock`   | `boolean`                                                                                       | `false`     | Make buttons full-width                     |
+| `inline`        | `boolean`                                                                                       | `false`     | Display checkboxes/radios inline            |
+| `reverse`       | `boolean`                                                                                       | `false`     | Reverse label and input position            |
+| `switch`        | `boolean`                                                                                       | `false`     | Render checkboxes as switches               |
+| `buttonGroup`   | `boolean`                                                                                       | `false`     | Render radio buttons as button group        |
+| `buttonSize`    | `'sm' \| 'lg'`                                                                                  | -           | Button size for radio button groups         |
+| `showValue`     | `boolean`                                                                                       | `false`     | Display current value for sliders           |
+| `plaintext`     | `boolean`                                                                                       | `false`     | Render inputs as plaintext                  |
 
 ### Field-Level Overrides
 
@@ -208,17 +209,18 @@ Field-level props always take precedence over global configuration. This allows 
 ```typescript
 import { Component, signal } from '@angular/core';
 import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withBootstrapFields, withBootstrapConfig } from '@ng-forge/dynamic-form-bootstrap';
+import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
 
 @Component({
   selector: 'app-user-form',
   imports: [DynamicForm],
   providers: [
-    provideDynamicForm(...withBootstrapFields()),
-    ...withBootstrapConfig({
-      floatingLabel: true, // Global default
-      size: 'lg',
-    }),
+    provideDynamicForm(
+      ...withBootstrapFields({
+        floatingLabel: true, // Global default
+        size: 'lg',
+      }),
+    ),
   ],
   template: `<dynamic-form [config]="config" [(value)]="formValue" />`,
 })
@@ -248,7 +250,7 @@ export class UserFormComponent {
         key: 'submit',
         label: 'Submit',
         props: {
-          variant: 'success', // Override default 'primary'
+          variant: 'success',
           size: 'sm', // Override global 'lg'
         },
       },
@@ -262,7 +264,7 @@ export class UserFormComponent {
 The configuration system follows this priority order (highest to lowest):
 
 1. **Field-level props** - Props defined directly on the field
-2. **Global configuration** - Values from `withBootstrapConfig()`
+2. **Global configuration** - Values passed to `withBootstrapFields()`
 3. **Default values** - Built-in defaults from the library
 
 This means you can set application-wide defaults with `withBootstrapConfig()`, override them for specific components, and further customize individual fields as needed.

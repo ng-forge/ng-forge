@@ -135,7 +135,7 @@ export class ContactFormComponent {
 
 ## Global Configuration
 
-You can configure default values for all PrimeNG fields using the `withPrimeNGConfig()` provider function. This allows you to set consistent defaults across your entire application or specific components without repeating props on every field.
+You can configure default values for all PrimeNG fields by passing a config object to `withPrimeNGFields()`. This allows you to set consistent defaults across your entire application or specific components without repeating props on every field.
 
 ### Basic Usage
 
@@ -143,22 +143,22 @@ You can configure default values for all PrimeNG fields using the `withPrimeNGCo
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withPrimeNGFields, withPrimeNGConfig } from '@ng-forge/dynamic-form-primeng';
+import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideDynamicForm(...withPrimeNGFields()),
+    provideDynamicForm(
+      ...withPrimeNGFields({
+        variant: 'outlined',
+        size: 'large',
+      }),
+    ),
     providePrimeNG({
       theme: {
         preset: Aura,
       },
-    }),
-    ...withPrimeNGConfig({
-      variant: 'outlined',
-      size: 'large',
-      severity: 'primary',
     }),
   ],
 };
@@ -166,22 +166,23 @@ export const appConfig: ApplicationConfig = {
 
 ### Component-Level Configuration
 
-You can also apply global configuration at the component level for specific forms:
+You can also apply configuration at the component level for specific forms:
 
 ```typescript
 import { Component, signal } from '@angular/core';
 import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withPrimeNGFields, withPrimeNGConfig } from '@ng-forge/dynamic-form-primeng';
+import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
 
 @Component({
   selector: 'app-settings-form',
   imports: [DynamicForm],
   providers: [
-    provideDynamicForm(...withPrimeNGFields()),
-    ...withPrimeNGConfig({
-      variant: 'filled',
-      showIcon: true,
-    }),
+    provideDynamicForm(
+      ...withPrimeNGFields({
+        variant: 'filled',
+        showIcon: true,
+      }),
+    ),
   ],
   template: `<dynamic-form [config]="config" [(value)]="formValue" />`,
 })
@@ -198,21 +199,21 @@ export class SettingsFormComponent {
 
 ### Available Configuration Options
 
-| Option                 | Type                                                                                                | Default       | Description                                   |
-| ---------------------- | --------------------------------------------------------------------------------------------------- | ------------- | --------------------------------------------- |
-| `variant`              | `'outlined' \| 'filled'`                                                                            | `'outlined'`  | Input field visual style                      |
-| `size`                 | `'small' \| 'large'`                                                                                | -             | Component size                                |
-| `severity`             | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warn' \| 'help' \| 'danger' \| 'contrast'`     | `'primary'`   | Button and component color theme              |
-| `showIcon`             | `boolean`                                                                                           | `false`       | Show calendar icon for datepickers            |
-| `showButtonBar`        | `boolean`                                                                                           | `false`       | Show today/clear buttons in datepickers       |
-| `filter`               | `boolean`                                                                                           | `false`       | Enable search/filter in select dropdowns      |
-| `showClear`            | `boolean`                                                                                           | `false`       | Show clear button in select dropdowns         |
-| `autoResize`           | `boolean`                                                                                           | `false`       | Auto-resize textareas based on content        |
-| `sliderOrientation`    | `'horizontal' \| 'vertical'`                                                                        | `'horizontal'`| Slider orientation                            |
-| `buttonOutlined`       | `boolean`                                                                                           | `false`       | Use outlined style for buttons                |
-| `buttonText`           | `boolean`                                                                                           | `false`       | Use text-only style for buttons               |
-| `buttonRaised`         | `boolean`                                                                                           | `false`       | Use raised style for buttons                  |
-| `buttonRounded`        | `boolean`                                                                                           | `false`       | Use rounded style for buttons                 |
+| Option              | Type                                                                                            | Default        | Description                              |
+| ------------------- | ----------------------------------------------------------------------------------------------- | -------------- | ---------------------------------------- |
+| `variant`           | `'outlined' \| 'filled'`                                                                        | `'outlined'`   | Input field visual style                 |
+| `size`              | `'small' \| 'large'`                                                                            | -              | Component size                           |
+| `severity`          | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warn' \| 'help' \| 'danger' \| 'contrast'` | `'primary'`    | Button and component color theme         |
+| `showIcon`          | `boolean`                                                                                       | `false`        | Show calendar icon for datepickers       |
+| `showButtonBar`     | `boolean`                                                                                       | `false`        | Show today/clear buttons in datepickers  |
+| `filter`            | `boolean`                                                                                       | `false`        | Enable search/filter in select dropdowns |
+| `showClear`         | `boolean`                                                                                       | `false`        | Show clear button in select dropdowns    |
+| `autoResize`        | `boolean`                                                                                       | `false`        | Auto-resize textareas based on content   |
+| `sliderOrientation` | `'horizontal' \| 'vertical'`                                                                    | `'horizontal'` | Slider orientation                       |
+| `buttonOutlined`    | `boolean`                                                                                       | `false`        | Use outlined style for buttons           |
+| `buttonText`        | `boolean`                                                                                       | `false`        | Use text-only style for buttons          |
+| `buttonRaised`      | `boolean`                                                                                       | `false`        | Use raised style for buttons             |
+| `buttonRounded`     | `boolean`                                                                                       | `false`        | Use rounded style for buttons            |
 
 ### Field-Level Overrides
 
@@ -221,17 +222,18 @@ Field-level props always take precedence over global configuration. This allows 
 ```typescript
 import { Component, signal } from '@angular/core';
 import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withPrimeNGFields, withPrimeNGConfig } from '@ng-forge/dynamic-form-primeng';
+import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
 
 @Component({
   selector: 'app-user-form',
   imports: [DynamicForm],
   providers: [
-    provideDynamicForm(...withPrimeNGFields()),
-    ...withPrimeNGConfig({
-      variant: 'outlined', // Global default
-      size: 'large',
-    }),
+    provideDynamicForm(
+      ...withPrimeNGFields({
+        variant: 'outlined', // Global default
+        size: 'large',
+      }),
+    ),
   ],
   template: `<dynamic-form [config]="config" [(value)]="formValue" />`,
 })
@@ -270,10 +272,10 @@ export class UserFormComponent {
 The configuration system follows this priority order (highest to lowest):
 
 1. **Field-level props** - Props defined directly on the field
-2. **Global configuration** - Values from `withPrimeNGConfig()`
+2. **Global configuration** - Values passed to `withPrimeNGFields()`
 3. **Default values** - Built-in defaults from the library
 
-This means you can set application-wide defaults with `withPrimeNGConfig()`, override them for specific components, and further customize individual fields as needed.
+This means you can set application-wide defaults with `withPrimeNGFields({ ... })`, override them for specific components, and further customize individual fields as needed.
 
 ---
 
