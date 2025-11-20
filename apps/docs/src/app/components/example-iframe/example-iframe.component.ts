@@ -24,8 +24,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
       </iframe>
     </div>
     @if (code()) {
-      <details open>
-        <summary>View Config</summary>
+      <details>
+        <summary>🔧 Click to view config!</summary>
         <pre><code>{{ code() }}</code></pre>
       </details>
     }

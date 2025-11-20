@@ -7,7 +7,7 @@ A comprehensive example demonstrating all conditional logic capabilities in ng-f
 
 ## Live Demo
 
-{{ NgDocActions.demo("ConditionalLogicShowcaseDemoComponent", { container: false, tabs: [] }) }}
+{{ NgDocActions.demo("ConditionalLogicShowcaseDemoComponent", { container: false }) }}
 
 ## Overview
 

@@ -137,7 +137,7 @@ export class ContactFormComponent {
 
 Here's a full registration form showcasing multiple PrimeNG field types:
 
-{{ NgDocActions.demo("CompleteFormIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
 
 This example demonstrates:
 
@@ -166,7 +166,7 @@ Text input field with HTML5 type support and PrimeNG styling.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("InputIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("InputIframeDemoComponent") }}
 
 **Basic Usage:**
 
@@ -227,7 +227,7 @@ Multi-line text input field with PrimeNG styling and auto-resize support.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("TextareaIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("TextareaIframeDemoComponent") }}
 
 **Basic Usage:**
 
@@ -271,7 +271,7 @@ Dropdown selection field with search capability and virtual scrolling support.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SelectIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("SelectIframeDemoComponent") }}
 
 **Basic Usage:**
 
@@ -313,7 +313,7 @@ Radio button group for selecting a single option.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("RadioIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("RadioIframeDemoComponent") }}
 
 **Basic Usage:**
 
@@ -348,7 +348,7 @@ Boolean checkbox control for single true/false selections.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("CheckboxIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
 
 **Basic Usage:**
 
@@ -380,7 +380,7 @@ Multiple checkbox selection field for choosing multiple options.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
 
 **Basic Usage:**
 
@@ -423,7 +423,7 @@ Slide toggle switch (InputSwitch) for boolean on/off selections.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ToggleIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
 
 **Basic Usage:**
 
@@ -454,7 +454,7 @@ Numeric slider control for selecting values from a range.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SliderIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("SliderIframeDemoComponent") }}
 
 **Basic Usage:**
 
@@ -495,7 +495,7 @@ Date selection field with calendar popup (p-calendar).
 
 **Live Demo:**
 
-{{ NgDocActions.demo("DatepickerIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
 
 **Basic Usage:**
 
@@ -547,7 +547,7 @@ Form submission button that's automatically disabled when the form is invalid.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ButtonIframeDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
 
 **Basic Usage:**
 

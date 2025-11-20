@@ -2,7 +2,7 @@ Groups nest form fields under a single key in the form value. This creates logic
 
 ## Interactive Demo
 
-{{ NgDocActions.demo("GroupFieldDemoComponent", { tabs: [] }) }}
+{{ NgDocActions.demo("GroupFieldDemoComponent") }}
 
 ## Basic Group
 
