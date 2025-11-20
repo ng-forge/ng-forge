@@ -52,7 +52,7 @@ import { format } from 'date-fns';
     >
       <div slot="error">
         @for (error of errorsToDisplay(); track error.kind) {
-        <ion-note color="danger">{{ error.message }}</ion-note>
+          <ion-note color="danger">{{ error.message }}</ion-note>
         }
       </div>
     </ion-input>

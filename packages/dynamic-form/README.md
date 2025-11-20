@@ -867,7 +867,7 @@ interface HttpValidatorConfig {
 // Custom validator function signatures
 type CustomValidator<TValue = unknown> = (
   ctx: FieldContext<TValue>,
-  params?: Record<string, unknown>
+  params?: Record<string, unknown>,
 ) => ValidationError | ValidationError[] | null;
 
 interface AsyncCustomValidator<TValue = unknown, TParams = unknown, TResult = unknown> {

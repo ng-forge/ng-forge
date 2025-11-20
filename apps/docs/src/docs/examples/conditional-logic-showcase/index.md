@@ -1201,10 +1201,11 @@ type CertificationFormValue = ExtractFormValue<typeof certificationConfig>;
     <div class="certification-container">
       <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
 
-      @let message = submitMessage(); @if (message) {
-      <div class="success-message">
-        {{ message }}
-      </div>
+      @let message = submitMessage();
+      @if (message) {
+        <div class="success-message">
+          {{ message }}
+        </div>
       }
     </div>
   `,
@@ -1245,14 +1246,14 @@ export class ConditionalLogicShowcaseComponent {
       value.certificationType === 'associate'
         ? 'Associate'
         : value.certificationType === 'professional'
-        ? 'Professional'
-        : value.certificationType === 'expert'
-        ? 'Expert'
-        : 'Specialist';
+          ? 'Professional'
+          : value.certificationType === 'expert'
+            ? 'Expert'
+            : 'Specialist';
 
     this.submitMessage.set(
       `Thank you, ${value.firstName}! Your ${certType} certification application has been submitted successfully. ` +
-        `You will receive a confirmation email at ${value.email} within 24 hours.`
+        `You will receive a confirmation email at ${value.email} within 24 hours.`,
     );
   }
 }

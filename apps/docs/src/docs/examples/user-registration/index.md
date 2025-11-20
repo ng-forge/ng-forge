@@ -360,10 +360,11 @@ type RegistrationValue = ExtractFormValue<typeof registrationConfig>;
 
       <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
 
-      @let message = submitMessage(); @if (message) {
-      <div class="success-message">
-        {{ message }}
-      </div>
+      @let message = submitMessage();
+      @if (message) {
+        <div class="success-message">
+          {{ message }}
+        </div>
       }
     </div>
   `,
