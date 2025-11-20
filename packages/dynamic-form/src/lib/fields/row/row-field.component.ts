@@ -8,6 +8,7 @@ import {
   Injector,
   input,
   model,
+  runInInjectionContext,
   ViewContainerRef,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -16,7 +17,7 @@ import { RowField } from '../../definitions/default/row-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
 import { FormUiControl } from '@angular/forms/signals';
-import { FieldSignalContext } from '../../mappers/types';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
@@ -41,17 +42,15 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
 export default class RowFieldComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
+  private readonly fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
 
-  // Row field definition and parent form context
+  // Row field definition
   field = input.required<RowField<any>>();
   key = input.required<string>();
   value = model<any>(undefined);
-  form = input.required<any>(); // Parent form instance
-  fieldSignalContext = input.required<FieldSignalContext<any>>();
-  arrayContext = input<{ arrayKey: string; index: number; formValue: unknown }>();
 
   readonly disabled = computed(() => this.field().disabled || false);
 
@@ -92,18 +91,12 @@ export default class RowFieldComponent {
           return undefined;
         }
 
-        // Pass through the parent form context - row doesn't change form shape
-        const fieldSignalContext = this.fieldSignalContext();
-        if (!fieldSignalContext) {
-          return undefined;
-        }
-
-        const bindings = mapFieldToBindings(fieldDef, {
-          fieldSignalContext,
-          fieldRegistry: this.fieldRegistry.raw,
-          arrayContext: this.arrayContext(),
+        // Run mapper in injection context - row passes through parent context unchanged
+        const bindings = runInInjectionContext(this.injector, () => {
+          return mapFieldToBindings(fieldDef, this.fieldRegistry.raw);
         });
 
+        // Create component with same injector (parent context is passed through)
         return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
       })
       .catch((error) => {

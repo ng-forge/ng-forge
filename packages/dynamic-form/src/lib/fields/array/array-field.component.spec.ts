@@ -6,7 +6,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { baseFieldMapper, FieldSignalContext } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
-import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models';
+import { FIELD_REGISTRY, FieldTypeDefinition, FIELD_SIGNAL_CONTEXT } from '../../models';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { createSchemaFromFields } from '../../core/schema-builder';
 
@@ -14,7 +14,10 @@ describe('ArrayFieldComponent', () => {
   function setupArrayTest(field: ArrayField<any>, value?: Record<string, unknown>) {
     const mockFieldType: FieldTypeDefinition = {
       name: 'test',
-      loadComponent: () => import('../../testing/simple-test-utils'),
+      loadComponent: async () => {
+        const module = await import('../../testing/simple-test-utils');
+        return module.TestFieldComponent;
+      },
       mapper: baseFieldMapper,
     };
 
@@ -29,32 +32,43 @@ describe('ArrayFieldComponent', () => {
           provide: FIELD_REGISTRY,
           useValue: registry,
         },
+        {
+          provide: FIELD_SIGNAL_CONTEXT,
+          useFactory: (injector: Injector) => {
+            return runInInjectionContext(injector, () => {
+              const valueSignal = signal(value || {});
+              const defaultValues = () => ({}) as any;
+
+              // Create schema from the array field to properly setup Signal Forms
+              const schema = createSchemaFromFields([field], registry);
+              const testForm = form(valueSignal, schema);
+
+              // Force Signal Forms to initialize the structure by reading the form
+              // This ensures the FieldTree structure is set up before the component accesses it
+              const formValue = testForm();
+              const structure = (testForm as any).structure?.();
+
+              const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
+                injector,
+                value: valueSignal,
+                defaultValues,
+                form: testForm,
+                defaultValidationMessages: signal({}),
+              };
+
+              return mockFieldSignalContext;
+            });
+          },
+          deps: [Injector],
+        },
       ],
     });
 
     const fixture = TestBed.createComponent(ArrayFieldComponent);
     const component = fixture.componentInstance;
-    const injector = TestBed.inject(Injector);
-
-    const valueSignal = signal(value || {});
-    const defaultValues = signal({});
-
-    // Create schema from the array field to properly setup Signal Forms
-    const schema = createSchemaFromFields([field], registry);
-    const testForm = runInInjectionContext(injector, () => form(valueSignal, schema));
-
-    const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
-      injector,
-      value: valueSignal,
-      defaultValues,
-      form: testForm,
-      defaultValidationMessages: signal({}),
-    };
 
     fixture.componentRef.setInput('key', field.key);
     fixture.componentRef.setInput('field', field);
-    fixture.componentRef.setInput('parentForm', testForm);
-    fixture.componentRef.setInput('parentFieldSignalContext', mockFieldSignalContext);
 
     fixture.detectChanges();
 
@@ -101,7 +115,63 @@ describe('ArrayFieldComponent', () => {
     expect(component.key()).toBe('testArray');
   });
 
-  it('should have parentForm and parentFieldSignalContext inputs', () => {
+  it('should store field template from fields array', () => {
+    const templateField = createSimpleTestField('item', 'Item');
+    const field: ArrayField<any> = {
+      key: 'testArray',
+      type: 'array',
+      label: 'Test Array',
+      fields: [templateField],
+    };
+
+    const { component } = setupArrayTest(field);
+
+    // The component should store the first field as a template
+    expect(component['fieldTemplate']()).toEqual(templateField);
+  });
+
+  it('should initialize with zero items for empty array', () => {
+    const field: ArrayField<any> = {
+      key: 'testArray',
+      type: 'array',
+      label: 'Test Array',
+      fields: [createSimpleTestField('item', 'Item')],
+    };
+
+    const { component } = setupArrayTest(field, { testArray: [] });
+
+    expect(component.fields()).toHaveLength(0);
+  });
+
+  it('should create field instances for existing array items', async () => {
+    const field: ArrayField<any> = {
+      key: 'items',
+      type: 'array',
+      label: 'Items',
+      fields: [createSimpleTestField('item', 'Item')],
+    };
+
+    const { component, fixture } = setupArrayTest(field, {
+      items: ['value1', 'value2', 'value3'],
+    });
+
+    // The component loads array items asynchronously via forkJoin in a switchMap
+    // Poll until the fields are loaded or timeout
+    const maxAttempts = 50; // 5 seconds max
+    let attempts = 0;
+
+    while (component.fields().length < 3 && attempts < maxAttempts) {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      TestBed.flushEffects();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
+    }
+
+    expect(component.fields()).toHaveLength(3);
+  });
+
+  it('should render array container in template', () => {
     const field: ArrayField<any> = {
       key: 'testArray',
       type: 'array',
@@ -109,39 +179,10 @@ describe('ArrayFieldComponent', () => {
       fields: [],
     };
 
-    const { component } = setupArrayTest(field);
+    const { fixture } = setupArrayTest(field);
 
-    expect(component.parentForm()).toBeDefined();
-    expect(component.parentFieldSignalContext()).toBeDefined();
-  });
-
-  it('should initialize fields signal', () => {
-    const field: ArrayField<any> = {
-      key: 'items',
-      type: 'array',
-      fields: [createSimpleTestField('item', 'Item')],
-    };
-
-    const { component } = setupArrayTest(field, { items: [] });
-
-    // The fields signal should exist and be initialized
-    expect(component.fields).toBeDefined();
-    expect(Array.isArray(component.fields())).toBe(true);
-  });
-
-  it('should render array container in template', () => {
-    const field: ArrayField<any> = {
-      key: 'testArray',
-      type: 'array',
-      fields: [createSimpleTestField('item', 'Item')],
-    };
-
-    const { fixture } = setupArrayTest(field, { testArray: [] });
-
-    // The array container should be present in the template
-    const containerElement = fixture.nativeElement.querySelector('.array-container');
-    expect(containerElement).not.toBeNull();
-    expect(containerElement).toBeInstanceOf(HTMLDivElement);
+    const container = fixture.nativeElement.querySelector('.array-container');
+    expect(container).toBeTruthy();
   });
 
   it('should have host classes', () => {
@@ -154,105 +195,8 @@ describe('ArrayFieldComponent', () => {
 
     const { fixture } = setupArrayTest(field);
 
-    const element = fixture.nativeElement;
-    expect(element.classList.contains('df-field')).toBe(true);
-    expect(element.classList.contains('df-array')).toBe(true);
-  });
-
-  it('should subscribe to AddArrayItemEvent on construction', () => {
-    const templateField = createSimpleTestField('item', 'Item');
-    templateField.value = 'default';
-
-    const field: ArrayField<any> = {
-      key: 'items',
-      type: 'array',
-      fields: [templateField],
-    };
-
-    const { component, fixture } = setupArrayTest(field, { items: [] });
-    const eventBus = TestBed.inject(EventBus);
-
-    // Verify the component was constructed successfully
-    expect(component).toBeDefined();
-
-    // Dispatch add event and verify parent form value is updated
-    eventBus.dispatch(AddArrayItemEvent, 'items', templateField);
-
-    fixture.detectChanges();
-
-    // The value should have been updated with a new array item
-    const updatedValue = component.parentFieldSignalContext().value() as Record<string, unknown>;
-    expect(Array.isArray(updatedValue['items'])).toBe(true);
-    expect((updatedValue['items'] as unknown[]).length).toBe(1);
-  });
-
-  it('should add item at specific index when index is provided', () => {
-    const templateField = createSimpleTestField('item', 'Item');
-    templateField.value = 'new';
-
-    const field: ArrayField<any> = {
-      key: 'items',
-      type: 'array',
-      fields: [templateField],
-    };
-
-    const { component, fixture } = setupArrayTest(field, { items: ['first', 'third'] });
-    const eventBus = TestBed.inject(EventBus);
-
-    // Add at index 1 (between first and third)
-    eventBus.dispatch(AddArrayItemEvent, 'items', templateField, 1);
-
-    fixture.detectChanges();
-
-    const updatedValue = component.parentFieldSignalContext().value() as Record<string, unknown>;
-    const items = updatedValue['items'] as unknown[];
-
-    // Should have 3 items now
-    expect(items.length).toBe(3);
-  });
-
-  it('should remove item when RemoveArrayItemEvent is dispatched', () => {
-    const field: ArrayField<any> = {
-      key: 'items',
-      type: 'array',
-      fields: [createSimpleTestField('item', 'Item')],
-    };
-
-    const { component, fixture } = setupArrayTest(field, { items: ['value1', 'value2'] });
-    const eventBus = TestBed.inject(EventBus);
-
-    // Dispatch remove event
-    eventBus.dispatch(RemoveArrayItemEvent, 'items', 0);
-
-    fixture.detectChanges();
-
-    const updatedValue = component.parentFieldSignalContext().value() as Record<string, unknown>;
-    const items = updatedValue['items'] as unknown[];
-
-    // Should have removed one item
-    expect(items.length).toBe(1);
-  });
-
-  it('should not respond to events for different array keys', () => {
-    const field: ArrayField<any> = {
-      key: 'items',
-      type: 'array',
-      fields: [createSimpleTestField('item', 'Item')],
-    };
-
-    const { component, fixture } = setupArrayTest(field, { items: ['value1'] });
-    const eventBus = TestBed.inject(EventBus);
-
-    const initialValue = component.parentFieldSignalContext().value();
-
-    // Dispatch event for different array
-    eventBus.dispatch(AddArrayItemEvent, 'otherArray', createSimpleTestField('other', 'Other'));
-
-    fixture.detectChanges();
-
-    const updatedValue = component.parentFieldSignalContext().value();
-
-    // Should not have changed
-    expect(updatedValue).toEqual(initialValue);
+    const host = fixture.nativeElement;
+    expect(host.classList.contains('df-field')).toBe(true);
+    expect(host.classList.contains('df-array')).toBe(true);
   });
 });

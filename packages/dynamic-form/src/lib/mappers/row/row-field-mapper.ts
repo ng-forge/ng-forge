@@ -1,28 +1,18 @@
 import { RowField } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
-import { FieldMapperOptions } from '../types';
 
 /**
  * Maps a row field definition to Angular bindings
- * Row components are layout containers that don't change the form shape - they pass through parent form context
+ * Row components are layout containers that don't change the form shape.
+ * The row component will inject FIELD_SIGNAL_CONTEXT directly.
  */
-export function rowFieldMapper(fieldDef: RowField, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
+export function rowFieldMapper(fieldDef: RowField): Binding[] {
   const bindings: Binding[] = [];
 
   bindings.push(inputBinding('key', () => fieldDef.key));
 
   // Row fields need the field definition
   bindings.push(inputBinding('field', () => fieldDef));
-
-  if (options) {
-    bindings.push(inputBinding('form', () => options.fieldSignalContext.form));
-    bindings.push(inputBinding('fieldSignalContext', () => options.fieldSignalContext));
-
-    // Pass arrayContext if this row is rendered inside an array
-    if (options.arrayContext) {
-      bindings.push(inputBinding('arrayContext', () => options.arrayContext));
-    }
-  }
 
   return bindings;
 }

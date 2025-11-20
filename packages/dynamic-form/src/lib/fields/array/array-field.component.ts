@@ -8,6 +8,7 @@ import {
   Injector,
   input,
   inputBinding,
+  runInInjectionContext,
   type Type,
   ViewContainerRef,
 } from '@angular/core';
@@ -16,13 +17,14 @@ import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { form, FormUiControl, FieldTree } from '@angular/forms/signals';
+import { FieldTree, form, FormUiControl } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
-import { FieldSignalContext } from '../../mappers';
+import { ArrayContext, FieldSignalContext } from '../../mappers';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
+import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 
 /**
  * Array field component that manages dynamic arrays of field values.
@@ -31,7 +33,7 @@ import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
  * - Fields array defines the TEMPLATE (not instances)
  * - Collects values as flat array: [value1, value2, value3]
  * - Supports dynamic add/remove via event bus
- * - Template stored in linkedSignal for type enforcement
+ * - Template stored in computed signal for type enforcement
  *
  * Example:
  * ```typescript
@@ -66,6 +68,7 @@ import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
+  private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
@@ -73,10 +76,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   /** Field configuration input */
   field = input.required<ArrayField>();
   key = input.required<string>();
-
-  // Parent form context inputs
-  parentForm = input.required<ReturnType<typeof form<TModel>>>();
-  parentFieldSignalContext = input.required<FieldSignalContext<TModel>>();
 
   /**
    * Get the field template from the array field definition.
@@ -99,9 +98,10 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const arrayKey = this.field().key;
 
     // Get the parent form - this tracks when the form structure changes
-    const parentForm = this.parentForm()();
+    const parentForm = this.parentFieldSignalContext.form();
 
     // Access the array FieldTree through the form's structure
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const childrenMap = (parentForm as any).structure?.childrenMap?.();
     if (!childrenMap) return [];
 
@@ -192,26 +192,24 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
       return;
     }
 
-    const context = this.parentFieldSignalContext();
     const arrayKey = this.field().key;
-    const currentArray = this.getArrayValue(context.value(), arrayKey);
+    const currentArray = this.getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
     const insertIndex = index !== undefined ? Math.min(index, currentArray.length) : currentArray.length;
 
     const value = getFieldDefaultValue(fieldTemplate, this.fieldRegistry.raw);
     const newArray = [...currentArray];
     newArray.splice(insertIndex, 0, value);
 
-    context.value.update((current) => ({ ...current, [arrayKey]: newArray }) as TModel);
+    this.parentFieldSignalContext.value.update((current) => ({ ...current, [arrayKey]: newArray }) as TModel);
   }
 
   /**
    * Remove an item from the array
    */
   private removeItem(index?: number): void {
-    const context = this.parentFieldSignalContext();
     const arrayKey = this.field().key;
 
-    context.value.update((current) => {
+    this.parentFieldSignalContext.value.update((current) => {
       const currentArray = this.getArrayValue(current, arrayKey);
       if (currentArray.length === 0) return current;
 
@@ -309,7 +307,7 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
       inputBinding('arrayContext', () => ({
         arrayKey,
         index,
-        formValue: this.parentFieldSignalContext().value(),
+        formValue: this.parentFieldSignalContext.value(),
       })),
     ];
 
@@ -325,7 +323,7 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   }
 
   /**
-   * Create component for flatten types (row/page)
+   * Create component for flatten types (row/page) and groups within arrays
    * These need special handling because they contain nested fields
    */
   private createFlattenTypeComponent(
@@ -341,23 +339,39 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     // The form property needs to be callable (wrapped in a function that returns the FieldTree)
     const itemFieldSignalContext: FieldSignalContext<unknown> = {
       injector: this.injector,
-      value: this.parentFieldSignalContext().value,
+      value: this.parentFieldSignalContext.value,
       defaultValues: () => ({}),
       form: (() => fieldTree) as ReturnType<typeof form<unknown>>,
-      defaultValidationMessages: this.parentFieldSignalContext().defaultValidationMessages,
+      defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 
-    const bindings = mapFieldToBindings(template, {
-      fieldSignalContext: itemFieldSignalContext,
-      fieldRegistry: this.fieldRegistry.raw,
-      arrayContext: {
-        arrayKey,
-        index,
-        formValue: this.parentFieldSignalContext().value(),
-      },
+    // Create scoped child injector that provides the array item's context
+    const arrayContext: ArrayContext = {
+      arrayKey,
+      index,
+      formValue: this.parentFieldSignalContext.value(),
+    };
+
+    const arrayItemInjector = Injector.create({
+      parent: this.injector,
+      providers: [
+        {
+          provide: FIELD_SIGNAL_CONTEXT,
+          useValue: itemFieldSignalContext,
+        },
+        {
+          provide: ARRAY_CONTEXT,
+          useValue: arrayContext,
+        },
+      ],
     });
 
-    return this.vcr.createComponent(componentType, { bindings, injector: this.injector });
+    // Map field to bindings using the scoped injector
+    const bindings = runInInjectionContext(arrayItemInjector, () => {
+      return mapFieldToBindings(template, this.fieldRegistry.raw);
+    });
+
+    return this.vcr.createComponent(componentType, { bindings, injector: arrayItemInjector });
   }
 
   onFieldsInitialized(): void {

@@ -1,9 +1,8 @@
 import { FieldDef } from '../../definitions';
 import { Binding, inputBinding } from '@angular/core';
 import { getGridClassString } from '../../utils/grid-classes/grid-classes';
-import { FieldMapperOptions } from '../types';
 
-export function baseFieldMapper(fieldDef: FieldDef<any>, options?: Omit<FieldMapperOptions, 'fieldRegistry'>): Binding[] {
+export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
   const { label, className, tabIndex, props } = fieldDef;
   const bindings: Binding[] = [];
 

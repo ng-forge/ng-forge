@@ -7,4 +7,10 @@ export type {
   PrimePreviousButtonField,
 } from './prime-button.type';
 export { default as PrimeButtonFieldComponent } from './prime-button.component';
-export { submitButtonFieldMapper, nextButtonFieldMapper, previousButtonFieldMapper } from './prime-specific-button.mapper';
+export {
+  submitButtonFieldMapper,
+  nextButtonFieldMapper,
+  previousButtonFieldMapper,
+  addArrayItemButtonFieldMapper,
+  removeArrayItemButtonFieldMapper,
+} from './prime-specific-button.mapper';

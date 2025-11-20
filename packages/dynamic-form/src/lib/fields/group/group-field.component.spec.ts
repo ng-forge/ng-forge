@@ -6,7 +6,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { baseFieldMapper, FieldSignalContext } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
-import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models';
+import { FIELD_REGISTRY, FIELD_SIGNAL_CONTEXT, FieldTypeDefinition } from '../../models';
 import { EventBus } from '../../events';
 
 describe('GroupFieldComponent', () => {
@@ -26,28 +26,31 @@ describe('GroupFieldComponent', () => {
           provide: FIELD_REGISTRY,
           useValue: new Map([['test', mockFieldType]]),
         },
+        {
+          provide: FIELD_SIGNAL_CONTEXT,
+          useFactory: (injector: Injector) => {
+            return runInInjectionContext(injector, () => {
+              const valueSignal = signal(value || {});
+              const testForm = form(valueSignal);
+              const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
+                injector,
+                value: valueSignal,
+                defaultValues: () => ({}),
+                form: testForm,
+              };
+              return mockFieldSignalContext;
+            });
+          },
+          deps: [Injector],
+        },
       ],
     });
 
     const fixture = TestBed.createComponent(GroupFieldComponent);
     const component = fixture.componentInstance;
-    const injector = TestBed.inject(Injector);
 
-    const valueSignal = signal(value || {});
-    const defaultValues = () => ({});
-    const testForm = runInInjectionContext(injector, () => form(valueSignal));
-
-    const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
-      injector,
-      value: valueSignal,
-      defaultValues,
-      form: testForm,
-    };
-
-    fixture.componentRef.setInput('key', 'key');
+    fixture.componentRef.setInput('key', field.key);
     fixture.componentRef.setInput('field', field);
-    fixture.componentRef.setInput('parentForm', testForm);
-    fixture.componentRef.setInput('parentFieldSignalContext', mockFieldSignalContext);
 
     fixture.detectChanges();
 
