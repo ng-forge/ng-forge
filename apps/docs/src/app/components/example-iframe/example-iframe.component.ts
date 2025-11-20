@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 import { ENVIRONMENT } from '../../config/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
@@ -10,10 +10,10 @@ import { filter } from 'rxjs';
   template: `
     <div class="example-iframe-container" [style.height]="height()">
       @if (loading()) {
-        <div class="example-loading">
-          <div class="spinner"></div>
-          <p>Loading example...</p>
-        </div>
+      <div class="example-loading">
+        <div class="spinner"></div>
+        <p>Loading example...</p>
+      </div>
       }
       <iframe
         #exampleIframe
@@ -28,10 +28,10 @@ import { filter } from 'rxjs';
       </iframe>
     </div>
     @if (code()) {
-      <details open>
-        <summary>View Config</summary>
-        <pre><code>{{ code() }}</code></pre>
-      </details>
+    <details open>
+      <summary>View Config</summary>
+      <pre><code>{{ code() }}</code></pre>
+    </details>
     }
   `,
   styles: [
@@ -186,6 +186,27 @@ export class ExampleIframeComponent {
           this.sendThemeToIframe(iframe, theme);
         }
       });
+
+    // Also listen for system preference changes when theme is "auto"
+    // This watches for class changes on the document element that ng-doc applies
+    const observer = new MutationObserver(() => {
+      const currentTheme = this.themeService.currentTheme;
+      if (currentTheme === 'auto') {
+        const iframe = this.iframeElement()?.nativeElement;
+        if (iframe && iframe.contentWindow && !this.loading()) {
+          this.sendThemeToIframe(iframe, currentTheme);
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    // Cleanup observer on destroy
+    const destroyRef = inject(DestroyRef);
+    destroyRef.onDestroy(() => observer.disconnect());
   }
 
   onLoad(): void {
@@ -200,15 +221,29 @@ export class ExampleIframeComponent {
 
   private sendThemeToIframe(iframe: HTMLIFrameElement, theme: string): void {
     try {
+      // Resolve "auto" theme to actual light/dark based on what's applied to document
+      const resolvedTheme = this.resolveTheme(theme);
       iframe.contentWindow?.postMessage(
         {
           type: 'THEME_CHANGE',
-          theme: theme,
+          theme: resolvedTheme,
         },
-        '*',
+        '*'
       );
     } catch (error) {
       console.warn('Failed to send theme to iframe:', error);
     }
+  }
+
+  private resolveTheme(theme: string): 'light' | 'dark' {
+    // If theme is "auto", resolve based on what ng-doc actually applied to the document
+    if (theme === 'auto') {
+      // Check if ng-doc applied a dark class to the document element
+      const htmlElement = document.documentElement;
+      const isDark = htmlElement.classList.contains('dark') || htmlElement.classList.contains('ng-doc-dark-theme');
+      return isDark ? 'dark' : 'light';
+    }
+    // Return theme as-is if it's already "light" or "dark"
+    return theme as 'light' | 'dark';
   }
 }
