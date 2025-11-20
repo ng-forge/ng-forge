@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => {
       reporters: ['default'],
       coverage: {
         reportsDirectory: '../../coverage/packages/dynamic-form-bootstrap',
-        provider: 'v8',
+        provider: 'istanbul',
       },
     },
     define: {

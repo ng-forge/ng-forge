@@ -51,7 +51,7 @@ export default defineConfig(() => {
       reporters: ['default'],
       coverage: {
         reportsDirectory: '../../coverage/packages/dynamic-form-ionic',
-        provider: 'v8' as const,
+        provider: 'istanbul' as const,
       },
       server: {
         deps: {
