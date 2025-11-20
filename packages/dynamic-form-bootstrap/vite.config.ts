@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
   const isCI = process.env.CI === 'true';
   const chromeArgs = [
     '--disable-dev-shm-usage', // Prevents shared memory issues in containers
-    '--disable-gpu',           // Reduces memory usage in headless mode
+    '--disable-gpu', // Reduces memory usage in headless mode
   ];
 
   // Only add sandbox flags in CI (Docker/containerized environments)
@@ -33,14 +33,16 @@ export default defineConfig(({ mode }) => {
       setupFiles: ['src/test-setup.ts'],
       browser: {
         enabled: true,
-        instances: [{
-          browser: 'chromium',
-          provider: playwright({
-            launch: {
-              args: chromeArgs,
-            },
-          }),
-        }],
+        instances: [
+          {
+            browser: 'chromium',
+            provider: playwright({
+              launch: {
+                args: chromeArgs,
+              },
+            }),
+          },
+        ],
         headless: true,
         fileParallelism: false,
         slowTestThreshold: 10000,
