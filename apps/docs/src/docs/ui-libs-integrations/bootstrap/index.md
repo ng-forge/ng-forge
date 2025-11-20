@@ -267,7 +267,7 @@ The configuration system follows this priority order (highest to lowest):
 2. **Global configuration** - Values passed to `withBootstrapFields()`
 3. **Default values** - Built-in defaults from the library
 
-This means you can set application-wide defaults with `withBootstrapConfig()`, override them for specific components, and further customize individual fields as needed.
+This means you can set application-wide defaults with `withBootstrapFields({ ... })` and override them for specific fields as needed.
 
 ---
 
