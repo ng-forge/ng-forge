@@ -84,7 +84,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
     case 'min':
       if (typeof config.value === 'number') {
         if (config.expression) {
-          const dynamicMin = createDynamicValueFunction<number, number>(config.expression);
+          const dynamicMin = createDynamicValueFunction<string | number | null, number | undefined>(config.expression);
           // Min validator expects SchemaPath<number>
           min(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, dynamicMin);
         } else {
@@ -96,7 +96,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
     case 'max':
       if (typeof config.value === 'number') {
         if (config.expression) {
-          const dynamicMax = createDynamicValueFunction<number, number>(config.expression);
+          const dynamicMax = createDynamicValueFunction<string | number | null, number | undefined>(config.expression);
           // Max validator expects SchemaPath<number>
           max(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, dynamicMax);
         } else {

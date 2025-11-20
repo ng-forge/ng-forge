@@ -17,8 +17,24 @@ import {
 } from '../fields';
 
 /**
- * Configure dynamic forms with Ionic field types
- * Provides all Ionic field types for use with provideDynamicForm
+ * Configure dynamic forms with Ionic field types.
+ * Provides all Ionic field types for use with provideDynamicForm.
+ *
+ * @example
+ * ```typescript
+ * // Application-level setup
+ * import { ApplicationConfig } from '@angular/core';
+ * import { provideDynamicForm } from '@ng-forge/dynamic-form';
+ * import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
+ *
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideDynamicForm(...withIonicFields())
+ *   ]
+ * };
+ * ```
+ *
+ * @returns Array of field type definitions for Ionic components
  */
 export function withIonicFields(): FieldTypeDefinition[] {
   return IONIC_FIELD_TYPES;
