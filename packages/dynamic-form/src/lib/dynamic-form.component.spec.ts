@@ -70,6 +70,12 @@ describe('DynamicFormComponent', () => {
     }).compileComponents();
   });
 
+  afterEach(() => {
+    // Clean up TestBed and destroy any created components to prevent memory leaks
+    // This is especially important in browser mode where the page stays open
+    TestBed.resetTestingModule();
+  });
+
   describe('Basic Functionality', () => {
     it('should create successfully with correct type and properties', () => {
       const { component } = createComponent();
