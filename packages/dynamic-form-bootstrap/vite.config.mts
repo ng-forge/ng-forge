@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => {
       include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       reporters: ['default'],
       coverage: {
+        enabled: false, // Browser mode doesn't support coverage - use jsdom for coverage
         reportsDirectory: '../../coverage/packages/dynamic-form-bootstrap',
         provider: 'istanbul',
         reporter: ['text', 'html', 'lcov'],
