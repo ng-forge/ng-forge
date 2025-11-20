@@ -53,7 +53,7 @@ export class RangeValidationTestComponent {
         validators: [
           {
             type: 'custom',
-            expression: 'fieldValue && formValue.minValue && Number(fieldValue) > Number(formValue.minValue)',
+            expression: 'fieldValue && formValue.minValue && +fieldValue > +formValue.minValue',
             kind: 'greaterThanMin',
             errorMessage: 'Maximum must be greater than minimum',
           },
