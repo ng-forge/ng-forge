@@ -16,6 +16,9 @@
     "@analogjs/vite-plugin-angular": "^1.21.3",
     "@nx/vite": "22.1.0"
   },
+  "devDependencies": {
+    "@vitest/browser-playwright": "4.0.10"
+  },
   "sideEffects": [
     "src/index.ts",
     "src/lib/index.ts",

@@ -50,9 +50,9 @@ export default defineConfig(() => {
       setupFiles: ['src/test-setup.ts'],
       reporters: ['default'],
       coverage: {
-        enabled: false, // Coverage not supported in browser mode yet
         reportsDirectory: '../../coverage/packages/dynamic-form-ionic',
         provider: 'istanbul' as const,
+        reporter: ['text', 'html', 'lcov'],
       },
       server: {
         deps: {
