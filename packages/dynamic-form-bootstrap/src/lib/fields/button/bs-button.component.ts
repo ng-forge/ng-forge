@@ -1,6 +1,15 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { DynamicText, DynamicTextPipe, EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
+import {
+  ArrayItemContext,
+  DynamicText,
+  DynamicTextPipe,
+  EventArgs,
+  EventBus,
+  FormEvent,
+  FormEventConstructor,
+  resolveTokens,
+} from '@ng-forge/dynamic-form';
 import { BsButtonComponent, BsButtonProps } from './bs-button.type';
 
 /**
@@ -42,7 +51,11 @@ export default class BsButtonFieldComponent<TEvent extends FormEvent> implements
   readonly className = input<string>('');
 
   readonly event = input.required<FormEventConstructor<TEvent>>();
+  readonly eventArgs = input<EventArgs>();
   readonly props = input<BsButtonProps>();
+
+  // Array item context for token resolution (only set for add/remove array item buttons)
+  readonly eventContext = input<ArrayItemContext>();
 
   buttonTestId = computed(() => `${this.props()?.type || 'button'}-${this.key()}`);
 
@@ -65,6 +78,20 @@ export default class BsButtonFieldComponent<TEvent extends FormEvent> implements
   });
 
   triggerEvent(): void {
-    this.eventBus.dispatch(this.event());
+    const args = this.eventArgs();
+
+    if (args && args.length > 0) {
+      // Get context or build default from key
+      const context = this.eventContext() || { key: this.key() };
+
+      // Resolve tokens in event args using the provided context
+      const resolvedArgs = resolveTokens(args, context);
+
+      // Dispatch event with resolved args
+      this.eventBus.dispatch(this.event(), ...resolvedArgs);
+    } else {
+      // No args, dispatch event without arguments
+      this.eventBus.dispatch(this.event());
+    }
   }
 }

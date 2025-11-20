@@ -85,13 +85,14 @@ export class LoginFormComponent {
         type: 'checkbox',
         label: 'Remember me for 30 days',
       },
-      submitButton({
+      {
+        type: 'submit',
         key: 'submit',
         label: 'Sign In',
         props: {
           color: 'primary',
         },
-      }),
+      },
     ],
   } as const satisfies FormConfig;
 

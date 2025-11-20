@@ -75,6 +75,20 @@ ng-forge is a type-safe, UI-agnostic dynamic forms library for Angular 21+ that 
 - Testing complex scenarios (multi-step forms, groups)
 - Best practices and patterns
 
+### 6. [Release Process](./06-release-process.md)
+
+**Topics Covered:**
+
+- Release branch strategy
+- Creating release branches from specific commits
+- Semantic versioning (patch, minor, major)
+- Release workflow and CI/CD pipeline
+- Hotfix process
+- GitHub Releases integration
+- npm publishing
+- Troubleshooting releases
+- Best practices
+
 ## Quick Reference
 
 ### Common Tasks
@@ -89,6 +103,8 @@ ng-forge is a type-safe, UI-agnostic dynamic forms library for Angular 21+ that 
 | Creating a custom mapper               | [Mappers & Binding System](./04-mappers-and-binding-system.md) | Creating Custom Mappers    |
 | Writing component tests                | [Testing Guide](./05-testing-guide.md)                         | Testing Field Components   |
 | Testing validation                     | [Testing Guide](./05-testing-guide.md)                         | Testing Validation         |
+| Releasing a new version                | [Release Process](./06-release-process.md)                     | Release Workflow           |
+| Creating a hotfix release              | [Release Process](./06-release-process.md)                     | Hotfix Workflow            |
 
 ### Key Concepts
 
@@ -131,6 +147,13 @@ ng-forge is a type-safe, UI-agnostic dynamic forms library for Angular 21+ that 
 1. Check data flow: [Architecture Overview](./01-architecture-overview.md) - Data Flow section
 2. Debug mappers: [Mappers & Binding System](./04-mappers-and-binding-system.md) - Debugging Mappers
 3. Add tests to reproduce: [Testing Guide](./05-testing-guide.md)
+
+### For Releasing New Versions
+
+1. Understand the release strategy: [Release Process](./06-release-process.md) - Overview
+2. Create release branch: [Release Process](./06-release-process.md) - Release Workflow
+3. Trigger and monitor: [Release Process](./06-release-process.md) - CI/CD Pipeline
+4. Handle hotfixes: [Release Process](./06-release-process.md) - Hotfix Workflow
 
 ## Code Examples
 

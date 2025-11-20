@@ -17,69 +17,74 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let p = props(); @if (p?.floatingLabel) {
-    <!-- Floating label variant -->
-    <div class="form-floating mb-3">
-      <input
-        dfBsInputConstraints
-        [field]="f"
-        [id]="key()"
-        type="date"
-        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [dfMin]="minAsString()"
-        [dfMax]="maxAsString()"
-        [attr.tabindex]="tabIndex()"
-        class="form-control"
-        [class.form-control-sm]="p?.size === 'sm'"
-        [class.form-control-lg]="p?.size === 'lg'"
-        [class.is-invalid]="f().invalid() && f().touched()"
-        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-      />
-      @if (label()) {
-      <label [for]="key()">{{ label() | dynamicText | async }}</label>
-      } @if (p?.validFeedback && f().valid() && f().touched()) {
-      <div class="valid-feedback d-block">
-        {{ p?.validFeedback | dynamicText | async }}
+    @let f = field(); @let p = props();
+    @if (p?.floatingLabel) {
+      <!-- Floating label variant -->
+      <div class="form-floating mb-3">
+        <input
+          dfBsInputConstraints
+          [field]="f"
+          [id]="key()"
+          type="date"
+          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+          [dfMin]="minAsString()"
+          [dfMax]="maxAsString()"
+          [attr.tabindex]="tabIndex()"
+          class="form-control"
+          [class.form-control-sm]="p?.size === 'sm'"
+          [class.form-control-lg]="p?.size === 'lg'"
+          [class.is-invalid]="f().invalid() && f().touched()"
+          [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+        />
+        @if (label()) {
+          <label [for]="key()">{{ label() | dynamicText | async }}</label>
+        }
+        @if (p?.validFeedback && f().valid() && f().touched()) {
+          <div class="valid-feedback d-block">
+            {{ p?.validFeedback | dynamicText | async }}
+          </div>
+        }
+        @for (error of errorsToDisplay(); track error.kind) {
+          <div class="invalid-feedback d-block">{{ error.message }}</div>
+        }
       </div>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <div class="invalid-feedback d-block">{{ error.message }}</div>
-      }
-    </div>
     } @else {
-    <!-- Standard variant -->
-    <div class="mb-3">
-      @if (label()) {
-      <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
-      }
+      <!-- Standard variant -->
+      <div class="mb-3">
+        @if (label()) {
+          <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
+        }
 
-      <input
-        dfBsInputConstraints
-        [field]="f"
-        [id]="key()"
-        type="date"
-        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [dfMin]="minAsString()"
-        [dfMax]="maxAsString()"
-        [attr.tabindex]="tabIndex()"
-        class="form-control"
-        [class.form-control-sm]="p?.size === 'sm'"
-        [class.form-control-lg]="p?.size === 'lg'"
-        [class.is-invalid]="f().invalid() && f().touched()"
-        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-      />
+        <input
+          dfBsInputConstraints
+          [field]="f"
+          [id]="key()"
+          type="date"
+          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+          [dfMin]="minAsString()"
+          [dfMax]="maxAsString()"
+          [attr.tabindex]="tabIndex()"
+          class="form-control"
+          [class.form-control-sm]="p?.size === 'sm'"
+          [class.form-control-lg]="p?.size === 'lg'"
+          [class.is-invalid]="f().invalid() && f().touched()"
+          [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+        />
 
-      @if (p?.helpText) {
-      <div class="form-text">
-        {{ p?.helpText | dynamicText | async }}
+        @if (p?.helpText) {
+          <div class="form-text">
+            {{ p?.helpText | dynamicText | async }}
+          </div>
+        }
+        @if (p?.validFeedback && f().valid() && f().touched()) {
+          <div class="valid-feedback d-block">
+            {{ p?.validFeedback | dynamicText | async }}
+          </div>
+        }
+        @for (error of errorsToDisplay(); track error.kind) {
+          <div class="invalid-feedback d-block">{{ error.message }}</div>
+        }
       </div>
-      } @if (p?.validFeedback && f().valid() && f().touched()) {
-      <div class="valid-feedback d-block">
-        {{ p?.validFeedback | dynamicText | async }}
-      </div>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <div class="invalid-feedback d-block">{{ error.message }}</div>
-      }
-    </div>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -75,7 +75,7 @@ The form consists of 4 pages with increasingly complex conditional logic:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-form';
 
 const certificationConfig = {
   defaultValidationMessages: {
@@ -1192,19 +1192,20 @@ const certificationConfig = {
   ],
 } as const satisfies FormConfig;
 
-type CertificationFormValue = InferFormValue<typeof certificationConfig.fields>;
+type CertificationFormValue = ExtractFormValue<typeof certificationConfig>;
 
 @Component({
   selector: 'app-conditional-logic-showcase',
   imports: [DynamicForm],
   template: `
     <div class="certification-container">
-      <df-dynamic-form [config]="config" [(value)]="formValue" (formSubmit)="onSubmit($event)" />
+      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
 
-      @let message = submitMessage(); @if (message) {
-      <div class="success-message">
-        {{ message }}
-      </div>
+      @let message = submitMessage();
+      @if (message) {
+        <div class="success-message">
+          {{ message }}
+        </div>
       }
     </div>
   `,
@@ -1245,14 +1246,14 @@ export class ConditionalLogicShowcaseComponent {
       value.certificationType === 'associate'
         ? 'Associate'
         : value.certificationType === 'professional'
-        ? 'Professional'
-        : value.certificationType === 'expert'
-        ? 'Expert'
-        : 'Specialist';
+          ? 'Professional'
+          : value.certificationType === 'expert'
+            ? 'Expert'
+            : 'Specialist';
 
     this.submitMessage.set(
       `Thank you, ${value.firstName}! Your ${certType} certification application has been submitted successfully. ` +
-        `You will receive a confirmation email at ${value.email} within 24 hours.`
+        `You will receive a confirmation email at ${value.email} within 24 hours.`,
     );
   }
 }
@@ -1448,7 +1449,7 @@ template: `
   <div class="progress">
     Step {{ currentPage() + 1 }} of 4
   </div>
-  <df-dynamic-form [config]="config" [(value)]="formValue" />
+  <dynamic-form [config]="config" [(value)]="formValue" />
 `;
 ```
 
@@ -1474,7 +1475,7 @@ export class SaveDraftEvent implements FormEvent {
 
 // In your component
 template: `
-  <df-dynamic-form
+  <dynamic-form
     [config]="config"
     [(value)]="formValue"
     (events)="onEvent($event)"

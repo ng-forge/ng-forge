@@ -22,35 +22,38 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
 
     <div class="df-prime-field">
       @if (label(); as label) {
-      <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
-      } @if (isMultiple()) {
-      <p-multiSelect
-        [field]="f"
-        [inputId]="key()"
-        [options]="options()"
-        optionLabel="label"
-        optionValue="value"
-        [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
-        [filter]="props()?.filter ?? false"
-        [showClear]="props()?.showClear ?? false"
-        [styleClass]="selectClasses()"
-      />
+        <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
+      }
+      @if (isMultiple()) {
+        <p-multiSelect
+          [field]="f"
+          [inputId]="key()"
+          [options]="options()"
+          optionLabel="label"
+          optionValue="value"
+          [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
+          [filter]="props()?.filter ?? false"
+          [showClear]="props()?.showClear ?? false"
+          [styleClass]="selectClasses()"
+        />
       } @else {
-      <p-select
-        [field]="f"
-        [inputId]="key()"
-        [options]="options()"
-        optionLabel="label"
-        optionValue="value"
-        [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
-        [filter]="props()?.filter ?? false"
-        [showClear]="props()?.showClear ?? false"
-        [styleClass]="selectClasses()"
-      />
-      } @if (props()?.hint; as hint) {
-      <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <small class="p-error">{{ error.message }}</small>
+        <p-select
+          [field]="f"
+          [inputId]="key()"
+          [options]="options()"
+          optionLabel="label"
+          optionValue="value"
+          [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
+          [filter]="props()?.filter ?? false"
+          [showClear]="props()?.showClear ?? false"
+          [styleClass]="selectClasses()"
+        />
+      }
+      @if (props()?.hint; as hint) {
+        <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <small class="p-error">{{ error.message }}</small>
       }
     </div>
   `,

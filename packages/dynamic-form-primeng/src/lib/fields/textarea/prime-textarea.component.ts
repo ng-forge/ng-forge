@@ -15,7 +15,7 @@ import { FormsModule } from '@angular/forms';
 
     <div class="df-prime-field">
       @if (label()) {
-      <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
+        <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
       <textarea
@@ -34,9 +34,10 @@ import { FormsModule } from '@angular/forms';
       ></textarea>
 
       @if (props()?.hint; as hint) {
-      <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <small class="p-error">{{ error.message }}</small>
+        <small class="df-prime-hint">{{ hint | dynamicText | async }}</small>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <small class="p-error">{{ error.message }}</small>
       }
     </div>
   `,

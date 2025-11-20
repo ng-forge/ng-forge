@@ -231,7 +231,7 @@ export class PrimeNGFormTestUtils {
   static async simulatePrimeDropdown(
     fixture: ComponentFixture<DynamicForm>,
     selectSelector: string,
-    value: string | string[]
+    value: string | string[],
   ): Promise<void> {
     // Find the select component (works with both p-select and p-dropdown CSS selectors)
     const selectElement = fixture.nativeElement.querySelector(selectSelector);

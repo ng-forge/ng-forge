@@ -90,7 +90,7 @@ import { Signal, ResourceRef } from '@angular/core';
  */
 export type CustomValidator<TValue = unknown> = (
   ctx: FieldContext<TValue>,
-  params?: Record<string, unknown>
+  params?: Record<string, unknown>,
 ) => ValidationError | ValidationError[] | null;
 
 /**

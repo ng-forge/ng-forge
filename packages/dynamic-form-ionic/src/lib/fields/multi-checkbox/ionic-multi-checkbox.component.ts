@@ -23,29 +23,30 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-ionic-multi-checkbox',
   imports: [IonCheckbox, IonItem, IonNote, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],
   template: `
-    @let f = field(); @if (label(); as label) {
-    <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
+    @let f = field();
+    @if (label(); as label) {
+      <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
     <div class="checkbox-group">
       @for (option of options(); track option.value) {
-      <ion-item lines="none">
-        <ion-checkbox
-          [checked]="option | inArray : valueViewModel()"
-          [disabled]="f().disabled() || option.disabled"
-          [labelPlacement]="props()?.labelPlacement ?? 'end'"
-          [justify]="props()?.justify ?? 'start'"
-          [color]="props()?.color ?? 'primary'"
-          (ionChange)="onCheckboxChange(option, $event.detail.checked)"
-        >
-          {{ option.label | dynamicText | async }}
-        </ion-checkbox>
-      </ion-item>
+        <ion-item lines="none">
+          <ion-checkbox
+            [checked]="option | inArray: valueViewModel()"
+            [disabled]="f().disabled() || option.disabled"
+            [labelPlacement]="props()?.labelPlacement ?? 'end'"
+            [justify]="props()?.justify ?? 'start'"
+            [color]="props()?.color ?? 'primary'"
+            (ionChange)="onCheckboxChange(option, $event.detail.checked)"
+          >
+            {{ option.label | dynamicText | async }}
+          </ion-checkbox>
+        </ion-item>
       }
     </div>
 
     @for (error of errorsToDisplay(); track error.kind) {
-    <ion-note color="danger">{{ error.message }}</ion-note>
+      <ion-note color="danger">{{ error.message }}</ion-note>
     }
   `,
   styles: [
@@ -110,7 +111,7 @@ export default class IonicMultiCheckboxFieldComponent<T extends ValueType> imple
       const currentValues = this.field()().value();
       return this.options().filter((option) => currentValues.includes(option.value));
     },
-    { equal: isEqual }
+    { equal: isEqual },
   );
 
   constructor() {

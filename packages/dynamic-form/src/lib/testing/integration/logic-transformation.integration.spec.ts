@@ -33,7 +33,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.email);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -54,7 +54,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.username);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -75,7 +75,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.email);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -106,7 +106,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.email);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -136,7 +136,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.advancedOption);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -166,7 +166,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.username);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -196,7 +196,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.state);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -243,7 +243,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.specialAccess);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -288,7 +288,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.exclusiveFeature);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -329,7 +329,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.weekdayOption);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -369,7 +369,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyMultipleLogic(configs, path.data);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -403,7 +403,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.field);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
@@ -432,7 +432,7 @@ describe('Logic Transformation Pipeline Integration', () => {
           formValue,
           schema<typeof formValue>((path) => {
             applyLogic(config, path.adminPanel);
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 

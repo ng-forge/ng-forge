@@ -64,7 +64,7 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
       'df-prime-input, df-prime-select, df-prime-checkbox, df-prime-radio, df-prime-toggle, ' +
         'df-prime-textarea, df-prime-datepicker, df-prime-slider, df-prime-button, df-prime-multi-checkbox, ' +
         'input[pInputText], p-select, p-checkbox, p-radiobutton, p-inputswitch, textarea[pInputTextarea], ' +
-        'p-calendar, p-slider, button[pButton], [data-testid]'
+        'p-calendar, p-slider, button[pButton], [data-testid]',
     );
 
     const currentComponentCount = primeComponents.length;

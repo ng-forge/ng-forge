@@ -32,7 +32,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.age);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -50,7 +50,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.age);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -67,7 +67,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.username);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -85,7 +85,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.username);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -108,7 +108,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.age);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -128,7 +128,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.age);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -150,7 +150,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.username);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -170,7 +170,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.username);
               }).toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -190,7 +190,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.username);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -210,7 +210,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.username);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -235,7 +235,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -254,7 +254,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -277,7 +277,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -297,7 +297,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.field);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -316,7 +316,7 @@ describe('validator-factory', () => {
               expect(() => {
                 applyValidator(config, path.email);
               }).not.toThrow();
-            })
+            }),
           );
           rootFormRegistry.registerRootForm(formInstance);
         });
@@ -336,7 +336,7 @@ describe('validator-factory', () => {
             expect(() => {
               applyValidators(configs, path.email);
             }).not.toThrow();
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
       });
@@ -353,7 +353,7 @@ describe('validator-factory', () => {
             expect(() => {
               applyValidators(configs, path.email);
             }).not.toThrow();
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
       });
@@ -371,7 +371,7 @@ describe('validator-factory', () => {
             expect(() => {
               applyValidators(configs, path.email);
             }).not.toThrow();
-          })
+          }),
         );
         rootFormRegistry.registerRootForm(formInstance);
       });

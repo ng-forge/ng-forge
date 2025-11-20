@@ -2,6 +2,7 @@ export * from './component-type';
 export * from './form-config';
 export * from './field-type';
 export * from './field-option';
+export * from './field-signal-context.token';
 export * from './validation-types';
 export * from './prettify';
 

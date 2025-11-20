@@ -17,10 +17,10 @@ type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 type ExtractFieldValue<T> = T extends { value: infer V; required: true }
   ? V
   : T extends { value: infer V; required?: false | undefined }
-  ? V | undefined
-  : T extends { value: infer V }
-  ? V | undefined
-  : unknown;
+    ? V | undefined
+    : T extends { value: infer V }
+      ? V | undefined
+      : unknown;
 
 /**
  * Process a single field and determine its contribution to the form value type
@@ -34,37 +34,37 @@ type ExtractFieldValue<T> = T extends { value: infer V; required: true }
 type ProcessField<T, D extends number = 5> = [D] extends [never]
   ? Record<string, unknown> // Max depth reached, return generic
   : // Page fields: flatten children (don't create a key for the page itself)
-  T extends { type: 'page'; fields: infer TFields }
-  ? TFields extends RegisteredFieldTypes[]
-    ? InferFormValueWithDepth<TFields, Depth[D]>
-    : never
-  : // Row fields: flatten children (don't create a key for the row itself)
-  T extends { type: 'row'; fields: infer TFields }
-  ? TFields extends RegisteredFieldTypes[]
-    ? InferFormValueWithDepth<TFields, Depth[D]>
-    : never
-  : // Group fields: nest children under the group's key
-  T extends { type: 'group'; key: infer K; fields: infer TFields }
-  ? K extends string
+    T extends { type: 'page'; fields: infer TFields }
     ? TFields extends RegisteredFieldTypes[]
-      ? { [P in K]: InferFormValueWithDepth<TFields, Depth[D]> }
-      : { [P in K]: Record<string, unknown> }
-    : never
-  : // Text fields: exclude from form values (display-only)
-  T extends { type: 'text' }
-  ? never
-  : // Value fields with required flag set to true
-  T extends { key: infer K; value: infer V; required: true }
-  ? K extends string
-    ? { [P in K]: V }
-    : never
-  : // Value fields with required flag set to false or undefined, or no required flag
-  T extends { key: infer K; value: infer V }
-  ? K extends string
-    ? { [P in K]: V | undefined }
-    : never
-  : // Fallback: fields without a key are excluded
-    never;
+      ? InferFormValueWithDepth<TFields, Depth[D]>
+      : never
+    : // Row fields: flatten children (don't create a key for the row itself)
+      T extends { type: 'row'; fields: infer TFields }
+      ? TFields extends RegisteredFieldTypes[]
+        ? InferFormValueWithDepth<TFields, Depth[D]>
+        : never
+      : // Group fields: nest children under the group's key
+        T extends { type: 'group'; key: infer K; fields: infer TFields }
+        ? K extends string
+          ? TFields extends RegisteredFieldTypes[]
+            ? { [P in K]: InferFormValueWithDepth<TFields, Depth[D]> }
+            : { [P in K]: Record<string, unknown> }
+          : never
+        : // Text fields: exclude from form values (display-only)
+          T extends { type: 'text' }
+          ? never
+          : // Value fields with required flag set to true
+            T extends { key: infer K; value: infer V; required: true }
+            ? K extends string
+              ? { [P in K]: V }
+              : never
+            : // Value fields with required flag set to false or undefined, or no required flag
+              T extends { key: infer K; value: infer V }
+              ? K extends string
+                ? { [P in K]: V | undefined }
+                : never
+              : // Fallback: fields without a key are excluded
+                never;
 
 /**
  * Internal helper with depth tracking

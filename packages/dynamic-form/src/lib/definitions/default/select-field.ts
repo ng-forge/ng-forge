@@ -11,5 +11,5 @@ export interface SelectProps {
  */
 export interface SelectField<T, TProps = SelectProps> extends BaseValueField<TProps, T> {
   type: 'select';
-  options: FieldOption<T>[];
+  readonly options: readonly FieldOption<T>[];
 }

@@ -1,12 +1,11 @@
 import { BaseValueField } from '../../definitions';
-import { Binding, inputBinding } from '@angular/core';
+import { Binding, inject, inputBinding } from '@angular/core';
 import { baseFieldMapper } from '../base/base-field-mapper';
-import { FieldMapperOptions } from '../types';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { omit } from '../../utils/object-utils';
 
-export type ValueFieldMapperOptions<TModel = any> = Omit<FieldMapperOptions<TModel>, 'fieldRegistry'>;
-
-export function valueFieldMapper(fieldDef: BaseValueField<any, any>, options: ValueFieldMapperOptions): Binding[] {
+export function valueFieldMapper(fieldDef: BaseValueField<any, any>): Binding[] {
+  const context = inject(FIELD_SIGNAL_CONTEXT);
   const omittedFields = omit(fieldDef, ['value']);
 
   const bindings: Binding[] = baseFieldMapper(omittedFields);
@@ -15,17 +14,35 @@ export function valueFieldMapper(fieldDef: BaseValueField<any, any>, options: Va
   bindings.push(inputBinding('validationMessages', () => fieldDef.validationMessages ?? {}));
 
   // Pass form-level validation messages for fallback error translations
-  const defaultValidationMessages = options.fieldSignalContext.defaultValidationMessages;
+  const defaultValidationMessages = context.defaultValidationMessages;
   if (defaultValidationMessages !== undefined) {
     bindings.push(inputBinding('defaultValidationMessages', () => defaultValidationMessages));
   }
 
-  const formRoot = options.fieldSignalContext.form();
+  const formRoot = context.form();
   const childrenMap = (formRoot as any).structure?.childrenMap?.();
 
-  const formField = childrenMap?.get(fieldDef.key);
-  if (formField?.fieldProxy) {
-    bindings.push(inputBinding('field', () => formField.fieldProxy));
+  // Check if this is an array item field (has array notation like tags[0])
+  const arrayMatch = fieldDef.key.match(/^(.+)\[(\d+)\]$/);
+
+  if (arrayMatch) {
+    // Parse array notation to extract array name and index
+    const [, arrayName, indexStr] = arrayMatch;
+    const index = parseInt(indexStr, 10);
+
+    // Access the array field node, then the element at the index
+    const arrayFieldNode = childrenMap?.get(arrayName);
+    const arrayItemFieldProxy = arrayFieldNode?.fieldProxy?.[index];
+
+    if (arrayItemFieldProxy) {
+      bindings.push(inputBinding('field', () => arrayItemFieldProxy));
+    }
+  } else {
+    // Standard field access for non-array keys
+    const formField = childrenMap?.get(fieldDef.key);
+    if (formField?.fieldProxy) {
+      bindings.push(inputBinding('field', () => formField.fieldProxy));
+    }
   }
 
   return bindings;

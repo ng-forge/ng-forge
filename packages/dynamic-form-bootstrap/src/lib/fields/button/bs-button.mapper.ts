@@ -1,6 +1,12 @@
-import { FieldDef } from '@ng-forge/dynamic-form';
-import { Binding, inputBinding } from '@angular/core';
-import { baseFieldMapper } from '@ng-forge/dynamic-form';
+import {
+  baseFieldMapper,
+  ArrayItemContext,
+  FieldDef,
+  AddArrayItemEvent,
+  RemoveArrayItemEvent,
+  ARRAY_CONTEXT,
+} from '@ng-forge/dynamic-form';
+import { Binding, inject, inputBinding } from '@angular/core';
 
 export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
@@ -18,6 +24,11 @@ export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): 
   // Add event binding for button events
   if ('event' in fieldDef && fieldDef.event !== undefined) {
     bindings.push(inputBinding('event', () => fieldDef.event));
+  }
+
+  // Add event args binding
+  if ('eventArgs' in fieldDef && fieldDef.eventArgs !== undefined) {
+    bindings.push(inputBinding('eventArgs', () => fieldDef.eventArgs));
   }
 
   return bindings;

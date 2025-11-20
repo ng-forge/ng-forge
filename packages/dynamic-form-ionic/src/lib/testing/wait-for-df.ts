@@ -63,7 +63,7 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
       'df-ionic-input, df-ionic-select, df-ionic-checkbox, df-ionic-radio, df-ionic-toggle, ' +
         'df-ionic-textarea, df-ionic-datepicker, df-ionic-slider, df-ionic-button, df-ionic-multi-checkbox, ' +
         'ion-input, ion-select, ion-checkbox, ion-radio, ion-toggle, ion-textarea, ' +
-        'ion-datetime, ion-range, ion-button, [data-testid]'
+        'ion-datetime, ion-range, ion-button, [data-testid]',
     );
 
     const currentComponentCount = ionicComponents.length;

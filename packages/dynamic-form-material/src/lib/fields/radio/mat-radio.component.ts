@@ -17,27 +17,29 @@ import { AsyncPipe } from '@angular/common';
   selector: 'df-mat-radio',
   imports: [MatRadioGroup, MatRadioButton, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
-    @let f = field(); @if (label()) {
-    <div class="radio-label">{{ label() | dynamicText | async }}</div>
+    @let f = field();
+    @if (label()) {
+      <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
     <mat-radio-group [field]="f">
       @for (option of options(); track option.value) {
-      <mat-radio-button
-        [value]="option.value"
-        [disabled]="option.disabled || false"
-        [color]="props()?.color || 'primary'"
-        [labelPosition]="props()?.labelPosition || 'after'"
-      >
-        {{ option.label | dynamicText | async }}
-      </mat-radio-button>
+        <mat-radio-button
+          [value]="option.value"
+          [disabled]="option.disabled || false"
+          [color]="props()?.color || 'primary'"
+          [labelPosition]="props()?.labelPosition || 'after'"
+        >
+          {{ option.label | dynamicText | async }}
+        </mat-radio-button>
       }
     </mat-radio-group>
 
     @if (props()?.hint; as hint) {
-    <div class="mat-hint">{{ hint | dynamicText | async }}</div>
-    } @for (error of errorsToDisplay(); track error.kind) {
-    <mat-error>{{ error.message }}</mat-error>
+      <div class="mat-hint">{{ hint | dynamicText | async }}</div>
+    }
+    @for (error of errorsToDisplay(); track error.kind) {
+      <mat-error>{{ error.message }}</mat-error>
     }
   `,
   styles: [

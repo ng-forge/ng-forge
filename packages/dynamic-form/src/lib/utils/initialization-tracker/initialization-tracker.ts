@@ -32,7 +32,7 @@ export function createInitializationTracker(eventBus: EventBus, expectedCount: n
   return eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
     scan((count, _event) => count + 1, 0),
     map((currentCount) => currentCount >= expectedCount),
-    filter((isComplete) => isComplete)
+    filter((isComplete) => isComplete),
   );
 }
 
@@ -60,7 +60,7 @@ export function createInitializationTracker(eventBus: EventBus, expectedCount: n
  */
 export function createDetailedInitializationTracker(
   eventBus: EventBus,
-  expectedCount: number
+  expectedCount: number,
 ): Observable<{ currentCount: number; expectedCount: number; isComplete: boolean }> {
   return eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
     scan((count, _event) => count + 1, 0),
@@ -68,6 +68,6 @@ export function createDetailedInitializationTracker(
       currentCount,
       expectedCount,
       isComplete: currentCount >= expectedCount,
-    }))
+    })),
   );
 }

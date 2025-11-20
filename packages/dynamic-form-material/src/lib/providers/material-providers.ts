@@ -17,8 +17,24 @@ import {
 } from '../fields';
 
 /**
- * Configure dynamic forms with Material Design field types
- * Provides all Material Design field types for use with provideDynamicForm
+ * Configure dynamic forms with Material Design field types.
+ * Provides all Material Design field types for use with provideDynamicForm.
+ *
+ * @example
+ * ```typescript
+ * // Application-level setup
+ * import { ApplicationConfig } from '@angular/core';
+ * import { provideDynamicForm } from '@ng-forge/dynamic-form';
+ * import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+ *
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideDynamicForm(...withMaterialFields())
+ *   ]
+ * };
+ * ```
+ *
+ * @returns Array of field type definitions for Material Design components
  */
 export function withMaterialFields(): FieldTypeDefinition[] {
   return MATERIAL_FIELD_TYPES;

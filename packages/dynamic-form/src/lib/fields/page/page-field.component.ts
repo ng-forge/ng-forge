@@ -7,6 +7,7 @@ import {
   inject,
   Injector,
   input,
+  runInInjectionContext,
   ViewContainerRef,
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -14,8 +15,8 @@ import { forkJoin, map, of, switchMap } from 'rxjs';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { FieldTree, FormUiControl } from '@angular/forms/signals';
-import { FieldSignalContext } from '../../mappers/types';
+import { FormUiControl } from '@angular/forms/signals';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
@@ -53,17 +54,14 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
 export default class PageFieldComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
+  private readonly fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
 
-  // Page field definition and parent form context
+  // Page field definition
   field = input.required<PageField<any>>();
   key = input.required<string>();
-
-  form = input.required<FieldTree<any>>();
-
-  fieldSignalContext = input.required<FieldSignalContext>();
 
   /**
    * Page index passed from orchestrator
@@ -93,7 +91,7 @@ export default class PageFieldComponent {
       console.error(
         `[PageField] Invalid configuration: Page '${pageField.key}' contains nested page fields. ` +
           `Pages cannot contain other pages. Consider using groups or rows for nested structure.`,
-        pageField
+        pageField,
       );
     }
 
@@ -111,7 +109,7 @@ export default class PageFieldComponent {
       }
 
       return pageField.fields || [];
-    })
+    }),
   );
 
   fields = toSignal(
@@ -123,9 +121,9 @@ export default class PageFieldComponent {
 
         return forkJoin(this.mapFields(fields));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp))
+      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
     ),
-    { initialValue: [] }
+    { initialValue: [] },
   );
 
   private mapFields(fields: any[]): Promise<ComponentRef<FormUiControl>>[] {
@@ -143,12 +141,12 @@ export default class PageFieldComponent {
           return undefined;
         }
 
-        // Pass through the parent form context - page doesn't change form shape like row
-        const bindings = mapFieldToBindings(fieldDef, {
-          fieldSignalContext: this.fieldSignalContext(),
-          fieldRegistry: this.fieldRegistry.raw,
+        // Run mapper in injection context - page passes through parent context unchanged
+        const bindings = runInInjectionContext(this.injector, () => {
+          return mapFieldToBindings(fieldDef, this.fieldRegistry.raw);
         });
 
+        // Create component with same injector (parent context is passed through)
         return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
       })
       .catch((error) => {
@@ -159,7 +157,7 @@ export default class PageFieldComponent {
           console.error(
             `[PageField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within page '${pageKey}'. Ensure the field type is registered in your field registry.`,
-            error
+            error,
           );
         }
         return undefined;

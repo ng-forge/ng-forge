@@ -1,4 +1,6 @@
-# Ng-Forge Dynamic Forms
+<p align="center">
+  <img src="logo-light.svg" alt="ng-forge logo" width="400"/>
+</p>
 
 **Stop writing repetitive form code.** Build type-safe, dynamic Angular forms in minutes, not hours.
 

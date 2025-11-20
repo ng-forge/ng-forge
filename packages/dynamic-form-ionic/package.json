@@ -2,10 +2,10 @@
   "name": "@ng-forge/dynamic-form-ionic",
   "version": "0.0.1",
   "peerDependencies": {
-    "@angular/common": "^21.0.0-rc.2",
-    "@angular/core": "^21.0.0-rc.2",
-    "@angular/forms": "^21.0.0-rc.2",
-    "@angular/platform-browser": "^21.0.0-rc.2",
+    "@angular/common": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/forms": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
     "@ionic/angular": "^8.0.0",
     "@ng-forge/dynamic-form": "*",
     "lodash-es": "^4.17.21",
@@ -14,7 +14,8 @@
     "ngxtension": "^6.0.0",
     "vite": "^7.1.11",
     "@analogjs/vite-plugin-angular": "^1.21.3",
-    "@nx/vite": "21.6.5"
+    "@nx/vite": "22.1.0",
+    "@vitest/browser-playwright": "4.0.10"
   },
   "sideEffects": [
     "src/index.ts",

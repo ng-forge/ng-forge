@@ -8,19 +8,16 @@ import { PRIMENG_FIELD_TYPES } from '../config/primeng-field-config';
  *
  * @example
  * ```typescript
- * // Component-level provider (recommended)
- * @Component({
+ * // Application-level setup
+ * import { ApplicationConfig } from '@angular/core';
+ * import { provideDynamicForm } from '@ng-forge/dynamic-form';
+ * import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+ *
+ * export const appConfig: ApplicationConfig = {
  *   providers: [
  *     provideDynamicForm(...withPrimeNGFields())
  *   ]
- * })
- * export class MyFormComponent {
- *   config = {
- *     fields: [
- *       { key: 'email', type: 'input', props: { type: 'email' } }
- *     ]
- *   };
- * }
+ * };
  * ```
  *
  * @returns Array of field type definitions for PrimeNG components

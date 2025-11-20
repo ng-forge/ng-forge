@@ -9,7 +9,7 @@ import { createLogicFunction } from '../expressions';
  * See validator-factory.ts for detailed explanation of why this is safe.
  */
 function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
-  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>
+  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>,
 ): SchemaPath<TValue, SchemaPathRules.Supported, TPathKind> {
   return path as SchemaPath<TValue, SchemaPathRules.Supported, TPathKind>;
 }

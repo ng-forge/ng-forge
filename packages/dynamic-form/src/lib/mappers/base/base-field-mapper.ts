@@ -53,6 +53,7 @@ export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
     'maxValue', // Handled by Field directive metadata (MAX)
     'step', // Passed via props instead
     'validationMessages', // Handled in value/checkbox mappers
+    'defaultValue', // Used for form reset/clear, not passed to components
   ]);
 
   for (const [key, value] of Object.entries(fieldDef)) {

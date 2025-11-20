@@ -101,9 +101,9 @@ export type ValidateRootFields<TFields extends RegisteredFieldTypes[]> =
       ? TFields
       : never // Mixed page and non-page fields not allowed
     : // If no pages, no pages should be present
-    TFields extends Exclude<RegisteredFieldTypes, { type: 'page' }>[]
-    ? TFields
-    : never;
+      TFields extends Exclude<RegisteredFieldTypes, { type: 'page' }>[]
+      ? TFields
+      : never;
 
 /**
  * Type helper for accessing nested field paths safely

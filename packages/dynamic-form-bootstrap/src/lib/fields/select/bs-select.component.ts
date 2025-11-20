@@ -20,7 +20,7 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="mb-3">
       @if (label(); as label) {
-      <label [for]="key()" class="form-label">{{ label | dynamicText | async }}</label>
+        <label [for]="key()" class="form-label">{{ label | dynamicText | async }}</label>
       }
       <select
         [field]="f"
@@ -34,18 +34,20 @@ import { AsyncPipe } from '@angular/common';
         [attr.aria-describedby]="props()?.helpText ? key() + '-help' : null"
       >
         @if (placeholder(); as placeholder) {
-        <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>
-        } @for (option of options(); track option.value) {
-        <option [value]="option.value" [disabled]="option.disabled || false" [selected]="isSelected(option.value, f().value())">
-          {{ option.label | dynamicText | async }}
-        </option>
+          <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>
+        }
+        @for (option of options(); track option.value) {
+          <option [value]="option.value" [disabled]="option.disabled || false" [selected]="isSelected(option.value, f().value())">
+            {{ option.label | dynamicText | async }}
+          </option>
         }
       </select>
 
       @if (props()?.helpText; as helpText) {
-      <div class="form-text" [id]="key() + '-help'">{{ helpText | dynamicText | async }}</div>
-      } @for (error of errorsToDisplay(); track error.kind) {
-      <div class="invalid-feedback d-block">{{ error.message }}</div>
+        <div class="form-text" [id]="key() + '-help'">{{ helpText | dynamicText | async }}</div>
+      }
+      @for (error of errorsToDisplay(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
     </div>
   `,

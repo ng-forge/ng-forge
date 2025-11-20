@@ -17,16 +17,18 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   imports: [PrimeRadioGroupComponent, Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @if (label()) {
-    <div class="radio-label">{{ label() | dynamicText | async }}</div>
+    @let f = field();
+    @if (label()) {
+      <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
     <df-prime-radio-group [field]="$any(f)" [options]="options()" [properties]="props()" />
 
     @if (props()?.hint; as hint) {
-    <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
-    } @for (error of errorsToDisplay(); track error.kind) {
-    <small class="p-error">{{ error.message }}</small>
+      <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+    }
+    @for (error of errorsToDisplay(); track error.kind) {
+      <small class="p-error">{{ error.message }}</small>
     }
   `,
   styles: [

@@ -1,9 +1,116 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DynamicForm, type FormConfig, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { AddArrayItemEvent, DynamicForm, type FormConfig, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
 import { JsonPipe } from '@angular/common';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+
+// Array item templates
+const tagTemplate = {
+  key: 'tag',
+  type: 'row',
+  fields: [
+    {
+      key: 'value',
+      type: 'input',
+      label: 'Tag',
+      value: '',
+      required: true,
+      minLength: 2,
+      props: {
+        placeholder: 'Enter a tag',
+        hint: 'Tags must be at least 2 characters',
+      },
+    },
+    {
+      key: 'removeTag',
+      type: 'button',
+      label: 'Remove',
+      className: 'remove-tag-button',
+      event: RemoveArrayItemEvent,
+      eventArgs: ['$arrayKey', '$index'],
+      props: {
+        color: 'warn',
+      },
+      // TODO: Add hide logic to hide when array length is 1
+    },
+  ],
+} as const;
+
+class AddTagsEvent extends AddArrayItemEvent {
+  constructor() {
+    super('tags', tagTemplate);
+  }
+}
+
+const contactTemplate = {
+  key: 'contact',
+  type: 'group',
+  fields: [
+    {
+      key: 'name',
+      type: 'input',
+      label: 'Contact Name',
+      value: '',
+      required: true,
+      minLength: 2,
+      props: {
+        placeholder: 'Enter contact name',
+        hint: 'Full name of the emergency contact',
+      },
+    },
+    {
+      key: 'phone',
+      type: 'input',
+      label: 'Phone Number',
+      value: '',
+      required: true,
+      pattern: /^\d{10}$/,
+      validationMessages: {
+        pattern: 'Please enter a valid 10-digit phone number',
+      },
+      props: {
+        type: 'tel',
+        placeholder: '5551234567',
+        hint: 'Enter 10-digit phone number without spaces or dashes',
+      },
+    },
+    {
+      key: 'relationship',
+      type: 'select',
+      label: 'Relationship',
+      value: 'friend',
+      required: true,
+      options: [
+        { label: 'Family', value: 'family' },
+        { label: 'Friend', value: 'friend' },
+        { label: 'Colleague', value: 'colleague' },
+        { label: 'Other', value: 'other' },
+      ],
+      props: {
+        hint: 'Select your relationship to this contact',
+      },
+    },
+    {
+      key: 'removeContact',
+      type: 'button',
+      label: 'Remove',
+      className: 'remove-contact-button',
+      event: RemoveArrayItemEvent,
+      eventArgs: ['$arrayKey', '$index'],
+      props: {
+        color: 'warn',
+      },
+      // TODO: Add hide logic to hide when array length is 1
+    },
+  ],
+} as const;
+
+class AddContactEvent extends AddArrayItemEvent {
+  constructor() {
+    super('contacts', contactTemplate);
+  }
+}
 
 @Component({
   selector: 'example-array-demo',
@@ -14,17 +121,6 @@ import { MatIconModule } from '@angular/material/icon';
   template: `
     <dynamic-form [config]="config" [(value)]="formValue" />
 
-    <div class="button-group">
-      <button mat-raised-button color="primary" (click)="addTag()">
-        <mat-icon>add</mat-icon>
-        Add Tag
-      </button>
-      <button mat-raised-button color="primary" (click)="addContact()">
-        <mat-icon>add</mat-icon>
-        Add Contact
-      </button>
-    </div>
-
     <div class="example-result">
       <h4>Form Data:</h4>
       <pre>{{ formValue() | json }}</pre>
@@ -32,11 +128,6 @@ import { MatIconModule } from '@angular/material/icon';
   `,
   styles: [
     `
-      .button-group {
-        display: flex;
-        gap: 1rem;
-        margin: 1rem 0;
-      }
       .example-result {
         margin-top: 2rem;
         padding: 1rem;
@@ -51,7 +142,6 @@ import { MatIconModule } from '@angular/material/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ArrayDemoComponent {
-  private eventBus = inject(EventBus);
   formValue = signal({
     tags: [],
     contacts: [],
@@ -76,20 +166,17 @@ export class ArrayDemoComponent {
         key: 'tags',
         type: 'array',
         label: 'Tags',
-        fields: [
-          {
-            key: 'tag',
-            type: 'input',
-            label: 'Tag',
-            value: '',
-            required: true,
-            minLength: 2,
-            props: {
-              placeholder: 'Enter a tag',
-              hint: 'Tags must be at least 2 characters',
-            },
-          },
-        ],
+        fields: [tagTemplate],
+      },
+      {
+        key: 'addTagButton',
+        type: 'button',
+        label: 'Add Tag',
+        className: 'add-tag-button',
+        event: AddTagsEvent,
+        props: {
+          color: 'primary',
+        },
       },
       {
         key: 'sectionTitle2',
@@ -108,58 +195,17 @@ export class ArrayDemoComponent {
         key: 'contacts',
         type: 'array',
         label: 'Emergency Contacts',
-        fields: [
-          {
-            key: 'contact',
-            type: 'group',
-            fields: [
-              {
-                key: 'name',
-                type: 'input',
-                label: 'Contact Name',
-                value: '',
-                required: true,
-                minLength: 2,
-                props: {
-                  placeholder: 'Enter contact name',
-                  hint: 'Full name of the emergency contact',
-                },
-              },
-              {
-                key: 'phone',
-                type: 'input',
-                label: 'Phone Number',
-                value: '',
-                required: true,
-                pattern: /^\d{10}$/,
-                validationMessages: {
-                  pattern: 'Please enter a valid 10-digit phone number',
-                },
-                props: {
-                  type: 'tel',
-                  placeholder: '5551234567',
-                  hint: 'Enter 10-digit phone number without spaces or dashes',
-                },
-              },
-              {
-                key: 'relationship',
-                type: 'select',
-                label: 'Relationship',
-                value: 'friend',
-                required: true,
-                options: [
-                  { label: 'Family', value: 'family' },
-                  { label: 'Friend', value: 'friend' },
-                  { label: 'Colleague', value: 'colleague' },
-                  { label: 'Other', value: 'other' },
-                ],
-                props: {
-                  hint: 'Select your relationship to this contact',
-                },
-              },
-            ],
-          },
-        ],
+        fields: [contactTemplate],
+      },
+      {
+        key: 'addContactButton',
+        type: 'button',
+        label: 'Add Contact',
+        className: 'add-contact-button',
+        event: AddContactEvent,
+        props: {
+          color: 'primary',
+        },
       },
       submitButton({
         key: 'submit',
@@ -170,20 +216,4 @@ export class ArrayDemoComponent {
       }),
     ],
   } as const satisfies FormConfig;
-
-  addTag() {
-    this.eventBus.dispatch(AddArrayItemEvent, 'tags');
-  }
-
-  addContact() {
-    this.eventBus.dispatch(AddArrayItemEvent, 'contacts');
-  }
-
-  removeTag(index: number) {
-    this.eventBus.dispatch(RemoveArrayItemEvent, 'tags', index);
-  }
-
-  removeContact(index: number) {
-    this.eventBus.dispatch(RemoveArrayItemEvent, 'contacts', index);
-  }
 }

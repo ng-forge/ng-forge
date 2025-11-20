@@ -222,7 +222,7 @@ export class IonicFormTestUtils {
           detail: { value },
           bubbles: true,
           composed: true,
-        })
+        }),
       );
     }
 
@@ -300,7 +300,7 @@ export class IonicFormTestUtils {
           detail: { checked },
           bubbles: true,
           composed: true,
-        })
+        }),
       );
     }
 
@@ -333,7 +333,7 @@ export class IonicFormTestUtils {
           detail: { checked },
           bubbles: true,
           composed: true,
-        })
+        }),
       );
     }
 

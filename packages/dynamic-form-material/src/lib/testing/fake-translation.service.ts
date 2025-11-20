@@ -70,7 +70,7 @@ export class FakeTranslationService {
       map((translations) => {
         const translatedValue = translations[key] || key;
         return this.interpolateParams(translatedValue, params);
-      })
+      }),
     );
   }
 
@@ -159,7 +159,7 @@ export const SPANISH_TEST_TRANSLATIONS = {
  * Test utility to create a configured FakeTranslationService with default translations
  */
 export function createTestTranslationService(
-  initialTranslations: Record<string, string> = DEFAULT_TEST_TRANSLATIONS
+  initialTranslations: Record<string, string> = DEFAULT_TEST_TRANSLATIONS,
 ): FakeTranslationService {
   const service = new FakeTranslationService();
   service.setTranslations(initialTranslations);

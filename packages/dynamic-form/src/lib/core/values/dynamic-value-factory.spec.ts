@@ -25,7 +25,7 @@ describe('dynamic-value-factory', () => {
       value: T,
       mockField?: Partial<FieldTree<T>>,
       mockValueOf?: (path: any) => any,
-      fieldKey?: string
+      fieldKey?: string,
     ): FieldContext<T> {
       const defaultValueOf = (path: any) => ({ username: 'test', email: 'test@example.com' });
 
@@ -59,7 +59,7 @@ describe('dynamic-value-factory', () => {
           formValue: mockFormValue,
           parent: parentField,
           key,
-        }
+        },
       ) as any;
 
       return mockRootField;
@@ -72,7 +72,7 @@ describe('dynamic-value-factory', () => {
       mockValueOf?: (path: any) => any,
       setupRoot = true,
       fieldKey?: string,
-      expectedPath?: string
+      expectedPath?: string,
     ): TReturn {
       return runInInjectionContext(injector, () => {
         // Set up the root form registry with mock data if needed

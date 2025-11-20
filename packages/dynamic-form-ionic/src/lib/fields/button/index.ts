@@ -7,5 +7,11 @@ export type {
   IonicPreviousButtonField,
 } from './ionic-button.type';
 export { default as IonicButtonFieldComponent } from './ionic-button.component';
-export { submitButtonFieldMapper, nextButtonFieldMapper, previousButtonFieldMapper } from './ionic-specific-button.mapper';
+export {
+  submitButtonFieldMapper,
+  nextButtonFieldMapper,
+  previousButtonFieldMapper,
+  addArrayItemButtonFieldMapper,
+  removeArrayItemButtonFieldMapper,
+} from './ionic-specific-button.mapper';
 export { buttonFieldMapper } from './ionic-button.mapper';

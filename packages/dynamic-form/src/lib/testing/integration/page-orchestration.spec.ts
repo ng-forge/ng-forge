@@ -5,13 +5,16 @@ import { detectFormMode, FormModeDetectionResult } from '../../models/types/form
 import { FormModeValidator } from '../../utils/form-validation/form-mode-validator';
 import { DynamicFormTestResult, DynamicFormTestUtils } from '../dynamic-form-test-utils';
 import { FormConfig } from '../../models/form-config';
+import { provideDynamicForm } from '../../providers';
 
 describe('Page Orchestration Integration', () => {
   let testResult: DynamicFormTestResult;
   let eventBus: EventBus;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({}).compileComponents();
+    await TestBed.configureTestingModule({
+      providers: [provideDynamicForm()],
+    }).compileComponents();
   });
 
   afterEach(() => {
@@ -29,7 +32,7 @@ describe('Page Orchestration Integration', () => {
             { key: 'input1', type: 'input', label: 'Input 1' },
             { key: 'input2', type: 'input', label: 'Input 2' },
           ],
-          'Page 1'
+          'Page 1',
         )
         .pageField('page2', [{ key: 'checkbox1', type: 'checkbox', label: 'Checkbox 1' }], 'Page 2')
         .build();
@@ -68,7 +71,7 @@ describe('Page Orchestration Integration', () => {
       expect(detection.mode).toBe('paged');
       expect(detection.isValid).toBe(false);
       expect(detection.errors).toContain(
-        'Mixed page and non-page fields at root level. In paged forms, ALL root-level fields must be of type "page".'
+        'Mixed page and non-page fields at root level. In paged forms, ALL root-level fields must be of type "page".',
       );
     });
   });
@@ -82,7 +85,7 @@ describe('Page Orchestration Integration', () => {
             { key: 'firstName', type: 'input', label: 'First Name', validation: ['required'] },
             { key: 'lastName', type: 'input', label: 'Last Name', validation: ['required'] },
           ],
-          'Personal Information'
+          'Personal Information',
         )
         .pageField('preferences', [{ key: 'newsletter', type: 'checkbox', label: 'Subscribe to newsletter' }], 'Preferences')
         .build();
@@ -247,7 +250,7 @@ describe('Page Orchestration Integration', () => {
             { key: 'firstName', type: 'input', label: 'First Name' },
             { key: 'lastName', type: 'input', label: 'Last Name' },
           ],
-          'Personal Info'
+          'Personal Info',
         )
         .pageField('page2', [{ key: 'email', type: 'input', label: 'Email' }], 'Contact Info')
         .build();

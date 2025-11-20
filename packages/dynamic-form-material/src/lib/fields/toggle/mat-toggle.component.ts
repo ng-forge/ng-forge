@@ -26,9 +26,10 @@ import { AsyncPipe } from '@angular/common';
     </mat-slide-toggle>
 
     @if (props()?.hint; as hint) {
-    <div class="mat-hint">{{ hint | dynamicText | async }}</div>
-    } @for (error of errorsToDisplay(); track error.kind) {
-    <mat-error>{{ error.message }}</mat-error>
+      <div class="mat-hint">{{ hint | dynamicText | async }}</div>
+    }
+    @for (error of errorsToDisplay(); track error.kind) {
+      <mat-error>{{ error.message }}</mat-error>
     }
   `,
   styles: [

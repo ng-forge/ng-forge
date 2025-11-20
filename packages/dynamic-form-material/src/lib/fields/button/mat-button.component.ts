@@ -1,6 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { MatButton } from '@angular/material/button';
-import { DynamicText, DynamicTextPipe, EventBus, FormEvent, FormEventConstructor } from '@ng-forge/dynamic-form';
+import {
+  ArrayItemContext,
+  DynamicText,
+  DynamicTextPipe,
+  EventArgs,
+  EventBus,
+  FormEvent,
+  FormEventConstructor,
+  resolveTokens,
+} from '@ng-forge/dynamic-form';
 import { MatButtonComponent, MatButtonProps } from './mat-button.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -51,11 +60,29 @@ export default class MatButtonFieldComponent<TEvent extends FormEvent> implement
   readonly className = input<string>('');
 
   readonly event = input.required<FormEventConstructor<TEvent>>();
+  readonly eventArgs = input<EventArgs>();
   readonly props = input<MatButtonProps>();
+
+  // Array item context for token resolution (only set for add/remove array item buttons)
+  readonly eventContext = input<ArrayItemContext>();
 
   buttonTestId = computed(() => `${this.props()?.type}-${this.key()}`);
 
   triggerEvent(): void {
-    this.eventBus.dispatch(this.event());
+    const args = this.eventArgs();
+
+    if (args && args.length > 0) {
+      // Get context or build default from key
+      const context = this.eventContext() || { key: this.key() };
+
+      // Resolve tokens in event args using the provided context
+      const resolvedArgs = resolveTokens(args, context);
+
+      // Dispatch event with resolved args
+      this.eventBus.dispatch(this.event(), ...resolvedArgs);
+    } else {
+      // No args, dispatch event without arguments
+      this.eventBus.dispatch(this.event());
+    }
   }
 }

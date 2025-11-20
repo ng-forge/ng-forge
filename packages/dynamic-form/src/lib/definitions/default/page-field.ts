@@ -19,10 +19,10 @@ interface ContainerFieldWithFields extends FieldDef<any> {
  * For documentation: Pages should contain rows, groups, and leaf fields, but NOT other pages.
  * Runtime validation enforces these rules.
  */
-export interface PageField<TFields extends PageAllowedChildren[] = PageAllowedChildren[]> extends FieldDef<never> {
+export interface PageField<TFields extends readonly PageAllowedChildren[] = PageAllowedChildren[]> extends FieldDef<never> {
   type: 'page';
   /** Child field definitions to render within this page */
-  fields: TFields;
+  readonly fields: TFields;
 }
 
 /**

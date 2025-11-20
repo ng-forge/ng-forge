@@ -34,47 +34,50 @@ export interface BsRadioGroupProps {
   selector: 'df-bs-radio-group',
   imports: [DynamicTextPipe, AsyncPipe],
   template: `
-    @let props = properties(); @if (props?.buttonGroup) {
-    <div class="btn-group" role="group" [attr.aria-label]="label() | dynamicText | async">
+    @let props = properties();
+    @if (props?.buttonGroup) {
+      <div class="btn-group" role="group" [attr.aria-label]="label() | dynamicText | async">
+        @for (option of options(); track option.value; let i = $index) {
+          <input
+            type="radio"
+            [name]="name()"
+            [value]="option.value"
+            [checked]="value() === option.value"
+            (change)="onRadioChange(option.value)"
+            [disabled]="disabled() || option.disabled || false"
+            class="btn-check"
+            [id]="name() + '_' + i"
+            autocomplete="off"
+          />
+          <label
+            class="btn btn-outline-primary"
+            [class.btn-sm]="props?.buttonSize === 'sm'"
+            [class.btn-lg]="props?.buttonSize === 'lg'"
+            [for]="name() + '_' + i"
+          >
+            {{ option.label | dynamicText | async }}
+          </label>
+        }
+      </div>
+    } @else {
       @for (option of options(); track option.value; let i = $index) {
-      <input
-        type="radio"
-        [name]="name()"
-        [value]="option.value"
-        [checked]="value() === option.value"
-        (change)="onRadioChange(option.value)"
-        [disabled]="disabled() || option.disabled || false"
-        class="btn-check"
-        [id]="name() + '_' + i"
-        autocomplete="off"
-      />
-      <label
-        class="btn btn-outline-primary"
-        [class.btn-sm]="props?.buttonSize === 'sm'"
-        [class.btn-lg]="props?.buttonSize === 'lg'"
-        [for]="name() + '_' + i"
-      >
-        {{ option.label | dynamicText | async }}
-      </label>
+        <div class="form-check" [class.form-check-inline]="props?.inline" [class.form-check-reverse]="props?.reverse">
+          <input
+            type="radio"
+            [name]="name()"
+            [value]="option.value"
+            [checked]="value() === option.value"
+            (change)="onRadioChange(option.value)"
+            [disabled]="disabled() || option.disabled || false"
+            class="form-check-input"
+            [id]="name() + '_' + i"
+          />
+          <label class="form-check-label" [for]="name() + '_' + i">
+            {{ option.label | dynamicText | async }}
+          </label>
+        </div>
       }
-    </div>
-    } @else { @for (option of options(); track option.value; let i = $index) {
-    <div class="form-check" [class.form-check-inline]="props?.inline" [class.form-check-reverse]="props?.reverse">
-      <input
-        type="radio"
-        [name]="name()"
-        [value]="option.value"
-        [checked]="value() === option.value"
-        (change)="onRadioChange(option.value)"
-        [disabled]="disabled() || option.disabled || false"
-        class="form-check-input"
-        [id]="name() + '_' + i"
-      />
-      <label class="form-check-label" [for]="name() + '_' + i">
-        {{ option.label | dynamicText | async }}
-      </label>
-    </div>
-    } }
+    }
   `,
   styles: [
     `

@@ -4,14 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release type (patch, minor, major) or specific version (e.g., 1.2.3)'
+        description: 'Version to release (must match branch version)'
         required: true
-        default: 'patch'
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
+        type: string
       publish:
         description: 'Publish to npm'
         required: true
@@ -20,24 +15,134 @@ on:
       dry_run:
         description: "Dry run (don't actually publish)"
         required: false
-        default: false
+        default: true
         type: boolean
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: write
   id-token: write
+  pull-requests: write
 
 jobs:
+  check-comment:
+    name: Check Release Comment
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/release')
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.parse.outputs.should_release }}
+      version: ${{ steps.parse.outputs.version }}
+      publish: ${{ steps.parse.outputs.publish }}
+      dry_run: ${{ steps.parse.outputs.dry_run }}
+      branch: ${{ steps.parse.outputs.branch }}
+    steps:
+      - name: Get PR details
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            return {
+              branch: pr.data.head.ref,
+              sha: pr.data.head.sha
+            };
+
+      - name: Parse command and validate
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr_data = ${{ steps.pr.outputs.result }};
+            const branch = pr_data.branch;
+            const comment = context.payload.comment.body.trim();
+
+            // Check if branch is a release branch
+            const releaseMatch = branch.match(/^release-(.+)$/);
+            if (!releaseMatch) {
+              core.setOutput('should_release', 'false');
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: '❌ This PR is not from a release branch. Release commands only work on `release-*` branches.'
+              });
+              return;
+            }
+
+            const version = releaseMatch[1];
+
+            // Parse command
+            let publish = false;
+            let dry_run = true;
+
+            if (comment === '/release dry-run' || comment === '/release') {
+              dry_run = true;
+              publish = false;
+            } else if (comment === '/release publish') {
+              dry_run = false;
+              publish = true;
+            } else {
+              core.setOutput('should_release', 'false');
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `❌ Unknown release command. Use:
+            - \`/release dry-run\` or \`/release\` - Test release without publishing
+            - \`/release publish\` - Publish to npm`
+              });
+              return;
+            }
+
+            // Confirm with comment
+            const mode = dry_run ? '🧪 **Dry run**' : '🚀 **Publishing to npm**';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✅ Starting release workflow for version \`${version}\`\n\n${mode}\n\nView progress in [Actions](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/release.yml)`
+            });
+
+            core.setOutput('should_release', 'true');
+            core.setOutput('version', version);
+            core.setOutput('publish', publish);
+            core.setOutput('dry_run', dry_run);
+            core.setOutput('branch', branch);
+
   release:
     name: Release Libraries
     runs-on: ubuntu-latest
+    needs: [check-comment]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'issue_comment' && needs.check-comment.outputs.should_release == 'true'))
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event_name == 'issue_comment' && needs.check-comment.outputs.branch || github.ref }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set release parameters
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "publish=${{ github.event.inputs.publish }}" >> $GITHUB_OUTPUT
+            echo "dry_run=${{ github.event.inputs.dry_run }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ needs.check-comment.outputs.version }}" >> $GITHUB_OUTPUT
+            echo "publish=${{ needs.check-comment.outputs.publish }}" >> $GITHUB_OUTPUT
+            echo "dry_run=${{ needs.check-comment.outputs.dry_run }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -54,50 +159,135 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Get version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Verify input version matches package.json
+          INPUT_VERSION="${{ steps.params.outputs.version }}"
+          echo "Input version: $INPUT_VERSION"
+          echo "Package version: $VERSION"
+
+          if [[ "$VERSION" != "$INPUT_VERSION" ]]; then
+            echo "❌ Error: Input version ($INPUT_VERSION) doesn't match package.json version ($VERSION)"
+            echo "Please ensure the version input matches the package.json version before releasing."
+            exit 1
+          fi
+
+          # Extract version from branch name if on release branch
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          if [[ "$BRANCH_NAME" =~ ^release-(.+)$ ]]; then
+            BRANCH_VERSION="${BASH_REMATCH[1]}"
+            echo "Branch version: $BRANCH_VERSION"
+
+            # Verify branch name matches package.json
+            if [[ "$VERSION" != "$BRANCH_VERSION" ]]; then
+              echo "❌ Error: Branch name version ($BRANCH_VERSION) doesn't match package.json version ($VERSION)"
+              echo "Please ensure the branch name matches the package.json version before releasing."
+              exit 1
+            fi
+          fi
+
       - name: Build and test libraries
         run: |
-          pnpm nx run-many -t build -p dynamic-form,dynamic-form-material
-          pnpm nx run-many -t test -p dynamic-form,dynamic-form-material --configuration=ci
+          pnpm nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic,dynamic-form-bootstrap
+          pnpm nx run-many -t test -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic,dynamic-form-bootstrap --configuration=ci
+
+      - name: Verify build outputs
+        run: |
+          echo "Verifying build outputs..."
+          MISSING=0
+          for pkg in dynamic-form dynamic-form-material dynamic-form-primeng dynamic-form-ionic dynamic-form-bootstrap; do
+            if [ ! -d "dist/packages/$pkg" ]; then
+              echo "❌ Build output missing for $pkg"
+              MISSING=1
+            else
+              echo "✅ Build output found for $pkg"
+            fi
+          done
+          if [ $MISSING -eq 1 ]; then
+            echo "❌ Some packages failed to build"
+            exit 1
+          fi
+          echo "✅ All packages built successfully"
 
       - name: Configure Git
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-      - name: Version bump
+      - name: Generate Changelog
+        id: changelog
         run: |
-          if [[ "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            pnpm nx release version ${{ github.event.inputs.version }}
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found, generating full changelog"
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
           else
-            pnpm nx release version ${{ github.event.inputs.version }}
+            echo "Generating changelog since $PREV_TAG"
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
           fi
 
-          # Get the new version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          # Create changelog file
+          cat > RELEASE_NOTES.md <<EOF
+          ## What's Changed
+
+          ${CHANGELOG}
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${{ env.VERSION }}
+          EOF
+
+          cat RELEASE_NOTES.md
+
+      - name: Create/Update Git Tag
+        run: |
+          # Check if tag already exists
+          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
+            echo "❌ Tag v${{ env.VERSION }} already exists!"
+            echo "If you need to re-release, delete the tag first or use a different version."
+            exit 1
+          fi
+          git tag -a "v${{ env.VERSION }}" -m "Release v${{ env.VERSION }}"
+          git push origin "v${{ env.VERSION }}"
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ env.NEW_VERSION }}
-          release_name: Release v${{ env.NEW_VERSION }}
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          body_path: RELEASE_NOTES.md
           draft: false
           prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm (dry-run)
-        if: ${{ github.event.inputs.dry_run == 'true' }}
+        if: ${{ steps.params.outputs.dry_run == 'true' }}
         run: pnpm nx release publish --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
-        if: ${{ github.event.inputs.publish == 'true' && github.event.inputs.dry_run == 'false' }}
+        if: ${{ steps.params.outputs.publish == 'true' && steps.params.outputs.dry_run != 'true' }}
         run: pnpm nx release publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Push changes
+      - name: Post-release summary
+        if: success()
         run: |
-          git push --follow-tags
+          echo "✅ Release v${{ env.VERSION }} completed successfully!"
+          echo ""
+          echo "📦 Published packages:"
+          for pkg in dynamic-form dynamic-form-material dynamic-form-primeng dynamic-form-ionic dynamic-form-bootstrap; do
+            echo "- @ng-forge/$pkg@${{ env.VERSION }}"
+          done
+          echo ""
+          echo "🔗 GitHub Release: https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }}"
+          echo "🔗 npm: https://www.npmjs.com/package/@ng-forge/dynamic-form/v/${{ env.VERSION }}"
