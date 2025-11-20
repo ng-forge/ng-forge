@@ -19,11 +19,25 @@ export default defineConfig(() => ({
     globals: true,
     browser: {
       enabled: true,
-      instances: [
-        { browser: 'chromium', provider: playwright() }
-      ],
+      instances: [{
+        browser: 'chromium',
+        provider: playwright({
+          launch: {
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-gpu',
+            ],
+          },
+        }),
+      }],
       headless: true,
+      fileParallelism: false,
+      slowTestThreshold: 10000,
     },
+    testTimeout: 30000,
+    hookTimeout: 30000,
     include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     setupFiles: ['src/test-setup.ts'],
     reporters: ['default'],
