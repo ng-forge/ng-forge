@@ -1,6 +1,13 @@
 import { checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-form';
 import { IonicField } from '../types/types';
-import { buttonFieldMapper, submitButtonFieldMapper, nextButtonFieldMapper, previousButtonFieldMapper } from '../fields/button';
+import {
+  buttonFieldMapper,
+  submitButtonFieldMapper,
+  nextButtonFieldMapper,
+  previousButtonFieldMapper,
+  addArrayItemButtonFieldMapper,
+  removeArrayItemButtonFieldMapper,
+} from '../fields/button';
 
 /**
  * Ionic field type definitions
@@ -44,6 +51,18 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
     name: IonicField.Previous,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: previousButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: IonicField.AddArrayItem,
+    loadComponent: () => import('../fields/button/ionic-button.component'),
+    mapper: addArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: IonicField.RemoveArrayItem,
+    loadComponent: () => import('../fields/button/ionic-button.component'),
+    mapper: removeArrayItemButtonFieldMapper,
     valueHandling: 'exclude',
   },
   {

@@ -18,17 +18,19 @@ import {
 } from '@angular/core';
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
-import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs';
 import { isEqual, memoize } from 'lodash-es';
 import { keyBy } from './utils/object-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
-import { FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes, FIELD_SIGNAL_CONTEXT } from './models';
+import { FIELD_SIGNAL_CONTEXT, FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
+import { FormResetEvent } from './events/constants/form-reset.event';
+import { FormClearEvent } from './events/constants/form-clear.event';
 import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
 import { InferGlobalFormValue } from './models/types';
 import { flattenFields, flattenFieldsForRendering } from './utils';
@@ -93,7 +95,6 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
       [class.disabled]="effectiveFormOptions().disabled"
       [class.df-form-paged]="formModeDetection().mode === 'paged'"
       [class.df-form-non-paged]="formModeDetection().mode === 'non-paged'"
-      (submit)="onSubmit($event)"
     >
       @if (formModeDetection().mode === 'paged') {
         <!-- Paged form: Use page orchestrator with page field definitions -->
@@ -128,7 +129,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
-  private readonly functionRegistry = inject(FunctionRegistryService);
 
   /**
    * Signal tracking field loading errors for error boundary pattern.
@@ -299,31 +299,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
 
-    this.registerValidatorsFromConfig(config);
-
     if (config.fields && config.fields.length > 0) {
       return this.createFormSetupFromConfig(config.fields, modeDetection.mode, registry);
     }
 
     return this.createEmptyFormSetup(registry);
   });
-
-  private registerValidatorsFromConfig(config: FormConfig<TFields>): void {
-    const signalFormsConfig = config.signalFormsConfig;
-    if (!signalFormsConfig) return;
-
-    // Register custom functions
-    if (signalFormsConfig.customFunctions) {
-      Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
-        this.functionRegistry.registerCustomFunction(name, fn);
-      });
-    }
-
-    // Set all validators from config - change detection is inside set methods
-    this.functionRegistry.setValidators(signalFormsConfig.validators);
-    this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
-    this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
-  }
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: 'paged' | 'non-paged', registry: Map<string, FieldTypeDefinition>) {
     // Use memoized functions for expensive operations with registry
@@ -530,6 +511,34 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    */
   readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit').pipe(map(() => this.value())));
 
+  /**
+   * Emitted when the form is reset to its default values.
+   *
+   * Subscribe to this output to react when the form is reset.
+   *
+   * @example
+   * ```typescript
+   * onFormReset() {
+   *   console.log('Form was reset to default values');
+   * }
+   * ```
+   */
+  readonly reset = outputFromObservable(this.eventBus.on<FormResetEvent>('form-reset'));
+
+  /**
+   * Emitted when the form is cleared.
+   *
+   * Subscribe to this output to react when the form is cleared.
+   *
+   * @example
+   * ```typescript
+   * onFormClear() {
+   *   console.log('Form was cleared');
+   * }
+   * ```
+   */
+  readonly cleared = outputFromObservable(this.eventBus.on<FormClearEvent>('form-clear'));
+
   readonly events = outputFromObservable(this.eventBus.events$);
 
   private readonly componentId = 'dynamic-form';
@@ -558,6 +567,22 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
       }
     });
+
+    // Listen for form reset events
+    this.eventBus
+      .on<FormResetEvent>('form-reset')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.onFormReset();
+      });
+
+    // Listen for form clear events
+    this.eventBus
+      .on<FormClearEvent>('form-clear')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.onFormClear();
+      });
   }
 
   /**
@@ -651,12 +676,25 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   }
 
   /**
-   * Handles form submission. Prevents default form submission behavior
-   * and emits the submit event through the event bus.
+   * Handles form reset. Restores all form field values to their
+   * initial default values as defined in the form configuration.
    */
-  protected onSubmit(event: Event): void {
-    event.preventDefault();
-    this.eventBus.dispatch(SubmitEvent, this.value());
+  private onFormReset(): void {
+    const defaults = this.defaultValues();
+    // Update both the form instance and the value model
+    this.form()().value.set(defaults as any);
+    this.value.set(defaults as Partial<TModel>);
+  }
+
+  /**
+   * Handles form clear. Clears all form field values,
+   * resetting them to an empty state.
+   */
+  private onFormClear(): void {
+    const emptyValue = {} as Partial<TModel>;
+    // Update both the form instance and the value model
+    this.form()().value.set(emptyValue as any);
+    this.value.set(emptyValue);
   }
 
   /**

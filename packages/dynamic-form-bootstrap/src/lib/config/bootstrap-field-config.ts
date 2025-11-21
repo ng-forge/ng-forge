@@ -1,7 +1,13 @@
 import { FieldTypeDefinition, valueFieldMapper, checkboxFieldMapper } from '@ng-forge/dynamic-form';
 import { BsField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/bs-button.mapper';
-import { submitButtonFieldMapper, nextButtonFieldMapper, previousButtonFieldMapper } from '../fields/button/bs-specific-button.mapper';
+import {
+  submitButtonFieldMapper,
+  nextButtonFieldMapper,
+  previousButtonFieldMapper,
+  addArrayItemButtonFieldMapper,
+  removeArrayItemButtonFieldMapper,
+} from '../fields/button/bs-specific-button.mapper';
 
 export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   {
@@ -41,6 +47,18 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
     name: BsField.Previous,
     loadComponent: () => import('../fields/button/bs-button.component'),
     mapper: previousButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: BsField.AddArrayItem,
+    loadComponent: () => import('../fields/button/bs-button.component'),
+    mapper: addArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: BsField.RemoveArrayItem,
+    loadComponent: () => import('../fields/button/bs-button.component'),
+    mapper: removeArrayItemButtonFieldMapper,
     valueHandling: 'exclude',
   },
   {

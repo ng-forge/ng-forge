@@ -2,7 +2,7 @@
 // Using ::ng-deep to ensure grid classes work on child components
 
 // Import grid system styles at the top level
-@import '../../styles/grid-system.scss';
+@use '../../styles/grid-system.scss';
 
 // Apply grid system globally using ::ng-deep to bypass view encapsulation
 :host ::ng-deep {

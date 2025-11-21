@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "example",
   "sourceRoot": "apps/examples/material/src",
-  "tags": ["examples"],
+  "tags": ["examples", "e2e"],
   "implicitDependencies": ["dynamic-form", "dynamic-form-material"],
   "targets": {
     "build": {
@@ -82,6 +82,13 @@
         "port": 4201,
         "staticFilePath": "dist/apps/examples/material/browser",
         "spa": true
+      }
+    },
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/material"],
+      "options": {
+        "config": "apps/examples/material/e2e/playwright.config.ts"
       }
     }
   }

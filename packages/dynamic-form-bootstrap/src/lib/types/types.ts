@@ -10,6 +10,8 @@ export const BsField = {
   Submit: 'submit',
   Next: 'next',
   Previous: 'previous',
+  AddArrayItem: 'addArrayItem',
+  RemoveArrayItem: 'removeArrayItem',
   Textarea: 'textarea',
   Radio: 'radio',
   MultiCheckbox: 'multi-checkbox',

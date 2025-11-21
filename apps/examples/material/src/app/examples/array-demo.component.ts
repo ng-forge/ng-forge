@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { AddArrayItemEvent, DynamicForm, type FormConfig, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
+import { AddArrayItemEvent, DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
 import { JsonPipe } from '@angular/common';
 import { submitButton } from '@ng-forge/dynamic-form-material';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,7 +14,6 @@ const tagTemplate = {
       key: 'value',
       type: 'input',
       label: 'Tag',
-      value: '',
       required: true,
       minLength: 2,
       props: {
@@ -24,11 +23,9 @@ const tagTemplate = {
     },
     {
       key: 'removeTag',
-      type: 'button',
+      type: 'removeArrayItem',
       label: 'Remove',
       className: 'remove-tag-button',
-      event: RemoveArrayItemEvent,
-      eventArgs: ['$arrayKey', '$index'],
       props: {
         color: 'warn',
       },
@@ -51,7 +48,6 @@ const contactTemplate = {
       key: 'name',
       type: 'input',
       label: 'Contact Name',
-      value: '',
       required: true,
       minLength: 2,
       props: {
@@ -63,7 +59,6 @@ const contactTemplate = {
       key: 'phone',
       type: 'input',
       label: 'Phone Number',
-      value: '',
       required: true,
       pattern: /^\d{10}$/,
       validationMessages: {
@@ -79,7 +74,6 @@ const contactTemplate = {
       key: 'relationship',
       type: 'select',
       label: 'Relationship',
-      value: 'friend',
       required: true,
       options: [
         { label: 'Family', value: 'family' },
@@ -93,11 +87,9 @@ const contactTemplate = {
     },
     {
       key: 'removeContact',
-      type: 'button',
+      type: 'removeArrayItem',
       label: 'Remove',
       className: 'remove-contact-button',
-      event: RemoveArrayItemEvent,
-      eventArgs: ['$arrayKey', '$index'],
       props: {
         color: 'warn',
       },
@@ -143,8 +135,14 @@ class AddContactEvent extends AddArrayItemEvent {
 })
 export class ArrayDemoComponent {
   formValue = signal({
-    tags: [],
-    contacts: [],
+    tags: [{ value: 'angular' }, { value: 'typescript' }],
+    contacts: [
+      {
+        name: 'Jane Smith',
+        phone: '5551234567',
+        relationship: 'family',
+      },
+    ],
   });
 
   config = {

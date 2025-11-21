@@ -280,8 +280,8 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
   /**
    * Create component for regular field types (input, group, select, etc.)
-   * For value fields (input, select): pass the FieldTree directly
-   * For container fields (group): use mapFieldToBindings with parent context
+   * Uses mapFieldToBindings for all bindings, then adds the field binding manually
+   * since we already have the FieldTree.
    */
   private createRegularComponent(
     componentType: Type<FormUiControl>,

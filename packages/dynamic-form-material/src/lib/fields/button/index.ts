@@ -1,5 +1,13 @@
 export { submitButton, nextPageButton, previousPageButton, actionButton } from './mat-button.function';
-export type { MatButtonProps, MatButtonField, MatSubmitButtonField, MatNextButtonField, MatPreviousButtonField } from './mat-button.type';
+export type {
+  MatButtonProps,
+  MatButtonField,
+  MatSubmitButtonField,
+  MatNextButtonField,
+  MatPreviousButtonField,
+  MatAddArrayItemButtonField,
+  MatRemoveArrayItemButtonField,
+} from './mat-button.type';
 export { default as MatButtonFieldComponent } from './mat-button.component';
 export {
   submitButtonFieldMapper,

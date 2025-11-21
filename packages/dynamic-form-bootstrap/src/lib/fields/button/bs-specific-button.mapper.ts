@@ -150,11 +150,6 @@ export function removeArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<strin
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
 
-  // Add eventArgs binding if provided in field definition
-  if ('eventArgs' in fieldDef && fieldDef.eventArgs !== undefined) {
-    bindings.push(inputBinding('eventArgs', () => fieldDef.eventArgs));
-  }
-
   // Add array context for token resolution
   const eventContext: ArrayItemContext = {
     key: fieldDef.key,
@@ -164,6 +159,13 @@ export function removeArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<strin
   };
 
   bindings.push(inputBinding('eventContext', () => eventContext));
+
+  // Set default eventArgs for RemoveArrayItemEvent (arrayKey, index)
+  // User can override by providing eventArgs in field definition
+  const defaultEventArgs = ['$arrayKey', '$index'];
+  const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
+
+  bindings.push(inputBinding('eventArgs', () => eventArgs));
 
   return bindings;
 }

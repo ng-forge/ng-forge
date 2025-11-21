@@ -41,3 +41,23 @@ export interface MatPreviousButtonField extends Omit<FieldDef<MatButtonProps>, '
   className?: string;
   props?: MatButtonProps;
 }
+
+/** Add array item button field - with preconfigured AddArrayItemEvent */
+export interface MatAddArrayItemButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+  type: 'addArrayItem';
+  key: string;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+  props?: MatButtonProps;
+}
+
+/** Remove array item button field - with preconfigured RemoveArrayItemEvent */
+export interface MatRemoveArrayItemButtonField extends Omit<FieldDef<MatButtonProps>, 'event'> {
+  type: 'removeArrayItem';
+  key: string;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+  props?: MatButtonProps;
+}

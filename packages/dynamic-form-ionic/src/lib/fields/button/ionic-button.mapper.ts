@@ -1,13 +1,11 @@
-import {
-  baseFieldMapper,
-  ArrayItemContext,
-  FieldDef,
-  AddArrayItemEvent,
-  RemoveArrayItemEvent,
-  ARRAY_CONTEXT,
-} from '@ng-forge/dynamic-form';
-import { Binding, inject, inputBinding } from '@angular/core';
+import { baseFieldMapper, FieldDef } from '@ng-forge/dynamic-form';
+import { Binding, inputBinding } from '@angular/core';
 
+/**
+ * Generic button mapper for custom events or basic buttons.
+ * For specific button types (submit, next, prev, add/remove array items),
+ * use the dedicated field types and their specific mappers.
+ */
 export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
@@ -26,7 +24,7 @@ export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): 
     bindings.push(inputBinding('event', () => fieldDef.event));
   }
 
-  // Add event args binding
+  // Add eventArgs binding if provided
   if ('eventArgs' in fieldDef && fieldDef.eventArgs !== undefined) {
     bindings.push(inputBinding('eventArgs', () => fieldDef.eventArgs));
   }

@@ -19,6 +19,8 @@ import type {
   MatSubmitButtonField,
   MatNextButtonField,
   MatPreviousButtonField,
+  MatAddArrayItemButtonField,
+  MatRemoveArrayItemButtonField,
 } from '../fields';
 
 declare module '@ng-forge/dynamic-form' {
@@ -30,6 +32,8 @@ declare module '@ng-forge/dynamic-form' {
     submit: MatSubmitButtonField;
     next: MatNextButtonField;
     previous: MatPreviousButtonField;
+    addArrayItem: MatAddArrayItemButtonField;
+    removeArrayItem: MatRemoveArrayItemButtonField;
     textarea: MatTextareaField;
     radio: MatRadioField<unknown>;
     'multi-checkbox': MatMultiCheckboxField<unknown>;

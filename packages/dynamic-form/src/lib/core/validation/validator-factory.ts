@@ -1,3 +1,4 @@
+import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import {
   email,
   FieldContext,
@@ -6,16 +7,15 @@ import {
   maxLength,
   min,
   minLength,
+  PathKind,
   pattern,
   required,
+  SchemaPathRules,
   validate,
   validateAsync,
   validateHttp,
   ValidationError,
-  SchemaPathRules,
-  PathKind,
 } from '@angular/forms/signals';
-import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { inject } from '@angular/core';
 import { AsyncValidatorConfig, CustomValidatorConfig, HttpValidatorConfig, ValidatorConfig } from '../../models';
 import { createLogicFunction } from '../expressions';
@@ -24,7 +24,6 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser';
-import { CustomValidator } from './validator-types';
 
 /**
  * Helper to create conditional logic function from when expression.
@@ -206,7 +205,7 @@ function createFunctionValidator<TValue>(
   if (!validatorFn) {
     console.warn(
       `[DynamicForm] Custom validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using signalFormsConfig.validators or check the function name for typos.`,
+        `Use expression-based validators instead (type: 'custom', expression: '...', kind: '...').`,
     );
     return () => null;
   }
@@ -282,7 +281,7 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
   if (!validatorConfig) {
     console.warn(
       `[DynamicForm] Async validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using signalFormsConfig.asyncValidators or check the function name for typos.`,
+        `Register validators using FunctionRegistryService or check the function name for typos.`,
     );
     return;
   }
@@ -334,7 +333,7 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
   if (!httpValidatorConfig) {
     console.warn(
       `[DynamicForm] HTTP validator "${config.functionName}" not found in registry. ` +
-        `Ensure it's registered using signalFormsConfig.httpValidators or check the function name for typos.`,
+        `Register validators using FunctionRegistryService or check the function name for typos.`,
     );
     return;
   }

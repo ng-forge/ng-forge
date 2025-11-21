@@ -1,7 +1,13 @@
 import { checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-form';
 import { PrimeField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/prime-button.mapper';
-import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/prime-specific-button.mapper';
+import {
+  nextButtonFieldMapper,
+  previousButtonFieldMapper,
+  submitButtonFieldMapper,
+  addArrayItemButtonFieldMapper,
+  removeArrayItemButtonFieldMapper,
+} from '../fields/button/prime-specific-button.mapper';
 
 /**
  * PrimeNG field type definitions
@@ -45,6 +51,18 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
     name: PrimeField.Previous,
     loadComponent: () => import('../fields/button/prime-button.component'),
     mapper: previousButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: PrimeField.AddArrayItem,
+    loadComponent: () => import('../fields/button/prime-button.component'),
+    mapper: addArrayItemButtonFieldMapper,
+    valueHandling: 'exclude',
+  },
+  {
+    name: PrimeField.RemoveArrayItem,
+    loadComponent: () => import('../fields/button/prime-button.component'),
+    mapper: removeArrayItemButtonFieldMapper,
     valueHandling: 'exclude',
   },
   {
