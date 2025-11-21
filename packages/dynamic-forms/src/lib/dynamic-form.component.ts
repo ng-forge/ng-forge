@@ -16,7 +16,7 @@ import {
   untracked,
   ViewContainerRef,
 } from '@angular/core';
-import { FieldRendererDirective } from './directives/dynamic-forms.directive';
+import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs';
@@ -112,7 +112,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
       }
     </form>
   `,
-  styleUrl: './dynamic-forms.component.scss',
+  styleUrl: './dynamic-form.component.scss',
   providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
   host: {
     '[class.disabled]': 'disabled()',

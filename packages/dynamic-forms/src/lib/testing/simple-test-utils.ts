@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DynamicForm } from '../dynamic-forms.component';
+import { DynamicForm } from '../dynamic-form.component';
 import { delay } from './delay';
 import { FieldDef } from '../definitions';
 import { provideDynamicForm } from '../providers/dynamic-forms-providers';

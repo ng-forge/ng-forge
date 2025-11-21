@@ -1,5 +1,5 @@
-export { DynamicForm } from './dynamic-forms.component';
-export { FieldRendererDirective } from './directives/dynamic-forms.directive';
+export { DynamicForm } from './dynamic-form.component';
+export { FieldRendererDirective } from './directives/dynamic-form.directive';
 
 // Core interfaces and types - clean signal forms API
 export * from './models';

@@ -18,7 +18,7 @@ import { memoize } from 'lodash-es';
 import { keyBy, mapValues } from '../../utils/object-utils';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
-import { FieldRendererDirective } from '../../directives/dynamic-forms.directive';
+import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions';
 import { FieldSignalContext } from '../../mappers';

@@ -26,7 +26,7 @@ export default [
         'error',
         {
           type: 'attribute',
-          prefix: 'df-bs',
+          prefix: 'dfBs',
           style: 'camelCase',
         },
       ],

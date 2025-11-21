@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { inputBinding } from '@angular/core';
 import { ValidationError } from '@angular/forms/signals';
-import { DynamicForm } from '../dynamic-forms.component';
+import { DynamicForm } from '../dynamic-form.component';
 import { FormConfig } from '../models';
 import { FieldDef, InputField, SelectField } from '../definitions';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';

@@ -14,7 +14,7 @@ import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs
 import { forkJoin, map, of, switchMap } from 'rxjs';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
-import { FieldRendererDirective } from '../../directives/dynamic-forms.directive';
+import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
 import { FormUiControl } from '@angular/forms/signals';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';

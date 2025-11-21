@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { DynamicForm } from './dynamic-forms.component';
+import { DynamicForm } from './dynamic-form.component';
 import { delay, SimpleTestUtils, TestCheckboxHarnessComponent, TestInputHarnessComponent } from './testing';
 import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
 import { checkboxFieldMapper, valueFieldMapper } from './mappers';
