@@ -87,7 +87,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
  * @public
  */
 @Component({
-  selector: 'dynamic-forms',
+  selector: 'dynamic-form',
   imports: [FieldRendererDirective, PageOrchestratorComponent],
   template: `
     <form
