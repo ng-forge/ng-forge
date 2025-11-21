@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DynamicForm } from '../dynamic-form.component';
 import { delay } from './delay';
 import { FieldDef } from '../definitions';
-import { provideDynamicForm } from '../providers/dynamic-forms-providers';
+import { provideDynamicForm } from '../providers/dynamic-form-providers';
 import { Component, Injector, runInInjectionContext, signal, Type } from '@angular/core';
 import { FIELD_REGISTRY, FIELD_SIGNAL_CONTEXT, FieldTypeDefinition } from '../models';
 import { EventBus } from '../events/event.bus';

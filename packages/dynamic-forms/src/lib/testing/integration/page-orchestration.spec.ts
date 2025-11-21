@@ -3,7 +3,7 @@ import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { detectFormMode, FormModeDetectionResult } from '../../models/types/form-mode';
 import { FormModeValidator } from '../../utils/form-validation/form-mode-validator';
-import { DynamicFormTestResult, DynamicFormTestUtils } from '../dynamic-forms-test-utils';
+import { DynamicFormTestResult, DynamicFormTestUtils } from '../dynamic-form-test-utils';
 import { FormConfig } from '../../models/form-config';
 import { provideDynamicForm } from '../../providers';
 
