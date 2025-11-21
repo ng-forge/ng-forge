@@ -1,0 +1,142 @@
+name: ❓ Question / Help
+description: Ask a question or get help with ng-forge
+title: '[Question]: '
+labels: ['question']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help!
+
+        **Note:** For general discussions, consider using [GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions) instead.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: How do I...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Question Category
+      description: What is your question about?
+      options:
+        - Getting Started / Installation
+        - Form Configuration
+        - Field Types
+        - Validation
+        - Conditional Logic
+        - Type Safety / TypeScript
+        - UI Adapters
+        - Testing
+        - Performance
+        - Custom Field Types
+        - Migration / Upgrade
+        - Best Practices
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Which package is this about?
+      multiple: true
+      options:
+        - '@ng-forge/dynamic-forms (core)'
+        - '@ng-forge/dynamic-forms-material'
+        - '@ng-forge/dynamic-forms-primeng'
+        - '@ng-forge/dynamic-forms-ionic'
+        - '@ng-forge/dynamic-forms-bootstrap'
+        - 'All packages / General'
+        - 'Not sure'
+    validations:
+      required: false
+
+  - type: textarea
+    id: what-tried
+    attributes:
+      label: What Have You Tried?
+      description: What have you already tried? Include any code or approaches you've attempted.
+      render: typescript
+      placeholder: |
+        I tried:
+        ```typescript
+        const config = {
+          fields: [...]
+        };
+        ```
+        But I'm getting...
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected-outcome
+    attributes:
+      label: Expected Outcome
+      description: What are you trying to achieve?
+      placeholder: I want to accomplish...
+    validations:
+      required: true
+
+  - type: textarea
+    id: code-context
+    attributes:
+      label: Relevant Code
+      description: Share relevant code snippets if applicable
+      render: typescript
+      placeholder: |
+        const config = {
+          fields: [
+            // Your configuration
+          ]
+        };
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Package Version
+      description: What version are you using?
+      placeholder: '1.0.0'
+    validations:
+      required: false
+
+  - type: input
+    id: angular-version
+    attributes:
+      label: Angular Version
+      description: What version of Angular are you using?
+      placeholder: '21.0.0'
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information that might help us answer your question
+      placeholder: |
+        - I'm building a form for...
+        - I'm coming from [other library]
+        - Related documentation: ...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and discussions
+          required: true
+        - label: I have checked the documentation
+          required: true
+        - label: I have reviewed the examples
+          required: false

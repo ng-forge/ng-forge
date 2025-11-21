@@ -1,0 +1,67 @@
+// Hide the host element when hidden attribute is present
+:host([hidden]) {
+  display: none !important;
+}
+
+// Text field base styles with CSS custom properties for customization
+.df-text {
+  // Default styling that can be overridden via CSS variables
+  font-size: var(--df-text-font-size, 1rem);
+  font-family: var(--df-text-font-family, inherit);
+  font-weight: var(--df-text-font-weight, normal);
+  color: var(--df-text-color, inherit);
+  line-height: var(--df-text-line-height, 1.5);
+  text-align: var(--df-text-text-align, inherit);
+  letter-spacing: var(--df-text-letter-spacing, normal);
+  text-decoration: var(--df-text-text-decoration, none);
+  text-transform: var(--df-text-text-transform, none);
+  margin: var(--df-text-margin, 0);
+  padding: var(--df-text-padding, 0);
+}
+
+// Element-specific default styles
+.df-text-h1 {
+  font-size: var(--df-text-h1-font-size, 2rem);
+  font-weight: var(--df-text-h1-font-weight, bold);
+  margin: var(--df-text-h1-margin, 0);
+}
+
+.df-text-h2 {
+  font-size: var(--df-text-h2-font-size, 1.75rem);
+  font-weight: var(--df-text-h2-font-weight, bold);
+  margin: var(--df-text-h2-margin, 0);
+}
+
+.df-text-h3 {
+  font-size: var(--df-text-h3-font-size, 1.5rem);
+  font-weight: var(--df-text-h3-font-weight, bold);
+  margin: var(--df-text-h3-margin, 0);
+}
+
+.df-text-h4 {
+  font-size: var(--df-text-h4-font-size, 1.25rem);
+  font-weight: var(--df-text-h4-font-weight, bold);
+  margin: var(--df-text-h4-margin, 0);
+}
+
+.df-text-h5 {
+  font-size: var(--df-text-h5-font-size, 1.125rem);
+  font-weight: var(--df-text-h5-font-weight, bold);
+  margin: var(--df-text-h5-margin, 0);
+}
+
+.df-text-h6 {
+  font-size: var(--df-text-h6-font-size, 1rem);
+  font-weight: var(--df-text-h6-font-weight, bold);
+  margin: var(--df-text-h6-margin, 0);
+}
+
+.df-text-p {
+  font-size: var(--df-text-p-font-size, 1rem);
+  margin: var(--df-text-p-margin, 0);
+}
+
+.df-text-span {
+  // Spans inherit most properties, minimal default styling
+  display: var(--df-text-span-display, inline);
+}

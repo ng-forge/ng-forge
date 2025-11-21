@@ -1,0 +1,34 @@
+// Row-specific styling overrides and customizations
+// Using ::ng-deep to ensure grid classes work on child components
+
+// Import grid system styles at the top level
+@use '../../styles/grid-system.scss';
+
+// Apply grid system globally using ::ng-deep to bypass view encapsulation
+:host ::ng-deep {
+  // Grid classes are now available on child components
+}
+
+:host {
+  // Allow customization of gap for individual rows
+  &.df-gap-custom {
+    --df-grid-gap: var(--row-custom-gap, 1rem);
+  }
+
+  // Row-specific responsive overrides
+  &.df-row-mobile-stack {
+    @media (max-width: 576px) {
+      grid-template-columns: 1fr !important;
+
+      > * {
+        grid-column: 1 / -1 !important;
+      }
+    }
+  }
+
+  &.df-row-tablet-2col {
+    @media (min-width: 577px) and (max-width: 768px) {
+      --df-grid-columns: 2;
+    }
+  }
+}

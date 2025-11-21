@@ -1,0 +1,421 @@
+/**
+ * Dynamic Form Grid System
+ * 
+ * A CSS Grid-based layout system with CSS variables for customization.
+ * Provides responsive behavior and consistent spacing throughout the form.
+ */
+
+/* CSS Variables for Grid System */
+:host,
+.df-form {
+  /* Grid Configuration */
+  --df-grid-columns: 12;
+  --df-grid-gap: 0.5rem;
+  --df-grid-row-gap: 0.5rem;
+
+  /* Responsive Breakpoints */
+  --df-breakpoint-sm: 576px;
+  --df-breakpoint-md: 768px;
+  --df-breakpoint-lg: 992px;
+  --df-breakpoint-xl: 1200px;
+
+  /* Responsive Gap Adjustments */
+  --df-grid-gap-sm: 0.5rem;
+  --df-grid-gap-md: 0.5rem;
+  --df-grid-gap-lg: 0.5rem;
+  --df-grid-gap-xl: 0.5rem;
+
+  /* Responsive Row Gap Adjustments */
+  --df-grid-row-gap-sm: 0.5rem;
+  --df-grid-row-gap-md: 0.5rem;
+  --df-grid-row-gap-lg: 0.5rem;
+  --df-grid-row-gap-xl: 0.5rem;
+
+  /* Group Field Styling Variables */
+  --df-group-gap: var(--df-grid-gap);
+  --df-group-padding: var(--df-grid-gap);
+}
+
+/* Base Form Grid Container */
+.df-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--df-grid-row-gap);
+  width: 100%;
+
+  /* Each field by default takes one row */
+  > * {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Row Grid Container */
+.df-row {
+  display: grid;
+  grid-template-columns: repeat(var(--df-grid-columns, 12), 1fr);
+  gap: var(--df-grid-gap);
+  align-items: start;
+  width: 100%;
+
+  /* Fields in row that don't have explicit col classes span full width */
+  > *:not([class*='df-col-']) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Column Span Utilities */
+.df-col-1 {
+  grid-column: span 1;
+}
+.df-col-2 {
+  grid-column: span 2;
+}
+.df-col-3 {
+  grid-column: span 3;
+}
+.df-col-4 {
+  grid-column: span 4;
+}
+.df-col-5 {
+  grid-column: span 5;
+}
+.df-col-6 {
+  grid-column: span 6;
+}
+.df-col-7 {
+  grid-column: span 7;
+}
+.df-col-8 {
+  grid-column: span 8;
+}
+.df-col-9 {
+  grid-column: span 9;
+}
+.df-col-10 {
+  grid-column: span 10;
+}
+.df-col-11 {
+  grid-column: span 11;
+}
+.df-col-12 {
+  grid-column: span 12;
+}
+
+/* Auto-sizing column */
+.df-col-auto {
+  grid-column: span auto;
+  width: auto;
+}
+
+/* Full width in row */
+.df-col-full {
+  grid-column: 1 / -1;
+}
+
+/* Column Start Utilities */
+.df-col-start-1 {
+  grid-column-start: 1;
+}
+.df-col-start-2 {
+  grid-column-start: 2;
+}
+.df-col-start-3 {
+  grid-column-start: 3;
+}
+.df-col-start-4 {
+  grid-column-start: 4;
+}
+.df-col-start-5 {
+  grid-column-start: 5;
+}
+.df-col-start-6 {
+  grid-column-start: 6;
+}
+.df-col-start-7 {
+  grid-column-start: 7;
+}
+.df-col-start-8 {
+  grid-column-start: 8;
+}
+.df-col-start-9 {
+  grid-column-start: 9;
+}
+.df-col-start-10 {
+  grid-column-start: 10;
+}
+.df-col-start-11 {
+  grid-column-start: 11;
+}
+.df-col-start-12 {
+  grid-column-start: 12;
+}
+
+/* Column End Utilities */
+.df-col-end-1 {
+  grid-column-end: 1;
+}
+.df-col-end-2 {
+  grid-column-end: 2;
+}
+.df-col-end-3 {
+  grid-column-end: 3;
+}
+.df-col-end-4 {
+  grid-column-end: 4;
+}
+.df-col-end-5 {
+  grid-column-end: 5;
+}
+.df-col-end-6 {
+  grid-column-end: 6;
+}
+.df-col-end-7 {
+  grid-column-end: 7;
+}
+.df-col-end-8 {
+  grid-column-end: 8;
+}
+.df-col-end-9 {
+  grid-column-end: 9;
+}
+.df-col-end-10 {
+  grid-column-end: 10;
+}
+.df-col-end-11 {
+  grid-column-end: 11;
+}
+.df-col-end-12 {
+  grid-column-end: 12;
+}
+.df-col-end-13 {
+  grid-column-end: 13;
+}
+
+/* Responsive Behavior */
+@media (max-width: 576px) {
+  .df-form {
+    --df-grid-gap: var(--df-grid-gap-sm);
+    --df-grid-row-gap: var(--df-grid-row-gap-sm);
+  }
+
+  .df-row {
+    /* Force single column on mobile for better UX */
+    grid-template-columns: 1fr;
+
+    > * {
+      grid-column: 1 / -1 !important;
+    }
+  }
+
+  /* Mobile-specific overrides */
+  .df-row.df-row-mobile-keep-cols {
+    grid-template-columns: repeat(var(--df-grid-columns), 1fr);
+
+    > * {
+      grid-column: revert !important;
+    }
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .df-form {
+    --df-grid-gap: var(--df-grid-gap-md);
+    --df-grid-row-gap: var(--df-grid-row-gap-md);
+  }
+
+  .df-row {
+    /* Reduce to 6 columns on tablet */
+    --df-grid-columns: 6;
+  }
+
+  /* Tablet-specific column spans */
+  .df-col-sm-1 {
+    grid-column: span 1;
+  }
+  .df-col-sm-2 {
+    grid-column: span 2;
+  }
+  .df-col-sm-3 {
+    grid-column: span 3;
+  }
+  .df-col-sm-4 {
+    grid-column: span 4;
+  }
+  .df-col-sm-5 {
+    grid-column: span 5;
+  }
+  .df-col-sm-6 {
+    grid-column: span 6;
+  }
+  .df-col-sm-full {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+  .df-form {
+    --df-grid-gap: var(--df-grid-gap-lg);
+    --df-grid-row-gap: var(--df-grid-row-gap-lg);
+  }
+
+  /* Medium-specific column spans */
+  .df-col-md-1 {
+    grid-column: span 1;
+  }
+  .df-col-md-2 {
+    grid-column: span 2;
+  }
+  .df-col-md-3 {
+    grid-column: span 3;
+  }
+  .df-col-md-4 {
+    grid-column: span 4;
+  }
+  .df-col-md-5 {
+    grid-column: span 5;
+  }
+  .df-col-md-6 {
+    grid-column: span 6;
+  }
+  .df-col-md-7 {
+    grid-column: span 7;
+  }
+  .df-col-md-8 {
+    grid-column: span 8;
+  }
+  .df-col-md-9 {
+    grid-column: span 9;
+  }
+  .df-col-md-10 {
+    grid-column: span 10;
+  }
+  .df-col-md-11 {
+    grid-column: span 11;
+  }
+  .df-col-md-12 {
+    grid-column: span 12;
+  }
+  .df-col-md-full {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 993px) {
+  .df-form {
+    --df-grid-gap: var(--df-grid-gap-xl);
+    --df-grid-row-gap: var(--df-grid-row-gap-xl);
+  }
+
+  /* Large-specific column spans */
+  .df-col-lg-1 {
+    grid-column: span 1;
+  }
+  .df-col-lg-2 {
+    grid-column: span 2;
+  }
+  .df-col-lg-3 {
+    grid-column: span 3;
+  }
+  .df-col-lg-4 {
+    grid-column: span 4;
+  }
+  .df-col-lg-5 {
+    grid-column: span 5;
+  }
+  .df-col-lg-6 {
+    grid-column: span 6;
+  }
+  .df-col-lg-7 {
+    grid-column: span 7;
+  }
+  .df-col-lg-8 {
+    grid-column: span 8;
+  }
+  .df-col-lg-9 {
+    grid-column: span 9;
+  }
+  .df-col-lg-10 {
+    grid-column: span 10;
+  }
+  .df-col-lg-11 {
+    grid-column: span 11;
+  }
+  .df-col-lg-12 {
+    grid-column: span 12;
+  }
+  .df-col-lg-full {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Utility Classes for Spacing */
+.df-gap-none {
+  --df-grid-gap: 0;
+}
+.df-gap-xs {
+  --df-grid-gap: 0.25rem;
+}
+.df-gap-sm {
+  --df-grid-gap: 0.5rem;
+}
+.df-gap-md {
+  --df-grid-gap: 1rem;
+}
+.df-gap-lg {
+  --df-grid-gap: 1.5rem;
+}
+.df-gap-xl {
+  --df-grid-gap: 2rem;
+}
+
+.df-row-gap-none {
+  --df-grid-row-gap: 0;
+}
+.df-row-gap-xs {
+  --df-grid-row-gap: 0.25rem;
+}
+.df-row-gap-sm {
+  --df-grid-row-gap: 0.5rem;
+}
+.df-row-gap-md {
+  --df-grid-row-gap: 1rem;
+}
+.df-row-gap-lg {
+  --df-grid-row-gap: 1.5rem;
+}
+.df-row-gap-xl {
+  --df-grid-row-gap: 2rem;
+}
+
+/* Field Styling */
+.df-field {
+  display: block;
+  width: 100%;
+
+  /* Ensure fields don't overflow their grid area */
+  min-width: 0;
+  overflow: hidden;
+
+  /* Basic field spacing */
+  margin: 0;
+}
+
+/* Group Field Styling */
+.df-group {
+  display: block;
+  width: 100%;
+}
+
+/* Page Field Styling */
+.df-page {
+  display: block;
+  width: 100%;
+}
+
+/* Disabled State */
+.df-form.disabled,
+.df-row.disabled,
+.df-field.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}

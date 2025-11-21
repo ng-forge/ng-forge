@@ -1,0 +1,23 @@
+@use '../../styles/grid-system.scss';
+
+// Group-specific styling overrides and customizations
+// The core grid system is handled by df-group class in grid-system.scss
+
+:host {
+  display: block;
+  width: 100%;
+
+  form {
+    // Same as .df-form - single column flow like parent dynamic-form
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--df-grid-row-gap, 0.5rem);
+    width: 100%;
+    margin: 0;
+
+    // Each field by default takes one row (like main form)
+    > * {
+      grid-column: 1 / -1;
+    }
+  }
+}

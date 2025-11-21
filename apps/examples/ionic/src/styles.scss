@@ -1,0 +1,93 @@
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/display.css';
+
+/* Optional Ionic CSS utilities */
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/float-elements.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/text-transformation.css';
+@import '@ionic/angular/css/flex-utils.css';
+
+// Force Ionic to always use light mode palette
+:root {
+  color-scheme: light;
+}
+
+// Disable dark mode palette
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Roboto', sans-serif;
+  overflow: auto !important;
+}
+
+// Ionic-specific: ion-content needs padding since it's a scrollable container
+ion-content {
+  --padding-start: 24px;
+  --padding-end: 24px;
+  --padding-top: 24px;
+  --padding-bottom: 24px;
+}
+
+// ============================================
+// Shared Example App Styles
+// ============================================
+
+:root {
+  // Light mode colors (default)
+  --example-result-bg: #efefef;
+  --example-result-border: #ddd;
+  --example-result-text: #1a1a1a;
+}
+
+// Dark mode colors - only when .dark class is explicitly applied
+.dark,
+:root.dark {
+  --example-result-bg: #1e1e1e;
+  --example-result-border: #404040;
+  --example-result-text: #f0f0f0;
+}
+
+// Example demo component shared styles
+.example-container {
+  display: block;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.example-result {
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--example-result-bg);
+  border: 1px solid var(--example-result-border);
+  border-radius: 0.375rem;
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: var(--example-result-text);
+  }
+
+  pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: var(--example-result-text);
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@examples/bootstrap/*": ["apps/examples/bootstrap/src/app/examples/*"],
+      "@examples/ionic/*": ["apps/examples/ionic/src/app/examples/*"],
+      "@examples/material/*": ["apps/examples/material/src/app/examples/*"],
+      "@examples/primeng/*": ["apps/examples/primeng/src/app/examples/*"],
+      "@ng-doc/generated": ["dist/ng-doc/docs"],
+      "@ng-forge/dynamic-forms": ["packages/dynamic-forms/src/index.ts"],
+      "@ng-forge/dynamic-forms-bootstrap": ["packages/dynamic-forms-bootstrap/src/index.ts"],
+      "@ng-forge/dynamic-forms-ionic": ["packages/dynamic-forms-ionic/src/index.ts"],
+      "@ng-forge/dynamic-forms-material": ["packages/dynamic-forms-material/src/index.ts"],
+      "@ng-forge/dynamic-forms-primeng": ["packages/dynamic-forms-primeng/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

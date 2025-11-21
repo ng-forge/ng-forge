@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Unified postinstall script for all patches
+# This script applies all necessary patches after pnpm install
+
+echo "🚀 Running postinstall patches..."
+
+# Angular build patches
+echo "📦 Applying Angular build patches..."
+bash scripts/patch-angular-build.sh
+
+# Install Playwright browsers for browser mode testing
+echo "🎭 Installing Playwright browsers..."
+pnpm exec playwright install chromium --with-deps
+
+# Install git hooks
+echo "🪝 Installing git hooks..."
+lefthook install
+
+echo "✅ All postinstall patches completed successfully!"

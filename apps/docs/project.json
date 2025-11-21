@@ -1,0 +1,138 @@
+{
+  "name": "docs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/docs/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@ng-doc/builder:application",
+      "outputs": ["{options.outputPath}"],
+      "dependsOn": ["^build"],
+      "options": {
+        "outputPath": "dist/apps/docs",
+        "browser": "apps/docs/src/main.ts",
+        "tsConfig": "apps/docs/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/docs/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "dist/ng-doc/docs/assets",
+            "output": "assets/ng-doc"
+          },
+          {
+            "glob": "**/*",
+            "input": "node_modules/@ng-doc/ui-kit/assets",
+            "output": "assets/ng-doc/ui-kit"
+          }
+        ],
+        "styles": ["apps/docs/src/styles.scss"],
+        "allowedCommonJsDependencies": ["dayjs", "@braintree/sanitize-url", "dompurify", "cytoscape-cose-bilkent", "elkjs", "@ng-doc/core"]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "2.5mb",
+              "maximumError": "5mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "20kb",
+              "maximumError": "40kb"
+            }
+          ],
+          "outputHashing": "all",
+          "baseHref": "/ng-forge/",
+          "define": {
+            "MATERIAL_EXAMPLES_URL": "'/ng-forge/examples/material'",
+            "PRIMENG_EXAMPLES_URL": "'/ng-forge/examples/primeng'",
+            "IONIC_EXAMPLES_URL": "'/ng-forge/examples/ionic'",
+            "BOOTSTRAP_EXAMPLES_URL": "'/ng-forge/examples/bootstrap'"
+          },
+          "ngDoc": {
+            "config": "apps/docs/ng-doc.config.ts"
+          }
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "define": {
+            "MATERIAL_EXAMPLES_URL": "'http://localhost:4201'",
+            "PRIMENG_EXAMPLES_URL": "'http://localhost:4202'",
+            "IONIC_EXAMPLES_URL": "'http://localhost:4203'",
+            "BOOTSTRAP_EXAMPLES_URL": "'http://localhost:4204'"
+          },
+          "ngDoc": {
+            "config": "apps/docs/ng-doc.config.ts"
+          }
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@ng-doc/builder:dev-server",
+      "options": {
+        "buildTarget": "docs:build:development"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "docs:build:production"
+        },
+        "development": {
+          "buildTarget": "docs:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular/build:extract-i18n",
+      "options": {
+        "buildTarget": "docs:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "ng-doc:rebuild": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["rm -rf dist/ng-doc", "nx build docs"],
+        "cwd": "{workspaceRoot}",
+        "parallel": false
+      },
+      "outputs": ["{workspaceRoot}/dist/apps/docs"]
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "docs:build",
+        "port": 4200,
+        "staticFilePath": "dist/apps/docs/browser",
+        "spa": true
+      }
+    },
+    "serve-all": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx serve material-examples",
+          "nx serve bootstrap-examples",
+          "nx serve ionic-examples",
+          "nx serve primeng-examples",
+          "npx wait-on http://localhost:4201 http://localhost:4202 http://localhost:4203 http://localhost:4204 -t 60000 && nx serve docs"
+        ],
+        "parallel": true
+      }
+    }
+  }
+}

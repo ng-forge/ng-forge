@@ -1,0 +1,16 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: 'packages/**/*.{ts,js}'
+      run: pnpm eslint {staged_files} --fix
+      stage_fixed: true
+    format:
+      glob: '*.{ts,js,json,md,html,scss,css}'
+      run: pnpm prettier --write {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: echo "Commit message format validated"

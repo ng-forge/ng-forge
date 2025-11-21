@@ -1,0 +1,121 @@
+import { GroupFieldComponent } from './group-field.component';
+import { GroupField } from '../../definitions';
+import { createSimpleTestField } from '../../testing';
+import { TestBed } from '@angular/core/testing';
+import { Injector, runInInjectionContext, signal } from '@angular/core';
+import { form } from '@angular/forms/signals';
+import { baseFieldMapper, FieldSignalContext } from '../../mappers';
+import { provideDynamicForm } from '../../providers';
+import { FIELD_REGISTRY, FIELD_SIGNAL_CONTEXT, FieldTypeDefinition } from '../../models';
+import { EventBus } from '../../events';
+
+describe('GroupFieldComponent', () => {
+  function setupGroupTest(field: GroupField<any>, value?: Record<string, unknown>) {
+    const mockFieldType: FieldTypeDefinition = {
+      name: 'test',
+      loadComponent: () => import('../../testing/simple-test-utils'),
+      mapper: baseFieldMapper,
+    };
+
+    TestBed.configureTestingModule({
+      imports: [GroupFieldComponent],
+      providers: [
+        provideDynamicForm(),
+        EventBus,
+        {
+          provide: FIELD_REGISTRY,
+          useValue: new Map([['test', mockFieldType]]),
+        },
+        {
+          provide: FIELD_SIGNAL_CONTEXT,
+          useFactory: (injector: Injector) => {
+            return runInInjectionContext(injector, () => {
+              const valueSignal = signal(value || {});
+              const testForm = form(valueSignal);
+              const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
+                injector,
+                value: valueSignal,
+                defaultValues: () => ({}),
+                form: testForm,
+              };
+              return mockFieldSignalContext;
+            });
+          },
+          deps: [Injector],
+        },
+      ],
+    });
+
+    const fixture = TestBed.createComponent(GroupFieldComponent);
+    const component = fixture.componentInstance;
+
+    fixture.componentRef.setInput('key', field.key);
+    fixture.componentRef.setInput('field', field);
+
+    fixture.detectChanges();
+
+    return { component, fixture };
+  }
+
+  it('should create', () => {
+    const field: GroupField<any> = {
+      key: 'testGroup',
+      type: 'group',
+      label: 'Test Group',
+      fields: [],
+    };
+
+    const { component } = setupGroupTest(field);
+
+    // ITERATION 6 FIX: Verify component is correct type
+    // Previous: expect(component).toBeTruthy()
+    expect(component).toBeDefined();
+    expect(component).toBeInstanceOf(GroupFieldComponent);
+  });
+
+  it('should have field input property', () => {
+    const field: GroupField<any> = {
+      key: 'testGroup',
+      type: 'group',
+      label: 'Test Group',
+      fields: [],
+    };
+
+    const { component } = setupGroupTest(field);
+
+    expect(component.field()).toEqual(field);
+  });
+
+  it('should render with child fields', () => {
+    const field: GroupField<any> = {
+      key: 'testGroup',
+      type: 'group',
+      label: 'Test Group',
+      fields: [createSimpleTestField('field1', 'Field 1'), createSimpleTestField('field2', 'Field 2')],
+    };
+
+    const { fixture } = setupGroupTest(field, { field1: 'value1', field2: 'value2' });
+
+    // The form element should be present in the template
+    const formElement = fixture.nativeElement.querySelector('form');
+    // ITERATION 6 FIX: Verify form element is correct HTML type
+    // Previous: expect(formElement).toBeTruthy()
+    expect(formElement).not.toBeNull();
+    expect(formElement).toBeInstanceOf(HTMLFormElement);
+  });
+
+  it('should have host classes', () => {
+    const field: GroupField<any> = {
+      key: 'testGroup',
+      type: 'group',
+      label: 'Test Group',
+      fields: [],
+    };
+
+    const { fixture } = setupGroupTest(field);
+
+    const element = fixture.nativeElement;
+    expect(element.classList.contains('df-field')).toBe(true);
+    expect(element.classList.contains('df-group')).toBe(true);
+  });
+});

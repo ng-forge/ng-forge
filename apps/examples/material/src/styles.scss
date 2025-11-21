@@ -1,0 +1,81 @@
+/* You can add global styles to this file, and also import other style files */
+
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$my-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 500);
+$my-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+
+$my-theme: mat.m2-define-light-theme(
+  (
+    color: (
+      primary: $my-primary,
+      accent: $my-accent,
+    ),
+    typography: mat.m2-define-typography-config(),
+    density: 0,
+  )
+);
+
+@include mat.all-component-themes($my-theme);
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+// ============================================
+// Shared Example App Styles
+// ============================================
+
+:root {
+  // Light mode colors (default)
+  --example-result-bg: #efefef;
+  --example-result-border: #ddd;
+  --example-result-text: #1a1a1a;
+}
+
+// Dark mode colors - only when .dark class is explicitly applied
+.dark,
+:root.dark {
+  --example-result-bg: #1e1e1e;
+  --example-result-border: #404040;
+  --example-result-text: #f0f0f0;
+}
+
+// Example demo component shared styles
+.example-container {
+  display: block;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.example-result {
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--example-result-bg);
+  border: 1px solid var(--example-result-border);
+  border-radius: 0.375rem;
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: var(--example-result-text);
+  }
+
+  pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: var(--example-result-text);
+  }
+}

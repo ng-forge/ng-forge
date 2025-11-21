@@ -1,0 +1,62 @@
+@use '@ng-doc/app/styles/global';
+@use '@ng-doc/app/styles/themes/dark.css';
+
+// ============================================
+// MATERIAL THEME (for docs UI only)
+// ============================================
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+// ============================================
+// THEME-AWARE LOGO
+// ============================================
+// Show light logo by default
+.logo-light {
+  display: block !important;
+}
+.logo-dark {
+  display: none !important;
+}
+
+// Swap to dark logo when system prefers dark (only in auto mode - no explicit theme set)
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .logo-light,
+  body:not([data-theme]) .logo-light {
+    display: none !important;
+  }
+  html:not([data-theme]) .logo-dark,
+  body:not([data-theme]) .logo-dark {
+    display: block !important;
+  }
+}
+
+// Explicit dark theme
+[data-theme='dark'] .logo-light,
+html[data-theme='dark'] .logo-light,
+body[data-theme='dark'] .logo-light {
+  display: none !important;
+}
+
+[data-theme='dark'] .logo-dark,
+html[data-theme='dark'] .logo-dark,
+body[data-theme='dark'] .logo-dark {
+  display: block !important;
+}
+
+// Explicit light theme
+[data-theme='light'] .logo-light,
+html[data-theme='light'] .logo-light,
+body[data-theme='light'] .logo-light {
+  display: block !important;
+}
+
+[data-theme='light'] .logo-dark,
+html[data-theme='light'] .logo-dark,
+body[data-theme='light'] .logo-dark {
+  display: none !important;
+}
+
+// ============================================
+// IFRAME EXAMPLES
+// ============================================
+// PrimeNG and Ionic examples are loaded via iframes
+// Their styles are isolated in their respective example apps
