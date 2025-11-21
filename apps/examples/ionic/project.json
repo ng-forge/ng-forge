@@ -5,7 +5,7 @@
   "prefix": "example",
   "sourceRoot": "apps/examples/ionic/src",
   "tags": ["examples"],
-  "implicitDependencies": ["dynamic-form", "dynamic-form-ionic"],
+  "implicitDependencies": ["dynamic-forms", "dynamic-forms-ionic"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",

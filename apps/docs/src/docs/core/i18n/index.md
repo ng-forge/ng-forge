@@ -120,8 +120,8 @@ Here's a complete example using [@jsverse/transloco](https://jsverse.github.io/t
 import { ApplicationConfig } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTransloco } from '@jsverse/transloco';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -142,7 +142,7 @@ export const appConfig: ApplicationConfig = {
 ```typescript name="my-form.component.ts"
 import { Component, inject } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-my-form',

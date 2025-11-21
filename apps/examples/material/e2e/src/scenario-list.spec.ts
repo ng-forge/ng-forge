@@ -69,7 +69,7 @@ test.describe('Material Demo App - Scenario List', () => {
 
     // Should display multi-page demo content - use getByRole to get the specific heading
     await expect(page.getByRole('heading', { name: 'Multi-Page Form Demo' })).toBeVisible();
-    await expect(page.locator('dynamic-form')).toBeVisible();
+    await expect(page.locator('dynamic-forms')).toBeVisible();
   });
 
   test('should have accessible content structure', async ({ page }) => {

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'bs-example-complete-form-demo',

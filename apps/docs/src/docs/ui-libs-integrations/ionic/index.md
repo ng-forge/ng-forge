@@ -7,15 +7,15 @@ Mobile-first Ionic field components for ng-forge dynamic forms, optimized for iO
 Install the package and its peer dependencies:
 
 ```bash group="install" name="npm"
-npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
+npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-ionic @ionic/angular
 ```
 
 ```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
+yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-ionic @ionic/angular
 ```
 
 ```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-ionic @ionic/angular
+pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-ionic @ionic/angular
 ```
 
 ## Quick Start
@@ -27,8 +27,8 @@ Add Ionic field types to your application:
 ```typescript
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
 
 export const appConfig: ApplicationConfig = {
   providers: [provideDynamicForm(...withIonicFields())],
@@ -58,7 +58,7 @@ Add Ionic core styles to your application:
 ```typescript
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-contact-form',
@@ -552,7 +552,7 @@ The submit button automatically:
 **Helper Function:**
 
 ```typescript
-import { submitButton } from '@ng-forge/dynamic-form-ionic';
+import { submitButton } from '@ng-forge/dynamic-forms-ionic';
 
 submitButton({
   key: 'submit',
@@ -612,7 +612,7 @@ Navigation buttons for multi-step (paged) forms with platform-adaptive styling.
 **Helper Functions:**
 
 ```typescript
-import { nextPageButton, previousPageButton } from '@ng-forge/dynamic-form-ionic';
+import { nextPageButton, previousPageButton } from '@ng-forge/dynamic-forms-ionic';
 
 nextPageButton({ key: 'next', label: 'Continue', props: { color: 'primary' } });
 previousPageButton({ key: 'back', label: 'Back' });
@@ -630,8 +630,8 @@ Generic button for custom events with full Ionic styling support.
 **Basic Usage:**
 
 ```typescript
-import { actionButton } from '@ng-forge/dynamic-form-ionic';
-import { FormEvent } from '@ng-forge/dynamic-form';
+import { actionButton } from '@ng-forge/dynamic-forms-ionic';
+import { FormEvent } from '@ng-forge/dynamic-forms';
 
 class SaveDraftEvent extends FormEvent {
   static override readonly eventName = 'SaveDraft';

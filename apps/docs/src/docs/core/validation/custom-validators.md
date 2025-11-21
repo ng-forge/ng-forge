@@ -174,7 +174,7 @@ Best for validation that needs field value and access to other fields via FieldC
 ### Basic Example
 
 ```typescript
-import { CustomValidator } from '@ng-forge/dynamic-form';
+import { CustomValidator } from '@ng-forge/dynamic-forms';
 
 // ✅ RECOMMENDED: Return only kind
 const noSpaces: CustomValidator = (ctx) => {
@@ -220,7 +220,7 @@ The `FieldContext` API provides access to:
 Use `ctx.valueOf()` to access other field values for comparison validators:
 
 ```typescript
-import { CustomValidator } from '@ng-forge/dynamic-form';
+import { CustomValidator } from '@ng-forge/dynamic-forms';
 
 const greaterThanMin: CustomValidator = (ctx) => {
   const value = ctx.value();
@@ -300,7 +300,7 @@ Async validators use Angular's resource API for database lookups or complex asyn
 ### Basic Example
 
 ```typescript
-import { AsyncCustomValidator } from '@ng-forge/dynamic-form';
+import { AsyncCustomValidator } from '@ng-forge/dynamic-forms';
 import { inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { UserService } from './user.service';
@@ -385,7 +385,7 @@ HTTP validators provide optimized HTTP validation with automatic request cancell
 ### Basic Example
 
 ```typescript
-import { HttpCustomValidator } from '@ng-forge/dynamic-form';
+import { HttpCustomValidator } from '@ng-forge/dynamic-forms';
 
 const checkEmailDomain: HttpCustomValidator = {
   // Build HTTP request from context

@@ -18,7 +18,7 @@ A minimal login form showing:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-login-form',

@@ -7,15 +7,15 @@ Beautiful Material Design field components for ng-forge dynamic forms, built wit
 Install the package and its peer dependencies:
 
 ```bash group="install" name="npm"
-npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
+npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material @angular/material @angular/cdk
 ```
 
 ```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
+yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material @angular/material @angular/cdk
 ```
 
 ```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-material @angular/material @angular/cdk
+pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material @angular/material @angular/cdk
 ```
 
 ## Quick Start
@@ -27,8 +27,8 @@ Add Material Design field types to your application:
 ```typescript
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
@@ -67,7 +67,7 @@ $my-theme: mat.define-light-theme(
 ```typescript
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-contact-form',

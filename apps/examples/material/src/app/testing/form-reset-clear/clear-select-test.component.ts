@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormClearEvent, FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormClearEvent, FormConfig } from '@ng-forge/dynamic-forms';
 
 /**
  * Clear Select Test Component

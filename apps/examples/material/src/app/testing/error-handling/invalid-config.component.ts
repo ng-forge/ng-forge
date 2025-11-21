@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm } from '@ng-forge/dynamic-forms';
 
 /**
  * Invalid Configuration Test Component

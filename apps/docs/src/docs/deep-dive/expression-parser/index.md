@@ -230,7 +230,7 @@ When providing custom functions for use in expressions, register them with the F
 
 ```typescript
 // ✅ GOOD - Pure functions
-import { FunctionRegistryService } from '@ng-forge/dynamic-form';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms';
 
 const functionRegistry = inject(FunctionRegistryService);
 

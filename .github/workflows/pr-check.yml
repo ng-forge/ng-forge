@@ -40,11 +40,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            dist/packages/dynamic-form
-            dist/packages/dynamic-form-material
-            dist/packages/dynamic-form-bootstrap
-            dist/packages/dynamic-form-ionic
-            dist/packages/dynamic-form-primeng
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
@@ -78,11 +78,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            dist/packages/dynamic-form
-            dist/packages/dynamic-form-material
-            dist/packages/dynamic-form-bootstrap
-            dist/packages/dynamic-form-ionic
-            dist/packages/dynamic-form-primeng
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
@@ -119,11 +119,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            dist/packages/dynamic-form
-            dist/packages/dynamic-form-material
-            dist/packages/dynamic-form-bootstrap
-            dist/packages/dynamic-form-ionic
-            dist/packages/dynamic-form-primeng
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
@@ -160,11 +160,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            dist/packages/dynamic-form
-            dist/packages/dynamic-form-material
-            dist/packages/dynamic-form-bootstrap
-            dist/packages/dynamic-form-ionic
-            dist/packages/dynamic-form-primeng
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
@@ -206,11 +206,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            dist/packages/dynamic-form
-            dist/packages/dynamic-form-material
-            dist/packages/dynamic-form-bootstrap
-            dist/packages/dynamic-form-ionic
-            dist/packages/dynamic-form-primeng
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
@@ -386,11 +386,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            dist/packages/dynamic-form
-            dist/packages/dynamic-form-material
-            dist/packages/dynamic-form-bootstrap
-            dist/packages/dynamic-form-ionic
-            dist/packages/dynamic-form-primeng
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
           restore-keys: |
             build-${{ github.sha }}-
@@ -400,7 +400,7 @@ jobs:
           echo "Verifying package integrity..."
 
           # Check that main library packages have valid exports
-          for PKG in dynamic-form dynamic-form-material dynamic-form-bootstrap dynamic-form-ionic dynamic-form-primeng; do
+          for PKG in dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng; do
             if [ -d "dist/packages/$PKG" ]; then
               echo "Checking dist/packages/$PKG..."
 

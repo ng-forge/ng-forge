@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { AddArrayItemEvent, DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { AddArrayItemEvent, DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
 class AddMembersEvent extends AddArrayItemEvent {
   constructor() {

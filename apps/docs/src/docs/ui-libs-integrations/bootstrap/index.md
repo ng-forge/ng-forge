@@ -7,15 +7,15 @@ Modern Bootstrap 5 field components for ng-forge dynamic forms, built with nativ
 Install the package and its peer dependencies:
 
 ```bash group="install" name="npm"
-npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-bootstrap bootstrap
+npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-bootstrap bootstrap
 ```
 
 ```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-bootstrap bootstrap
+yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-bootstrap bootstrap
 ```
 
 ```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-bootstrap bootstrap
+pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-bootstrap bootstrap
 ```
 
 Optional: For advanced datepicker features with calendar UI:
@@ -41,8 +41,8 @@ Add Bootstrap field types to your application:
 ```typescript
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
 
 export const appConfig: ApplicationConfig = {
   providers: [provideDynamicForm(...withBootstrapFields())],
@@ -68,7 +68,7 @@ Or include via CDN in your `index.html`:
 ```typescript
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-contact-form',

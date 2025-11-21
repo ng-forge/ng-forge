@@ -46,12 +46,12 @@ Use this checklist when preparing and executing a release.
 ## Post-Release Verification
 
 - [ ] Verify npm publication:
-  - [ ] @ng-forge/dynamic-form@1.2.3
-  - [ ] @ng-forge/dynamic-form-material@1.2.3
-  - [ ] @ng-forge/dynamic-form-primeng@1.2.3
-  - [ ] @ng-forge/dynamic-form-ionic@1.2.3
-  - [ ] @ng-forge/dynamic-form-bootstrap@1.2.3
-- [ ] Test installation: `npm install @ng-forge/dynamic-form@1.2.3`
+  - [ ] @ng-forge/dynamic-forms@1.2.3
+  - [ ] @ng-forge/dynamic-forms-material@1.2.3
+  - [ ] @ng-forge/dynamic-forms-primeng@1.2.3
+  - [ ] @ng-forge/dynamic-forms-ionic@1.2.3
+  - [ ] @ng-forge/dynamic-forms-bootstrap@1.2.3
+- [ ] Test installation: `npm install @ng-forge/dynamic-forms@1.2.3`
 - [ ] Smoke test: Create a small test project and verify basic functionality
 - [ ] GitHub Release notes are accurate and complete
 - [ ] Update documentation site if needed
@@ -80,13 +80,13 @@ Use this checklist when preparing and executing a release.
 
 # Check release status
 gh release list
-npm view @ng-forge/dynamic-form versions
+npm view @ng-forge/dynamic-forms versions
 
 # Verify all packages
-for pkg in dynamic-form dynamic-form-material dynamic-form-primeng dynamic-form-ionic dynamic-form-bootstrap; do
+for pkg in dynamic-forms dynamic-forms-material dynamic-forms-primeng dynamic-forms-ionic dynamic-forms-bootstrap; do
   npm view @ng-forge/$pkg version
 done
 
 # Test installation
-npm install @ng-forge/dynamic-form@1.2.3
+npm install @ng-forge/dynamic-forms@1.2.3
 ```

@@ -4,8 +4,8 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { appRoutes } from './app.routes';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 
 export const appConfig: ApplicationConfig = {
   providers: [

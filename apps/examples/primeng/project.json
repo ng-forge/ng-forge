@@ -5,7 +5,7 @@
   "prefix": "example",
   "sourceRoot": "apps/examples/primeng/src",
   "tags": ["examples"],
-  "implicitDependencies": ["dynamic-form", "dynamic-form-primeng"],
+  "implicitDependencies": ["dynamic-forms", "dynamic-forms-primeng"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",

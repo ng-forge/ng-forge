@@ -1,0 +1,20 @@
+{
+  "name": "@ng-forge/dynamic-forms-primeng",
+  "type": "module",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@analogjs/vite-plugin-angular": "^1.21.3",
+    "@angular/core": "^21.0.0",
+    "@angular/common": "^21.0.0",
+    "@angular/forms": "^21.0.0",
+    "@angular/platform-browser": "~21.0.0",
+    "@ng-forge/dynamic-forms": "^0.0.1",
+    "@nx/vite": "22.1.0",
+    "@vitest/browser-playwright": "4.0.10",
+    "lodash-es": "^4.17.21",
+    "ngxtension": "^6.0.0",
+    "primeng": "^20.3.0",
+    "rxjs": "~7.8.0",
+    "vite": "^7.1.11"
+  }
+}

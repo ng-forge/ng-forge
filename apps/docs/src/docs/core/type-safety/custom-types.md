@@ -16,7 +16,7 @@ Create type definitions for your custom fields:
 
 ```typescript
 // custom-fields.d.ts
-import type { BaseValueField } from '@ng-forge/dynamic-form';
+import type { BaseValueField } from '@ng-forge/dynamic-forms';
 
 // Color picker props
 export interface ColorPickerProps {
@@ -53,7 +53,7 @@ Register your types with the global registry:
 
 ```typescript
 // custom-fields.d.ts (continued)
-declare module '@ng-forge/dynamic-form' {
+declare module '@ng-forge/dynamic-forms' {
   interface FieldRegistryLeaves {
     'color-picker': ColorPickerField;
     'file-upload': FileUploadField;
@@ -77,7 +77,7 @@ Implement the component for each field type:
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { AsyncPipe } from '@angular/common';
-import { DynamicText, DynamicTextPipe, ValueFieldComponent } from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 import { ColorPickerField, ColorPickerProps } from './custom-fields';
 
 @Component({
@@ -115,7 +115,7 @@ Create field type definitions and register them:
 
 ```typescript
 // custom-fields.provider.ts
-import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-form';
+import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms';
 import type { ColorPickerField, ColorPickerProps, FileUploadField, FileUploadProps, RatingField, RatingProps } from './custom-fields';
 
 export const ColorPickerFieldType: FieldTypeDefinition<ColorPickerField> = {
@@ -146,8 +146,8 @@ Add to your app configuration:
 
 ```typescript
 // app.config.ts
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 import { ColorPickerFieldType, FileUploadFieldType, RatingFieldType } from './custom-fields.provider';
 
 export const appConfig: ApplicationConfig = {
@@ -221,7 +221,7 @@ import {
   isPageField,
   isRowField,
   isGroupField,
-} from '@ng-forge/dynamic-form';
+} from '@ng-forge/dynamic-forms';
 ```
 
 ### Container vs Leaf Fields
@@ -281,7 +281,7 @@ function processContainers(field: RegisteredFieldTypes) {
 ### Complete Example
 
 ```typescript
-import { isContainerField, isValueBearingField, isPageField } from '@ng-forge/dynamic-form';
+import { isContainerField, isValueBearingField, isPageField } from '@ng-forge/dynamic-forms';
 
 function collectFormKeys(fields: RegisteredFieldTypes[]): string[] {
   const keys: string[] = [];
@@ -317,7 +317,7 @@ Form values are typed at compile-time via `InferFormValue`, but runtime validati
 If you trust the form structure, cast the value:
 
 ```typescript
-import { InferFormValue } from '@ng-forge/dynamic-form';
+import { InferFormValue } from '@ng-forge/dynamic-forms';
 
 const USER_FORM = {
   fields: [
@@ -345,7 +345,7 @@ For runtime guarantees, use a validation library like Zod:
 
 ```typescript
 import { z } from 'zod';
-import { InferFormValue } from '@ng-forge/dynamic-form';
+import { InferFormValue } from '@ng-forge/dynamic-forms';
 
 const USER_FORM = {
   fields: [
@@ -385,7 +385,7 @@ Use both for maximum safety:
 
 ```typescript
 import { z } from 'zod';
-import { InferFormValue } from '@ng-forge/dynamic-form';
+import { InferFormValue } from '@ng-forge/dynamic-forms';
 
 const REGISTRATION_FORM = {
   fields: [
@@ -540,7 +540,7 @@ Create reusable field types with generics:
 
 ```typescript
 // autocomplete-field.d.ts
-import type { BaseValueField, FieldOption } from '@ng-forge/dynamic-form';
+import type { BaseValueField, FieldOption } from '@ng-forge/dynamic-forms';
 
 export interface AutocompleteProps<T = string> {
   filterFn?: (value: T, query: string) => boolean;
@@ -551,7 +551,7 @@ export interface AutocompleteField<T = string> extends BaseValueField<Autocomple
   options: FieldOption<T>[];
 }
 
-declare module '@ng-forge/dynamic-form' {
+declare module '@ng-forge/dynamic-forms' {
   interface FieldRegistryLeaves {
     autocomplete: AutocompleteField<unknown>;
   }
@@ -589,7 +589,7 @@ Create custom container fields:
 
 ```typescript
 // accordion-field.d.ts
-import type { FieldDef, RegisteredFieldTypes } from '@ng-forge/dynamic-form';
+import type { FieldDef, RegisteredFieldTypes } from '@ng-forge/dynamic-forms';
 
 export interface AccordionField extends FieldDef<never> {
   sections: Array<{
@@ -598,7 +598,7 @@ export interface AccordionField extends FieldDef<never> {
   }>;
 }
 
-declare module '@ng-forge/dynamic-form' {
+declare module '@ng-forge/dynamic-forms' {
   interface FieldRegistryContainers {
     accordion: AccordionField;
   }

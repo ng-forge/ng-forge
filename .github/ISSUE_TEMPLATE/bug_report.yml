@@ -99,11 +99,11 @@ body:
       label: Which package is affected?
       multiple: true
       options:
-        - '@ng-forge/dynamic-form (core)'
-        - '@ng-forge/dynamic-form-material'
-        - '@ng-forge/dynamic-form-primeng'
-        - '@ng-forge/dynamic-form-ionic'
-        - '@ng-forge/dynamic-form-bootstrap'
+        - '@ng-forge/dynamic-forms (core)'
+        - '@ng-forge/dynamic-forms-material'
+        - '@ng-forge/dynamic-forms-primeng'
+        - '@ng-forge/dynamic-forms-ionic'
+        - '@ng-forge/dynamic-forms-bootstrap'
         - 'Documentation'
         - 'Other'
     validations:

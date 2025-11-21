@@ -81,11 +81,11 @@ We recommend using **WebStorm** or **VS Code** with the following extensions:
 ```
 ng-forge/
 ├── packages/           # Publishable libraries
-│   ├── dynamic-form/          # Core library
-│   ├── dynamic-form-material/ # Material Design adapter
-│   ├── dynamic-form-primeng/  # PrimeNG adapter
-│   ├── dynamic-form-ionic/    # Ionic adapter
-│   └── dynamic-form-bootstrap/# Bootstrap adapter
+│   ├── dynamic-forms/          # Core library
+│   ├── dynamic-forms-material/ # Material Design adapter
+│   ├── dynamic-forms-primeng/  # PrimeNG adapter
+│   ├── dynamic-forms-ionic/    # Ionic adapter
+│   └── dynamic-forms-bootstrap/# Bootstrap adapter
 ├── apps/
 │   ├── docs/          # Documentation site
 │   └── examples/      # Example applications
@@ -120,7 +120,7 @@ Follow our [Coding Standards](./CODING_STANDARDS.md) while making changes.
 pnpm test
 
 # Run tests for specific package
-nx run dynamic-form:test
+nx run dynamic-forms:test
 
 # Run tests in watch mode
 pnpm test:watch
@@ -133,7 +133,7 @@ pnpm test:watch
 pnpm build:libs
 
 # Build specific library
-nx run dynamic-form:build
+nx run dynamic-forms:build
 
 # Build everything (libs + docs + examples)
 pnpm build:all:prod
@@ -229,7 +229,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 ### Examples
 
 ```bash
-feat(dynamic-form): add support for async validators
+feat(dynamic-forms): add support for async validators
 
 Add AsyncValidatorConfig interface and implement async validation
 support in form structure builder.
@@ -289,7 +289,7 @@ Add comprehensive custom-integrations for creating custom mappers with examples.
 Use the same format as commit messages:
 
 ```
-feat(dynamic-form): add async validator support
+feat(dynamic-forms): add async validator support
 fix(primeng): correct select field reactivity
 docs: improve getting started guide
 ```

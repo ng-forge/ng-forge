@@ -164,8 +164,8 @@ Numeric range selection (requires UI integration).
 Register custom field types using `FieldTypeDefinition` with `provideDynamicForm`:
 
 ```typescript
-import { FieldTypeDefinition, provideDynamicForm, valueFieldMapper } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { FieldTypeDefinition, provideDynamicForm, valueFieldMapper } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 import type { CustomDatePickerField } from './custom-date-picker';
 
 export const CustomDatePickerType: FieldTypeDefinition<CustomDatePickerField> = {

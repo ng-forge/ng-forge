@@ -14,7 +14,7 @@ ng-forge dynamic forms is a type-safe, UI-agnostic form library for Angular 21+ 
                        │
                        ↓
 ┌─────────────────────────────────────────────────────────────┐
-│               Core Library (@ng-forge/dynamic-form)          │
+│               Core Library (@ng-forge/dynamic-forms)          │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  DynamicForm (Root Component)                       │   │
 │  │  - Receives FormConfig                              │   │
@@ -45,7 +45,7 @@ ng-forge dynamic forms is a type-safe, UI-agnostic form library for Angular 21+ 
                       │
                       ↓
 ┌─────────────────────────────────────────────────────────────┐
-│          UI Adapter (@ng-forge/dynamic-form-*)               │
+│          UI Adapter (@ng-forge/dynamic-forms-*)               │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  Field Type Definitions                             │   │
 │  │  - PRIMENG_FIELD_TYPES / MATERIAL_FIELD_TYPES       │   │
@@ -71,7 +71,7 @@ The root component that applications interact with:
 
 ```typescript
 @Component({
-  selector: 'dynamic-form',
+  selector: 'dynamic-forms',
   template: `
     @for (fieldContext of fieldContexts(); track fieldContext.fieldDef.key) {
       <dynamic-field [context]="fieldContext" />
@@ -362,7 +362,7 @@ The core library defines empty interfaces that UI adapters augment:
 **Core Library:**
 
 ```typescript
-// packages/dynamic-form/src/lib/models/registry/field-registry.ts
+// packages/dynamic-forms/src/lib/models/registry/field-registry.ts
 export interface FieldRegistryLeaves {
   text: TextField; // Only core types
 }
@@ -376,8 +376,8 @@ export interface DynamicFormFieldRegistry {
 **UI Adapter:**
 
 ```typescript
-// packages/dynamic-form-primeng/src/lib/types/registry-augmentation.ts
-declare module '@ng-forge/dynamic-form' {
+// packages/dynamic-forms-primeng/src/lib/types/registry-augmentation.ts
+declare module '@ng-forge/dynamic-forms' {
   interface FieldRegistryLeaves {
     input: PrimeInputField;
     select: PrimeSelectField<unknown>;

@@ -2,8 +2,8 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessC
 import { provideRouter, withHashLocation } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { appRoutes } from './app.routes';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
 
 export const appConfig: ApplicationConfig = {
   providers: [

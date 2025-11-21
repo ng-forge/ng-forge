@@ -193,14 +193,14 @@ jobs:
 
       - name: Build and test libraries
         run: |
-          pnpm nx run-many -t build -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic,dynamic-form-bootstrap
-          pnpm nx run-many -t test -p dynamic-form,dynamic-form-material,dynamic-form-primeng,dynamic-form-ionic,dynamic-form-bootstrap --configuration=ci
+          pnpm nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-forms-bootstrap
+          pnpm nx run-many -t test -p dynamic-forms,dynamic-forms-material,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-forms-bootstrap --configuration=ci
 
       - name: Verify build outputs
         run: |
           echo "Verifying build outputs..."
           MISSING=0
-          for pkg in dynamic-form dynamic-form-material dynamic-form-primeng dynamic-form-ionic dynamic-form-bootstrap; do
+          for pkg in dynamic-forms dynamic-forms-material dynamic-forms-primeng dynamic-forms-ionic dynamic-forms-bootstrap; do
             if [ ! -d "dist/packages/$pkg" ]; then
               echo "❌ Build output missing for $pkg"
               MISSING=1
@@ -285,9 +285,9 @@ jobs:
           echo "✅ Release v${{ env.VERSION }} completed successfully!"
           echo ""
           echo "📦 Published packages:"
-          for pkg in dynamic-form dynamic-form-material dynamic-form-primeng dynamic-form-ionic dynamic-form-bootstrap; do
+          for pkg in dynamic-forms dynamic-forms-material dynamic-forms-primeng dynamic-forms-ionic dynamic-forms-bootstrap; do
             echo "- @ng-forge/$pkg@${{ env.VERSION }}"
           done
           echo ""
           echo "🔗 GitHub Release: https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }}"
-          echo "🔗 npm: https://www.npmjs.com/package/@ng-forge/dynamic-form/v/${{ env.VERSION }}"
+          echo "🔗 npm: https://www.npmjs.com/package/@ng-forge/dynamic-forms/v/${{ env.VERSION }}"

@@ -18,7 +18,7 @@ When building custom field types, inject the event bus to communicate with the p
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { EventBus } from '@ng-forge/dynamic-form';
+import { EventBus } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-custom-submit-button',
@@ -28,7 +28,7 @@ export class CustomSubmitButton {
   eventBus = inject(EventBus);
 
   submit() {
-    // Dispatch submit event to the parent dynamic-form
+    // Dispatch submit event to the parent dynamic-forms
     this.eventBus.dispatch(SubmitEvent);
   }
 }
@@ -105,7 +105,7 @@ eventBus.on([SubmitEvent, PageChangeEvent, NextPageEvent]).subscribe((event) => 
 Create custom events for your forms:
 
 ```typescript
-import { FormEvent } from '@ng-forge/dynamic-form';
+import { FormEvent } from '@ng-forge/dynamic-forms';
 
 // Simple event
 export class SaveDraftEvent implements FormEvent {
@@ -286,7 +286,7 @@ The event bus is automatically provided by the `DynamicForm` component to all ch
 ```typescript
 // The DynamicForm component internally provides EventBus
 // All child field components can inject and use it
-import { DynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-my-form',

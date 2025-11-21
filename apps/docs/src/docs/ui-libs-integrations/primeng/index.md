@@ -7,15 +7,15 @@ Beautiful PrimeNG field components for ng-forge dynamic forms, built with the Pr
 Install the package and its peer dependencies:
 
 ```bash group="install" name="npm"
-npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-primeng primeng primeicons
+npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng primeicons
 ```
 
 ```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-primeng primeng primeicons
+yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng primeicons
 ```
 
 ```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-primeng primeng primeicons
+pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng primeicons
 ```
 
 ## Quick Start
@@ -27,8 +27,8 @@ Add PrimeNG field types to your application:
 ```typescript
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 
@@ -71,7 +71,7 @@ providePrimeNG({
 ```typescript
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-contact-form',
@@ -573,7 +573,7 @@ The submit button automatically:
 You can also use the helper function:
 
 ```typescript
-import { submitButton } from '@ng-forge/dynamic-form-primeng';
+import { submitButton } from '@ng-forge/dynamic-forms-primeng';
 
 submitButton({
   key: 'submit',
@@ -643,7 +643,7 @@ Navigation buttons for multi-step (paged) forms.
 You can also use helper functions:
 
 ```typescript
-import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dynamic-form-primeng';
+import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dynamic-forms-primeng';
 
 nextPageButton({ key: 'next', label: 'Continue', props: { severity: 'primary' } });
 previousPageButton({ key: 'back', label: 'Back' });
@@ -662,7 +662,7 @@ Generic button for custom events. Use this for application-specific actions.
 **Basic Usage:**
 
 ```typescript
-import { FormEvent } from '@ng-forge/dynamic-form';
+import { FormEvent } from '@ng-forge/dynamic-forms';
 
 // Define your custom event
 class SaveDraftEvent extends FormEvent {
@@ -705,7 +705,7 @@ const config = {
 Then listen for the event in your component:
 
 ```typescript
-import { EventBus } from '@ng-forge/dynamic-form';
+import { EventBus } from '@ng-forge/dynamic-forms';
 
 class MyComponent {
   private eventBus = inject(EventBus);
@@ -722,7 +722,7 @@ class MyComponent {
 You can also use the helper function:
 
 ```typescript
-import { actionButton } from '@ng-forge/dynamic-form-primeng';
+import { actionButton } from '@ng-forge/dynamic-forms-primeng';
 
 actionButton({
   key: 'saveDraft',

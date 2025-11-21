@@ -34,7 +34,7 @@ Show different contact fields based on preferred contact method.
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-contact-form',

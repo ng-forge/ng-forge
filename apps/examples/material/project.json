@@ -5,7 +5,7 @@
   "prefix": "example",
   "sourceRoot": "apps/examples/material/src",
   "tags": ["examples", "e2e"],
-  "implicitDependencies": ["dynamic-form", "dynamic-form-material"],
+  "implicitDependencies": ["dynamic-forms", "dynamic-forms-material"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",

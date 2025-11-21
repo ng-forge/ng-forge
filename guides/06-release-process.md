@@ -26,7 +26,7 @@ This guide explains how to release new versions of the ng-forge libraries.
 
 # View release status
 gh release list
-npm view @ng-forge/dynamic-form versions
+npm view @ng-forge/dynamic-forms versions
 ```
 
 ---
@@ -227,8 +227,8 @@ The workflow will:
 After the workflow completes:
 
 1. **Check GitHub Release**: Visit `https://github.com/your-org/ng-forge/releases`
-2. **Check npm**: Visit `https://www.npmjs.com/package/@ng-forge/dynamic-form`
-3. **Test installation**: `npm install @ng-forge/dynamic-form@1.0.0`
+2. **Check npm**: Visit `https://www.npmjs.com/package/@ng-forge/dynamic-forms`
+3. **Test installation**: `npm install @ng-forge/dynamic-forms@1.0.0`
 
 ## Release Types
 
@@ -437,14 +437,14 @@ gh release delete v1.0.0 --yes
 
 ```bash
 # Within 24 hours (use with caution)
-npm unpublish @ng-forge/dynamic-form@1.0.0
+npm unpublish @ng-forge/dynamic-forms@1.0.0
 
 # For all 5 packages
-npm unpublish @ng-forge/dynamic-form@1.0.0
-npm unpublish @ng-forge/dynamic-form-material@1.0.0
-npm unpublish @ng-forge/dynamic-form-primeng@1.0.0
-npm unpublish @ng-forge/dynamic-form-ionic@1.0.0
-npm unpublish @ng-forge/dynamic-form-bootstrap@1.0.0
+npm unpublish @ng-forge/dynamic-forms@1.0.0
+npm unpublish @ng-forge/dynamic-forms-material@1.0.0
+npm unpublish @ng-forge/dynamic-forms-primeng@1.0.0
+npm unpublish @ng-forge/dynamic-forms-ionic@1.0.0
+npm unpublish @ng-forge/dynamic-forms-bootstrap@1.0.0
 ```
 
 **After 24 hours**: You cannot unpublish. Instead:
@@ -452,7 +452,7 @@ npm unpublish @ng-forge/dynamic-form-bootstrap@1.0.0
 1. Publish a new patch version with the fix (e.g., 1.0.1)
 2. Mark the problematic version as deprecated:
    ```bash
-   npm deprecate @ng-forge/dynamic-form@1.0.0 "This version has issues, please upgrade to 1.0.1"
+   npm deprecate @ng-forge/dynamic-forms@1.0.0 "This version has issues, please upgrade to 1.0.1"
    ```
 
 #### Clean Up and Retry
@@ -499,10 +499,10 @@ gh release view
 
 ```bash
 # View published versions
-npm view @ng-forge/dynamic-form versions
+npm view @ng-forge/dynamic-forms versions
 
 # Check latest version
-npm view @ng-forge/dynamic-form version
+npm view @ng-forge/dynamic-forms version
 ```
 
 ## Example: Full Release Process
@@ -532,7 +532,7 @@ git push origin release-1.2.0
 
 # 6. Verify release
 open https://github.com/your-org/ng-forge/releases/latest
-npm view @ng-forge/dynamic-form version
+npm view @ng-forge/dynamic-forms version
 
 # 7. Update main with the tag (if needed)
 git checkout main

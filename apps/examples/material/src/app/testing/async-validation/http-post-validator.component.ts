@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig, HttpCustomValidator } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, HttpCustomValidator } from '@ng-forge/dynamic-forms';
 
 const validateEmail: HttpCustomValidator<string, string> = {
   request: (ctx) => ({

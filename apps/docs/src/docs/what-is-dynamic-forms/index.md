@@ -12,7 +12,7 @@ Declarative, lightweight forms for Angular 21+, powered by signal forms. Build c
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-registration',
@@ -480,13 +480,13 @@ provideDynamicForm([
 
 ## Choose Your UI Framework
 
-| Framework           | Package                            | Status          |
-| ------------------- | ---------------------------------- | --------------- |
-| **Material Design** | `@ng-forge/dynamic-form-material`  | 🧪 Preview      |
-| **PrimeNG**         | `@ng-forge/dynamic-form-primeng`   | 🧪 Preview      |
-| **Bootstrap**       | `@ng-forge/dynamic-form-bootstrap` | 🧪 Preview      |
-| **Ionic**           | `@ng-forge/dynamic-form-ionic`     | 🧪 Preview      |
-| **Custom**          | Build your own                     | ✅ Full Support |
+| Framework           | Package                             | Status          |
+| ------------------- | ----------------------------------- | --------------- |
+| **Material Design** | `@ng-forge/dynamic-forms-material`  | 🧪 Preview      |
+| **PrimeNG**         | `@ng-forge/dynamic-forms-primeng`   | 🧪 Preview      |
+| **Bootstrap**       | `@ng-forge/dynamic-forms-bootstrap` | 🧪 Preview      |
+| **Ionic**           | `@ng-forge/dynamic-forms-ionic`     | 🧪 Preview      |
+| **Custom**          | Build your own                      | ✅ Full Support |
 
 **Material Design**, **PrimeNG, Bootstrap, and Ionic** integrations are in preview - functional but APIs may change. See individual pages for details.
 

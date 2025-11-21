@@ -4,29 +4,29 @@ const api: NgDocApi = {
   title: 'API Reference',
   scopes: [
     {
-      name: 'dynamic-form',
+      name: 'dynamic-forms',
       route: 'core',
-      include: 'packages/dynamic-form/src/lib/**/*.ts',
+      include: 'packages/dynamic-forms/src/lib/**/*.ts',
     },
     {
-      name: 'dynamic-form-material',
+      name: 'dynamic-forms-material',
       route: 'material',
-      include: 'packages/dynamic-form-material/src/lib/**/*.ts',
+      include: 'packages/dynamic-forms-material/src/lib/**/*.ts',
     },
     {
-      name: 'dynamic-form-ionic',
+      name: 'dynamic-forms-ionic',
       route: 'ionic',
-      include: 'packages/dynamic-form-ionic/src/lib/**/*.ts',
+      include: 'packages/dynamic-forms-ionic/src/lib/**/*.ts',
     },
     {
-      name: 'dynamic-form-bootstrap',
+      name: 'dynamic-forms-bootstrap',
       route: 'bootstrap',
-      include: 'packages/dynamic-form-bootstrap/src/lib/**/*.ts',
+      include: 'packages/dynamic-forms-bootstrap/src/lib/**/*.ts',
     },
     {
-      name: 'dynamic-form-primeng',
+      name: 'dynamic-forms-primeng',
       route: 'primeng',
-      include: 'packages/dynamic-form-primeng/src/lib/**/*.ts',
+      include: 'packages/dynamic-forms-primeng/src/lib/**/*.ts',
     },
   ],
 };

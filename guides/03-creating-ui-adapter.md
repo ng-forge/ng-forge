@@ -15,7 +15,7 @@ Before creating an adapter, you should have:
 ## Project Structure
 
 ```
-packages/dynamic-form-superui/
+packages/dynamic-forms-superui/
 ├── src/
 │   ├── lib/
 │   │   ├── config/
@@ -56,14 +56,14 @@ packages/dynamic-form-superui/
 
 ```json
 {
-  "name": "@ng-forge/dynamic-form-superui",
+  "name": "@ng-forge/dynamic-forms-superui",
   "version": "1.0.0",
   "description": "SuperUI integration for ng-forge dynamic forms",
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.0.0",
-    "@ng-forge/dynamic-form": "^1.0.0",
+    "@ng-forge/dynamic-forms": "^1.0.0",
     "superui": "^5.0.0"
   },
   "dependencies": {
@@ -81,29 +81,29 @@ packages/dynamic-form-superui/
 ### `README.md`
 
 ```markdown
-# @ng-forge/dynamic-form-superui
+# @ng-forge/dynamic-forms-superui
 
 SuperUI integration for ng-forge dynamic forms.
 
 ## Installation
 
 \`\`\`bash group="install" name="npm"
-npm install @ng-forge/dynamic-form-superui superui
+npm install @ng-forge/dynamic-forms-superui superui
 \`\`\`
 
 \`\`\`bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-form-superui superui
+yarn add @ng-forge/dynamic-forms-superui superui
 \`\`\`
 
 \`\`\`bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-form-superui superui
+pnpm add @ng-forge/dynamic-forms-superui superui
 \`\`\`
 
 ## Usage
 
 \`\`\`typescript
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withSuperUIFields } from '@ng-forge/dynamic-form-superui';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withSuperUIFields } from '@ng-forge/dynamic-forms-superui';
 
 export const appConfig: ApplicationConfig = {
 providers: [provideDynamicForm(...withSuperUIFields())],
@@ -156,7 +156,7 @@ import type {
   SuperUIMultiCheckboxField,
 } from '../fields';
 
-declare module '@ng-forge/dynamic-form' {
+declare module '@ng-forge/dynamic-forms' {
   interface FieldRegistryLeaves {
     input: SuperUIInputField;
     select: SuperUISelectField<unknown>;
@@ -189,7 +189,7 @@ Let's create a complete input field component as an example.
 **`src/lib/fields/input/superui-input.type.ts`:**
 
 ```typescript
-import { InputField, InputProps, ValueFieldComponent, DynamicText } from '@ng-forge/dynamic-form';
+import { InputField, InputProps, ValueFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
 
 /**
  * SuperUI-specific input properties
@@ -252,7 +252,7 @@ export type SuperUIInputComponent = ValueFieldComponent<SuperUIInputField>;
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { AsyncPipe, FormsModule } from '@angular/common';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-forms';
 
 // SuperUI imports
 import { SuperInput } from 'superui/input';
@@ -559,7 +559,7 @@ export class SuperUIErrorsComponent {
 **`src/lib/config/superui-field-config.ts`:**
 
 ```typescript
-import { FieldTypeDefinition, valueFieldMapper, checkboxFieldMapper, buttonFieldMapper } from '@ng-forge/dynamic-form';
+import { FieldTypeDefinition, valueFieldMapper, checkboxFieldMapper, buttonFieldMapper } from '@ng-forge/dynamic-forms';
 
 export const SUPERUI_FIELD_TYPES: FieldTypeDefinition[] = [
   // ========== Input Field ==========
@@ -662,7 +662,7 @@ export const SUPERUI_FIELD_TYPES: FieldTypeDefinition[] = [
 **`src/lib/providers/superui-providers.ts`:**
 
 ````typescript
-import { FieldTypeDefinition } from '@ng-forge/dynamic-form';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import { SUPERUI_FIELD_TYPES } from '../config/superui-field-config';
 
 /**
@@ -670,8 +670,8 @@ import { SUPERUI_FIELD_TYPES } from '../config/superui-field-config';
  *
  * @example
  * ```typescript
- * import { provideDynamicForm } from '@ng-forge/dynamic-form';
- * import { withSuperUIFields } from '@ng-forge/dynamic-form-superui';
+ * import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+ * import { withSuperUIFields } from '@ng-forge/dynamic-forms-superui';
  *
  * export const appConfig: ApplicationConfig = {
  *   providers: [provideDynamicForm(...withSuperUIFields())],
@@ -689,7 +689,7 @@ export function withSuperUIFields(): FieldTypeDefinition[] {
 
 ```typescript
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DynamicForm, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withSuperUIFields } from '../providers/superui-providers';
 import { untracked } from '@angular/core';
 import { By } from '@angular/platform-browser';

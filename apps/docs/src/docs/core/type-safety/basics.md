@@ -14,7 +14,7 @@ ng-forge provides compile-time type inference for form configurations, eliminati
 Use `as const satisfies FormConfig` to enable type inference:
 
 ```typescript
-import { FormConfig } from '@ng-forge/dynamic-form';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 
 const formConfig = {
   fields: [
@@ -64,8 +64,8 @@ UI integrations register their field types via `provideDynamicForm`. For example
 
 ```typescript
 // app.config.ts
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -78,8 +78,8 @@ export const appConfig: ApplicationConfig = {
 Material fields augment the `FieldRegistryLeaves` interface for type safety:
 
 ```typescript
-// From @ng-forge/dynamic-form-material (already included)
-declare module '@ng-forge/dynamic-form' {
+// From @ng-forge/dynamic-forms-material (already included)
+declare module '@ng-forge/dynamic-forms' {
   interface FieldRegistryLeaves {
     input: MatInputField;
     select: MatSelectField<unknown>;
@@ -142,7 +142,7 @@ Extract the inferred type for use in your component:
 
 ```typescript
 import { signal } from '@angular/core';
-import { InferFormValue } from '@ng-forge/dynamic-form';
+import { InferFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({...})
 export class UserFormComponent {
@@ -256,7 +256,7 @@ const config = {
 Create type aliases for complex form values:
 
 ```typescript
-import { InferFormValue } from '@ng-forge/dynamic-form';
+import { InferFormValue } from '@ng-forge/dynamic-forms';
 
 const REGISTRATION_FORM = {
   fields: [

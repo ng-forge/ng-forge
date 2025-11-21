@@ -12,18 +12,18 @@ Get ng-forge dynamic forms up and running in your Angular project in 3 minutes.
 Install the core library and your preferred UI integration:
 
 ```bash group="install" name="npm"
-npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material
 ```
 
 ```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material
 ```
 
 ```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material
 ```
 
-> This installs the core `@ng-forge/dynamic-form` package and the Material Design integration. See [UI Framework Options](#ui-framework-options) below for other choices.
+> This installs the core `@ng-forge/dynamic-forms` package and the Material Design integration. See [UI Framework Options](#ui-framework-options) below for other choices.
 
 ## Configure Your App
 
@@ -31,8 +31,8 @@ Add the dynamic form provider to your app configuration:
 
 ```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -50,7 +50,7 @@ Create a simple login form to verify everything works:
 
 ```typescript name="login.component.ts"
 import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-login',
@@ -108,19 +108,19 @@ ng-forge dynamic forms supports multiple UI frameworks. Install the integration 
 ### Material Design (Preview)
 
 ```bash group="install-material" name="npm"
-npm install @ng-forge/dynamic-form-material
+npm install @ng-forge/dynamic-forms-material
 ```
 
 ```bash group="install-material" name="yarn"
-yarn add @ng-forge/dynamic-form-material
+yarn add @ng-forge/dynamic-forms-material
 ```
 
 ```bash group="install-material" name="pnpm"
-pnpm add @ng-forge/dynamic-form-material
+pnpm add @ng-forge/dynamic-forms-material
 ```
 
 ```typescript
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 
 export const appConfig: ApplicationConfig = {
   providers: [provideDynamicForm(...withMaterialFields())],
@@ -132,19 +132,19 @@ See [Material Integration](../ui-libs-integrations/material) for full documentat
 ### PrimeNG (Preview)
 
 ```bash group="install-primeng" name="npm"
-npm install @ng-forge/dynamic-form-primeng
+npm install @ng-forge/dynamic-forms-primeng
 ```
 
 ```bash group="install-primeng" name="yarn"
-yarn add @ng-forge/dynamic-form-primeng
+yarn add @ng-forge/dynamic-forms-primeng
 ```
 
 ```bash group="install-primeng" name="pnpm"
-pnpm add @ng-forge/dynamic-form-primeng
+pnpm add @ng-forge/dynamic-forms-primeng
 ```
 
 ```typescript
-import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 
 export const appConfig: ApplicationConfig = {
   providers: [provideDynamicForm(...withPrimeNGFields())],
@@ -156,19 +156,19 @@ See [PrimeNG Integration](../ui-libs-integrations/primeng) for full documentatio
 ### Bootstrap (Preview)
 
 ```bash group="install-bootstrap" name="npm"
-npm install @ng-forge/dynamic-form-bootstrap
+npm install @ng-forge/dynamic-forms-bootstrap
 ```
 
 ```bash group="install-bootstrap" name="yarn"
-yarn add @ng-forge/dynamic-form-bootstrap
+yarn add @ng-forge/dynamic-forms-bootstrap
 ```
 
 ```bash group="install-bootstrap" name="pnpm"
-pnpm add @ng-forge/dynamic-form-bootstrap
+pnpm add @ng-forge/dynamic-forms-bootstrap
 ```
 
 ```typescript
-import { withBootstrapFields } from '@ng-forge/dynamic-form-bootstrap';
+import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
 
 export const appConfig: ApplicationConfig = {
   providers: [provideDynamicForm(...withBootstrapFields())],
@@ -180,19 +180,19 @@ See [Bootstrap Integration](../ui-libs-integrations/bootstrap) for full document
 ### Ionic (Preview)
 
 ```bash group="install-ionic" name="npm"
-npm install @ng-forge/dynamic-form-ionic
+npm install @ng-forge/dynamic-forms-ionic
 ```
 
 ```bash group="install-ionic" name="yarn"
-yarn add @ng-forge/dynamic-form-ionic
+yarn add @ng-forge/dynamic-forms-ionic
 ```
 
 ```bash group="install-ionic" name="pnpm"
-pnpm add @ng-forge/dynamic-form-ionic
+pnpm add @ng-forge/dynamic-forms-ionic
 ```
 
 ```typescript
-import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
+import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
 
 export const appConfig: ApplicationConfig = {
   providers: [provideDynamicForm(...withIonicFields())],
@@ -276,7 +276,7 @@ See [Angular Material Theming Guide](https://material.angular.io/guide/theming) 
 
 ### Module Not Found
 
-If you see import errors for `@ng-forge/dynamic-form`, ensure:
+If you see import errors for `@ng-forge/dynamic-forms`, ensure:
 
 1. You've run `npm install` (or yarn/pnpm equivalent)
 2. Your package.json includes the dependency

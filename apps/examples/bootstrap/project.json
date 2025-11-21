@@ -5,7 +5,7 @@
   "prefix": "bs-example",
   "sourceRoot": "apps/examples/bootstrap/src",
   "tags": ["examples"],
-  "implicitDependencies": ["dynamic-form", "dynamic-form-bootstrap"],
+  "implicitDependencies": ["dynamic-forms", "dynamic-forms-bootstrap"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { AddArrayItemEvent, DynamicForm, FormConfig, RemoveArrayItemEvent } from '@ng-forge/dynamic-form';
+import { AddArrayItemEvent, DynamicForm, FormConfig, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms';
 
 class AddNotesEvent extends AddArrayItemEvent {
   constructor() {

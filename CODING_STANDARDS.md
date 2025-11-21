@@ -541,7 +541,7 @@ import { CommonModule } from '@angular/common';
 import { Select } from 'primeng/select';
 
 // 3. Internal imports (absolute)
-import { DynamicTextPipe } from '@ng-forge/dynamic-form';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
 
 // 4. Relative imports
 import { MyService } from '../services/my.service';

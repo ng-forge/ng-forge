@@ -19,7 +19,7 @@ This example demonstrates:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { FormConfig, DynamicForm, ExtractFormValue } from '@ng-forge/dynamic-form';
+import { FormConfig, DynamicForm, ExtractFormValue } from '@ng-forge/dynamic-forms';
 
 const registrationConfig = {
   fields: [

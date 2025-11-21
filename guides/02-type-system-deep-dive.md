@@ -16,7 +16,7 @@ TypeScript's **module augmentation** allows packages to extend interfaces define
 
 ### Core Registry Definition
 
-**`packages/dynamic-form/src/lib/models/registry/field-registry.ts`:**
+**`packages/dynamic-forms/src/lib/models/registry/field-registry.ts`:**
 
 ```typescript
 /**
@@ -56,10 +56,10 @@ At this point, TypeScript knows about:
 
 ### Adapter Augmentation
 
-**`packages/dynamic-form-primeng/src/lib/types/registry-augmentation.ts`:**
+**`packages/dynamic-forms-primeng/src/lib/types/registry-augmentation.ts`:**
 
 ```typescript
-declare module '@ng-forge/dynamic-form' {
+declare module '@ng-forge/dynamic-forms' {
   interface FieldRegistryLeaves {
     input: PrimeInputField;
     select: PrimeSelectField<unknown>;
@@ -78,7 +78,7 @@ declare module '@ng-forge/dynamic-form' {
 **Critical:** This file MUST be imported in the adapter's `index.ts` for the augmentation to take effect:
 
 ```typescript
-// packages/dynamic-form-primeng/src/lib/index.ts
+// packages/dynamic-forms-primeng/src/lib/index.ts
 
 // Import for side effects (module augmentation)
 import './types/registry-augmentation';
@@ -573,7 +573,7 @@ const userField: SelectField<User> = {
 The registry uses `unknown` for generic fields:
 
 ```typescript
-declare module '@ng-forge/dynamic-form' {
+declare module '@ng-forge/dynamic-forms' {
   interface FieldRegistryLeaves {
     select: PrimeSelectField<unknown>; // Generic parameter
     radio: PrimeRadioField<unknown>;

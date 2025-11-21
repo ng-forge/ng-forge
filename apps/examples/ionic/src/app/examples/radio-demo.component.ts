@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
-import '@ng-forge/dynamic-form-ionic';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
+import '@ng-forge/dynamic-forms-ionic';
 import { IonContent } from '@ionic/angular/standalone';
 
 @Component({

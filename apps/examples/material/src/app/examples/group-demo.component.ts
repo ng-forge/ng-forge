@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 import { JsonPipe } from '@angular/common';
-import { submitButton } from '@ng-forge/dynamic-form-material';
+import { submitButton } from '@ng-forge/dynamic-forms-material';
 
 @Component({
   selector: 'example-group-demo',

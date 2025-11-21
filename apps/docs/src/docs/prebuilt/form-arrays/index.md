@@ -66,8 +66,8 @@ This creates an array of objects:
 Array items can be added or removed dynamically at runtime using the event bus:
 
 ```typescript
-import { EventBus } from '@ng-forge/dynamic-form';
-import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form/events';
+import { EventBus } from '@ng-forge/dynamic-forms';
+import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms/events';
 
 // Inject the event bus
 eventBus = inject(EventBus);
@@ -108,8 +108,8 @@ Here's a complete working example of a flat array field with dynamic add/remove:
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { DynamicForm, EventBus } from '@ng-forge/dynamic-form';
-import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form/events';
+import { DynamicForm, EventBus } from '@ng-forge/dynamic-forms';
+import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms/events';
 
 @Component({
   selector: 'app-tags-form',
@@ -163,8 +163,8 @@ Here's a complete working example of an object array field with validation:
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { DynamicForm, EventBus } from '@ng-forge/dynamic-form';
-import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-form/events';
+import { DynamicForm, EventBus } from '@ng-forge/dynamic-forms';
+import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms/events';
 
 @Component({
   selector: 'app-contacts-form',

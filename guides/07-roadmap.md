@@ -9,9 +9,9 @@ This document outlines planned features and known limitations that need to be ad
 **Status:** Not Implemented
 **Related Files:**
 
-- `packages/dynamic-form/src/lib/core/page-orchestrator/page-orchestrator.component.ts`
-- `packages/dynamic-form/src/lib/definitions/default/page-field.ts`
-- `packages/dynamic-form/src/lib/models/logic/logic-config.ts`
+- `packages/dynamic-forms/src/lib/core/page-orchestrator/page-orchestrator.component.ts`
+- `packages/dynamic-forms/src/lib/definitions/default/page-field.ts`
+- `packages/dynamic-forms/src/lib/models/logic/logic-config.ts`
 
 **Description:**
 The library currently lacks support for conditional page visibility in multi-page forms. While the `LogicConfig` interface exists for field-level logic (hidden, readonly, disabled, required), it is not implemented for `PageField` types.
@@ -27,7 +27,7 @@ The library currently lacks support for conditional page visibility in multi-pag
 1. **Add Logic Support to PageField Interface**
 
    ```typescript
-   // packages/dynamic-form/src/lib/definitions/default/page-field.ts
+   // packages/dynamic-forms/src/lib/definitions/default/page-field.ts
    export interface PageField {
      type: 'page';
      logic?: LogicConfig[]; // Add this property

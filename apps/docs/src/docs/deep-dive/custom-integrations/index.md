@@ -13,7 +13,7 @@ UI integrations map field types to your components using `FieldTypeDefinition` o
 Create a type interface extending the base field type:
 
 ```typescript
-import { InputField, ValueFieldComponent, DynamicText } from '@ng-forge/dynamic-form';
+import { InputField, ValueFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
 
 // Define your custom props
 export interface CustomInputProps extends Record<string, unknown> {
@@ -36,7 +36,7 @@ Implement the component using Angular's signal forms:
 ```typescript
 import { Component, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-form';
+import { DynamicText, DynamicTextPipe } from '@ng-forge/dynamic-forms';
 import { CustomInputComponent, CustomInputProps } from './custom-input.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -93,7 +93,7 @@ export default class CustomInputFieldComponent implements CustomInputComponent {
 Define the field type registration:
 
 ```typescript
-import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-form';
+import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms';
 
 export const CustomInputType: FieldTypeDefinition = {
   name: 'input',
@@ -107,7 +107,7 @@ export const CustomInputType: FieldTypeDefinition = {
 Export a function that returns all your field type definitions:
 
 ```typescript
-import { FieldTypeDefinition } from '@ng-forge/dynamic-form';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
 import { CustomInputType } from './fields/input';
 import { CustomSelectType } from './fields/select';
 import { CustomCheckboxType } from './fields/checkbox';
@@ -128,7 +128,7 @@ Add your fields to the app configuration:
 
 ```typescript name="app.config.ts"
 import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withCustomFields } from './custom-fields';
 
 export const appConfig: ApplicationConfig = {
@@ -145,7 +145,7 @@ ng-forge provides component interface types for different field categories:
 For fields that collect user input (input, select, textarea, datepicker, radio, slider):
 
 ```typescript
-import { ValueFieldComponent, InputField } from '@ng-forge/dynamic-form';
+import { ValueFieldComponent, InputField } from '@ng-forge/dynamic-forms';
 
 export type CustomInputComponent = ValueFieldComponent<CustomInputField>;
 ```
@@ -165,7 +165,7 @@ The component must implement these inputs:
 For checkbox and toggle fields:
 
 ```typescript
-import { CheckboxFieldComponent, CheckboxField } from '@ng-forge/dynamic-form';
+import { CheckboxFieldComponent, CheckboxField } from '@ng-forge/dynamic-forms';
 
 export type CustomCheckboxComponent = CheckboxFieldComponent<CustomCheckboxField>;
 ```
@@ -198,7 +198,7 @@ Mappers convert field definitions to component input bindings. ng-forge provides
 For standard value-bearing fields:
 
 ```typescript
-import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-form';
+import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms';
 
 export const CustomInputType: FieldTypeDefinition = {
   name: 'input',
@@ -212,7 +212,7 @@ export const CustomInputType: FieldTypeDefinition = {
 For checkbox/toggle fields:
 
 ```typescript
-import { FieldTypeDefinition, checkboxFieldMapper } from '@ng-forge/dynamic-form';
+import { FieldTypeDefinition, checkboxFieldMapper } from '@ng-forge/dynamic-forms';
 
 export const CustomCheckboxType: FieldTypeDefinition = {
   name: 'checkbox',
@@ -227,7 +227,7 @@ For specialized fields (like buttons), create custom mappers:
 
 ```typescript
 import { Binding, inputBinding } from '@angular/core';
-import { ButtonField } from '@ng-forge/dynamic-form';
+import { ButtonField } from '@ng-forge/dynamic-forms';
 
 export function buttonFieldMapper(fieldDef: ButtonField): Binding[] {
   return [
@@ -270,7 +270,7 @@ Register your field types with TypeScript for full type inference:
 
 ```typescript
 // In your field types file
-declare module '@ng-forge/dynamic-form' {
+declare module '@ng-forge/dynamic-forms' {
   interface DynamicFormFieldRegistry {
     input: CustomInputField;
     select: CustomSelectField;

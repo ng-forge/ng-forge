@@ -61,11 +61,11 @@ export class FormTestUtils {
 
 ### PrimeNG Test Utils Example
 
-**`packages/dynamic-form-primeng/src/lib/testing/primeng-test-utils.ts`:**
+**`packages/dynamic-forms-primeng/src/lib/testing/primeng-test-utils.ts`:**
 
 ```typescript
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withPrimeNGFields } from '../providers/primeng-providers';
 import { untracked } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';

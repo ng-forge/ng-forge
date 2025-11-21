@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { AsyncCustomValidator, DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
+import { AsyncCustomValidator, DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';

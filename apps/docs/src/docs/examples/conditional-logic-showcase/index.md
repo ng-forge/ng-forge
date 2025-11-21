@@ -75,7 +75,7 @@ The form consists of 4 pages with increasingly complex conditional logic:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-form';
+import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-forms';
 
 const certificationConfig = {
   defaultValidationMessages: {

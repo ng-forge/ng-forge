@@ -4,7 +4,7 @@
 
 **Stop writing repetitive form code.** Build type-safe, dynamic Angular forms in minutes, not hours.
 
-[![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-form.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form)
+[![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-forms.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **📖 [View Documentation](https://ng-forge.github.io/ng-forge/)**
@@ -17,7 +17,7 @@ ng-forge dynamic forms uses a declarative, type-safe configuration to build comp
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-login',
@@ -85,35 +85,35 @@ export class LoginComponent {
 
 This monorepo contains:
 
-| Package                                                             | Description                              | Version                                                                                                                                   |
-| ------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| [@ng-forge/dynamic-form](./packages/dynamic-form)                   | Core library - UI-agnostic dynamic forms | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-form.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form)                   |
-| [@ng-forge/dynamic-form-material](./packages/dynamic-form-material) | Material Design implementation           | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-form-material.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form-material) |
-| [@ng-forge/dynamic-form-primeng](./packages/dynamic-form-primeng)   | PrimeNG implementation                   | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-form-primeng.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form-primeng)   |
-| [@ng-forge/dynamic-form-ionic](./packages/dynamic-form-ionic)       | Ionic implementation                     | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-form-ionic.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-form-ionic)       |
+| Package                                                               | Description                              | Version                                                                                                                                     |
+| --------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| [@ng-forge/dynamic-forms](./packages/dynamic-forms)                   | Core library - UI-agnostic dynamic forms | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-forms.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms)                   |
+| [@ng-forge/dynamic-forms-material](./packages/dynamic-forms-material) | Material Design implementation           | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-forms-material.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-material) |
+| [@ng-forge/dynamic-forms-primeng](./packages/dynamic-forms-primeng)   | PrimeNG implementation                   | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-forms-primeng.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-primeng)   |
+| [@ng-forge/dynamic-forms-ionic](./packages/dynamic-forms-ionic)       | Ionic implementation                     | [![npm](https://img.shields.io/npm/v/@ng-forge/dynamic-forms-ionic.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-ionic)       |
 
 ## 🎯 Quick Start
 
 ### Installation
 
 ```bash group="install" name="npm"
-npm install @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material
 ```
 
 ```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+yarn add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material
 ```
 
 ```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-form @ng-forge/dynamic-form-material
+pnpm add @ng-forge/dynamic-forms @ng-forge/dynamic-forms-material
 ```
 
 ### Configure Your App
 
 ```typescript
 import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-form';
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 
 export const appConfig: ApplicationConfig = {
   providers: [provideDynamicForm(...withMaterialFields())],
@@ -124,7 +124,7 @@ export const appConfig: ApplicationConfig = {
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-form';
+import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-registration',
@@ -298,21 +298,21 @@ ng-forge dynamic forms works with any UI library:
 ### Material Design (Official)
 
 ```typescript
-import { withMaterialFields } from '@ng-forge/dynamic-form-material';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 provideDynamicForm(...withMaterialFields());
 ```
 
 ### PrimeNG (Official)
 
 ```typescript
-import { withPrimeNGFields } from '@ng-forge/dynamic-form-primeng';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 provideDynamicForm(...withPrimeNGFields());
 ```
 
 ### Ionic (Official)
 
 ```typescript
-import { withIonicFields } from '@ng-forge/dynamic-form-ionic';
+import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
 provideDynamicForm(...withIonicFields());
 ```
 
@@ -370,10 +370,10 @@ pnpm run serve:docs
 ```
 ng-forge/
 ├── packages/
-│   ├── dynamic-form/          # Core library
-│   ├── dynamic-form-material/ # Material Design integration
-│   ├── dynamic-form-primeng/  # PrimeNG integration
-│   └── dynamic-form-ionic/    # Ionic integration
+│   ├── dynamic-forms/          # Core library
+│   ├── dynamic-forms-material/ # Material Design integration
+│   ├── dynamic-forms-primeng/  # PrimeNG integration
+│   └── dynamic-forms-ionic/    # Ionic integration
 ├── apps/
 │   ├── docs/                  # Documentation site
 │   ├── demo/                  # Demo applications

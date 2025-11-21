@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
-import { submitButton } from '@ng-forge/dynamic-form-primeng';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
+import { submitButton } from '@ng-forge/dynamic-forms-primeng';
 
 @Component({
   selector: 'app-complete-prime-form',

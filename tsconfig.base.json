@@ -20,11 +20,11 @@
       "@examples/material/*": ["apps/examples/material/src/app/examples/*"],
       "@examples/primeng/*": ["apps/examples/primeng/src/app/examples/*"],
       "@ng-doc/generated": ["dist/ng-doc/docs"],
-      "@ng-forge/dynamic-form": ["packages/dynamic-form/src/index.ts"],
-      "@ng-forge/dynamic-form-bootstrap": ["packages/dynamic-form-bootstrap/src/index.ts"],
-      "@ng-forge/dynamic-form-ionic": ["packages/dynamic-form-ionic/src/index.ts"],
-      "@ng-forge/dynamic-form-material": ["packages/dynamic-form-material/src/index.ts"],
-      "@ng-forge/dynamic-form-primeng": ["packages/dynamic-form-primeng/src/index.ts"]
+      "@ng-forge/dynamic-forms": ["packages/dynamic-forms/src/index.ts"],
+      "@ng-forge/dynamic-forms-bootstrap": ["packages/dynamic-forms-bootstrap/src/index.ts"],
+      "@ng-forge/dynamic-forms-ionic": ["packages/dynamic-forms-ionic/src/index.ts"],
+      "@ng-forge/dynamic-forms-material": ["packages/dynamic-forms-material/src/index.ts"],
+      "@ng-forge/dynamic-forms-primeng": ["packages/dynamic-forms-primeng/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

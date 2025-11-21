@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { AddArrayItemEvent, DynamicForm, type FormConfig } from '@ng-forge/dynamic-form';
+import { AddArrayItemEvent, DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 import { JsonPipe } from '@angular/common';
-import { submitButton } from '@ng-forge/dynamic-form-material';
+import { submitButton } from '@ng-forge/dynamic-forms-material';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 

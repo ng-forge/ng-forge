@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
-import '@ng-forge/dynamic-form-material';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
+import '@ng-forge/dynamic-forms-material';
 
 @Component({
   selector: 'example-multi-checkbox-demo',

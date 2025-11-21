@@ -336,7 +336,7 @@ Let's create a custom mapper for a star rating field:
 **Step 1: Define Field Type**
 
 ```typescript
-import { FieldDef } from '@ng-forge/dynamic-form';
+import { FieldDef } from '@ng-forge/dynamic-forms';
 
 export interface RatingFieldProps {
   maxRating?: number;
@@ -357,7 +357,7 @@ export interface RatingField extends FieldDef<RatingFieldProps> {
 
 ```typescript
 import { Binding, inputBinding } from '@angular/core';
-import { baseFieldMapper } from '@ng-forge/dynamic-form';
+import { baseFieldMapper } from '@ng-forge/dynamic-forms';
 
 export function ratingFieldMapper(fieldDef: RatingField, options: FieldMapperOptions): Binding[] {
   // 1. Start with base bindings
