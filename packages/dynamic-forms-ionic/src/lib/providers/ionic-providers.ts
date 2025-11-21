@@ -1,5 +1,8 @@
 import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import type { Provider } from '@angular/core';
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
+import { IonicConfig } from '../models/ionic-config';
+import { IONIC_CONFIG } from '../models/ionic-config.token';
 import {
   IonicButtonField,
   IonicCheckboxField,
@@ -17,8 +20,17 @@ import {
 } from '../fields';
 
 /**
+ * Field type definitions with optional config providers
+ */
+export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
+  __configProviders?: Provider[];
+};
+
+/**
  * Configure dynamic forms with Ionic field types.
  * Provides all Ionic field types for use with provideDynamicForm.
+ *
+ * @param config - Optional global configuration for Ionic form fields
  *
  * @example
  * ```typescript
@@ -34,10 +46,36 @@ import {
  * };
  * ```
  *
+ * @example
+ * ```typescript
+ * // With global configuration
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideDynamicForm(
+ *       ...withIonicFields({
+ *         fill: 'outline',
+ *         labelPlacement: 'floating'
+ *       })
+ *     )
+ *   ]
+ * };
+ * ```
+ *
  * @returns Array of field type definitions for Ionic components
  */
-export function withIonicFields(): FieldTypeDefinition[] {
-  return IONIC_FIELD_TYPES;
+export function withIonicFields(config?: IonicConfig): FieldTypeDefinitionsWithConfig {
+  const fields = IONIC_FIELD_TYPES as FieldTypeDefinitionsWithConfig;
+
+  if (config) {
+    fields.__configProviders = [
+      {
+        provide: IONIC_CONFIG,
+        useValue: config,
+      },
+    ];
+  }
+
+  return fields;
 }
 
 /**

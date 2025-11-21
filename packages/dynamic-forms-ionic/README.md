@@ -139,6 +139,45 @@ export class ContactFormComponent {
 }
 ```
 
+## Global Configuration
+
+You can configure default props for all Ionic form fields using the global configuration option:
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideIonicAngular({ mode: 'md' }),
+    provideDynamicForm(
+      ...withIonicFields({
+        fill: 'outline',
+        labelPlacement: 'floating',
+        color: 'primary',
+      }),
+    ),
+  ],
+};
+```
+
+### Configuration Options
+
+| Option           | Type                                                                                                            | Default     | Description                                        |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------- |
+| `fill`           | `'solid' \| 'outline'`                                                                                          | `'solid'`   | Default fill style for form inputs                 |
+| `shape`          | `'round'`                                                                                                       | `undefined` | Default shape for form controls                    |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                                                        | `'start'`   | Default label placement for inputs                 |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger' \| 'light' \| 'medium' \| 'dark'` | `'primary'` | Default color theme                                |
+| `size`           | `'small' \| 'default' \| 'large'`                                                                               | `'default'` | Default size for buttons                           |
+| `expand`         | `'full' \| 'block'`                                                                                             | `undefined` | Default expand behavior for buttons                |
+| `buttonFill`     | `'clear' \| 'outline' \| 'solid' \| 'default'`                                                                  | `'solid'`   | Default fill style for buttons                     |
+| `strong`         | `boolean`                                                                                                       | `false`     | Whether buttons should be strong (bold) by default |
+
+These settings will be applied to all Ionic form fields unless overridden by individual field props.
+
 ## Customization
 
 ### Using with Multiple UI Libraries

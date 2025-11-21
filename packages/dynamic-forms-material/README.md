@@ -119,6 +119,38 @@ export class ContactFormComponent {
 }
 ```
 
+## Global Configuration
+
+You can configure default props for all Material form fields using the global configuration option:
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withMaterialFields({
+        appearance: 'fill',
+        subscriptSizing: 'fixed',
+        disableRipple: false,
+      }),
+    ),
+  ],
+};
+```
+
+### Configuration Options
+
+| Option            | Type                   | Default     | Description                               |
+| ----------------- | ---------------------- | ----------- | ----------------------------------------- |
+| `appearance`      | `'fill' \| 'outline'`  | `'outline'` | Default appearance for form fields        |
+| `subscriptSizing` | `'fixed' \| 'dynamic'` | `'dynamic'` | How subscript (hint/error) sizing behaves |
+| `disableRipple`   | `boolean`              | `false`     | Whether to disable ripple effects         |
+
+These settings will be applied to all Material form fields unless overridden by individual field props.
+
 ## Available Field Types
 
 ### Text Input

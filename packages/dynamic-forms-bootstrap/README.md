@@ -107,6 +107,40 @@ export class MyFormComponent {
 }
 ```
 
+## Global Configuration
+
+You can configure default props for all Bootstrap form fields using the global configuration option:
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withBootstrapFields({
+        floatingLabel: true,
+        size: 'lg',
+        variant: 'primary',
+      }),
+    ),
+  ],
+};
+```
+
+### Configuration Options
+
+| Option          | Type                                                                                                      | Default     | Description                                      |
+| --------------- | --------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------ |
+| `size`          | `'sm' \| 'lg'`                                                                                            | `undefined` | Default size for form controls                   |
+| `floatingLabel` | `boolean`                                                                                                 | `false`     | Use floating labels for inputs by default        |
+| `variant`       | `'primary' \| 'secondary' \| 'success' \| 'danger' \| 'warning' \| 'info' \| 'light' \| 'dark' \| 'link'` | `'primary'` | Default variant for buttons                      |
+| `outline`       | `boolean`                                                                                                 | `false`     | Whether buttons should be outlined by default    |
+| `block`         | `boolean`                                                                                                 | `false`     | Whether buttons should be block-level by default |
+
+These settings will be applied to all Bootstrap form fields unless overridden by individual field props.
+
 ## Field Types
 
 All 13 field types are documented in detail in the main documentation. Here are the available types:
