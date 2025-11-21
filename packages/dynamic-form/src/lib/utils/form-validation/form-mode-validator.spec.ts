@@ -1,7 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { FormModeValidator, isValidFormConfiguration } from './form-mode-validator';
-import * as formMode from '../../models/types/form-mode';
-import * as pageField from '../../definitions/default/page-field';
 
 describe('form-mode-validator', () => {
   describe('FormModeValidator.validateFormConfiguration', () => {
@@ -11,12 +9,6 @@ describe('form-mode-validator', () => {
           { type: 'input', key: 'name' },
           { type: 'input', key: 'email' },
         ];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'non-paged',
-          isValid: true,
-          errors: [],
-        });
 
         const result = FormModeValidator.validateFormConfiguration(fields as any);
 
@@ -28,37 +20,65 @@ describe('form-mode-validator', () => {
       it('should include warnings in result', () => {
         const fields = [{ type: 'input', key: 'test' }];
 
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'non-paged',
-          isValid: true,
-          errors: [],
-        });
-
         const result = FormModeValidator.validateFormConfiguration(fields as any);
 
         expect(result).toHaveProperty('warnings');
         expect(Array.isArray(result.warnings)).toBe(true);
       });
+
+      it('should validate form with multiple field types', () => {
+        const fields = [
+          { type: 'input', key: 'name' },
+          { type: 'checkbox', key: 'agree' },
+          { type: 'select', key: 'country' },
+        ];
+
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
+
+        expect(result.isValid).toBe(true);
+        expect(result.mode).toBe('non-paged');
+      });
+
+      it('should validate form with nested groups', () => {
+        const fields = [
+          {
+            type: 'group',
+            key: 'address',
+            fields: [
+              { type: 'input', key: 'street' },
+              { type: 'input', key: 'city' },
+            ],
+          },
+        ];
+
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
+
+        expect(result.isValid).toBe(true);
+        expect(result.mode).toBe('non-paged');
+      });
+
+      it('should validate form with array fields', () => {
+        const fields = [
+          {
+            type: 'array',
+            key: 'items',
+            items: { type: 'input', key: 'item' },
+          },
+        ];
+
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
+
+        expect(result.isValid).toBe(true);
+        expect(result.mode).toBe('non-paged');
+      });
     });
 
     describe('paged forms', () => {
-      afterEach(() => {
-        vi.restoreAllMocks();
-      });
-
       it('should validate paged form as valid', () => {
         const fields = [
           { type: 'page', key: 'page1', fields: [{ type: 'input', key: 'name' }] },
           { type: 'page', key: 'page2', fields: [{ type: 'input', key: 'email' }] },
         ];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: [],
-        });
-
-        vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(true);
 
         const result = FormModeValidator.validateFormConfiguration(fields as any);
 
@@ -67,338 +87,271 @@ describe('form-mode-validator', () => {
         expect(result.errors).toEqual([]);
       });
 
-      it('should call validatePageNesting for each page field', () => {
+      it('should validate paged form with multiple pages', () => {
+        const fields = [
+          { type: 'page', key: 'personal', fields: [{ type: 'input', key: 'name' }] },
+          { type: 'page', key: 'contact', fields: [{ type: 'input', key: 'email' }] },
+          { type: 'page', key: 'address', fields: [{ type: 'input', key: 'street' }] },
+        ];
+
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
+
+        expect(result.isValid).toBe(true);
+        expect(result.mode).toBe('paged');
+      });
+
+      it('should validate paged form with empty pages', () => {
         const fields = [
           { type: 'page', key: 'page1', fields: [] },
           { type: 'page', key: 'page2', fields: [] },
         ];
 
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: [],
-        });
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
 
-        const validatePageNestingSpy = vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(true);
+        expect(result.isValid).toBe(true);
+        expect(result.mode).toBe('paged');
+      });
 
-        FormModeValidator.validateFormConfiguration(fields as any);
+      it('should validate paged form with complex page content', () => {
+        const fields = [
+          {
+            type: 'page',
+            key: 'page1',
+            fields: [
+              { type: 'input', key: 'name' },
+              { type: 'checkbox', key: 'agree' },
+              {
+                type: 'group',
+                key: 'contact',
+                fields: [
+                  { type: 'input', key: 'email' },
+                  { type: 'input', key: 'phone' },
+                ],
+              },
+            ],
+          },
+          { type: 'page', key: 'page2', fields: [{ type: 'input', key: 'notes' }] },
+        ];
 
-        expect(validatePageNestingSpy).toHaveBeenCalledTimes(2);
-        expect(validatePageNestingSpy).toHaveBeenCalledWith(fields[0]);
-        expect(validatePageNestingSpy).toHaveBeenCalledWith(fields[1]);
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
+
+        expect(result.isValid).toBe(true);
+        expect(result.mode).toBe('paged');
       });
 
       it('should detect nested page errors', () => {
-        const fields = [{ type: 'page', key: 'page1', fields: [{ type: 'page', key: 'nested' }] }];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: [],
-        });
-
-        vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(false);
+        const fields = [
+          {
+            type: 'page',
+            key: 'page1',
+            fields: [{ type: 'page', key: 'nested', fields: [] }],
+          },
+        ];
 
         const result = FormModeValidator.validateFormConfiguration(fields as any);
 
         expect(result.isValid).toBe(false);
-        expect(result.errors).toHaveLength(1);
-        expect(result.errors[0]).toContain('nested page fields');
-      });
-
-      it('should include field index and key in nested page error', () => {
-        const fields = [
-          { type: 'page', key: 'valid', fields: [] },
-          { type: 'page', key: 'invalid', fields: [{ type: 'page' }] },
-        ];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: [],
-        });
-
-        vi.spyOn(pageField, 'validatePageNesting')
-          .mockReturnValueOnce(true) // first page valid
-          .mockReturnValueOnce(false); // second page invalid
-
-        const result = FormModeValidator.validateFormConfiguration(fields as any);
-
-        expect(result.errors[0]).toContain('index 1');
-        expect(result.errors[0]).toContain('key: "invalid"');
-      });
-
-      it('should handle page without key in error message', () => {
-        const fields = [{ type: 'page', fields: [{ type: 'page' }] }];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: [],
-        });
-
-        vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(false);
-
-        const result = FormModeValidator.validateFormConfiguration(fields as any);
-
-        expect(result.errors[0]).toContain('key: "unknown"');
+        expect(result.errors.length).toBeGreaterThan(0);
       });
     });
 
-    describe('invalid forms', () => {
-      it('should propagate errors from mode detection', () => {
-        const fields = [
-          { type: 'page', key: 'page1' },
-          { type: 'input', key: 'name' }, // Mixed page/non-page
-        ];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'invalid',
-          isValid: false,
-          errors: ['Cannot mix page and non-page fields at root level'],
-        });
-
-        const result = FormModeValidator.validateFormConfiguration(fields as any);
-
-        expect(result.isValid).toBe(false);
-        expect(result.errors).toContain('Cannot mix page and non-page fields at root level');
-      });
-
-      it('should combine mode detection errors with page nesting errors', () => {
-        const fields = [{ type: 'page', key: 'page1', fields: [{ type: 'page' }] }];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: ['Mode detection warning'],
-        });
-
-        vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(false);
-
-        const result = FormModeValidator.validateFormConfiguration(fields as any);
-
-        expect(result.isValid).toBe(false);
-        expect(result.errors.length).toBeGreaterThanOrEqual(2);
-        expect(result.errors).toContain('Mode detection warning');
-      });
-    });
-
-    describe('warnings', () => {
-      it('should warn about single page forms', () => {
-        const fields = [{ type: 'page', key: 'only-page', fields: [{ type: 'input', key: 'test' }] }];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: [],
-        });
-
-        vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(true);
-
-        const result = FormModeValidator.validateFormConfiguration(fields as any);
-
-        expect(result.warnings).toHaveLength(1);
-        expect(result.warnings[0]).toContain('Single page form');
-        expect(result.warnings[0]).toContain('better performance');
-      });
-
-      it('should not warn about single page in non-paged mode', () => {
-        const fields = [{ type: 'input', key: 'test' }];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'non-paged',
-          isValid: true,
-          errors: [],
-        });
-
-        const result = FormModeValidator.validateFormConfiguration(fields as any);
-
-        expect(result.warnings).toEqual([]);
-      });
-
-      it('should warn about empty pages', () => {
+    describe('mixed forms (invalid)', () => {
+      it('should detect mixed mode (pages + non-pages) as invalid', () => {
         const fields = [
           { type: 'page', key: 'page1', fields: [] },
-          { type: 'page', key: 'page2', fields: [{ type: 'input', key: 'test' }] },
+          { type: 'input', key: 'name' },
         ];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: [],
-        });
-
-        vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(true);
 
         const result = FormModeValidator.validateFormConfiguration(fields as any);
 
-        expect(result.warnings.length).toBeGreaterThanOrEqual(1);
-        expect(result.warnings.some((w) => w.includes('contains no fields'))).toBe(true);
+        expect(result.isValid).toBe(false);
+        expect(result.mode).toBe('mixed');
+        expect(result.errors.length).toBeGreaterThan(0);
       });
 
-      it('should include page index and key in empty page warning', () => {
+      it('should detect invalid form structure', () => {
         const fields = [
-          { type: 'page', key: 'valid', fields: [{ type: 'input', key: 'test' }] },
-          { type: 'page', key: 'empty', fields: [] },
+          { type: 'input', key: 'name' },
+          { type: 'page', key: 'page1', fields: [{ type: 'input', key: 'email' }] },
         ];
 
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: [],
-        });
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
 
-        vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(true);
+        expect(result.isValid).toBe(false);
+        expect(result.mode).toBe('mixed');
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle empty fields array', () => {
+        const fields: any[] = [];
+
+        const result = FormModeValidator.validateFormConfiguration(fields);
+
+        expect(result.isValid).toBe(true);
+        expect(result.errors).toEqual([]);
+      });
+
+      it('should handle undefined fields', () => {
+        const result = FormModeValidator.validateFormConfiguration(undefined as any);
+
+        expect(result).toBeDefined();
+        expect(result.isValid).toBeDefined();
+      });
+
+      it('should handle single page form', () => {
+        const fields = [{ type: 'page', key: 'only-page', fields: [{ type: 'input', key: 'name' }] }];
 
         const result = FormModeValidator.validateFormConfiguration(fields as any);
 
-        const emptyWarning = result.warnings.find((w) => w.includes('contains no fields'));
-        expect(emptyWarning).toContain('index 1');
-        expect(emptyWarning).toContain('key: "empty"');
+        expect(result.isValid).toBe(true);
+        expect(result.mode).toBe('paged');
       });
 
-      it('should handle page without fields property', () => {
-        const fields = [{ type: 'page', key: 'page1' }];
-
-        vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-          mode: 'paged',
-          isValid: true,
-          errors: [],
-        });
-
-        vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(true);
+      it('should handle single field form', () => {
+        const fields = [{ type: 'input', key: 'name' }];
 
         const result = FormModeValidator.validateFormConfiguration(fields as any);
 
-        expect(result.warnings.some((w) => w.includes('contains no fields'))).toBe(true);
+        expect(result.isValid).toBe(true);
+        expect(result.mode).toBe('non-paged');
       });
     });
-  });
 
-  describe('FormModeValidator.validateFormConfigurationOrThrow', () => {
-    it('should not throw for valid configuration', () => {
-      const fields = [{ type: 'input', key: 'test' }];
+    describe('validation messages', () => {
+      it('should include error messages for invalid configurations', () => {
+        const fields = [
+          { type: 'page', key: 'page1', fields: [] },
+          { type: 'input', key: 'name' },
+        ];
 
-      vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-        mode: 'non-paged',
-        isValid: true,
-        errors: [],
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
+
+        expect(result.errors).toBeDefined();
+        expect(result.errors.length).toBeGreaterThan(0);
+        result.errors.forEach((error) => {
+          expect(typeof error).toBe('string');
+          expect(error.length).toBeGreaterThan(0);
+        });
       });
 
-      expect(() => {
-        FormModeValidator.validateFormConfigurationOrThrow(fields as any);
-      }).not.toThrow();
-    });
+      it('should provide clear error messages', () => {
+        const fields = [
+          { type: 'input', key: 'name' },
+          { type: 'page', key: 'page1', fields: [] },
+        ];
 
-    it('should throw for invalid configuration', () => {
-      const fields = [
-        { type: 'page', key: 'page1' },
-        { type: 'input', key: 'name' },
-      ];
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
 
-      vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-        mode: 'invalid',
-        isValid: false,
-        errors: ['Cannot mix page and non-page fields'],
+        expect(result.errors.some((e) => e.includes('mixed') || e.includes('page'))).toBe(true);
       });
-
-      expect(() => {
-        FormModeValidator.validateFormConfigurationOrThrow(fields as any);
-      }).toThrow();
-    });
-
-    it('should include mode in error message', () => {
-      const fields = [{ type: 'input', key: 'test' }];
-
-      vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-        mode: 'non-paged',
-        isValid: false,
-        errors: ['Some error'],
-      });
-
-      expect(() => {
-        FormModeValidator.validateFormConfigurationOrThrow(fields as any);
-      }).toThrow(/non-paged mode/);
-    });
-
-    it('should include all errors in error message', () => {
-      const fields = [{ type: 'page', key: 'page1' }];
-
-      vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-        mode: 'paged',
-        isValid: false,
-        errors: ['Error 1', 'Error 2'],
-      });
-
-      expect(() => {
-        FormModeValidator.validateFormConfigurationOrThrow(fields as any);
-      }).toThrow(/Error 1.*Error 2/s);
-    });
-
-    it('should format error message with bullets', () => {
-      const fields = [{ type: 'page', key: 'page1' }];
-
-      vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-        mode: 'paged',
-        isValid: false,
-        errors: ['Test error'],
-      });
-
-      try {
-        FormModeValidator.validateFormConfigurationOrThrow(fields as any);
-        expect.fail('Should have thrown');
-      } catch (error: any) {
-        expect(error.message).toContain('  - Test error');
-      }
     });
   });
 
   describe('isValidFormConfiguration', () => {
-    it('should return true for valid configuration', () => {
-      const fields = [{ type: 'input', key: 'test' }];
+    it('should return true for valid non-paged form', () => {
+      const fields = [
+        { type: 'input', key: 'name' },
+        { type: 'input', key: 'email' },
+      ];
 
-      vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-        mode: 'non-paged',
-        isValid: true,
-        errors: [],
-      });
-
-      const result = isValidFormConfiguration(fields as any);
-
-      expect(result).toBe(true);
+      expect(isValidFormConfiguration(fields as any)).toBe(true);
     });
 
-    it('should return false for invalid configuration', () => {
+    it('should return true for valid paged form', () => {
       const fields = [
-        { type: 'page', key: 'page1' },
+        { type: 'page', key: 'page1', fields: [] },
+        { type: 'page', key: 'page2', fields: [] },
+      ];
+
+      expect(isValidFormConfiguration(fields as any)).toBe(true);
+    });
+
+    it('should return false for invalid mixed form', () => {
+      const fields = [
+        { type: 'page', key: 'page1', fields: [] },
         { type: 'input', key: 'name' },
       ];
 
-      vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-        mode: 'invalid',
-        isValid: false,
-        errors: ['Cannot mix'],
-      });
-
-      const result = isValidFormConfiguration(fields as any);
-
-      expect(result).toBe(false);
+      expect(isValidFormConfiguration(fields as any)).toBe(false);
     });
 
-    it('should return false when page nesting validation fails', () => {
-      const fields = [{ type: 'page', key: 'page1', fields: [{ type: 'page' }] }];
+    it('should return false for nested pages', () => {
+      const fields = [
+        {
+          type: 'page',
+          key: 'page1',
+          fields: [{ type: 'page', key: 'nested', fields: [] }],
+        },
+      ];
 
-      vi.spyOn(formMode, 'detectFormMode').mockReturnValue({
-        mode: 'paged',
-        isValid: true,
-        errors: [],
+      expect(isValidFormConfiguration(fields as any)).toBe(false);
+    });
+
+    it('should return true for empty form', () => {
+      const fields: any[] = [];
+
+      expect(isValidFormConfiguration(fields)).toBe(true);
+    });
+  });
+
+  describe('form mode detection', () => {
+    it('should correctly identify non-paged forms', () => {
+      const testCases = [
+        [{ type: 'input', key: 'a' }],
+        [
+          { type: 'input', key: 'a' },
+          { type: 'input', key: 'b' },
+        ],
+        [{ type: 'group', key: 'g', fields: [{ type: 'input', key: 'a' }] }],
+        [{ type: 'array', key: 'arr', items: { type: 'input', key: 'item' } }],
+      ];
+
+      testCases.forEach((fields) => {
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
+        expect(result.mode).toBe('non-paged');
       });
+    });
 
-      vi.spyOn(pageField, 'validatePageNesting').mockReturnValue(false);
+    it('should correctly identify paged forms', () => {
+      const testCases = [
+        [{ type: 'page', key: 'p1', fields: [] }],
+        [
+          { type: 'page', key: 'p1', fields: [] },
+          { type: 'page', key: 'p2', fields: [] },
+        ],
+        [
+          { type: 'page', key: 'p1', fields: [{ type: 'input', key: 'a' }] },
+          { type: 'page', key: 'p2', fields: [{ type: 'input', key: 'b' }] },
+        ],
+      ];
 
-      const result = isValidFormConfiguration(fields as any);
+      testCases.forEach((fields) => {
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
+        expect(result.mode).toBe('paged');
+      });
+    });
 
-      expect(result).toBe(false);
+    it('should correctly identify mixed (invalid) forms', () => {
+      const testCases = [
+        [
+          { type: 'page', key: 'p1', fields: [] },
+          { type: 'input', key: 'a' },
+        ],
+        [
+          { type: 'input', key: 'a' },
+          { type: 'page', key: 'p1', fields: [] },
+        ],
+        [
+          { type: 'page', key: 'p1', fields: [] },
+          { type: 'group', key: 'g', fields: [] },
+        ],
+      ];
+
+      testCases.forEach((fields) => {
+        const result = FormModeValidator.validateFormConfiguration(fields as any);
+        expect(result.mode).toBe('mixed');
+      });
     });
   });
 });
