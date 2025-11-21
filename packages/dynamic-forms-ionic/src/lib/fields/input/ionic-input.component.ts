@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
+import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 /**
  * Ionic input field component
@@ -17,13 +18,13 @@ import { AsyncPipe } from '@angular/common';
     <ion-input
       [field]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
-      [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
+      [labelPlacement]="effectiveLabelPlacement()"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
       [clearInput]="props()?.clearInput ?? false"
       [counter]="props()?.counter ?? false"
-      [color]="props()?.color"
-      [fill]="props()?.fill ?? 'outline'"
-      [shape]="props()?.shape"
+      [color]="effectiveColor()"
+      [fill]="effectiveFill()"
+      [shape]="effectiveShape()"
       [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
       [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
@@ -51,6 +52,8 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class IonicInputFieldComponent implements IonicInputComponent {
+  private ionicConfig = inject(IONIC_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -61,6 +64,11 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
   readonly props = input<IonicInputProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  readonly effectiveFill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
+  readonly effectiveShape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);
+  readonly effectiveLabelPlacement = computed(() => this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'start');
+  readonly effectiveColor = computed(() => this.props()?.color ?? this.ionicConfig?.color);
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

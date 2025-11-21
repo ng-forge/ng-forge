@@ -95,6 +95,42 @@ export class ContactFormComponent {
 }
 ```
 
+## Global Configuration
+
+You can configure default props for all PrimeNG form fields using the global configuration option:
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withPrimeNGFields({
+        variant: 'filled',
+        size: 'large',
+        severity: 'primary',
+      }),
+    ),
+  ],
+};
+```
+
+### Configuration Options
+
+| Option     | Type                                                                                            | Default      | Description                                    |
+| ---------- | ----------------------------------------------------------------------------------------------- | ------------ | ---------------------------------------------- |
+| `size`     | `'small' \| 'large'`                                                                            | `undefined`  | Default size for form inputs                   |
+| `variant`  | `'outlined' \| 'filled'`                                                                        | `'outlined'` | Default visual variant for inputs              |
+| `severity` | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warn' \| 'danger' \| 'help' \| 'contrast'` | `'primary'`  | Default severity for buttons                   |
+| `text`     | `boolean`                                                                                       | `false`      | Whether buttons should be text-only by default |
+| `outlined` | `boolean`                                                                                       | `false`      | Whether buttons should be outlined by default  |
+| `raised`   | `boolean`                                                                                       | `false`      | Whether buttons should be raised by default    |
+| `rounded`  | `boolean`                                                                                       | `false`      | Whether buttons should be rounded by default   |
+
+These settings will be applied to all PrimeNG form fields unless overridden by individual field props.
+
 ## Customization
 
 ### CSS Variables
