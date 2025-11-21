@@ -191,7 +191,11 @@ export class Evaluator {
 
     // Block access to dangerous properties that could leak information or enable attacks
     if (BLOCKED_PROPERTIES.has(node.property)) {
-      throw new ExpressionParserError(`[Dynamic Forms] Property "${node.property}" is not accessible for security reasons`, 0, this.expression);
+      throw new ExpressionParserError(
+        `[Dynamic Forms] Property "${node.property}" is not accessible for security reasons`,
+        0,
+        this.expression,
+      );
     }
 
     // Allow property access on plain objects and primitives
@@ -276,7 +280,11 @@ export class Evaluator {
 
     // Block access to dangerous properties (must check before method call)
     if (BLOCKED_PROPERTIES.has(methodName)) {
-      throw new ExpressionParserError(`[Dynamic Forms] Property "${methodName}" is not accessible for security reasons`, 0, this.expression);
+      throw new ExpressionParserError(
+        `[Dynamic Forms] Property "${methodName}" is not accessible for security reasons`,
+        0,
+        this.expression,
+      );
     }
 
     // Check if the method is in the whitelist
