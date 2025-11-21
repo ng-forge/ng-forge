@@ -79,17 +79,18 @@ export class ConditionalPagesComponent {
       {
         key: 'individualPage',
         type: 'page',
-        logic: [
-          {
-            type: 'hidden',
-            condition: {
-              type: 'fieldValue',
-              fieldPath: 'accountType',
-              operator: 'notEquals',
-              value: 'individual',
-            },
-          },
-        ],
+        // TODO: uncomment when page hiding logic is supported
+        // logic: [
+        //   {
+        //     type: 'hidden',
+        //     condition: {
+        //       type: 'fieldValue',
+        //       fieldPath: 'accountType',
+        //       operator: 'notEquals',
+        //       value: 'individual',
+        //     },
+        //   },
+        // ],
         fields: [
           {
             key: 'individual-description',
@@ -141,17 +142,18 @@ export class ConditionalPagesComponent {
       {
         key: 'businessPage',
         type: 'page',
-        logic: [
-          {
-            type: 'hidden',
-            condition: {
-              type: 'fieldValue',
-              fieldPath: 'accountType',
-              operator: 'notEquals',
-              value: 'business',
-            },
-          },
-        ],
+        // TODO: uncomment when page hiding logic is supported
+        // logic: [
+        //   {
+        //     type: 'hidden',
+        //     condition: {
+        //       type: 'fieldValue',
+        //       fieldPath: 'accountType',
+        //       operator: 'notEquals',
+        //       value: 'business',
+        //     },
+        //   },
+        // ],
         fields: [
           {
             key: 'business-page-description',
