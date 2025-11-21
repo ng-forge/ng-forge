@@ -89,7 +89,7 @@ export default class PageFieldComponent {
 
     if (!valid) {
       console.error(
-        `[PageField] Invalid configuration: Page '${pageField.key}' contains nested page fields. ` +
+        `[Dynamic Forms] Invalid configuration: Page '${pageField.key}' contains nested page fields. ` +
           `Pages cannot contain other pages. Consider using groups or rows for nested structure.`,
         pageField,
       );
@@ -155,7 +155,7 @@ export default class PageFieldComponent {
           const fieldKey = fieldDef.key || '<no key>';
           const pageKey = this.field().key;
           console.error(
-            `[PageField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within page '${pageKey}'. Ensure the field type is registered in your field registry.`,
             error,
           );

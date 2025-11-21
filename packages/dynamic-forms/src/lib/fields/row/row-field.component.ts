@@ -105,7 +105,7 @@ export default class RowFieldComponent {
           const fieldKey = fieldDef.key || '<no key>';
           const rowKey = this.field().key || '<no key>';
           console.error(
-            `[RowField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within row '${rowKey}'. Ensure the field type is registered in your field registry.`,
             error,
           );

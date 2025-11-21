@@ -284,11 +284,11 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const validation = FormModeValidator.validateFormConfiguration(fields);
 
     if (!validation.isValid) {
-      console.error('Invalid form configuration:', validation.errors);
+      console.error('[Dynamic Forms] Invalid form configuration:', validation.errors);
     }
 
     if (validation.warnings.length > 0) {
-      console.warn('Form configuration warnings:', validation.warnings);
+      console.warn('[Dynamic Forms] Form configuration warnings:', validation.warnings);
     }
 
     return detection;

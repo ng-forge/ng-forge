@@ -210,7 +210,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
           const fieldKey = fieldDef.key || '<no key>';
           const groupKey = this.field().key;
           console.error(
-            `[GroupField] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
               `within group '${groupKey}'. Ensure the field type is registered in your field registry.`,
             error,
           );

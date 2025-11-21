@@ -24,7 +24,7 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
   if (!schema) {
     const availableSchemas = Array.from(schemaRegistry.getAllSchemas().keys()).join(', ') || '<none>';
     console.error(
-      `[Schema] Schema not found: '${config.schema}'. ` +
+      `[Dynamic Forms] Schema not found: '${config.schema}'. ` +
         `Available schemas: ${availableSchemas}. ` +
         `Ensure the schema is registered in your schema registry.`,
     );

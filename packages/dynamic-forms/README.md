@@ -386,7 +386,7 @@ const checkUsernameAvailable: AsyncCustomValidator<string> = {
 
   // Handle errors gracefully
   onError: (error, ctx) => {
-    console.error('Availability check failed:', error);
+    console.error('[Dynamic Forms] Availability check failed:', error);
     return null; // Don't block form on network errors
   },
 };
@@ -446,7 +446,7 @@ const checkEmailDomain: HttpCustomValidator<string> = {
   },
 
   onError: (error, ctx) => {
-    console.error('Domain validation failed:', error);
+    console.error('[Dynamic Forms] Domain validation failed:', error);
     return null; // Don't block form on network errors
   },
 };
