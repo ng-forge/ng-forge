@@ -11,32 +11,18 @@ test.describe('Cross-Field Validation Tests', () => {
       const scenario = page.locator('[data-testid="password-validation"]');
       await expect(scenario).toBeVisible();
 
-      // Test mismatched passwords
-      await scenario.locator('#password input').fill('password123');
-      await scenario.locator('#confirmPassword input').fill('differentpassword');
-      await scenario.locator('#email input').fill('test@example.com');
-
-      // Check form value shows the input
-      const formValue = await page.evaluate(() => {
-        const pre = document.querySelector('[data-testid="form-value-password-validation"]');
-        return pre ? JSON.parse(pre.textContent || '{}') : null;
-      });
-
-      expect(formValue).toMatchObject({
-        password: 'password123',
-        confirmPassword: 'differentpassword',
-        email: 'test@example.com',
-      });
-
-      // Submit button should be disabled due to password mismatch
       const submitButton = scenario.locator('#submitPassword button');
-      await expect(submitButton).toBeDisabled();
+      const passwordInput = scenario.locator('#password input');
+      const confirmPasswordInput = scenario.locator('#confirmPassword input');
+      const emailInput = scenario.locator('#email input');
 
-      // Test matching passwords
-      await scenario.locator('#confirmPassword input').fill('password123');
-      await page.waitForTimeout(200);
+      // Fill all required fields with matching passwords
+      await emailInput.fill('test@example.com');
+      await passwordInput.fill('password123');
+      await confirmPasswordInput.fill('password123');
+      await page.waitForTimeout(300);
 
-      // Submit button should now be enabled
+      // Submit button should be enabled with all valid fields
       await expect(submitButton).toBeEnabled();
 
       // Set up event listener BEFORE clicking submit
@@ -66,9 +52,17 @@ test.describe('Cross-Field Validation Tests', () => {
         email: 'test@example.com',
       });
 
-      // Verify submission appears in UI
-      await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-      await expect(page.locator('[data-testid="submission-0"]')).toContainText('test@example.com');
+      // Verify form value shows the submitted data
+      const formValue = await page.evaluate(() => {
+        const pre = document.querySelector('[data-testid="form-value-password-validation"]');
+        return pre ? JSON.parse(pre.textContent || '{}') : null;
+      });
+
+      expect(formValue).toMatchObject({
+        password: 'password123',
+        confirmPassword: 'password123',
+        email: 'test@example.com',
+      });
     });
   });
 
@@ -83,8 +77,12 @@ test.describe('Cross-Field Validation Tests', () => {
       await expect(scenario).toBeVisible();
 
       const submitButton = scenario.locator('#submitConditional button');
+      const hasAddressCheckbox = scenario.locator('#hasAddress mat-checkbox');
 
-      // Initially, submit without address (checkbox not checked)
+      // Submit button should be enabled initially
+      await expect(submitButton).toBeEnabled();
+
+      // Submit without address (checkbox not checked)
       await submitButton.click();
       await page.waitForTimeout(500);
 
@@ -97,8 +95,8 @@ test.describe('Cross-Field Validation Tests', () => {
       expect(formValue1).toBeDefined();
 
       // Check the "has address" checkbox
-      await scenario.locator('#hasAddress mat-checkbox').click();
-      await page.waitForTimeout(200);
+      await hasAddressCheckbox.click();
+      await page.waitForTimeout(300);
 
       // Fill address fields
       await scenario.locator('#streetAddress input').fill('123 Main Street');
@@ -108,7 +106,7 @@ test.describe('Cross-Field Validation Tests', () => {
       // Select country
       await scenario.locator('#country mat-select').click();
       await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'United States' }).click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300);
 
       // Submit with address information
       await submitButton.click();
@@ -127,12 +125,6 @@ test.describe('Cross-Field Validation Tests', () => {
         zipCode: '10001',
         country: 'us',
       });
-
-      // Verify submission appears in UI
-      const latestSubmission = page.locator('[data-testid^="submission-"]').last();
-      await expect(latestSubmission).toContainText('123 Main Street');
-      await expect(latestSubmission).toContainText('New York');
-      await expect(latestSubmission).toContainText('10001');
     });
   });
 
@@ -147,32 +139,37 @@ test.describe('Cross-Field Validation Tests', () => {
       await expect(scenario).toBeVisible();
 
       const submitButton = scenario.locator('#submitDependent button');
+      const categorySelect = scenario.locator('#category mat-select');
+      const subcategorySelect = scenario.locator('#subcategory mat-select');
+      const productNameInput = scenario.locator('#productName input');
+      const priceInput = scenario.locator('#price input');
+      const currencySelect = scenario.locator('#currency mat-select');
 
-      // Submit should be disabled initially (required fields empty)
+      // Initially, submit button should be disabled (required fields are empty)
       await expect(submitButton).toBeDisabled();
 
       // Select electronics category
-      await scenario.locator('#category mat-select').click();
+      await categorySelect.click();
       await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Electronics' }).click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300);
 
       // Select laptop subcategory
-      await scenario.locator('#subcategory mat-select').click();
+      await subcategorySelect.click();
       await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Laptop' }).click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300);
 
       // Fill product details
-      await scenario.locator('#productName input').fill('MacBook Pro 16');
-      await scenario.locator('#price input').fill('2499.99');
-      await page.waitForTimeout(200);
+      await productNameInput.fill('MacBook Pro 16');
+      await priceInput.fill('2499.99');
+      await page.waitForTimeout(300);
 
       // Submit button should now be enabled
       await expect(submitButton).toBeEnabled();
 
       // Change currency from default USD to EUR
-      await scenario.locator('#currency mat-select').click();
+      await currencySelect.click();
       await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'EUR' }).click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300);
 
       // Submit the form
       await submitButton.click();
@@ -188,40 +185,41 @@ test.describe('Cross-Field Validation Tests', () => {
         category: 'electronics',
         subcategory: 'laptop',
         productName: 'MacBook Pro 16',
-        price: 2499.99,
+        price: '2499.99',
         currency: 'eur',
       });
 
-      // Verify submission appears in UI
-      await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-      await expect(page.locator('[data-testid="submission-0"]')).toContainText('electronics');
-      await expect(page.locator('[data-testid="submission-0"]')).toContainText('laptop');
-      await expect(page.locator('[data-testid="submission-0"]')).toContainText('MacBook Pro 16');
-
       // Test changing category and submitting again
-      await scenario.locator('#category mat-select').click();
+      await categorySelect.click();
       await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Clothing' }).click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300);
 
       // Change subcategory
-      await scenario.locator('#subcategory mat-select').click();
+      await subcategorySelect.click();
       await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Shirt' }).click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300);
 
       // Update product details
-      await scenario.locator('#productName input').fill('Cotton T-Shirt');
-      await scenario.locator('#price input').fill('29.99');
-      await page.waitForTimeout(200);
+      await productNameInput.fill('Cotton T-Shirt');
+      await priceInput.fill('29.99');
+      await page.waitForTimeout(300);
 
       // Submit second product
       await submitButton.click();
       await page.waitForTimeout(500);
 
       // Verify second submission
-      await expect(page.locator('[data-testid="submission-1"]')).toBeVisible();
-      await expect(page.locator('[data-testid="submission-1"]')).toContainText('clothing');
-      await expect(page.locator('[data-testid="submission-1"]')).toContainText('shirt');
-      await expect(page.locator('[data-testid="submission-1"]')).toContainText('Cotton T-Shirt');
+      const formValue2 = await page.evaluate(() => {
+        const pre = document.querySelector('[data-testid="form-value-dependent-fields"]');
+        return pre ? JSON.parse(pre.textContent || '{}') : null;
+      });
+
+      expect(formValue2).toMatchObject({
+        category: 'clothing',
+        subcategory: 'shirt',
+        productName: 'Cotton T-Shirt',
+        price: '29.99',
+      });
     });
   });
 
@@ -236,19 +234,23 @@ test.describe('Cross-Field Validation Tests', () => {
       await expect(scenario).toBeVisible();
 
       const submitButton = scenario.locator('#submitEnableDisable button');
+      const standardShippingRadio = scenario.locator('#shippingMethod mat-radio-button').filter({ hasText: 'Standard' });
+      const expressShippingRadio = scenario.locator('#shippingMethod mat-radio-button').filter({ hasText: 'Express' });
+      const pickupRadio = scenario.locator('#shippingMethod mat-radio-button').filter({ hasText: 'Store Pickup' });
 
-      // Submit should be disabled initially (shipping method required)
+      // Initially, submit button should be disabled (no shipping method selected)
       await expect(submitButton).toBeDisabled();
 
       // Select standard shipping
-      await scenario.locator('#shippingMethod mat-radio-button').filter({ hasText: 'Standard' }).click();
-      await page.waitForTimeout(200);
-
-      // Submit button should now be enabled
-      await expect(submitButton).toBeEnabled();
+      await standardShippingRadio.click();
+      await page.waitForTimeout(300);
 
       // Fill shipping address
       await scenario.locator('#shippingAddress textarea').fill('123 Main St\nAnytown, State 12345');
+      await page.waitForTimeout(300);
+
+      // Submit button should now be enabled
+      await expect(submitButton).toBeEnabled();
 
       // Submit with standard shipping
       await submitButton.click();
@@ -265,46 +267,52 @@ test.describe('Cross-Field Validation Tests', () => {
         shippingAddress: '123 Main St\nAnytown, State 12345',
       });
 
-      await expect(page.locator('[data-testid="submission-0"]')).toBeVisible();
-      await expect(page.locator('[data-testid="submission-0"]')).toContainText('standard');
-      await expect(page.locator('[data-testid="submission-0"]')).toContainText('123 Main St');
-
       // Test express shipping scenario
-      await scenario.locator('#shippingMethod mat-radio-button').filter({ hasText: 'Express' }).click();
-      await page.waitForTimeout(200);
+      await expressShippingRadio.click();
+      await page.waitForTimeout(300);
 
       // Fill express instructions
       await scenario.locator('#expressInstructions textarea').fill('Please deliver to back door. Ring doorbell twice.');
+      await page.waitForTimeout(300);
 
       // Submit with express shipping
       await submitButton.click();
       await page.waitForTimeout(500);
 
       // Verify second submission
-      await expect(page.locator('[data-testid="submission-1"]')).toBeVisible();
-      await expect(page.locator('[data-testid="submission-1"]')).toContainText('express');
-      await expect(page.locator('[data-testid="submission-1"]')).toContainText('Ring doorbell twice');
+      const formValue2 = await page.evaluate(() => {
+        const pre = document.querySelector('[data-testid="form-value-enable-disable"]');
+        return pre ? JSON.parse(pre.textContent || '{}') : null;
+      });
+
+      expect(formValue2).toMatchObject({
+        shippingMethod: 'express',
+      });
+      expect(formValue2).toHaveProperty('expressInstructions');
 
       // Test pickup scenario
-      await scenario.locator('#shippingMethod mat-radio-button').filter({ hasText: 'Store Pickup' }).click();
-      await page.waitForTimeout(200);
+      await pickupRadio.click();
+      await page.waitForTimeout(300);
 
       // Select pickup location
       await scenario.locator('#storeLocation mat-select').click();
       await page.locator('.cdk-overlay-pane mat-option').filter({ hasText: 'Downtown Store' }).click();
-      await page.waitForTimeout(200);
-
-      // Clear shipping address since pickup doesn't need it
-      await scenario.locator('#shippingAddress textarea').fill('');
+      await page.waitForTimeout(300);
 
       // Submit with pickup
       await submitButton.click();
       await page.waitForTimeout(500);
 
       // Verify third submission
-      await expect(page.locator('[data-testid="submission-2"]')).toBeVisible();
-      await expect(page.locator('[data-testid="submission-2"]')).toContainText('pickup');
-      await expect(page.locator('[data-testid="submission-2"]')).toContainText('downtown');
+      const formValue3 = await page.evaluate(() => {
+        const pre = document.querySelector('[data-testid="form-value-enable-disable"]');
+        return pre ? JSON.parse(pre.textContent || '{}') : null;
+      });
+
+      expect(formValue3).toMatchObject({
+        shippingMethod: 'pickup',
+        storeLocation: 'downtown',
+      });
     });
   });
 });

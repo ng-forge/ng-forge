@@ -7,7 +7,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
  * Tests smooth transitions between pages with large data sets
  */
 @Component({
-  selector: 'examplepage-transitions',
+  selector: 'example-page-transitions',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">

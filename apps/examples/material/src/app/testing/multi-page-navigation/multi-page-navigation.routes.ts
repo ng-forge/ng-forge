@@ -8,27 +8,26 @@ import { PageTransitionsComponent } from './page-transitions.component';
 export default [
   {
     path: '',
-    children: [
-      {
-        path: 'multi-page-registration',
-        component: MultiPageRegistrationComponent,
-      },
-      {
-        path: 'validation-navigation',
-        component: ValidationNavigationComponent,
-      },
-      {
-        path: 'backward-navigation',
-        component: BackwardNavigationComponent,
-      },
-      {
-        path: 'direct-navigation',
-        component: DirectNavigationComponent,
-      },
-      {
-        path: 'page-transitions',
-        component: PageTransitionsComponent,
-      },
-    ],
+    loadComponent: () => import('./multi-page-navigation-index.component').then((m) => m.MultiPageNavigationIndexComponent),
+  },
+  {
+    path: 'multi-page-registration',
+    component: MultiPageRegistrationComponent,
+  },
+  {
+    path: 'validation-navigation',
+    component: ValidationNavigationComponent,
+  },
+  {
+    path: 'backward-navigation',
+    component: BackwardNavigationComponent,
+  },
+  {
+    path: 'direct-navigation',
+    component: DirectNavigationComponent,
+  },
+  {
+    path: 'page-transitions',
+    component: PageTransitionsComponent,
   },
 ] satisfies Route[];

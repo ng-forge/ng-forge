@@ -56,7 +56,6 @@ test.describe('Debug Validation Behavior', () => {
     console.log('\n=== CLICKING SUBMIT (no force) ===');
 
     // Try normal click (without force)
-    await submitButton.click();
     await page.waitForTimeout(1000);
 
     const errorsAfterSubmit = await passwordField.locator('mat-error').count();

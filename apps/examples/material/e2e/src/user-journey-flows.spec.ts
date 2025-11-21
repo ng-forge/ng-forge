@@ -22,7 +22,7 @@ test.describe('User Journey Flow Tests', () => {
       await page.locator('mat-option:has-text("Search Engine")').click();
 
       // Navigate to Page 2
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToPersonalInfoPage button').click();
       await page.waitForTimeout(300);
 
       // Page 2: Personal Information
@@ -32,14 +32,20 @@ test.describe('User Journey Flow Tests', () => {
       await scenario.locator('#phoneNumber input').fill('+1-555-123-4567');
 
       // Fill date picker
-      await scenario.locator('#birthDate input').click();
-      await page.locator('mat-calendar').waitFor({ state: 'visible' });
+
+      await scenario.locator('#birthDate mat-datepicker-toggle button').click();
+      await page.waitForTimeout(300);
+
+      await page.locator('.mat-calendar-period-button').click();
+      await page.locator('.mat-calendar-previous-button').click();
+      await page.locator('.mat-calendar-previous-button').click();
+
       await page.locator('button[aria-label*="1985"]').click();
-      await page.locator('button[aria-label*="MAR"]').click();
-      await page.locator('button[aria-label*="March 15"]').click();
+      await page.locator('button[aria-label*="March 1985"]').click();
+      await page.locator('button[aria-label*="March 15, 1985"]').click();
 
       // Navigate to Page 3
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToAddressPage button').click();
       await page.waitForTimeout(300);
 
       // Page 3: Address Information
@@ -56,7 +62,7 @@ test.describe('User Journey Flow Tests', () => {
       await expect(scenario.locator('#country mat-select')).toContainText('United States');
 
       // Navigate to Page 4
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToSecurityPage button').click();
       await page.waitForTimeout(300);
 
       // Page 4: Security & Preferences
@@ -74,7 +80,7 @@ test.describe('User Journey Flow Tests', () => {
       await scenario.locator('#emailNotifications mat-checkbox').click();
 
       // Navigate to Page 5
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToReviewPage button').click();
       await page.waitForTimeout(300);
 
       // Page 5: Review & Submit
@@ -153,7 +159,7 @@ test.describe('User Journey Flow Tests', () => {
       await scenario.locator('#giftWrap mat-checkbox').click();
 
       // Navigate to Page 2
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToShippingPage button').click();
       await page.waitForTimeout(300);
 
       // Page 2: Shipping Information
@@ -167,7 +173,7 @@ test.describe('User Journey Flow Tests', () => {
       await scenario.locator('#deliveryInstructions textarea').fill('Please leave at front door');
 
       // Navigate to Page 3
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToBillingPage button').click();
       await page.waitForTimeout(300);
 
       // Page 3: Billing & Payment
@@ -186,7 +192,7 @@ test.describe('User Journey Flow Tests', () => {
       await scenario.locator('#savePayment mat-checkbox').click();
 
       // Navigate to Page 4
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToConfirmationPage button').click();
       await page.waitForTimeout(300);
 
       // Page 4: Order Confirmation
@@ -272,7 +278,7 @@ test.describe('User Journey Flow Tests', () => {
       await page.locator('mat-option:has-text("North America")').click();
 
       // Navigate to Page 2
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToExperiencePage button').click();
       await page.waitForTimeout(300);
 
       // Page 2: Product/Service Experience
@@ -285,7 +291,7 @@ test.describe('User Journey Flow Tests', () => {
       await page.locator('mat-option:has-text("High Quality")').click();
 
       // Navigate to Page 3
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToFeedbackPage button').click();
       await page.waitForTimeout(300);
 
       // Page 3: Feedback & Suggestions
@@ -300,7 +306,7 @@ test.describe('User Journey Flow Tests', () => {
       await scenario.locator('#futureInterest mat-checkbox').filter({ hasText: 'Special promotions and discounts' }).click();
 
       // Navigate to Page 4
-      await scenario.locator('button:has-text("Next")').click();
+      await scenario.locator('#nextToCompletionPage button').click();
       await page.waitForTimeout(300);
 
       // Page 4: Contact & Completion

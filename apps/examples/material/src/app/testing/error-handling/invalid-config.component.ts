@@ -30,7 +30,8 @@ export class InvalidConfigComponent {
   testId = 'invalid-config';
   title = 'Invalid Configuration Test';
 
-  config = {
+  // Using 'any' type to test error handling with intentionally invalid field configurations
+  config: any = {
     fields: [
       // Field with missing required properties
       {
@@ -59,7 +60,7 @@ export class InvalidConfigComponent {
         label: 'Submit Invalid Config',
       },
     ],
-  } as any;
+  };
 
   value = signal<Record<string, unknown>>({});
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

@@ -85,12 +85,6 @@ export default [
     loadChildren: () => import('./multi-page-navigation/multi-page-navigation.routes'),
   },
 
-  // Navigation Edge Cases Tests - Refactored into folder structure
-  {
-    path: 'navigation-edge-cases',
-    loadChildren: () => import('./navigation-edge-cases/navigation-edge-cases.routes'),
-  },
-
   // Scenario List Tests - Refactored into folder structure
   {
     path: 'scenarios',

@@ -124,7 +124,7 @@ export class TestIndexComponent {
     {
       title: 'Demo Scenarios',
       description: 'Real-world form scenarios and use cases',
-      path: '/test/demo-scenarios-test',
+      path: '/test/demo-scenarios',
     },
     {
       title: 'Error Handling',
@@ -164,7 +164,7 @@ export class TestIndexComponent {
     {
       title: 'Scenario List',
       description: 'Browse all available test scenarios',
-      path: '/test/scenario-list',
+      path: '/test/scenarios',
     },
     {
       title: 'User Journey Flows',

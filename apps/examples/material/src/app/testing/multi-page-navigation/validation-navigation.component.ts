@@ -7,7 +7,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
  * Tests page navigation with required field validation
  */
 @Component({
-  selector: 'examplevalidation-navigation',
+  selector: 'example-validation-navigation',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">

@@ -7,7 +7,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-form';
  * Tests 3-page registration workflow with account setup, personal information, and preferences
  */
 @Component({
-  selector: 'examplemulti-page-registration',
+  selector: 'example-multi-page-registration',
   imports: [DynamicForm, JsonPipe],
   template: `
     <div class="test-page">
