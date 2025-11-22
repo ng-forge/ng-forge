@@ -77,18 +77,16 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       break;
 
     case 'email':
-      // Email validator expects SchemaPath<string>
-      email(fieldPath as SchemaPath<string, SchemaPathRules.Supported>);
+      email(fieldPath as SchemaPath<string>);
       break;
 
     case 'min':
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMin = createDynamicValueFunction<string | number | null, number | undefined>(config.expression);
-          // Min validator expects SchemaPath<number>
-          min(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, dynamicMin);
+          min(fieldPath as SchemaPath<number>, dynamicMin);
         } else {
-          min(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, config.value);
+          min(fieldPath as SchemaPath<number>, config.value);
         }
       }
       break;
@@ -97,10 +95,9 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMax = createDynamicValueFunction<string | number | null, number | undefined>(config.expression);
-          // Max validator expects SchemaPath<number>
-          max(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, dynamicMax);
+          max(fieldPath as SchemaPath<number>, dynamicMax);
         } else {
-          max(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, config.value);
+          max(fieldPath as SchemaPath<number>, config.value);
         }
       }
       break;
@@ -109,10 +106,9 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMinLength = createDynamicValueFunction<string, number>(config.expression);
-          // MinLength validator expects SchemaPath<string>
-          minLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, dynamicMinLength);
+          minLength(fieldPath as SchemaPath<string>, dynamicMinLength);
         } else {
-          minLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, config.value);
+          minLength(fieldPath as SchemaPath<string>, config.value);
         }
       }
       break;
@@ -163,7 +159,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
  * Apply custom validator to field path using Angular's public validate() API
  * Supports both function-based and expression-based validators
  */
-function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<any, SchemaPathRules.Supported>): void {
+function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<any>): void {
   // Determine validator type and create appropriate validator function
   let validatorFn: (ctx: FieldContext<any>) => ValidationError | ValidationError[] | null;
 
@@ -205,7 +201,7 @@ function createFunctionValidator<TValue>(
   if (!validatorFn) {
     console.warn(
       `[DynamicForm] Custom validator "${config.functionName}" not found in registry. ` +
-        `Use expression-based validators instead (type: 'custom', expression: '...', kind: '...').`,
+        `Ensure it's registered using customFnConfig.validators or check the function name for typos.`,
     );
     return () => null;
   }
@@ -281,7 +277,7 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
   if (!validatorConfig) {
     console.warn(
       `[DynamicForm] Async validator "${config.functionName}" not found in registry. ` +
-        `Register validators using FunctionRegistryService or check the function name for typos.`,
+        `Ensure it's registered using customFnConfig.asyncValidators or check the function name for typos.`,
     );
     return;
   }
@@ -324,7 +320,7 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
  * - onSuccess: Maps HTTP response to validation errors (inverted logic!)
  * - onError: Optional handler for HTTP errors
  */
-function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<any, SchemaPathRules.Supported>): void {
+function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<any>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get HTTP validator config from registry
@@ -333,7 +329,7 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
   if (!httpValidatorConfig) {
     console.warn(
       `[DynamicForm] HTTP validator "${config.functionName}" not found in registry. ` +
-        `Register validators using FunctionRegistryService or check the function name for typos.`,
+        `Ensure it's registered using customFnConfig.httpValidators or check the function name for typos.`,
     );
     return;
   }

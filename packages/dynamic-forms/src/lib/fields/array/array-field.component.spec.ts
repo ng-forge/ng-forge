@@ -6,8 +6,8 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { baseFieldMapper, FieldSignalContext } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
-import { FIELD_REGISTRY, FIELD_SIGNAL_CONTEXT, FieldTypeDefinition } from '../../models';
-import { EventBus } from '../../events';
+import { FIELD_REGISTRY, FieldTypeDefinition, FIELD_SIGNAL_CONTEXT } from '../../models';
+import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { createSchemaFromFields } from '../../core/schema-builder';
 
 describe('ArrayFieldComponent', () => {

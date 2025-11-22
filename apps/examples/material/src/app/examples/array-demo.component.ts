@@ -14,6 +14,7 @@ const tagTemplate = {
       key: 'value',
       type: 'input',
       label: 'Tag',
+      value: '',
       required: true,
       minLength: 2,
       props: {
@@ -23,9 +24,11 @@ const tagTemplate = {
     },
     {
       key: 'removeTag',
-      type: 'removeArrayItem',
+      type: 'button',
       label: 'Remove',
       className: 'remove-tag-button',
+      event: RemoveArrayItemEvent,
+      eventArgs: ['$arrayKey', '$index'],
       props: {
         color: 'warn',
       },
@@ -48,6 +51,7 @@ const contactTemplate = {
       key: 'name',
       type: 'input',
       label: 'Contact Name',
+      value: '',
       required: true,
       minLength: 2,
       props: {
@@ -59,6 +63,7 @@ const contactTemplate = {
       key: 'phone',
       type: 'input',
       label: 'Phone Number',
+      value: '',
       required: true,
       pattern: /^\d{10}$/,
       validationMessages: {
@@ -74,6 +79,7 @@ const contactTemplate = {
       key: 'relationship',
       type: 'select',
       label: 'Relationship',
+      value: 'friend',
       required: true,
       options: [
         { label: 'Family', value: 'family' },
@@ -87,9 +93,11 @@ const contactTemplate = {
     },
     {
       key: 'removeContact',
-      type: 'removeArrayItem',
+      type: 'button',
       label: 'Remove',
       className: 'remove-contact-button',
+      event: RemoveArrayItemEvent,
+      eventArgs: ['$arrayKey', '$index'],
       props: {
         color: 'warn',
       },
@@ -135,14 +143,8 @@ class AddContactEvent extends AddArrayItemEvent {
 })
 export class ArrayDemoComponent {
   formValue = signal({
-    tags: [{ value: 'angular' }, { value: 'typescript' }],
-    contacts: [
-      {
-        name: 'Jane Smith',
-        phone: '5551234567',
-        relationship: 'family',
-      },
-    ],
+    tags: [],
+    contacts: [],
   });
 
   config = {
@@ -163,7 +165,6 @@ export class ArrayDemoComponent {
       {
         key: 'tags',
         type: 'array',
-        label: 'Tags',
         fields: [tagTemplate],
       },
       {
@@ -192,7 +193,6 @@ export class ArrayDemoComponent {
       {
         key: 'contacts',
         type: 'array',
-        label: 'Emergency Contacts',
         fields: [contactTemplate],
       },
       {

@@ -6,6 +6,7 @@ import { FormModeValidator } from '../../utils/form-validation/form-mode-validat
 import { DynamicFormTestResult, DynamicFormTestUtils } from '../dynamic-form-test-utils';
 import { FormConfig } from '../../models/form-config';
 import { provideDynamicForm } from '../../providers';
+import { firstValueFrom } from 'rxjs';
 
 describe('Page Orchestration Integration', () => {
   let testResult: DynamicFormTestResult;
@@ -188,11 +189,7 @@ describe('Page Orchestration Integration', () => {
       // Get the EventBus from the component's dependency injection context
       eventBus = testResult.fixture.debugElement.injector.get(EventBus);
 
-      let pageChangeEvent: PageChangeEvent | null = null;
-
-      eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
-        pageChangeEvent = event;
-      });
+      const pageChangeEvent = await firstValueFrom(eventBus.on<PageChangeEvent>('page-change'));
 
       // Emit next page event
       eventBus.dispatch(NextPageEvent);
@@ -200,9 +197,9 @@ describe('Page Orchestration Integration', () => {
       await DynamicFormTestUtils.waitForInit(testResult.fixture);
 
       expect(pageChangeEvent).toBeTruthy();
-      expect(pageChangeEvent!.currentPageIndex).toBe(1);
-      expect(pageChangeEvent!.totalPages).toBe(2);
-      expect(pageChangeEvent!.previousPageIndex).toBe(0);
+      expect(pageChangeEvent.currentPageIndex).toBe(1);
+      expect(pageChangeEvent.totalPages).toBe(2);
+      expect(pageChangeEvent.previousPageIndex).toBe(0);
     });
 
     it('should handle navigation boundary constraints', async () => {
@@ -338,7 +335,7 @@ describe('Form Mode Validation Edge Cases', () => {
           ],
         },
       ],
-    } as FormConfig;
+    } as any;
 
     const validation = FormModeValidator.validateFormConfiguration(deeplyNestedInvalidConfig.fields);
     expect(validation.isValid).toBe(false);

@@ -1,14 +1,10 @@
 import { Route } from '@angular/router';
 
-export default [
+export const appRoutes: Route[] = [
   {
     path: '',
-    redirectTo: '/scenarios',
+    redirectTo: '/examples',
     pathMatch: 'full',
-  },
-  {
-    path: 'scenarios',
-    loadChildren: () => import('./testing/scenario-list/scenario-list.routes'),
   },
   {
     path: 'examples',
@@ -96,8 +92,4 @@ export default [
       },
     ],
   },
-  {
-    path: 'test',
-    loadChildren: () => import('./testing/testing-routes'),
-  },
-] satisfies Route[];
+];

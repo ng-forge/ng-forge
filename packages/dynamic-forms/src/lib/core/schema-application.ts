@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
-import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { apply, applyEach, applyWhen, applyWhenValue, SchemaOrSchemaFn } from '@angular/forms/signals';
+import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
 import { SchemaRegistryService } from './registry';
 import { createLogicFunction } from './expressions';

@@ -107,8 +107,7 @@ export class FormConfigBuilder {
     return this.field({
       key,
       type: 'page',
-      title,
-      fields,
+      fields: [{ key: `${key}-title`, type: 'text', label: title }, ...fields],
     } as FieldDef<any>);
   }
 

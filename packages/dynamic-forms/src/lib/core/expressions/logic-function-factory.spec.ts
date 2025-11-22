@@ -3,7 +3,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
 import { vi } from 'vitest';
 import { ConditionalExpression } from '../../models';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService } from '../registry';
+import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { createLogicFunction } from './logic-function-factory';
 
 describe('logic-function-factory', () => {

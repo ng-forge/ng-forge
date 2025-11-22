@@ -1,5 +1,5 @@
 import { Parser } from './parser';
-import { EvaluationScope, Evaluator } from './evaluator';
+import { Evaluator, EvaluationScope } from './evaluator';
 import { ASTNode, ExpressionParserError } from './types';
 
 /**

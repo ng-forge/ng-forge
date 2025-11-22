@@ -2,9 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { applyLogic, applyMultipleLogic } from '../../core/logic/logic-applicator';
 import { LogicConfig } from '../../models/logic';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService } from '../../core/registry';
+import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 
 describe('Logic Transformation Pipeline Integration', () => {
   let injector: Injector;

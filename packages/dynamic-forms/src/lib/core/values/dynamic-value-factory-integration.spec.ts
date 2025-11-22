@@ -2,7 +2,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FieldContext, FieldTree } from '@angular/forms/signals';
 import { createDynamicValueFunction } from './dynamic-value-factory';
-import { FieldContextRegistryService, RootFormRegistryService } from '../registry';
+import { RootFormRegistryService, FieldContextRegistryService } from '../registry';
 
 describe('dynamic-value-factory (integration)', () => {
   let injector: Injector;

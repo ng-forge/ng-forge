@@ -27,18 +27,6 @@ The core library for building type-safe, dynamic Angular forms with signal forms
 
 ## Installation
 
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms
-```
-
 For a complete working setup, install with a UI integration:
 
 ```bash group="install" name="npm"
@@ -195,8 +183,8 @@ Use the `validators` array for complex scenarios:
   value: null,
   label: 'Discount',
   validators: [
-    { type: 'required', errorMessage: 'Discount is required' },
-    { type: 'min', value: 0, errorMessage: 'Cannot be negative' },
+    { type: 'required' },
+    { type: 'min', value: 0 },
     {
       type: 'max',
       value: 100,
@@ -206,7 +194,6 @@ Use the `validators` array for complex scenarios:
         operator: 'equals',
         value: 'percentage',
       },
-      errorMessage: 'Percentage cannot exceed 100%',
     },
   ],
 }
@@ -337,7 +324,7 @@ const config = {
       },
     },
   ],
-  signalFormsConfig: {
+  customFnConfig: {
     validators: {
       lessThanField,
     },
@@ -462,7 +449,7 @@ const config = {
       },
     },
   ],
-  signalFormsConfig: {
+  customFnConfig: {
     httpValidators: {
       checkEmailDomain,
     },
@@ -525,7 +512,7 @@ const config = {
       },
     },
   ],
-  signalFormsConfig: {
+  customFnConfig: {
     validators: {
       businessEmailValidator,
     },
@@ -577,7 +564,6 @@ Make fields required conditionally:
       operator: 'equals',
       value: 'business',
     },
-    errorMessage: 'Company name required for business accounts',
   }],
 }
 ```
@@ -725,203 +711,6 @@ Use Observables or Signals for translations:
     required: computed(() => this.validationMessages().required),
   },
 }
-```
-
-## UI Framework Integration
-
-The core library is UI-agnostic. Use with official integrations:
-
-### Material Design
-
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms-material
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms-material
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms-material
-```
-
-```typescript
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
-provideDynamicForm(...withMaterialFields());
-```
-
-### Bootstrap
-
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms-bootstrap
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms-bootstrap
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms-bootstrap
-```
-
-```typescript
-import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
-provideDynamicForm(...withBootstrapFields());
-```
-
-### PrimeNG
-
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms-primeng
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms-primeng
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms-primeng
-```
-
-```typescript
-import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
-provideDynamicForm(...withPrimeNGFields());
-```
-
-### Ionic
-
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms-ionic
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms-ionic
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms-ionic
-```
-
-```typescript
-import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
-provideDynamicForm(...withIonicFields());
-```
-
-## API Reference
-
-### Core Types
-
-```typescript
-// Form configuration
-interface FormConfig {
-  fields: FieldConfig[];
-  schemas?: SchemaDefinition[];
-  signalFormsConfig?: SignalFormsConfig;
-}
-
-// Signal forms configuration
-interface SignalFormsConfig {
-  migrateLegacyValidation?: boolean;
-  customFunctions?: Record<string, CustomFunction>;
-  validators?: Record<string, CustomValidator>;
-  asyncValidators?: Record<string, AsyncCustomValidator>;
-  httpValidators?: Record<string, HttpCustomValidator>;
-  strictMode?: boolean;
-}
-
-// Validator configuration (discriminated union)
-type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | HttpValidatorConfig;
-
-interface BuiltInValidatorConfig {
-  type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern';
-  value?: number | string | RegExp;
-  expression?: string;
-  errorMessage?: string;
-  when?: ConditionalExpression;
-}
-
-interface CustomValidatorConfig {
-  type: 'custom';
-  functionName: string;
-  params?: Record<string, unknown>;
-  errorMessage?: string;
-  when?: ConditionalExpression;
-}
-
-interface AsyncValidatorConfig {
-  type: 'customAsync';
-  functionName: string;
-  params?: Record<string, unknown>;
-  errorMessage?: string;
-  when?: ConditionalExpression;
-}
-
-interface HttpValidatorConfig {
-  type: 'customHttp';
-  functionName: string;
-  params?: Record<string, unknown>;
-  errorMessage?: string;
-  when?: ConditionalExpression;
-}
-
-// Custom validator function signatures
-type CustomValidator<TValue = unknown> = (
-  ctx: FieldContext<TValue>,
-  params?: Record<string, unknown>,
-) => ValidationError | ValidationError[] | null;
-
-interface AsyncCustomValidator<TValue = unknown, TParams = unknown, TResult = unknown> {
-  readonly params: (ctx: FieldContext<TValue>, config?: Record<string, unknown>) => TParams;
-  readonly factory: (params: Signal<TParams | undefined>) => ResourceRef<TResult | undefined>;
-  readonly onSuccess?: (result: TResult, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
-  readonly onError?: (error: unknown, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
-}
-
-interface HttpCustomValidator<TValue = unknown, TResult = unknown> {
-  readonly request: (ctx: FieldContext<TValue>) => HttpResourceRequest | string | undefined;
-  readonly onSuccess?: (result: TResult, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
-  readonly onError?: (error: unknown, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
-}
-
-// Logic configuration
-interface LogicConfig {
-  type: 'hidden' | 'readonly' | 'required';
-  condition: ConditionalExpression | boolean;
-  errorMessage?: string;
-}
-
-// Conditional expression
-interface ConditionalExpression {
-  type: 'fieldValue' | 'formValue' | 'javascript' | 'custom';
-  fieldPath?: string;
-  operator?:
-    | 'equals'
-    | 'notEquals'
-    | 'greater'
-    | 'less'
-    | 'greaterOrEqual'
-    | 'lessOrEqual'
-    | 'contains'
-    | 'startsWith'
-    | 'endsWith'
-    | 'matches';
-  value?: unknown;
-  expression?: string;
-  conditions?: {
-    logic: 'and' | 'or';
-    expressions: ConditionalExpression[];
-  };
-}
-```
-
-### Core Functions
-
-```typescript
-// Provider function
-function provideDynamicForm(...features: DynamicFormFeature[]): EnvironmentProviders;
-
-// Schema registration
-function withSchemas(schemas: SchemaDefinition[]): DynamicFormFeature;
 ```
 
 ## Documentation

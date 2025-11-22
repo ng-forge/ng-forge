@@ -27,5 +27,3 @@ export * from './mappers';
 
 // Pipes
 export * from './pipes';
-
-// Performance optimizations - parked for later

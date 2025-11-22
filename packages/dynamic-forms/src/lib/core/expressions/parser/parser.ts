@@ -1,4 +1,4 @@
-import { ASTNode, ExpressionParserError, Token, TokenType } from './types';
+import { Token, TokenType, ASTNode, ExpressionParserError } from './types';
 import { Tokenizer } from './tokenizer';
 
 /**

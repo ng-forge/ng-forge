@@ -1,3 +1,4 @@
+import { FieldDef } from '../../definitions';
 import { isPageField } from '../../definitions/default/page-field';
 import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';

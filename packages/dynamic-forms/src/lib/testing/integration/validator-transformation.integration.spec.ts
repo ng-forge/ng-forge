@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import type { SchemaPath } from '@angular/forms/signals';
 import { form, schema } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { applyValidator, applyValidators } from '../../core/validation/validator-factory';
 import { ValidatorConfig } from '../../models';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService } from '../../core/registry';
+import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 
 describe('Validator Transformation Pipeline Integration', () => {
   let injector: Injector;

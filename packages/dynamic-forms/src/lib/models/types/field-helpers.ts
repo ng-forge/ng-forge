@@ -3,9 +3,9 @@
  */
 
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
-import { ArrayField, GroupField, PageField, RowField } from '../../definitions';
+import { PageField, RowField, GroupField, ArrayField } from '../../definitions';
 import { RegisteredFieldTypes } from '../registry/field-registry';
-import { ArrayAllowedChildren, GroupAllowedChildren, PageAllowedChildren, RowAllowedChildren } from './nesting-constraints';
+import { PageAllowedChildren, RowAllowedChildren, GroupAllowedChildren, ArrayAllowedChildren } from './nesting-constraints';
 
 /**
  * Create a type-safe page field with nesting validation
