@@ -29,6 +29,9 @@ export class App implements OnInit {
   );
 
   constructor() {
+    // Request initial theme state from parent immediately
+    window.parent.postMessage({ type: 'request-theme' }, '*');
+
     // Update document root for Ionic's dark palette
     explicitEffect([this.isDark], ([isDark]) => {
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -36,8 +39,5 @@ export class App implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    // Request initial theme state from parent
-    window.parent.postMessage({ type: 'request-theme' }, '*');
-  }
+  ngOnInit(): void {}
 }

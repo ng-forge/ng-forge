@@ -35,6 +35,20 @@ ion-content {
   --padding-bottom: 24px;
 }
 
+// Ensure ion-content respects dark mode
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    ion-content {
+      --background: var(--ion-background-color, #1e1e1e);
+    }
+  }
+}
+
+html[data-theme='dark'] ion-content,
+html.dark ion-content {
+  --background: var(--ion-background-color, #1e1e1e);
+}
+
 // ============================================
 // Shared Example App Styles
 // ============================================
