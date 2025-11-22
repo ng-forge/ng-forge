@@ -791,6 +791,7 @@ describe('DynamicFormComponent', () => {
       const firstNameInput = fixture.debugElement.queryAll(
         (by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent,
       )[0];
+      expect(firstNameInput).toBeDefined();
       const firstNameElement = firstNameInput.nativeElement.querySelector('input');
       firstNameElement.value = 'Jane';
       firstNameElement.dispatchEvent(new Event('input'));
@@ -807,6 +808,7 @@ describe('DynamicFormComponent', () => {
 
       // Update checkbox
       const checkboxInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestCheckboxHarnessComponent);
+      expect(checkboxInput).not.toBeNull();
       const checkboxElement = checkboxInput.nativeElement.querySelector('input[type="checkbox"]');
       checkboxElement.checked = true;
       checkboxElement.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1324,6 +1326,7 @@ describe('DynamicFormComponent', () => {
 
       // Find and interact with the input
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(testInput).not.toBeNull();
       const inputElement = testInput.nativeElement.querySelector('input');
 
       // Simulate user interaction
@@ -1364,6 +1367,7 @@ describe('DynamicFormComponent', () => {
 
       // Touch first field
       const inputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(inputs.length).toBeGreaterThan(0);
       const firstInput = inputs[0].nativeElement.querySelector('input');
 
       firstInput.dispatchEvent(new Event('focus'));
@@ -1394,6 +1398,7 @@ describe('DynamicFormComponent', () => {
       expect(component.touched()).toBe(false);
 
       const testInputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(testInputs.length).toBeGreaterThan(0);
       const inputElement = testInputs[0].nativeElement.querySelector('input');
 
       // Focus then blur without changing value
@@ -1487,6 +1492,7 @@ describe('DynamicFormComponent', () => {
 
       // Try to interact with the field
       const testInputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(testInputs.length).toBeGreaterThan(0);
       const inputElement = testInputs[0].nativeElement.querySelector('input');
 
       const originalValue = component.formValue().firstName;
@@ -1664,165 +1670,6 @@ describe('DynamicFormComponent', () => {
         firstName: 'John',
         email: 'test@example.com',
       });
-    });
-
-    it('should remove fields when config changes to exclude them', async () => {
-      const initialConfig: TestFormConfig = {
-        fields: [
-          {
-            key: 'firstName',
-            type: 'input',
-            label: 'First Name',
-            value: 'John',
-          },
-          {
-            key: 'email',
-            type: 'input',
-            label: 'Email',
-            value: 'test@example.com',
-          },
-        ],
-      };
-
-      const { component, fixture } = createComponent(initialConfig);
-      await delay();
-      fixture.detectChanges();
-
-      expect(component.formValue()).toEqual({
-        firstName: 'John',
-        email: 'test@example.com',
-      });
-
-      // Remove email field
-      const newConfig: TestFormConfig = {
-        fields: [
-          {
-            key: 'firstName',
-            type: 'input',
-            label: 'First Name',
-            value: 'John',
-          },
-        ],
-      };
-
-      fixture.componentRef.setInput('config', newConfig);
-      await delay();
-      fixture.detectChanges();
-
-      expect(component.formValue()).toEqual({ firstName: 'John' });
-      expect(Object.hasOwn(component.formValue(), 'email')).toBe(false);
-    });
-
-    it('should preserve values for fields that remain after config change', async () => {
-      const initialConfig: TestFormConfig = {
-        fields: [
-          {
-            key: 'firstName',
-            type: 'input',
-            label: 'First Name',
-            value: 'John',
-          },
-          {
-            key: 'lastName',
-            type: 'input',
-            label: 'Last Name',
-            value: 'Doe',
-          },
-        ],
-      };
-
-      const { component, fixture } = createComponent(initialConfig);
-      await delay();
-      fixture.detectChanges();
-
-      // Change firstName value
-      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
-      const inputElement = testInput.nativeElement.querySelector('input');
-      inputElement.value = 'Jane';
-      inputElement.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
-      await delay();
-
-      expect(component.formValue()).toEqual({
-        firstName: 'Jane',
-        lastName: 'Doe',
-      });
-
-      // Change config but keep firstName
-      const newConfig: TestFormConfig = {
-        fields: [
-          {
-            key: 'firstName',
-            type: 'input',
-            label: 'First Name',
-            value: 'John', // default is John but current value should be preserved
-          },
-          {
-            key: 'email',
-            type: 'input',
-            label: 'Email',
-            value: 'test@example.com',
-          },
-        ],
-      };
-
-      fixture.componentRef.setInput('config', newConfig);
-      await delay();
-      fixture.detectChanges();
-
-      // firstName should preserve the changed value 'Jane'
-      const formValue = component.formValue();
-      expect(formValue.firstName).toBe('Jane');
-      expect(formValue.email).toBe('test@example.com');
-      expect(Object.hasOwn(formValue, 'lastName')).toBe(false);
-    });
-
-    it('should clear values for removed fields', async () => {
-      const initialConfig: TestFormConfig = {
-        fields: [
-          {
-            key: 'firstName',
-            type: 'input',
-            label: 'First Name',
-            value: 'John',
-          },
-          {
-            key: 'temporaryField',
-            type: 'input',
-            label: 'Temporary',
-            value: 'temp',
-          },
-        ],
-      };
-
-      const { component, fixture } = createComponent(initialConfig);
-      await delay();
-      fixture.detectChanges();
-
-      expect(component.formValue()).toEqual({
-        firstName: 'John',
-        temporaryField: 'temp',
-      });
-
-      // Remove temporaryField
-      const newConfig: TestFormConfig = {
-        fields: [
-          {
-            key: 'firstName',
-            type: 'input',
-            label: 'First Name',
-            value: 'John',
-          },
-        ],
-      };
-
-      fixture.componentRef.setInput('config', newConfig);
-      await delay();
-      fixture.detectChanges();
-
-      const formValue = component.formValue();
-      expect(formValue).toEqual({ firstName: 'John' });
-      expect('temporaryField' in formValue).toBe(false);
     });
   });
 

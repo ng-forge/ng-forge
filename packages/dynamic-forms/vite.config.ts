@@ -8,6 +8,7 @@ import { playwright } from '@vitest/browser-playwright';
 export default defineConfig(({ mode }) => {
   // Conditionally add --no-sandbox only in CI environments
   const isCI = process.env.CI === 'true';
+  const useBrowserMode = process.env.VITEST_BROWSER === 'true';
   const chromeArgs = [
     '--disable-dev-shm-usage', // Prevents shared memory issues in containers
     '--disable-gpu', // Reduces memory usage in headless mode
@@ -31,8 +32,9 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       setupFiles: ['src/test-setup.ts'],
+      environment: useBrowserMode ? undefined : 'jsdom',
       browser: {
-        enabled: true,
+        enabled: useBrowserMode,
         instances: [
           {
             browser: 'chromium',
