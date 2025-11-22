@@ -871,6 +871,7 @@ describe('DynamicFormComponent', () => {
 
       // Simulate user input
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(testInput).not.toBeNull();
       const inputElement = testInput.nativeElement.querySelector('input');
       inputElement.value = 'Jane';
       inputElement.dispatchEvent(new Event('input'));
@@ -1288,6 +1289,7 @@ describe('DynamicFormComponent', () => {
       fixture.detectChanges();
 
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(testInput).not.toBeNull();
       const inputElement = testInput.nativeElement.querySelector('input');
 
       // Rapid changes
