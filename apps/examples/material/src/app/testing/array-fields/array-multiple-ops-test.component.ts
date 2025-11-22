@@ -52,6 +52,7 @@ export class ArrayMultipleOpsTestComponent {
         type: 'array',
         fields: [
           {
+            key: 'noteRow',
             type: 'row',
             fields: [
               {

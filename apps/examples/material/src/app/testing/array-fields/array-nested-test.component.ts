@@ -68,6 +68,7 @@ export class ArrayNestedTestComponent {
         type: 'array',
         fields: [
           {
+            key: 'userRow',
             type: 'row',
             fields: [
               {

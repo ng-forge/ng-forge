@@ -47,6 +47,7 @@ export class ArrayMaxLengthTestComponent {
         // maxLength: 3,
         fields: [
           {
+            key: 'tagRow',
             type: 'row',
             fields: [
               {

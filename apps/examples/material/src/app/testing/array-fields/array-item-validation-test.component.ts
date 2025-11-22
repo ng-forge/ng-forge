@@ -60,6 +60,7 @@ export class ArrayItemValidationTestComponent {
         type: 'array',
         fields: [
           {
+            key: 'memberRow',
             type: 'row',
             fields: [
               {

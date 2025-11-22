@@ -47,6 +47,7 @@ export class ArrayMinLengthTestComponent {
         // minLength: 2,
         fields: [
           {
+            key: 'itemRow',
             type: 'row',
             fields: [
               {

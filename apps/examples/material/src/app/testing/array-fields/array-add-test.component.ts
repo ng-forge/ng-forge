@@ -49,6 +49,7 @@ export class ArrayAddTestComponent {
         type: 'array',
         fields: [
           {
+            key: 'emailRow',
             type: 'row',
             fields: [
               {

@@ -42,6 +42,7 @@ export class ArrayRemoveTestComponent {
         type: 'array',
         fields: [
           {
+            key: 'phoneRow',
             type: 'row',
             fields: [
               {
