@@ -42,13 +42,10 @@ describe('IonicTextareaFieldComponent', () => {
         initialValue: { comments: '' },
       });
 
-      // Initial value check
       expect(IonicFormTestUtils.getFormValue(component).comments).toBe('');
 
-      // Simulate user typing
       await IonicFormTestUtils.simulateIonicInput(fixture, 'ion-textarea textarea', 'This is a test comment.');
 
-      // Verify form value updated
       expect(IonicFormTestUtils.getFormValue(component).comments).toBe('This is a test comment.');
     });
 
@@ -60,7 +57,6 @@ describe('IonicTextareaFieldComponent', () => {
         initialValue: { notes: '' },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { notes: 'Updated notes content' });
       fixture.detectChanges();
 
@@ -79,7 +75,6 @@ describe('IonicTextareaFieldComponent', () => {
 
       const multilineText = 'Line 1\nLine 2\nLine 3';
 
-      // Simulate user typing multiline text
       await IonicFormTestUtils.simulateIonicInput(fixture, 'ion-textarea textarea', multilineText);
 
       expect(IonicFormTestUtils.getFormValue(component).message).toBe(multilineText);
@@ -156,13 +151,11 @@ describe('IonicTextareaFieldComponent', () => {
         initialValue: { field1: 'Initial 1', field2: 'Initial 2' },
       });
 
-      // Initial values
       IonicFormTestUtils.assertFormValue(component, {
         field1: 'Initial 1',
         field2: 'Initial 2',
       });
 
-      // Change first textarea via programmatic update
       fixture.componentRef.setInput('value', { field1: 'Updated 1', field2: 'Initial 2' });
       fixture.detectChanges();
 
@@ -170,7 +163,6 @@ describe('IonicTextareaFieldComponent', () => {
       expect(formValue.field1).toBe('Updated 1');
       expect(formValue.field2).toBe('Initial 2');
 
-      // Change second textarea via programmatic update
       fixture.componentRef.setInput('value', { field1: 'Updated 1', field2: 'Updated 2' });
       fixture.detectChanges();
 
@@ -305,7 +297,6 @@ describe('IonicTextareaFieldComponent', () => {
         initialValue: { content: '' },
       });
 
-      // Simulate rapid typing
       await IonicFormTestUtils.simulateIonicInput(fixture, 'ion-textarea textarea', 'Final content');
 
       expect(IonicFormTestUtils.getFormValue(component).content).toBe('Final content');
@@ -326,10 +317,8 @@ describe('IonicTextareaFieldComponent', () => {
         initialValue: { message: '' },
       });
 
-      // Trigger validation by marking field as touched
       fixture.detectChanges();
 
-      // Check for error component
     });
 
     it('should handle default rows configuration', async () => {

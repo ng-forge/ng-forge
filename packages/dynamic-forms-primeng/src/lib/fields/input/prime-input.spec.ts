@@ -35,7 +35,6 @@ describe('PrimeInputFieldComponent', () => {
 
       expect(input).toBeTruthy();
       expect(input.nativeElement.getAttribute('type')).toBe('email');
-      // PrimeNG handles placeholders differently - the value is resolved asynchronously
       const placeholderValue = input.nativeElement.getAttribute('placeholder');
       expect(placeholderValue === 'Enter your email' || placeholderValue === '').toBeTruthy();
       expect(input.nativeElement.getAttribute('tabindex')).toBe('1');
@@ -54,13 +53,10 @@ describe('PrimeInputFieldComponent', () => {
         initialValue: { email: '' },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component).email).toBe('');
 
-      // Simulate user typing using utility
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'input[type="email"]', 'test@example.com');
 
-      // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component).email).toBe('test@example.com');
     });
 
@@ -74,7 +70,6 @@ describe('PrimeInputFieldComponent', () => {
         initialValue: { email: '' },
       });
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, { email: 'user@domain.com' });
 
       expect(PrimeNGFormTestUtils.getFormValue(component).email).toBe('user@domain.com');
@@ -116,13 +111,10 @@ describe('PrimeInputFieldComponent', () => {
         initialValue: { age: 0 },
       });
 
-      // Initial value
       expect(PrimeNGFormTestUtils.getFormValue(component).age).toBe(0);
 
-      // Simulate typing a number using utility
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'input[type="number"]', '25');
 
-      // Note: PrimeNG inputs with type="number" correctly return numeric values
       expect(PrimeNGFormTestUtils.getFormValue(component).age).toBe(25);
     });
 
@@ -140,7 +132,6 @@ describe('PrimeInputFieldComponent', () => {
         initialValue: { firstName: '', password: '', age: 0, website: '', phone: '' },
       });
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         firstName: 'John',
         password: 'secret123',
@@ -171,7 +162,6 @@ describe('PrimeInputFieldComponent', () => {
       const fieldWrapper = fixture.debugElement.query(By.css('df-prime-input'));
 
       expect(input.nativeElement.getAttribute('type')).toBe('text');
-      // PrimeNG uses standard input styling by default
       expect(fieldWrapper.nativeElement).toBeTruthy();
     });
 
@@ -235,20 +225,17 @@ describe('PrimeInputFieldComponent', () => {
         initialValue: { firstName: 'Initial Name', email: 'initial@email.com' },
       });
 
-      // Initial values
       PrimeNGFormTestUtils.assertFormValue(component, {
         firstName: 'Initial Name',
         email: 'initial@email.com',
       });
 
-      // Change first input using utility
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'input[type="text"]', 'Updated Name');
 
       let formValue = PrimeNGFormTestUtils.getFormValue(component);
       expect(formValue.firstName).toBe('Updated Name');
       expect(formValue.email).toBe('initial@email.com');
 
-      // Change second input using utility
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'input[type="email"]', 'updated@email.com');
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
@@ -301,9 +288,7 @@ describe('PrimeInputFieldComponent', () => {
       const input = fixture.debugElement.query(By.css('input[pInputText]'));
       const fieldWrapper = fixture.debugElement.query(By.css('df-prime-input'));
 
-      // Verify default PrimeNG configuration is applied
       expect(input.nativeElement.getAttribute('type')).toBe('text');
-      // PrimeNG uses standard input styling by default
       expect(fieldWrapper.nativeElement).toBeTruthy();
     });
 
@@ -317,7 +302,6 @@ describe('PrimeInputFieldComponent', () => {
 
       const specialText = 'José María 🌟 @#$%^&*()';
 
-      // Simulate typing special characters using utility
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'input[type="text"]', specialText);
 
       expect(PrimeNGFormTestUtils.getFormValue(component).firstName).toBe(specialText);
@@ -331,10 +315,8 @@ describe('PrimeInputFieldComponent', () => {
         initialValue: { firstName: '' },
       });
 
-      // Simulate rapid typing using utility (final value)
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'input[type="text"]', 'Alice');
 
-      // Should have the final value
       expect(PrimeNGFormTestUtils.getFormValue(component).firstName).toBe('Alice');
     });
   });
@@ -362,7 +344,6 @@ describe('PrimeInputFieldComponent', () => {
         initialValue: { firstName: 'Test Value' },
       });
 
-      // Use PrimeNG-specific field value assertion
       PrimeNGFormTestUtils.assertPrimeFieldValue(fixture, 'input', 'Test Value');
     });
   });
@@ -424,11 +405,9 @@ describe('PrimeInputFieldComponent', () => {
           initialValue: { email: '' },
         });
 
-        // Initial label
         let label = fixture.debugElement.query(By.css('label'));
         expect(label.nativeElement.textContent.trim()).toBe('Initial Label');
 
-        // Update Observable
         labelSubject.next('Updated Label');
         untracked(() => fixture.detectChanges());
 
@@ -452,11 +431,9 @@ describe('PrimeInputFieldComponent', () => {
           initialValue: { email: '' },
         });
 
-        // Initial placeholder
         let input = fixture.debugElement.query(By.css('input'));
         expect(input.nativeElement.getAttribute('placeholder')).toBe('Initial placeholder');
 
-        // Update Observable
         placeholderSubject.next('Updated placeholder');
         untracked(() => fixture.detectChanges());
 
@@ -489,11 +466,9 @@ describe('PrimeInputFieldComponent', () => {
         const label = fixture.debugElement.query(By.css('label'));
         const input = fixture.debugElement.query(By.css('input'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Email Address');
         expect(input.nativeElement.getAttribute('placeholder')).toBe('Enter your email address');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.email.label': 'Dirección de Correo Electrónico',
           'form.email.placeholder': 'Ingrese su correo electrónico',
@@ -604,7 +579,6 @@ describe('PrimeInputFieldComponent', () => {
 
         const input = fixture.debugElement.query(By.css('input'));
 
-        // Empty Observable results in empty string placeholder attribute in PrimeNG
         expect(input.nativeElement.getAttribute('placeholder')).toBe('');
       });
     });

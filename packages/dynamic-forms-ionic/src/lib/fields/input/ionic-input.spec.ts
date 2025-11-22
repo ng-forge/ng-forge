@@ -31,12 +31,7 @@ describe('IonicInputFieldComponent', () => {
       //       const input = fixture.debugElement.query(By.css('ion-input input'));
 
       expect(ionInput).not.toBeNull();
-      //       expect(ionInput.nativeElement.getAttribute('ng-reflect-label')).toBe('Email Address');
-      //       expect(ionInput.nativeElement.getAttribute('ng-reflect-placeholder')).toBe('Enter your email');
-      //       expect(ionInput.nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
       expect(ionInput.nativeElement.getAttribute('tabindex')).toBe('1');
-      //       expect(input).not.toBeNull();
-      //       expect(input.nativeElement.tagName.toLowerCase()).toBe('input');
     });
 
     it('should handle user input and update form value', async () => {
@@ -49,13 +44,10 @@ describe('IonicInputFieldComponent', () => {
         initialValue: { email: '' },
       });
 
-      // Initial value check
       expect(IonicFormTestUtils.getFormValue(component).email).toBe('');
 
-      // Simulate user typing using utility
       await IonicFormTestUtils.simulateIonicInput(fixture, 'ion-input input', 'test@example.com');
 
-      // Verify form value updated
       expect(IonicFormTestUtils.getFormValue(component).email).toBe('test@example.com');
     });
 
@@ -67,7 +59,6 @@ describe('IonicInputFieldComponent', () => {
         initialValue: { email: '' },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { email: 'user@domain.com' });
       fixture.detectChanges();
 
@@ -108,13 +99,10 @@ describe('IonicInputFieldComponent', () => {
         initialValue: { age: 0 },
       });
 
-      // Initial value
       expect(IonicFormTestUtils.getFormValue(component).age).toBe(0);
 
-      // Simulate typing a number using utility
       await IonicFormTestUtils.simulateIonicInput(fixture, 'ion-input input', '25');
 
-      // Form should have the updated value
       expect(IonicFormTestUtils.getFormValue(component).age).toBe('25');
     });
 
@@ -132,7 +120,6 @@ describe('IonicInputFieldComponent', () => {
         initialValue: { firstName: '', password: '', age: 0, website: '', phone: '' },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         firstName: 'John',
         password: 'secret123',
@@ -162,8 +149,6 @@ describe('IonicInputFieldComponent', () => {
 
       const ionInput = fixture.debugElement.query(By.css('df-ionic-input ion-input'));
 
-      //       expect(ionInput.nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
-      //       expect(ionInput.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('stacked');
     });
 
     it('should not display helper text when not provided', async () => {
@@ -197,7 +182,6 @@ describe('IonicInputFieldComponent', () => {
       });
 
       //       const input = fixture.debugElement.query(By.css('ion-input input'));
-      //       expect(input.nativeElement.disabled).toBe(true);
     });
 
     it('should apply different Ionic fill styles', async () => {
@@ -212,8 +196,6 @@ describe('IonicInputFieldComponent', () => {
       });
 
       const ionInputs = fixture.debugElement.queryAll(By.css('df-ionic-input ion-input'));
-      //       expect(ionInputs[0].nativeElement.getAttribute('ng-reflect-fill')).toBe('solid');
-      //       expect(ionInputs[1].nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
     });
 
     it('should handle multiple inputs with independent value changes', async () => {
@@ -224,13 +206,11 @@ describe('IonicInputFieldComponent', () => {
         initialValue: { firstName: 'Initial Name', email: 'initial@email.com' },
       });
 
-      // Initial values
       IonicFormTestUtils.assertFormValue(component, {
         firstName: 'Initial Name',
         email: 'initial@email.com',
       });
 
-      // Change first input via programmatic update
       fixture.componentRef.setInput('value', { firstName: 'Updated Name', email: 'initial@email.com' });
       fixture.detectChanges();
 
@@ -238,7 +218,6 @@ describe('IonicInputFieldComponent', () => {
       expect(formValue.firstName).toBe('Updated Name');
       expect(formValue.email).toBe('initial@email.com');
 
-      // Change second input via programmatic update
       fixture.componentRef.setInput('value', { firstName: 'Updated Name', email: 'updated@email.com' });
       fixture.detectChanges();
 
@@ -293,7 +272,6 @@ describe('IonicInputFieldComponent', () => {
 
       const specialText = 'José María';
 
-      // Simulate typing special characters using utility
       await IonicFormTestUtils.simulateIonicInput(fixture, 'ion-input input', specialText);
 
       expect(IonicFormTestUtils.getFormValue(component).firstName).toBe(specialText);
@@ -307,10 +285,8 @@ describe('IonicInputFieldComponent', () => {
         initialValue: { firstName: '' },
       });
 
-      // Simulate rapid typing using utility (final value)
       await IonicFormTestUtils.simulateIonicInput(fixture, 'ion-input input', 'Alice');
 
-      // Should have the final value
       expect(IonicFormTestUtils.getFormValue(component).firstName).toBe('Alice');
     });
   });
@@ -327,7 +303,6 @@ describe('IonicInputFieldComponent', () => {
       });
 
       const ionInput = fixture.debugElement.query(By.css('df-ionic-input ion-input'));
-      //       expect(ionInput.nativeElement.getAttribute('ng-reflect-clear-input')).toBe('true');
     });
 
     it('should handle counter prop', async () => {
@@ -341,7 +316,6 @@ describe('IonicInputFieldComponent', () => {
       });
 
       const ionInput = fixture.debugElement.query(By.css('df-ionic-input ion-input'));
-      //       expect(ionInput.nativeElement.getAttribute('ng-reflect-counter')).toBe('true');
     });
 
     it('should handle different label placements', async () => {
@@ -355,7 +329,6 @@ describe('IonicInputFieldComponent', () => {
       });
 
       const ionInput = fixture.debugElement.query(By.css('df-ionic-input ion-input'));
-      //       expect(ionInput.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('floating');
     });
   });
 });

@@ -32,12 +32,6 @@ describe('IonicSliderFieldComponent', () => {
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
 
       expect(ionRange).not.toBeNull();
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-label')).toBe('Volume');
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-step')).toBe('5');
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-pin')).toBe('true');
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-ticks')).toBe('true');
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-snaps')).toBe('true');
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
       expect(ionRange.nativeElement.getAttribute('tabindex')).toBe('1');
     });
 
@@ -57,10 +51,8 @@ describe('IonicSliderFieldComponent', () => {
         initialValue: { brightness: 50 },
       });
 
-      // Initial value check
       expect(IonicFormTestUtils.getFormValue(component).brightness).toBe(50);
 
-      // Simulate slider change
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
       const rangeElement = ionRange.nativeElement;
 
@@ -69,8 +61,6 @@ describe('IonicSliderFieldComponent', () => {
       rangeElement.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 75 } }));
       fixture.detectChanges();
 
-      // Note: The actual value might not update in tests without full Ionic component interaction
-      // This test verifies the component structure and event binding
     });
 
     it('should reflect external value changes in slider', async () => {
@@ -91,7 +81,6 @@ describe('IonicSliderFieldComponent', () => {
 
       expect(IonicFormTestUtils.getFormValue(component).opacity).toBe(0.5);
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { opacity: 0.8 });
       fixture.detectChanges();
 
@@ -136,7 +125,6 @@ describe('IonicSliderFieldComponent', () => {
       });
 
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-step')).toBe('0.5');
     });
 
     it('should handle large ranges', async () => {
@@ -179,7 +167,6 @@ describe('IonicSliderFieldComponent', () => {
       });
 
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
-      // Note: Ionic Range uses shadow DOM, disabled state checking may vary
       expect(ionRange).not.toBeNull();
     });
 
@@ -201,7 +188,6 @@ describe('IonicSliderFieldComponent', () => {
         initialValue: { rating: 3 },
       });
 
-      // Slider with a value should be valid
       expect(IonicFormTestUtils.isFormValid(component)).toBe(true);
     });
 
@@ -221,7 +207,6 @@ describe('IonicSliderFieldComponent', () => {
       });
 
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-step')).toBe('1');
     });
   });
 
@@ -244,7 +229,6 @@ describe('IonicSliderFieldComponent', () => {
       });
 
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-pin')).toBe('true');
     });
 
     it('should handle ticks property', async () => {
@@ -265,7 +249,6 @@ describe('IonicSliderFieldComponent', () => {
       });
 
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-ticks')).toBe('true');
     });
 
     it('should handle snaps property', async () => {
@@ -286,7 +269,6 @@ describe('IonicSliderFieldComponent', () => {
       });
 
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-snaps')).toBe('true');
     });
 
     it('should handle dualKnobs property', async () => {
@@ -307,7 +289,6 @@ describe('IonicSliderFieldComponent', () => {
       });
 
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-dual-knobs')).toBe('true');
     });
 
     it('should handle different label placements', async () => {
@@ -328,7 +309,6 @@ describe('IonicSliderFieldComponent', () => {
       });
 
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('floating');
     });
 
     it('should handle different color options', async () => {
@@ -349,7 +329,6 @@ describe('IonicSliderFieldComponent', () => {
       });
 
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
-      //       expect(ionRange.nativeElement.getAttribute('ng-reflect-color')).toBe('success');
     });
   });
 
@@ -447,14 +426,11 @@ describe('IonicSliderFieldComponent', () => {
         initialValue: { rating: null },
       });
 
-      // Trigger validation by marking field as touched
       const ionRange = fixture.debugElement.query(By.css('df-ionic-slider ion-range'));
       ionRange.nativeElement.dispatchEvent(new Event('blur'));
       fixture.detectChanges();
 
-      // Check for error component
       //       const errorComponent = fixture.debugElement.query(By.css('df-ionic-errors'));
-      //       expect(errorComponent).not.toBeNull();
     });
 
     it('should handle boundary values correctly', async () => {
@@ -475,7 +451,6 @@ describe('IonicSliderFieldComponent', () => {
 
       expect(IonicFormTestUtils.getFormValue(component).percentage).toBe(0);
 
-      // Update to max value
       fixture.componentRef.setInput('value', { percentage: 100 });
       fixture.detectChanges();
 

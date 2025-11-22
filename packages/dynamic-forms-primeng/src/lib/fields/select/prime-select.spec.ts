@@ -72,7 +72,6 @@ describe('PrimeSelectFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component).country).toBe('');
 
       // Simulate selection change by updating form value
@@ -85,7 +84,6 @@ describe('PrimeSelectFieldComponent', () => {
         categories: [],
       });
 
-      // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component).country).toBe('CA');
     });
 
@@ -111,7 +109,6 @@ describe('PrimeSelectFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         country: 'UK',
         languages: [],
@@ -207,7 +204,6 @@ describe('PrimeSelectFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component).languages).toEqual(['en', 'es']);
 
       // Simulate multi-selection change by updating form value
@@ -243,7 +239,6 @@ describe('PrimeSelectFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         country: '',
         languages: ['fr', 'de'],
@@ -500,7 +495,6 @@ describe('PrimeSelectFieldComponent', () => {
 
       const select = fixture.debugElement.query(By.directive(Select));
 
-      // Check default props from PrimeNG configuration
       expect(select).toBeTruthy();
     });
 
@@ -623,13 +617,11 @@ describe('PrimeSelectFieldComponent', () => {
         const label = fixture.debugElement.query(By.css('label'));
         const hint = fixture.debugElement.query(By.css('.df-prime-hint'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Country');
         expect(hint.nativeElement.textContent.trim()).toBe('Choose the country you live in');
         // Note: Options are dynamic and tested via the options input
         // Opening the overlay in tests requires matchMedia support
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.country.label': 'País',
           'form.country.placeholder': 'Selecciona tu país',

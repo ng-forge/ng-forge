@@ -35,8 +35,6 @@ describe('IonicRadioFieldComponent', () => {
       expect(ionRadioGroup).not.toBeNull();
       expect(ionRadios.length).toBe(3);
       expect(label.nativeElement.textContent.trim()).toBe('Payment Method');
-      //       expect(ionRadios[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      //       expect(ionRadios[0].nativeElement.getAttribute('ng-reflect-label-placement')).toBe('end');
     });
 
     it('should handle user radio selection and update form value', async () => {
@@ -57,14 +55,11 @@ describe('IonicRadioFieldComponent', () => {
         initialValue: { size: null },
       });
 
-      // Initial value check
       expect(IonicFormTestUtils.getFormValue(component).size).toBe(null);
 
-      // Simulate user selecting a radio option via programmatic update
       fixture.componentRef.setInput('value', { size: 'M' });
       fixture.detectChanges();
 
-      // Verify form value updated
       expect(IonicFormTestUtils.getFormValue(component).size).toBe('M');
     });
 
@@ -88,7 +83,6 @@ describe('IonicRadioFieldComponent', () => {
 
       expect(IonicFormTestUtils.getFormValue(component).color).toBe('red');
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { color: 'blue' });
       fixture.detectChanges();
 
@@ -115,17 +109,14 @@ describe('IonicRadioFieldComponent', () => {
         initialValue: { priority: null },
       });
 
-      // Select first option via programmatic update
       fixture.componentRef.setInput('value', { priority: 1 });
       fixture.detectChanges();
       expect(IonicFormTestUtils.getFormValue(component).priority).toBe(1);
 
-      // Select second option (should deselect first)
       fixture.componentRef.setInput('value', { priority: 2 });
       fixture.detectChanges();
       expect(IonicFormTestUtils.getFormValue(component).priority).toBe(2);
 
-      // Select third option (should deselect second)
       fixture.componentRef.setInput('value', { priority: 3 });
       fixture.detectChanges();
       expect(IonicFormTestUtils.getFormValue(component).priority).toBe(3);
@@ -198,7 +189,6 @@ describe('IonicRadioFieldComponent', () => {
 
       const radioInputs = fixture.debugElement.queryAll(By.css('ion-radio input'));
       radioInputs.forEach((input) => {
-        //         expect(input.nativeElement.disabled).toBe(true);
       });
     });
 
@@ -221,9 +211,6 @@ describe('IonicRadioFieldComponent', () => {
       });
 
       const ionRadios = fixture.debugElement.queryAll(By.css('df-ionic-radio ion-radio'));
-      //       expect(ionRadios[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
-      //       expect(ionRadios[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-      //       expect(ionRadios[2].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
     });
 
     it('should apply required validation', async () => {
@@ -245,14 +232,11 @@ describe('IonicRadioFieldComponent', () => {
         initialValue: { agreement: null },
       });
 
-      // Form should be invalid when no option is selected
       expect(IonicFormTestUtils.isFormValid(component)).toBe(false);
 
-      // Select an option via programmatic update
       fixture.componentRef.setInput('value', { agreement: true });
       fixture.detectChanges();
 
-      // Form should now be valid
       expect(IonicFormTestUtils.isFormValid(component)).toBe(true);
     });
   });
@@ -278,7 +262,6 @@ describe('IonicRadioFieldComponent', () => {
 
       const ionRadios = fixture.debugElement.queryAll(By.css('df-ionic-radio ion-radio'));
       ionRadios.forEach((radio) => {
-        //         expect(radio.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('start');
       });
     });
 
@@ -302,7 +285,6 @@ describe('IonicRadioFieldComponent', () => {
 
       const ionRadios = fixture.debugElement.queryAll(By.css('df-ionic-radio ion-radio'));
       ionRadios.forEach((radio) => {
-        //         expect(radio.nativeElement.getAttribute('ng-reflect-justify')).toBe('space-between');
       });
     });
 
@@ -326,7 +308,6 @@ describe('IonicRadioFieldComponent', () => {
 
       const ionRadios = fixture.debugElement.queryAll(By.css('df-ionic-radio ion-radio'));
       ionRadios.forEach((radio) => {
-        //         expect(radio.nativeElement.getAttribute('ng-reflect-color')).toBe('success');
       });
     });
   });
@@ -390,14 +371,11 @@ describe('IonicRadioFieldComponent', () => {
         initialValue: { option: null },
       });
 
-      // Trigger validation by marking field as touched
       const radioGroup = fixture.debugElement.query(By.css('df-ionic-radio ion-radio-group'));
       radioGroup.nativeElement.dispatchEvent(new Event('blur'));
       fixture.detectChanges();
 
-      // Check for error component
       //       const errorComponent = fixture.debugElement.query(By.css('df-ionic-errors'));
-      //       expect(errorComponent).not.toBeNull();
     });
 
     it('should render label correctly when provided', async () => {

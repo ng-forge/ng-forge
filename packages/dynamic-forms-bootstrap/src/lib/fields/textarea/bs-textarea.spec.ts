@@ -65,13 +65,10 @@ describe('BsTextareaFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component).comments).toBe('');
 
-      // Simulate user typing using utility
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'textarea.form-control', 'This is a multi-line comment\nwith line breaks');
 
-      // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component).comments).toBe('This is a multi-line comment\nwith line breaks');
     });
 
@@ -91,7 +88,6 @@ describe('BsTextareaFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         comments: 'Updated comments\nwith multiple lines',
         description: '',
@@ -256,7 +252,6 @@ describe('BsTextareaFieldComponent', () => {
         },
       });
 
-      // Initial values
       expect(BootstrapFormTestUtils.getFormValue(component).description).toBe('Initial description');
       expect(BootstrapFormTestUtils.getFormValue(component).feedback).toBe('Initial feedback');
 
@@ -384,7 +379,6 @@ describe('BsTextareaFieldComponent', () => {
       const textarea = fixture.debugElement.query(By.css('textarea.form-control'));
       const container = fixture.debugElement.query(By.css('.mb-3'));
 
-      // Verify default Bootstrap configuration is applied
       expect(textarea.nativeElement.getAttribute('rows')).toBe('4');
       expect(container).toBeTruthy();
     });
@@ -399,7 +393,6 @@ describe('BsTextareaFieldComponent', () => {
 
       const specialText = 'Jos� Mar�a < @#$%^&*()\nSecond line with �mojis <�\nThird line with symbols: ���';
 
-      // Simulate typing special characters using utility
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'textarea.form-control', specialText);
 
       expect(BootstrapFormTestUtils.getFormValue(component).comments).toBe(specialText);
@@ -416,14 +409,12 @@ describe('BsTextareaFieldComponent', () => {
       const textarea = fixture.debugElement.query(By.css('textarea.form-control'));
       const testValues = ['Line 1', 'Line 1\nLine 2', 'Line 1\nLine 2\nLine 3', 'Final multi-line\ntext content\nwith three lines'];
 
-      // Simulate rapid typing
       for (const value of testValues) {
         textarea.nativeElement.value = value;
         textarea.nativeElement.dispatchEvent(new Event('input'));
         fixture.detectChanges();
       }
 
-      // Should have the final value
       expect(BootstrapFormTestUtils.getFormValue(component).comments).toBe('Final multi-line\ntext content\nwith three lines');
     });
 
@@ -476,12 +467,10 @@ describe('BsTextareaFieldComponent', () => {
         const textarea = fixture.debugElement.query(By.css('textarea.form-control'));
         const helpText = fixture.debugElement.query(By.css('.form-text'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Comments');
         expect(textarea.nativeElement.getAttribute('placeholder')).toBe('Enter your comments');
         expect(helpText.nativeElement.textContent.trim()).toBe('Please provide feedback');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.comments.label': 'Comentarios',
           'form.comments.placeholder': 'Ingrese sus comentarios',

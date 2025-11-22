@@ -36,12 +36,6 @@ describe('IonicButtonFieldComponent', () => {
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
 
       expect(ionButton).not.toBeNull();
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-fill')).toBe('solid');
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-expand')).toBe('block');
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-size')).toBe('large');
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-shape')).toBe('round');
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-strong')).toBe('true');
     });
 
     it('should handle button click and trigger event', async () => {
@@ -60,16 +54,10 @@ describe('IonicButtonFieldComponent', () => {
         initialValue: {},
       });
 
-      // Note: Full event dispatch testing would require EventBus integration
-      // This test verifies the button structure and click handling setup
       //       const button = fixture.debugElement.query(By.css('ion-button button'));
-      //       expect(button).not.toBeNull();
 
-      // Simulate button click
       //       await IonicFormTestUtils.simulateIonicButtonClick(fixture, 'ion-button button');
 
-      // Button click should work without errors
-      //       expect(button).not.toBeNull();
     });
 
     it('should display button label correctly', async () => {
@@ -87,7 +75,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.textContent.trim()).toBe('Test Button Label');
     });
   });
 
@@ -108,7 +95,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
     });
 
     it('should handle enabled state', async () => {
@@ -127,7 +113,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
     });
 
     it('should have correct test id', async () => {
@@ -145,7 +130,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.getAttribute('data-testid')).toBe('button-myButton');
     });
   });
 
@@ -178,9 +162,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButtons = fixture.debugElement.queryAll(By.css('ion-button'));
-      //       expect(ionButtons[0].nativeElement.getAttribute('ng-reflect-fill')).toBe('solid');
-      //       expect(ionButtons[1].nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
-      //       expect(ionButtons[2].nativeElement.getAttribute('ng-reflect-fill')).toBe('clear');
     });
 
     it('should handle different color options', async () => {
@@ -211,9 +192,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButtons = fixture.debugElement.queryAll(By.css('ion-button'));
-      //       expect(ionButtons[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      //       expect(ionButtons[1].nativeElement.getAttribute('ng-reflect-color')).toBe('success');
-      //       expect(ionButtons[2].nativeElement.getAttribute('ng-reflect-color')).toBe('danger');
     });
 
     it('should handle different sizes', async () => {
@@ -244,9 +222,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButtons = fixture.debugElement.queryAll(By.css('ion-button'));
-      //       expect(ionButtons[0].nativeElement.getAttribute('ng-reflect-size')).toBe('small');
-      //       expect(ionButtons[1].nativeElement.getAttribute('ng-reflect-size')).toBe('default');
-      //       expect(ionButtons[2].nativeElement.getAttribute('ng-reflect-size')).toBe('large');
     });
 
     it('should handle expand property', async () => {
@@ -271,8 +246,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButtons = fixture.debugElement.queryAll(By.css('ion-button'));
-      //       expect(ionButtons[0].nativeElement.getAttribute('ng-reflect-expand')).toBe('block');
-      //       expect(ionButtons[1].nativeElement.getAttribute('ng-reflect-expand')).toBe('full');
     });
 
     it('should handle shape property', async () => {
@@ -291,7 +264,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-shape')).toBe('round');
     });
 
     it('should handle strong property', async () => {
@@ -310,7 +282,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-strong')).toBe('true');
     });
   });
 
@@ -330,7 +301,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-fill')).toBe('solid');
     });
 
     it('should use default primary color', async () => {
@@ -348,7 +318,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
     });
 
     it('should not be disabled by default', async () => {
@@ -366,7 +335,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
     });
   });
 
@@ -400,9 +368,6 @@ describe('IonicButtonFieldComponent', () => {
 
       const ionButtons = fixture.debugElement.queryAll(By.css('ion-button'));
       expect(ionButtons.length).toBe(3);
-      //       expect(ionButtons[0].nativeElement.textContent.trim()).toBe('Submit');
-      //       expect(ionButtons[1].nativeElement.textContent.trim()).toBe('Cancel');
-      //       expect(ionButtons[2].nativeElement.textContent.trim()).toBe('Reset');
     });
 
     it('should handle clicks on different buttons', async () => {
@@ -426,13 +391,9 @@ describe('IonicButtonFieldComponent', () => {
 
       //       const buttons = fixture.debugElement.queryAll(By.css('ion-button button'));
 
-      // Click first button
       //       await IonicFormTestUtils.simulateIonicButtonClick(fixture, 'ion-button:first-of-type button');
-      //       expect(buttons[0]).not.toBeNull();
 
-      // Click second button
       //       await IonicFormTestUtils.simulateIonicButtonClick(fixture, 'ion-button:last-of-type button');
-      //       expect(buttons[1]).not.toBeNull();
     });
   });
 
@@ -453,7 +414,6 @@ describe('IonicButtonFieldComponent', () => {
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
       expect(ionButton).not.toBeNull();
-      //       expect(ionButton.nativeElement.textContent.trim()).toBe('Minimal Button');
     });
 
     it('should handle empty className', async () => {
@@ -491,7 +451,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.getAttribute('ng-reflect-class')).toBe('custom-btn-class');
     });
 
     it('should handle rapid clicks', async () => {
@@ -508,13 +467,11 @@ describe('IonicButtonFieldComponent', () => {
         initialValue: {},
       });
 
-      // Rapid clicks
       //       await IonicFormTestUtils.simulateIonicButtonClick(fixture, 'ion-button button');
       //       await IonicFormTestUtils.simulateIonicButtonClick(fixture, 'ion-button button');
       //       await IonicFormTestUtils.simulateIonicButtonClick(fixture, 'ion-button button');
 
       //       const button = fixture.debugElement.query(By.css('ion-button button'));
-      //       expect(button).not.toBeNull();
     });
 
     it('should not trigger click when disabled', async () => {
@@ -533,9 +490,7 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       //       const button = fixture.debugElement.query(By.css('ion-button button'));
-      //       expect(button.nativeElement.disabled).toBe(true);
 
-      // Clicking a disabled button should not throw errors
       //       button.nativeElement.click();
       fixture.detectChanges();
     });
@@ -557,7 +512,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.textContent.trim()).toBe(longLabel);
     });
 
     it('should handle special characters in label', async () => {
@@ -577,7 +531,6 @@ describe('IonicButtonFieldComponent', () => {
       });
 
       const ionButton = fixture.debugElement.query(By.css('ion-button'));
-      //       expect(ionButton.nativeElement.textContent.trim()).toBe(specialLabel);
     });
   });
 });

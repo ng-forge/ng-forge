@@ -140,7 +140,7 @@ describe('MatInputFieldComponent', () => {
       const input = fixture.debugElement.query(By.css('input[matInput]'));
       // Material may set default tabindex, we just verify it's not our custom value
       const tabindex = input.nativeElement.getAttribute('tabindex');
-      expect(tabindex).not.toBe('5'); // Our test value from previous test
+      expect(tabindex).not.toBe('5');
     });
   });
 

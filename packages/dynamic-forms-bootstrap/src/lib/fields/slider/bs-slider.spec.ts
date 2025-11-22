@@ -72,13 +72,11 @@ describe('BsSliderFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component).volume).toBe(25);
 
       // Simulate user changing slider value
       await BootstrapFormTestUtils.simulateBsSlider(fixture, 'input[type="range"]', 75);
 
-      // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component).volume).toBe(75);
     });
 
@@ -104,7 +102,6 @@ describe('BsSliderFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         volume: 80,
         brightness: 0,
@@ -161,7 +158,6 @@ describe('BsSliderFieldComponent', () => {
         initialValue: { rating: 5 },
       });
 
-      // Initial value
       expect(BootstrapFormTestUtils.getFormValue(component).rating).toBe(5);
 
       // Simulate changing to a half-step value
@@ -188,7 +184,6 @@ describe('BsSliderFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         volume: 85,
         brightness: 200,
@@ -410,7 +405,6 @@ describe('BsSliderFieldComponent', () => {
         },
       });
 
-      // Initial values
       expect(BootstrapFormTestUtils.getFormValue(component).volume).toBe(30);
       expect(BootstrapFormTestUtils.getFormValue(component).brightness).toBe(100);
 
@@ -664,7 +658,6 @@ describe('BsSliderFieldComponent', () => {
         await BootstrapFormTestUtils.simulateBsSlider(fixture, 'input[type="range"]', value);
       }
 
-      // Should have the final value
       expect(BootstrapFormTestUtils.getFormValue(component).volume).toBe(90);
     });
   });
@@ -699,11 +692,9 @@ describe('BsSliderFieldComponent', () => {
         const labelElement = fixture.debugElement.query(By.css('.form-label'));
         const helpTextElement = fixture.debugElement.query(By.css('.form-text'));
 
-        // Initial translations
         expect(labelElement.nativeElement.textContent.trim()).toContain('Volume Level');
         expect(helpTextElement.nativeElement.textContent.trim()).toBe('Adjust the volume to your preference');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.volume.label': 'Nivel de Volumen',
           'form.volume.helpText': 'Ajusta el volumen según tu preferencia',

@@ -35,8 +35,6 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       expect(groupLabel).not.toBeNull();
       expect(groupLabel.nativeElement.textContent.trim()).toBe('Select your interests');
       expect(ionCheckboxes.length).toBe(4);
-      //       expect(ionCheckboxes[0].nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      //       expect(ionCheckboxes[0].nativeElement.getAttribute('ng-reflect-label-placement')).toBe('end');
     });
 
     it('should handle user checkbox selection and update form value', async () => {
@@ -57,18 +55,14 @@ describe('IonicMultiCheckboxFieldComponent', () => {
         initialValue: { hobbies: [] },
       });
 
-      // Initial value check
       expect(IonicFormTestUtils.getFormValue(component).hobbies).toEqual([]);
 
-      // Simulate user checking first checkbox via programmatic update
       fixture.componentRef.setInput('value', { hobbies: ['gaming'] });
       fixture.detectChanges();
 
-      // Verify form value updated
       let formValue = IonicFormTestUtils.getFormValue(component);
       expect(formValue.hobbies).toEqual(['gaming']);
 
-      // Check second checkbox via programmatic update
       fixture.componentRef.setInput('value', { hobbies: ['gaming', 'cooking'] });
       fixture.detectChanges();
 
@@ -98,7 +92,6 @@ describe('IonicMultiCheckboxFieldComponent', () => {
 
       expect(IonicFormTestUtils.getFormValue(component).skills).toEqual(['js']);
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { skills: ['js', 'ng'] });
       fixture.detectChanges();
 
@@ -126,7 +119,6 @@ describe('IonicMultiCheckboxFieldComponent', () => {
         initialValue: { features: [] },
       });
 
-      // Check all checkboxes via programmatic update
       fixture.componentRef.setInput('value', { features: ['a', 'b', 'c', 'd'] });
       fixture.detectChanges();
 
@@ -156,10 +148,8 @@ describe('IonicMultiCheckboxFieldComponent', () => {
         initialValue: { options: [1, 2, 3] },
       });
 
-      // Initial state - all checked
       expect(IonicFormTestUtils.getFormValue(component).options).toEqual([1, 2, 3]);
 
-      // Uncheck second checkbox via programmatic update
       fixture.componentRef.setInput('value', { options: [1, 3] });
       fixture.detectChanges();
 
@@ -187,15 +177,12 @@ describe('IonicMultiCheckboxFieldComponent', () => {
         initialValue: { items: [] },
       });
 
-      // Check first checkbox
       await IonicFormTestUtils.simulateIonicCheckbox(fixture, 'ion-checkbox:first-of-type', true);
       expect(IonicFormTestUtils.getFormValue(component).items).toEqual(['item1']);
 
-      // Uncheck it
       await IonicFormTestUtils.simulateIonicCheckbox(fixture, 'ion-checkbox:first-of-type', false);
       expect(IonicFormTestUtils.getFormValue(component).items).toEqual([]);
 
-      // Check it again
       await IonicFormTestUtils.simulateIonicCheckbox(fixture, 'ion-checkbox:first-of-type', true);
       expect(IonicFormTestUtils.getFormValue(component).items).toEqual(['item1']);
     });
@@ -223,7 +210,6 @@ describe('IonicMultiCheckboxFieldComponent', () => {
 
       const inputs = fixture.debugElement.queryAll(By.css('ion-checkbox input'));
       inputs.forEach((input) => {
-        //         expect(input.nativeElement.disabled).toBe(true);
       });
     });
 
@@ -246,9 +232,6 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       });
 
       const ionCheckboxes = fixture.debugElement.queryAll(By.css('ion-checkbox'));
-      //       expect(ionCheckboxes[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
-      //       expect(ionCheckboxes[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-      //       expect(ionCheckboxes[2].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
     });
 
     it('should apply required validation', async () => {
@@ -270,15 +253,11 @@ describe('IonicMultiCheckboxFieldComponent', () => {
         initialValue: { terms: [] },
       });
 
-      // Note: Empty array is treated as valid by standard required validator
       // Form should be invalid when no checkboxes are checked
-      //       expect(IonicFormTestUtils.isFormValid(component)).toBe(false);
 
-      // Check one checkbox via programmatic update
       fixture.componentRef.setInput('value', { terms: ['tos'] });
       fixture.detectChanges();
 
-      // Form should be valid with selection
       expect(IonicFormTestUtils.isFormValid(component)).toBe(true);
     });
   });
@@ -304,7 +283,6 @@ describe('IonicMultiCheckboxFieldComponent', () => {
 
       const ionCheckboxes = fixture.debugElement.queryAll(By.css('ion-checkbox'));
       ionCheckboxes.forEach((checkbox) => {
-        //         expect(checkbox.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('start');
       });
     });
 
@@ -328,7 +306,6 @@ describe('IonicMultiCheckboxFieldComponent', () => {
 
       const ionCheckboxes = fixture.debugElement.queryAll(By.css('ion-checkbox'));
       ionCheckboxes.forEach((checkbox) => {
-        //         expect(checkbox.nativeElement.getAttribute('ng-reflect-justify')).toBe('space-between');
       });
     });
 
@@ -352,7 +329,6 @@ describe('IonicMultiCheckboxFieldComponent', () => {
 
       const ionCheckboxes = fixture.debugElement.queryAll(By.css('ion-checkbox'));
       ionCheckboxes.forEach((checkbox) => {
-        //         expect(checkbox.nativeElement.getAttribute('ng-reflect-color')).toBe('success');
       });
     });
   });
@@ -416,14 +392,11 @@ describe('IonicMultiCheckboxFieldComponent', () => {
         initialValue: { options: [] },
       });
 
-      // Trigger validation by marking field as touched
       const checkboxGroup = fixture.debugElement.query(By.css('.checkbox-group'));
       checkboxGroup.nativeElement.dispatchEvent(new Event('blur'));
       fixture.detectChanges();
 
-      // Check for error component
       //       const errorComponent = fixture.debugElement.query(By.css('df-ionic-errors'));
-      //       expect(errorComponent).not.toBeNull();
     });
 
     it('should render label correctly when provided', async () => {
