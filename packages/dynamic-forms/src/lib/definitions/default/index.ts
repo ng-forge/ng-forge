@@ -1,4 +1,4 @@
-export type { InputField, InputProps, StrictInputField, InputType } from './input-field';
+export type { InputField, InputFieldDef, InputProps, InputType } from './input-field';
 export type { CheckboxField } from './checkbox-field';
 export type { SelectField, SelectProps } from './select-field';
 export type { ButtonField, EventArgs } from './button-field';

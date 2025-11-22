@@ -26,16 +26,17 @@ export interface InputProps<T extends InputType = InputType> {
 }
 
 /**
- * Generic input field definition. Can be extended by framework-specific implementations.
+ * Generic input field definition for framework-specific implementations.
+ * Use this when you need to extend InputProps with custom properties.
  *
  * @example
  * // Framework extension
  * interface MaterialInputProps extends InputProps<'text'> {
  *   color?: 'primary' | 'accent';
  * }
- * type MaterialInputField = InputField<MaterialInputProps>;
+ * type MaterialInputField = InputFieldDef<MaterialInputProps>;
  */
-export interface InputField<TProps extends InputProps<any> = InputProps>
+export interface InputFieldDef<TProps extends InputProps<any> = InputProps>
   extends BaseValueField<TProps, TProps extends InputProps<infer T> ? InputTypeToValueType<T> : string> {
   type: 'input';
 }
@@ -61,16 +62,14 @@ interface TextInputField extends BaseValueField<InputProps<'text' | 'email' | 'p
 }
 
 /**
- * Strict type-safe input field with automatic value type inference.
- * Use this for direct field definitions to get full type safety without explicit generics.
- *
- * TypeScript will automatically infer the correct value type based on props.type:
+ * Input field with automatic type-safe value inference.
+ * TypeScript automatically infers the correct value type based on props.type:
  * - props.type: 'number' → value must be number
  * - props.type: 'text' | 'email' | 'password' | 'tel' | 'url' → value must be string
  *
  * @example
  * // String input (text is default)
- * const textField: StrictInputField = {
+ * const textField: InputField = {
  *   type: 'input',
  *   key: 'name',
  *   props: { type: 'text' },
@@ -79,7 +78,7 @@ interface TextInputField extends BaseValueField<InputProps<'text' | 'email' | 'p
  *
  * @example
  * // Number input with automatic type checking
- * const numberField: StrictInputField = {
+ * const numberField: InputField = {
  *   type: 'input',
  *   key: 'age',
  *   props: { type: 'number' },
@@ -88,11 +87,11 @@ interface TextInputField extends BaseValueField<InputProps<'text' | 'email' | 'p
  *
  * @example
  * // Type error example
- * const invalid: StrictInputField = {
+ * const invalid: InputField = {
  *   type: 'input',
  *   key: 'age',
  *   props: { type: 'number' },
  *   value: 'hello' // ✗ Type error: string not assignable to number
  * };
  */
-export type StrictInputField = NumberInputField | TextInputField;
+export type InputField = NumberInputField | TextInputField;

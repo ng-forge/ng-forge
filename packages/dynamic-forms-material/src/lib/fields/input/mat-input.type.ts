@@ -1,4 +1,4 @@
-import { DynamicText, InputField, InputProps, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, InputFieldDef, InputProps, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
 export interface MatInputProps extends InputProps {
@@ -9,6 +9,6 @@ export interface MatInputProps extends InputProps {
   hint?: DynamicText;
 }
 
-export type MatInputField = InputField<MatInputProps>;
+export type MatInputField = InputFieldDef<MatInputProps>;
 
 export type MatInputComponent = ValueFieldComponent<MatInputField>;
