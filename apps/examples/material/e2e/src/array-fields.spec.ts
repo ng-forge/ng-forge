@@ -7,9 +7,7 @@ test.describe('Array Fields Tests', () => {
   });
 
   test.describe('Basic Array Operations', () => {
-    test.skip('should add new array items dynamically', async ({ page }) => {
-      // NOTE: This test is skipped because empty arrays have no items = no add button
-      // Need to either: (1) start with one empty item, or (2) add global add button for empty arrays
+    test('should add new array items dynamically', async ({ page }) => {
       // Navigate to the array-add test component
       await page.goto('http://localhost:4200/#/test/array-fields/array-add');
       await page.waitForLoadState('networkidle');
@@ -18,7 +16,30 @@ test.describe('Array Fields Tests', () => {
       const scenario = page.locator('[data-testid="array-add"]');
       await expect(scenario).toBeVisible();
 
-      // TODO: Update once empty array UX is decided
+      // Should have one initial empty item
+      let emailInputs = scenario.locator('#emails input[type="email"]');
+      expect(await emailInputs.count()).toBe(1);
+
+      // Should have one add button (inside the first item)
+      const addButton = scenario.locator('button:has-text("Add Email")').first();
+      await expect(addButton).toBeVisible();
+
+      // Add second item
+      await addButton.click();
+      await page.waitForTimeout(200);
+
+      // Should have two email inputs now
+      emailInputs = scenario.locator('#emails input[type="email"]');
+      expect(await emailInputs.count()).toBe(2);
+
+      // Add third item
+      const addButtons = scenario.locator('button:has-text("Add Email")');
+      await addButtons.first().click();
+      await page.waitForTimeout(200);
+
+      // Should have three email inputs
+      emailInputs = scenario.locator('#emails input[type="email"]');
+      expect(await emailInputs.count()).toBe(3);
     });
 
     test('should remove array items', async ({ page }) => {
