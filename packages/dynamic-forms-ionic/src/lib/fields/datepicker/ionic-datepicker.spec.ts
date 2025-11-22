@@ -67,7 +67,6 @@ describe('IonicDatepickerFieldComponent', () => {
         initialValue: { eventDate: null },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { eventDate: selectedDate });
       fixture.detectChanges();
 
@@ -237,7 +236,6 @@ describe('IonicDatepickerFieldComponent', () => {
         initialValue: { mandatoryDate: null },
       });
 
-      // Form should be invalid when no date is selected
       expect(IonicFormTestUtils.isFormValid(component)).toBe(false);
     });
 
@@ -256,11 +254,9 @@ describe('IonicDatepickerFieldComponent', () => {
         initialValue: { mandatoryDate: null },
       });
 
-      // Set a date value
       fixture.componentRef.setInput('value', { mandatoryDate: new Date() });
       fixture.detectChanges();
 
-      // Form should now be valid
       expect(IonicFormTestUtils.isFormValid(component)).toBe(true);
     });
   });
@@ -402,12 +398,9 @@ describe('IonicDatepickerFieldComponent', () => {
         initialValue: { date: null },
       });
 
-      // Trigger validation by marking field as touched
       const ionInput = fixture.debugElement.query(By.css('df-ionic-datepicker ion-input'));
       ionInput.nativeElement.dispatchEvent(new Event('blur'));
       fixture.detectChanges();
-
-      // Check for error component
     });
 
     it('should handle dates at boundaries', async () => {
@@ -430,7 +423,6 @@ describe('IonicDatepickerFieldComponent', () => {
 
       expect(IonicFormTestUtils.getFormValue(component).date).toEqual(minDate);
 
-      // Update to max date
       fixture.componentRef.setInput('value', { date: maxDate });
       fixture.detectChanges();
 
@@ -472,7 +464,6 @@ describe('IonicDatepickerFieldComponent', () => {
 
       const ionModal = fixture.debugElement.query(By.css('df-ionic-datepicker ion-modal'));
       expect(ionModal).not.toBeNull();
-      // Modal starts closed
     });
 
     it('should render readonly input', async () => {

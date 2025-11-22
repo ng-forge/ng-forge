@@ -5,9 +5,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { IonicCheckboxComponent, IonicCheckboxProps } from './ionic-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic checkbox field component
- */
 @Component({
   selector: 'df-ionic-checkbox',
   imports: [IonCheckbox, IonNote, Field, DynamicTextPipe, AsyncPipe],
@@ -64,6 +61,5 @@ export default class IonicCheckboxFieldComponent implements IonicCheckboxCompone
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

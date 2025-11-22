@@ -21,7 +21,6 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
   // Inject field signal context to access form state
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
 
-  // Preconfigure the SubmitEvent
   bindings.push(inputBinding('event', () => SubmitEvent));
 
   // Add disabled binding - disabled if explicitly set OR if form is invalid
@@ -36,7 +35,6 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
     ),
   );
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
@@ -51,7 +49,6 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
 export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  // Preconfigure the NextPageEvent
   bindings.push(inputBinding('event', () => NextPageEvent));
 
   // Add disabled binding only if explicitly set by user
@@ -59,7 +56,6 @@ export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>
     bindings.push(inputBinding('disabled', () => fieldDef.disabled));
   }
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
@@ -74,7 +70,6 @@ export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>
 export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  // Preconfigure the PreviousPageEvent
   bindings.push(inputBinding('event', () => PreviousPageEvent));
 
   // Add disabled binding only if explicitly set by user
@@ -82,7 +77,6 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
     bindings.push(inputBinding('disabled', () => fieldDef.disabled));
   }
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
@@ -98,7 +92,6 @@ export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, 
 
   const arrayContext = inject(ARRAY_CONTEXT);
 
-  // Preconfigure the AddArrayItemEvent
   bindings.push(inputBinding('event', () => AddArrayItemEvent));
 
   // Add disabled binding only if explicitly set by user
@@ -106,7 +99,6 @@ export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, 
     bindings.push(inputBinding('disabled', () => fieldDef.disabled));
   }
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
@@ -137,7 +129,6 @@ export function removeArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<strin
 
   const arrayContext = inject(ARRAY_CONTEXT);
 
-  // Preconfigure the RemoveArrayItemEvent
   bindings.push(inputBinding('event', () => RemoveArrayItemEvent));
 
   // Add disabled binding only if explicitly set by user
@@ -145,7 +136,6 @@ export function removeArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<strin
     bindings.push(inputBinding('disabled', () => fieldDef.disabled));
   }
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }

@@ -1,6 +1,3 @@
-/**
- * Runtime context for evaluating conditional expressions
- */
 export interface EvaluationContext<TValue = unknown> {
   /** Current field value */
   fieldValue: TValue;

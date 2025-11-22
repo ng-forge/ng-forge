@@ -6,9 +6,6 @@ import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
 import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
-/**
- * PrimeNG input field component
- */
 @Component({
   selector: 'df-prime-input',
   imports: [InputText, DynamicTextPipe, AsyncPipe, Field],
@@ -131,7 +128,6 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly inputClasses = computed(() => {

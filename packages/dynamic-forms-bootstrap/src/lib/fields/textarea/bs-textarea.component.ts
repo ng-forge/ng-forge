@@ -4,10 +4,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { BsTextareaComponent, BsTextareaProps } from './bs-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Bootstrap textarea field component
- * Supports standard and floating label variants with Bootstrap 5 styling
- */
 @Component({
   selector: 'df-bs-textarea',
   imports: [Field, DynamicTextPipe, AsyncPipe],
@@ -108,6 +104,5 @@ export default class BsTextareaFieldComponent implements BsTextareaComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

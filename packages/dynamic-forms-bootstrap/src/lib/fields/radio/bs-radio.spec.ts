@@ -71,7 +71,6 @@ describe('BsRadioFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component)['preference']).toBe('');
 
       // Simulate radio button interaction by clicking the second option
@@ -79,7 +78,6 @@ describe('BsRadioFieldComponent', () => {
       radioInputs[1].nativeElement.click();
       fixture.detectChanges();
 
-      // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component)['preference']).toBe('option2');
     });
 
@@ -104,7 +102,6 @@ describe('BsRadioFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         gender: '',
         preference: 'option3',
@@ -571,11 +568,9 @@ describe('BsRadioFieldComponent', () => {
 
       let radioInputs = fixture.debugElement.queryAll(By.css('.form-check-input[type="radio"]'));
 
-      // Initial state
       expect((radioInputs[0].nativeElement as HTMLInputElement).checked).toBe(false);
       expect((radioInputs[1].nativeElement as HTMLInputElement).checked).toBe(false);
 
-      // Update via programmatic value change
       fixture.componentRef.setInput('value', { preference: 'option2' });
       fixture.detectChanges();
       await fixture.whenStable();
@@ -653,14 +648,12 @@ describe('BsRadioFieldComponent', () => {
         const helpTextElement = fixture.debugElement.query(By.css('.form-text'));
         const radioLabels = fixture.debugElement.queryAll(By.css('.form-check-label'));
 
-        // Initial translations
         expect(labelElement.nativeElement.textContent.trim()).toBe('Select Gender');
         expect(helpTextElement.nativeElement.textContent.trim()).toBe('Choose your gender');
         expect(radioLabels[0].nativeElement.textContent.trim()).toBe('Male');
         expect(radioLabels[1].nativeElement.textContent.trim()).toBe('Female');
         expect(radioLabels[2].nativeElement.textContent.trim()).toBe('Other');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.gender.label': 'Seleccionar G�nero',
           'form.gender.helpText': 'Elige tu g�nero',

@@ -67,8 +67,6 @@ describe('GroupFieldComponent', () => {
 
     const { component } = setupGroupTest(field);
 
-    // ITERATION 6 FIX: Verify component is correct type
-    // Previous: expect(component).toBeTruthy()
     expect(component).toBeDefined();
     expect(component).toBeInstanceOf(GroupFieldComponent);
   });
@@ -98,8 +96,6 @@ describe('GroupFieldComponent', () => {
 
     // The form element should be present in the template
     const formElement = fixture.nativeElement.querySelector('form');
-    // ITERATION 6 FIX: Verify form element is correct HTML type
-    // Previous: expect(formElement).toBeTruthy()
     expect(formElement).not.toBeNull();
     expect(formElement).toBeInstanceOf(HTMLFormElement);
   });
