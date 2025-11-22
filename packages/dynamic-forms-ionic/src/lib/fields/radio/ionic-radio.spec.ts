@@ -188,7 +188,7 @@ describe('IonicRadioFieldComponent', () => {
       });
 
       const radioInputs = fixture.debugElement.queryAll(By.css('ion-radio input'));
-      radioInputs.forEach((input) => {});
+      radioInputs.forEach((input) => void 0);
     });
 
     it('should handle disabled individual options', async () => {
@@ -260,7 +260,7 @@ describe('IonicRadioFieldComponent', () => {
       });
 
       const ionRadios = fixture.debugElement.queryAll(By.css('df-ionic-radio ion-radio'));
-      ionRadios.forEach((radio) => {});
+      ionRadios.forEach((radio) => void 0);
     });
 
     it('should handle justify property', async () => {
@@ -282,7 +282,7 @@ describe('IonicRadioFieldComponent', () => {
       });
 
       const ionRadios = fixture.debugElement.queryAll(By.css('df-ionic-radio ion-radio'));
-      ionRadios.forEach((radio) => {});
+      ionRadios.forEach((radio) => void 0);
     });
 
     it('should handle different color options', async () => {
@@ -304,7 +304,7 @@ describe('IonicRadioFieldComponent', () => {
       });
 
       const ionRadios = fixture.debugElement.queryAll(By.css('df-ionic-radio ion-radio'));
-      ionRadios.forEach((radio) => {});
+      ionRadios.forEach((radio) => void 0);
     });
   });
 
