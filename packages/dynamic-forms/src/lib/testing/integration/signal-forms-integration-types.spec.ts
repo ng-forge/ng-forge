@@ -26,12 +26,10 @@ describe('Signal Forms Integration Types', () => {
       const config: ValidatorConfig = {
         type: 'min',
         value: 10,
-        errorMessage: 'Value must be at least 10',
       };
 
       expect(config.type).toBe('min');
       expect(config.value).toBe(10);
-      expect(config.errorMessage).toBe('Value must be at least 10');
     });
 
     it('should create max validator with dynamic expression', () => {
@@ -111,11 +109,9 @@ describe('Signal Forms Integration Types', () => {
           operator: 'equals',
           value: 'employed',
         },
-        errorMessage: 'This field is required when employed',
       };
 
       expect(config.type).toBe('required');
-      expect(config.errorMessage).toBe('This field is required when employed');
     });
   });
 
@@ -517,9 +513,7 @@ describe('Signal Forms Integration Types', () => {
     it('should create form config with signal forms settings', () => {
       const config: FormConfig = {
         fields: [],
-        signalFormsConfig: {
-          migrateLegacyValidation: true,
-          strictMode: true,
+        customFnConfig: {
           customFunctions: {
             isBusinessEmail: (context) => {
               const email = context.fieldValue as string;
@@ -529,13 +523,11 @@ describe('Signal Forms Integration Types', () => {
         },
       };
 
-      expect(config.signalFormsConfig?.migrateLegacyValidation).toBe(true);
-      expect(config.signalFormsConfig?.strictMode).toBe(true);
-      expect(config.signalFormsConfig?.customFunctions?.['isBusinessEmail']).toBeDefined();
+      expect(config.customFnConfig?.customFunctions?.['isBusinessEmail']).toBeDefined();
     });
 
     it('should create complete form configuration', () => {
-      const config: FormConfig = {
+      const config = {
         fields: [
           {
             key: 'email',
@@ -553,15 +545,11 @@ describe('Signal Forms Integration Types', () => {
             validators: [{ type: 'email' }],
           },
         ],
-        signalFormsConfig: {
-          migrateLegacyValidation: true,
-        },
-      } as any;
+      };
 
       expect(config.fields).toHaveLength(1);
       expect(config.options?.disabled).toBe(false);
       expect(config.schemas).toHaveLength(1);
-      expect(config.signalFormsConfig?.migrateLegacyValidation).toBe(true);
     });
   });
 

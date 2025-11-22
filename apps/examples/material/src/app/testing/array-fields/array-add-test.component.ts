@@ -47,7 +47,6 @@ export class ArrayAddTestComponent {
       {
         key: 'emails',
         type: 'array',
-        label: 'Email Addresses',
         fields: [
           {
             key: 'email',
@@ -59,10 +58,9 @@ export class ArrayAddTestComponent {
       },
       {
         key: 'addEmailButton',
-        type: 'button',
+        type: 'addArrayItem',
         label: 'Add Email',
         className: 'array-add-button',
-        event: AddEmailsEvent,
         props: { color: 'primary' },
       },
     ],

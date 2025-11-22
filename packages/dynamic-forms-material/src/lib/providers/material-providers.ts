@@ -1,5 +1,8 @@
 import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import type { Provider } from '@angular/core';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
+import { MaterialConfig } from '../models/material-config';
+import { MATERIAL_CONFIG } from '../models/material-config.token';
 import {
   MatButtonField,
   MatCheckboxField,
@@ -17,8 +20,17 @@ import {
 } from '../fields';
 
 /**
+ * Field type definitions with optional config providers
+ */
+export type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
+  __configProviders?: Provider[];
+};
+
+/**
  * Configure dynamic forms with Material Design field types.
  * Provides all Material Design field types for use with provideDynamicForm.
+ *
+ * @param config - Optional global configuration for Material form fields
  *
  * @example
  * ```typescript
@@ -34,10 +46,36 @@ import {
  * };
  * ```
  *
+ * @example
+ * ```typescript
+ * // With global configuration
+ * export const appConfig: ApplicationConfig = {
+ *   providers: [
+ *     provideDynamicForm(
+ *       ...withMaterialFields({
+ *         appearance: 'fill',
+ *         subscriptSizing: 'fixed'
+ *       })
+ *     )
+ *   ]
+ * };
+ * ```
+ *
  * @returns Array of field type definitions for Material Design components
  */
-export function withMaterialFields(): FieldTypeDefinition[] {
-  return MATERIAL_FIELD_TYPES;
+export function withMaterialFields(config?: MaterialConfig): FieldTypeDefinitionsWithConfig {
+  const fields = MATERIAL_FIELD_TYPES as FieldTypeDefinitionsWithConfig;
+
+  if (config) {
+    fields.__configProviders = [
+      {
+        provide: MATERIAL_CONFIG,
+        useValue: config,
+      },
+    ];
+  }
+
+  return fields;
 }
 
 /**

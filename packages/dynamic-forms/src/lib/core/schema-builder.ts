@@ -1,5 +1,5 @@
-import type { SchemaPath } from '@angular/forms/signals';
 import { Schema, schema } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { FieldDef } from '../definitions';
 import { mapFieldToForm } from './form-mapping';
 import { FieldTypeDefinition, getFieldValueHandling } from '../models/field-type';

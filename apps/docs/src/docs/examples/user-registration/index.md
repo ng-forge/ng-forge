@@ -203,7 +203,6 @@ const registrationConfig = {
                 operator: 'equals',
                 value: 'business',
               },
-              errorMessage: 'Company name is required for business accounts',
             },
           ],
           props: { appearance: 'outline' },
@@ -239,7 +238,6 @@ const registrationConfig = {
                 operator: 'equals',
                 value: 'business',
               },
-              errorMessage: 'Industry is required for business accounts',
             },
           ],
           props: {

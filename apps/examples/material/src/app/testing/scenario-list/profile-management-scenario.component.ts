@@ -32,7 +32,6 @@ export class ProfileManagementScenarioComponent {
       {
         key: 'personalInfo',
         type: 'group',
-        label: 'Personal Information',
         fields: [
           {
             key: 'firstName',
@@ -56,7 +55,6 @@ export class ProfileManagementScenarioComponent {
       {
         key: 'contactInfo',
         type: 'group',
-        label: 'Contact Information',
         fields: [
           {
             key: 'email',
@@ -84,7 +82,6 @@ export class ProfileManagementScenarioComponent {
       {
         key: 'preferences',
         type: 'group',
-        label: 'Preferences',
         fields: [
           {
             key: 'newsletter',

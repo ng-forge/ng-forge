@@ -1,4 +1,4 @@
-import { ExpressionParserError, Token, TokenType } from './types';
+import { Token, TokenType, ExpressionParserError } from './types';
 
 /**
  * Tokenizes an expression string into tokens

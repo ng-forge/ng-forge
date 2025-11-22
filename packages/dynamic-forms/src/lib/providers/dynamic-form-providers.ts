@@ -1,4 +1,4 @@
-import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
+import { EnvironmentProviders, makeEnvironmentProviders, Provider } from '@angular/core';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
 import { FieldDef } from '../definitions/base';
@@ -6,6 +6,13 @@ import { FieldDef } from '../definitions/base';
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
 export type { RegisteredFieldTypes, InferGlobalFormValue } from '../models/types';
+
+/**
+ * Field type definitions with optional config providers
+ */
+type FieldTypeDefinitionsWithConfig = FieldTypeDefinition[] & {
+  __configProviders?: Provider[];
+};
 
 /**
  * Extract FieldDef type from FieldTypeDefinition
@@ -82,6 +89,15 @@ type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProv
 export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fieldTypes: T): ProvideDynamicFormResult<T> {
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
 
+  // Extract config providers from field type arrays
+  const configProviders: Provider[] = [];
+  fieldTypes.forEach((fieldTypeArray) => {
+    const fieldTypeWithConfig = fieldTypeArray as unknown as FieldTypeDefinitionsWithConfig;
+    if (fieldTypeWithConfig.__configProviders) {
+      configProviders.push(...fieldTypeWithConfig.__configProviders);
+    }
+  });
+
   return makeEnvironmentProviders([
     {
       provide: FIELD_REGISTRY,
@@ -97,6 +113,7 @@ export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fie
         return registry;
       },
     },
+    ...configProviders,
   ]) as ProvideDynamicFormResult<T>;
 }
 

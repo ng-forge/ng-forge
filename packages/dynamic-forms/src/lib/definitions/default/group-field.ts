@@ -12,7 +12,11 @@ import { GroupAllowedChildren } from '../../models/types/nesting-constraints';
  */
 export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never> {
   type: 'group';
+
   readonly fields: TFields;
+
+  /** Array fields do not have a label property **/
+  readonly label?: undefined;
 }
 
 /**

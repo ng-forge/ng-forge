@@ -1,16 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { BsInputComponent, BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
+import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 
 @Component({
   selector: 'df-bs-input',
   imports: [Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let p = props();
-    @if (p?.floatingLabel) {
+    @let f = field(); @let p = props(); @let effectiveSize = this.effectiveSize();
+    @let effectiveFloatingLabel = this.effectiveFloatingLabel();
+    @if (effectiveFloatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         @switch (p?.type ?? 'text') {
@@ -22,8 +24,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -37,8 +39,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -52,8 +54,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -67,8 +69,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -82,8 +84,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -97,8 +99,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -132,8 +134,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -147,8 +149,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -162,8 +164,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -177,8 +179,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -192,8 +194,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -207,8 +209,8 @@ import { AsyncPipe } from '@angular/common';
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
               class="form-control"
-              [class.form-control-sm]="p?.size === 'sm'"
-              [class.form-control-lg]="p?.size === 'lg'"
+              [class.form-control-sm]="effectiveSize === 'sm'"
+              [class.form-control-lg]="effectiveSize === 'lg'"
               [class.form-control-plaintext]="p?.plaintext"
               [class.is-invalid]="f().invalid() && f().touched()"
               [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -247,6 +249,8 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class BsInputFieldComponent implements BsInputComponent {
+  private bootstrapConfig = inject(BOOTSTRAP_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -257,6 +261,9 @@ export default class BsInputFieldComponent implements BsInputComponent {
   readonly props = input<BsInputProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  readonly effectiveSize = computed(() => this.props()?.size ?? this.bootstrapConfig?.size);
+  readonly effectiveFloatingLabel = computed(() => this.props()?.floatingLabel ?? this.bootstrapConfig?.floatingLabel ?? false);
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

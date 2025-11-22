@@ -1,4 +1,4 @@
-import { Injector, isSignal } from '@angular/core';
+import { isSignal, Injector } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { isObservable, Observable, of } from 'rxjs';
 import { DynamicText } from '../models/types/dynamic-text';

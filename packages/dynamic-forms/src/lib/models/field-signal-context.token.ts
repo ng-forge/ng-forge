@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import type { ArrayContext, FieldSignalContext } from '../mappers/types';
+import type { FieldSignalContext, ArrayContext } from '../mappers/types';
 
 /**
  * Injection token for providing field signal context to mappers and components.

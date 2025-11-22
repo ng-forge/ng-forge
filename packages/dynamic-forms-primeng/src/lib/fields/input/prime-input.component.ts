@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
+import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 @Component({
   selector: 'df-prime-input',
@@ -108,6 +109,8 @@ import { InputText } from 'primeng/inputtext';
   ],
 })
 export default class PrimeInputFieldComponent implements PrimeInputComponent {
+  private primeNGConfig = inject(PRIMENG_CONFIG, { optional: true });
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -118,6 +121,9 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly props = input<PrimeInputProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  readonly effectiveSize = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
+  readonly effectiveVariant = computed(() => this.props()?.variant ?? this.primeNGConfig?.variant);
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -132,13 +138,14 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
       classes.push(styleClass);
     }
 
-    if (this.props()?.size === 'small') {
+    const size = this.effectiveSize();
+    if (size === 'small') {
       classes.push('p-inputtext-sm');
-    } else if (this.props()?.size === 'large') {
+    } else if (size === 'large') {
       classes.push('p-inputtext-lg');
     }
 
-    if (this.props()?.variant === 'filled') {
+    if (this.effectiveVariant() === 'filled') {
       classes.push('p-filled');
     }
 

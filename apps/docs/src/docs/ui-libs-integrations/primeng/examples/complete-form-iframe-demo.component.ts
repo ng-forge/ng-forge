@@ -4,7 +4,43 @@ import { ExampleIframeComponent } from '../../../../app/components/example-ifram
 @Component({
   selector: 'complete-form-iframe-demo',
   imports: [ExampleIframeComponent],
-  template: `<example-iframe library="primeng" example="complete-form" height="800px" />`,
+  template: `<example-iframe library="primeng" example="complete-form" height="800px" [code]="code" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CompleteFormIframeDemoComponent {}
+export class CompleteFormIframeDemoComponent {
+  code = `{
+  fields: [
+    { key: 'firstName', type: 'input', label: 'First Name', required: true, minLength: 2,
+      validationMessages: { required: 'This field is required', minLength: 'Must be at least {requiredLength} characters' },
+      props: { placeholder: 'Enter your first name', variant: 'outlined' } },
+    { key: 'lastName', type: 'input', label: 'Last Name', required: true, minLength: 2,
+      validationMessages: { required: 'This field is required', minLength: 'Must be at least {requiredLength} characters' },
+      props: { placeholder: 'Enter your last name', variant: 'outlined' } },
+    { key: 'email', type: 'input', label: 'Email Address', required: true, email: true,
+      validationMessages: { required: 'This field is required', email: 'Please enter a valid email address' },
+      props: { type: 'email', placeholder: 'user@example.com', variant: 'outlined', hint: 'We will never share your email' } },
+    { key: 'age', type: 'input', label: 'Age', required: true, min: 18, max: 120,
+      validationMessages: { required: 'This field is required', min: 'Must be at least {min}', max: 'Must not exceed {max}' },
+      props: { type: 'number', placeholder: '18', variant: 'outlined' } },
+    { key: 'country', type: 'select', label: 'Country', required: true,
+      validationMessages: { required: 'This field is required' },
+      options: [
+        { value: 'us', label: 'United States' }, { value: 'uk', label: 'United Kingdom' },
+        { value: 'ca', label: 'Canada' }, { value: 'au', label: 'Australia' },
+        { value: 'de', label: 'Germany' }, { value: 'fr', label: 'France' }, { value: 'jp', label: 'Japan' }
+      ],
+      props: { placeholder: 'Select your country', variant: 'outlined' } },
+    { key: 'plan', type: 'select', label: 'Subscription Plan', required: true,
+      validationMessages: { required: 'This field is required' },
+      options: [
+        { value: 'free', label: 'Free - $0/month' }, { value: 'pro', label: 'Pro - $10/month' },
+        { value: 'enterprise', label: 'Enterprise - $50/month' }
+      ],
+      props: { placeholder: 'Choose a plan', variant: 'outlined' } },
+    { key: 'bio', type: 'textarea', label: 'Bio',
+      props: { placeholder: 'Tell us about yourself', variant: 'outlined', hint: 'Optional - share a bit about yourself' } },
+    { key: 'newsletter', type: 'checkbox', label: 'Subscribe to newsletter' },
+    { type: 'submit', key: 'submit', label: 'Create Account', props: { severity: 'success' } },
+  ],
+}`;
+}

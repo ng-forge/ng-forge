@@ -3,7 +3,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
 import { ValidatorConfig } from '../../models';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService } from '../registry';
+import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { applyValidator, applyValidators } from './validator-factory';
 
 describe('validator-factory', () => {

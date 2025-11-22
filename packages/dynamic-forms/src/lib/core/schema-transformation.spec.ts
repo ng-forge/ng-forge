@@ -5,7 +5,7 @@ import { form, schema } from '@angular/forms/signals';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
 import { FieldDef } from '../definitions';
 import { FieldTypeDefinition } from '../models/field-type';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './registry';
+import { RootFormRegistryService, SchemaRegistryService, FunctionRegistryService, FieldContextRegistryService } from './registry';
 import { applySchema, createSchemaFunction } from './schema-application';
 import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
 

@@ -76,7 +76,6 @@ describe('MatDatepickerFieldComponent', () => {
       datepickerInput.nativeElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      // Previous: expect(MaterialFormTestUtils.getFormValue(component).birthDate).toBeDefined();
       const formValue = MaterialFormTestUtils.getFormValue(component).birthDate;
       expect(formValue).toBeDefined();
       expect(formValue).toBeInstanceOf(Date);
@@ -136,7 +135,6 @@ describe('MatDatepickerFieldComponent', () => {
       });
 
       const datepickerInput = fixture.debugElement.query(By.directive(MatDatepickerInput));
-      // Previous: expect(datepickerInput).toBeTruthy()
       expect(datepickerInput).not.toBeNull();
       expect(datepickerInput.nativeElement.tagName.toLowerCase()).toBe('input');
       // Component-specific properties are tested at the component level
@@ -155,10 +153,9 @@ describe('MatDatepickerFieldComponent', () => {
       const datepickerInput = fixture.debugElement.query(By.directive(MatDatepickerInput));
       const formField = fixture.debugElement.query(By.css('mat-form-field'));
 
-      // Previous: expect(datepickerInput).toBeTruthy()
       expect(datepickerInput).not.toBeNull();
       expect(datepickerInput.nativeElement.tagName.toLowerCase()).toBe('input');
-      expect(formField.nativeElement.className).toContain('mat-form-field-appearance-fill');
+      expect(formField.nativeElement.className).toContain('mat-form-field-appearance-outline');
     });
 
     it('should not display hint when not provided', async () => {
@@ -251,7 +248,6 @@ describe('MatDatepickerFieldComponent', () => {
       expect(formValue.startDate).toEqual(new Date(2024, 0, 1));
       expect(formValue.endDate).toEqual(new Date(2024, 11, 31));
 
-      // Previous: expect(formValue.appointmentDate).toBeDefined();
       expect(formValue.appointmentDate).toBeDefined();
       expect(formValue.appointmentDate).toBeInstanceOf(Date);
       expect(formValue.appointmentDate?.getFullYear()).toBe(2024);
@@ -338,7 +334,6 @@ describe('MatDatepickerFieldComponent', () => {
       datepickers[0].nativeElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      // Previous: expect(formValue.startDate).toBeDefined();
       let formValue = MaterialFormTestUtils.getFormValue(component);
       expect(formValue.startDate).toBeDefined();
       expect(formValue.startDate).toBeInstanceOf(Date);
@@ -354,7 +349,6 @@ describe('MatDatepickerFieldComponent', () => {
       datepickers[1].nativeElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      // Previous: expect(formValue.startDate).toBeDefined(); expect(formValue.endDate).toBeDefined();
       formValue = MaterialFormTestUtils.getFormValue(component);
       // Verify startDate still has first change
       expect(formValue.startDate?.getFullYear()).toBe(2024);
@@ -469,7 +463,7 @@ describe('MatDatepickerFieldComponent', () => {
 
       // Verify default Material configuration is applied
       expect(datepickerInput).toBeTruthy();
-      expect(formField.nativeElement.className).toContain('mat-form-field-appearance-fill');
+      expect(formField.nativeElement.className).toContain('mat-form-field-appearance-outline');
     });
 
     it('should handle date inputs with special format requirements', async () => {

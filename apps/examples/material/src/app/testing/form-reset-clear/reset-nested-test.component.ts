@@ -28,7 +28,6 @@ export class ResetNestedTestComponent {
       {
         key: 'userInfo',
         type: 'group',
-        label: 'User Information',
         fields: [
           {
             key: 'firstName',

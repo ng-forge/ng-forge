@@ -1403,8 +1403,8 @@ describe('DynamicFormComponent', () => {
 
       expect(component.touched()).toBe(false);
 
-      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
-      const inputElement = testInput.nativeElement.querySelector('input');
+      const testInputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      const inputElement = testInputs[0].nativeElement.querySelector('input');
 
       // Focus then blur without changing value
       inputElement.dispatchEvent(new Event('focus'));
@@ -1496,8 +1496,8 @@ describe('DynamicFormComponent', () => {
       expect(component.disabled()).toBe(true);
 
       // Try to interact with the field
-      const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
-      const inputElement = testInput.nativeElement.querySelector('input');
+      const testInputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      const inputElement = testInputs[0].nativeElement.querySelector('input');
 
       const originalValue = component.formValue().firstName;
       inputElement.value = 'Jane';

@@ -121,7 +121,7 @@ describe('Page Orchestration Integration', () => {
 
     it('should generate warnings for empty pages', () => {
       const configWithEmptyPage: FormConfig = DynamicFormTestUtils.builder()
-        .pageField('emptyPage', [], 'Empty Page')
+        .pageField('emptyPage', [])
         .pageField('normalPage', [{ key: 'input1', type: 'input', label: 'Test' }], 'Normal Page')
         .build();
 
@@ -193,7 +193,6 @@ describe('Page Orchestration Integration', () => {
       eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
         pageChangeEvent = event;
       });
-
       // Emit next page event
       eventBus.dispatch(NextPageEvent);
       testResult.fixture.detectChanges();
@@ -338,7 +337,7 @@ describe('Form Mode Validation Edge Cases', () => {
           ],
         },
       ],
-    } as FormConfig;
+    } as any;
 
     const validation = FormModeValidator.validateFormConfiguration(deeplyNestedInvalidConfig.fields);
     expect(validation.isValid).toBe(false);

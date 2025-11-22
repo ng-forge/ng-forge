@@ -29,8 +29,6 @@ import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
-import { FormResetEvent } from './events/constants/form-reset.event';
-import { FormClearEvent } from './events/constants/form-clear.event';
 import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
 import { InferGlobalFormValue } from './models/types';
 import { flattenFields, flattenFieldsForRendering } from './utils';
@@ -42,7 +40,7 @@ import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryS
 import { detectFormMode, FormModeDetectionResult } from './models/types/form-mode';
 import { FormModeValidator } from './utils/form-validation/form-mode-validator';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
-import { PageChangeEvent } from './events';
+import { FormClearEvent, FormResetEvent, PageChangeEvent } from './events';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
 
 /**
@@ -98,12 +96,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
     >
       @if (formModeDetection().mode === 'paged') {
         <!-- Paged form: Use page orchestrator with page field definitions -->
-        <page-orchestrator
-          [pageFields]="pageFieldDefinitions()"
-          [form]="$any(form())"
-          [fieldSignalContext]="fieldSignalContext()"
-          [config]="{ initialPageIndex: 0 }"
-        />
+        <page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()" />
       } @else {
         <!-- Non-paged form: Render fields directly with grid system -->
         <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
@@ -129,6 +122,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
+  private readonly functionRegistry = inject(FunctionRegistryService);
 
   /**
    * Signal tracking field loading errors for error boundary pattern.
@@ -185,19 +179,17 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   // Memoized field signal context to avoid recreation for every field
-  readonly fieldSignalContext = computed(
-    (): FieldSignalContext<TModel> => ({
-      injector: this.injector,
-      value: this.value,
-      defaultValues: this.defaultValues,
-      form: this.form(),
-      defaultValidationMessages: this.config().defaultValidationMessages,
-    }),
-  );
+  readonly fieldSignalContext = computed<FieldSignalContext<TModel>>(() => ({
+    injector: this.injector,
+    value: this.value,
+    defaultValues: this.defaultValues,
+    form: this.form(),
+    defaultValidationMessages: this.config().defaultValidationMessages,
+  }));
 
   // Injector that provides FIELD_SIGNAL_CONTEXT for mappers and child components
-  private readonly fieldInjector = computed(() => {
-    return Injector.create({
+  private readonly fieldInjector = computed(() =>
+    Injector.create({
       parent: this.injector,
       providers: [
         {
@@ -205,8 +197,8 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
           useValue: this.fieldSignalContext(),
         },
       ],
-    });
-  });
+    }),
+  );
 
   // Memoized field registry raw access
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
@@ -299,12 +291,32 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const modeDetection = this.formModeDetection();
     const registry = this.rawFieldRegistry();
 
+    this.registerValidatorsFromConfig(config);
+
     if (config.fields && config.fields.length > 0) {
       return this.createFormSetupFromConfig(config.fields, modeDetection.mode, registry);
     }
 
     return this.createEmptyFormSetup(registry);
   });
+
+  private registerValidatorsFromConfig({ customFnConfig }: FormConfig<TFields>): void {
+    if (!customFnConfig) {
+      return;
+    }
+
+    // Register custom functions
+    if (customFnConfig.customFunctions) {
+      Object.entries(customFnConfig.customFunctions).forEach(([name, fn]) => {
+        this.functionRegistry.registerCustomFunction(name, fn);
+      });
+    }
+
+    // Set all validators from config - change detection is inside set methods
+    this.functionRegistry.setValidators(customFnConfig.validators);
+    this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
+    this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
+  }
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: 'paged' | 'non-paged', registry: Map<string, FieldTypeDefinition>) {
     // Use memoized functions for expensive operations with registry
@@ -462,6 +474,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   readonly disabled = computed(() => {
     const optionsDisabled = this.effectiveFormOptions().disabled;
     const formDisabled = this.form()().disabled();
+
     return optionsDisabled ?? formDisabled;
   });
 
@@ -541,7 +554,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   readonly events = outputFromObservable(this.eventBus.events$);
 
-  private readonly componentId = 'dynamic-forms';
+  private readonly componentId = 'dynamic-form';
 
   /**
    * Observable that emits when all components (pages + rows + groups + dynamic-form) are initialized.
@@ -564,7 +577,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       if (mode === 'paged' && pages.length > 0) {
         // Emit initialization for dynamic-form component in paged mode
         // This happens after the page orchestrator is set up
-        this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-forms', this.componentId);
+        this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
       }
     });
 
@@ -672,7 +685,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   }
 
   protected onFieldsInitialized(): void {
-    this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-forms', this.componentId);
+    this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
   }
 
   /**
@@ -722,7 +735,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
           if (count === 1) {
             // Only dynamic-form component, emit immediately when it initializes
             return this.eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
-              filter((event) => event.componentType === 'dynamic-forms' && event.componentId === this.componentId),
+              filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
               map(() => true),
               take(1), // Only take the first initialization event
             );

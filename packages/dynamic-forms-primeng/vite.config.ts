@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
           {
             browser: 'chromium',
             provider: playwright({
-              launch: {
+              launchOptions: {
                 args: chromeArgs,
               },
             }),
@@ -45,10 +45,10 @@ export default defineConfig(({ mode }) => {
         ],
         headless: true,
         fileParallelism: false,
-        slowTestThreshold: 10000,
+        slowTestThreshold: 1000,
       },
-      testTimeout: 30000,
-      hookTimeout: 30000,
+      testTimeout: 1000,
+      hookTimeout: 1000,
       include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       reporters: ['default'],
       coverage: {
