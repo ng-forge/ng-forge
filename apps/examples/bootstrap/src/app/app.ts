@@ -1,46 +1,49 @@
-import { Component, ElementRef, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, effect, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { fromEvent } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   imports: [RouterModule],
   selector: 'bs-example-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  host: {
+    '[attr.data-bs-theme]': 'theme()',
+  },
 })
-export class App implements OnInit, OnDestroy {
+export class App implements OnInit {
   protected title = 'Bootstrap Examples';
 
-  private elementRef = inject(ElementRef);
-  private isDark = false;
+  isDark = signal(false);
+  theme = computed(() => (this.isDark() ? 'dark' : 'light'));
 
-  private messageListener = (event: MessageEvent) => {
-    // Accept messages from any origin since we're in an iframe
-    if (event.data && event.data.type === 'theme-change') {
-      this.isDark = event.data.isDark;
-      this.updateTheme();
-    }
-  };
+  constructor() {
+    // Listen for theme change messages from parent window
+    fromEvent<MessageEvent>(window, 'message')
+      .pipe(
+        filter((event) => event.data?.type === 'theme-change'),
+        map((event) => event.data.isDark as boolean),
+        takeUntilDestroyed(),
+      )
+      .subscribe((isDark) => {
+        this.isDark.set(isDark);
+      });
 
-  private updateTheme(): void {
-    const theme = this.isDark ? 'dark' : 'light';
-    this.elementRef.nativeElement.setAttribute('data-bs-theme', theme);
-    // Also update document root for global dark mode CSS
-    if (this.isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Update document root when signal changes
+    effect(() => {
+      const darkMode = this.isDark();
+      if (darkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    });
   }
 
   ngOnInit(): void {
-    // Listen for theme changes from parent window
-    window.addEventListener('message', this.messageListener);
-
     // Request initial theme state from parent
     window.parent.postMessage({ type: 'request-theme' }, '*');
-  }
-
-  ngOnDestroy(): void {
-    window.removeEventListener('message', this.messageListener);
   }
 }

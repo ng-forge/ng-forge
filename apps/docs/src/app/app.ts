@@ -2,8 +2,8 @@ import { Component, effect, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
-import { map, startWith } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { fromEvent, map, startWith, filter } from 'rxjs';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   imports: [RouterModule, NgDocRootComponent, NgDocNavbarComponent, NgDocSidebarComponent, NgDocThemeToggleComponent],
@@ -37,13 +37,16 @@ export class App implements OnInit {
       });
     });
 
-    // Listen for theme requests from iframes
-    window.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'request-theme') {
+    // Listen for theme requests from iframes using fromEvent
+    fromEvent<MessageEvent>(window, 'message')
+      .pipe(
+        filter((event) => event.data?.type === 'request-theme'),
+        takeUntilDestroyed(),
+      )
+      .subscribe((event) => {
         // Send current theme to the requesting iframe
         event.source?.postMessage({ type: 'theme-change', isDark: this.isDark() }, '*' as any);
-      }
-    });
+      });
   }
 
   ngOnInit(): void {
