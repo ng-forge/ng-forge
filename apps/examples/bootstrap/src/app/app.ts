@@ -1,8 +1,9 @@
-import { Component, computed, explicitEffect, OnInit } from '@angular/core';
+import { Component, computed, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   imports: [RouterModule],

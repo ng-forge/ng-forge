@@ -1,9 +1,10 @@
-import { Component, explicitEffect, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
 import { fromEvent, map, startWith, filter } from 'rxjs';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   imports: [RouterModule, NgDocRootComponent, NgDocNavbarComponent, NgDocSidebarComponent, NgDocThemeToggleComponent],
