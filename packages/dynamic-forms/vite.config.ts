@@ -49,8 +49,8 @@ export default defineConfig(({ mode }) => {
         fileParallelism: false,
         slowTestThreshold: 1000,
       },
-      testTimeout: 60000,
-      hookTimeout: 60000,
+      testTimeout: 1000,
+      hookTimeout: 1000,
       include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       reporters: ['default'],
       coverage: {
