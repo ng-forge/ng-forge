@@ -104,10 +104,11 @@ export class FormConfigBuilder {
   }
 
   pageField(key: string, fields: FieldDef<any>[], title?: string): FormConfigBuilder {
+    const pageFields = title ? [{ key: `${key}-title`, type: 'text', label: title }, ...fields] : fields;
     return this.field({
       key,
       type: 'page',
-      fields: [{ key: `${key}-title`, type: 'text', label: title }, ...fields],
+      fields: pageFields,
     } as FieldDef<any>);
   }
 

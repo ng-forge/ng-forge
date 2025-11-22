@@ -39,7 +39,7 @@ export default defineConfig(() => {
           {
             browser: 'chromium',
             provider: playwright({
-              launch: {
+              launchOptions: {
                 args: chromeArgs,
               },
             }),
@@ -47,10 +47,10 @@ export default defineConfig(() => {
         ],
         headless: true,
         fileParallelism: false,
-        slowTestThreshold: 10000,
+        slowTestThreshold: 1000,
       },
-      testTimeout: 30000,
-      hookTimeout: 30000,
+      testTimeout: 1000,
+      hookTimeout: 1000,
       include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       setupFiles: ['src/test-setup.ts'],
       reporters: ['default'],

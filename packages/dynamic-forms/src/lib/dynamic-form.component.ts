@@ -685,7 +685,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   }
 
   protected onFieldsInitialized(): void {
-    this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-forms', this.componentId);
+    this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
   }
 
   /**

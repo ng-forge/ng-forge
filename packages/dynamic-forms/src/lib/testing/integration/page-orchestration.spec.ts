@@ -6,7 +6,6 @@ import { FormModeValidator } from '../../utils/form-validation/form-mode-validat
 import { DynamicFormTestResult, DynamicFormTestUtils } from '../dynamic-form-test-utils';
 import { FormConfig } from '../../models/form-config';
 import { provideDynamicForm } from '../../providers';
-import { firstValueFrom } from 'rxjs';
 
 describe('Page Orchestration Integration', () => {
   let testResult: DynamicFormTestResult;
@@ -122,7 +121,7 @@ describe('Page Orchestration Integration', () => {
 
     it('should generate warnings for empty pages', () => {
       const configWithEmptyPage: FormConfig = DynamicFormTestUtils.builder()
-        .pageField('emptyPage', [], 'Empty Page')
+        .pageField('emptyPage', [])
         .pageField('normalPage', [{ key: 'input1', type: 'input', label: 'Test' }], 'Normal Page')
         .build();
 
@@ -189,17 +188,20 @@ describe('Page Orchestration Integration', () => {
       // Get the EventBus from the component's dependency injection context
       eventBus = testResult.fixture.debugElement.injector.get(EventBus);
 
-      const pageChangeEvent = await firstValueFrom(eventBus.on<PageChangeEvent>('page-change'));
+      let pageChangeEvent: PageChangeEvent | null = null;
 
+      eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
+        pageChangeEvent = event;
+      });
       // Emit next page event
       eventBus.dispatch(NextPageEvent);
       testResult.fixture.detectChanges();
       await DynamicFormTestUtils.waitForInit(testResult.fixture);
 
       expect(pageChangeEvent).toBeTruthy();
-      expect(pageChangeEvent.currentPageIndex).toBe(1);
-      expect(pageChangeEvent.totalPages).toBe(2);
-      expect(pageChangeEvent.previousPageIndex).toBe(0);
+      expect(pageChangeEvent!.currentPageIndex).toBe(1);
+      expect(pageChangeEvent!.totalPages).toBe(2);
+      expect(pageChangeEvent!.previousPageIndex).toBe(0);
     });
 
     it('should handle navigation boundary constraints', async () => {

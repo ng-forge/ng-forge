@@ -1,4 +1,4 @@
-import { detectFormMode, FormModeDetectionResult } from '../../models/types/form-mode';
+import { detectFormMode, FormModeDetectionResult, isPageField } from '../../models/types/form-mode';
 import { RegisteredFieldTypes } from '../../models/registry';
 import { validatePageNesting } from '../../definitions/default/page-field';
 
@@ -23,11 +23,10 @@ export class FormModeValidator {
       // Validate each page field individually
       for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
-        if (field.type === 'page') {
-          const pageField = field as any;
-          if (!validatePageNesting(pageField)) {
+        if (isPageField(field)) {
+          if (!validatePageNesting(field)) {
             additionalErrors.push(
-              `Page field at index ${i} (key: "${pageField.key || 'unknown'}") contains nested page fields, which is not allowed.`,
+              `Page field at index ${i} (key: "${field.key || 'unknown'}") contains nested page fields, which is not allowed.`,
             );
           }
         }
@@ -83,10 +82,9 @@ export class FormModeValidator {
     if (modeDetection.mode === 'paged') {
       for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
-        if (field.type === 'page') {
-          const pageField = field as any;
-          if (!pageField.fields || pageField.fields.length === 0) {
-            warnings.push(`Page field at index ${i} (key: "${pageField.key || 'unknown'}") contains no fields and will render as empty.`);
+        if (isPageField(field)) {
+          if (!field.fields || field.fields.length === 0) {
+            warnings.push(`Page field at index ${i} (key: "${field.key || 'unknown'}") contains no fields and will render as empty.`);
           }
         }
       }
