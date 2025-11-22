@@ -13,6 +13,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   styleUrl: './app.scss',
   host: {
     '[attr.data-theme]': 'isDark() ? "dark" : "light"',
+    '[class.dark]': 'isDark()',
   },
 })
 export class App implements OnInit {
@@ -28,15 +29,10 @@ export class App implements OnInit {
   );
 
   constructor() {
-    // Update document root data-theme attribute when signal changes
+    // Update document root for Ionic's dark palette
     explicitEffect([this.isDark], ([isDark]) => {
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-      // Also toggle .dark class for Ionic's dark palette
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      document.documentElement.classList.toggle('dark', isDark);
     });
   }
 
