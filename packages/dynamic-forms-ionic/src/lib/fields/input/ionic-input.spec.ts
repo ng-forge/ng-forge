@@ -148,7 +148,6 @@ describe('IonicInputFieldComponent', () => {
       });
 
       const ionInput = fixture.debugElement.query(By.css('df-ionic-input ion-input'));
-
     });
 
     it('should not display helper text when not provided', async () => {

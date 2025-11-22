@@ -60,7 +60,6 @@ describe('IonicSliderFieldComponent', () => {
       rangeElement.value = 75;
       rangeElement.dispatchEvent(new CustomEvent('ionChange', { detail: { value: 75 } }));
       fixture.detectChanges();
-
     });
 
     it('should reflect external value changes in slider', async () => {

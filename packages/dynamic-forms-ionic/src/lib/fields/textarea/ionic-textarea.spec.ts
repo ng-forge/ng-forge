@@ -318,7 +318,6 @@ describe('IonicTextareaFieldComponent', () => {
       });
 
       fixture.detectChanges();
-
     });
 
     it('should handle default rows configuration', async () => {

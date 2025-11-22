@@ -401,7 +401,6 @@ describe('IonicDatepickerFieldComponent', () => {
       const ionInput = fixture.debugElement.query(By.css('df-ionic-datepicker ion-input'));
       ionInput.nativeElement.dispatchEvent(new Event('blur'));
       fixture.detectChanges();
-
     });
 
     it('should handle dates at boundaries', async () => {

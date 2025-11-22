@@ -57,7 +57,6 @@ describe('IonicButtonFieldComponent', () => {
       //       const button = fixture.debugElement.query(By.css('ion-button button'));
 
       //       await IonicFormTestUtils.simulateIonicButtonClick(fixture, 'ion-button button');
-
     });
 
     it('should display button label correctly', async () => {

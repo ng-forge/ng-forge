@@ -209,8 +209,7 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       });
 
       const inputs = fixture.debugElement.queryAll(By.css('ion-checkbox input'));
-      inputs.forEach((input) => {
-      });
+      inputs.forEach((input) => {});
     });
 
     it('should handle disabled individual options', async () => {
@@ -282,8 +281,7 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       });
 
       const ionCheckboxes = fixture.debugElement.queryAll(By.css('ion-checkbox'));
-      ionCheckboxes.forEach((checkbox) => {
-      });
+      ionCheckboxes.forEach((checkbox) => {});
     });
 
     it('should handle justify property', async () => {
@@ -305,8 +303,7 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       });
 
       const ionCheckboxes = fixture.debugElement.queryAll(By.css('ion-checkbox'));
-      ionCheckboxes.forEach((checkbox) => {
-      });
+      ionCheckboxes.forEach((checkbox) => {});
     });
 
     it('should handle different color options', async () => {
@@ -328,8 +325,7 @@ describe('IonicMultiCheckboxFieldComponent', () => {
       });
 
       const ionCheckboxes = fixture.debugElement.queryAll(By.css('ion-checkbox'));
-      ionCheckboxes.forEach((checkbox) => {
-      });
+      ionCheckboxes.forEach((checkbox) => {});
     });
   });
 
