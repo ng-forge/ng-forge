@@ -20,12 +20,34 @@ export class App implements OnInit {
   isDark = toSignal(
     this.themeService.themeChanges().pipe(
       startWith(this.themeService.currentTheme),
-      map((theme) => theme === 'dark'),
+      map((theme) => {
+        // For 'auto' mode, check if document has .dark class applied by ng-doc
+        // For explicit 'dark' or 'light', use the theme value
+        if (theme === 'auto') {
+          return document.documentElement.classList.contains('dark');
+        }
+        return theme === 'dark';
+      }),
     ),
     { requireSync: true },
   );
 
   constructor() {
+    // Observe .dark class changes on document for auto mode
+    // This ensures we detect system preference changes
+    const observer = new MutationObserver(() => {
+      const currentTheme = this.themeService.currentTheme;
+      if (currentTheme === 'auto') {
+        // Manually trigger a theme change check
+        this.themeService.set('auto');
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
     // Send dark mode changes to all iframes (example apps)
     effect(() => {
       const darkMode = this.isDark();
@@ -51,5 +73,11 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.themeService.set('auto');
+
+    // Recheck dark mode after ng-doc has initialized
+    // This handles the initial load case where .dark class might not be applied yet
+    setTimeout(() => {
+      this.themeService.set('auto'); // Trigger re-evaluation
+    }, 100);
   }
 }
