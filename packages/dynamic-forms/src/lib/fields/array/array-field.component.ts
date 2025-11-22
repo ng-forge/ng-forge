@@ -269,7 +269,7 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
       .catch((error) => {
         if (!this.destroyRef.destroyed) {
           console.error(
-            `[ArrayField] Failed to load component for field type '${template.type}' at index ${index} ` +
+            `[Dynamic Forms] Failed to load component for field type '${template.type}' at index ${index} ` +
               `within array '${arrayKey}'. Ensure the field type is registered in your field registry.`,
             error,
           );

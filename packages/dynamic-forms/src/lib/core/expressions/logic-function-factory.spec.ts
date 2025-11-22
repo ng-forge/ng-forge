@@ -196,7 +196,7 @@ describe('logic-function-factory', () => {
 
         const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('Custom function not found:', 'nonExistentFunction');
+        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Custom function not found:', 'nonExistentFunction');
 
         consoleSpy.mockRestore();
       });
@@ -215,7 +215,7 @@ describe('logic-function-factory', () => {
 
         const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('Error executing custom function:', 'throwingFn', expect.any(Error));
+        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Error executing custom function:', 'throwingFn', expect.any(Error));
 
         consoleSpy.mockRestore();
       });

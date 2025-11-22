@@ -54,9 +54,10 @@ export class FormModeValidator {
     const result = this.validateFormConfiguration(fields);
 
     if (!result.isValid) {
-      const errorMessage = [`Invalid form configuration (${result.mode} mode):`, ...result.errors.map((error) => `  - ${error}`)].join(
-        '\n',
-      );
+      const errorMessage = [
+        `[Dynamic Forms] Invalid form configuration (${result.mode} mode):`,
+        ...result.errors.map((error) => `  - ${error}`),
+      ].join('\n');
 
       throw new Error(errorMessage);
     }

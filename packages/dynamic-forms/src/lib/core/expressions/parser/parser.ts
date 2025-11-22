@@ -23,7 +23,7 @@ export class Parser {
     this.current = 0;
 
     if (this.isAtEnd()) {
-      throw new ExpressionParserError('Empty expression', 0, this.expression);
+      throw new ExpressionParserError('[Dynamic Forms] Empty expression', 0, this.expression);
     }
 
     return this.parseExpression();
@@ -122,7 +122,7 @@ export class Parser {
       if (this.match(TokenType.DOT)) {
         // Member access: obj.property
         if (!this.check(TokenType.IDENTIFIER)) {
-          throw new ExpressionParserError('Expected property name after "."', this.peek().position, this.expression);
+          throw new ExpressionParserError('[Dynamic Forms] Expected property name after "."', this.peek().position, this.expression);
         }
         const property = this.advance().value;
         node = { type: 'MemberAccess', object: node, property };
@@ -184,7 +184,7 @@ export class Parser {
       return expr;
     }
 
-    throw new ExpressionParserError(`Unexpected token: ${this.peek().value}`, this.peek().position, this.expression);
+    throw new ExpressionParserError(`[Dynamic Forms] Unexpected token: ${this.peek().value}`, this.peek().position, this.expression);
   }
 
   private parseArgumentList(): ASTNode[] {
@@ -246,6 +246,6 @@ export class Parser {
   private consume(type: TokenType, message: string): Token {
     if (this.check(type)) return this.advance();
 
-    throw new ExpressionParserError(message, this.peek().position, this.expression);
+    throw new ExpressionParserError(`[Dynamic Forms] ${message}`, this.peek().position, this.expression);
   }
 }

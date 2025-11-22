@@ -171,7 +171,7 @@ export class Evaluator {
         return this.evaluateArrayLiteral(node);
 
       default:
-        throw new ExpressionParserError(`Unknown node type: ${(node as { type: string }).type}`, 0, this.expression);
+        throw new ExpressionParserError(`[Dynamic Forms] Unknown node type: ${(node as { type: string }).type}`, 0, this.expression);
     }
   }
 
@@ -191,7 +191,11 @@ export class Evaluator {
 
     // Block access to dangerous properties that could leak information or enable attacks
     if (BLOCKED_PROPERTIES.has(node.property)) {
-      throw new ExpressionParserError(`Property "${node.property}" is not accessible for security reasons`, 0, this.expression);
+      throw new ExpressionParserError(
+        `[Dynamic Forms] Property "${node.property}" is not accessible for security reasons`,
+        0,
+        this.expression,
+      );
     }
 
     // Allow property access on plain objects and primitives
@@ -244,7 +248,7 @@ export class Evaluator {
         return left || right;
 
       default:
-        throw new ExpressionParserError(`Unknown binary operator: ${node.operator}`, 0, this.expression);
+        throw new ExpressionParserError(`[Dynamic Forms] Unknown binary operator: ${node.operator}`, 0, this.expression);
     }
   }
 
@@ -261,14 +265,14 @@ export class Evaluator {
       case 'typeof':
         return typeof operand;
       default:
-        throw new ExpressionParserError(`Unknown unary operator: ${node.operator}`, 0, this.expression);
+        throw new ExpressionParserError(`[Dynamic Forms] Unknown unary operator: ${node.operator}`, 0, this.expression);
     }
   }
 
   private evaluateCallExpression(node: { callee: ASTNode; arguments: ASTNode[] }): unknown {
     // Only allow method calls (member access), not arbitrary function calls
     if (node.callee.type !== 'MemberAccess') {
-      throw new ExpressionParserError('Only method calls are allowed, not arbitrary function calls', 0, this.expression);
+      throw new ExpressionParserError('[Dynamic Forms] Only method calls are allowed, not arbitrary function calls', 0, this.expression);
     }
 
     const obj = this.evaluate(node.callee.object);
@@ -276,12 +280,16 @@ export class Evaluator {
 
     // Block access to dangerous properties (must check before method call)
     if (BLOCKED_PROPERTIES.has(methodName)) {
-      throw new ExpressionParserError(`Property "${methodName}" is not accessible for security reasons`, 0, this.expression);
+      throw new ExpressionParserError(
+        `[Dynamic Forms] Property "${methodName}" is not accessible for security reasons`,
+        0,
+        this.expression,
+      );
     }
 
     // Check if the method is in the whitelist
     if (!this.isMethodSafe(obj, methodName)) {
-      throw new ExpressionParserError(`Method "${methodName}" is not allowed for security reasons`, 0, this.expression);
+      throw new ExpressionParserError(`[Dynamic Forms] Method "${methodName}" is not allowed for security reasons`, 0, this.expression);
     }
 
     // Evaluate arguments

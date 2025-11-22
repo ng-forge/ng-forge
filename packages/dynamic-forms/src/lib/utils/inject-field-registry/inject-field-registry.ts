@@ -104,7 +104,7 @@ export function injectFieldRegistry() {
       const fieldType = registry.get(name);
 
       if (!fieldType) {
-        throw new Error(`Field type "${name}" is not registered`);
+        throw new Error(`[Dynamic Forms] Field type "${name}" is not registered`);
       }
 
       // Handle async loading
@@ -114,11 +114,11 @@ export function injectFieldRegistry() {
           // Handle ES module imports - extract default export if needed
           return (result as any)?.default || result;
         } catch (error) {
-          throw new Error(`Failed to load component for field type "${name}": ${error}`);
+          throw new Error(`[Dynamic Forms] Failed to load component for field type "${name}": ${error}`);
         }
       }
 
-      throw new Error(`Field type "${name}" has no component or loadComponent function`);
+      throw new Error(`[Dynamic Forms] Field type "${name}" has no component or loadComponent function`);
     },
 
     /**

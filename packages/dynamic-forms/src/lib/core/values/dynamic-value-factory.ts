@@ -17,7 +17,7 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
       // Use secure AST-based expression parser
       return ExpressionParser.evaluate(expression, evaluationContext) as TReturn;
     } catch (error) {
-      console.error('Error evaluating dynamic expression:', expression, error);
+      console.error('[Dynamic Forms] Error evaluating dynamic expression:', expression, error);
       return undefined as TReturn;
     }
   };

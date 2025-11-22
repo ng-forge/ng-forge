@@ -7,7 +7,7 @@ export function createTypePredicateFunction<T = unknown>(predicate: string): (va
       const func = new Function('value', `return ${predicate};`);
       return func(value);
     } catch (error) {
-      console.error('Error evaluating type predicate:', predicate, error);
+      console.error('[Dynamic Forms] Error evaluating type predicate:', predicate, error);
       return false;
     }
   };
