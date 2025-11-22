@@ -803,6 +803,7 @@ describe('DynamicFormComponent', () => {
       const firstNameInput = fixture.debugElement.queryAll(
         (by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent,
       )[0];
+      expect(firstNameInput).toBeDefined();
       const firstNameElement = firstNameInput.nativeElement.querySelector('input');
       firstNameElement.value = 'Jane';
       firstNameElement.dispatchEvent(new Event('input'));
@@ -819,6 +820,7 @@ describe('DynamicFormComponent', () => {
 
       // Update checkbox
       const checkboxInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestCheckboxHarnessComponent);
+      expect(checkboxInput).not.toBeNull();
       const checkboxElement = checkboxInput.nativeElement.querySelector('input[type="checkbox"]');
       checkboxElement.checked = true;
       checkboxElement.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1344,6 +1346,7 @@ describe('DynamicFormComponent', () => {
 
       // Find and interact with the input
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(testInput).not.toBeNull();
       const inputElement = testInput.nativeElement.querySelector('input');
 
       // Simulate user interaction
@@ -1384,6 +1387,7 @@ describe('DynamicFormComponent', () => {
 
       // Touch first field
       const inputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(inputs.length).toBeGreaterThan(0);
       const firstInput = inputs[0].nativeElement.querySelector('input');
 
       firstInput.dispatchEvent(new Event('focus'));
@@ -1414,6 +1418,7 @@ describe('DynamicFormComponent', () => {
       expect(component.touched()).toBe(false);
 
       const testInputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(testInputs.length).toBeGreaterThan(0);
       const inputElement = testInputs[0].nativeElement.querySelector('input');
 
       // Focus then blur without changing value
@@ -1507,6 +1512,7 @@ describe('DynamicFormComponent', () => {
 
       // Try to interact with the field
       const testInputs = fixture.debugElement.queryAll((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
+      expect(testInputs.length).toBeGreaterThan(0);
       const inputElement = testInputs[0].nativeElement.querySelector('input');
 
       const originalValue = component.formValue().firstName;
