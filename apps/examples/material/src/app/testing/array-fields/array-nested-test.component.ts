@@ -68,39 +68,44 @@ export class ArrayNestedTestComponent {
         type: 'array',
         fields: [
           {
-            key: 'user',
-            type: 'group',
+            type: 'row',
             fields: [
               {
-                key: 'firstName',
-                type: 'input',
-                label: 'First Name',
-                col: 6,
-              },
-              {
-                key: 'lastName',
-                type: 'input',
-                label: 'Last Name',
-                col: 6,
-              },
-              {
-                key: 'role',
-                type: 'select',
-                label: 'Role',
-                options: [
-                  { value: 'admin', label: 'Admin' },
-                  { value: 'user', label: 'User' },
+                key: 'user',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'firstName',
+                    type: 'input',
+                    label: 'First Name',
+                    col: 6,
+                  },
+                  {
+                    key: 'lastName',
+                    type: 'input',
+                    label: 'Last Name',
+                    col: 6,
+                  },
+                  {
+                    key: 'role',
+                    type: 'select',
+                    label: 'Role',
+                    options: [
+                      { value: 'admin', label: 'Admin' },
+                      { value: 'user', label: 'User' },
+                    ],
+                  },
                 ],
+              },
+              {
+                key: 'addUserButton',
+                type: 'addArrayItem',
+                label: 'Add User',
+                className: 'array-add-button',
               },
             ],
           },
         ],
-      },
-      {
-        key: 'addUserButton',
-        type: 'addArrayItem',
-        label: 'Add User',
-        className: 'array-add-button',
       },
     ],
   } as const satisfies FormConfig;

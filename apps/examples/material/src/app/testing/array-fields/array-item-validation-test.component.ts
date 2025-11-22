@@ -60,31 +60,36 @@ export class ArrayItemValidationTestComponent {
         type: 'array',
         fields: [
           {
-            key: 'member',
-            type: 'group',
+            type: 'row',
             fields: [
               {
-                key: 'name',
-                type: 'input',
-                label: 'Name',
-                required: true,
+                key: 'member',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'name',
+                    type: 'input',
+                    label: 'Name',
+                    required: true,
+                  },
+                  {
+                    key: 'email',
+                    type: 'input',
+                    label: 'Email',
+                    required: true,
+                    email: true,
+                  },
+                ],
               },
               {
-                key: 'email',
-                type: 'input',
-                label: 'Email',
-                required: true,
-                email: true,
+                key: 'addMemberButton',
+                type: 'addArrayItem',
+                label: 'Add Member',
+                className: 'array-add-button',
               },
             ],
           },
         ],
-      },
-      {
-        key: 'addMemberButton',
-        type: 'addArrayItem',
-        label: 'Add Member',
-        className: 'array-add-button',
       },
     ],
   } as const satisfies FormConfig;
