@@ -12,7 +12,8 @@ export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
 export type InputTypeToValueType<T extends InputType> = T extends 'number' ? number : string;
 
 /**
- * Props for input fields with optional inputType specification
+ * Props for input fields with optional inputType specification.
+ * This is a generic interface that can be extended by framework-specific implementations.
  */
 export interface InputProps<T extends InputType = InputType> {
   /**
@@ -25,27 +26,73 @@ export interface InputProps<T extends InputType = InputType> {
 }
 
 /**
- * Input field definition with type-safe value inference based on inputType.
+ * Generic input field definition. Can be extended by framework-specific implementations.
  *
  * @example
- * // String input (default)
- * const textField: InputField = {
- *   type: 'input',
- *   key: 'name',
- *   props: { type: 'text' },
- *   value: 'hello' // string
- * };
- *
- * @example
- * // Number input
- * const numberField: InputField<InputProps<'number'>> = {
- *   type: 'input',
- *   key: 'age',
- *   props: { type: 'number' },
- *   value: 25 // number
- * };
+ * // Framework extension
+ * interface MaterialInputProps extends InputProps<'text'> {
+ *   color?: 'primary' | 'accent';
+ * }
+ * type MaterialInputField = InputField<MaterialInputProps>;
  */
 export interface InputField<TProps extends InputProps<any> = InputProps>
   extends BaseValueField<TProps, TProps extends InputProps<infer T> ? InputTypeToValueType<T> : string> {
   type: 'input';
 }
+
+// ============================================================================
+// Strict Type-Safe Variants (for direct usage with automatic type inference)
+// ============================================================================
+
+/**
+ * Number input field with strict number value type
+ */
+interface NumberInputField extends BaseValueField<InputProps<'number'>, number> {
+  type: 'input';
+  props: { type: 'number'; placeholder?: DynamicText };
+}
+
+/**
+ * Text-based input field with strict string value type
+ */
+interface TextInputField extends BaseValueField<InputProps<'text' | 'email' | 'password' | 'tel' | 'url'>, string> {
+  type: 'input';
+  props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url'; placeholder?: DynamicText };
+}
+
+/**
+ * Strict type-safe input field with automatic value type inference.
+ * Use this for direct field definitions to get full type safety without explicit generics.
+ *
+ * TypeScript will automatically infer the correct value type based on props.type:
+ * - props.type: 'number' → value must be number
+ * - props.type: 'text' | 'email' | 'password' | 'tel' | 'url' → value must be string
+ *
+ * @example
+ * // String input (text is default)
+ * const textField: StrictInputField = {
+ *   type: 'input',
+ *   key: 'name',
+ *   props: { type: 'text' },
+ *   value: 'hello' // ✓ string
+ * };
+ *
+ * @example
+ * // Number input with automatic type checking
+ * const numberField: StrictInputField = {
+ *   type: 'input',
+ *   key: 'age',
+ *   props: { type: 'number' },
+ *   value: 25 // ✓ number (string would be a type error!)
+ * };
+ *
+ * @example
+ * // Type error example
+ * const invalid: StrictInputField = {
+ *   type: 'input',
+ *   key: 'age',
+ *   props: { type: 'number' },
+ *   value: 'hello' // ✗ Type error: string not assignable to number
+ * };
+ */
+export type StrictInputField = NumberInputField | TextInputField;
