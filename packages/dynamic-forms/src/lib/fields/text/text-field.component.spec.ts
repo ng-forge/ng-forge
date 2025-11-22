@@ -38,7 +38,6 @@ describe('TextFieldComponent', () => {
 
   it('should render text content in paragraph by default', () => {
     const element = fixture.nativeElement.querySelector('p');
-    // ITERATION 6 FIX: Verify element is correct HTML type
     // Previous: expect(element).toBeTruthy()
     expect(element).not.toBeNull();
     expect(element).toBeInstanceOf(HTMLParagraphElement);
@@ -55,7 +54,6 @@ describe('TextFieldComponent', () => {
     fixture.detectChanges();
 
     const h1Element = fixture.nativeElement.querySelector('h1');
-    // ITERATION 6 FIX: Verify element is correct HTML heading type
     // Previous: expect(h1Element).toBeTruthy()
     expect(h1Element).not.toBeNull();
     expect(h1Element).toBeInstanceOf(HTMLHeadingElement);
@@ -70,7 +68,6 @@ describe('TextFieldComponent', () => {
       fixture.detectChanges();
 
       const element = fixture.nativeElement.querySelector(elementType);
-      // ITERATION 6 FIX: Verify element exists and is HTML element
       // Previous: expect(element).toBeTruthy()
       expect(element).not.toBeNull();
       expect(element).toBeInstanceOf(HTMLElement);

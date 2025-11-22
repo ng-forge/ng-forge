@@ -76,7 +76,6 @@ describe('MatDatepickerFieldComponent', () => {
       datepickerInput.nativeElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      // ITERATION 1 FIX: Verify form value updated with correct date values
       // Previous: expect(MaterialFormTestUtils.getFormValue(component).birthDate).toBeDefined();
       const formValue = MaterialFormTestUtils.getFormValue(component).birthDate;
       expect(formValue).toBeDefined();
@@ -137,7 +136,6 @@ describe('MatDatepickerFieldComponent', () => {
       });
 
       const datepickerInput = fixture.debugElement.query(By.directive(MatDatepickerInput));
-      // ITERATION 3 FIX: Verify datepicker input is correct instance
       // Previous: expect(datepickerInput).toBeTruthy()
       expect(datepickerInput).not.toBeNull();
       expect(datepickerInput.nativeElement.tagName.toLowerCase()).toBe('input');
@@ -157,7 +155,6 @@ describe('MatDatepickerFieldComponent', () => {
       const datepickerInput = fixture.debugElement.query(By.directive(MatDatepickerInput));
       const formField = fixture.debugElement.query(By.css('mat-form-field'));
 
-      // ITERATION 3 FIX: Verify datepicker input is correct instance
       // Previous: expect(datepickerInput).toBeTruthy()
       expect(datepickerInput).not.toBeNull();
       expect(datepickerInput.nativeElement.tagName.toLowerCase()).toBe('input');
@@ -254,7 +251,6 @@ describe('MatDatepickerFieldComponent', () => {
       expect(formValue.startDate).toEqual(new Date(2024, 0, 1));
       expect(formValue.endDate).toEqual(new Date(2024, 11, 31));
 
-      // ITERATION 1 FIX: Verify appointmentDate is the correct date, not just defined
       // Previous: expect(formValue.appointmentDate).toBeDefined();
       expect(formValue.appointmentDate).toBeDefined();
       expect(formValue.appointmentDate).toBeInstanceOf(Date);
@@ -342,7 +338,6 @@ describe('MatDatepickerFieldComponent', () => {
       datepickers[0].nativeElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      // ITERATION 1 FIX: Verify startDate changed to correct new date
       // Previous: expect(formValue.startDate).toBeDefined();
       let formValue = MaterialFormTestUtils.getFormValue(component);
       expect(formValue.startDate).toBeDefined();
@@ -359,7 +354,6 @@ describe('MatDatepickerFieldComponent', () => {
       datepickers[1].nativeElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      // ITERATION 1 FIX: Verify both dates have correct values after sequential changes
       // Previous: expect(formValue.startDate).toBeDefined(); expect(formValue.endDate).toBeDefined();
       formValue = MaterialFormTestUtils.getFormValue(component);
       // Verify startDate still has first change

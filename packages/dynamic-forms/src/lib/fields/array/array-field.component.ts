@@ -108,7 +108,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const arrayFieldTree = childrenMap.get(arrayKey);
     if (!arrayFieldTree) return [];
 
-    // Get the array items from the array FieldTree's structure
     const arrayItemsMap = arrayFieldTree.structure?.childrenMap?.();
     if (!arrayItemsMap) return [];
 
@@ -117,7 +116,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     return Array.from(arrayItemsMap.values());
   });
 
-  // Track the current component refs to avoid recreating them
   private currentComponents: ComponentRef<FormUiControl>[] = [];
 
   // TODO: Eliminate flicker when adding/removing array items
@@ -131,8 +129,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   fields = toSignal(
     toObservable(this.arrayFieldTrees).pipe(
       switchMap((fieldTrees: readonly FieldTree<unknown>[]) => {
-        // Only clear and recreate if the array length changed
-        // This prevents re-rendering when individual field values change
         if (fieldTrees.length !== this.currentComponents.length) {
           this.vcr.clear();
           this.currentComponents = [];
@@ -141,7 +137,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
             return of([]);
           }
 
-          // Create new components
           return forkJoin(this.mapFieldTrees(fieldTrees)).pipe(
             map((components) => {
               this.currentComponents = components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp);
@@ -150,7 +145,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
           );
         }
 
-        // Return existing components (array length hasn't changed)
         return of(this.currentComponents);
       }),
     ),
@@ -258,12 +252,10 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
         const valueHandling = this.fieldRegistry.raw.get(template.type)?.valueHandling || 'include';
 
-        // Handle flatten types (row/page) differently
         if (valueHandling === 'flatten' && 'fields' in template && template.fields) {
           return this.createFlattenTypeComponent(componentType as Type<FormUiControl>, fieldTree, template, index);
         }
 
-        // For regular types (input, group, etc.), pass FieldTree directly
         return this.createRegularComponent(componentType as Type<FormUiControl>, fieldTree, template, index);
       })
       .catch((error) => {
@@ -311,7 +303,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
       })),
     ];
 
-    // Add optional bindings from template
     if ('label' in template && template.label) {
       bindings.push(inputBinding('label', () => template.label));
     }

@@ -88,7 +88,6 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper that breaks Material projection
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;

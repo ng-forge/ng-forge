@@ -114,7 +114,6 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   // Helper methods to convert Date to string for HTML attributes

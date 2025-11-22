@@ -53,7 +53,6 @@ export default class PrimeButtonFieldComponent<TEvent extends FormEvent> impleme
   readonly eventArgs = input<EventArgs>();
   readonly props = input<PrimeButtonProps>();
 
-  // Array item context for token resolution (only set for add/remove array item buttons)
   readonly eventContext = input<ArrayItemContext>();
 
   buttonTestId = computed(() => `${this.props()?.type}-${this.key()}`);

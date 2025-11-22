@@ -53,7 +53,6 @@ export default class IonicButtonFieldComponent<TEvent extends FormEvent> impleme
   readonly eventArgs = input<EventArgs>();
   readonly props = input<IonicButtonProps>();
 
-  // Array item context for token resolution (only set for add/remove array item buttons)
   readonly eventContext = input<ArrayItemContext>();
 
   buttonTestId = computed(() => `${this.props()?.type || 'button'}-${this.key()}`);

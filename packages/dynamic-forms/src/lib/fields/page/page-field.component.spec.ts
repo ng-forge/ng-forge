@@ -11,7 +11,6 @@ describe('PageFieldComponent', () => {
     };
 
     const { component } = setupSimpleTest(PageFieldComponent, { field, pageIndex: 0, isVisible: true });
-    // ITERATION 6 FIX: Verify component is correct type
     // Previous: expect(component).toBeTruthy()
     expect(component).toBeDefined();
     expect(component).toBeInstanceOf(PageFieldComponent);
