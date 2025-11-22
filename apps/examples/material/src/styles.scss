@@ -44,6 +44,14 @@ html,
 body {
   height: 100%;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: white;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+html.dark,
+html.dark body {
+  background-color: #303030;
+  color: rgba(255, 255, 255, 0.87);
 }
 
 // ============================================
