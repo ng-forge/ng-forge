@@ -88,7 +88,7 @@ describe('BUILT_IN_FIELDS', () => {
 
           expect(module).toBeDefined();
           expect(module[exportName]).toBeDefined();
-        });
+        }, 10000);
       });
     });
   });

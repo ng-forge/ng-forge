@@ -504,6 +504,7 @@ describe('schema-builder', () => {
           },
         ];
         const result = fieldsToDefaultValues(fields, registry);
+        // Row fields are presentational and should not contribute to form values
         expect(result).toEqual({});
       });
     });
@@ -593,7 +594,7 @@ describe('schema-builder', () => {
           },
         ];
         const result = fieldsToDefaultValues(fields, registry);
-        // Page fields with flatten don't contribute to default values when standalone
+        // Page fields are presentational and should not contribute to form values
         expect(result).toEqual({});
       });
 
