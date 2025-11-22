@@ -271,7 +271,7 @@ describe('SignalFormsAdapterService Unit Tests', () => {
       const result = evaluateCondition(missingFunctionExpression, context);
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith('Custom function not found:', 'nonExistentFunction');
+      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Custom function not found:', 'nonExistentFunction');
       consoleSpy.mockRestore();
     });
 
