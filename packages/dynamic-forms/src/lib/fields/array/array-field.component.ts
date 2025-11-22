@@ -172,7 +172,7 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
         takeUntilDestroyed(),
         filter((event) => event.arrayKey === keySignal()),
       )
-      .subscribe((event) => this.addItem(event.field, event.index));
+      .subscribe((event) => this.addItem(event.field ?? this.fieldTemplate(), event.index));
 
     this.eventBus
       .on<RemoveArrayItemEvent>('remove-array-item')
@@ -185,11 +185,15 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
   /**
    * Add a new item to the array
-   * @param fieldTemplate - The field template to use for the new item (provided by the event)
+   * @param fieldTemplate - The field template to use for the new item (provided by the event or from array's own template)
    * @param index - Optional index where to insert the item
    */
-  private addItem(fieldTemplate: FieldDef<unknown>, index?: number): void {
+  private addItem(fieldTemplate: FieldDef<unknown> | null, index?: number): void {
     if (!fieldTemplate) {
+      console.error(
+        `[Dynamic Forms] Cannot add item to array '${this.field().key}': no field template provided. ` +
+          'Ensure the array field has a fields property with at least one field definition.',
+      );
       return;
     }
 

@@ -47,17 +47,23 @@ export class ArrayMinLengthTestComponent {
         // minLength: 2,
         fields: [
           {
-            key: 'item',
-            type: 'input',
-            label: 'Item',
+            key: 'itemRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'item',
+                type: 'input',
+                label: 'Item',
+              },
+              {
+                key: 'addItemButton',
+                type: 'addArrayItem',
+                label: 'Add Item',
+                className: 'array-add-button',
+              },
+            ],
           },
         ],
-      },
-      {
-        key: 'addItemButton',
-        type: 'addArrayItem',
-        label: 'Add Item',
-        className: 'array-add-button',
       },
       {
         key: 'submit',
@@ -66,7 +72,9 @@ export class ArrayMinLengthTestComponent {
       },
     ],
   } as const satisfies FormConfig;
-  value = signal<Record<string, unknown>>({});
+  value = signal<Record<string, unknown>>({
+    items: [''], // Start with one empty item
+  });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 
   onSubmitted(value: Record<string, unknown> | undefined): void {

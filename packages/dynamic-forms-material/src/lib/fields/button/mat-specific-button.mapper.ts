@@ -92,6 +92,7 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
 
 /**
  * Mapper for add array item button - preconfigures AddArrayItemEvent with array context
+ * Note: This button type should only be used inside array field templates.
  */
 export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
@@ -111,11 +112,6 @@ export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, 
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
 
-  // Add eventArgs binding if provided in field definition
-  if ('eventArgs' in fieldDef && fieldDef.eventArgs !== undefined) {
-    bindings.push(inputBinding('eventArgs', () => fieldDef.eventArgs));
-  }
-
   // Add array context for token resolution
   const eventContext: ArrayItemContext = {
     key: fieldDef.key,
@@ -126,11 +122,20 @@ export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, 
 
   bindings.push(inputBinding('eventContext', () => eventContext));
 
+  // Set default eventArgs for AddArrayItemEvent (arrayKey)
+  // The array component will use its own template automatically
+  // User can override by providing eventArgs in field definition
+  const defaultEventArgs = ['$arrayKey'];
+  const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
+
+  bindings.push(inputBinding('eventArgs', () => eventArgs));
+
   return bindings;
 }
 
 /**
  * Mapper for remove array item button - preconfigures RemoveArrayItemEvent with array context
+ * Note: This button type should only be used inside array field templates.
  */
 export function removeArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);

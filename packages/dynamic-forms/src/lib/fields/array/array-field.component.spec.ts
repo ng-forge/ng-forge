@@ -9,6 +9,7 @@ import { provideDynamicForm } from '../../providers';
 import { FIELD_REGISTRY, FieldTypeDefinition, FIELD_SIGNAL_CONTEXT } from '../../models';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { createSchemaFromFields } from '../../core/schema-builder';
+import { vi } from 'vitest';
 
 describe('ArrayFieldComponent', () => {
   function setupArrayTest(field: ArrayField<any>, value?: Record<string, unknown>) {
@@ -198,5 +199,245 @@ describe('ArrayFieldComponent', () => {
     const host = fixture.nativeElement;
     expect(host.classList.contains('df-field')).toBe(true);
     expect(host.classList.contains('df-array')).toBe(true);
+  });
+
+  describe('AddArrayItemEvent', () => {
+    it('should add item when AddArrayItemEvent is dispatched with custom field template', async () => {
+      const field: ArrayField<any> = {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        fields: [createSimpleTestField('item', 'Default Item')],
+      };
+
+      const { component, fixture } = setupArrayTest(field, { items: [] });
+      const eventBus = TestBed.inject(EventBus);
+
+      // Initially empty
+      expect(component.fields()).toHaveLength(0);
+
+      // Dispatch event with custom field template
+      const customField = createSimpleTestField('customItem', 'Custom Item');
+      eventBus.dispatch(AddArrayItemEvent, 'items', customField);
+
+      // Wait for async component loading
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.fields().length < 1 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      expect(component.fields()).toHaveLength(1);
+    });
+
+    it('should add item using array template as fallback when AddArrayItemEvent has no field', async () => {
+      const field: ArrayField<any> = {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        fields: [createSimpleTestField('item', 'Default Item')],
+      };
+
+      const { component, fixture } = setupArrayTest(field, { items: [] });
+      const eventBus = TestBed.inject(EventBus);
+
+      // Initially empty
+      expect(component.fields()).toHaveLength(0);
+
+      // Dispatch event WITHOUT field parameter - should use array's template
+      eventBus.dispatch(AddArrayItemEvent, 'items');
+
+      // Wait for async component loading
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.fields().length < 1 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      expect(component.fields()).toHaveLength(1);
+    });
+
+    it('should add item at specific index when index is provided', async () => {
+      const field: ArrayField<any> = {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        fields: [createSimpleTestField('item', 'Item')],
+      };
+
+      const { component, fixture } = setupArrayTest(field, {
+        items: ['first', 'second', 'third'],
+      });
+
+      const eventBus = TestBed.inject(EventBus);
+
+      // Wait for initial items to load
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.fields().length < 3 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      expect(component.fields()).toHaveLength(3);
+
+      // Add at index 1 (between first and second)
+      eventBus.dispatch(AddArrayItemEvent, 'items', undefined, 1);
+
+      // Wait for new item
+      attempts = 0;
+      while (component.fields().length < 4 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      expect(component.fields()).toHaveLength(4);
+    });
+
+    it('should not add item if array has no template', async () => {
+      const field: ArrayField<any> = {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        fields: [], // No template
+      };
+
+      const { component, fixture } = setupArrayTest(field, { items: [] });
+      const eventBus = TestBed.inject(EventBus);
+      const consoleSpy = vi.spyOn(console, 'error');
+
+      // Dispatch event without field and no array template
+      eventBus.dispatch(AddArrayItemEvent, 'items');
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.fields()).toHaveLength(0);
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cannot add item to array'));
+    });
+  });
+
+  describe('RemoveArrayItemEvent', () => {
+    it('should remove last item when RemoveArrayItemEvent is dispatched without index', async () => {
+      const field: ArrayField<any> = {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        fields: [createSimpleTestField('item', 'Item')],
+      };
+
+      const { component, fixture } = setupArrayTest(field, {
+        items: ['first', 'second', 'third'],
+      });
+
+      const eventBus = TestBed.inject(EventBus);
+
+      // Wait for initial items
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.fields().length < 3 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      expect(component.fields()).toHaveLength(3);
+
+      // Remove last item
+      eventBus.dispatch(RemoveArrayItemEvent, 'items');
+
+      // Wait for the component to update
+      attempts = 0;
+      while (component.fields().length > 2 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      expect(component.fields()).toHaveLength(2);
+    });
+
+    it('should remove item at specific index when index is provided', async () => {
+      const field: ArrayField<any> = {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        fields: [createSimpleTestField('item', 'Item')],
+      };
+
+      const { component, fixture } = setupArrayTest(field, {
+        items: ['first', 'second', 'third'],
+      });
+
+      const eventBus = TestBed.inject(EventBus);
+
+      // Wait for initial items
+      const maxAttempts = 50;
+      let attempts = 0;
+      while (component.fields().length < 3 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      expect(component.fields()).toHaveLength(3);
+
+      // Remove item at index 1 (middle item)
+      eventBus.dispatch(RemoveArrayItemEvent, 'items', 1);
+
+      // Wait for the component to update
+      attempts = 0;
+      while (component.fields().length > 2 && attempts < maxAttempts) {
+        await fixture.whenStable();
+        fixture.detectChanges();
+        TestBed.flushEffects();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      expect(component.fields()).toHaveLength(2);
+    });
+
+    it('should not remove from empty array', async () => {
+      const field: ArrayField<any> = {
+        key: 'items',
+        type: 'array',
+        label: 'Items',
+        fields: [createSimpleTestField('item', 'Item')],
+      };
+
+      const { component, fixture } = setupArrayTest(field, { items: [] });
+      const eventBus = TestBed.inject(EventBus);
+
+      expect(component.fields()).toHaveLength(0);
+
+      // Try to remove from empty array
+      eventBus.dispatch(RemoveArrayItemEvent, 'items');
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.fields()).toHaveLength(0);
+    });
   });
 });
