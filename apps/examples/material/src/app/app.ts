@@ -26,14 +26,10 @@ export class App implements OnInit {
   );
 
   constructor() {
-    // Update document root when signal changes
+    // Update document root data-theme attribute when signal changes
     effect(() => {
       const darkMode = this.isDark();
-      if (darkMode) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
     });
   }
 
