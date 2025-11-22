@@ -1,8 +1,8 @@
-import { Component, effect, OnInit, signal } from '@angular/core';
+import { Component, effect, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   imports: [RouterModule],
@@ -16,20 +16,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class App implements OnInit {
   protected title = 'PrimeNG Examples';
 
-  isDark = signal(false);
+  // Listen for theme change messages from parent window
+  isDark = toSignal(
+    fromEvent<MessageEvent>(window, 'message').pipe(
+      filter((event) => event.data?.type === 'theme-change'),
+      map((event) => event.data.isDark as boolean),
+    ),
+    { initialValue: false },
+  );
 
   constructor() {
-    // Listen for theme change messages from parent window
-    fromEvent<MessageEvent>(window, 'message')
-      .pipe(
-        filter((event) => event.data?.type === 'theme-change'),
-        map((event) => event.data.isDark as boolean),
-        takeUntilDestroyed(),
-      )
-      .subscribe((isDark) => {
-        this.isDark.set(isDark);
-      });
-
     // Update document root when signal changes
     effect(() => {
       const darkMode = this.isDark();
