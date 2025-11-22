@@ -31,6 +31,12 @@ export class App implements OnInit {
     // Update document root data-theme attribute when signal changes
     explicitEffect([this.isDark], ([isDark]) => {
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      // Also toggle .dark class for Ionic's dark palette
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     });
   }
 
