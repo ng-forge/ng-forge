@@ -16,7 +16,6 @@ describe('RowFieldComponent', () => {
       field,
     });
 
-    // Previous: expect(component).toBeTruthy()
     expect(component).toBeDefined();
     expect(component).toBeInstanceOf(RowFieldComponent);
   });

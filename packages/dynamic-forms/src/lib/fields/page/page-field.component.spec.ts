@@ -11,7 +11,6 @@ describe('PageFieldComponent', () => {
     };
 
     const { component } = setupSimpleTest(PageFieldComponent, { field, pageIndex: 0, isVisible: true });
-    // Previous: expect(component).toBeTruthy()
     expect(component).toBeDefined();
     expect(component).toBeInstanceOf(PageFieldComponent);
   });

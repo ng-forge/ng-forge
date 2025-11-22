@@ -46,7 +46,6 @@ describe('Signal Forms Integration Types', () => {
 
       expect(config.type).toBe('max');
       expect(config.expression).toContain('formValue.country');
-      // Previous: expect(config.when).toBeDefined() - doesn't verify structure
       expect(config.when).toBeDefined();
       expect(typeof config.when).toBe('object');
       expect(config.when?.type).toBe('fieldValue');
@@ -293,7 +292,6 @@ describe('Signal Forms Integration Types', () => {
       };
 
       expect(config.type).toBe('applyWhen');
-      // Previous: expect(config.condition).toBeDefined() - doesn't verify structure
       expect(config.condition).toBeDefined();
       expect(typeof config.condition).toBe('object');
     });
@@ -395,7 +393,6 @@ describe('Signal Forms Integration Types', () => {
         },
       };
 
-      // Previous: Only checked .toBeDefined() - doesn't verify they're config objects
       expect(config.dynamicProperties?.placeholder).toBeDefined();
       expect(typeof config.dynamicProperties?.placeholder).toBe('object');
 

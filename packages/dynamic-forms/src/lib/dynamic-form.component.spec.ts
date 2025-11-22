@@ -66,11 +66,9 @@ describe('DynamicFormComponent', () => {
     it('should create successfully with correct type and properties', () => {
       const { component } = createComponent();
 
-      // Previous: expect(component).toBeTruthy() - only checks truthy value
       expect(component).not.toBeNull();
       expect(component).toBeInstanceOf(DynamicForm);
 
-      // Previous: Only checked .toBeDefined() - doesn't verify they're signals
       expect(component.config).toBeDefined();
       expect(typeof component.config).toBe('function');
 
@@ -101,7 +99,6 @@ describe('DynamicFormComponent', () => {
     it('should have required computed properties with correct types', () => {
       const { component } = createComponent();
 
-      // Previous: Only checked .toBeDefined() which doesn't verify functionality
       expect(component.config).toBeDefined();
       expect(typeof component.config).toBe('function');
 
@@ -434,7 +431,6 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      // Previous: expect(component.errors()).toBeDefined();
       const errors = component.errors();
       expect(errors).toBeDefined();
       expect(typeof errors).toBe('object');
@@ -693,7 +689,6 @@ describe('DynamicFormComponent', () => {
       // Find the test input component and simulate user input
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
 
-      // Previous: expect(testInput).toBeTruthy() - only checks truthy
       expect(testInput).not.toBeNull();
       expect(testInput.componentInstance).toBeInstanceOf(TestInputHarnessComponent);
       expect(testInput.nativeElement.querySelector('input')).not.toBeNull();
@@ -738,7 +733,6 @@ describe('DynamicFormComponent', () => {
       // Find the test checkbox component and simulate user interaction
       const testCheckbox = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestCheckboxHarnessComponent);
 
-      // Previous: expect(testCheckbox).toBeTruthy() - only checks truthy
       expect(testCheckbox).not.toBeNull();
       expect(testCheckbox.componentInstance).toBeInstanceOf(TestCheckboxHarnessComponent);
       expect(testCheckbox.nativeElement.querySelector('input[type="checkbox"]')).not.toBeNull();
@@ -880,7 +874,6 @@ describe('DynamicFormComponent', () => {
       expect(component.value).toBeDefined();
       expect(typeof component.value).toBe('function');
 
-      // Previous: Only checked signal exists, not that it works
       const testValue = { test: 'data' };
       component.value.set(testValue);
       expect(component.value()).toEqual(testValue);
@@ -895,7 +888,6 @@ describe('DynamicFormComponent', () => {
       expect(component.validityChange).toBeDefined();
       expect(typeof component.validityChange.subscribe).toBe('function');
 
-      // Previous: Only checked output exists, not that it emits
       let emittedValue: boolean | undefined;
       component.validityChange.subscribe((valid) => (emittedValue = valid));
 
@@ -915,7 +907,6 @@ describe('DynamicFormComponent', () => {
       expect(component.dirtyChange).toBeDefined();
       expect(typeof component.dirtyChange.subscribe).toBe('function');
 
-      // Previous: Only checked output exists, not that it emits
       const dirtyValues: boolean[] = [];
       component.dirtyChange.subscribe((dirty) => dirtyValues.push(dirty));
 
@@ -1201,7 +1192,6 @@ describe('DynamicFormComponent', () => {
       await delay();
       fixture.detectChanges();
 
-      // Previous: expect(component.formValue()).toBeDefined() - too weak
       const formValue = component.formValue();
       expect(formValue).toBeDefined();
       expect(typeof formValue).toBe('object');
