@@ -58,7 +58,6 @@ export class ArrayItemValidationTestComponent {
       {
         key: 'members',
         type: 'array',
-        label: 'Team Members',
         fields: [
           {
             key: 'member',
@@ -83,10 +82,9 @@ export class ArrayItemValidationTestComponent {
       },
       {
         key: 'addMemberButton',
-        type: 'button',
+        type: 'addArrayItem',
         label: 'Add Member',
         className: 'array-add-button',
-        event: AddMembersEvent,
       },
     ],
   } as const satisfies FormConfig;

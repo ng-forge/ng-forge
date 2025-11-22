@@ -34,7 +34,6 @@ export class ArrayInitialValuesTestComponent {
       {
         key: 'contacts',
         type: 'array',
-        label: 'Contacts',
         fields: [
           {
             key: 'name',

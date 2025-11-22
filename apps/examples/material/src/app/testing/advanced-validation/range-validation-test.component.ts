@@ -55,10 +55,12 @@ export class RangeValidationTestComponent {
             type: 'custom',
             expression: 'fieldValue && formValue.minValue && +fieldValue > +formValue.minValue',
             kind: 'greaterThanMin',
-            errorMessage: 'Maximum must be greater than minimum',
           },
         ],
         col: 6,
+        validationMessages: {
+          greaterThanMin: 'Maximum must be greater than minimum',
+        },
       },
       {
         key: 'submit',

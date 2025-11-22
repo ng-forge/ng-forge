@@ -54,14 +54,12 @@ export class ConditionalValidatorTestComponent {
               fieldPath: 'isAdult',
               value: true,
             },
-            errorMessage: 'Age is required when you confirm you are 18 or older',
           },
         ],
         validators: [
           {
             type: 'min',
             value: 18,
-            errorMessage: 'Must be 18 or older',
             when: {
               type: 'fieldValue',
               operator: 'equals',
@@ -70,6 +68,10 @@ export class ConditionalValidatorTestComponent {
             },
           },
         ],
+        validationMessages: {
+          min: 'Must be 18 or older',
+          required: 'Age is required when you confirm you are 18 or older',
+        },
         col: 12,
       },
       {

@@ -44,7 +44,6 @@ export class ArrayValuesTestComponent {
       {
         key: 'tasks',
         type: 'array',
-        label: 'Tasks',
         fields: [
           {
             key: 'taskName',
