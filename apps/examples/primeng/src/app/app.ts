@@ -10,26 +10,29 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   selector: 'example-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
-  host: {
-    '[attr.data-theme]': 'isDark() ? "dark" : "light"',
-  },
 })
 export class App implements OnInit {
   protected title = 'PrimeNG Examples';
 
   // Listen for theme change messages from parent window
-  isDark = toSignal(
+  theme = toSignal(
     fromEvent<MessageEvent>(window, 'message').pipe(
       filter((event) => event.data?.type === 'theme-change'),
-      map((event) => event.data.isDark as boolean),
+      map((event) => event.data.theme as string),
     ),
-    { initialValue: false },
+    { initialValue: 'auto' },
   );
 
   constructor() {
-    // Update document root data-theme attribute when signal changes
-    explicitEffect([this.isDark], ([isDark]) => {
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    // Update document root data-theme attribute when theme changes
+    explicitEffect([this.theme], ([theme]) => {
+      if (theme === 'auto') {
+        // For auto mode, set based on system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
     });
   }
 

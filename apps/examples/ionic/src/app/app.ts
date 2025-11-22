@@ -11,26 +11,27 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   selector: 'example-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
-  host: {
-    '[attr.data-theme]': 'isDark() ? "dark" : "light"',
-  },
 })
 export class App implements OnInit {
   protected title = 'Ionic Examples';
 
   // Listen for theme change messages from parent window
-  isDark = toSignal(
+  theme = toSignal(
     fromEvent<MessageEvent>(window, 'message').pipe(
       filter((event) => event.data?.type === 'theme-change'),
-      map((event) => event.data.isDark as boolean),
+      map((event) => event.data.theme as string),
     ),
-    { initialValue: false },
+    { initialValue: 'auto' },
   );
 
   constructor() {
-    // Update document root data-theme attribute
-    explicitEffect([this.isDark], ([isDark]) => {
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    // Update document root data-theme attribute when theme changes
+    explicitEffect([this.theme], ([theme]) => {
+      if (theme === 'auto') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
     });
   }
 

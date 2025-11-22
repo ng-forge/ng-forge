@@ -18,6 +18,10 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 export class App implements OnInit {
   readonly themeService = inject(NgDocThemeService);
 
+  theme = toSignal(this.themeService.themeChanges().pipe(startWith(this.themeService.currentTheme)), {
+    requireSync: true,
+  });
+
   isDark = toSignal(
     this.themeService.themeChanges().pipe(
       startWith(this.themeService.currentTheme),
@@ -27,11 +31,11 @@ export class App implements OnInit {
   );
 
   constructor() {
-    // Send dark mode changes to all iframes (example apps)
-    explicitEffect([this.isDark], ([isDark]) => {
+    // Send theme changes to all iframes (example apps)
+    explicitEffect([this.theme], ([theme]) => {
       const iframes = document.querySelectorAll<HTMLIFrameElement>('iframe');
       iframes.forEach((iframe) => {
-        iframe.contentWindow?.postMessage({ type: 'theme-change', isDark }, '*');
+        iframe.contentWindow?.postMessage({ type: 'theme-change', theme }, '*');
       });
     });
 
@@ -42,7 +46,7 @@ export class App implements OnInit {
         takeUntilDestroyed(),
       )
       .subscribe((event) => {
-        event.source?.postMessage({ type: 'theme-change', isDark: this.isDark() }, '*' as any);
+        event.source?.postMessage({ type: 'theme-change', theme: this.theme() }, '*' as any);
       });
   }
 
