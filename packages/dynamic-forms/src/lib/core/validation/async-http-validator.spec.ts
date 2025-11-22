@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { Injector, ResourceRef, runInInjectionContext, signal } from '@angular/core';
+import { Injector, runInInjectionContext, signal, ResourceRef } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FieldContext, form, schema } from '@angular/forms/signals';
+import { form, schema, FieldContext } from '@angular/forms/signals';
 import { AsyncValidatorConfig, HttpValidatorConfig } from '../../models';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService } from '../registry';
+import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { applyValidator } from './validator-factory';
 import { AsyncCustomValidator, HttpCustomValidator } from './validator-types';
 

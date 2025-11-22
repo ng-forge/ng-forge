@@ -47,9 +47,11 @@ export class CustomValidatorTestComponent {
             expression:
               'fieldValue && fieldValue.match("[A-Z]") && fieldValue.match("[a-z]") && fieldValue.match("[0-9]") && fieldValue.match("[!@#$%^&*(),.?\\":{}|<>]")',
             kind: 'strongPassword',
-            errorMessage: 'Password must contain uppercase, lowercase, number and special character',
           },
         ],
+        validationMessages: {
+          strongPassword: 'Password must contain uppercase, lowercase, number and special character',
+        },
         col: 12,
       },
       {

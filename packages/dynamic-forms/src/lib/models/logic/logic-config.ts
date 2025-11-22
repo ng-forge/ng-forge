@@ -9,7 +9,4 @@ export interface LogicConfig {
 
   /** Boolean expression or static value */
   condition: ConditionalExpression | boolean;
-
-  /** Optional error message for conditional required */
-  errorMessage?: string;
 }

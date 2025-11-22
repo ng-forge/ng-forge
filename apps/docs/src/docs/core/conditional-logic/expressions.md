@@ -551,7 +551,6 @@ Hidden for free accounts OR unverified accounts.
         },
       ],
     },
-    errorMessage: 'Tax exemption number required for business accounts claiming exemption in US/CA',
   }],
 }
 ```
@@ -616,16 +615,6 @@ Order items become read-only once order is shipped, delivered, or cancelled.
   type: 'formValue',
   expression: 'formValue.accountType === "business" && formValue.country !== null && formValue.hasTeam',
 }
-```
-
-**Use descriptive error messages:**
-
-```typescript
-// ✅ Good - Clear why field is required
-errorMessage: 'Company name is required for business accounts';
-
-// ❌ Avoid - Generic message
-errorMessage: 'This field is required';
 ```
 
 ## ConditionalExpression Interface

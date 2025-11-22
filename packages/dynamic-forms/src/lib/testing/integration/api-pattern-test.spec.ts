@@ -1,10 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
 import { applyLogic } from '../../core/logic/logic-applicator';
 import { LogicConfig } from '../../models/logic';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService } from '../../core/registry';
+import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 
 /**
  * This test file confirms the correct API pattern for accessing

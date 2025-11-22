@@ -1,5 +1,5 @@
-import { FieldContext, TreeValidationResult, ValidationError } from '@angular/forms/signals';
-import { ResourceRef, Signal } from '@angular/core';
+import { FieldContext, ValidationError, TreeValidationResult } from '@angular/forms/signals';
+import { Signal, ResourceRef } from '@angular/core';
 
 /**
  * Custom validator function signature using Angular's public FieldContext API

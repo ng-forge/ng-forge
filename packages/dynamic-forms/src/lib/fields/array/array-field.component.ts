@@ -75,6 +75,7 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
   /** Field configuration input */
   field = input.required<ArrayField>();
+
   key = input.required<string>();
 
   /**

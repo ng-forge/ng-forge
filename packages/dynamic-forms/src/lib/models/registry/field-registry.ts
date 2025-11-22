@@ -5,7 +5,7 @@ import { ArrayField, GroupField, PageField, RowField, TextField } from '../../de
  *
  * @example
  * ```typescript
- * declare module '@ng-forge/dynamic-form' {
+ * declare module '@ng-forge/dynamic-forms' {
  *   interface FieldRegistryContainers {
  *     'my-container': MyContainerFieldDef;
  *   }
@@ -24,7 +24,7 @@ export interface FieldRegistryContainers {
  *
  * @example
  * ```typescript
- * declare module '@ng-forge/dynamic-form' {
+ * declare module '@ng-forge/dynamic-forms' {
  *   interface FieldRegistryLeaves {
  *     'my-input': MyInputFieldDef;
  *   }

@@ -66,7 +66,6 @@ export class ArrayNestedTestComponent {
       {
         key: 'users',
         type: 'array',
-        label: 'Users',
         fields: [
           {
             key: 'user',
@@ -99,10 +98,9 @@ export class ArrayNestedTestComponent {
       },
       {
         key: 'addUserButton',
-        type: 'button',
+        type: 'addArrayItem',
         label: 'Add User',
         className: 'array-add-button',
-        event: AddUsersEvent,
       },
     ],
   } as const satisfies FormConfig;

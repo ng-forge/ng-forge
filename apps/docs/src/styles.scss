@@ -60,3 +60,13 @@ body[data-theme='light'] .logo-dark {
 // ============================================
 // PrimeNG and Ionic examples are loaded via iframes
 // Their styles are isolated in their respective example apps
+
+// Hide ng-doc's built-in code viewer for iframe wrapper components
+// The wrapper code is not useful - users see the actual FormConfig
+// via the custom "View Config" section in ExampleIframeComponent
+ng-doc-demo-displayer {
+  ::ng-deep ng-doc-code,
+  ::ng-deep .ng-doc-code-viewer {
+    display: none !important;
+  }
+}

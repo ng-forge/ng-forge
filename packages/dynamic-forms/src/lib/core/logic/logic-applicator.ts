@@ -1,5 +1,5 @@
+import { disabled, hidden, readonly, required, SchemaPathRules, PathKind } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
-import { disabled, hidden, PathKind, readonly, required, SchemaPathRules } from '@angular/forms/signals';
 import { LogicConfig } from '../../models/logic';
 import { ConditionalExpression } from '../../models';
 import { createLogicFunction } from '../expressions';

@@ -50,7 +50,6 @@ export class ArrayMultipleOpsTestComponent {
       {
         key: 'notes',
         type: 'array',
-        label: 'Notes',
         fields: [
           {
             key: 'note',
@@ -68,10 +67,8 @@ export class ArrayMultipleOpsTestComponent {
       },
       {
         key: 'removeNoteButton',
-        type: 'button',
+        type: 'removeArrayItem',
         label: 'Remove Last',
-        className: 'array-remove-button',
-        event: RemoveNotesEvent,
       },
     ],
   } as const satisfies FormConfig;

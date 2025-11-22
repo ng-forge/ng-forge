@@ -1,9 +1,9 @@
 import { vi } from 'vitest';
 import { FieldContext, FieldTree } from '@angular/forms/signals';
-import { Injector, runInInjectionContext, signal } from '@angular/core';
+import { signal, Injector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { createDynamicValueFunction } from './dynamic-value-factory';
-import { FieldContextRegistryService, RootFormRegistryService } from '../registry';
+import { RootFormRegistryService, FieldContextRegistryService } from '../registry';
 
 describe('dynamic-value-factory', () => {
   let injector: Injector;

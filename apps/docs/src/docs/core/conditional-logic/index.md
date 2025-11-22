@@ -81,9 +81,6 @@ interface LogicConfig {
 
   /** Boolean expression or static value */
   condition: ConditionalExpression | boolean;
-
-  /** Optional error message for conditional required */
-  errorMessage?: string;
 }
 ```
 
@@ -151,7 +148,6 @@ Make fields required based on conditions.
       operator: 'equals',
       value: 'business',
     },
-    errorMessage: 'Tax ID is required for business accounts',
   }],
 }
 ```
