@@ -5,9 +5,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic input field component
- */
 @Component({
   selector: 'df-ionic-input',
   imports: [IonInput, IonNote, Field, DynamicTextPipe, AsyncPipe],

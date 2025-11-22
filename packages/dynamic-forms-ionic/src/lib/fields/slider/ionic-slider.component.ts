@@ -5,9 +5,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { IonicSliderComponent, IonicSliderProps } from './ionic-slider.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic slider field component using IonRange
- */
 @Component({
   selector: 'df-ionic-slider',
   imports: [IonRange, IonNote, Field, DynamicTextPipe, AsyncPipe],

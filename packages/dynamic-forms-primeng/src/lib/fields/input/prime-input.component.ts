@@ -5,9 +5,6 @@ import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
 
-/**
- * PrimeNG input field component
- */
 @Component({
   selector: 'df-prime-input',
   imports: [InputText, DynamicTextPipe, AsyncPipe, Field],

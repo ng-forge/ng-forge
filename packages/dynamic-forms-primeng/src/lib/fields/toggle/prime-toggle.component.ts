@@ -5,9 +5,6 @@ import { PrimeToggleComponent, PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 
-/**
- * PrimeNG toggle field component
- */
 @Component({
   selector: 'df-prime-toggle',
   imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, Field],

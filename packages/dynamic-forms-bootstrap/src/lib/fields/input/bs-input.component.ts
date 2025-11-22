@@ -4,10 +4,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { BsInputComponent, BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Bootstrap input field component
- * Supports standard and floating label variants with Bootstrap 5 styling
- */
 @Component({
   selector: 'df-bs-input',
   imports: [Field, DynamicTextPipe, AsyncPipe],

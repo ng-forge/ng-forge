@@ -16,9 +16,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { IonicMultiCheckboxComponent, IonicMultiCheckboxProps } from './ionic-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic multi-checkbox field component
- */
 @Component({
   selector: 'df-ionic-multi-checkbox',
   imports: [IonCheckbox, IonItem, IonNote, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],

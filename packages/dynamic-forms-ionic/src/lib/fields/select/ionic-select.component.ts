@@ -12,9 +12,6 @@ import {
 import { IonicSelectComponent, IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic select field component
- */
 @Component({
   selector: 'df-ionic-select',
   imports: [IonSelect, IonSelectOption, IonNote, Field, DynamicTextPipe, AsyncPipe],

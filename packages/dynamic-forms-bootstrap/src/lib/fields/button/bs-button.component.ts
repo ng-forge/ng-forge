@@ -12,9 +12,6 @@ import {
 } from '@ng-forge/dynamic-forms';
 import { BsButtonComponent, BsButtonProps } from './bs-button.type';
 
-/**
- * Bootstrap button component
- */
 @Component({
   selector: 'df-bs-button',
   imports: [DynamicTextPipe, AsyncPipe],

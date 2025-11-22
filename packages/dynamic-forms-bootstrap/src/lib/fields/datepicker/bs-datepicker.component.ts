@@ -5,13 +5,6 @@ import { BsDatepickerComponent, BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
-/**
- * Bootstrap datepicker field component
- * Uses native HTML5 date input with Bootstrap 5 styling
- * Supports standard and floating label variants
- *
- * Note: ng-bootstrap datepicker integration (useNgBootstrap prop) is reserved for future enhancement
- */
 @Component({
   selector: 'df-bs-datepicker',
   imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],

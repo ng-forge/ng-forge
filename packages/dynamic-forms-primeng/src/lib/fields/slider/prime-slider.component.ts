@@ -5,9 +5,6 @@ import { PrimeSliderComponent, PrimeSliderProps } from './prime-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { Slider } from 'primeng/slider';
 
-/**
- * PrimeNG slider field component
- */
 @Component({
   selector: 'df-prime-slider',
   imports: [Slider, Field, DynamicTextPipe, AsyncPipe],

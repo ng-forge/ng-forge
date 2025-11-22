@@ -13,9 +13,6 @@ import {
 import { IonicButtonComponent, IonicButtonProps } from './ionic-button.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic button component
- */
 @Component({
   selector: 'df-ionic-button',
   imports: [IonButton, DynamicTextPipe, AsyncPipe],

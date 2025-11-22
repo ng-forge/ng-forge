@@ -7,10 +7,6 @@ import { DynamicText } from '../pipes';
  */
 export type ValidationError = AngularValidationError;
 
-/**
- * Custom error messages for validation rules.
- * Supports static strings, Observables, and Signals for dynamic content.
- */
 export interface ValidationMessages {
   required?: DynamicText;
   email?: DynamicText;

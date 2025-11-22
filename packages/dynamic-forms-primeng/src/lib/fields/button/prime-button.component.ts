@@ -13,9 +13,6 @@ import {
 } from '@ng-forge/dynamic-forms';
 import { PrimeButtonComponent, PrimeButtonProps } from './prime-button.type';
 
-/**
- * PrimeNG button field component
- */
 @Component({
   selector: 'df-prime-button',
   imports: [ButtonDirective, DynamicTextPipe, AsyncPipe],

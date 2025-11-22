@@ -5,9 +5,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { IonicCheckboxComponent, IonicCheckboxProps } from './ionic-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic checkbox field component
- */
 @Component({
   selector: 'df-ionic-checkbox',
   imports: [IonCheckbox, IonNote, Field, DynamicTextPipe, AsyncPipe],

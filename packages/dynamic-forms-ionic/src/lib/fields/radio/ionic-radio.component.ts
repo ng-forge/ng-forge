@@ -12,9 +12,6 @@ import {
 import { IonicRadioComponent, IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic radio field component
- */
 @Component({
   selector: 'df-ionic-radio',
   imports: [IonRadioGroup, IonRadio, IonItem, IonNote, Field, DynamicTextPipe, AsyncPipe],

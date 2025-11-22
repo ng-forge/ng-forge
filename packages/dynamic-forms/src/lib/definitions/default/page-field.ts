@@ -27,7 +27,6 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
 
 /**
  * Type guard for PageField with proper type narrowing
- * After this guard, TypeScript knows the field is a PageField and can access its properties safely
  */
 export function isPageField(field: FieldDef<any>): field is PageField {
   return field.type === 'page' && 'fields' in field && Array.isArray((field as PageField).fields);

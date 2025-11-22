@@ -17,9 +17,6 @@ import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepick
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
 
-/**
- * Ionic datepicker field component
- */
 @Component({
   selector: 'df-ionic-datepicker',
   imports: [

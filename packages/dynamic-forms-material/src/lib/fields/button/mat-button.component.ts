@@ -13,9 +13,6 @@ import {
 import { MatButtonComponent, MatButtonProps } from './mat-button.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Material Design button button component
- */
 @Component({
   selector: 'df-mat-button',
   imports: [MatButton, DynamicTextPipe, AsyncPipe],

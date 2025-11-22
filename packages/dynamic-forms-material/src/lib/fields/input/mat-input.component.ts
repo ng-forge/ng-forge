@@ -6,9 +6,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { MatInputComponent, MatInputProps } from './mat-input.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Material Design input field component
- */
 @Component({
   selector: 'df-mat-input',
   imports: [MatFormField, MatLabel, MatInput, MatHint, Field, MatError, DynamicTextPipe, AsyncPipe],

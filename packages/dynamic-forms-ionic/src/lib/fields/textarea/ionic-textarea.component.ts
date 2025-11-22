@@ -5,9 +5,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { IonicTextareaComponent, IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic textarea field component
- */
 @Component({
   selector: 'df-ionic-textarea',
   imports: [IonTextarea, IonNote, Field, DynamicTextPipe, AsyncPipe],

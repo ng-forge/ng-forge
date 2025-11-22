@@ -5,9 +5,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { IonicToggleComponent, IonicToggleProps } from './ionic-toggle.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic toggle field component
- */
 @Component({
   selector: 'df-ionic-toggle',
   imports: [IonToggle, IonNote, Field, DynamicTextPipe, AsyncPipe],

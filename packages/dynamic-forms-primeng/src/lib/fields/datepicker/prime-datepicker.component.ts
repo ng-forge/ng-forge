@@ -5,9 +5,6 @@ import { PrimeDatepickerComponent, PrimeDatepickerProps } from './prime-datepick
 import { AsyncPipe } from '@angular/common';
 import { DatePicker } from 'primeng/datepicker';
 
-/**
- * PrimeNG datepicker field component
- */
 @Component({
   selector: 'df-prime-datepicker',
   imports: [DatePicker, Field, DynamicTextPipe, AsyncPipe],

@@ -4,10 +4,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { BsTextareaComponent, BsTextareaProps } from './bs-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Bootstrap textarea field component
- * Supports standard and floating label variants with Bootstrap 5 styling
- */
 @Component({
   selector: 'df-bs-textarea',
   imports: [Field, DynamicTextPipe, AsyncPipe],
