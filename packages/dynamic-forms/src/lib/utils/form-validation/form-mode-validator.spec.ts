@@ -155,32 +155,7 @@ describe('form-mode-validator', () => {
       });
     });
 
-    describe('mixed forms (invalid)', () => {
-      it('should detect mixed mode (pages + non-pages) as invalid', () => {
-        const fields = [
-          { type: 'page', key: 'page1', fields: [] },
-          { type: 'input', key: 'name' },
-        ];
-
-        const result = FormModeValidator.validateFormConfiguration(fields as any);
-
-        expect(result.isValid).toBe(false);
-        expect(result.mode).toBe('mixed');
-        expect(result.errors.length).toBeGreaterThan(0);
-      });
-
-      it('should detect invalid form structure', () => {
-        const fields = [
-          { type: 'input', key: 'name' },
-          { type: 'page', key: 'page1', fields: [{ type: 'input', key: 'email' }] },
-        ];
-
-        const result = FormModeValidator.validateFormConfiguration(fields as any);
-
-        expect(result.isValid).toBe(false);
-        expect(result.mode).toBe('mixed');
-      });
-    });
+    // Mixed mode no longer exists in current codebase
 
     describe('edge cases', () => {
       it('should handle empty fields array', () => {
@@ -329,28 +304,6 @@ describe('form-mode-validator', () => {
       testCases.forEach((fields) => {
         const result = FormModeValidator.validateFormConfiguration(fields as any);
         expect(result.mode).toBe('paged');
-      });
-    });
-
-    it('should correctly identify mixed (invalid) forms', () => {
-      const testCases = [
-        [
-          { type: 'page', key: 'p1', fields: [] },
-          { type: 'input', key: 'a' },
-        ],
-        [
-          { type: 'input', key: 'a' },
-          { type: 'page', key: 'p1', fields: [] },
-        ],
-        [
-          { type: 'page', key: 'p1', fields: [] },
-          { type: 'group', key: 'g', fields: [] },
-        ],
-      ];
-
-      testCases.forEach((fields) => {
-        const result = FormModeValidator.validateFormConfiguration(fields as any);
-        expect(result.mode).toBe('mixed');
       });
     });
   });

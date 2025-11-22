@@ -164,7 +164,7 @@ describe('createTypePredicateFunction', () => {
 
       invalidPredicate('test');
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error evaluating type predicate:', '!!!', expect.any(Error));
+      expect(consoleErrorSpy).toHaveBeenCalledWith('[Dynamic Forms] Error evaluating type predicate:', '!!!', expect.any(Error));
 
       consoleErrorSpy.mockRestore();
     });

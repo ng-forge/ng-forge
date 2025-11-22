@@ -140,7 +140,7 @@ describe('schema-application', () => {
           applySchema(config, mockFieldPath);
         });
 
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[Schema] Schema not found: 'nonexistent-schema'"));
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[Dynamic Forms] Schema not found: 'nonexistent-schema'"));
       });
 
       it('should list available schemas in error message', () => {
@@ -781,8 +781,8 @@ describe('schema-application', () => {
         let schemaFn: any;
         runInInjectionContext(injector, () => {
           schemaFn = createSchemaFunction(schema);
+          schemaFn(mockFieldPath);
         });
-        schemaFn(mockFieldPath);
 
         // Sub-schemas will attempt to call applySchema (through the actual implementation)
         // We can't easily test the recursive calls here without more complex mocking
@@ -802,8 +802,8 @@ describe('schema-application', () => {
         let schemaFn: any;
         runInInjectionContext(injector, () => {
           schemaFn = createSchemaFunction(schema);
+          schemaFn(mockFieldPath);
         });
-        schemaFn(mockFieldPath);
 
         expect(schema.subSchemas).toHaveLength(3);
       });
@@ -830,11 +830,11 @@ describe('schema-application', () => {
         let schemaFn: any;
         runInInjectionContext(injector, () => {
           schemaFn = createSchemaFunction(schema);
-        });
 
-        expect(() => {
-          schemaFn(mockPathTree);
-        }).not.toThrow();
+          expect(() => {
+            schemaFn(mockPathTree);
+          }).not.toThrow();
+        });
       });
 
       it('should handle nested sub-schemas (recursion)', () => {
@@ -854,11 +854,11 @@ describe('schema-application', () => {
         let schemaFn: any;
         runInInjectionContext(injector, () => {
           schemaFn = createSchemaFunction(schema);
-        });
 
-        expect(() => {
-          schemaFn(mockFieldPath);
-        }).not.toThrow();
+          expect(() => {
+            schemaFn(mockFieldPath);
+          }).not.toThrow();
+        });
       });
     });
 
@@ -875,8 +875,8 @@ describe('schema-application', () => {
         let schemaFn: any;
         runInInjectionContext(injector, () => {
           schemaFn = createSchemaFunction(schema);
+          schemaFn(mockFieldPath);
         });
-        schemaFn(mockFieldPath);
 
         expect(vi.mocked(validation.applyValidator)).toHaveBeenCalled();
         expect(vi.mocked(logic.applyLogic)).toHaveBeenCalled();
@@ -932,8 +932,8 @@ describe('schema-application', () => {
         let schemaFn: any;
         runInInjectionContext(injector, () => {
           schemaFn = createSchemaFunction(schema);
+          schemaFn(mockFieldPath);
         });
-        schemaFn(mockFieldPath);
 
         expect(vi.mocked(validation.applyValidator)).toHaveBeenCalledTimes(3);
         expect(vi.mocked(logic.applyLogic)).toHaveBeenCalledTimes(2);
