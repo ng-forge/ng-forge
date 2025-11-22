@@ -11,17 +11,8 @@
 @import '@ionic/angular/css/text-transformation.css';
 @import '@ionic/angular/css/flex-utils.css';
 
-// Force Ionic to always use light mode palette
-:root {
-  color-scheme: light;
-}
-
-// Disable dark mode palette
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: light;
-  }
-}
+/* Import Ionic dark theme palette when .dark class is present */
+@import '@ionic/angular/css/palettes/dark.class.css';
 
 * {
   margin: 0;
