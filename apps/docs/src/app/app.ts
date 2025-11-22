@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
@@ -24,6 +24,27 @@ export class App implements OnInit {
     ),
     { requireSync: true },
   );
+
+  constructor() {
+    // Send dark mode changes to all iframes (example apps)
+    effect(() => {
+      const darkMode = this.isDark();
+      // Find all iframes and send them the dark mode state
+      const iframes = document.querySelectorAll<HTMLIFrameElement>('iframe');
+      iframes.forEach((iframe) => {
+        // Use '*' as targetOrigin since example apps may be on different ports in dev
+        iframe.contentWindow?.postMessage({ type: 'theme-change', isDark: darkMode }, '*');
+      });
+    });
+
+    // Listen for theme requests from iframes
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'request-theme') {
+        // Send current theme to the requesting iframe
+        event.source?.postMessage({ type: 'theme-change', isDark: this.isDark() }, '*' as any);
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.themeService.set('auto');

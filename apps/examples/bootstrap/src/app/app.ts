@@ -1,4 +1,4 @@
-import { Component, effect, ElementRef, inject } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -7,29 +7,40 @@ import { RouterModule } from '@angular/router';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {
+export class App implements OnInit, OnDestroy {
   protected title = 'Bootstrap Examples';
 
   private elementRef = inject(ElementRef);
+  private isDark = false;
 
-  constructor() {
-    // Set Bootstrap theme based on dark mode
-    effect(() => {
-      const isDark = document.documentElement.classList.contains('dark');
-      const theme = isDark ? 'dark' : 'light';
-      this.elementRef.nativeElement.setAttribute('data-bs-theme', theme);
+  private messageListener = (event: MessageEvent) => {
+    // Accept messages from any origin since we're in an iframe
+    if (event.data && event.data.type === 'theme-change') {
+      this.isDark = event.data.isDark;
+      this.updateTheme();
+    }
+  };
 
-      // Also observe changes to the dark class on document
-      const observer = new MutationObserver(() => {
-        const currentlyDark = document.documentElement.classList.contains('dark');
-        const currentTheme = currentlyDark ? 'dark' : 'light';
-        this.elementRef.nativeElement.setAttribute('data-bs-theme', currentTheme);
-      });
+  private updateTheme(): void {
+    const theme = this.isDark ? 'dark' : 'light';
+    this.elementRef.nativeElement.setAttribute('data-bs-theme', theme);
+    // Also update document root for global dark mode CSS
+    if (this.isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
 
-      observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['class'],
-      });
-    });
+  ngOnInit(): void {
+    // Listen for theme changes from parent window
+    window.addEventListener('message', this.messageListener);
+
+    // Request initial theme state from parent
+    window.parent.postMessage({ type: 'request-theme' }, '*');
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('message', this.messageListener);
   }
 }
