@@ -89,7 +89,6 @@ export class ContactFormComponent {
               operator: 'equals',
               value: 'email',
             },
-            errorMessage: 'Email is required when email is selected as contact method',
           },
         ],
       },
@@ -116,7 +115,6 @@ export class ContactFormComponent {
               operator: 'equals',
               value: 'phone',
             },
-            errorMessage: 'Phone is required when phone is selected as contact method',
           },
         ],
         props: { type: 'tel' },
@@ -144,7 +142,6 @@ export class ContactFormComponent {
               operator: 'equals',
               value: 'mail',
             },
-            errorMessage: 'Address is required when postal mail is selected',
           },
         ],
         props: { rows: 3 },
@@ -228,7 +225,6 @@ const config = {
             operator: 'equals',
             value: 'business',
           },
-          errorMessage: 'Company name is required for business accounts',
         },
       ],
     },
@@ -255,7 +251,6 @@ const config = {
             operator: 'equals',
             value: 'business',
           },
-          errorMessage: 'Tax ID is required for business accounts',
         },
       ],
     },
@@ -399,7 +394,6 @@ const config = {
             operator: 'less',
             value: 18,
           },
-          errorMessage: 'Parent email is required for users under 18',
         },
       ],
     },
@@ -553,7 +547,6 @@ logic: [
     condition: {
       /* when to require */
     },
-    errorMessage: 'Clear message why required',
   },
 ];
 ```

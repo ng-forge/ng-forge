@@ -151,7 +151,6 @@ describe('Signal Forms Integration Tests', () => {
           {
             type: 'pattern',
             value: '^[0-9]+$',
-            errorMessage: 'Please enter a valid number',
           },
         ],
       };

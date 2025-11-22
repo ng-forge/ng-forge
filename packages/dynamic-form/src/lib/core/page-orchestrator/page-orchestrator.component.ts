@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSign
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
-import { NavigationResult, PageOrchestratorConfig, PageOrchestratorState } from './page-orchestrator.interfaces';
+import { NavigationResult, PageOrchestratorState } from './page-orchestrator.interfaces';
 import { PageField } from '../../definitions/default/page-field';
 import { FieldSignalContext } from '../../mappers/types';
 import PageFieldComponent from '../../fields/page/page-field.component';
@@ -96,21 +96,15 @@ export class PageOrchestratorComponent {
   fieldSignalContext = input.required<FieldSignalContext>();
 
   /**
-   * Configuration for the orchestrator
-   */
-  config = input<PageOrchestratorConfig>({});
-
-  /**
    * Internal signal for current page index that tracks with page fields
    */
   private readonly currentPageIndex = linkedSignal(() => {
     const totalPages = this.pageFields().length;
-    const initialIndex = this.config().initialPageIndex ?? 0;
 
     if (totalPages === 0) return 0;
 
     // Clamp initial index within valid page range
-    return Math.max(0, Math.min(initialIndex, totalPages - 1));
+    return Math.max(0, Math.min(0, totalPages - 1));
   });
 
   /**
@@ -125,7 +119,7 @@ export class PageOrchestratorComponent {
       totalPages,
       isFirstPage: currentIndex === 0,
       isLastPage: currentIndex >= totalPages - 1,
-      navigationDisabled: this.config().initialNavigationDisabled || false,
+      navigationDisabled: false,
     };
   });
 

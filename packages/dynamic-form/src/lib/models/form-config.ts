@@ -117,11 +117,8 @@ export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredF
 
   /**
    * Signal forms adapter configuration.
-   *
-   * Advanced configuration for signal forms behavior including
-   * legacy migration and custom expression functions.
    */
-  signalFormsConfig?: SignalFormsConfig;
+  customFnConfig?: CustomFnConfig;
 }
 
 /**
@@ -132,9 +129,7 @@ export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredF
  *
  * @example
  * ```typescript
- * signalFormsConfig: {
- *   migrateLegacyValidation: true,
- *   strictMode: false,
+ * customFnConfig: {
  *   customFunctions: {
  *     isAdult: (context) => context.age >= 18,
  *     formatCurrency: (context) => new Intl.NumberFormat('en-US', {
@@ -165,17 +160,7 @@ export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredF
  *
  * @public
  */
-export interface SignalFormsConfig {
-  /**
-   * Enable automatic migration from legacy validation.
-   *
-   * When enabled, automatically converts legacy Angular reactive forms
-   * validation to signal forms validation.
-   *
-   * @value false
-   */
-  migrateLegacyValidation?: boolean;
-
+export interface CustomFnConfig {
   /**
    * Custom evaluation functions for conditional expressions.
    *
@@ -381,16 +366,6 @@ export interface SignalFormsConfig {
    * ```
    */
   httpValidators?: Record<string, HttpCustomValidator>;
-
-  /**
-   * Strict mode for expression evaluation.
-   *
-   * When enabled, throws errors for invalid expressions instead of
-   * failing silently. Useful for debugging and development.
-   *
-   * @value false
-   */
-  strictMode?: boolean;
 }
 
 /**

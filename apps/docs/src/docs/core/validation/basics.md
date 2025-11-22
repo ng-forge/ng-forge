@@ -68,7 +68,6 @@ Choose based on your validation complexity:
       operator: 'equals',
       value: 'percentage',
     },
-    errorMessage: 'Percentage cannot exceed 100%',
   }],
 }
 ```

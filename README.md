@@ -199,8 +199,10 @@ Show/hide fields based on form state:
       operator: 'equals',
       value: 'business',
     },
-    errorMessage: 'Tax ID required for business accounts',
   }],
+  validationMessages: {
+    required: 'Tax ID required for business accounts',
+  }
 }
 ```
 
@@ -223,8 +225,10 @@ Apply validators conditionally:
       operator: 'equals',
       value: 'percentage',
     },
-    errorMessage: 'Percentage cannot exceed 100%',
   }],
+  validationMessages: {
+    max: 'Discount exceeds maximum allowed value',
+  }
 }
 ```
 
@@ -257,38 +261,6 @@ Build wizards with ease:
     },
   ],
 }
-```
-
-### Custom Field Types
-
-Extend with your own components:
-
-```typescript
-@Component({
-  selector: 'app-rating-field',
-  template: `
-    <label>{{ label() }}</label>
-    <div>
-      @for (star of [1,2,3,4,5]; track star) {
-        <button (click)="rating.set(star)">
-          {{ star <= rating() ? '⭐' : '☆' }}
-        </button>
-      }
-    </div>
-  `,
-})
-export class RatingFieldComponent {
-  label = input<string>();
-  rating = model<number>(0);
-}
-
-// Register it
-provideDynamicForm([
-  { name: 'rating', loadComponent: () => RatingFieldComponent }
-]);
-
-// Use it
-{ key: 'userRating', type: 'rating', value: 0, label: 'Rate your experience' }
 ```
 
 ## 🎨 UI Framework Support

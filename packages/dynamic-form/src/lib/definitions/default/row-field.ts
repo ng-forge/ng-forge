@@ -13,8 +13,12 @@ import { RowAllowedChildren } from '../../models/types/nesting-constraints';
  */
 export interface RowField<TFields extends readonly RowAllowedChildren[] = readonly RowAllowedChildren[]> extends FieldDef<never> {
   type: 'row';
+
   /** Child definitions to render within this row */
   readonly fields: TFields;
+
+  /** Row fields do not have a label property **/
+  readonly label?: undefined;
 }
 
 /**

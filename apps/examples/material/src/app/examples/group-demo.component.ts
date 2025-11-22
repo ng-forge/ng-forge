@@ -44,7 +44,6 @@ export class GroupDemoComponent {
       {
         key: 'address',
         type: 'group',
-        label: 'Address Information',
         fields: [
           {
             key: 'street',

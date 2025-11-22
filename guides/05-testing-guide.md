@@ -749,7 +749,6 @@ describe('Conditional Logic - Required', () => {
               operator: 'equals',
               value: 'business',
             },
-            errorMessage: 'Tax ID required for business accounts',
           },
         ],
       })

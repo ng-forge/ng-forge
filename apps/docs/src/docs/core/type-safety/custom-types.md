@@ -479,7 +479,6 @@ const config = {
         {
           type: 'min',
           value: 0,
-          errorMessage: 'Discount cannot be negative',
         },
         {
           type: 'max',
@@ -490,7 +489,6 @@ const config = {
             operator: 'equals',
             value: 'percentage',
           },
-          errorMessage: 'Percentage discount cannot exceed 100',
         },
       ],
     },
@@ -519,7 +517,6 @@ const config = {
             operator: 'equals',
             value: 'business',
           },
-          errorMessage: 'Tax ID required for business accounts',
         },
       ],
     },

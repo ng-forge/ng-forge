@@ -229,9 +229,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                     },
                   ],
                 },
-                errorMessage: 'State/Province is required for US and Canada',
               },
             ],
+            validationMessages: {
+              required: 'State/Province is required for US and Canada',
+            },
             props: {
               appearance: 'outline',
               placeholder: 'Select state/province',
@@ -367,9 +369,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                     },
                   ],
                 },
-                errorMessage: 'Company name is required for employed applicants',
               },
             ],
+            validationMessages: {
+              required: 'Company name is required for employed applicants',
+            },
             props: {
               appearance: 'outline',
             },
@@ -420,9 +424,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                     },
                   ],
                 },
-                errorMessage: 'Job title is required for employed applicants',
               },
             ],
+            validationMessages: {
+              required: 'Job title is required for employed applicants',
+            },
             props: {
               appearance: 'outline',
             },
@@ -462,9 +468,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                   operator: 'notEquals',
                   value: 'unemployed',
                 },
-                errorMessage: 'Please select your industry',
               },
             ],
+            validationMessages: {
+              required: 'Please select your industry',
+            },
             props: {
               appearance: 'outline',
               placeholder: 'Select your industry',
@@ -494,9 +502,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                   operator: 'equals',
                   value: 'specialist',
                 },
-                errorMessage: 'Specialist certification requires an area of specialization',
               },
             ],
+            validationMessages: {
+              required: 'Specialist certification requires an area of specialization',
+            },
             props: {
               appearance: 'outline',
               hint: 'e.g., Cloud Architecture, Data Science, Cybersecurity',
@@ -528,9 +538,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                     },
                   ],
                 },
-                errorMessage: 'Expert and Specialist certifications require documented projects',
               },
             ],
+            validationMessages: {
+              required: 'Expert and Specialist certifications require documented projects',
+            },
             props: {
               appearance: 'outline',
               rows: 4,
@@ -676,9 +688,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                       operator: 'notEquals',
                       value: 'associate',
                     },
-                    errorMessage: 'Second reference is required for this certification level',
                   },
                 ],
+                validationMessages: {
+                  required: 'Second reference is required for this certification level',
+                },
               },
               {
                 key: 'reference2Email',
@@ -706,9 +720,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                       operator: 'notEquals',
                       value: 'associate',
                     },
-                    errorMessage: 'Reference email is required',
                   },
                 ],
+                validationMessages: {
+                  required: 'Reference email is required',
+                },
               },
             ],
           },
@@ -739,9 +755,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                   operator: 'notEquals',
                   value: 'associate',
                 },
-                errorMessage: 'Professional relationship is required',
               },
             ],
+            validationMessages: {
+              required: 'Professional relationship is required',
+            },
           },
           // Reference 3 (Required for Expert only)
           {
@@ -790,9 +808,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                       operator: 'equals',
                       value: 'expert',
                     },
-                    errorMessage: 'Third reference is required for Expert certification',
                   },
                 ],
+                validationMessages: {
+                  required: 'Third reference is required for Expert certification',
+                },
               },
               {
                 key: 'reference3Email',
@@ -820,9 +840,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                       operator: 'equals',
                       value: 'expert',
                     },
-                    errorMessage: 'Reference email is required',
                   },
                 ],
+                validationMessages: {
+                  required: 'Reference email is required',
+                },
               },
             ],
           },
@@ -853,9 +875,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                   operator: 'equals',
                   value: 'expert',
                 },
-                errorMessage: 'Professional relationship is required',
               },
             ],
+            validationMessages: {
+              required: 'Professional relationship is required',
+            },
           },
           // Professional Memberships
           {
@@ -947,9 +971,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                     },
                   ],
                 },
-                errorMessage: 'Please specify the organization name',
               },
             ],
+            validationMessages: {
+              required: 'Please specify the organization name',
+            },
           },
           // Background Check & Compliance
           {
@@ -1066,9 +1092,11 @@ export class ConditionalLogicShowcaseDemoComponent {
                     },
                   ],
                 },
-                errorMessage: 'Portfolio URL is required if you selected to submit a portfolio',
               },
             ],
+            validationMessages: {
+              required: 'Portfolio URL is required if you selected to submit a portfolio',
+            },
           },
           {
             type: 'row',

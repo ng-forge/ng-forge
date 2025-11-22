@@ -17,11 +17,9 @@ The `validators` array provides fine-grained control over validation behavior:
   value: 0,
   validators: [{
     type: 'required',
-    errorMessage: 'Discount amount is required',
   }, {
     type: 'min',
     value: 0,
-    errorMessage: 'Discount cannot be negative',
   }, {
     type: 'max',
     value: 100,
@@ -31,7 +29,6 @@ The `validators` array provides fine-grained control over validation behavior:
       operator: 'equals',
       value: 'percentage',
     },
-    errorMessage: 'Percentage discount cannot exceed 100%',
   }],
 }
 ```
@@ -56,7 +53,6 @@ Activate validators only when conditions are met.
       operator: 'equals',
       value: 'percentage',
     },
-    errorMessage: 'Percentage cannot exceed 100%',
   }],
 }
 ```
@@ -78,7 +74,6 @@ Validate against the entire form state:
       type: 'formValue',
       expression: 'formValue.hasEndDate === true',
     },
-    errorMessage: 'End date is required when "Has end date" is checked',
   }],
 }
 ```
@@ -95,7 +90,6 @@ Use JavaScript expressions for dynamic validation:
   validators: [{
     type: 'max',
     expression: 'formValue.maxQuantity || 100',
-    errorMessage: 'Quantity exceeds maximum',
   }],
 }
 ```
@@ -120,7 +114,6 @@ Combine multiple validators with different conditions:
         operator: 'equals',
         value: 'existing',
       },
-      errorMessage: 'Customer ID is required for existing customers',
     },
     {
       type: 'pattern',
@@ -131,7 +124,6 @@ Combine multiple validators with different conditions:
         operator: 'equals',
         value: 'existing',
       },
-      errorMessage: 'Customer ID must be 8 alphanumeric characters',
     },
   ],
 }
@@ -194,7 +186,6 @@ Combine multiple conditions with AND/OR logic:
         },
       ],
     },
-    errorMessage: 'Business email required for team accounts',
   }],
 }
 ```
@@ -228,7 +219,6 @@ const config = {
             operator: 'equals',
             value: 'business',
           },
-          errorMessage: 'Company name is required for business accounts',
         },
         {
           type: 'minLength',
@@ -239,7 +229,6 @@ const config = {
             operator: 'equals',
             value: 'business',
           },
-          errorMessage: 'Company name must be at least 2 characters',
         },
       ],
     },
@@ -256,7 +245,6 @@ const config = {
             operator: 'equals',
             value: 'business',
           },
-          errorMessage: 'Tax ID is required for business accounts',
         },
         {
           type: 'pattern',
@@ -267,7 +255,6 @@ const config = {
             operator: 'equals',
             value: 'business',
           },
-          errorMessage: 'Tax ID must be in format XX-XXXXXXX',
         },
       ],
     },
@@ -300,7 +287,6 @@ const config = {
         {
           type: 'min',
           value: 0,
-          errorMessage: 'Discount cannot be negative',
         },
         {
           type: 'max',
@@ -311,7 +297,6 @@ const config = {
             operator: 'equals',
             value: 'percentage',
           },
-          errorMessage: 'Percentage cannot exceed 100%',
         },
         {
           type: 'max',
@@ -322,7 +307,6 @@ const config = {
             operator: 'equals',
             value: 'fixed',
           },
-          errorMessage: 'Fixed discount cannot exceed order total',
         },
       ],
       props: { type: 'number' },
@@ -356,16 +340,6 @@ const config = {
     when: { /* condition */ },
   }],
 }
-```
-
-**Provide clear error messages:**
-
-```typescript
-// ✅ Good - Specific and actionable
-errorMessage: 'Tax ID is required for business accounts';
-
-// ❌ Avoid - Generic and unhelpful
-errorMessage: 'Invalid value';
 ```
 
 **Keep conditions simple:**

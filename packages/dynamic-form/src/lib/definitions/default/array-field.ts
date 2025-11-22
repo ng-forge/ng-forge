@@ -39,6 +39,7 @@ import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
  */
 export interface ArrayField<TFields extends readonly ArrayAllowedChildren[] = readonly ArrayAllowedChildren[]> extends FieldDef<never> {
   type: 'array';
+
   /**
    * Template field definition(s) that will be cloned for each array item.
    * Typically contains a single field definition:
@@ -46,6 +47,9 @@ export interface ArrayField<TFields extends readonly ArrayAllowedChildren[] = re
    * - For object arrays: A group field containing multiple child fields
    */
   readonly fields: TFields;
+
+  /** Array fields do not have a label property **/
+  readonly label?: undefined;
 }
 
 /**

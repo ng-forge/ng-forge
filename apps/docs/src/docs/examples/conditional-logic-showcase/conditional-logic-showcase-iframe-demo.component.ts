@@ -24,7 +24,6 @@ export class ConditionalLogicShowcaseIframeDemoComponent {
         },
         { type: 'required',
           condition: { type: 'fieldValue', fieldPath: 'accountType', operator: 'equals', value: 'business' },
-          errorMessage: 'Business name is required for business accounts'
         }
       ]
     },

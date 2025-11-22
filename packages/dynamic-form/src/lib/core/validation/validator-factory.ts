@@ -1,3 +1,4 @@
+import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import {
   email,
   FieldContext,
@@ -6,16 +7,15 @@ import {
   maxLength,
   min,
   minLength,
+  PathKind,
   pattern,
   required,
+  SchemaPathRules,
   validate,
   validateAsync,
   validateHttp,
   ValidationError,
-  SchemaPathRules,
-  PathKind,
 } from '@angular/forms/signals';
-import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { inject } from '@angular/core';
 import { AsyncValidatorConfig, CustomValidatorConfig, HttpValidatorConfig, ValidatorConfig } from '../../models';
 import { createLogicFunction } from '../expressions';
@@ -24,7 +24,6 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser';
-import { CustomValidator } from './validator-types';
 
 /**
  * Helper to create conditional logic function from when expression.
@@ -78,18 +77,16 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       break;
 
     case 'email':
-      // Email validator expects SchemaPath<string>
-      email(fieldPath as SchemaPath<string, SchemaPathRules.Supported>);
+      email(fieldPath as SchemaPath<string>);
       break;
 
     case 'min':
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMin = createDynamicValueFunction<string | number | null, number | undefined>(config.expression);
-          // Min validator expects SchemaPath<number>
-          min(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, dynamicMin);
+          min(fieldPath as SchemaPath<number>, dynamicMin);
         } else {
-          min(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, config.value);
+          min(fieldPath as SchemaPath<number>, config.value);
         }
       }
       break;
@@ -98,10 +95,9 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMax = createDynamicValueFunction<string | number | null, number | undefined>(config.expression);
-          // Max validator expects SchemaPath<number>
-          max(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, dynamicMax);
+          max(fieldPath as SchemaPath<number>, dynamicMax);
         } else {
-          max(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, config.value);
+          max(fieldPath as SchemaPath<number>, config.value);
         }
       }
       break;
@@ -110,10 +106,9 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       if (typeof config.value === 'number') {
         if (config.expression) {
           const dynamicMinLength = createDynamicValueFunction<string, number>(config.expression);
-          // MinLength validator expects SchemaPath<string>
-          minLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, dynamicMinLength);
+          minLength(fieldPath as SchemaPath<string>, dynamicMinLength);
         } else {
-          minLength(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, config.value);
+          minLength(fieldPath as SchemaPath<string>, config.value);
         }
       }
       break;
@@ -164,7 +159,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
  * Apply custom validator to field path using Angular's public validate() API
  * Supports both function-based and expression-based validators
  */
-function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<any, SchemaPathRules.Supported>): void {
+function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<any>): void {
   // Determine validator type and create appropriate validator function
   let validatorFn: (ctx: FieldContext<any>) => ValidationError | ValidationError[] | null;
 
@@ -325,7 +320,7 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
  * - onSuccess: Maps HTTP response to validation errors (inverted logic!)
  * - onError: Optional handler for HTTP errors
  */
-function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<any, SchemaPathRules.Supported>): void {
+function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<any>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get HTTP validator config from registry

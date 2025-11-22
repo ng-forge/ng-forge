@@ -165,7 +165,6 @@ export class ArrayDemoComponent {
       {
         key: 'tags',
         type: 'array',
-        label: 'Tags',
         fields: [tagTemplate],
       },
       {
@@ -194,7 +193,6 @@ export class ArrayDemoComponent {
       {
         key: 'contacts',
         type: 'array',
-        label: 'Emergency Contacts',
         fields: [contactTemplate],
       },
       {

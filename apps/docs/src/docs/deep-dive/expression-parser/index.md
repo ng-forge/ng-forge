@@ -17,7 +17,6 @@ When you configure JavaScript expressions in your form:
         type: 'javascript',
         expression: 'formValue.age >= 18 && formValue.needsTransport === true'
       },
-      errorMessage: 'Driver license required for adults needing transport'
     }
   ]
 }
@@ -169,7 +168,6 @@ When expressions are evaluated, they have access to:
         type: 'javascript',
         expression: 'formValue.accountType === "business"'
       },
-      errorMessage: 'Tax ID is required for business accounts'
     }
   ]
 }
@@ -210,7 +208,6 @@ When expressions are evaluated, they have access to:
         type: 'javascript',
         expression: 'formValue.email.endsWith("@company.com")'
       },
-      errorMessage: 'Discount code required for company emails'
     }
   ]
 }

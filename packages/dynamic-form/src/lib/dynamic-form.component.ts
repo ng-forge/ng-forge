@@ -23,7 +23,7 @@ import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs'
 import { isEqual, memoize } from 'lodash-es';
 import { keyBy } from './utils/object-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
-import { FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes, FIELD_SIGNAL_CONTEXT } from './models';
+import { FIELD_SIGNAL_CONTEXT, FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 import { createSchemaFromFields } from './core';
 import { EventBus } from './events/event.bus';
@@ -93,16 +93,10 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
       [class.disabled]="effectiveFormOptions().disabled"
       [class.df-form-paged]="formModeDetection().mode === 'paged'"
       [class.df-form-non-paged]="formModeDetection().mode === 'non-paged'"
-      (submit)="onSubmit($event)"
     >
       @if (formModeDetection().mode === 'paged') {
         <!-- Paged form: Use page orchestrator with page field definitions -->
-        <page-orchestrator
-          [pageFields]="pageFieldDefinitions()"
-          [form]="$any(form())"
-          [fieldSignalContext]="fieldSignalContext()"
-          [config]="{ initialPageIndex: 0 }"
-        />
+        <page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()" />
       } @else {
         <!-- Non-paged form: Render fields directly with grid system -->
         <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
@@ -185,19 +179,17 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   // Memoized field signal context to avoid recreation for every field
-  readonly fieldSignalContext = computed(
-    (): FieldSignalContext<TModel> => ({
-      injector: this.injector,
-      value: this.value,
-      defaultValues: this.defaultValues,
-      form: this.form(),
-      defaultValidationMessages: this.config().defaultValidationMessages,
-    }),
-  );
+  readonly fieldSignalContext = computed<FieldSignalContext<TModel>>(() => ({
+    injector: this.injector,
+    value: this.value,
+    defaultValues: this.defaultValues,
+    form: this.form(),
+    defaultValidationMessages: this.config().defaultValidationMessages,
+  }));
 
   // Injector that provides FIELD_SIGNAL_CONTEXT for mappers and child components
-  private readonly fieldInjector = computed(() => {
-    return Injector.create({
+  private readonly fieldInjector = computed(() =>
+    Injector.create({
       parent: this.injector,
       providers: [
         {
@@ -205,8 +197,8 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
           useValue: this.fieldSignalContext(),
         },
       ],
-    });
-  });
+    }),
+  );
 
   // Memoized field registry raw access
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
@@ -308,21 +300,22 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     return this.createEmptyFormSetup(registry);
   });
 
-  private registerValidatorsFromConfig(config: FormConfig<TFields>): void {
-    const signalFormsConfig = config.signalFormsConfig;
-    if (!signalFormsConfig) return;
+  private registerValidatorsFromConfig({ customFnConfig }: FormConfig<TFields>): void {
+    if (!customFnConfig) {
+      return;
+    }
 
     // Register custom functions
-    if (signalFormsConfig.customFunctions) {
-      Object.entries(signalFormsConfig.customFunctions).forEach(([name, fn]) => {
+    if (customFnConfig.customFunctions) {
+      Object.entries(customFnConfig.customFunctions).forEach(([name, fn]) => {
         this.functionRegistry.registerCustomFunction(name, fn);
       });
     }
 
     // Set all validators from config - change detection is inside set methods
-    this.functionRegistry.setValidators(signalFormsConfig.validators);
-    this.functionRegistry.setAsyncValidators(signalFormsConfig.asyncValidators);
-    this.functionRegistry.setHttpValidators(signalFormsConfig.httpValidators);
+    this.functionRegistry.setValidators(customFnConfig.validators);
+    this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
+    this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
   }
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: 'paged' | 'non-paged', registry: Map<string, FieldTypeDefinition>) {
@@ -481,6 +474,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   readonly disabled = computed(() => {
     const optionsDisabled = this.effectiveFormOptions().disabled;
     const formDisabled = this.form()().disabled();
+
     return optionsDisabled ?? formDisabled;
   });
 
@@ -648,15 +642,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   protected onFieldsInitialized(): void {
     this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
-  }
-
-  /**
-   * Handles form submission. Prevents default form submission behavior
-   * and emits the submit event through the event bus.
-   */
-  protected onSubmit(event: Event): void {
-    event.preventDefault();
-    this.eventBus.dispatch(SubmitEvent, this.value());
   }
 
   /**

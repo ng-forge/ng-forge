@@ -21,8 +21,12 @@ interface ContainerFieldWithFields extends FieldDef<any> {
  */
 export interface PageField<TFields extends readonly PageAllowedChildren[] = PageAllowedChildren[]> extends FieldDef<never> {
   type: 'page';
+
   /** Child field definitions to render within this page */
   readonly fields: TFields;
+
+  /** Page fields do not have a label property **/
+  readonly label?: undefined;
 }
 
 /**

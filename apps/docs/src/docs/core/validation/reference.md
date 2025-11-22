@@ -20,7 +20,6 @@ Field must have a value.
 {
   validators: [{
     type: 'required',
-    errorMessage: 'This field is required',
   }],
 }
 ```
@@ -37,7 +36,6 @@ Must be a valid email format.
 {
   validators: [{
     type: 'email',
-    errorMessage: 'Please enter a valid email address',
   }],
 }
 ```
@@ -55,7 +53,6 @@ Minimum string length.
   validators: [{
     type: 'minLength',
     value: 8,
-    errorMessage: 'Must be at least 8 characters',
   }],
 }
 ```
@@ -73,7 +70,6 @@ Maximum string length.
   validators: [{
     type: 'maxLength',
     value: 20,
-    errorMessage: 'Cannot exceed 20 characters',
   }],
 }
 ```
@@ -91,7 +87,6 @@ Minimum numeric value.
   validators: [{
     type: 'min',
     value: 0,
-    errorMessage: 'Must be at least 0',
   }],
 }
 ```
@@ -109,7 +104,6 @@ Maximum numeric value.
   validators: [{
     type: 'max',
     value: 100,
-    errorMessage: 'Cannot exceed 100',
   }],
 }
 ```
@@ -127,7 +121,6 @@ Regular expression validation.
   validators: [{
     type: 'pattern',
     value: '^[0-9]{5}$',
-    errorMessage: 'Must be a 5-digit ZIP code',
   }],
 }
 ```
@@ -290,7 +283,7 @@ interface ValidatorConfig {
   type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
   value?: number | string | RegExp;
   expression?: string;
-  errorMessage?: string;
+  kind?: string;
   when?: ConditionalExpression;
 }
 ```

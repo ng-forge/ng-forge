@@ -4,9 +4,6 @@ import { ConditionalExpression } from '../expressions/conditional-expression';
  * Base configuration shared by all validators
  */
 export interface BaseValidatorConfig {
-  /** Custom error message */
-  errorMessage?: string;
-
   /** Conditional logic for when validator applies */
   when?: ConditionalExpression;
 }

@@ -541,29 +541,6 @@ validationMessages: {
   required: 'Email is required',
   email: 'Invalid email format',
 }
-
-// In error display component:
-@Component({
-  template: `
-    @if (invalid() && touched()) {
-      @for (error of errors(); track error.key) {
-        <div class="error">
-          {{ getErrorMessage(error.key) }}
-        </div>
-      }
-    }
-  `,
-})
-export class ErrorsComponent {
-  errors = input.required<ValidationErrors>();
-  customMessages = input<ValidationMessages>();
-
-  getErrorMessage(errorKey: string): string {
-    return this.customMessages()?.[errorKey]
-      ?? DEFAULT_MESSAGES[errorKey]
-      ?? 'Invalid value';
-  }
-}
 ```
 
 ## Conditional Logic System

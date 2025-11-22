@@ -99,7 +99,6 @@ export class ExpressionValidatorsDemoComponent {
       {
         type: 'group',
         key: 'expressionExamples',
-        label: '1. Expression-Based Validators',
         fields: [
           {
             key: 'password',
@@ -185,7 +184,6 @@ export class ExpressionValidatorsDemoComponent {
       {
         type: 'group',
         key: 'functionExample',
-        label: '2. Function-Based Validator (for comparison)',
         fields: [
           {
             key: 'nickname',
@@ -214,7 +212,7 @@ export class ExpressionValidatorsDemoComponent {
         },
       },
     ],
-    signalFormsConfig: {
+    customFnConfig: {
       validators: {
         noSpaces, // Register function-based validator
       },

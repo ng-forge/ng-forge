@@ -465,7 +465,6 @@ Apply different validation rules per step:
       operator: 'equals',
       value: 'business',
     },
-    errorMessage: 'Tax ID is required for business accounts',
   }],
 }
 ```
