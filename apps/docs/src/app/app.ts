@@ -1,9 +1,9 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
-import { fromEvent, map, startWith, filter } from 'rxjs';
-import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { fromEvent, filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   imports: [RouterModule, NgDocRootComponent, NgDocNavbarComponent, NgDocSidebarComponent, NgDocThemeToggleComponent],
@@ -11,36 +11,20 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
   templateUrl: './app.html',
   styleUrl: './app.scss',
   host: {
-    'class.dark': 'isDark()',
+    '[class.dark]': 'isDark()',
   },
 })
 export class App implements OnInit {
   readonly themeService = inject(NgDocThemeService);
 
-  isDark = toSignal(
-    this.themeService.themeChanges().pipe(
-      startWith(this.themeService.currentTheme),
-      map((theme) => {
-        // For 'auto' mode, check if document has .dark class applied by ng-doc
-        // For explicit 'dark' or 'light', use the theme value
-        if (theme === 'auto') {
-          return document.documentElement.classList.contains('dark');
-        }
-        return theme === 'dark';
-      }),
-    ),
-    { requireSync: true },
-  );
+  // Read dark mode from document element since ng-doc applies it there
+  private darkSignal = signal(document.documentElement.classList.contains('dark'));
+  isDark = computed(() => this.darkSignal());
 
   constructor() {
-    // Observe .dark class changes on document for auto mode
-    // This ensures we detect system preference changes
+    // Observe .dark class on document element
     const observer = new MutationObserver(() => {
-      const currentTheme = this.themeService.currentTheme;
-      if (currentTheme === 'auto') {
-        // Manually trigger a theme change check
-        this.themeService.set('auto');
-      }
+      this.darkSignal.set(document.documentElement.classList.contains('dark'));
     });
 
     observer.observe(document.documentElement, {
@@ -73,11 +57,5 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.themeService.set('auto');
-
-    // Recheck dark mode after ng-doc has initialized
-    // This handles the initial load case where .dark class might not be applied yet
-    setTimeout(() => {
-      this.themeService.set('auto'); // Trigger re-evaluation
-    }, 100);
   }
 }
