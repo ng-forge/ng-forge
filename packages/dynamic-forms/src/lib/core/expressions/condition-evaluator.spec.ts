@@ -242,7 +242,11 @@ describe('condition-evaluator', () => {
         const result = evaluateCondition(expression, mockContext);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('Error evaluating JavaScript expression:', 'invalid @@ syntax', expect.any(Error));
+        expect(consoleSpy).toHaveBeenCalledWith(
+          '[Dynamic Forms] Error evaluating JavaScript expression:',
+          'invalid @@ syntax',
+          expect.any(Error),
+        );
 
         consoleSpy.mockRestore();
       });
@@ -360,7 +364,7 @@ describe('condition-evaluator', () => {
         const result = evaluateCondition(expression, mockContext);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('Custom function not found:', 'nonExistentFunction');
+        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Custom function not found:', 'nonExistentFunction');
 
         consoleSpy.mockRestore();
       });
@@ -386,7 +390,7 @@ describe('condition-evaluator', () => {
         const result = evaluateCondition(expression, contextWithThrowingFn);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('Error executing custom function:', 'throwingFunction', expect.any(Error));
+        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Error executing custom function:', 'throwingFunction', expect.any(Error));
 
         consoleSpy.mockRestore();
       });
@@ -407,7 +411,7 @@ describe('condition-evaluator', () => {
         const result = evaluateCondition(expression, contextWithoutCustomFn);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('Custom function not found:', 'testFunction');
+        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Custom function not found:', 'testFunction');
 
         consoleSpy.mockRestore();
       });
