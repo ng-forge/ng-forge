@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import { Component, explicitEffect, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
@@ -27,11 +27,10 @@ export class App implements OnInit {
 
   constructor() {
     // Send dark mode changes to all iframes (example apps)
-    effect(() => {
-      const darkMode = this.isDark();
+    explicitEffect([this.isDark], ([isDark]) => {
       const iframes = document.querySelectorAll<HTMLIFrameElement>('iframe');
       iframes.forEach((iframe) => {
-        iframe.contentWindow?.postMessage({ type: 'theme-change', isDark: darkMode }, '*');
+        iframe.contentWindow?.postMessage({ type: 'theme-change', isDark }, '*');
       });
     });
 

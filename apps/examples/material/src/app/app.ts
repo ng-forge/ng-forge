@@ -1,4 +1,4 @@
-import { Component, effect, OnInit } from '@angular/core';
+import { Component, explicitEffect, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -10,7 +10,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   templateUrl: './app.html',
   styleUrl: './app.scss',
   host: {
-    '[class.dark]': 'isDark()',
+    '[attr.data-theme]': 'isDark() ? "dark" : "light"',
   },
 })
 export class App implements OnInit {
@@ -27,9 +27,8 @@ export class App implements OnInit {
 
   constructor() {
     // Update document root data-theme attribute when signal changes
-    effect(() => {
-      const darkMode = this.isDark();
-      document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    explicitEffect([this.isDark], ([isDark]) => {
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     });
   }
 
