@@ -7,7 +7,7 @@
 $my-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 500);
 $my-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
 
-$my-theme: mat.m2-define-light-theme(
+$my-light-theme: mat.m2-define-light-theme(
   (
     color: (
       primary: $my-primary,
@@ -18,7 +18,31 @@ $my-theme: mat.m2-define-light-theme(
   )
 );
 
-@include mat.all-component-themes($my-theme);
+$my-dark-theme: mat.m2-define-dark-theme(
+  (
+    color: (
+      primary: $my-primary,
+      accent: $my-accent,
+    ),
+  )
+);
+
+@include mat.all-component-themes($my-light-theme);
+
+// Auto mode - use system preference when no data-theme is set
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    @include mat.all-component-colors($my-dark-theme);
+  }
+}
+
+// Explicit dark theme
+[data-theme='dark'],
+html[data-theme='dark'],
+:root[data-theme='dark'] {
+  @include mat.all-component-colors($my-dark-theme);
+}
 
 * {
   margin: 0;
@@ -30,6 +54,24 @@ html,
 body {
   height: 100%;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: white;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+// Auto mode - use system preference when no data-theme is set
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  html:not([data-theme]) body {
+    background-color: #303030;
+    color: rgba(255, 255, 255, 0.87);
+  }
+}
+
+// Explicit dark theme
+html[data-theme='dark'],
+html[data-theme='dark'] body {
+  background-color: #303030;
+  color: rgba(255, 255, 255, 0.87);
 }
 
 // ============================================
@@ -43,9 +85,19 @@ body {
   --example-result-text: #1a1a1a;
 }
 
-// Dark mode colors - only when .dark class is explicitly applied
-.dark,
-:root.dark {
+// Auto mode - use system preference when no data-theme is set
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    --example-result-bg: #1e1e1e;
+    --example-result-border: #404040;
+    --example-result-text: #f0f0f0;
+  }
+}
+
+// Explicit dark theme
+html[data-theme='dark'],
+:root[data-theme='dark'] {
   --example-result-bg: #1e1e1e;
   --example-result-border: #404040;
   --example-result-text: #f0f0f0;
