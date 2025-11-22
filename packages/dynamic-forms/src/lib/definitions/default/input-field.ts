@@ -25,50 +25,49 @@ export interface InputProps<T extends InputType = InputType> {
   placeholder?: DynamicText;
 }
 
-/**
- * Generic input field definition for framework-specific implementations.
- * Use this when you need to extend InputProps with custom properties.
- *
- * @example
- * // Framework extension
- * interface MaterialInputProps extends InputProps<'text'> {
- *   color?: 'primary' | 'accent';
- * }
- * type MaterialInputField = InputFieldDef<MaterialInputProps>;
- */
-export interface InputFieldDef<TProps extends InputProps<any> = InputProps>
-  extends BaseValueField<TProps, TProps extends InputProps<infer T> ? InputTypeToValueType<T> : string> {
-  type: 'input';
-}
-
 // ============================================================================
-// Strict Type-Safe Variants (for direct usage with automatic type inference)
+// Generic discriminated union builder
 // ============================================================================
 
 /**
- * Number input field with strict number value type
+ * Number input variant - used when props.type can be 'number'
  */
-interface NumberInputField extends BaseValueField<InputProps<'number'>, number> {
+interface NumberInputFieldVariant<TProps extends { type?: any }> extends BaseValueField<TProps, number> {
   type: 'input';
-  props: { type: 'number'; placeholder?: DynamicText };
+  props: TProps & { type: 'number' };
 }
 
 /**
- * Text-based input field with strict string value type
+ * String input variant - used when props.type can be text/email/etc
  */
-interface TextInputField extends BaseValueField<InputProps<'text' | 'email' | 'password' | 'tel' | 'url'>, string> {
+interface StringInputFieldVariant<TProps extends { type?: any }> extends BaseValueField<TProps, string> {
   type: 'input';
-  props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url'; placeholder?: DynamicText };
+  props?: TProps;
 }
+
+/**
+ * Helper type to extract the input type from props
+ */
+type ExtractInputType<TProps> = TProps extends { type?: infer T } ? T : InputType;
+
+/**
+ * Builds discriminated union based on what input types are possible in TProps
+ */
+type BuildInputFieldUnion<TProps extends { type?: any }> =
+  ExtractInputType<TProps> extends infer T
+    ? T extends string
+      ?
+          | ('number' extends T ? NumberInputFieldVariant<TProps> : never)
+          | (Exclude<T, 'number'> extends never ? never : StringInputFieldVariant<TProps>)
+      : StringInputFieldVariant<TProps>
+    : never;
 
 /**
  * Input field with automatic type-safe value inference.
- * TypeScript automatically infers the correct value type based on props.type:
- * - props.type: 'number' → value must be number
- * - props.type: 'text' | 'email' | 'password' | 'tel' | 'url' → value must be string
+ * TypeScript automatically infers the correct value type based on props.type.
  *
  * @example
- * // String input (text is default)
+ * // Direct usage - strict type safety without generics
  * const textField: InputField = {
  *   type: 'input',
  *   key: 'name',
@@ -76,8 +75,6 @@ interface TextInputField extends BaseValueField<InputProps<'text' | 'email' | 'p
  *   value: 'hello' // ✓ string
  * };
  *
- * @example
- * // Number input with automatic type checking
  * const numberField: InputField = {
  *   type: 'input',
  *   key: 'age',
@@ -86,12 +83,11 @@ interface TextInputField extends BaseValueField<InputProps<'text' | 'email' | 'p
  * };
  *
  * @example
- * // Type error example
- * const invalid: InputField = {
- *   type: 'input',
- *   key: 'age',
- *   props: { type: 'number' },
- *   value: 'hello' // ✗ Type error: string not assignable to number
- * };
+ * // Framework usage - extend with custom props
+ * interface MatInputProps extends InputProps {
+ *   appearance?: 'fill' | 'outline';
+ *   hint?: string;
+ * }
+ * type MatInputField = InputField<MatInputProps>; // Automatically gets discriminated union
  */
-export type InputField = NumberInputField | TextInputField;
+export type InputField<TProps extends { type?: any } = InputProps> = BuildInputFieldUnion<TProps>;

@@ -1,4 +1,4 @@
-import { DynamicText, InputFieldDef, InputProps, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, InputField, InputProps, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 
 export interface BsInputProps extends InputProps {
   size?: 'sm' | 'lg';
@@ -10,6 +10,6 @@ export interface BsInputProps extends InputProps {
   type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
 }
 
-export type BsInputField = InputFieldDef<BsInputProps>;
+export type BsInputField = InputField<BsInputProps>;
 
 export type BsInputComponent = ValueFieldComponent<BsInputField>;

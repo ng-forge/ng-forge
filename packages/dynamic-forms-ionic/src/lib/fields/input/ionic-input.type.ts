@@ -1,4 +1,4 @@
-import { DynamicText, InputFieldDef, InputProps, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, InputField, InputProps, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 
 export interface IonicInputProps extends InputProps {
   fill?: 'solid' | 'outline';
@@ -13,6 +13,6 @@ export interface IonicInputProps extends InputProps {
   type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
 }
 
-export type IonicInputField = InputFieldDef<IonicInputProps>;
+export type IonicInputField = InputField<IonicInputProps>;
 
 export type IonicInputComponent = ValueFieldComponent<IonicInputField>;
