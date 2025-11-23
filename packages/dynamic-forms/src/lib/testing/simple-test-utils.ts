@@ -95,6 +95,9 @@ export class SimpleTestUtils {
 
     fixture.detectChanges();
     TestBed.flushEffects();
+    fixture.detectChanges();
+    TestBed.flushEffects();
+
     return { component, fixture };
   }
 

@@ -1,3 +1,4 @@
+import { beforeAll } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { DynamicForm } from './dynamic-form.component';
 import { delay, SimpleTestUtils, TestCheckboxHarnessComponent, TestInputHarnessComponent } from './testing';
@@ -24,39 +25,45 @@ type TestFormConfig = {
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: 'input',
-    loadComponent: () => import('./testing/harnesses/test-input.harness'),
+    loadComponent: () => Promise.resolve({ default: TestInputHarnessComponent }),
     mapper: valueFieldMapper,
+    valueHandling: 'include',
   },
   {
     name: 'checkbox',
-    loadComponent: () => import('./testing/harnesses/test-checkbox.harness'),
+    loadComponent: () => Promise.resolve({ default: TestCheckboxHarnessComponent }),
     mapper: checkboxFieldMapper,
+    valueHandling: 'include',
   },
 ];
 
 describe('DynamicFormComponent', () => {
+  // Pre-load all components to cache dynamic imports
+  beforeAll(async () => {
+    const loadPromises = [...BUILT_IN_FIELDS, ...TEST_FIELD_TYPES].map((field) => field.loadComponent());
+    await Promise.all(loadPromises);
+  }, 10000);
+
   const createComponent = (config: TestFormConfig = { fields: [] }, initialValue?: any) => {
     return SimpleTestUtils.createComponent(config, initialValue);
   };
 
   beforeEach(async () => {
+    // Create properly populated registry for each test
+    const registry = new Map();
+    BUILT_IN_FIELDS.forEach((fieldType) => {
+      registry.set(fieldType.name, fieldType);
+    });
+    TEST_FIELD_TYPES.forEach((fieldType) => {
+      registry.set(fieldType.name, fieldType);
+    });
+
     await TestBed.configureTestingModule({
       imports: [DynamicForm, TestInputHarnessComponent, TestCheckboxHarnessComponent],
       providers: [
         {
           provide: FIELD_REGISTRY,
-          useFactory: () => {
-            const registry = new Map();
-            // Add built-in fields first
-            BUILT_IN_FIELDS.forEach((fieldType) => {
-              registry.set(fieldType.name, fieldType);
-            });
-            // Add test fields
-            TEST_FIELD_TYPES.forEach((fieldType) => {
-              registry.set(fieldType.name, fieldType);
-            });
-            return registry;
-          },
+          useValue: registry,
         },
       ],
     }).compileComponents();
@@ -1416,6 +1423,7 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await delay();
       fixture.detectChanges();
+      TestBed.flushEffects();
 
       expect(component.touched()).toBe(false);
 
