@@ -26,23 +26,28 @@ export interface InputProps<T extends InputType = InputType> {
 }
 
 // ============================================================================
-// Generic discriminated union builder
+// Discriminated union variants
 // ============================================================================
 
 /**
- * Number input variant - used when props.type can be 'number'
+ * Number input field with strict number value type.
+ * When props.type is 'number', value must be number.
  */
-interface NumberInputFieldVariant<TProps extends { type?: any }> extends BaseValueField<TProps, number> {
+interface NumberInputField<TProps extends { type?: any } = { type: 'number'; placeholder?: DynamicText }>
+  extends BaseValueField<TProps, number> {
   type: 'input';
-  props: TProps & { type: 'number' };
+  props?: TProps; // Optional to match component expectations
 }
 
 /**
- * String input variant - used when props.type can be text/email/etc
+ * String input field with strict string value type.
+ * When props.type is text/email/etc, value must be string.
  */
-interface StringInputFieldVariant<TProps extends { type?: any }> extends BaseValueField<TProps, string> {
+interface StringInputField<
+  TProps extends { type?: any } = { type: 'text' | 'email' | 'password' | 'tel' | 'url'; placeholder?: DynamicText },
+> extends BaseValueField<TProps, string> {
   type: 'input';
-  props?: TProps;
+  props?: TProps; // Optional to match component expectations
 }
 
 /**
@@ -51,35 +56,42 @@ interface StringInputFieldVariant<TProps extends { type?: any }> extends BaseVal
 type ExtractInputType<TProps> = TProps extends { type?: infer T } ? T : InputType;
 
 /**
+ * Fallback variant when props is undefined - allows both string and number values
+ */
+interface UndefinedPropsInputField extends BaseValueField<undefined, string | number> {
+  type: 'input';
+  props?: undefined;
+}
+
+/**
  * Builds discriminated union based on what input types are possible in TProps
  */
 type BuildInputFieldUnion<TProps extends { type?: any }> =
-  ExtractInputType<TProps> extends infer T
-    ? T extends string
-      ?
-          | ('number' extends T ? NumberInputFieldVariant<TProps> : never)
-          | (Exclude<T, 'number'> extends never ? never : StringInputFieldVariant<TProps>)
-      : StringInputFieldVariant<TProps>
-    : never;
+  | (ExtractInputType<TProps> extends infer T
+      ? T extends string
+        ? ('number' extends T ? NumberInputField<TProps> : never) | (Exclude<T, 'number'> extends never ? never : StringInputField<TProps>)
+        : StringInputField<TProps>
+      : never)
+  | UndefinedPropsInputField; // Allow undefined props as fallback
 
 /**
  * Input field with automatic type-safe value inference.
  * TypeScript automatically infers the correct value type based on props.type.
  *
  * @example
- * // Direct usage - strict type safety without generics
- * const textField: InputField = {
- *   type: 'input',
- *   key: 'name',
- *   props: { type: 'text' },
- *   value: 'hello' // ✓ string
- * };
- *
+ * // Direct usage - automatic strict type safety
  * const numberField: InputField = {
  *   type: 'input',
  *   key: 'age',
  *   props: { type: 'number' },
- *   value: 25 // ✓ number (string would be a type error!)
+ *   value: 25 // ✓ number only (string is type error!)
+ * };
+ *
+ * const textField: InputField = {
+ *   type: 'input',
+ *   key: 'name',
+ *   props: { type: 'text' },
+ *   value: 'hello' // ✓ string only (number is type error!)
  * };
  *
  * @example
