@@ -94,6 +94,7 @@ export class SimpleTestUtils {
     }
 
     fixture.detectChanges();
+    TestBed.flushEffects();
     return { component, fixture };
   }
 
@@ -103,6 +104,7 @@ export class SimpleTestUtils {
   static async waitForInit(fixture: any): Promise<void> {
     await delay(0);
     fixture.detectChanges();
+    TestBed.flushEffects();
     await delay(0);
   }
 
