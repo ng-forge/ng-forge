@@ -1,10 +1,16 @@
-import { describe, it, expect } from 'vitest';
+import { beforeAll, describe, it, expect } from 'vitest';
 import { BUILT_IN_FIELDS } from './built-in-fields';
 import { FieldTypeDefinition } from '../models/field-type';
 import { arrayFieldMapper, baseFieldMapper, groupFieldMapper, rowFieldMapper } from '../mappers';
 import { pageFieldMapper } from '../mappers/page/page-field-mapper';
 
 describe('BUILT_IN_FIELDS', () => {
+  // Pre-load all components to cache dynamic imports
+  beforeAll(async () => {
+    const loadPromises = BUILT_IN_FIELDS.map((field) => field.loadComponent());
+    await Promise.all(loadPromises);
+  }, 10000);
+
   describe('Array structure', () => {
     it('should be an array', () => {
       expect(Array.isArray(BUILT_IN_FIELDS)).toBe(true);
@@ -88,7 +94,7 @@ describe('BUILT_IN_FIELDS', () => {
 
           expect(module).toBeDefined();
           expect(module[exportName]).toBeDefined();
-        }, 10000);
+        });
       });
     });
   });
