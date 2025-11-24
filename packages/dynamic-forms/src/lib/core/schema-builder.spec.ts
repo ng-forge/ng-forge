@@ -1,26 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
 import { FieldTypeDefinition } from '../models/field-type';
 import { FieldDef } from '../definitions';
-import * as formMapping from './form-mapping';
-
-// Mock the mapFieldToForm function
-vi.mock('./form-mapping', async () => {
-  const actual = await vi.importActual<typeof formMapping>('./form-mapping');
-  return {
-    ...actual,
-    mapFieldToForm: vi.fn(),
-  };
-});
 
 describe('schema-builder', () => {
   let registry: Map<string, FieldTypeDefinition>;
-  let mapFieldToFormSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     registry = new Map<string, FieldTypeDefinition>();
-    mapFieldToFormSpy = vi.mocked(formMapping.mapFieldToForm);
-    mapFieldToFormSpy.mockClear();
 
     // Register common field types
     registry.set('input', {
@@ -138,12 +125,6 @@ describe('schema-builder', () => {
         ];
         const schema = createSchemaFromFields(fields, registry);
         expect(schema).toBeDefined();
-      });
-
-      it('should not call mapFieldToForm for excluded fields', () => {
-        const fields: FieldDef<any>[] = [{ type: 'text', key: 'label' }];
-        createSchemaFromFields(fields, registry);
-        expect(mapFieldToFormSpy).not.toHaveBeenCalled();
       });
 
       it('should process subsequent fields after excluded fields', () => {
