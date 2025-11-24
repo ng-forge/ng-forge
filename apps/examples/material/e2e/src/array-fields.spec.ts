@@ -2,14 +2,14 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Array Fields Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/#/test/array-fields');
+    await page.goto('http://localhost:4201/#/test/array-fields');
     await page.waitForLoadState('networkidle');
   });
 
   test.describe('Basic Array Operations', () => {
     test('should add new array items dynamically', async ({ page }) => {
       // Navigate to the array-add test component
-      await page.goto('http://localhost:4200/#/test/array-fields/array-add');
+      await page.goto('http://localhost:4201/#/test/array-fields/array-add');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -44,7 +44,7 @@ test.describe('Array Fields Tests', () => {
 
     test('should remove array items', async ({ page }) => {
       // Navigate to the array-remove test component
-      await page.goto('http://localhost:4200/#/test/array-fields/array-remove');
+      await page.goto('http://localhost:4201/#/test/array-fields/array-remove');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -69,7 +69,7 @@ test.describe('Array Fields Tests', () => {
 
     test.skip('should maintain input values after add/remove operations', async ({ page }) => {
       // Navigate to the array-values test component
-      await page.goto('http://localhost:4200/#/test/array-fields/array-values');
+      await page.goto('http://localhost:4201/#/test/array-fields/array-values');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -100,7 +100,7 @@ test.describe('Array Fields Tests', () => {
 
     test.skip('should handle array with initial values', async ({ page }) => {
       // Navigate to the array-initial-values test component
-      await page.goto('http://localhost:4200/#/test/array-fields/array-initial-values');
+      await page.goto('http://localhost:4201/#/test/array-fields/array-initial-values');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -125,7 +125,7 @@ test.describe('Array Fields Tests', () => {
   test.describe('Array Validation', () => {
     test.skip('should validate individual array items', async ({ page }) => {
       // Navigate to the array-item-validation test component
-      await page.goto('http://localhost:4200/#/test/array-fields/array-item-validation');
+      await page.goto('http://localhost:4201/#/test/array-fields/array-item-validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -147,7 +147,7 @@ test.describe('Array Fields Tests', () => {
 
     test.skip('should enforce minimum array length', async ({ page }) => {
       // Navigate to the array-min-length test component
-      await page.goto('http://localhost:4200/#/test/array-fields/array-min-length');
+      await page.goto('http://localhost:4201/#/test/array-fields/array-min-length');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -162,7 +162,7 @@ test.describe('Array Fields Tests', () => {
 
     test('should enforce maximum array length', async ({ page }) => {
       // Navigate to the array-max-length test component
-      await page.goto('http://localhost:4200/#/test/array-fields/array-max-length');
+      await page.goto('http://localhost:4201/#/test/array-fields/array-max-length');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -192,7 +192,7 @@ test.describe('Array Fields Tests', () => {
   test.describe('Complex Array Structures', () => {
     test.skip('should handle nested fields within array items', async ({ page }) => {
       // Navigate to the array-nested test component
-      await page.goto('http://localhost:4200/#/test/array-fields/array-nested');
+      await page.goto('http://localhost:4201/#/test/array-fields/array-nested');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -226,7 +226,7 @@ test.describe('Array Fields Tests', () => {
 
     test('should handle multiple add and remove operations', async ({ page }) => {
       // Navigate to the array-multiple-ops test component
-      await page.goto('http://localhost:4200/#/test/array-fields/array-multiple-ops');
+      await page.goto('http://localhost:4201/#/test/array-fields/array-multiple-ops');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -238,8 +238,8 @@ test.describe('Array Fields Tests', () => {
       expect(await noteInputs.count()).toBe(2);
 
       // Buttons are inside each array item now
-      let addButtons = scenario.locator('button:has-text("Add Note")');
-      let removeButtons = scenario.locator('button:has-text("Remove")');
+      const addButtons = scenario.locator('button:has-text("Add Note")');
+      const removeButtons = scenario.locator('button:has-text("Remove")');
 
       expect(await addButtons.count()).toBe(2); // One per item
       expect(await removeButtons.count()).toBe(2); // One per item

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test('debug individual array field page', async ({ page }) => {
   // Listen for console messages
@@ -12,7 +12,7 @@ test('debug individual array field page', async ({ page }) => {
 
   try {
     // Test individual page instead of index
-    await page.goto('http://localhost:4200/#/test/array-fields/array-add', { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await page.goto('http://localhost:4201/#/test/array-fields/array-add', { waitUntil: 'domcontentloaded', timeout: 10000 });
     await page.waitForTimeout(2000);
 
     // Take a screenshot
