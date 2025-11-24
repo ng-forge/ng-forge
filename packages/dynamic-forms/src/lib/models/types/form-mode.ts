@@ -6,20 +6,13 @@ import { RegisteredFieldTypes } from '../registry';
 export { isPageField };
 
 /**
- * Helper interface for container fields with fields property
- */
-interface ContainerFieldWithFields extends FieldDef<any> {
-  fields: FieldDef<any>[];
-}
-
-/**
  * Type guard to check if a field is a container with fields
  */
-function isContainerWithFields(field: FieldDef<any>): field is ContainerFieldWithFields {
+function isContainerWithFields(field: FieldDef<any>): field is FieldDef<any> & { fields: FieldDef<any>[] } {
   return (
     (field.type === 'row' || field.type === 'group' || field.type === 'page') &&
     'fields' in field &&
-    Array.isArray((field as ContainerFieldWithFields).fields)
+    Array.isArray((field as FieldDef<any> & { fields: FieldDef<any>[] }).fields)
   );
 }
 

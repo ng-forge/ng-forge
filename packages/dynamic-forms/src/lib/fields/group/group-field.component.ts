@@ -14,8 +14,7 @@ import {
 } from '@angular/core';
 import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, map, of, switchMap } from 'rxjs';
-import { memoize } from 'lodash-es';
-import { keyBy, mapValues } from '../../utils/object-utils';
+import { keyBy, mapValues, memoize } from '../../utils/object-utils';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';

@@ -3,7 +3,6 @@ export type { FlattenedField } from './flattener/field-flattener';
 export * from './grid-classes';
 export * from './form-validation';
 export { dynamicTextToObservable } from './dynamic-text-to-observable';
-export { interpolateParams } from './interpolate-params';
 export { shouldShowErrors } from './should-show-errors';
 export { createResolvedErrorsSignal } from './create-resolved-errors-signal';
 export type { ResolvedError } from './create-resolved-errors-signal';

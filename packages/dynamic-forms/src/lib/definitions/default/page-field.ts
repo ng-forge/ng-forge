@@ -2,13 +2,6 @@ import { FieldComponent, FieldDef } from '../base';
 import { PageAllowedChildren } from '../../models/types/nesting-constraints';
 
 /**
- * Helper interface for container fields (row/group) within nested checking
- */
-interface ContainerFieldWithFields extends FieldDef<any> {
-  fields: FieldDef<any>[];
-}
-
-/**
  * Page field interface for creating top-level page layouts
  * This is a special field type that contains other field definitions
  * The page itself doesn't have a value - it's a layout container like row
@@ -50,8 +43,12 @@ export function validatePageNesting(pageField: PageField): boolean {
 /**
  * Type guard to check if a field is a container with fields property
  */
-function isContainerWithFields(field: FieldDef<any>): field is ContainerFieldWithFields {
-  return (field.type === 'row' || field.type === 'group') && 'fields' in field && Array.isArray((field as ContainerFieldWithFields).fields);
+function isContainerWithFields(field: FieldDef<any>): field is FieldDef<any> & { fields: FieldDef<any>[] } {
+  return (
+    (field.type === 'row' || field.type === 'group') &&
+    'fields' in field &&
+    Array.isArray((field as FieldDef<any> & { fields: FieldDef<any>[] }).fields)
+  );
 }
 
 /**

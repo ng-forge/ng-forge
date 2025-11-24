@@ -20,8 +20,7 @@ import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs';
-import { isEqual, memoize } from 'lodash-es';
-import { keyBy } from './utils/object-utils';
+import { keyBy, memoize, isEqual } from './utils/object-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FIELD_SIGNAL_CONTEXT, FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes } from './models';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
@@ -30,6 +29,7 @@ import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
+import { InferFormValue } from './models/types';
 import { flattenFields } from './utils';
 import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
@@ -112,7 +112,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = Record<string, unknown>>
+export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = InferFormValue<TFields>>
   implements OnDestroy
 {
   private readonly destroyRef = inject(DestroyRef);
