@@ -52,8 +52,8 @@ export class ArrayInitialValuesTestComponent {
   } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
     contacts: [
-      { functionName: 'Alice', email: 'alice@example.com' },
-      { functionName: 'Bob', email: 'bob@example.com' },
+      { name: 'Alice', email: 'alice@example.com' },
+      { name: 'Bob', email: 'bob@example.com' },
     ],
   });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

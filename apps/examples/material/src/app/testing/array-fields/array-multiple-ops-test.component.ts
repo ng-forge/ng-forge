@@ -79,7 +79,7 @@ export class ArrayMultipleOpsTestComponent {
     ],
   } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
-    notes: [{ note: 'First note' }, { note: 'Second note' }],
+    notes: ['First note', 'Second note'],
   });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 

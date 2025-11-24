@@ -95,7 +95,7 @@ export class ArrayItemValidationTestComponent {
     ],
   } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
-    members: [{ name: '', email: '' }], // Start with one empty item
+    members: [{ member: { name: '', email: '' } }], // Start with one empty item (group key preserved)
   });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 
