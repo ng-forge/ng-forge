@@ -1,10 +1,11 @@
 // New organized exports
-export * from './validation';
-export * from './logic';
-export * from './expressions';
-export * from './values';
-export * from './registry';
-export * from './page-orchestrator';
+export { applyValidator, applyValidators } from './validation';
+export { applyLogic, applyMultipleLogic } from './logic';
+export { compareValues, createLogicFunction, evaluateCondition, getNestedValue } from './expressions';
+export { createDynamicValueFunction, createTypePredicateFunction } from './values';
+export { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './registry';
+export { PageOrchestratorComponent } from './page-orchestrator';
+export type { NavigationResult, PageOrchestratorConfig, PageOrchestratorState, PageVisibilityContext } from './page-orchestrator';
 
 // Schema application (keeping original file location for now)
 export { applySchema, createSchemaFunction } from './schema-application';
