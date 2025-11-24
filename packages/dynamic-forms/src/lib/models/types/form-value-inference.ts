@@ -91,9 +91,3 @@ type InferFormValueWithDepth<T extends RegisteredFieldTypes[], D extends number 
  * ```
  */
 export type InferFormValue<T extends RegisteredFieldTypes[]> = InferFormValueWithDepth<T, 5>;
-
-/**
- * Infer form value type from the global field registry
- * Useful for generic form handling when specific field configuration is not known
- */
-export type InferGlobalFormValue = Record<string, unknown>;

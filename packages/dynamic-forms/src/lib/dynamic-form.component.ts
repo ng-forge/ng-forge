@@ -30,8 +30,7 @@ import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
-import { InferGlobalFormValue } from './models/types';
-import { flattenFields, flattenFieldsForRendering } from './utils';
+import { flattenFields } from './utils';
 import { FieldDef } from './definitions';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers';
@@ -113,7 +112,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = InferGlobalFormValue>
+export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = Record<string, unknown>>
   implements OnDestroy
 {
   private readonly destroyRef = inject(DestroyRef);
@@ -142,7 +141,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   private readonly memoizedFlattenFieldsForRendering = memoize(
-    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFieldsForRendering(fields, registry),
+    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
     // Optimized key generation with stable registry keys
     (fields, registry) => {
       const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');

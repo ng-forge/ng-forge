@@ -5,7 +5,7 @@ import { FieldDef } from '../definitions/base';
 
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
-export type { RegisteredFieldTypes, InferGlobalFormValue } from '../models/types';
+export type { RegisteredFieldTypes } from '../models/types';
 
 /**
  * Field type definitions with optional config providers
