@@ -1,2 +1,2 @@
-export * from './conditional-expression';
-export * from './evaluation-context';
+export type { ConditionalExpression } from './conditional-expression';
+export type { EvaluationContext } from './evaluation-context';
