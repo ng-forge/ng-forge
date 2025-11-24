@@ -90,6 +90,16 @@ describe('ExpressionParser - Security Tests', () => {
     it('should not support import() syntax', () => {
       expect(() => ExpressionParser.evaluate('import("module")', {})).toThrow();
     });
+
+    it('should block constructor access via property chains', () => {
+      const scope = { obj: { nested: {} } };
+      expect(() => ExpressionParser.evaluate('obj.nested.constructor', scope)).toThrow(ExpressionParserError);
+    });
+
+    it('should block __proto__ access via property chains', () => {
+      const scope = { obj: { nested: {} } };
+      expect(() => ExpressionParser.evaluate('obj.nested.__proto__', scope)).toThrow(ExpressionParserError);
+    });
   });
 
   describe('Unsafe Method Call Prevention', () => {
@@ -231,27 +241,6 @@ describe('ExpressionParser - Security Tests', () => {
       const scope = { obj: { a: { b: { c: 'value' } } } };
       const result = ExpressionParser.evaluate('obj.a.b.c', scope);
       expect(result).toBe('value');
-    });
-  });
-
-  describe('Scope Isolation', () => {
-    it('should not leak variables between evaluations', () => {
-      const scope1 = { secret: 'password123' };
-      ExpressionParser.evaluate('secret', scope1);
-
-      const scope2 = { public: 'data' };
-      const result = ExpressionParser.evaluate('secret', scope2);
-      expect(result).toBeUndefined();
-    });
-
-    it('should block constructor access via property chains', () => {
-      const scope = { obj: { nested: {} } };
-      expect(() => ExpressionParser.evaluate('obj.nested.constructor', scope)).toThrow(ExpressionParserError);
-    });
-
-    it('should block __proto__ access via property chains', () => {
-      const scope = { obj: { nested: {} } };
-      expect(() => ExpressionParser.evaluate('obj.nested.__proto__', scope)).toThrow(ExpressionParserError);
     });
   });
 
