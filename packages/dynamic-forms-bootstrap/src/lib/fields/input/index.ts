@@ -1,2 +1,2 @@
 export { default as BsInputFieldComponent } from './bs-input.component';
-export * from './bs-input.type';
+export type { BsInputProps, BsInputField, BsInputComponent } from './bs-input.type';

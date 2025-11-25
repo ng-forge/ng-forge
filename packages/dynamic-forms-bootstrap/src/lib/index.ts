@@ -1,9 +1,65 @@
 // Field components
-export * from './fields';
+export {
+  submitButton,
+  nextPageButton,
+  previousPageButton,
+  actionButton,
+  BsButtonFieldComponent,
+  submitButtonFieldMapper,
+  nextButtonFieldMapper,
+  previousButtonFieldMapper,
+  addArrayItemButtonFieldMapper,
+  removeArrayItemButtonFieldMapper,
+  buttonFieldMapper,
+  BsCheckboxFieldComponent,
+  BsDatepickerFieldComponent,
+  BsInputFieldComponent,
+  BsMultiCheckboxFieldComponent,
+  BsRadioFieldComponent,
+  BsSelectFieldComponent,
+  BsSliderFieldComponent,
+  BsTextareaFieldComponent,
+  BsToggleFieldComponent,
+} from './fields';
+export type {
+  BsButtonProps,
+  BsButtonField,
+  BsSubmitButtonField,
+  BsNextButtonField,
+  BsPreviousButtonField,
+  BsCheckboxProps,
+  BsCheckboxField,
+  BsCheckboxComponent,
+  BsDatepickerProps,
+  BsDatepickerField,
+  BsDatepickerComponent,
+  BsInputProps,
+  BsInputField,
+  BsInputComponent,
+  BsMultiCheckboxProps,
+  BsMultiCheckboxField,
+  BsMultiCheckboxComponent,
+  BsRadioProps,
+  BsRadioField,
+  BsRadioComponent,
+  BsSelectProps,
+  BsSelectField,
+  BsSelectComponent,
+  BsSliderProps,
+  BsSliderField,
+  BsSliderComponent,
+  BsTextareaProps,
+  BsTextareaField,
+  BsTextareaComponent,
+  BsToggleProps,
+  BsToggleField,
+  BsToggleComponent,
+} from './fields';
 
 // Configuration
 export { BOOTSTRAP_FIELD_TYPES } from './config/bootstrap-field-config';
-export * from './models';
+export type { BootstrapConfig } from './models';
+export { BOOTSTRAP_CONFIG } from './models';
 
 // Types and constants
 export { BsField, type BsFieldType } from './types/types';
