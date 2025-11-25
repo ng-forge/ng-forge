@@ -5,6 +5,8 @@ export type {
   PrimeSubmitButtonField,
   PrimeNextButtonField,
   PrimePreviousButtonField,
+  AddArrayItemButtonField,
+  RemoveArrayItemButtonField,
 } from './prime-button.type';
 export { default as PrimeButtonFieldComponent } from './prime-button.component';
 export {

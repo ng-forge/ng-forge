@@ -51,13 +51,14 @@ export class ArrayRemoveTestComponent {
       {
         key: 'removePhoneButton',
         type: 'removeArrayItem',
-        label: 'Remove',
+        label: 'Remove Last',
         className: 'array-remove-button',
+        arrayKey: 'phones',
       },
     ],
   } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
-    phones: [{ phone: '555-0001' }, { phone: '555-0002' }],
+    phones: ['555-0001', '555-0002'],
   });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 

@@ -5,8 +5,8 @@ export type {
   MatSubmitButtonField,
   MatNextButtonField,
   MatPreviousButtonField,
-  MatAddArrayItemButtonField,
-  MatRemoveArrayItemButtonField,
+  AddArrayItemButtonField,
+  RemoveArrayItemButtonField,
 } from './mat-button.type';
 export { default as MatButtonFieldComponent } from './mat-button.component';
 export {

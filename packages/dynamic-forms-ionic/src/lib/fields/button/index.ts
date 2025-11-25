@@ -5,6 +5,8 @@ export type {
   IonicSubmitButtonField,
   IonicNextButtonField,
   IonicPreviousButtonField,
+  AddArrayItemButtonField,
+  RemoveArrayItemButtonField,
 } from './ionic-button.type';
 export { default as IonicButtonFieldComponent } from './ionic-button.component';
 export {

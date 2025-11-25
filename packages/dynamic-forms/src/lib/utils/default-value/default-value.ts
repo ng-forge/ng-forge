@@ -53,8 +53,21 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
       }
     }
 
-    // For arrays, always create object structure (Signal Forms needs proper nesting)
-    if (valueFields.length >= 1) {
+    // For a single value field with a primitive value, return it directly (flattened)
+    // This matches how simple array values are structured: ['value1', 'value2']
+    // For complex values (objects/arrays), preserve the key to maintain structure
+    if (valueFields.length === 1) {
+      const singleValue = valueFields[0].value;
+      const isPrimitive = singleValue === null || typeof singleValue !== 'object';
+      if (isPrimitive) {
+        return singleValue;
+      }
+      // Complex value (group, nested object) - preserve the key
+      return { [valueFields[0].key]: singleValue };
+    }
+
+    // For multiple value fields, create object structure
+    if (valueFields.length > 1) {
       const defaults: Record<string, unknown> = {};
       for (const valueField of valueFields) {
         defaults[valueField.key] = valueField.value;

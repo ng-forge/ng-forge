@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
@@ -8,7 +8,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-slider',
-  imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, Field],
   template: `
     @let f = field();
     @if (label(); as label) {
@@ -24,7 +24,7 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color || 'primary'"
       class="slider-container"
     >
-      <input matSliderThumb [(value)]="f().value" [disabled]="f().disabled()" [attr.tabindex]="tabIndex()" />
+      <input matSliderThumb [field]="f" [attr.tabindex]="tabIndex()" />
     </mat-slider>
 
     @if (props()?.hint; as hint) {
@@ -59,7 +59,7 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatSliderFieldComponent implements MatSliderComponent {
-  readonly field = input.required<FieldTree<number>>();
+  readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();

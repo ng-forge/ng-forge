@@ -36,15 +36,22 @@ export class ArrayInitialValuesTestComponent {
         type: 'array',
         fields: [
           {
-            key: 'name',
-            type: 'input',
-            label: 'Name',
-          },
-          {
-            key: 'email',
-            type: 'input',
-            label: 'Email',
-            props: { type: 'email' },
+            key: 'contactRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'name',
+                type: 'input',
+                label: 'Name',
+                col: 6,
+              },
+              {
+                key: 'email',
+                type: 'input',
+                label: 'Email',
+                col: 6,
+              },
+            ],
           },
         ],
       },
@@ -52,8 +59,8 @@ export class ArrayInitialValuesTestComponent {
   } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
     contacts: [
-      { functionName: 'Alice', email: 'alice@example.com' },
-      { functionName: 'Bob', email: 'bob@example.com' },
+      { name: 'Alice', email: 'alice@example.com' },
+      { name: 'Bob', email: 'bob@example.com' },
     ],
   });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);

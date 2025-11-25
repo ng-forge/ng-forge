@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('User Workflows E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/#/test/user-workflows');
+    await page.goto('http://localhost:4201/#/test/user-workflows');
     await page.waitForLoadState('networkidle');
   });
 

@@ -56,13 +56,14 @@ export class ArrayMaxLengthTestComponent {
       {
         key: 'addTagButton',
         type: 'addArrayItem',
+        arrayKey: 'tags',
         label: 'Add Tag',
         className: 'array-add-button',
       },
     ],
   } as const satisfies FormConfig;
   value = signal<Record<string, unknown>>({
-    tags: [{ tag: 'tag1' }, { tag: 'tag2' }],
+    tags: ['tag1', 'tag2'],
   });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 
