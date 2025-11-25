@@ -53,7 +53,6 @@ describe('PrimeRadioFieldComponent', () => {
       expect(optionLabels[1].nativeElement.textContent.trim()).toBe('Female');
       expect(optionLabels[2].nativeElement.textContent.trim()).toBe('Other');
 
-      // Verify form control integration and dynamic field component properties
       if (primeRadioComponent) {
         expect(primeRadioComponent.label()).toBe('Select Gender');
         // Note: PrimeNG radio doesn't support color and labelPosition props like Material
@@ -79,7 +78,6 @@ describe('PrimeRadioFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component)['preference']).toBe('');
 
       // Simulate radio button interaction by clicking the second option
@@ -90,7 +88,6 @@ describe('PrimeRadioFieldComponent', () => {
       secondRadioInput.click();
       untracked(() => fixture.detectChanges());
 
-      // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component)['preference']).toBe('option2');
     });
 
@@ -113,7 +110,6 @@ describe('PrimeRadioFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         preference: 'option3',
       });
@@ -475,7 +471,6 @@ describe('PrimeRadioFieldComponent', () => {
       // Initial state - no radio selected
       expect(PrimeNGFormTestUtils.getFormValue(component)['preference']).toBe('');
 
-      // Update via programmatic value change
       await PrimeNGFormTestUtils.updateFormValue(fixture, { preference: 'option2' });
 
       // Verify the form value was updated
@@ -549,14 +544,12 @@ describe('PrimeRadioFieldComponent', () => {
         const radioButtons = fixture.debugElement.queryAll(By.directive(RadioButton));
         const optionLabels = fixture.debugElement.queryAll(By.css('.radio-option-label'));
 
-        // Initial translations
         expect(labelElement.nativeElement.textContent.trim()).toBe('Select Gender');
         expect(hintElement.nativeElement.textContent.trim()).toBe('Choose your gender');
         expect(optionLabels[0].nativeElement.textContent.trim()).toBe('Male');
         expect(optionLabels[1].nativeElement.textContent.trim()).toBe('Female');
         expect(optionLabels[2].nativeElement.textContent.trim()).toBe('Other');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.gender.label': 'Seleccionar Género',
           'form.gender.hint': 'Elige tu género',

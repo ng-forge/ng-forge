@@ -5,9 +5,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { IonicToggleComponent, IonicToggleProps } from './ionic-toggle.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic toggle field component
- */
 @Component({
   selector: 'df-ionic-toggle',
   imports: [IonToggle, IonNote, Field, DynamicTextPipe, AsyncPipe],
@@ -64,6 +61,5 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

@@ -29,11 +29,7 @@ describe('IonicToggleFieldComponent', () => {
       //       const button = fixture.debugElement.query(By.css('ion-toggle button[role="switch"]'));
 
       expect(ionToggle).not.toBeNull();
-      //       expect(ionToggle.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      //       expect(ionToggle.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('end');
-      //       expect(ionToggle.nativeElement.getAttribute('ng-reflect-enable-on-off-labels')).toBe('true');
       expect(ionToggle.nativeElement.getAttribute('tabindex')).toBe('1');
-      //       expect(button).not.toBeNull();
     });
 
     it('should handle user toggle interaction and update form value', async () => {
@@ -44,14 +40,11 @@ describe('IonicToggleFieldComponent', () => {
         initialValue: { darkMode: false },
       });
 
-      // Initial value check
       expect(IonicFormTestUtils.getFormValue(component).darkMode).toBe(false);
 
-      // Simulate user toggling on via programmatic update
       fixture.componentRef.setInput('value', { darkMode: true });
       fixture.detectChanges();
 
-      // Verify form value updated
       expect(IonicFormTestUtils.getFormValue(component).darkMode).toBe(true);
     });
 
@@ -63,7 +56,6 @@ describe('IonicToggleFieldComponent', () => {
         initialValue: { autoSave: false },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { autoSave: true });
       fixture.detectChanges();
 
@@ -80,14 +72,11 @@ describe('IonicToggleFieldComponent', () => {
         initialValue: { feature: false },
       });
 
-      // Initial state
       expect(IonicFormTestUtils.getFormValue(component).feature).toBe(false);
 
-      // Toggle on
       await IonicFormTestUtils.simulateIonicToggle(fixture, 'ion-toggle', true);
       expect(IonicFormTestUtils.getFormValue(component).feature).toBe(true);
 
-      // Toggle off
       await IonicFormTestUtils.simulateIonicToggle(fixture, 'ion-toggle', false);
       expect(IonicFormTestUtils.getFormValue(component).feature).toBe(false);
     });
@@ -104,7 +93,6 @@ describe('IonicToggleFieldComponent', () => {
         initialValue: { wifi: false, bluetooth: false, location: false },
       });
 
-      // Toggle first
       await IonicFormTestUtils.simulateIonicToggle(fixture, 'ion-toggle:first-of-type', true);
 
       let formValue = IonicFormTestUtils.getFormValue(component);
@@ -112,7 +100,6 @@ describe('IonicToggleFieldComponent', () => {
       expect(formValue.bluetooth).toBe(false);
       expect(formValue.location).toBe(false);
 
-      // Toggle third
       const toggles = fixture.debugElement.queryAll(By.css('df-ionic-toggle ion-toggle'));
       await IonicFormTestUtils.simulateIonicToggle(fixture, 'ion-toggle:last-of-type', true);
 
@@ -140,7 +127,6 @@ describe('IonicToggleFieldComponent', () => {
       });
 
       //       const button = fixture.debugElement.query(By.css('ion-toggle button[role="switch"]'));
-      //       expect(button.nativeElement.disabled).toBe(true);
     });
 
     it('should apply required validation', async () => {
@@ -158,14 +144,11 @@ describe('IonicToggleFieldComponent', () => {
         initialValue: { acceptTerms: false },
       });
 
-      // Form should be invalid when toggle is off and required
       expect(IonicFormTestUtils.isFormValid(component)).toBe(false);
 
-      // Toggle on via programmatic update
       fixture.componentRef.setInput('value', { acceptTerms: true });
       fixture.detectChanges();
 
-      // Form should now be valid
       expect(IonicFormTestUtils.isFormValid(component)).toBe(true);
     });
 
@@ -194,8 +177,6 @@ describe('IonicToggleFieldComponent', () => {
       });
 
       const toggles = fixture.debugElement.queryAll(By.css('df-ionic-toggle ion-toggle'));
-      //       expect(toggles[0].nativeElement.getAttribute('ng-reflect-label-placement')).toBe('start');
-      //       expect(toggles[1].nativeElement.getAttribute('ng-reflect-label-placement')).toBe('end');
     });
 
     it('should handle enableOnOffLabels property', async () => {
@@ -209,7 +190,6 @@ describe('IonicToggleFieldComponent', () => {
       });
 
       const ionToggle = fixture.debugElement.query(By.css('df-ionic-toggle ion-toggle'));
-      //       expect(ionToggle.nativeElement.getAttribute('ng-reflect-enable-on-off-labels')).toBe('true');
     });
 
     it('should handle justify property', async () => {
@@ -223,7 +203,6 @@ describe('IonicToggleFieldComponent', () => {
       });
 
       const ionToggle = fixture.debugElement.query(By.css('df-ionic-toggle ion-toggle'));
-      //       expect(ionToggle.nativeElement.getAttribute('ng-reflect-justify')).toBe('space-between');
     });
 
     it('should handle different color options', async () => {
@@ -237,7 +216,6 @@ describe('IonicToggleFieldComponent', () => {
       });
 
       const ionToggle = fixture.debugElement.query(By.css('df-ionic-toggle ion-toggle'));
-      //       expect(ionToggle.nativeElement.getAttribute('ng-reflect-color')).toBe('success');
     });
   });
 
@@ -278,14 +256,11 @@ describe('IonicToggleFieldComponent', () => {
         initialValue: { acceptTerms: false },
       });
 
-      // Trigger validation by marking field as touched
       //       const button = fixture.debugElement.query(By.css('ion-toggle button'));
       //       button.nativeElement.dispatchEvent(new Event('blur'));
       fixture.detectChanges();
 
-      // Check for error component
       //       const errorComponent = fixture.debugElement.query(By.css('df-ionic-errors'));
-      //       expect(errorComponent).not.toBeNull();
     });
   });
 });

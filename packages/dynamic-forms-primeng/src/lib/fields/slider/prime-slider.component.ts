@@ -5,9 +5,6 @@ import { PrimeSliderComponent, PrimeSliderProps } from './prime-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { Slider } from 'primeng/slider';
 
-/**
- * PrimeNG slider field component
- */
 @Component({
   selector: 'df-prime-slider',
   imports: [Slider, Field, DynamicTextPipe, AsyncPipe],
@@ -69,7 +66,6 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly sliderClasses = computed(() => {

@@ -73,7 +73,6 @@ describe('PrimeSliderFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component).volume).toBe(25);
 
       // Update value programmatically
@@ -85,7 +84,6 @@ describe('PrimeSliderFieldComponent', () => {
         speed: 0,
       });
 
-      // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component).volume).toBe(75);
     });
 
@@ -111,7 +109,6 @@ describe('PrimeSliderFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         volume: 80,
         brightness: 0,
@@ -163,7 +160,6 @@ describe('PrimeSliderFieldComponent', () => {
         initialValue: { rating: 5 },
       });
 
-      // Initial value
       expect(PrimeNGFormTestUtils.getFormValue(component).rating).toBe(5);
 
       // Update to a half-step value programmatically
@@ -190,7 +186,6 @@ describe('PrimeSliderFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         volume: 85,
         brightness: 200,
@@ -285,7 +280,6 @@ describe('PrimeSliderFieldComponent', () => {
         },
       });
 
-      // Initial values
       expect(PrimeNGFormTestUtils.getFormValue(component).volume).toBe(30);
       expect(PrimeNGFormTestUtils.getFormValue(component).brightness).toBe(100);
 
@@ -454,7 +448,6 @@ describe('PrimeSliderFieldComponent', () => {
         await PrimeNGFormTestUtils.updateFormValue(fixture, { volume: value });
       }
 
-      // Should have the final value
       expect(PrimeNGFormTestUtils.getFormValue(component).volume).toBe(90);
     });
   });
@@ -489,11 +482,9 @@ describe('PrimeSliderFieldComponent', () => {
         const labelElement = fixture.debugElement.query(By.css('label'));
         const hintElement = fixture.debugElement.query(By.css('.p-hint'));
 
-        // Initial translations
         expect(labelElement.nativeElement.textContent.trim()).toBe('Volume Level');
         expect(hintElement.nativeElement.textContent.trim()).toBe('Adjust the volume to your preference');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.volume.label': 'Nivel de Volumen',
           'form.volume.hint': 'Ajusta el volumen según tu preferencia',

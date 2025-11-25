@@ -26,10 +26,6 @@ export interface BsRadioGroupProps {
   helpText?: DynamicText;
 }
 
-/**
- * Bootstrap radio group wrapper that implements FormValueControl
- * for proper integration with Angular 21's Field directive
- */
 @Component({
   selector: 'df-bs-radio-group',
   imports: [DynamicTextPipe, AsyncPipe],

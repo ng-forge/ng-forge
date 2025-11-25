@@ -66,13 +66,10 @@ describe('PrimeTextareaFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component).comments).toBe('');
 
-      // Simulate user typing using utility
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'textarea[pInputTextarea]', 'This is a multi-line comment\nwith line breaks');
 
-      // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component).comments).toBe('This is a multi-line comment\nwith line breaks');
     });
 
@@ -92,7 +89,6 @@ describe('PrimeTextareaFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         comments: 'Updated comments\nwith multiple lines',
         description: '',
@@ -214,7 +210,6 @@ describe('PrimeTextareaFieldComponent', () => {
         },
       });
 
-      // Initial values
       expect(PrimeNGFormTestUtils.getFormValue(component).description).toBe('Initial description');
       expect(PrimeNGFormTestUtils.getFormValue(component).feedback).toBe('Initial feedback');
 
@@ -284,7 +279,6 @@ describe('PrimeTextareaFieldComponent', () => {
       const textarea = fixture.debugElement.query(By.css('textarea[pInputTextarea]'));
       const fieldWrapper = fixture.debugElement.query(By.css('.df-prime-field'));
 
-      // Verify default PrimeNG configuration is applied
       expect(textarea.nativeElement.getAttribute('rows')).toBe('4');
       expect(fieldWrapper).toBeTruthy();
     });
@@ -299,7 +293,6 @@ describe('PrimeTextareaFieldComponent', () => {
 
       const specialText = 'José María 🌟 @#$%^&*()\nSecond line with émojis 🎉\nThird line with symbols: ¿¡§';
 
-      // Simulate typing special characters using utility
       await PrimeNGFormTestUtils.simulatePrimeInput(fixture, 'textarea[pInputTextarea]', specialText);
 
       expect(PrimeNGFormTestUtils.getFormValue(component).comments).toBe(specialText);
@@ -316,14 +309,12 @@ describe('PrimeTextareaFieldComponent', () => {
       const textarea = fixture.debugElement.query(By.css('textarea[pInputTextarea]'));
       const testValues = ['Line 1', 'Line 1\nLine 2', 'Line 1\nLine 2\nLine 3', 'Final multi-line\ntext content\nwith three lines'];
 
-      // Simulate rapid typing
       for (const value of testValues) {
         textarea.nativeElement.value = value;
         textarea.nativeElement.dispatchEvent(new Event('input'));
         untracked(() => fixture.detectChanges());
       }
 
-      // Should have the final value
       expect(PrimeNGFormTestUtils.getFormValue(component).comments).toBe('Final multi-line\ntext content\nwith three lines');
     });
 
@@ -376,12 +367,10 @@ describe('PrimeTextareaFieldComponent', () => {
         const textarea = fixture.debugElement.query(By.css('textarea[pInputTextarea]'));
         const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Comments');
         expect(textarea.nativeElement.getAttribute('placeholder')).toBe('Enter your comments');
         expect(hint.nativeElement.textContent.trim()).toBe('Please provide feedback');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.comments.label': 'Comentarios',
           'form.comments.placeholder': 'Ingrese sus comentarios',

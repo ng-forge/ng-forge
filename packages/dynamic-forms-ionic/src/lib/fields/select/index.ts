@@ -1,3 +1,2 @@
-// Barrel for select field
 export * from './ionic-select.component';
 export * from './ionic-select.type';

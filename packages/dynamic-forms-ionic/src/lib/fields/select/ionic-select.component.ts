@@ -12,9 +12,6 @@ import {
 import { IonicSelectComponent, IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic select field component
- */
 @Component({
   selector: 'df-ionic-select',
   imports: [IonSelect, IonSelectOption, IonNote, Field, DynamicTextPipe, AsyncPipe],
@@ -82,7 +79,6 @@ export default class IonicSelectFieldComponent<T> implements IonicSelectComponen
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
