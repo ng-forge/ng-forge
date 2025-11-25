@@ -16,9 +16,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { IonicMultiCheckboxComponent, IonicMultiCheckboxProps } from './ionic-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic multi-checkbox field component
- */
 @Component({
   selector: 'df-ionic-multi-checkbox',
   imports: [IonCheckbox, IonItem, IonNote, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],
@@ -103,7 +100,6 @@ export default class IonicMultiCheckboxFieldComponent<T extends ValueType> imple
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   valueViewModel = linkedSignal<FieldOption<T>[]>(

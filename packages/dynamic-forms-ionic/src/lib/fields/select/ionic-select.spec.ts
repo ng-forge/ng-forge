@@ -36,10 +36,6 @@ describe('IonicSelectFieldComponent', () => {
       const ionSelectOptions = fixture.debugElement.queryAll(By.css('df-ionic-select ion-select-option'));
 
       expect(ionSelect).not.toBeNull();
-      //       expect(ionSelect.nativeElement.getAttribute('ng-reflect-label')).toBe('Country');
-      //       expect(ionSelect.nativeElement.getAttribute('ng-reflect-placeholder')).toBe('Select a country');
-      //       expect(ionSelect.nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
-      //       expect(ionSelect.nativeElement.getAttribute('ng-reflect-interface')).toBe('alert');
       expect(ionSelect.nativeElement.getAttribute('tabindex')).toBe('1');
       expect(ionSelectOptions.length).toBe(3);
     });
@@ -62,14 +58,11 @@ describe('IonicSelectFieldComponent', () => {
         initialValue: { fruit: null },
       });
 
-      // Initial value check
       expect(IonicFormTestUtils.getFormValue(component).fruit).toBe(null);
 
-      // Simulate user selecting an option via programmatic update
       fixture.componentRef.setInput('value', { fruit: 'banana' });
       fixture.detectChanges();
 
-      // Verify form value updated
       expect(IonicFormTestUtils.getFormValue(component).fruit).toBe('banana');
     });
 
@@ -93,7 +86,6 @@ describe('IonicSelectFieldComponent', () => {
 
       expect(IonicFormTestUtils.getFormValue(component).city).toBe('ny');
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { city: 'la' });
       fixture.detectChanges();
 
@@ -125,7 +117,6 @@ describe('IonicSelectFieldComponent', () => {
       });
 
       const ionSelect = fixture.debugElement.query(By.css('df-ionic-select ion-select'));
-      //       expect(ionSelect.nativeElement.getAttribute('ng-reflect-multiple')).toBe('true');
     });
 
     it('should handle initial multiple values', async () => {
@@ -199,9 +190,6 @@ describe('IonicSelectFieldComponent', () => {
       });
 
       const ionSelectOptions = fixture.debugElement.queryAll(By.css('df-ionic-select ion-select-option'));
-      //       expect(ionSelectOptions[0].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
-      //       expect(ionSelectOptions[1].nativeElement.getAttribute('ng-reflect-disabled')).toBe('true');
-      //       expect(ionSelectOptions[2].nativeElement.getAttribute('ng-reflect-disabled')).toBe('false');
     });
 
     it('should handle numeric option values', async () => {
@@ -274,14 +262,11 @@ describe('IonicSelectFieldComponent', () => {
         initialValue: { country: null },
       });
 
-      // Form should be invalid when no option is selected
       expect(IonicFormTestUtils.isFormValid(component)).toBe(false);
 
-      // Select an option via programmatic update
       fixture.componentRef.setInput('value', { country: 'us' });
       fixture.detectChanges();
 
-      // Form should now be valid
       expect(IonicFormTestUtils.isFormValid(component)).toBe(true);
     });
   });
@@ -315,9 +300,6 @@ describe('IonicSelectFieldComponent', () => {
       });
 
       const ionSelects = fixture.debugElement.queryAll(By.css('df-ionic-select ion-select'));
-      //       expect(ionSelects[0].nativeElement.getAttribute('ng-reflect-interface')).toBe('alert');
-      //       expect(ionSelects[1].nativeElement.getAttribute('ng-reflect-interface')).toBe('action-sheet');
-      //       expect(ionSelects[2].nativeElement.getAttribute('ng-reflect-interface')).toBe('popover');
     });
 
     it('should handle different fill styles', async () => {
@@ -342,8 +324,6 @@ describe('IonicSelectFieldComponent', () => {
       });
 
       const ionSelects = fixture.debugElement.queryAll(By.css('df-ionic-select ion-select'));
-      //       expect(ionSelects[0].nativeElement.getAttribute('ng-reflect-fill')).toBe('solid');
-      //       expect(ionSelects[1].nativeElement.getAttribute('ng-reflect-fill')).toBe('outline');
     });
 
     it('should handle different label placements', async () => {
@@ -362,7 +342,6 @@ describe('IonicSelectFieldComponent', () => {
       });
 
       const ionSelect = fixture.debugElement.query(By.css('df-ionic-select ion-select'));
-      //       expect(ionSelect.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('floating');
     });
 
     it('should handle custom ok and cancel text', async () => {
@@ -384,8 +363,6 @@ describe('IonicSelectFieldComponent', () => {
       });
 
       const ionSelect = fixture.debugElement.query(By.css('df-ionic-select ion-select'));
-      //       expect(ionSelect.nativeElement.getAttribute('ng-reflect-ok-text')).toBe('Confirm');
-      //       expect(ionSelect.nativeElement.getAttribute('ng-reflect-cancel-text')).toBe('Close');
     });
   });
 
@@ -469,14 +446,11 @@ describe('IonicSelectFieldComponent', () => {
         initialValue: { option: null },
       });
 
-      // Trigger validation by marking field as touched
       const ionSelect = fixture.debugElement.query(By.css('df-ionic-select ion-select'));
       ionSelect.nativeElement.dispatchEvent(new Event('blur'));
       fixture.detectChanges();
 
-      // Check for error component
       //       const errorComponent = fixture.debugElement.query(By.css('df-ionic-errors'));
-      //       expect(errorComponent).not.toBeNull();
     });
 
     it('should handle rapid selection changes', async () => {
@@ -497,7 +471,6 @@ describe('IonicSelectFieldComponent', () => {
         initialValue: { option: null },
       });
 
-      // Rapid selections via programmatic updates
       fixture.componentRef.setInput('value', { option: 1 });
       fixture.detectChanges();
       fixture.componentRef.setInput('value', { option: 2 });
@@ -505,7 +478,6 @@ describe('IonicSelectFieldComponent', () => {
       fixture.componentRef.setInput('value', { option: 3 });
       fixture.detectChanges();
 
-      // Should have the final value
       expect(IonicFormTestUtils.getFormValue(component).option).toBe(3);
     });
   });

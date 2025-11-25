@@ -25,9 +25,19 @@ body {
   --example-result-text: #1a1a1a;
 }
 
-// Dark mode colors - only when .dark class is explicitly applied
-.dark,
-:root.dark {
+// Auto mode - use system preference when no data-theme is set
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    --example-result-bg: #1e1e1e;
+    --example-result-border: #404040;
+    --example-result-text: #f0f0f0;
+  }
+}
+
+// Explicit dark theme
+html[data-theme='dark'],
+:root[data-theme='dark'] {
   --example-result-bg: #1e1e1e;
   --example-result-border: #404040;
   --example-result-text: #f0f0f0;

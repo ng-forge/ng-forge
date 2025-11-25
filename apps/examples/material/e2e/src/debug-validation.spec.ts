@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('Debug Validation Behavior', () => {
   test('inspect password validation manually', async ({ page }) => {
     // Navigate to the page
-    await page.goto('http://localhost:4200/#/test/advanced-validation');
+    await page.goto('http://localhost:4201/#/test/advanced-validation');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
 

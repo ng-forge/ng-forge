@@ -1,8 +1,7 @@
-import { Binding, computed, inject, inputBinding } from '@angular/core';
+import { Binding, computed, inject, inputBinding, isSignal } from '@angular/core';
 import {
   AddArrayItemEvent,
   ARRAY_CONTEXT,
-  ArrayItemContext,
   baseFieldMapper,
   FIELD_SIGNAL_CONTEXT,
   FieldDef,
@@ -11,6 +10,7 @@ import {
   RemoveArrayItemEvent,
   SubmitEvent,
 } from '@ng-forge/dynamic-forms';
+import { AddArrayItemButtonField, RemoveArrayItemButtonField } from './ionic-button.type';
 
 /**
  * Mapper for submit button - preconfigures SubmitEvent and disables when form is invalid
@@ -21,7 +21,6 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
   // Inject field signal context to access form state
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
 
-  // Preconfigure the SubmitEvent
   bindings.push(inputBinding('event', () => SubmitEvent));
 
   // Add disabled binding - disabled if explicitly set OR if form is invalid
@@ -36,7 +35,6 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
     ),
   );
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
@@ -51,7 +49,6 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
 export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  // Preconfigure the NextPageEvent
   bindings.push(inputBinding('event', () => NextPageEvent));
 
   // Add disabled binding only if explicitly set by user
@@ -59,7 +56,6 @@ export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>
     bindings.push(inputBinding('disabled', () => fieldDef.disabled));
   }
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
@@ -74,7 +70,6 @@ export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>
 export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  // Preconfigure the PreviousPageEvent
   bindings.push(inputBinding('event', () => PreviousPageEvent));
 
   // Add disabled binding only if explicitly set by user
@@ -82,7 +77,6 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
     bindings.push(inputBinding('disabled', () => fieldDef.disabled));
   }
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
@@ -91,14 +85,30 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
 }
 
 /**
- * Mapper for add array item button - preconfigures AddArrayItemEvent with array context
+ * Mapper for add array item button - preconfigures AddArrayItemEvent with array context.
+ *
+ * Supports two modes:
+ * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array
+ * 2. Outside array: Uses `arrayKey` property from field definition
  */
-export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
+export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  const arrayContext = inject(ARRAY_CONTEXT);
+  // Try to get array context (available when inside an array)
+  // Use optional injection so it doesn't fail when outside an array
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
 
-  // Preconfigure the AddArrayItemEvent
+  // Determine the target array key
+  // Priority: explicit arrayKey from fieldDef > arrayKey from context
+  const targetArrayKey = fieldDef.arrayKey ?? arrayContext?.arrayKey;
+
+  if (!targetArrayKey) {
+    console.warn(
+      `[Dynamic Forms] addArrayItem button "${fieldDef.key}" has no array context. ` +
+        'Either place it inside an array field, or provide an explicit arrayKey property.',
+    );
+  }
+
   bindings.push(inputBinding('event', () => AddArrayItemEvent));
 
   // Add disabled binding only if explicitly set by user
@@ -106,38 +116,62 @@ export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, 
     bindings.push(inputBinding('disabled', () => fieldDef.disabled));
   }
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
 
-  // Add eventArgs binding if provided in field definition
-  if ('eventArgs' in fieldDef && fieldDef.eventArgs !== undefined) {
-    bindings.push(inputBinding('eventArgs', () => fieldDef.eventArgs));
-  }
-
-  // Add array context for token resolution
-  const eventContext: ArrayItemContext = {
-    key: fieldDef.key,
-    index: arrayContext.index,
-    arrayKey: arrayContext.arrayKey,
-    formValue: arrayContext.formValue,
+  // Add array context for token resolution (fallback - component prefers injected ARRAY_CONTEXT)
+  // Read signal value if index is a signal (supports differential updates)
+  const getIndex = () => {
+    if (!arrayContext) return -1;
+    return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
   };
 
-  bindings.push(inputBinding('eventContext', () => eventContext));
+  bindings.push(
+    inputBinding('eventContext', () => ({
+      key: fieldDef.key,
+      index: getIndex(),
+      arrayKey: targetArrayKey ?? '',
+      formValue: arrayContext?.formValue ?? {},
+    })),
+  );
+
+  // Set default eventArgs for AddArrayItemEvent (arrayKey)
+  // The array component will use its own template automatically
+  // User can override by providing eventArgs in field definition
+  const defaultEventArgs = ['$arrayKey'];
+  const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
+
+  bindings.push(inputBinding('eventArgs', () => eventArgs));
 
   return bindings;
 }
 
 /**
- * Mapper for remove array item button - preconfigures RemoveArrayItemEvent with array context
+ * Mapper for remove array item button - preconfigures RemoveArrayItemEvent with array context.
+ *
+ * Supports two modes:
+ * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array and removes item at current index
+ * 2. Outside array: Uses `arrayKey` property from field definition, removes last item by default
  */
-export function removeArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
+export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButtonField): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  const arrayContext = inject(ARRAY_CONTEXT);
+  // Try to get array context (available when inside an array)
+  // Use optional injection so it doesn't fail when outside an array
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
 
-  // Preconfigure the RemoveArrayItemEvent
+  // Determine the target array key
+  // Priority: explicit arrayKey from fieldDef > arrayKey from context
+  const targetArrayKey = fieldDef.arrayKey ?? arrayContext?.arrayKey;
+
+  if (!targetArrayKey) {
+    console.warn(
+      `[Dynamic Forms] removeArrayItem button "${fieldDef.key}" has no array context. ` +
+        'Either place it inside an array field, or provide an explicit arrayKey property.',
+    );
+  }
+
   bindings.push(inputBinding('event', () => RemoveArrayItemEvent));
 
   // Add disabled binding only if explicitly set by user
@@ -145,24 +179,30 @@ export function removeArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<strin
     bindings.push(inputBinding('disabled', () => fieldDef.disabled));
   }
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
 
-  // Add array context for token resolution
-  const eventContext: ArrayItemContext = {
-    key: fieldDef.key,
-    index: arrayContext.index,
-    arrayKey: arrayContext.arrayKey,
-    formValue: arrayContext.formValue,
+  // Add array context for token resolution (fallback - component prefers injected ARRAY_CONTEXT)
+  // Read signal value if index is a signal (supports differential updates)
+  const getIndex = () => {
+    if (!arrayContext) return -1; // -1 means remove last (no specific index)
+    return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
   };
 
-  bindings.push(inputBinding('eventContext', () => eventContext));
+  bindings.push(
+    inputBinding('eventContext', () => ({
+      key: fieldDef.key,
+      index: getIndex(),
+      arrayKey: targetArrayKey ?? '',
+      formValue: arrayContext?.formValue ?? {},
+    })),
+  );
 
-  // Set default eventArgs for RemoveArrayItemEvent (arrayKey, index)
+  // Set default eventArgs for RemoveArrayItemEvent (arrayKey, index if inside array)
+  // When outside array, only pass arrayKey (removes last by default)
   // User can override by providing eventArgs in field definition
-  const defaultEventArgs = ['$arrayKey', '$index'];
+  const defaultEventArgs = arrayContext ? ['$arrayKey', '$index'] : ['$arrayKey'];
   const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
 
   bindings.push(inputBinding('eventArgs', () => eventArgs));

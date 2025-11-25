@@ -5,9 +5,6 @@ import { PrimeDatepickerComponent, PrimeDatepickerProps } from './prime-datepick
 import { AsyncPipe } from '@angular/common';
 import { DatePicker } from 'primeng/datepicker';
 
-/**
- * PrimeNG datepicker field component
- */
 @Component({
   selector: 'df-prime-datepicker',
   imports: [DatePicker, Field, DynamicTextPipe, AsyncPipe],
@@ -78,7 +75,6 @@ export default class PrimeDatepickerFieldComponent implements PrimeDatepickerCom
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly datepickerClasses = computed(() => {

@@ -5,9 +5,6 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { IonicSliderComponent, IonicSliderProps } from './ionic-slider.type';
 import { AsyncPipe } from '@angular/common';
 
-/**
- * Ionic slider field component using IonRange
- */
 @Component({
   selector: 'df-ionic-slider',
   imports: [IonRange, IonNote, Field, DynamicTextPipe, AsyncPipe],
@@ -67,7 +64,6 @@ export default class IonicSliderFieldComponent implements IonicSliderComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   protected defaultPinFormatter = (value: number) => String(value);

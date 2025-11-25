@@ -28,11 +28,7 @@ describe('IonicCheckboxFieldComponent', () => {
       const input = fixture.debugElement.query(By.css('ion-checkbox input'));
 
       expect(ionCheckbox).not.toBeNull();
-      //       expect(ionCheckbox.nativeElement.getAttribute('ng-reflect-color')).toBe('primary');
-      //       expect(ionCheckbox.nativeElement.getAttribute('ng-reflect-label-placement')).toBe('end');
       expect(ionCheckbox.nativeElement.getAttribute('tabindex')).toBe('1');
-      //       expect(input).not.toBeNull();
-      //       expect(input.nativeElement.type).toBe('checkbox');
     });
 
     it('should handle user checkbox interaction and update form value', async () => {
@@ -43,13 +39,10 @@ describe('IonicCheckboxFieldComponent', () => {
         initialValue: { agreeToTerms: false },
       });
 
-      // Initial value check
       expect(IonicFormTestUtils.getFormValue(component).agreeToTerms).toBe(false);
 
-      // Simulate user checking the checkbox
       await IonicFormTestUtils.simulateIonicCheckbox(fixture, 'ion-checkbox', true);
 
-      // Verify form value updated
       expect(IonicFormTestUtils.getFormValue(component).agreeToTerms).toBe(true);
     });
 
@@ -61,7 +54,6 @@ describe('IonicCheckboxFieldComponent', () => {
         initialValue: { agreeToTerms: false },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { agreeToTerms: true });
       fixture.detectChanges();
 
@@ -78,7 +70,6 @@ describe('IonicCheckboxFieldComponent', () => {
         initialValue: { subscribe: false },
       });
 
-      // Initial state
       expect(IonicFormTestUtils.getFormValue(component).subscribe).toBe(false);
 
       // Check the checkbox via programmatic update
@@ -104,7 +95,6 @@ describe('IonicCheckboxFieldComponent', () => {
         initialValue: { option1: false, option2: false, option3: false },
       });
 
-      // Check first checkbox
       const checkboxes = fixture.debugElement.queryAll(By.css('df-ionic-checkbox ion-checkbox'));
       await IonicFormTestUtils.simulateIonicCheckbox(fixture, 'ion-checkbox:first-of-type', true);
 
@@ -113,7 +103,6 @@ describe('IonicCheckboxFieldComponent', () => {
       expect(formValue.option2).toBe(false);
       expect(formValue.option3).toBe(false);
 
-      // Check third checkbox
       await IonicFormTestUtils.simulateIonicCheckbox(fixture, 'ion-checkbox:nth-of-type(3)', true);
 
       formValue = IonicFormTestUtils.getFormValue(component);
@@ -140,7 +129,6 @@ describe('IonicCheckboxFieldComponent', () => {
       });
 
       const input = fixture.debugElement.query(By.css('ion-checkbox input'));
-      //       expect(input.nativeElement.disabled).toBe(true);
     });
 
     it('should apply required validation', async () => {
@@ -158,13 +146,10 @@ describe('IonicCheckboxFieldComponent', () => {
         initialValue: { agreeToTerms: false },
       });
 
-      // Form should be invalid when checkbox is unchecked and required
       expect(IonicFormTestUtils.isFormValid(component)).toBe(false);
 
-      // Check the checkbox
       await IonicFormTestUtils.simulateIonicCheckbox(fixture, 'ion-checkbox', true);
 
-      // Form should now be valid
       expect(IonicFormTestUtils.isFormValid(component)).toBe(true);
     });
 
@@ -193,8 +178,6 @@ describe('IonicCheckboxFieldComponent', () => {
       });
 
       const checkboxes = fixture.debugElement.queryAll(By.css('df-ionic-checkbox ion-checkbox'));
-      //       expect(checkboxes[0].nativeElement.getAttribute('ng-reflect-label-placement')).toBe('start');
-      //       expect(checkboxes[1].nativeElement.getAttribute('ng-reflect-label-placement')).toBe('end');
     });
 
     it('should handle indeterminate state', async () => {
@@ -208,7 +191,6 @@ describe('IonicCheckboxFieldComponent', () => {
       });
 
       const ionCheckbox = fixture.debugElement.query(By.css('df-ionic-checkbox ion-checkbox'));
-      //       expect(ionCheckbox.nativeElement.getAttribute('ng-reflect-indeterminate')).toBe('true');
     });
 
     it('should handle justify property', async () => {
@@ -222,7 +204,6 @@ describe('IonicCheckboxFieldComponent', () => {
       });
 
       const ionCheckbox = fixture.debugElement.query(By.css('df-ionic-checkbox ion-checkbox'));
-      //       expect(ionCheckbox.nativeElement.getAttribute('ng-reflect-justify')).toBe('space-between');
     });
   });
 
@@ -263,14 +244,11 @@ describe('IonicCheckboxFieldComponent', () => {
         initialValue: { agreeToTerms: false },
       });
 
-      // Trigger validation by marking field as touched
       const input = fixture.debugElement.query(By.css('ion-checkbox input'));
       input.nativeElement.dispatchEvent(new Event('blur'));
       fixture.detectChanges();
 
-      // Check for error component
       //       const errorComponent = fixture.debugElement.query(By.css('df-ionic-errors'));
-      //       expect(errorComponent).not.toBeNull();
     });
   });
 });

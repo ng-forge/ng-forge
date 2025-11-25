@@ -6,9 +6,6 @@ import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
-/**
- * Ionic input field component
- */
 @Component({
   selector: 'df-ionic-input',
   imports: [IonInput, IonNote, Field, DynamicTextPipe, AsyncPipe],
@@ -73,6 +70,5 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

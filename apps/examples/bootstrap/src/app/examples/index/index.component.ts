@@ -15,22 +15,35 @@ import { Component } from '@angular/core';
   `,
   styles: [
     `
+      :host {
+        --index-primary: #0d6efd;
+        --index-bg: #f8f9fa;
+        --index-text: inherit;
+      }
+
+      :host-context(.dark) {
+        --index-primary: #6ea8fe;
+        --index-bg: #2d2d2d;
+        --index-text: #f0f0f0;
+      }
+
       .index-container {
         padding: 2rem;
         max-width: 800px;
         margin: 0 auto;
+        color: var(--index-text);
       }
 
       h1 {
         margin-bottom: 1rem;
-        color: #0d6efd;
+        color: var(--index-primary);
       }
 
       .info-box {
         padding: 1rem;
-        background: #f8f9fa;
+        background: var(--index-bg);
         border-radius: 0.375rem;
-        border-left: 4px solid #0d6efd;
+        border-left: 4px solid var(--index-primary);
       }
     `,
   ],

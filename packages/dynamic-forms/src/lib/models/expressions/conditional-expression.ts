@@ -1,6 +1,3 @@
-/**
- * Conditional expression that can be evaluated against form values
- */
 export interface ConditionalExpression {
   /** Expression type */
   type: 'fieldValue' | 'formValue' | 'custom' | 'javascript' | 'and' | 'or';

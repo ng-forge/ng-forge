@@ -38,7 +38,6 @@ describe('PrimeToggleFieldComponent', () => {
       expect(containerDiv).toBeTruthy();
       expect(hintElement?.nativeElement.textContent.trim()).toBe('Toggle between light and dark themes');
 
-      // Verify form control integration and dynamic field component properties
       if (primeToggleComponent) {
         expect(primeToggleComponent.label()).toBe('Enable Dark Mode');
       }
@@ -56,13 +55,11 @@ describe('PrimeToggleFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component)['darkMode']).toBe(false);
 
       // Simulate toggle interaction using utility
       await PrimeNGFormTestUtils.simulatePrimeToggle(fixture, 'p-toggleswitch', true);
 
-      // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component)['darkMode']).toBe(true);
     });
 
@@ -89,7 +86,6 @@ describe('PrimeToggleFieldComponent', () => {
       const toggle = fixture.debugElement.query(By.css('p-toggleswitch'));
       const toggleInput = toggle.nativeElement.querySelector('input');
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         darkMode: true,
         notifications: false,
@@ -296,7 +292,6 @@ describe('PrimeToggleFieldComponent', () => {
 
       const toggle = fixture.debugElement.query(By.css('p-toggleswitch'));
 
-      // Check default props from PrimeNG configuration
       expect(toggle).toBeTruthy();
     });
 
@@ -332,10 +327,8 @@ describe('PrimeToggleFieldComponent', () => {
       const toggle = fixture.debugElement.query(By.css('p-toggleswitch'));
       const toggleInput = toggle.nativeElement.querySelector('input');
 
-      // Initial state
       expect(toggleInput.checked).toBe(false);
 
-      // Update via programmatic value change
       await PrimeNGFormTestUtils.updateFormValue(fixture, { darkMode: true });
 
       expect(toggleInput.checked).toBe(true);
@@ -370,11 +363,9 @@ describe('PrimeToggleFieldComponent', () => {
         const label = fixture.debugElement.query(By.css('label'));
         const hint = fixture.debugElement.query(By.css('.p-hint'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Enable Dark Mode');
         expect(hint.nativeElement.textContent.trim()).toBe('Toggle between light and dark themes');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.darkMode.label': 'Habilitar Modo Oscuro',
           'form.darkMode.hint': 'Alternar entre temas claro y oscuro',

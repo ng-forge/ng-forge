@@ -409,7 +409,6 @@ describe('PrimeButtonFieldComponent', () => {
         // Initial translation
         expect(buttonElement.nativeElement.textContent.trim()).toBe('Submit Form');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.submit.label': 'Enviar Formulario',
         });

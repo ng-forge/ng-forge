@@ -4,7 +4,7 @@ import { workspaceRoot } from '@nx/devkit';
 import { fileURLToPath } from 'node:url';
 
 // For CI, you may want to set BASE_URL to the deployed application.
-const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
+const baseURL = process.env['BASE_URL'] || 'http://localhost:4201';
 
 /**
  * Read environment variables from file.
@@ -31,8 +31,8 @@ export default defineConfig({
   outputDir: '../screenshots',
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'pnpm exec nx run material-examples:serve --port 4200',
-    url: 'http://localhost:4200',
+    command: 'pnpm exec nx run material-examples:serve --port 4201',
+    url: 'http://localhost:4201',
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },

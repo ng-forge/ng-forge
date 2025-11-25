@@ -1,13 +1,17 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
   computed,
   DestroyRef,
+  effect,
+  ElementRef,
   inject,
   Injector,
   input,
   model,
+  Renderer2,
   runInInjectionContext,
   ViewContainerRef,
 } from '@angular/core';
@@ -15,7 +19,6 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, map, of, switchMap } from 'rxjs';
 import { RowField } from '../../definitions/default/row-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
-import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
 import { FormUiControl } from '@angular/forms/signals';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
@@ -25,8 +28,8 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
 @Component({
   selector: 'row-field',
   template: `
-    <div class="df-row" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-      <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+    <div class="df-row">
+      <!-- Fields are rendered directly via effect -->
     </div>
   `,
   styleUrl: './row-field.component.scss',
@@ -36,7 +39,6 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
-  imports: [FieldRendererDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class RowFieldComponent {
@@ -46,19 +48,36 @@ export default class RowFieldComponent {
   private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
+  private readonly elementRef = inject(ElementRef);
+  private readonly renderer = inject(Renderer2);
+
+  // Track rendered components for cleanup
+  private renderedComponents: ComponentRef<FormUiControl>[] = [];
 
   // Row field definition
   field = input.required<RowField<any>>();
   key = input.required<string>();
   value = model<any>(undefined);
 
-  readonly disabled = computed(() => this.field().disabled || false);
+  readonly disabled = computed(() => {
+    try {
+      return this.field().disabled || false;
+    } catch {
+      return false;
+    }
+  });
 
   // Row fields are just layout containers - they pass through child fields directly
+  // Note: Use try/catch to handle timing where field input isn't available during class initialization
   fields$ = toObservable(
     computed(() => {
-      const rowField = this.field();
-      return rowField.fields || [];
+      try {
+        const rowField = this.field();
+        return rowField.fields || [];
+      } catch {
+        // Input not yet available during component initialization
+        return [];
+      }
     }),
   );
 
@@ -75,6 +94,13 @@ export default class RowFieldComponent {
     ),
     { initialValue: [] },
   );
+
+  // Effect to render fields directly into the row div
+  // This bypasses template binding issues with OnPush change detection
+  private readonly renderFieldsEffect = effect(() => {
+    const currentFields = this.fields();
+    this.renderFields(currentFields);
+  });
 
   private mapFields(fields: readonly any[]): Promise<ComponentRef<FormUiControl>>[] {
     return fields
@@ -114,8 +140,70 @@ export default class RowFieldComponent {
       });
   }
 
-  onFieldsInitialized(): void {
-    this.eventBus.dispatch(ComponentInitializedEvent, 'row', this.field().key);
+  /**
+   * Renders field components directly into the row's .df-row div.
+   * This bypasses the FieldRendererDirective to avoid OnPush change detection issues.
+   */
+  private renderFields(fields: ComponentRef<FormUiControl>[]): void {
+    // Clear existing rendered components
+    this.clearFields();
+
+    if (!fields || fields.length === 0) {
+      // Still emit event even with no fields
+      this.emitFieldsInitialized();
+      return;
+    }
+
+    // Find the .df-row container element
+    const rowContainer = this.elementRef.nativeElement.querySelector('.df-row');
+    if (!rowContainer) {
+      return;
+    }
+
+    // Append each field component to the row container
+    fields.forEach((fieldComponent) => {
+      if (fieldComponent && fieldComponent.location) {
+        this.renderer.appendChild(rowContainer, fieldComponent.location.nativeElement);
+        this.renderedComponents.push(fieldComponent);
+      }
+    });
+
+    // Emit initialized event after next render
+    this.emitFieldsInitialized();
+  }
+
+  /**
+   * Clears previously rendered field components from the DOM.
+   */
+  private clearFields(): void {
+    const rowContainer = this.elementRef.nativeElement.querySelector('.df-row');
+    if (!rowContainer) {
+      return;
+    }
+
+    this.renderedComponents.forEach((fieldComponent) => {
+      if (fieldComponent.location?.nativeElement?.parentNode === rowContainer) {
+        this.renderer.removeChild(rowContainer, fieldComponent.location.nativeElement);
+      }
+    });
+
+    this.renderedComponents = [];
+  }
+
+  /**
+   * Emits the fieldsInitialized event after the next render cycle.
+   */
+  private emitFieldsInitialized(): void {
+    afterNextRender(
+      () => {
+        try {
+          this.eventBus.dispatch(ComponentInitializedEvent, 'row', this.field().key);
+        } catch {
+          // Input not available - component may have been destroyed
+        }
+      },
+      { injector: this.injector },
+    );
   }
 }
 

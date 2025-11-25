@@ -68,28 +68,34 @@ export class ArrayNestedTestComponent {
         type: 'array',
         fields: [
           {
-            key: 'user',
-            type: 'group',
+            key: 'userRow',
+            type: 'row',
             fields: [
               {
-                key: 'firstName',
-                type: 'input',
-                label: 'First Name',
-                col: 6,
-              },
-              {
-                key: 'lastName',
-                type: 'input',
-                label: 'Last Name',
-                col: 6,
-              },
-              {
-                key: 'role',
-                type: 'select',
-                label: 'Role',
-                options: [
-                  { value: 'admin', label: 'Admin' },
-                  { value: 'user', label: 'User' },
+                key: 'user',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'firstName',
+                    type: 'input',
+                    label: 'First Name',
+                    col: 6,
+                  },
+                  {
+                    key: 'lastName',
+                    type: 'input',
+                    label: 'Last Name',
+                    col: 6,
+                  },
+                  {
+                    key: 'role',
+                    type: 'select',
+                    label: 'Role',
+                    options: [
+                      { value: 'admin', label: 'Admin' },
+                      { value: 'user', label: 'User' },
+                    ],
+                  },
                 ],
               },
             ],
@@ -99,12 +105,15 @@ export class ArrayNestedTestComponent {
       {
         key: 'addUserButton',
         type: 'addArrayItem',
+        arrayKey: 'users',
         label: 'Add User',
         className: 'array-add-button',
       },
     ],
   } as const satisfies FormConfig;
-  value = signal<Record<string, unknown>>({});
+  value = signal<Record<string, unknown>>({
+    users: [{ user: { firstName: '', lastName: '', role: '' } }], // Start with one empty item (group key preserved)
+  });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 
   onSubmitted(value: Record<string, unknown> | undefined): void {

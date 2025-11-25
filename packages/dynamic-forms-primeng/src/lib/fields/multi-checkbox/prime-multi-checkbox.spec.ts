@@ -72,13 +72,11 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component).hobbies).toEqual([]);
 
       // Simulate checking first checkbox using utility
       await PrimeNGFormTestUtils.simulatePrimeCheckbox(fixture, 'p-checkbox:first-of-type', true);
 
-      // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component).hobbies).toEqual(['reading']);
 
       // Check second checkbox using utility
@@ -108,7 +106,6 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         hobbies: ['reading', 'cooking'],
         skills: [],
@@ -379,7 +376,6 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
         },
       });
 
-      // Initial values
       expect(PrimeNGFormTestUtils.getFormValue(component).hobbies).toEqual(['reading']);
       expect(PrimeNGFormTestUtils.getFormValue(component).skills).toEqual(['typescript']);
 
@@ -517,14 +513,12 @@ describe('PrimeMultiCheckboxFieldComponent', () => {
         const hintElement = fixture.debugElement.query(By.css('.p-hint'));
         let optionLabels = fixture.debugElement.queryAll(By.css('.checkbox-option label'));
 
-        // Initial translations
         expect(labelElement.nativeElement.textContent.trim()).toBe('Select Hobbies');
         expect(hintElement.nativeElement.textContent.trim()).toBe('Choose your hobbies');
         expect(optionLabels[0]?.nativeElement.textContent.trim()).toBe('Reading');
         expect(optionLabels[1]?.nativeElement.textContent.trim()).toBe('Gaming');
         expect(optionLabels[2]?.nativeElement.textContent.trim()).toBe('Cooking');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.hobbies.label': 'Seleccionar Pasatiempos',
           'form.hobbies.hint': 'Elige tus pasatiempos',

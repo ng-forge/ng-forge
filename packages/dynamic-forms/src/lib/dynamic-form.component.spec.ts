@@ -85,13 +85,9 @@ describe('DynamicFormComponent', () => {
     it('should create successfully with correct type and properties', () => {
       const { component } = createComponent();
 
-      // ITERATION 2 FIX: Verify component is correct type with expected structure
-      // Previous: expect(component).toBeTruthy() - only checks truthy value
       expect(component).not.toBeNull();
       expect(component).toBeInstanceOf(DynamicForm);
 
-      // ITERATION 6 FIX: Verify essential properties exist AND are signals (functions)
-      // Previous: Only checked .toBeDefined() - doesn't verify they're signals
       expect(component.config).toBeDefined();
       expect(typeof component.config).toBe('function');
 
@@ -122,8 +118,6 @@ describe('DynamicFormComponent', () => {
     it('should have required computed properties with correct types', () => {
       const { component } = createComponent();
 
-      // ITERATION 1 FIX: Verify properties are functions (signals) returning correct types
-      // Previous: Only checked .toBeDefined() which doesn't verify functionality
       expect(component.config).toBeDefined();
       expect(typeof component.config).toBe('function');
 
@@ -434,8 +428,6 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
-      // ITERATION 1 FIX: Verify errors object contains actual errors, not just defined
-      // Previous: expect(component.errors()).toBeDefined();
       const errors = component.errors();
       expect(errors).toBeDefined();
       expect(typeof errors).toBe('object');
@@ -689,8 +681,6 @@ describe('DynamicFormComponent', () => {
       // Find the test input component and simulate user input
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
 
-      // ITERATION 2 FIX: Verify element exists and has correct structure
-      // Previous: expect(testInput).toBeTruthy() - only checks truthy
       expect(testInput).not.toBeNull();
       expect(testInput.componentInstance).toBeInstanceOf(TestInputHarnessComponent);
       expect(testInput.nativeElement.querySelector('input')).not.toBeNull();
@@ -730,8 +720,6 @@ describe('DynamicFormComponent', () => {
       // Find the test checkbox component and simulate user interaction
       const testCheckbox = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestCheckboxHarnessComponent);
 
-      // ITERATION 2 FIX: Verify element exists and has correct structure
-      // Previous: expect(testCheckbox).toBeTruthy() - only checks truthy
       expect(testCheckbox).not.toBeNull();
       expect(testCheckbox.componentInstance).toBeInstanceOf(TestCheckboxHarnessComponent);
       expect(testCheckbox.nativeElement.querySelector('input[type="checkbox"]')).not.toBeNull();
@@ -874,8 +862,6 @@ describe('DynamicFormComponent', () => {
       expect(component.value).toBeDefined();
       expect(typeof component.value).toBe('function');
 
-      // ITERATION 2 FIX: Verify signal can actually get/set values
-      // Previous: Only checked signal exists, not that it works
       const testValue = { test: 'data' };
       component.value.set(testValue);
       expect(component.value()).toEqual(testValue);
@@ -890,8 +876,6 @@ describe('DynamicFormComponent', () => {
       expect(component.validityChange).toBeDefined();
       expect(typeof component.validityChange.subscribe).toBe('function');
 
-      // ITERATION 2 FIX: Verify output actually emits values
-      // Previous: Only checked output exists, not that it emits
       let emittedValue: boolean | undefined;
       component.validityChange.subscribe((valid) => (emittedValue = valid));
 
@@ -910,8 +894,6 @@ describe('DynamicFormComponent', () => {
       expect(component.dirtyChange).toBeDefined();
       expect(typeof component.dirtyChange.subscribe).toBe('function');
 
-      // ITERATION 2 FIX: Verify output actually emits values
-      // Previous: Only checked output exists, not that it emits
       const dirtyValues: boolean[] = [];
       component.dirtyChange.subscribe((dirty) => dirtyValues.push(dirty));
 
@@ -1188,8 +1170,6 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
-      // ITERATION 2 FIX: Verify null/undefined are handled correctly
-      // Previous: expect(component.formValue()).toBeDefined() - too weak
       const formValue = component.formValue();
       expect(formValue).toBeDefined();
       expect(typeof formValue).toBe('object');

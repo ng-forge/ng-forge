@@ -54,7 +54,6 @@ export interface ArrayField<TFields extends readonly ArrayAllowedChildren[] = re
 
 /**
  * Type guard for ArrayField with proper type narrowing
- * After this guard, TypeScript knows the field is an ArrayField and can access its properties safely
  */
 export function isArrayField(field: FieldDef<any>): field is ArrayField {
   return field.type === 'array' && 'fields' in field;
