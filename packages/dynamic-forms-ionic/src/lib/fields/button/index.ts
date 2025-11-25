@@ -12,5 +12,5 @@ export type {
   RemoveArrayItemButtonField,
 } from './ionic-button.type';
 
-// Public API - component (default export)
+// Public API - component
 export { default as IonicButtonFieldComponent } from './ionic-button.component';
