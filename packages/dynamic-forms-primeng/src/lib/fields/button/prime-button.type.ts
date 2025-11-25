@@ -47,3 +47,35 @@ export interface PrimePreviousButtonField extends Omit<FieldDef<PrimeButtonProps
   className?: string;
   props?: PrimeButtonProps;
 }
+
+/** Add array item button field - with preconfigured AddArrayItemEvent */
+export interface PrimeAddArrayItemButtonField extends Omit<FieldDef<PrimeButtonProps>, 'event'> {
+  type: 'addArrayItem';
+  key: string;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+  props?: PrimeButtonProps;
+  /**
+   * The key of the array field to add items to.
+   * Required when the button is placed outside the array.
+   * When inside an array, this is automatically determined from context.
+   */
+  arrayKey?: string;
+}
+
+/** Remove array item button field - with preconfigured RemoveArrayItemEvent */
+export interface PrimeRemoveArrayItemButtonField extends Omit<FieldDef<PrimeButtonProps>, 'event'> {
+  type: 'removeArrayItem';
+  key: string;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+  props?: PrimeButtonProps;
+  /**
+   * The key of the array field to remove items from.
+   * Required when the button is placed outside the array.
+   * When inside an array, this is automatically determined from context.
+   */
+  arrayKey?: string;
+}
