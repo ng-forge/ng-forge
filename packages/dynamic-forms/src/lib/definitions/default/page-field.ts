@@ -26,7 +26,7 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
   readonly fields: TFields;
 
   /** Page fields do not have a label property **/
-  readonly label?: undefined;
+  readonly label?: never;
 }
 
 /**

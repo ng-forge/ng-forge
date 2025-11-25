@@ -18,7 +18,7 @@ export interface RowField<TFields extends readonly RowAllowedChildren[] = readon
   readonly fields: TFields;
 
   /** Row fields do not have a label property **/
-  readonly label?: undefined;
+  readonly label?: never;
 }
 
 /**

@@ -33,7 +33,7 @@ export interface InputProps<T extends InputType = InputType> {
  * Number input field with strict number value type.
  * When props.type is 'number', value must be number.
  */
-interface NumberInputField<TProps extends { type?: any } = { type: 'number'; placeholder?: DynamicText }>
+interface NumberInputField<TProps extends { type?: string } = { type: 'number'; placeholder?: DynamicText }>
   extends BaseValueField<TProps, number> {
   type: 'input';
   props?: TProps; // Optional to match component expectations
@@ -44,7 +44,7 @@ interface NumberInputField<TProps extends { type?: any } = { type: 'number'; pla
  * When props.type is text/email/etc, value must be string.
  */
 interface StringInputField<
-  TProps extends { type?: any } = { type: 'text' | 'email' | 'password' | 'tel' | 'url'; placeholder?: DynamicText },
+  TProps extends { type?: string } = { type: 'text' | 'email' | 'password' | 'tel' | 'url'; placeholder?: DynamicText },
 > extends BaseValueField<TProps, string> {
   type: 'input';
   props?: TProps; // Optional to match component expectations
@@ -60,13 +60,13 @@ type ExtractInputType<TProps> = TProps extends { type?: infer T } ? T : InputTyp
  */
 interface UndefinedPropsInputField extends BaseValueField<undefined, string | number> {
   type: 'input';
-  props?: undefined;
+  props?: never;
 }
 
 /**
  * Builds discriminated union based on what input types are possible in TProps
  */
-type BuildInputFieldUnion<TProps extends { type?: any }> =
+type BuildInputFieldUnion<TProps extends { type?: string }> =
   | (ExtractInputType<TProps> extends infer T
       ? T extends string
         ? ('number' extends T ? NumberInputField<TProps> : never) | (Exclude<T, 'number'> extends never ? never : StringInputField<TProps>)
@@ -102,4 +102,4 @@ type BuildInputFieldUnion<TProps extends { type?: any }> =
  * }
  * type MatInputField = InputField<MatInputProps>; // Automatically gets discriminated union
  */
-export type InputField<TProps extends { type?: any } = InputProps> = BuildInputFieldUnion<TProps>;
+export type InputField<TProps extends { type?: string } = InputProps> = BuildInputFieldUnion<TProps>;
