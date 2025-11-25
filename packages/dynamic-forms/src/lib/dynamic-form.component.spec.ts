@@ -39,6 +39,20 @@ describe('DynamicFormComponent', () => {
     return SimpleTestUtils.createComponent(config, initialValue);
   };
 
+  /**
+   * Waits for dynamic components to finish loading and rendering.
+   * Call this after createComponent() and before querying for test harness components.
+   */
+  const waitForDynamicComponents = async (fixture: any) => {
+    // Two-pass approach: first for async loading, second for rendering
+    await delay();
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    await delay();
+    fixture.detectChanges();
+    TestBed.flushEffects();
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DynamicForm, TestInputHarnessComponent, TestCheckboxHarnessComponent],
@@ -60,6 +74,11 @@ describe('DynamicFormComponent', () => {
         },
       ],
     }).compileComponents();
+  });
+
+  afterEach(() => {
+    // Reset TestBed to prevent test pollution
+    TestBed.resetTestingModule();
   });
 
   describe('Basic Functionality', () => {
@@ -140,10 +159,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-
-      // Wait for async field rendering
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({ firstName: 'John' });
     });
@@ -161,10 +177,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-
-      // Wait for async field rendering
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({ isActive: true });
     });
@@ -188,10 +201,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-
-      // Wait for async field rendering
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({
         firstName: 'John',
@@ -215,10 +225,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-
-      // Wait for async field rendering
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Should be valid with default value
       expect(component.valid()).toBe(true);
@@ -238,10 +245,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-
-      // Wait for async field rendering
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Check the form value directly
       expect(component.formValue()).toEqual({ firstName: 'John' });
@@ -263,8 +267,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.valid()).toBe(false);
       expect(component.invalid()).toBe(true);
@@ -291,8 +294,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.valid()).toBe(false);
       expect(component.invalid()).toBe(true);
@@ -319,8 +321,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.valid()).toBe(true);
       expect(component.invalid()).toBe(false);
@@ -345,8 +346,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // When no default value is specified, type-appropriate defaults are used
       expect(component.formValue()).toEqual({
@@ -386,8 +386,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({
         firstName: 'John',
@@ -412,8 +411,7 @@ describe('DynamicFormComponent', () => {
       } as any;
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({ email: 'test@example.com' });
     });
@@ -434,8 +432,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // ITERATION 1 FIX: Verify errors object contains actual errors, not just defined
       // Previous: expect(component.errors()).toBeDefined();
@@ -461,8 +458,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.valid()).toBe(true);
     });
@@ -553,8 +549,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({
         firstName: 'John',
@@ -604,8 +599,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({
         firstName: 'John',
@@ -640,8 +634,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(initialConfig);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
@@ -688,8 +681,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initial value
       expect(component.formValue()).toEqual({ firstName: 'John' });
@@ -730,12 +722,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-
-      // Wait for dynamic component loading
-      await delay(10);
-      fixture.detectChanges();
-      await delay(10);
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initial value
       expect(component.formValue()).toEqual({ isActive: false });
@@ -789,8 +776,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initial values
       expect(component.formValue()).toEqual({
@@ -863,8 +849,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initial value
       expect(component.formValue()).toEqual({ firstName: 'John' });
@@ -910,8 +895,7 @@ describe('DynamicFormComponent', () => {
       let emittedValue: boolean | undefined;
       component.validityChange.subscribe((valid) => (emittedValue = valid));
 
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Should emit false for invalid form (empty required field)
       expect(emittedValue).toBe(false);
@@ -931,8 +915,7 @@ describe('DynamicFormComponent', () => {
       const dirtyValues: boolean[] = [];
       component.dirtyChange.subscribe((dirty) => dirtyValues.push(dirty));
 
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Modify form to trigger dirty state
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
@@ -971,8 +954,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initial values
       expect(component.formValue()).toEqual({
@@ -1019,8 +1001,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initial values
       expect(component.formValue()).toEqual({
@@ -1063,8 +1044,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({
         firstName: 'John',
@@ -1101,8 +1081,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Should have validity tracking methods
       expect(typeof component.valid).toBe('function');
@@ -1126,8 +1105,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component: validComponent, fixture: validFixture } = createComponent(validConfig);
-      await delay();
-      validFixture.detectChanges();
+      await waitForDynamicComponents(validFixture);
 
       // Valid form should be valid
       expect(validComponent.valid()).toBe(true);
@@ -1145,8 +1123,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component: invalidComponent, fixture: invalidFixture } = createComponent(invalidConfig);
-      await delay();
-      invalidFixture.detectChanges();
+      await waitForDynamicComponents(invalidFixture);
 
       // Invalid form should be invalid
       expect(invalidComponent.valid()).toBe(false);
@@ -1165,8 +1142,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       const initialValue = component.formValue();
       expect(initialValue).toEqual({ firstName: 'John' });
@@ -1210,8 +1186,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // ITERATION 2 FIX: Verify null/undefined are handled correctly
       // Previous: expect(component.formValue()).toBeDefined() - too weak
@@ -1243,8 +1218,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({
         'field-with-dashes': 'test',
@@ -1266,8 +1240,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({ longText: longValue });
     });
@@ -1285,8 +1258,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       const testInput = fixture.debugElement.query((by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent);
       expect(testInput).not.toBeNull();
@@ -1322,8 +1294,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.touched()).toBe(false);
     });
@@ -1341,8 +1312,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.touched()).toBe(false);
 
@@ -1382,8 +1352,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.touched()).toBe(false);
 
@@ -1414,8 +1383,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.touched()).toBe(false);
 
@@ -1450,8 +1418,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initially not disabled
       expect(component.disabled()).toBe(false);
@@ -1477,8 +1444,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       const formElement = fixture.nativeElement.querySelector('form');
       expect(formElement.classList.contains('disabled')).toBe(false);
@@ -1503,8 +1469,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       fixture.componentRef.setInput('formOptions', { disabled: true });
       fixture.detectChanges();
@@ -1541,8 +1506,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Disable first
       fixture.componentRef.setInput('formOptions', { disabled: true });
@@ -1582,8 +1546,7 @@ describe('DynamicFormComponent', () => {
         initializationEmitted = true;
       });
 
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(initializationEmitted).toBe(true);
     });
@@ -1610,8 +1573,7 @@ describe('DynamicFormComponent', () => {
 
       const initializationPromise = firstValueFrom(component.initialized$);
 
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       await initializationPromise;
       // If we reach here, initialization was emitted successfully
@@ -1636,8 +1598,7 @@ describe('DynamicFormComponent', () => {
         emissionCount++;
       });
 
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Wait a bit more to ensure no duplicate emissions
       await delay(50);
@@ -1661,8 +1622,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(initialConfig);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
@@ -1722,8 +1682,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Row definitions should flatten their children
       expect(component.formValue()).toEqual({
@@ -1764,8 +1723,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Group definitions should create nested object structure
       expect(component.formValue()).toEqual({
@@ -1816,8 +1774,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Should create nested structure with group containing row-flattened fields
       expect(component.formValue()).toEqual({
@@ -1886,8 +1843,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Should handle mixed field types correctly with group fields nested
       expect(component.formValue()).toEqual({
@@ -1930,8 +1886,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Form should be invalid due to empty required email field in nested group
       expect(component.valid()).toBe(false);
@@ -1968,8 +1923,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Should handle empty nested definitions gracefully
       expect(component.formValue()).toEqual({
@@ -2015,8 +1969,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Verify initial values
       expect(component.formValue()).toEqual({
@@ -2078,8 +2031,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Verify initial values
       expect(component.formValue()).toEqual({
@@ -2111,8 +2063,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       let resetEmitted = false;
       component.reset.subscribe(() => {
@@ -2140,8 +2091,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       let clearedEmitted = false;
       component.cleared.subscribe(() => {
@@ -2173,8 +2123,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initial values with type-appropriate defaults
       const initialValue = component.formValue();
@@ -2232,8 +2181,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       const initialValue = component.formValue();
       expect(initialValue).toEqual({
@@ -2269,8 +2217,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({});
 
@@ -2296,8 +2243,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initially valid with default value
       expect(component.valid()).toBe(true);
@@ -2332,8 +2278,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       // Initially valid
       expect(component.valid()).toBe(true);
@@ -2361,8 +2306,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({ firstName: 'John' });
 
@@ -2405,8 +2349,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({
         firstName: 'John',
@@ -2466,8 +2409,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({
         address: {
@@ -2532,8 +2474,7 @@ describe('DynamicFormComponent', () => {
       };
 
       const { component, fixture } = createComponent(config);
-      await delay();
-      fixture.detectChanges();
+      await waitForDynamicComponents(fixture);
 
       expect(component.formValue()).toEqual({
         user: {
