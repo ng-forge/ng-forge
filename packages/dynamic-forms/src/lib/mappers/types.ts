@@ -16,7 +16,7 @@ import { ValidationMessages } from '../models/validation-types';
  *
  * Container fields (Group, Array) create scoped contexts with nested forms.
  */
-export interface FieldSignalContext<TModel = any> {
+export interface FieldSignalContext<TModel = unknown> {
   injector: Injector;
   value: WritableSignal<Partial<TModel> | undefined>;
   defaultValues: () => TModel;
@@ -57,4 +57,4 @@ export interface ArrayContext {
  * }
  * ```
  */
-export type MapperFn<T extends FieldDef<any>> = (input: T) => Binding[];
+export type MapperFn<T extends FieldDef<unknown>> = (input: T) => Binding[];

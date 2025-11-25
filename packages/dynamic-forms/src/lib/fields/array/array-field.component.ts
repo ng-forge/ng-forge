@@ -7,7 +7,6 @@ import {
   inject,
   Injector,
   input,
-  inputBinding,
   linkedSignal,
   runInInjectionContext,
   type Type,
@@ -28,7 +27,7 @@ import { ArrayContext, FieldSignalContext } from '../../mappers';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { createSchemaFromFields } from '../../core';
-import { flattenFields } from '../../utils';
+import { flattenFields, getChildrenMap } from '../../utils';
 
 /**
  * Array field component that manages dynamic arrays of field values.
@@ -115,17 +114,15 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const arrayValue = this.getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
     if (arrayValue.length === 0) return [];
 
-    // Access the array FieldTree through the form's structure
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const childrenMap = (parentForm as any).structure?.childrenMap?.();
+    // Access the array FieldTree through the form's structure using utility
+    const childrenMap = getChildrenMap(parentForm);
 
     // Get the array's inner childrenMap if available
     let innerChildrenMap: Map<string, FieldTree<unknown>> | null = null;
     if (childrenMap) {
       const arrayFieldTree = childrenMap.get(arrayKey);
       if (arrayFieldTree) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        innerChildrenMap = (arrayFieldTree as any).structure?.childrenMap?.() ?? null;
+        innerChildrenMap = getChildrenMap(arrayFieldTree);
       }
     }
 
@@ -273,50 +270,49 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   }
 
   /**
-   * Create array-specific injector for a single array item
-   * This provides FIELD_SIGNAL_CONTEXT and ARRAY_CONTEXT to child components
+   * Core helper to create an injector for an array item.
+   * Provides both FIELD_SIGNAL_CONTEXT and ARRAY_CONTEXT to child components.
+   *
+   * @param formRef - The form reference (FieldTree or local form) for this item
+   * @param index - Index of the array item
    */
-  private createArrayItemInjector(fieldTree: FieldTree<unknown>, index: number): Injector {
-    const arrayKey = this.field().key;
-
-    // Create scoped child injector
+  private createItemInjector(formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>, index: number): Injector {
     const arrayContext: ArrayContext = {
-      arrayKey,
+      arrayKey: this.field().key,
       index,
       formValue: this.parentFieldSignalContext.value(),
       field: this.field(),
     };
 
-    // Create a mutable context object that will reference the injector
-    // We need to create the injector first so the context can reference it
+    // Create context with placeholder injector (will be set after Injector.create)
     const itemFieldSignalContext: FieldSignalContext<unknown> = {
-      injector: undefined as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      injector: undefined as unknown as Injector,
       value: this.parentFieldSignalContext.value,
       defaultValues: () => ({}),
-      form: (() => fieldTree) as any as ReturnType<typeof form<unknown>>,
+      form: (() => formRef) as unknown as ReturnType<typeof form<unknown>>,
       defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 
-    // Create the array item injector with the array context and field signal context
-    const arrayItemInjector = Injector.create({
+    const injector = Injector.create({
       parent: this.parentInjector,
       providers: [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: itemFieldSignalContext,
-        },
-        {
-          provide: ARRAY_CONTEXT,
-          useValue: arrayContext,
-        },
+        { provide: FIELD_SIGNAL_CONTEXT, useValue: itemFieldSignalContext },
+        { provide: ARRAY_CONTEXT, useValue: arrayContext },
       ],
     });
 
-    // Now set the injector in the context to the array item injector
-    // This allows child fields to resolve themselves from the array item's structure
-    itemFieldSignalContext.injector = arrayItemInjector;
+    // Complete the circular reference
+    itemFieldSignalContext.injector = injector;
 
-    return arrayItemInjector;
+    return injector;
+  }
+
+  /**
+   * Create array-specific injector for a single array item with a FieldTree.
+   * This provides FIELD_SIGNAL_CONTEXT and ARRAY_CONTEXT to child components.
+   */
+  private createArrayItemInjector(fieldTree: FieldTree<unknown>, index: number): Injector {
+    return this.createItemInjector(fieldTree, index);
   }
 
   /**
@@ -409,55 +405,16 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     template: FieldDef<unknown>,
     index: number,
   ): ComponentRef<FormUiControl> {
-    const arrayKey = this.field().key;
-
-    // Create scoped child injector first
-    const arrayContext: ArrayContext = {
-      arrayKey,
-      index,
-      formValue: this.parentFieldSignalContext.value(),
-      field: this.field(),
-    };
-
     // Get the form reference - use existing FieldTree or create a local form for objects
     const formRef = fieldTree ?? this.createObjectItemForm(template, index);
-
-    // Create a mutable context object that will reference the injector
-    // We need to create the injector first so the context can reference it
-    const itemFieldSignalContext: FieldSignalContext<unknown> = {
-      injector: undefined as unknown as Injector, // Will be set below
-      value: this.parentFieldSignalContext.value,
-      defaultValues: () => ({}),
-      form: (() => formRef) as unknown as ReturnType<typeof form<unknown>>,
-      defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
-    };
-
-    // Create the array item injector with the array context and field signal context
-    const arrayItemInjector = Injector.create({
-      parent: this.parentInjector,
-      providers: [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: itemFieldSignalContext,
-        },
-        {
-          provide: ARRAY_CONTEXT,
-          useValue: arrayContext,
-        },
-      ],
-    });
-
-    // Now set the injector in the context to the array item injector
-    // This allows child fields to resolve themselves from the array item's structure
-    itemFieldSignalContext.injector = arrayItemInjector;
+    const injector = this.createItemInjector(formRef, index);
 
     // Map field to bindings using the scoped injector
-    // The mapper handles key/field bindings, form is provided via FIELD_SIGNAL_CONTEXT
-    const bindings = runInInjectionContext(arrayItemInjector, () => {
+    const bindings = runInInjectionContext(injector, () => {
       return mapFieldToBindings(template, this.rawFieldRegistry());
     });
 
-    return this.vcr.createComponent(componentType, { bindings, injector: arrayItemInjector });
+    return this.vcr.createComponent(componentType, { bindings, injector });
   }
 
   /**
@@ -465,42 +422,8 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
    * This creates a local form for the object and provides it via FIELD_SIGNAL_CONTEXT.
    */
   private createObjectItemInjector(template: FieldDef<unknown>, index: number): Injector {
-    const arrayKey = this.field().key;
-
-    const arrayContext: ArrayContext = {
-      arrayKey,
-      index,
-      formValue: this.parentFieldSignalContext.value(),
-      field: this.field(),
-    };
-
-    // Create a local form for this object item
     const localForm = this.createObjectItemForm(template, index);
-
-    const itemFieldSignalContext: FieldSignalContext<unknown> = {
-      injector: undefined as unknown as Injector, // Will be set below
-      value: this.parentFieldSignalContext.value,
-      defaultValues: () => ({}),
-      form: (() => localForm) as unknown as ReturnType<typeof form<unknown>>,
-      defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
-    };
-
-    const arrayItemInjector = Injector.create({
-      parent: this.parentInjector,
-      providers: [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: itemFieldSignalContext,
-        },
-        {
-          provide: ARRAY_CONTEXT,
-          useValue: arrayContext,
-        },
-      ],
-    });
-
-    itemFieldSignalContext.injector = arrayItemInjector;
-    return arrayItemInjector;
+    return this.createItemInjector(localForm, index);
   }
 
   /**
