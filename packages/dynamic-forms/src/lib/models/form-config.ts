@@ -4,6 +4,7 @@ import { SchemaDefinition } from './schemas';
 import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../core/validation/validator-types';
 import { CustomFunction } from '../core/expressions/custom-function-types';
 import { ValidationMessages } from './validation-types';
+import { SubmissionConfig } from './submission-config';
 
 /**
  * Configuration interface for defining dynamic form structure and behavior.
@@ -119,6 +120,39 @@ export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredF
    * Signal forms adapter configuration.
    */
   customFnConfig?: CustomFnConfig;
+
+  /**
+   * Form submission configuration.
+   *
+   * When provided, enables integration with Angular Signal Forms' native `submit()` function.
+   * The submission mechanism is **optional** - you can still handle submission manually
+   * via the `(submitted)` output if you prefer.
+   *
+   * While the submission action is executing, `form().submitting()` will be `true`,
+   * which automatically disables submit buttons (unless configured otherwise).
+   *
+   * Server errors returned from the action will be automatically applied to the
+   * corresponding form fields.
+   *
+   * @example
+   * ```typescript
+   * const config: FormConfig = {
+   *   fields: [...],
+   *   submission: {
+   *     action: async (form) => {
+   *       const value = form().value();
+   *       try {
+   *         await this.api.submit(value);
+   *         return undefined;
+   *       } catch (error) {
+   *         return [{ field: form.email, error: { kind: 'server', message: 'Email exists' }}];
+   *       }
+   *     }
+   *   }
+   * };
+   * ```
+   */
+  submission?: SubmissionConfig<TValue>;
 }
 
 /**
@@ -415,4 +449,84 @@ export interface FormOptions {
    * @value false
    */
   disabled?: boolean;
+
+  /**
+   * Default disabled behavior for submit buttons.
+   *
+   * Controls when submit buttons are automatically disabled.
+   * Can be overridden per-button via the `logic` array on individual button fields.
+   *
+   * @example
+   * ```typescript
+   * options: {
+   *   submitButton: {
+   *     disableWhenInvalid: true,      // Disable when form is invalid
+   *     disableWhileSubmitting: true,  // Disable during submission
+   *   }
+   * }
+   * ```
+   */
+  submitButton?: SubmitButtonOptions;
+
+  /**
+   * Default disabled behavior for next page buttons.
+   *
+   * Controls when next page buttons are automatically disabled in paged forms.
+   * Can be overridden per-button via the `logic` array on individual button fields.
+   *
+   * @example
+   * ```typescript
+   * options: {
+   *   nextButton: {
+   *     disableWhenPageInvalid: true,  // Disable when current page is invalid
+   *     disableWhileSubmitting: true,  // Disable during submission
+   *   }
+   * }
+   * ```
+   */
+  nextButton?: NextButtonOptions;
+}
+
+/**
+ * Options for controlling submit button disabled behavior.
+ *
+ * @public
+ */
+export interface SubmitButtonOptions {
+  /**
+   * Disable submit button when the form is invalid.
+   *
+   * @default true
+   */
+  disableWhenInvalid?: boolean;
+
+  /**
+   * Disable submit button while the form is submitting.
+   *
+   * Requires `submission.action` to be configured for automatic detection.
+   *
+   * @default true
+   */
+  disableWhileSubmitting?: boolean;
+}
+
+/**
+ * Options for controlling next page button disabled behavior.
+ *
+ * @public
+ */
+export interface NextButtonOptions {
+  /**
+   * Disable next button when the current page has invalid fields.
+   *
+   * @default true
+   */
+  disableWhenPageInvalid?: boolean;
+
+  /**
+   * Disable next button while the form is submitting.
+   *
+   * @default true
+   */
+  disableWhileSubmitting?: boolean;
 }

@@ -1,5 +1,6 @@
 export * from './component-type';
 export * from './form-config';
+export * from './submission-config';
 export * from './field-type';
 export * from './field-option';
 export * from './field-signal-context.token';

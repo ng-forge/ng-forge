@@ -1,7 +1,8 @@
 import { FieldDef } from '../definitions';
-import { Binding, Injector, WritableSignal } from '@angular/core';
+import { Binding, Injector, Signal, WritableSignal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { ValidationMessages } from '../models/validation-types';
+import { FormOptions } from '../models/form-config';
 
 /**
  * Field signal context contains the "nervous system" of the dynamic form.
@@ -12,6 +13,7 @@ import { ValidationMessages } from '../models/validation-types';
  * - Current form values (as signals)
  * - Default values
  * - Validation messages
+ * - Form options (for button behavior configuration)
  * - The injector for creating components
  *
  * Container fields (Group, Array) create scoped contexts with nested forms.
@@ -22,6 +24,16 @@ export interface FieldSignalContext<TModel = any> {
   defaultValues: () => TModel;
   form: ReturnType<typeof form<TModel>>;
   defaultValidationMessages?: ValidationMessages;
+  /**
+   * Form-level options including button behavior configuration.
+   * Used by button mappers to determine disabled state defaults.
+   */
+  formOptions?: FormOptions;
+  /**
+   * Signal indicating current page validity (for paged forms).
+   * Used by next button to determine disabled state.
+   */
+  currentPageValid?: Signal<boolean>;
 }
 
 /**
