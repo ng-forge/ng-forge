@@ -1,19 +1,15 @@
 // Public exports for bootstrap field components and types
 
-export {
-  submitButton,
-  nextPageButton,
-  previousPageButton,
-  actionButton,
-  BsButtonFieldComponent,
-  submitButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-  addArrayItemButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
-  buttonFieldMapper,
+export { submitButton, nextPageButton, previousPageButton, actionButton, BsButtonFieldComponent } from './button';
+export type {
+  BsButtonProps,
+  BsButtonField,
+  BsSubmitButtonField,
+  BsNextButtonField,
+  BsPreviousButtonField,
+  AddArrayItemButtonField,
+  RemoveArrayItemButtonField,
 } from './button';
-export type { BsButtonProps, BsButtonField, BsSubmitButtonField, BsNextButtonField, BsPreviousButtonField } from './button';
 
 export { BsCheckboxFieldComponent } from './checkbox';
 export type { BsCheckboxProps, BsCheckboxField, BsCheckboxComponent } from './checkbox';

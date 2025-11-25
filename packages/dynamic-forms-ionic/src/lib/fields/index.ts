@@ -1,20 +1,16 @@
 // Public exports for ionic field fields and types
 
 // Button
-export {
-  submitButton,
-  nextPageButton,
-  previousPageButton,
-  actionButton,
-  IonicButtonFieldComponent,
-  submitButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-  addArrayItemButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
-  buttonFieldMapper,
+export { submitButton, nextPageButton, previousPageButton, actionButton, IonicButtonFieldComponent } from './button';
+export type {
+  IonicButtonProps,
+  IonicButtonField,
+  IonicSubmitButtonField,
+  IonicNextButtonField,
+  IonicPreviousButtonField,
+  AddArrayItemButtonField,
+  RemoveArrayItemButtonField,
 } from './button';
-export type { IonicButtonProps, IonicButtonField, IonicSubmitButtonField, IonicNextButtonField, IonicPreviousButtonField } from './button';
 
 // Checkbox
 export { IonicCheckboxFieldComponent } from './checkbox';

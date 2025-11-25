@@ -14,11 +14,6 @@ export {
   nextPageButton,
   previousPageButton,
   actionButton,
-  submitButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-  addArrayItemButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
 } from './fields';
 export type {
   MatCheckboxProps,
@@ -47,8 +42,8 @@ export type {
   MatSubmitButtonField,
   MatNextButtonField,
   MatPreviousButtonField,
-  MatAddArrayItemButtonField,
-  MatRemoveArrayItemButtonField,
+  AddArrayItemButtonField,
+  RemoveArrayItemButtonField,
   MatTextareaProps,
   MatTextareaField,
   MatTextareaComponent,

@@ -21,19 +21,16 @@ export type { PrimeSelectProps, PrimeSelectField, PrimeSelectComponent } from '.
 export { PrimeSliderFieldComponent } from './slider';
 export type { PrimeSliderProps, PrimeSliderField, PrimeSliderComponent } from './slider';
 
-export {
-  submitButton,
-  nextPageButton,
-  previousPageButton,
-  actionButton,
-  PrimeButtonFieldComponent,
-  submitButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-  addArrayItemButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
+export { submitButton, nextPageButton, previousPageButton, actionButton, PrimeButtonFieldComponent } from './button';
+export type {
+  PrimeButtonProps,
+  PrimeButtonField,
+  PrimeSubmitButtonField,
+  PrimeNextButtonField,
+  PrimePreviousButtonField,
+  AddArrayItemButtonField,
+  RemoveArrayItemButtonField,
 } from './button';
-export type { PrimeButtonProps, PrimeButtonField, PrimeSubmitButtonField, PrimeNextButtonField, PrimePreviousButtonField } from './button';
 
 export { PrimeTextareaFieldComponent } from './textarea';
 export type { PrimeTextareaProps, PrimeTextareaField, PrimeTextareaComponent } from './textarea';

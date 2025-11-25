@@ -11,3 +11,6 @@ export type {
   AddArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from './bs-button.type';
+
+// Public API - component
+export { default as BsButtonFieldComponent } from './bs-button.component';

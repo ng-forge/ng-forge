@@ -1,0 +1,20 @@
+
+> nx run dynamic-forms:test
+
+[1m[46m RUN [49m[22m [36mv4.0.10 [39m[90m/home/user/ng-forge/packages/dynamic-forms[39m
+[2m Test Files [22m [90m (31)[39m
+[2m      Tests [22m [1m[32m16 passed[39m[22m[90m (73)[39m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 20:52:35
+[2m   Duration [22m 10.29s[2m (transform 0ms, setup 535ms, collect 1.62s, tests 0ms, environment 0ms, prepare 170ms)[22m
+
+
+
+ NX   Running target test for project dynamic-forms failed
+
+Failed tasks:
+
+- dynamic-forms:test
+
+Hint: run the command with --verbose for more details.
+

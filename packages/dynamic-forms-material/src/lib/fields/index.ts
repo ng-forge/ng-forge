@@ -21,26 +21,15 @@ export type { MatSelectProps, MatSelectField, MatSelectComponent } from './selec
 export { MatSliderFieldComponent } from './slider';
 export type { MatSliderProps, MatSliderField, MatSliderComponent } from './slider';
 
-export {
-  submitButton,
-  nextPageButton,
-  previousPageButton,
-  actionButton,
-  MatButtonFieldComponent,
-  submitButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-  addArrayItemButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
-} from './button';
+export { submitButton, nextPageButton, previousPageButton, actionButton, MatButtonFieldComponent } from './button';
 export type {
   MatButtonProps,
   MatButtonField,
   MatSubmitButtonField,
   MatNextButtonField,
   MatPreviousButtonField,
-  MatAddArrayItemButtonField,
-  MatRemoveArrayItemButtonField,
+  AddArrayItemButtonField,
+  RemoveArrayItemButtonField,
 } from './button';
 
 export { MatTextareaFieldComponent } from './textarea';

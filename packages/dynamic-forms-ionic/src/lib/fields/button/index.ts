@@ -11,3 +11,6 @@ export type {
   AddArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from './ionic-button.type';
+
+// Public API - component (default export)
+export { default as IonicButtonFieldComponent } from './ionic-button.component';

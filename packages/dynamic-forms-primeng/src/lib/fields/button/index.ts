@@ -11,3 +11,6 @@ export type {
   AddArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from './prime-button.type';
+
+// Public API - component
+export { default as PrimeButtonFieldComponent } from './prime-button.component';
