@@ -1,4 +1,4 @@
-import { Binding, computed, inject, inputBinding } from '@angular/core';
+import { Binding, computed, inject, inputBinding, isSignal } from '@angular/core';
 import {
   AddArrayItemEvent,
   ARRAY_CONTEXT,
@@ -130,15 +130,21 @@ export function addArrayItemButtonFieldMapper(fieldDef: MatAddArrayItemButtonFie
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
 
-  // Add array context for token resolution
-  const eventContext: ArrayItemContext = {
-    key: fieldDef.key,
-    index: arrayContext?.index ?? -1,
-    arrayKey: targetArrayKey ?? '',
-    formValue: arrayContext?.formValue ?? {},
+  // Add array context for token resolution (fallback - component prefers injected ARRAY_CONTEXT)
+  // Read signal value if index is a signal (supports differential updates)
+  const getIndex = () => {
+    if (!arrayContext) return -1;
+    return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
   };
 
-  bindings.push(inputBinding('eventContext', () => eventContext));
+  bindings.push(
+    inputBinding('eventContext', () => ({
+      key: fieldDef.key,
+      index: getIndex(),
+      arrayKey: targetArrayKey ?? '',
+      formValue: arrayContext?.formValue ?? {},
+    })),
+  );
 
   // Set default eventArgs for AddArrayItemEvent (arrayKey)
   // The array component will use its own template automatically
@@ -189,15 +195,21 @@ export function removeArrayItemButtonFieldMapper(fieldDef: MatRemoveArrayItemBut
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }
 
-  // Add array context for token resolution
-  const eventContext: ArrayItemContext = {
-    key: fieldDef.key,
-    index: arrayContext?.index ?? -1, // -1 means remove last (no specific index)
-    arrayKey: targetArrayKey ?? '',
-    formValue: arrayContext?.formValue ?? {},
+  // Add array context for token resolution (fallback - component prefers injected ARRAY_CONTEXT)
+  // Read signal value if index is a signal (supports differential updates)
+  const getIndex = () => {
+    if (!arrayContext) return -1; // -1 means remove last (no specific index)
+    return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
   };
 
-  bindings.push(inputBinding('eventContext', () => eventContext));
+  bindings.push(
+    inputBinding('eventContext', () => ({
+      key: fieldDef.key,
+      index: getIndex(),
+      arrayKey: targetArrayKey ?? '',
+      formValue: arrayContext?.formValue ?? {},
+    })),
+  );
 
   // Set default eventArgs for RemoveArrayItemEvent (arrayKey, index if inside array)
   // When outside array, only pass arrayKey (removes last by default)

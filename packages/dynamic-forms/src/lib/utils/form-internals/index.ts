@@ -1,1 +1,1 @@
-export { FormInternals, hasFormStructure, getChildrenMap, getFieldProxy, getChildFieldTree } from './form-internals';
+export { type FormInternals, hasFormStructure, getChildrenMap, getFieldProxy, getChildFieldTree } from './form-internals';

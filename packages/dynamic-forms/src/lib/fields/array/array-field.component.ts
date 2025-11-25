@@ -9,12 +9,15 @@ import {
   input,
   linkedSignal,
   runInInjectionContext,
+  Signal,
+  signal,
   type Type,
   untracked,
   ViewContainerRef,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { filter, forkJoin, map, of, switchMap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
@@ -28,6 +31,31 @@ import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { createSchemaFromFields } from '../../core';
 import { flattenFields, getChildrenMap } from '../../utils';
+
+/**
+ * Tracked array item with stable identity for differential updates.
+ * Each item has a unique ID and a linkedSignal-based index that
+ * automatically updates when items are added/removed.
+ */
+interface TrackedArrayItem {
+  /** Unique identifier for this item (stable across position changes) */
+  id: number;
+  /** The Angular component reference */
+  componentRef: ComponentRef<FormUiControl>;
+  /** The injector used for this item */
+  injector: Injector;
+  /** JSON snapshot of the value this item was created with (for differential comparison) */
+  valueSnapshot: string;
+}
+
+/** Helper to create a value snapshot for comparison */
+function createValueSnapshot(value: unknown): string {
+  try {
+    return JSON.stringify(value) ?? '';
+  } catch {
+    return '';
+  }
+}
 
 /**
  * Array field component that manages dynamic arrays of field values.
@@ -137,45 +165,332 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     return items;
   });
 
-  // Track the current component refs to avoid recreating them
-  private currentComponents: ComponentRef<FormUiControl>[] = [];
+  /**
+   * Source of truth: tracked array items with stable identity.
+   * All other signals (fields, itemOrderSignal) derive from this.
+   */
+  private readonly trackedItemsSignal = signal<TrackedArrayItem[]>([]);
 
-  // TODO: Eliminate flicker when adding/removing array items
-  // Current implementation clears all components and recreates them when array length changes,
-  // causing a brief visual flicker. Consider implementing:
-  // - Differential updates (only add/remove changed items)
-  // - Animation transitions for smoother add/remove operations
-  // - Reusing existing component instances when possible
+  /** Counter for generating unique item IDs */
+  private itemIdCounter = 0;
 
-  // Create field components from FieldTree array (or null for object items)
-  fields = toSignal(
-    toObservable(this.arrayFieldTrees).pipe(
-      switchMap((fieldTrees: readonly (FieldTree<unknown> | null)[]) => {
-        // Only clear and recreate if the array length changed
-        // This prevents re-rendering when individual field values change
-        if (fieldTrees.length !== this.currentComponents.length) {
-          this.vcr.clear();
-          this.currentComponents = [];
+  /**
+   * Derived signal containing the ordered item IDs.
+   * Used by individual item's linkedSignal to compute their current index.
+   */
+  private readonly itemOrderSignal = linkedSignal(() => this.trackedItemsSignal().map((item) => item.id));
 
-          if (fieldTrees.length === 0) {
-            return of([]);
-          }
+  /**
+   * Derived signal containing the current component refs for the template.
+   * Automatically updates when trackedItemsSignal changes.
+   */
+  readonly fields = linkedSignal(() => this.trackedItemsSignal().map((item) => item.componentRef));
 
-          // Create new components
-          return forkJoin(this.mapFieldTrees(fieldTrees)).pipe(
-            map((components) => {
-              this.currentComponents = components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp);
-              return this.currentComponents;
-            }),
-          );
-        }
+  /** Track in-progress operations to prevent race conditions */
+  private pendingUpdateId = 0;
 
-        // Return existing components (array length hasn't changed)
-        return of(this.currentComponents);
-      }),
-    ),
-    { initialValue: [] },
-  );
+  /**
+   * Effect that performs differential updates when arrayFieldTrees changes.
+   * Optimizes for the most common operations:
+   * - Pure append (items added at end): Create only new items, no flicker
+   * - Pure pop (items removed from end): Destroy only removed items, no flicker
+   * - Middle operations: Full recreation (correctness over optimization)
+   */
+  private readonly _syncFieldsEffect = explicitEffect([this.arrayFieldTrees], ([fieldTrees]) => {
+    const updateId = ++this.pendingUpdateId;
+    this.performDifferentialUpdate(fieldTrees, updateId);
+  });
+
+  /**
+   * Perform differential update of array items.
+   * Uses value comparison to detect append/pop vs middle operations.
+   */
+  private async performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): Promise<void> {
+    const trackedItems = this.trackedItemsSignal();
+    const currentLength = trackedItems.length;
+    const newLength = fieldTrees.length;
+
+    // Get current array values for comparison
+    const arrayKey = this.field().key;
+    const currentArrayValue = this.getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
+
+    // Handle empty arrays
+    if (newLength === 0) {
+      return this.clearAllItems();
+    }
+
+    // Handle initial render (no existing items)
+    if (currentLength === 0) {
+      return this.createAllItems(fieldTrees, updateId);
+    }
+
+    // Determine operation type by comparing values
+    const minLength = Math.min(currentLength, newLength);
+
+    if (newLength > currentLength) {
+      // Items were added - check if it's a pure append
+      const isPureAppend = this.checkValuesMatch(currentArrayValue, minLength);
+      if (isPureAppend) {
+        return this.appendItems(fieldTrees, currentLength, newLength, updateId);
+      }
+    }
+    if (newLength < currentLength) {
+      // Items were removed - check if it's a pure pop (remove from end)
+      const isPurePop = this.checkValuesMatch(currentArrayValue, newLength);
+      if (isPurePop) {
+        return this.removeItemsFromEnd(currentLength, newLength);
+      }
+    }
+
+    // If lengths are equal and values match, no update needed
+    if (newLength === currentLength) {
+      const valuesMatch = this.checkValuesMatch(currentArrayValue, newLength);
+      if (valuesMatch) {
+        return;
+      }
+    }
+
+    // Recreate all for any other operation (middle insert/remove, value change)
+    return this.recreateAllItems(fieldTrees, updateId);
+  }
+
+  /**
+   * Check if the first N values match between tracked items' snapshots and new values.
+   * Uses pre-computed JSON snapshots for comparison.
+   */
+  private checkValuesMatch(newValues: unknown[], count: number): boolean {
+    const trackedItems = this.trackedItemsSignal();
+    if (trackedItems.length < count || newValues.length < count) {
+      return false;
+    }
+
+    for (let i = 0; i < count; i++) {
+      const oldSnapshot = trackedItems[i].valueSnapshot;
+      const newSnapshot = createValueSnapshot(newValues[i]);
+
+      if (oldSnapshot !== newSnapshot) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Remove items from the end of the array (pure pop operation).
+   * Only destroys removed items. Remaining items' indices automatically update
+   * via their linkedSignal derivation from itemOrderSignal.
+   */
+  private removeItemsFromEnd(currentLength: number, newLength: number): void {
+    const trackedItems = this.trackedItemsSignal();
+
+    // Remove and destroy items from the end
+    for (let i = currentLength - 1; i >= newLength; i--) {
+      const item = trackedItems[i];
+      const viewIndex = this.vcr.indexOf(item.componentRef.hostView);
+      if (viewIndex >= 0) {
+        this.vcr.remove(viewIndex);
+      }
+      item.componentRef.destroy();
+    }
+
+    // Update signal with truncated array - fields and itemOrderSignal derive automatically
+    this.trackedItemsSignal.set(trackedItems.slice(0, newLength));
+  }
+
+  /**
+   * Clear all tracked items and their components.
+   */
+  private clearAllItems(): void {
+    this.vcr.clear();
+    // Update signal - fields and itemOrderSignal derive automatically
+    this.trackedItemsSignal.set([]);
+  }
+
+  /**
+   * Create all items from scratch (initial render).
+   */
+  private async createAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): Promise<void> {
+    const newItems: TrackedArrayItem[] = [];
+
+    for (let i = 0; i < fieldTrees.length; i++) {
+      if (updateId !== this.pendingUpdateId) return;
+
+      const item = await this.createTrackedItem(fieldTrees[i], i);
+      if (item && updateId === this.pendingUpdateId) {
+        newItems.push(item);
+      }
+    }
+
+    if (updateId === this.pendingUpdateId) {
+      // Update signal - fields and itemOrderSignal derive automatically
+      this.trackedItemsSignal.set(newItems);
+    }
+  }
+
+  /**
+   * Recreate all items (used for middle operations).
+   */
+  private async recreateAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): Promise<void> {
+    // Clear existing items
+    this.clearAllItems();
+
+    // Create new items
+    await this.createAllItems(fieldTrees, updateId);
+  }
+
+  /**
+   * Append new items to the end of the array.
+   */
+  private async appendItems(
+    fieldTrees: readonly (FieldTree<unknown> | null)[],
+    startIndex: number,
+    endIndex: number,
+    updateId: number,
+  ): Promise<void> {
+    const newItems: TrackedArrayItem[] = [];
+
+    for (let i = startIndex; i < endIndex; i++) {
+      if (updateId !== this.pendingUpdateId) return;
+
+      const item = await this.createTrackedItem(fieldTrees[i], i);
+      if (item && updateId === this.pendingUpdateId) {
+        newItems.push(item);
+      }
+    }
+
+    if (updateId === this.pendingUpdateId) {
+      // Update signal with appended items - fields and itemOrderSignal derive automatically
+      this.trackedItemsSignal.update((current) => [...current, ...newItems]);
+    }
+  }
+
+  /**
+   * Create a tracked item for a single array element.
+   * Uses linkedSignal for the index, which automatically updates when itemOrderSignal changes.
+   */
+  private async createTrackedItem(fieldTree: FieldTree<unknown> | null, index: number): Promise<TrackedArrayItem | undefined> {
+    const template = this.fieldTemplate();
+    if (!template) {
+      return undefined;
+    }
+
+    try {
+      const componentType = await this.fieldRegistry.loadTypeComponent(template.type);
+      if (this.destroyRef.destroyed) {
+        return undefined;
+      }
+
+      // Generate unique ID for this item
+      const itemId = this.itemIdCounter++;
+
+      // Create a linkedSignal that derives its index from itemOrderSignal
+      // When itemOrderSignal is updated (e.g., items removed), this automatically updates
+      const indexSignal = linkedSignal(() => {
+        const order = this.itemOrderSignal();
+        const idx = order.indexOf(itemId);
+        return idx >= 0 ? idx : index; // Fallback to initial index if not yet in order
+      });
+
+      // Create the component and get the injector
+      const { componentRef, injector } = this.createComponentWithInjector(
+        componentType as Type<FormUiControl>,
+        fieldTree,
+        template,
+        indexSignal,
+      );
+
+      // Get current value for this item to create snapshot
+      const arrayKey = this.field().key;
+      const currentValue = this.parentFieldSignalContext.value() as Partial<TModel>;
+      const arrayValue = this.getArrayValue(currentValue, arrayKey);
+      const itemValue = arrayValue[index];
+
+      return {
+        id: itemId,
+        componentRef,
+        injector,
+        valueSnapshot: createValueSnapshot(itemValue),
+      };
+    } catch (error) {
+      if (!this.destroyRef.destroyed) {
+        console.error(
+          `[Dynamic Forms] Failed to load component for field type '${template.type}' at index ${index} ` +
+            `within array '${this.field().key}'. Ensure the field type is registered in your field registry.`,
+          error,
+        );
+      }
+      return undefined;
+    }
+  }
+
+  /**
+   * Create a component and its injector for an array item.
+   * Returns both the componentRef and the injector for tracking.
+   */
+  private createComponentWithInjector(
+    componentType: Type<FormUiControl>,
+    fieldTree: FieldTree<unknown> | null,
+    template: FieldDef<unknown>,
+    indexSignal: Signal<number>,
+  ): { componentRef: ComponentRef<FormUiControl>; injector: Injector } {
+    const valueHandling = this.rawFieldRegistry().get(template.type)?.valueHandling || 'include';
+
+    // Determine the form reference and create injector
+    let formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>;
+
+    if (valueHandling === 'flatten' && 'fields' in template && template.fields) {
+      // Flatten types (row/page) or groups
+      formRef = fieldTree ?? this.createObjectItemFormWithSignal(template, indexSignal);
+    } else if (template.type === 'group' && valueHandling === 'include') {
+      // Group types inside arrays
+      formRef = fieldTree ?? this.createObjectItemFormWithSignal(template, indexSignal);
+    } else if (fieldTree) {
+      // Regular types with FieldTree
+      formRef = fieldTree;
+    } else {
+      // Object items without FieldTree
+      formRef = this.createObjectItemFormWithSignal(template, indexSignal);
+    }
+
+    const injector = this.createItemInjector(formRef, indexSignal);
+
+    // Map field to bindings using the scoped injector
+    const bindings = runInInjectionContext(injector, () => {
+      return mapFieldToBindings(template, this.rawFieldRegistry());
+    });
+
+    const componentRef = this.vcr.createComponent(componentType, { bindings, injector });
+
+    return { componentRef, injector };
+  }
+
+  /**
+   * Create a local form for an object array item using a signal-based index.
+   */
+  private createObjectItemFormWithSignal(template: FieldDef<unknown>, indexSignal: Signal<number>): ReturnType<typeof form<unknown>> {
+    const arrayKey = this.field().key;
+    const registry = this.rawFieldRegistry();
+
+    // Create entity signal that reads from the array at the signal's current index
+    const itemEntity = linkedSignal(() => {
+      const parentValue = this.parentFieldSignalContext.value();
+      const arrayValue = this.getArrayValue(parentValue as Partial<TModel>, arrayKey);
+      return arrayValue[indexSignal()] ?? {};
+    });
+
+    // Get nested fields for schema creation (if available)
+    const nestedFields = 'fields' in template && Array.isArray(template.fields) ? template.fields : [];
+
+    // Create form with schema if we have nested fields
+    return runInInjectionContext(this.parentInjector, () => {
+      if (nestedFields.length > 0) {
+        const flattenedFields = flattenFields(nestedFields, registry);
+        const schema = createSchemaFromFields(flattenedFields, registry);
+        return untracked(() => form(itemEntity, schema));
+      }
+      return untracked(() => form(itemEntity));
+    });
+  }
 
   /**
    * Listen for AddArrayItemEvent and RemoveArrayItemEvent
@@ -260,31 +575,22 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   }
 
   /**
-   * Map FieldTree array to component references.
-   * Handles both FieldTree (primitives) and null (objects needing local forms).
-   */
-  private mapFieldTrees(fieldTrees: readonly (FieldTree<unknown> | null)[]): Promise<ComponentRef<FormUiControl>>[] {
-    return fieldTrees
-      .map((fieldTree, index) => this.mapSingleFieldTree(fieldTree, index))
-      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
-  }
-
-  /**
    * Core helper to create an injector for an array item.
    * Provides both FIELD_SIGNAL_CONTEXT and ARRAY_CONTEXT to child components.
    *
    * @param formRef - The form reference (FieldTree or local form) for this item
-   * @param index - Index of the array item
+   * @param indexSignal - Signal containing the index of the array item (automatically updates via linkedSignal)
    */
-  private createItemInjector(formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>, index: number): Injector {
+  private createItemInjector(formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>, indexSignal: Signal<number>): Injector {
     const arrayContext: ArrayContext = {
       arrayKey: this.field().key,
-      index,
+      index: indexSignal,
       formValue: this.parentFieldSignalContext.value(),
       field: this.field(),
     };
 
     // Create context with placeholder injector (will be set after Injector.create)
+    // Wrap formRef in a function to make it callable (FieldSignalContext.form must be callable)
     const itemFieldSignalContext: FieldSignalContext<unknown> = {
       injector: undefined as unknown as Injector,
       value: this.parentFieldSignalContext.value,
@@ -305,158 +611,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     itemFieldSignalContext.injector = injector;
 
     return injector;
-  }
-
-  /**
-   * Create array-specific injector for a single array item with a FieldTree.
-   * This provides FIELD_SIGNAL_CONTEXT and ARRAY_CONTEXT to child components.
-   */
-  private createArrayItemInjector(fieldTree: FieldTree<unknown>, index: number): Injector {
-    return this.createItemInjector(fieldTree, index);
-  }
-
-  /**
-   * Create a component for a single array item.
-   *
-   * @param fieldTree - FieldTree if available (primitive items), or null (object items)
-   * @param index - Index of the array item
-   */
-  private async mapSingleFieldTree(fieldTree: FieldTree<unknown> | null, index: number): Promise<ComponentRef<FormUiControl> | undefined> {
-    const template = this.fieldTemplate();
-    if (!template) {
-      return undefined;
-    }
-
-    const arrayKey = this.field().key;
-
-    return this.fieldRegistry
-      .loadTypeComponent(template.type)
-      .then((componentType) => {
-        if (this.destroyRef.destroyed) {
-          return undefined;
-        }
-
-        const valueHandling = this.rawFieldRegistry().get(template.type)?.valueHandling || 'include';
-
-        // Handle flatten types (row/page) - these always need special handling
-        if (valueHandling === 'flatten' && 'fields' in template && template.fields) {
-          return this.createFlattenTypeComponent(componentType as Type<FormUiControl>, fieldTree, template, index);
-        }
-
-        // For regular types (input, group, etc.)
-        return this.createRegularComponent(componentType as Type<FormUiControl>, fieldTree, template, index);
-      })
-      .catch((error) => {
-        if (!this.destroyRef.destroyed) {
-          console.error(
-            `[Dynamic Forms] Failed to load component for field type '${template.type}' at index ${index} ` +
-              `within array '${arrayKey}'. Ensure the field type is registered in your field registry.`,
-            error,
-          );
-        }
-        return undefined;
-      });
-  }
-
-  /**
-   * Create component for regular field types (input, group, select, etc.)
-   *
-   * @param componentType - The component type to create
-   * @param fieldTree - FieldTree if available (primitive items), or null (object items needing local form)
-   * @param template - The field template definition
-   * @param index - Index of the array item
-   */
-  private createRegularComponent(
-    componentType: Type<FormUiControl>,
-    fieldTree: FieldTree<unknown> | null,
-    template: FieldDef<unknown>,
-    index: number,
-  ): ComponentRef<FormUiControl> {
-    const valueHandling = this.rawFieldRegistry().get(template.type)?.valueHandling || 'include';
-
-    // For group types inside arrays, use the flatten type approach
-    // This creates a local form for the group's nested fields
-    if (template.type === 'group' && valueHandling === 'include') {
-      return this.createFlattenTypeComponent(componentType, fieldTree, template, index);
-    }
-
-    // If no FieldTree available (object array items), create a local form
-    // This happens when Angular Signal Forms doesn't create FieldTree for object items
-    const arrayItemInjector = fieldTree ? this.createArrayItemInjector(fieldTree, index) : this.createObjectItemInjector(template, index);
-
-    // Map field to bindings using the scoped injector
-    // The mapper handles key/field bindings, form is provided via FIELD_SIGNAL_CONTEXT
-    const bindings = runInInjectionContext(arrayItemInjector, () => {
-      return mapFieldToBindings(template, this.rawFieldRegistry());
-    });
-
-    return this.vcr.createComponent(componentType, { bindings, injector: arrayItemInjector });
-  }
-
-  /**
-   * Create component for flatten types (row/page) and groups within arrays.
-   * These need special handling because they contain nested fields.
-   *
-   * When fieldTree is null (object items), creates a local form for the nested structure.
-   */
-  private createFlattenTypeComponent(
-    componentType: Type<FormUiControl>,
-    fieldTree: FieldTree<unknown> | null,
-    template: FieldDef<unknown>,
-    index: number,
-  ): ComponentRef<FormUiControl> {
-    // Get the form reference - use existing FieldTree or create a local form for objects
-    const formRef = fieldTree ?? this.createObjectItemForm(template, index);
-    const injector = this.createItemInjector(formRef, index);
-
-    // Map field to bindings using the scoped injector
-    const bindings = runInInjectionContext(injector, () => {
-      return mapFieldToBindings(template, this.rawFieldRegistry());
-    });
-
-    return this.vcr.createComponent(componentType, { bindings, injector });
-  }
-
-  /**
-   * Create an injector for object array items (when no FieldTree is available).
-   * This creates a local form for the object and provides it via FIELD_SIGNAL_CONTEXT.
-   */
-  private createObjectItemInjector(template: FieldDef<unknown>, index: number): Injector {
-    const localForm = this.createObjectItemForm(template, index);
-    return this.createItemInjector(localForm, index);
-  }
-
-  /**
-   * Create a local form for an object array item.
-   *
-   * This is used when Angular Signal Forms doesn't create a FieldTree for the item
-   * (which happens for object items in arrays). The form:
-   * - Reads its value from parentValue[arrayKey][index]
-   * - Uses the template's nested fields for schema creation
-   */
-  private createObjectItemForm(template: FieldDef<unknown>, index: number): ReturnType<typeof form<unknown>> {
-    const arrayKey = this.field().key;
-    const registry = this.rawFieldRegistry();
-
-    // Create entity signal that reads from the array at this index
-    const itemEntity = linkedSignal(() => {
-      const parentValue = this.parentFieldSignalContext.value();
-      const arrayValue = this.getArrayValue(parentValue as Partial<TModel>, arrayKey);
-      return arrayValue[index] ?? {};
-    });
-
-    // Get nested fields for schema creation (if available)
-    const nestedFields = 'fields' in template && Array.isArray(template.fields) ? template.fields : [];
-
-    // Create form with schema if we have nested fields
-    return runInInjectionContext(this.parentInjector, () => {
-      if (nestedFields.length > 0) {
-        const flattenedFields = flattenFields(nestedFields, registry);
-        const schema = createSchemaFromFields(flattenedFields, registry);
-        return untracked(() => form(itemEntity, schema));
-      }
-      return untracked(() => form(itemEntity));
-    });
   }
 
   onFieldsInitialized(): void {

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import {
+  ARRAY_CONTEXT,
   ArrayItemContext,
   DynamicText,
   DynamicTextPipe,
@@ -51,6 +52,7 @@ import { AsyncPipe } from '@angular/common';
 })
 export default class MatButtonFieldComponent<TEvent extends FormEvent> implements MatButtonComponent<TEvent> {
   private readonly eventBus = inject(EventBus);
+  private readonly arrayContext = inject(ARRAY_CONTEXT, { optional: true });
 
   readonly key = input.required<string>();
   readonly label = input.required<DynamicText>();
@@ -72,8 +74,16 @@ export default class MatButtonFieldComponent<TEvent extends FormEvent> implement
     const args = this.eventArgs();
 
     if (args && args.length > 0) {
-      // Get context or build default from key
-      const context = this.eventContext() || { key: this.key() };
+      // Build context from injected ARRAY_CONTEXT (with linkedSignal index) or fallback to eventContext
+      const context: ArrayItemContext = this.arrayContext
+        ? {
+            key: this.key(),
+            // Read signal to get current index (automatically updates via linkedSignal)
+            index: this.arrayContext.index(),
+            arrayKey: this.arrayContext.arrayKey,
+            formValue: this.arrayContext.formValue,
+          }
+        : this.eventContext() || { key: this.key() };
 
       // Resolve tokens in event args using the provided context
       const resolvedArgs = resolveTokens(args, context);

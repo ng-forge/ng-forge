@@ -59,13 +59,25 @@ export default class RowFieldComponent {
   key = input.required<string>();
   value = model<any>(undefined);
 
-  readonly disabled = computed(() => this.field().disabled || false);
+  readonly disabled = computed(() => {
+    try {
+      return this.field().disabled || false;
+    } catch {
+      return false;
+    }
+  });
 
   // Row fields are just layout containers - they pass through child fields directly
+  // Note: Use try/catch to handle timing where field input isn't available during class initialization
   fields$ = toObservable(
     computed(() => {
-      const rowField = this.field();
-      return rowField.fields || [];
+      try {
+        const rowField = this.field();
+        return rowField.fields || [];
+      } catch {
+        // Input not yet available during component initialization
+        return [];
+      }
     }),
   );
 
@@ -184,7 +196,11 @@ export default class RowFieldComponent {
   private emitFieldsInitialized(): void {
     afterNextRender(
       () => {
-        this.eventBus.dispatch(ComponentInitializedEvent, 'row', this.field().key);
+        try {
+          this.eventBus.dispatch(ComponentInitializedEvent, 'row', this.field().key);
+        } catch {
+          // Input not available - component may have been destroyed
+        }
       },
       { injector: this.injector },
     );

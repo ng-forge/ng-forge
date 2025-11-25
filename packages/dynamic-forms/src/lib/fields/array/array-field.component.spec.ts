@@ -676,7 +676,7 @@ describe('ArrayFieldComponent', () => {
     });
 
     it('should create fields for array with simple input template', async () => {
-      // Test simpler case: arrays with single input field as template
+      // Test simpler case: arrays with single input field as template (using object items)
       const field: ArrayField<any> = {
         key: 'emails',
         type: 'array',
@@ -684,7 +684,7 @@ describe('ArrayFieldComponent', () => {
       };
 
       const { component, fixture } = setupNestedObjectArrayTest(field, {
-        emails: ['alice@example.com', 'bob@example.com'],
+        emails: [{ email: 'alice@example.com' }, { email: 'bob@example.com' }],
       });
 
       const maxAttempts = 50;
