@@ -9,12 +9,10 @@ import { Binding, inputBinding } from '@angular/core';
 export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  // Add disabled binding since baseFieldMapper excludes it
   if (fieldDef.disabled !== undefined) {
     bindings.push(inputBinding('disabled', () => fieldDef.disabled));
   }
 
-  // Add hidden binding since baseFieldMapper excludes it
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
   }

@@ -42,7 +42,6 @@ describe('BsCheckboxFieldComponent', () => {
       expect(containerDiv).toBeTruthy();
       expect(helpTextElement?.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
-      // Verify form control integration and dynamic field component properties
       if (bsCheckboxComponent) {
         expect(bsCheckboxComponent.label()).toBe('Accept Terms and Conditions');
         expect(bsCheckboxComponent.props().inline).toBe(false);
@@ -62,13 +61,10 @@ describe('BsCheckboxFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component)['acceptTerms']).toBe(false);
 
-      // Simulate checkbox interaction using utility
       await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]', true);
 
-      // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component)['acceptTerms']).toBe(true);
     });
 
@@ -86,7 +82,6 @@ describe('BsCheckboxFieldComponent', () => {
 
       const checkbox = fixture.debugElement.query(By.css('.form-check-input[type="checkbox"]'));
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         acceptTerms: true,
         newsletter: false,
@@ -121,7 +116,6 @@ describe('BsCheckboxFieldComponent', () => {
 
       const checkboxContainer = fixture.debugElement.query(By.css('.form-check'));
 
-      // Check Bootstrap-specific classes
       expect(checkboxContainer.nativeElement.classList.contains('form-check-inline')).toBe(true);
     });
   });
@@ -238,7 +232,6 @@ describe('BsCheckboxFieldComponent', () => {
         },
       });
 
-      // Simulate first checkbox click using utility
       await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]:first-of-type', true);
 
       let formValue = BootstrapFormTestUtils.getFormValue(component);
@@ -246,7 +239,6 @@ describe('BsCheckboxFieldComponent', () => {
       expect(formValue['newsletter']).toBe(true);
       expect(formValue['enableNotifications']).toBe(false);
 
-      // Simulate third checkbox click using utility
       await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]:nth-of-type(3)', true);
 
       formValue = BootstrapFormTestUtils.getFormValue(component);
@@ -304,11 +296,9 @@ describe('BsCheckboxFieldComponent', () => {
 
       expect(checkboxInput.disabled).toBe(true);
 
-      // Try to click disabled checkbox - should not change value since it's disabled
       checkbox.nativeElement.click();
       fixture.detectChanges();
 
-      // Verify the checkbox remains disabled and doesn't change
       expect(checkboxInput.disabled).toBe(true);
       expect(checkboxInput.checked).toBe(false);
     });
@@ -323,7 +313,6 @@ describe('BsCheckboxFieldComponent', () => {
 
       const formCheck = fixture.debugElement.query(By.css('.form-check'));
 
-      // Check default props from Bootstrap configuration
       expect(formCheck.nativeElement.classList.contains('form-check')).toBe(true);
       expect(formCheck.nativeElement.classList.contains('form-switch')).toBe(false);
       expect(formCheck.nativeElement.classList.contains('form-check-inline')).toBe(false);
@@ -384,10 +373,8 @@ describe('BsCheckboxFieldComponent', () => {
       const checkbox = fixture.debugElement.query(By.css('.form-check-input[type="checkbox"]'));
       const checkboxInput = checkbox.nativeElement as HTMLInputElement;
 
-      // Initial state
       expect(checkboxInput.checked).toBe(false);
 
-      // Update via programmatic value change
       fixture.componentRef.setInput('value', { acceptTerms: true });
       fixture.detectChanges();
 
@@ -485,11 +472,9 @@ describe('BsCheckboxFieldComponent', () => {
         const label = fixture.debugElement.query(By.css('.form-check-label'));
         const helpText = fixture.debugElement.query(By.css('.form-text'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
         expect(helpText.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.terms.label': 'Aceptar Términos y Condiciones',
           'form.terms.helpText': 'Por favor lea y acepte nuestros términos',

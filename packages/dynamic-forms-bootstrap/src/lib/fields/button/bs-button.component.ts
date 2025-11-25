@@ -12,9 +12,6 @@ import {
 } from '@ng-forge/dynamic-forms';
 import { BsButtonComponent, BsButtonProps } from './bs-button.type';
 
-/**
- * Bootstrap button component
- */
 @Component({
   selector: 'df-bs-button',
   imports: [DynamicTextPipe, AsyncPipe],
@@ -54,7 +51,6 @@ export default class BsButtonFieldComponent<TEvent extends FormEvent> implements
   readonly eventArgs = input<EventArgs>();
   readonly props = input<BsButtonProps>();
 
-  // Array item context for token resolution (only set for add/remove array item buttons)
   readonly eventContext = input<ArrayItemContext>();
 
   buttonTestId = computed(() => `${this.props()?.type || 'button'}-${this.key()}`);

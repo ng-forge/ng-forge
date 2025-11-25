@@ -76,7 +76,6 @@ export default class BsCheckboxFieldComponent implements BsCheckboxComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly checkboxInput = viewChild<ElementRef<HTMLInputElement>>('checkboxInput');

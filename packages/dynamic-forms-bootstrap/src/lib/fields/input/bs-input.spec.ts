@@ -34,7 +34,6 @@ describe('BsInputFieldComponent', () => {
 
       expect(input).toBeTruthy();
       expect(input.nativeElement.getAttribute('type')).toBe('email');
-      // Placeholder is rendered in Bootstrap inputs
       const placeholder = input.nativeElement.getAttribute('placeholder');
       expect(placeholder).not.toBeNull();
       expect(input.nativeElement.getAttribute('tabindex')).toBe('1');
@@ -53,13 +52,10 @@ describe('BsInputFieldComponent', () => {
         initialValue: { email: '' },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component).email).toBe('');
 
-      // Simulate user typing using utility
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="email"]', 'test@example.com');
 
-      // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component).email).toBe('test@example.com');
     });
 
@@ -73,7 +69,6 @@ describe('BsInputFieldComponent', () => {
         initialValue: { email: '' },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', { email: 'user@domain.com' });
       fixture.detectChanges();
 
@@ -116,13 +111,10 @@ describe('BsInputFieldComponent', () => {
         initialValue: { age: 0 },
       });
 
-      // Initial value
       expect(BootstrapFormTestUtils.getFormValue(component).age).toBe(0);
 
-      // Simulate typing a number using utility
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="number"]', '25');
 
-      // Note: HTML input returns string, form should handle conversion
       expect(BootstrapFormTestUtils.getFormValue(component).age).toBe(25);
     });
 
@@ -140,7 +132,6 @@ describe('BsInputFieldComponent', () => {
         initialValue: { firstName: '', password: '', age: 0, website: '', phone: '' },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         firstName: 'John',
         password: 'secret123',
@@ -235,20 +226,17 @@ describe('BsInputFieldComponent', () => {
         initialValue: { firstName: 'Initial Name', email: 'initial@email.com' },
       });
 
-      // Initial values
       BootstrapFormTestUtils.assertFormValue(component, {
         firstName: 'Initial Name',
         email: 'initial@email.com',
       });
 
-      // Change first input using utility
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="text"]', 'Updated Name');
 
       let formValue = BootstrapFormTestUtils.getFormValue(component);
       expect(formValue.firstName).toBe('Updated Name');
       expect(formValue.email).toBe('initial@email.com');
 
-      // Change second input using utility
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="email"]', 'updated@email.com');
 
       formValue = BootstrapFormTestUtils.getFormValue(component);
@@ -301,7 +289,6 @@ describe('BsInputFieldComponent', () => {
       const input = fixture.debugElement.query(By.css('.form-control'));
       const container = fixture.debugElement.query(By.css('.mb-3'));
 
-      // Verify default Bootstrap configuration is applied
       expect(input.nativeElement.getAttribute('type')).toBe('text');
       expect(container).toBeTruthy();
     });
@@ -316,7 +303,6 @@ describe('BsInputFieldComponent', () => {
 
       const specialText = 'José María 🌟 @#$%^&*()';
 
-      // Simulate typing special characters using utility
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="text"]', specialText);
 
       expect(BootstrapFormTestUtils.getFormValue(component).firstName).toBe(specialText);
@@ -330,10 +316,8 @@ describe('BsInputFieldComponent', () => {
         initialValue: { firstName: '' },
       });
 
-      // Simulate rapid typing using utility (final value)
       await BootstrapFormTestUtils.simulateBsInput(fixture, 'input[type="text"]', 'Alice');
 
-      // Should have the final value
       expect(BootstrapFormTestUtils.getFormValue(component).firstName).toBe('Alice');
     });
   });
@@ -387,7 +371,6 @@ describe('BsInputFieldComponent', () => {
         initialValue: { firstName: 'Test Value' },
       });
 
-      // Use Bootstrap-specific field value assertion
       BootstrapFormTestUtils.assertBsFieldValue(fixture, 'input', 'Test Value');
     });
   });
@@ -449,11 +432,9 @@ describe('BsInputFieldComponent', () => {
           initialValue: { email: '' },
         });
 
-        // Initial label
         let label = fixture.debugElement.query(By.css('.form-label'));
         expect(label.nativeElement.textContent.trim()).toBe('Initial Label');
 
-        // Update Observable
         labelSubject.next('Updated Label');
         fixture.detectChanges();
 
@@ -477,11 +458,9 @@ describe('BsInputFieldComponent', () => {
           initialValue: { email: '' },
         });
 
-        // Initial placeholder
         let input = fixture.debugElement.query(By.css('input'));
         expect(input.nativeElement.getAttribute('placeholder')).toBe('Initial placeholder');
 
-        // Update Observable
         placeholderSubject.next('Updated placeholder');
         fixture.detectChanges();
 
@@ -514,11 +493,9 @@ describe('BsInputFieldComponent', () => {
         const label = fixture.debugElement.query(By.css('.form-label'));
         const input = fixture.debugElement.query(By.css('input'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Email Address');
         expect(input.nativeElement.getAttribute('placeholder')).toBe('Enter your email address');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.email.label': 'Dirección de Correo Electrónico',
           'form.email.placeholder': 'Ingrese su correo electrónico',
@@ -629,7 +606,6 @@ describe('BsInputFieldComponent', () => {
 
         const input = fixture.debugElement.query(By.css('input'));
 
-        // Empty Observable results in empty string placeholder in Bootstrap
         expect(input.nativeElement.getAttribute('placeholder')).toBe('');
       });
     });

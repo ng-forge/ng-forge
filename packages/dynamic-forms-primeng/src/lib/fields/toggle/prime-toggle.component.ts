@@ -5,9 +5,6 @@ import { PrimeToggleComponent, PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 
-/**
- * PrimeNG toggle field component
- */
 @Component({
   selector: 'df-prime-toggle',
   imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, Field],
@@ -67,7 +64,6 @@ export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly toggleClasses = computed(() => {

@@ -63,14 +63,12 @@ describe('PrimeDatepickerFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component).birthDate).toBe(null);
 
       // Simulate date selection via programmatic update
       const testDate = new Date(1995, 5, 15);
       await PrimeNGFormTestUtils.updateFormValue(fixture, { birthDate: testDate });
 
-      // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component).birthDate).toEqual(testDate);
     });
 
@@ -91,7 +89,6 @@ describe('PrimeDatepickerFieldComponent', () => {
 
       const testDate = new Date(1995, 5, 15);
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         birthDate: testDate,
         startDate: null,
@@ -303,7 +300,6 @@ describe('PrimeDatepickerFieldComponent', () => {
         },
       });
 
-      // Initial values
       expect(PrimeNGFormTestUtils.getFormValue(component).startDate).toEqual(new Date(2024, 0, 1));
       expect(PrimeNGFormTestUtils.getFormValue(component).endDate).toEqual(new Date(2024, 11, 31));
 
@@ -412,7 +408,6 @@ describe('PrimeDatepickerFieldComponent', () => {
 
       const testDate = new Date(2024, 5, 15);
 
-      // Update via programmatic value change
       await PrimeNGFormTestUtils.updateFormValue(fixture, { birthDate: testDate });
 
       expect(PrimeNGFormTestUtils.getFormValue(component).birthDate).toEqual(testDate);
@@ -429,7 +424,6 @@ describe('PrimeDatepickerFieldComponent', () => {
       const calendar = fixture.debugElement.query(By.directive(DatePicker));
       const fieldWrapper = fixture.debugElement.query(By.css('df-prime-datepicker'));
 
-      // Verify default PrimeNG configuration is applied
       expect(calendar).toBeTruthy();
       expect(fieldWrapper).toBeTruthy();
     });
@@ -491,11 +485,9 @@ describe('PrimeDatepickerFieldComponent', () => {
         const label = fixture.debugElement.query(By.css('label'));
         const hint = fixture.debugElement.query(By.css('small.df-prime-hint'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Birth Date');
         expect(hint.nativeElement.textContent.trim()).toBe('Choose the date you were born');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.birthDate.label': 'Fecha de Nacimiento',
           'form.birthDate.placeholder': 'Selecciona tu fecha de nacimiento',

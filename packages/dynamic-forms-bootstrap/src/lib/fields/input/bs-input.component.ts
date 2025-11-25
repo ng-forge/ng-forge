@@ -5,10 +5,6 @@ import { BsInputComponent, BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 
-/**
- * Bootstrap input field component
- * Supports standard and floating label variants with Bootstrap 5 styling
- */
 @Component({
   selector: 'df-bs-input',
   imports: [Field, DynamicTextPipe, AsyncPipe],
@@ -272,6 +268,5 @@ export default class BsInputFieldComponent implements BsInputComponent {
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
-  // Combine showErrors and resolvedErrors to avoid @if wrapper
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 }

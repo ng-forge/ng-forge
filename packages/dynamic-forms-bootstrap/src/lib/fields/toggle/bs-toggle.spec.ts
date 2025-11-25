@@ -56,13 +56,11 @@ describe('BsToggleFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component)['darkMode']).toBe(false);
 
       // Simulate toggle interaction using utility
       await BootstrapFormTestUtils.simulateBsToggle(fixture, '.form-check-input[type="checkbox"]', true);
 
-      // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component)['darkMode']).toBe(true);
     });
 
@@ -89,7 +87,6 @@ describe('BsToggleFieldComponent', () => {
       const toggle = fixture.debugElement.query(By.css('.form-check-input[type="checkbox"]'));
       const toggleElement = toggle.nativeElement as HTMLInputElement;
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         darkMode: true,
         notifications: false,
@@ -122,7 +119,6 @@ describe('BsToggleFieldComponent', () => {
 
       const toggleContainer = fixture.debugElement.query(By.css('.form-check.form-switch'));
 
-      // Check Bootstrap-specific classes
       expect(toggleContainer.nativeElement.classList.contains('form-switch-sm')).toBe(true);
       expect(toggleContainer.nativeElement.classList.contains('form-check-inline')).toBe(true);
       expect(toggleContainer.nativeElement.classList.contains('form-check-reverse')).toBe(true);
@@ -463,10 +459,8 @@ describe('BsToggleFieldComponent', () => {
       const toggle = fixture.debugElement.query(By.css('.form-check-input[type="checkbox"]'));
       const toggleElement = toggle.nativeElement as HTMLInputElement;
 
-      // Initial state
       expect(toggleElement.checked).toBe(false);
 
-      // Update via programmatic value change
       fixture.componentRef.setInput('value', { darkMode: true });
       fixture.detectChanges();
 
@@ -527,11 +521,9 @@ describe('BsToggleFieldComponent', () => {
         const label = fixture.debugElement.query(By.css('.form-check-label'));
         const helpText = fixture.debugElement.query(By.css('.form-text'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Enable Dark Mode');
         expect(helpText.nativeElement.textContent.trim()).toBe('Toggle between light and dark themes');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.darkMode.label': 'Habilitar Modo Oscuro',
           'form.darkMode.helpText': 'Alternar entre temas claro y oscuro',

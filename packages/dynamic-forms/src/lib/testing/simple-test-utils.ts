@@ -3,7 +3,7 @@ import { DynamicForm } from '../dynamic-form.component';
 import { delay } from './delay';
 import { FieldDef } from '../definitions';
 import { provideDynamicForm } from '../providers/dynamic-form-providers';
-import { Component, Injector, runInInjectionContext, signal, Type } from '@angular/core';
+import { Component, Injector, input, runInInjectionContext, signal, Type } from '@angular/core';
 import { FIELD_REGISTRY, FieldTypeDefinition, FIELD_SIGNAL_CONTEXT } from '../models';
 import { EventBus } from '../events/event.bus';
 import { form } from '@angular/forms/signals';
@@ -162,12 +162,25 @@ export class SimpleTestUtils {
 }
 
 // Mock field component for testing
+// Includes all inputs that baseFieldMapper and valueFieldMapper might create bindings for
 @Component({
   selector: 'df-test-field',
   template: '<div>Test Field: {{ value() }}</div>',
 })
 export class TestFieldComponent {
   value = signal('test');
+  // Required inputs from baseFieldMapper
+  key = input<string>('');
+  label = input<string>('');
+  className = input<string>('');
+  tabIndex = input<number | undefined>(undefined);
+  props = input<Record<string, unknown> | undefined>(undefined);
+  // Array-related inputs
+  fields = input<unknown[]>([]);
+  // Validation inputs from valueFieldMapper
+  validationMessages = input<Record<string, string> | undefined>(undefined);
+  defaultValidationMessages = input<Record<string, string> | undefined>(undefined);
+  field = input<unknown>(undefined);
 }
 
 /**

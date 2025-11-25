@@ -58,7 +58,6 @@ describe('BsDatepickerFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component).birthDate).toBe(null);
 
       // Simulate date selection
@@ -67,7 +66,6 @@ describe('BsDatepickerFieldComponent', () => {
       datepickerInput.nativeElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
-      // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component).birthDate).toBeDefined();
     });
 
@@ -86,7 +84,6 @@ describe('BsDatepickerFieldComponent', () => {
 
       const testDate = '1995-06-15';
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         birthDate: testDate,
         startDate: null,
@@ -402,7 +399,6 @@ describe('BsDatepickerFieldComponent', () => {
         },
       });
 
-      // Initial values
       expect(BootstrapFormTestUtils.getFormValue(component).startDate).toEqual('2024-01-01');
       expect(BootstrapFormTestUtils.getFormValue(component).endDate).toEqual('2024-12-31');
 
@@ -585,7 +581,6 @@ describe('BsDatepickerFieldComponent', () => {
 
       const testDate = '2024-06-15';
 
-      // Update via programmatic value change
       fixture.componentRef.setInput('value', { birthDate: testDate });
       fixture.detectChanges();
 
@@ -602,7 +597,6 @@ describe('BsDatepickerFieldComponent', () => {
 
       const datepickerInput = fixture.debugElement.query(By.css('input[type="date"]'));
 
-      // Verify default Bootstrap configuration is applied
       expect(datepickerInput).toBeTruthy();
       expect(datepickerInput.nativeElement.className).toContain('form-control');
     });
@@ -665,12 +659,10 @@ describe('BsDatepickerFieldComponent', () => {
         const input = fixture.debugElement.query(By.css('input[type="date"]'));
         const helpText = fixture.debugElement.query(By.css('.form-text'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Birth Date');
         expect(input.nativeElement.getAttribute('placeholder')).toBe('Select your birth date');
         expect(helpText.nativeElement.textContent.trim()).toBe('Choose the date you were born');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.birthDate.label': 'Fecha de Nacimiento',
           'form.birthDate.placeholder': 'Selecciona tu fecha de nacimiento',

@@ -47,7 +47,6 @@ describe('PrimeCheckboxFieldComponent', () => {
       expect(containerDiv).toBeTruthy();
       expect(hintElement?.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
-      // Verify form control integration and dynamic field component properties
       if (primeCheckboxComponent) {
         expect(primeCheckboxComponent.label()).toBe('Accept Terms and Conditions');
         expect(primeCheckboxComponent.props().binary).toBe(true);
@@ -67,13 +66,10 @@ describe('PrimeCheckboxFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(PrimeNGFormTestUtils.getFormValue(component)['acceptTerms']).toBe(false);
 
-      // Simulate checkbox interaction using utility
       await PrimeNGFormTestUtils.simulatePrimeCheckbox(fixture, 'p-checkbox', true);
 
-      // Verify form value updated
       expect(PrimeNGFormTestUtils.getFormValue(component)['acceptTerms']).toBe(true);
     });
 
@@ -92,7 +88,6 @@ describe('PrimeCheckboxFieldComponent', () => {
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const checkboxComponent = checkbox.componentInstance;
 
-      // Update form model programmatically
       await PrimeNGFormTestUtils.updateFormValue(fixture, {
         acceptTerms: true,
         newsletter: false,
@@ -127,7 +122,6 @@ describe('PrimeCheckboxFieldComponent', () => {
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const checkboxComponent = checkbox.componentInstance;
 
-      // These properties are passed to the inner Checkbox component
       expect(checkboxComponent.binary).toBe(true);
       expect(checkboxComponent.trueValue).toBe('yes');
       expect(checkboxComponent.falseValue).toBe('no');
@@ -249,7 +243,6 @@ describe('PrimeCheckboxFieldComponent', () => {
         },
       });
 
-      // Simulate first checkbox click using utility
       await PrimeNGFormTestUtils.simulatePrimeCheckbox(fixture, 'p-checkbox:first-of-type', true);
       await fixture.whenStable();
       untracked(() => fixture.detectChanges());
@@ -259,7 +252,6 @@ describe('PrimeCheckboxFieldComponent', () => {
       expect(formValue['newsletter']).toBe(true);
       expect(formValue['enableNotifications']).toBe(false);
 
-      // Simulate third checkbox click using utility
       await PrimeNGFormTestUtils.simulatePrimeCheckbox(fixture, 'p-checkbox:nth-of-type(3)', true);
 
       formValue = PrimeNGFormTestUtils.getFormValue(component);
@@ -319,11 +311,9 @@ describe('PrimeCheckboxFieldComponent', () => {
 
       expect(checkboxInput.nativeElement.disabled).toBe(true);
 
-      // Try to click disabled checkbox - should not change value since it's disabled
       checkbox.nativeElement.click();
       untracked(() => fixture.detectChanges());
 
-      // Verify the checkbox remains disabled and doesn't change
       expect(checkboxInput.nativeElement.disabled).toBe(true);
       expect(checkboxComponent.checked).toBe(false);
     });
@@ -339,7 +329,6 @@ describe('PrimeCheckboxFieldComponent', () => {
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const checkboxComponent = checkbox.componentInstance;
 
-      // Check default props from PrimeNG configuration
       expect(checkboxComponent.binary).toBe(true);
     });
 
@@ -398,10 +387,8 @@ describe('PrimeCheckboxFieldComponent', () => {
       const checkbox = fixture.debugElement.query(By.directive(Checkbox));
       const checkboxComponent = checkbox.componentInstance;
 
-      // Initial state
       expect(checkboxComponent.checked).toBe(false);
 
-      // Update via programmatic value change
       await PrimeNGFormTestUtils.updateFormValue(fixture, { acceptTerms: true });
       await fixture.whenStable();
       untracked(() => fixture.detectChanges());
@@ -441,11 +428,9 @@ describe('PrimeCheckboxFieldComponent', () => {
         let labelElement = fixture.debugElement.query(By.css('label'));
         const hint = fixture.debugElement.query(By.css('.p-hint'));
 
-        // Initial translations
         expect(labelElement?.nativeElement.textContent.trim()).toBe('Accept Terms and Conditions');
         expect(hint.nativeElement.textContent.trim()).toBe('Please read and accept our terms');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.terms.label': 'Aceptar Términos y Condiciones',
           'form.terms.hint': 'Por favor lea y acepte nuestros términos',

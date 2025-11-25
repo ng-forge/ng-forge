@@ -52,23 +52,30 @@ export class ArrayMultipleOpsTestComponent {
         type: 'array',
         fields: [
           {
-            key: 'note',
-            type: 'input',
-            label: 'Note',
+            key: 'noteRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'note',
+                type: 'input',
+                label: 'Note',
+              },
+              {
+                key: 'removeNoteButton',
+                type: 'removeArrayItem',
+                label: 'Remove',
+                className: 'array-remove-button',
+              },
+            ],
           },
         ],
       },
       {
         key: 'addNoteButton',
-        type: 'button',
+        type: 'addArrayItem',
+        arrayKey: 'notes',
         label: 'Add Note',
         className: 'array-add-button',
-        event: AddNotesEvent,
-      },
-      {
-        key: 'removeNoteButton',
-        type: 'removeArrayItem',
-        label: 'Remove Last',
       },
     ],
   } as const satisfies FormConfig;

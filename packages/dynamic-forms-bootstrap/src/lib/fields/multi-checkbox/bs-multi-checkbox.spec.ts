@@ -70,13 +70,11 @@ describe('BsMultiCheckboxFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component).hobbies).toEqual([]);
 
       // Simulate checking first checkbox using utility
       await BootstrapFormTestUtils.simulateBsCheckbox(fixture, '.form-check-input[type="checkbox"]:first-of-type', true);
 
-      // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component).hobbies).toEqual(['reading']);
 
       // Check second checkbox using utility
@@ -106,7 +104,6 @@ describe('BsMultiCheckboxFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         hobbies: ['reading', 'cooking'],
         skills: [],
@@ -456,7 +453,6 @@ describe('BsMultiCheckboxFieldComponent', () => {
         },
       });
 
-      // Initial values
       expect(BootstrapFormTestUtils.getFormValue(component).hobbies).toEqual(['reading']);
       expect(BootstrapFormTestUtils.getFormValue(component).skills).toEqual(['typescript']);
 
@@ -594,14 +590,12 @@ describe('BsMultiCheckboxFieldComponent', () => {
         const helpTextElement = fixture.debugElement.query(By.css('.form-text'));
         const checkboxLabels = fixture.debugElement.queryAll(By.css('.form-check-label'));
 
-        // Initial translations
         expect(labelElement.nativeElement.textContent.trim()).toBe('Select Hobbies');
         expect(helpTextElement.nativeElement.textContent.trim()).toBe('Choose your hobbies');
         expect(checkboxLabels[0].nativeElement.textContent.trim()).toBe('Reading');
         expect(checkboxLabels[1].nativeElement.textContent.trim()).toBe('Gaming');
         expect(checkboxLabels[2].nativeElement.textContent.trim()).toBe('Cooking');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.hobbies.label': 'Seleccionar Pasatiempos',
           'form.hobbies.helpText': 'Elige tus pasatiempos',

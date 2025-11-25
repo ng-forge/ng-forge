@@ -76,13 +76,11 @@ describe('BsSelectFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component).country).toBe('');
 
       // Simulate selection change using utility
       await BootstrapFormTestUtils.simulateBsSelect(fixture, '.form-select', 'CA');
 
-      // Verify form value updated
       expect(BootstrapFormTestUtils.getFormValue(component).country).toBe('CA');
     });
 
@@ -108,7 +106,6 @@ describe('BsSelectFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         country: 'UK',
         languages: [],
@@ -210,7 +207,6 @@ describe('BsSelectFieldComponent', () => {
         },
       });
 
-      // Initial value check
       expect(BootstrapFormTestUtils.getFormValue(component).languages).toEqual(['en', 'es']);
 
       // Update form value programmatically (simulating form value change)
@@ -248,7 +244,6 @@ describe('BsSelectFieldComponent', () => {
         },
       });
 
-      // Update form model programmatically
       fixture.componentRef.setInput('value', {
         country: '',
         languages: ['fr', 'de'],
@@ -515,7 +510,6 @@ describe('BsSelectFieldComponent', () => {
 
       const select = fixture.debugElement.query(By.css('.form-select'));
 
-      // Check default props from Bootstrap configuration
       expect(select.nativeElement.multiple).toBe(false);
     });
 
@@ -563,7 +557,6 @@ describe('BsSelectFieldComponent', () => {
       // Initial state check
       expect(BootstrapFormTestUtils.getFormValue(component).country).toBe('opt1');
 
-      // Update via programmatic value change
       fixture.componentRef.setInput('value', { country: 'opt2' });
 
       // Verify form value updated correctly
@@ -687,7 +680,6 @@ describe('BsSelectFieldComponent', () => {
         const select = fixture.debugElement.query(By.css('.form-select'));
         const helpText = fixture.debugElement.query(By.css('.form-text'));
 
-        // Initial translations
         expect(label.nativeElement.textContent.trim()).toBe('Country');
         expect(helpText.nativeElement.textContent.trim()).toBe('Choose the country you live in');
 
@@ -698,7 +690,6 @@ describe('BsSelectFieldComponent', () => {
         expect(options[2].textContent.trim()).toBe('Canada');
         expect(options[3].textContent.trim()).toBe('United Kingdom');
 
-        // Update to Spanish
         translationService.addTranslations({
           'form.country.label': 'País',
           'form.country.placeholder': 'Selecciona tu país',

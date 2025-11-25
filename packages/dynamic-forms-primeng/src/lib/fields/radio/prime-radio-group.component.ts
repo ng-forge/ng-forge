@@ -12,10 +12,6 @@ export interface PrimeRadioGroupProps {
   styleClass?: string;
 }
 
-/**
- * PrimeNG radio group wrapper that implements FormValueControl
- * for proper integration with Angular 21's Field directive using signal forms
- */
 @Component({
   selector: 'df-prime-radio-group',
   imports: [RadioButton, FormsModule, DynamicTextPipe, AsyncPipe],
