@@ -49,7 +49,7 @@ export interface PrimePreviousButtonField extends Omit<FieldDef<PrimeButtonProps
 }
 
 /** Add array item button field - with preconfigured AddArrayItemEvent */
-export interface PrimeAddArrayItemButtonField extends Omit<FieldDef<PrimeButtonProps>, 'event'> {
+export interface AddArrayItemButtonField extends Omit<FieldDef<PrimeButtonProps>, 'event'> {
   type: 'addArrayItem';
   key: string;
   label: string;
@@ -65,7 +65,7 @@ export interface PrimeAddArrayItemButtonField extends Omit<FieldDef<PrimeButtonP
 }
 
 /** Remove array item button field - with preconfigured RemoveArrayItemEvent */
-export interface PrimeRemoveArrayItemButtonField extends Omit<FieldDef<PrimeButtonProps>, 'event'> {
+export interface RemoveArrayItemButtonField extends Omit<FieldDef<PrimeButtonProps>, 'event'> {
   type: 'removeArrayItem';
   key: string;
   label: string;

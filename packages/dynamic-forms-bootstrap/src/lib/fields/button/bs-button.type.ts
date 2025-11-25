@@ -47,7 +47,7 @@ export interface BsPreviousButtonField extends Omit<FieldDef<BsButtonProps>, 'ev
 }
 
 /** Add array item button field - with preconfigured AddArrayItemEvent */
-export interface BsAddArrayItemButtonField extends Omit<FieldDef<BsButtonProps>, 'event'> {
+export interface AddArrayItemButtonField extends Omit<FieldDef<BsButtonProps>, 'event'> {
   type: 'addArrayItem';
   key: string;
   label: string;
@@ -63,7 +63,7 @@ export interface BsAddArrayItemButtonField extends Omit<FieldDef<BsButtonProps>,
 }
 
 /** Remove array item button field - with preconfigured RemoveArrayItemEvent */
-export interface BsRemoveArrayItemButtonField extends Omit<FieldDef<BsButtonProps>, 'event'> {
+export interface RemoveArrayItemButtonField extends Omit<FieldDef<BsButtonProps>, 'event'> {
   type: 'removeArrayItem';
   key: string;
   label: string;

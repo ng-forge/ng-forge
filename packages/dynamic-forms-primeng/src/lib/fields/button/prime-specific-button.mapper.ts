@@ -10,7 +10,7 @@ import {
   RemoveArrayItemEvent,
   SubmitEvent,
 } from '@ng-forge/dynamic-forms';
-import { PrimeAddArrayItemButtonField, PrimeRemoveArrayItemButtonField } from './prime-button.type';
+import { AddArrayItemButtonField, RemoveArrayItemButtonField } from './prime-button.type';
 
 /**
  * Mapper for submit button - preconfigures SubmitEvent and disables when form is invalid
@@ -91,7 +91,7 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
  * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array
  * 2. Outside array: Uses `arrayKey` property from field definition
  */
-export function addArrayItemButtonFieldMapper(fieldDef: PrimeAddArrayItemButtonField): Binding[] {
+export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Try to get array context (available when inside an array)
@@ -154,7 +154,7 @@ export function addArrayItemButtonFieldMapper(fieldDef: PrimeAddArrayItemButtonF
  * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array and removes item at current index
  * 2. Outside array: Uses `arrayKey` property from field definition, removes last item by default
  */
-export function removeArrayItemButtonFieldMapper(fieldDef: PrimeRemoveArrayItemButtonField): Binding[] {
+export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButtonField): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
   // Try to get array context (available when inside an array)

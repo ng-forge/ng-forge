@@ -48,7 +48,7 @@ export interface IonicPreviousButtonField extends Omit<FieldDef<IonicButtonProps
 }
 
 /** Add array item button field - with preconfigured AddArrayItemEvent */
-export interface IonicAddArrayItemButtonField extends Omit<FieldDef<IonicButtonProps>, 'event'> {
+export interface AddArrayItemButtonField extends Omit<FieldDef<IonicButtonProps>, 'event'> {
   type: 'addArrayItem';
   key: string;
   label: string;
@@ -64,7 +64,7 @@ export interface IonicAddArrayItemButtonField extends Omit<FieldDef<IonicButtonP
 }
 
 /** Remove array item button field - with preconfigured RemoveArrayItemEvent */
-export interface IonicRemoveArrayItemButtonField extends Omit<FieldDef<IonicButtonProps>, 'event'> {
+export interface RemoveArrayItemButtonField extends Omit<FieldDef<IonicButtonProps>, 'event'> {
   type: 'removeArrayItem';
   key: string;
   label: string;
