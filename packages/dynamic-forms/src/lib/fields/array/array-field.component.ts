@@ -8,8 +8,10 @@ import {
   Injector,
   input,
   inputBinding,
+  linkedSignal,
   runInInjectionContext,
   type Type,
+  untracked,
   ViewContainerRef,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -25,6 +27,8 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
 import { ArrayContext, FieldSignalContext } from '../../mappers';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { createSchemaFromFields } from '../../core';
+import { flattenFields } from '../../utils';
 
 /**
  * Array field component that manages dynamic arrays of field values.
@@ -95,39 +99,42 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
    * Get the array of FieldTree objects from the parent form.
    * Signal Forms automatically creates FieldTree for each array item.
    *
-   * IMPORTANT: Only track array structure changes (add/remove), not individual item value changes.
-   * This prevents unnecessary re-rendering when typing in fields.
+   * IMPORTANT: Returns (FieldTree | null)[] to handle both:
+   * - Primitive array items: FieldTree is available
+   * - Object array items: FieldTree is null (Angular Signal Forms doesn't create them for objects)
+   *
+   * For object items, we create local forms in the component creation methods.
    */
-  private readonly arrayFieldTrees = computed<readonly FieldTree<unknown>[]>(() => {
+  private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
     const arrayKey = this.field().key;
 
     // Get the parent form - this tracks when the form structure changes
     const parentForm = this.parentFieldSignalContext.form();
 
+    // Get the current array value to determine length
+    const arrayValue = this.getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
+    if (arrayValue.length === 0) return [];
+
     // Access the array FieldTree through the form's structure
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const childrenMap = (parentForm as any).structure?.childrenMap?.();
-    if (!childrenMap) return [];
 
-    const arrayFieldTree = childrenMap.get(arrayKey);
-    if (!arrayFieldTree) return [];
-
-    // Access the array's inner structure to get the childrenMap for array items
-    // Array items in Angular Signal Forms are accessed via structure.childrenMap() with string keys
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const innerChildrenMap = (arrayFieldTree as any).structure?.childrenMap?.();
-    if (!innerChildrenMap) return [];
-
-    // Get the current array value to determine length
-    const arrayValue = this.getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
-
-    // Access each array item FieldTree using string index keys
-    const items: FieldTree<unknown>[] = [];
-    for (let i = 0; i < arrayValue.length; i++) {
-      const itemFieldTree = innerChildrenMap.get(String(i));
-      if (itemFieldTree) {
-        items.push(itemFieldTree);
+    // Get the array's inner childrenMap if available
+    let innerChildrenMap: Map<string, FieldTree<unknown>> | null = null;
+    if (childrenMap) {
+      const arrayFieldTree = childrenMap.get(arrayKey);
+      if (arrayFieldTree) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        innerChildrenMap = (arrayFieldTree as any).structure?.childrenMap?.() ?? null;
       }
+    }
+
+    // Build array of FieldTree or null for each item
+    // null indicates an object item that needs a local form
+    const items: (FieldTree<unknown> | null)[] = [];
+    for (let i = 0; i < arrayValue.length; i++) {
+      const itemFieldTree = innerChildrenMap?.get(String(i)) ?? null;
+      items.push(itemFieldTree);
     }
 
     return items;
@@ -143,10 +150,10 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   // - Animation transitions for smoother add/remove operations
   // - Reusing existing component instances when possible
 
-  // Create field components from FieldTree array
+  // Create field components from FieldTree array (or null for object items)
   fields = toSignal(
     toObservable(this.arrayFieldTrees).pipe(
-      switchMap((fieldTrees: readonly FieldTree<unknown>[]) => {
+      switchMap((fieldTrees: readonly (FieldTree<unknown> | null)[]) => {
         // Only clear and recreate if the array length changed
         // This prevents re-rendering when individual field values change
         if (fieldTrees.length !== this.currentComponents.length) {
@@ -256,9 +263,10 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   }
 
   /**
-   * Map FieldTree array to component references
+   * Map FieldTree array to component references.
+   * Handles both FieldTree (primitives) and null (objects needing local forms).
    */
-  private mapFieldTrees(fieldTrees: readonly FieldTree<unknown>[]): Promise<ComponentRef<FormUiControl>>[] {
+  private mapFieldTrees(fieldTrees: readonly (FieldTree<unknown> | null)[]): Promise<ComponentRef<FormUiControl>>[] {
     return fieldTrees
       .map((fieldTree, index) => this.mapSingleFieldTree(fieldTree, index))
       .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
@@ -312,9 +320,12 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   }
 
   /**
-   * Create a component for a single FieldTree
+   * Create a component for a single array item.
+   *
+   * @param fieldTree - FieldTree if available (primitive items), or null (object items)
+   * @param index - Index of the array item
    */
-  private async mapSingleFieldTree(fieldTree: FieldTree<unknown>, index: number): Promise<ComponentRef<FormUiControl> | undefined> {
+  private async mapSingleFieldTree(fieldTree: FieldTree<unknown> | null, index: number): Promise<ComponentRef<FormUiControl> | undefined> {
     const template = this.fieldTemplate();
     if (!template) {
       return undefined;
@@ -331,12 +342,12 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
         const valueHandling = this.rawFieldRegistry().get(template.type)?.valueHandling || 'include';
 
-        // Handle flatten types (row/page) differently
+        // Handle flatten types (row/page) - these always need special handling
         if (valueHandling === 'flatten' && 'fields' in template && template.fields) {
           return this.createFlattenTypeComponent(componentType as Type<FormUiControl>, fieldTree, template, index);
         }
 
-        // For regular types (input, group, etc.), pass FieldTree directly
+        // For regular types (input, group, etc.)
         return this.createRegularComponent(componentType as Type<FormUiControl>, fieldTree, template, index);
       })
       .catch((error) => {
@@ -353,41 +364,48 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
   /**
    * Create component for regular field types (input, group, select, etc.)
-   * These components receive the actual FieldTree for their array index
+   *
+   * @param componentType - The component type to create
+   * @param fieldTree - FieldTree if available (primitive items), or null (object items needing local form)
+   * @param template - The field template definition
+   * @param index - Index of the array item
    */
   private createRegularComponent(
     componentType: Type<FormUiControl>,
-    fieldTree: FieldTree<unknown>,
+    fieldTree: FieldTree<unknown> | null,
     template: FieldDef<unknown>,
     index: number,
   ): ComponentRef<FormUiControl> {
     const valueHandling = this.rawFieldRegistry().get(template.type)?.valueHandling || 'include';
 
     // For group types inside arrays, use the flatten type approach
-    // This bypasses the group's form creation and uses the FieldTree directly
+    // This creates a local form for the group's nested fields
     if (template.type === 'group' && valueHandling === 'include') {
       return this.createFlattenTypeComponent(componentType, fieldTree, template, index);
     }
 
-    // For value fields (input, select, checkbox, etc.), create array-specific context
-    const arrayItemInjector = this.createArrayItemInjector(fieldTree, index);
+    // If no FieldTree available (object array items), create a local form
+    // This happens when Angular Signal Forms doesn't create FieldTree for object items
+    const arrayItemInjector = fieldTree ? this.createArrayItemInjector(fieldTree, index) : this.createObjectItemInjector(template, index);
 
     // Map field to bindings using the scoped injector
-    // Pass the actual FieldTree (not the template) so child components get the indexed field
+    // The mapper handles key/field bindings, form is provided via FIELD_SIGNAL_CONTEXT
     const bindings = runInInjectionContext(arrayItemInjector, () => {
-      return [inputBinding('field', () => fieldTree), ...mapFieldToBindings(template, this.rawFieldRegistry())];
+      return mapFieldToBindings(template, this.rawFieldRegistry());
     });
 
     return this.vcr.createComponent(componentType, { bindings, injector: arrayItemInjector });
   }
 
   /**
-   * Create component for flatten types (row/page) and groups within arrays
-   * These need special handling because they contain nested fields
+   * Create component for flatten types (row/page) and groups within arrays.
+   * These need special handling because they contain nested fields.
+   *
+   * When fieldTree is null (object items), creates a local form for the nested structure.
    */
   private createFlattenTypeComponent(
     componentType: Type<FormUiControl>,
-    fieldTree: FieldTree<unknown>,
+    fieldTree: FieldTree<unknown> | null,
     template: FieldDef<unknown>,
     index: number,
   ): ComponentRef<FormUiControl> {
@@ -401,13 +419,16 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
       field: this.field(),
     };
 
+    // Get the form reference - use existing FieldTree or create a local form for objects
+    const formRef = fieldTree ?? this.createObjectItemForm(template, index);
+
     // Create a mutable context object that will reference the injector
     // We need to create the injector first so the context can reference it
     const itemFieldSignalContext: FieldSignalContext<unknown> = {
-      injector: undefined as any, // Will be set below
+      injector: undefined as unknown as Injector, // Will be set below
       value: this.parentFieldSignalContext.value,
       defaultValues: () => ({}),
-      form: (() => fieldTree) as any as ReturnType<typeof form<unknown>>,
+      form: (() => formRef) as unknown as ReturnType<typeof form<unknown>>,
       defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 
@@ -431,12 +452,88 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     itemFieldSignalContext.injector = arrayItemInjector;
 
     // Map field to bindings using the scoped injector
-    // Pass the actual FieldTree (not the template) so child components get the indexed field
+    // The mapper handles key/field bindings, form is provided via FIELD_SIGNAL_CONTEXT
     const bindings = runInInjectionContext(arrayItemInjector, () => {
-      return [inputBinding('field', () => fieldTree), ...mapFieldToBindings(template, this.rawFieldRegistry())];
+      return mapFieldToBindings(template, this.rawFieldRegistry());
     });
 
     return this.vcr.createComponent(componentType, { bindings, injector: arrayItemInjector });
+  }
+
+  /**
+   * Create an injector for object array items (when no FieldTree is available).
+   * This creates a local form for the object and provides it via FIELD_SIGNAL_CONTEXT.
+   */
+  private createObjectItemInjector(template: FieldDef<unknown>, index: number): Injector {
+    const arrayKey = this.field().key;
+
+    const arrayContext: ArrayContext = {
+      arrayKey,
+      index,
+      formValue: this.parentFieldSignalContext.value(),
+      field: this.field(),
+    };
+
+    // Create a local form for this object item
+    const localForm = this.createObjectItemForm(template, index);
+
+    const itemFieldSignalContext: FieldSignalContext<unknown> = {
+      injector: undefined as unknown as Injector, // Will be set below
+      value: this.parentFieldSignalContext.value,
+      defaultValues: () => ({}),
+      form: (() => localForm) as unknown as ReturnType<typeof form<unknown>>,
+      defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
+    };
+
+    const arrayItemInjector = Injector.create({
+      parent: this.parentInjector,
+      providers: [
+        {
+          provide: FIELD_SIGNAL_CONTEXT,
+          useValue: itemFieldSignalContext,
+        },
+        {
+          provide: ARRAY_CONTEXT,
+          useValue: arrayContext,
+        },
+      ],
+    });
+
+    itemFieldSignalContext.injector = arrayItemInjector;
+    return arrayItemInjector;
+  }
+
+  /**
+   * Create a local form for an object array item.
+   *
+   * This is used when Angular Signal Forms doesn't create a FieldTree for the item
+   * (which happens for object items in arrays). The form:
+   * - Reads its value from parentValue[arrayKey][index]
+   * - Uses the template's nested fields for schema creation
+   */
+  private createObjectItemForm(template: FieldDef<unknown>, index: number): ReturnType<typeof form<unknown>> {
+    const arrayKey = this.field().key;
+    const registry = this.rawFieldRegistry();
+
+    // Create entity signal that reads from the array at this index
+    const itemEntity = linkedSignal(() => {
+      const parentValue = this.parentFieldSignalContext.value();
+      const arrayValue = this.getArrayValue(parentValue as Partial<TModel>, arrayKey);
+      return arrayValue[index] ?? {};
+    });
+
+    // Get nested fields for schema creation (if available)
+    const nestedFields = 'fields' in template && Array.isArray(template.fields) ? template.fields : [];
+
+    // Create form with schema if we have nested fields
+    return runInInjectionContext(this.parentInjector, () => {
+      if (nestedFields.length > 0) {
+        const flattenedFields = flattenFields(nestedFields, registry);
+        const schema = createSchemaFromFields(flattenedFields, registry);
+        return untracked(() => form(itemEntity, schema));
+      }
+      return untracked(() => form(itemEntity));
+    });
   }
 
   onFieldsInitialized(): void {

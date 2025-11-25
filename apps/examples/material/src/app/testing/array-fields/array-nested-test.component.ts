@@ -98,15 +98,16 @@ export class ArrayNestedTestComponent {
                   },
                 ],
               },
-              {
-                key: 'addUserButton',
-                type: 'addArrayItem',
-                label: 'Add User',
-                className: 'array-add-button',
-              },
             ],
           },
         ],
+      },
+      {
+        key: 'addUserButton',
+        type: 'addArrayItem',
+        arrayKey: 'users',
+        label: 'Add User',
+        className: 'array-add-button',
       },
     ],
   } as const satisfies FormConfig;

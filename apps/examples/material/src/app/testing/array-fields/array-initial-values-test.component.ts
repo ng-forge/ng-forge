@@ -36,15 +36,22 @@ export class ArrayInitialValuesTestComponent {
         type: 'array',
         fields: [
           {
-            key: 'name',
-            type: 'input',
-            label: 'Name',
-          },
-          {
-            key: 'email',
-            type: 'input',
-            label: 'Email',
-            props: { type: 'email' },
+            key: 'contactRow',
+            type: 'row',
+            fields: [
+              {
+                key: 'name',
+                type: 'input',
+                label: 'Name',
+                col: 6,
+              },
+              {
+                key: 'email',
+                type: 'input',
+                label: 'Email',
+                col: 6,
+              },
+            ],
           },
         ],
       },

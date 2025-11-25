@@ -11,6 +11,7 @@ import {
   RemoveArrayItemEvent,
   SubmitEvent,
 } from '@ng-forge/dynamic-forms';
+import { MatAddArrayItemButtonField, MatRemoveArrayItemButtonField } from './mat-button.type';
 
 /**
  * Mapper for submit button - preconfigures SubmitEvent and disables when form is invalid
@@ -30,6 +31,7 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
     inputBinding('disabled', () =>
       computed(() => {
         const explicitlyDisabled = fieldDef.disabled || false;
+
         const formInvalid = !form().valid();
         return explicitlyDisabled || formInvalid;
       })(),
@@ -91,13 +93,29 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
 }
 
 /**
- * Mapper for add array item button - preconfigures AddArrayItemEvent with array context
- * Note: This button type should only be used inside array field templates.
+ * Mapper for add array item button - preconfigures AddArrayItemEvent with array context.
+ *
+ * Supports two modes:
+ * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array
+ * 2. Outside array: Uses `arrayKey` property from field definition
  */
-export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
+export function addArrayItemButtonFieldMapper(fieldDef: MatAddArrayItemButtonField): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  const arrayContext = inject(ARRAY_CONTEXT);
+  // Try to get array context (available when inside an array)
+  // Use optional injection so it doesn't fail when outside an array
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+
+  // Determine the target array key
+  // Priority: explicit arrayKey from fieldDef > arrayKey from context
+  const targetArrayKey = fieldDef.arrayKey ?? arrayContext?.arrayKey;
+
+  if (!targetArrayKey) {
+    console.warn(
+      `[Dynamic Forms] addArrayItem button "${fieldDef.key}" has no array context. ` +
+        'Either place it inside an array field, or provide an explicit arrayKey property.',
+    );
+  }
 
   // Preconfigure the AddArrayItemEvent
   bindings.push(inputBinding('event', () => AddArrayItemEvent));
@@ -115,9 +133,9 @@ export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, 
   // Add array context for token resolution
   const eventContext: ArrayItemContext = {
     key: fieldDef.key,
-    index: arrayContext.index,
-    arrayKey: arrayContext.arrayKey,
-    formValue: arrayContext.formValue,
+    index: arrayContext?.index ?? -1,
+    arrayKey: targetArrayKey ?? '',
+    formValue: arrayContext?.formValue ?? {},
   };
 
   bindings.push(inputBinding('eventContext', () => eventContext));
@@ -134,13 +152,29 @@ export function addArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, 
 }
 
 /**
- * Mapper for remove array item button - preconfigures RemoveArrayItemEvent with array context
- * Note: This button type should only be used inside array field templates.
+ * Mapper for remove array item button - preconfigures RemoveArrayItemEvent with array context.
+ *
+ * Supports two modes:
+ * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array and removes item at current index
+ * 2. Outside array: Uses `arrayKey` property from field definition, removes last item by default
  */
-export function removeArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
+export function removeArrayItemButtonFieldMapper(fieldDef: MatRemoveArrayItemButtonField): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  const arrayContext = inject(ARRAY_CONTEXT);
+  // Try to get array context (available when inside an array)
+  // Use optional injection so it doesn't fail when outside an array
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+
+  // Determine the target array key
+  // Priority: explicit arrayKey from fieldDef > arrayKey from context
+  const targetArrayKey = fieldDef.arrayKey ?? arrayContext?.arrayKey;
+
+  if (!targetArrayKey) {
+    console.warn(
+      `[Dynamic Forms] removeArrayItem button "${fieldDef.key}" has no array context. ` +
+        'Either place it inside an array field, or provide an explicit arrayKey property.',
+    );
+  }
 
   // Preconfigure the RemoveArrayItemEvent
   bindings.push(inputBinding('event', () => RemoveArrayItemEvent));
@@ -158,16 +192,17 @@ export function removeArrayItemButtonFieldMapper(fieldDef: FieldDef<Record<strin
   // Add array context for token resolution
   const eventContext: ArrayItemContext = {
     key: fieldDef.key,
-    index: arrayContext.index,
-    arrayKey: arrayContext.arrayKey,
-    formValue: arrayContext.formValue,
+    index: arrayContext?.index ?? -1, // -1 means remove last (no specific index)
+    arrayKey: targetArrayKey ?? '',
+    formValue: arrayContext?.formValue ?? {},
   };
 
   bindings.push(inputBinding('eventContext', () => eventContext));
 
-  // Set default eventArgs for RemoveArrayItemEvent (arrayKey, index)
+  // Set default eventArgs for RemoveArrayItemEvent (arrayKey, index if inside array)
+  // When outside array, only pass arrayKey (removes last by default)
   // User can override by providing eventArgs in field definition
-  const defaultEventArgs = ['$arrayKey', '$index'];
+  const defaultEventArgs = arrayContext ? ['$arrayKey', '$index'] : ['$arrayKey'];
   const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
 
   bindings.push(inputBinding('eventArgs', () => eventArgs));

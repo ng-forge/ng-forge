@@ -47,23 +47,18 @@ export class ArrayMinLengthTestComponent {
         // minLength: 2,
         fields: [
           {
-            key: 'itemRow',
-            type: 'row',
-            fields: [
-              {
-                key: 'item',
-                type: 'input',
-                label: 'Item',
-              },
-              {
-                key: 'addItemButton',
-                type: 'addArrayItem',
-                label: 'Add Item',
-                className: 'array-add-button',
-              },
-            ],
+            key: 'item',
+            type: 'input',
+            label: 'Item',
           },
         ],
+      },
+      {
+        key: 'addItemButton',
+        type: 'addArrayItem',
+        arrayKey: 'items',
+        label: 'Add Item',
+        className: 'array-add-button',
       },
       {
         key: 'submit',

@@ -82,15 +82,16 @@ export class ArrayItemValidationTestComponent {
                   },
                 ],
               },
-              {
-                key: 'addMemberButton',
-                type: 'addArrayItem',
-                label: 'Add Member',
-                className: 'array-add-button',
-              },
             ],
           },
         ],
+      },
+      {
+        key: 'addMemberButton',
+        type: 'addArrayItem',
+        arrayKey: 'members',
+        label: 'Add Member',
+        className: 'array-add-button',
       },
     ],
   } as const satisfies FormConfig;

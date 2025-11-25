@@ -37,6 +37,8 @@ export interface ArrayContext {
   index: number;
   /** The current form value for token resolution */
   formValue: unknown;
+  /** The array field definition */
+  field: FieldDef<unknown>;
 }
 
 /**

@@ -61,12 +61,6 @@ export class ArrayMultipleOpsTestComponent {
                 label: 'Note',
               },
               {
-                key: 'addNoteButton',
-                type: 'addArrayItem',
-                label: 'Add Note',
-                className: 'array-add-button',
-              },
-              {
                 key: 'removeNoteButton',
                 type: 'removeArrayItem',
                 label: 'Remove',
@@ -75,6 +69,13 @@ export class ArrayMultipleOpsTestComponent {
             ],
           },
         ],
+      },
+      {
+        key: 'addNoteButton',
+        type: 'addArrayItem',
+        arrayKey: 'notes',
+        label: 'Add Note',
+        className: 'array-add-button',
       },
     ],
   } as const satisfies FormConfig;

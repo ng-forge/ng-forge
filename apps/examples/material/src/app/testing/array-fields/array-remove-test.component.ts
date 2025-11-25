@@ -42,23 +42,18 @@ export class ArrayRemoveTestComponent {
         type: 'array',
         fields: [
           {
-            key: 'phoneRow',
-            type: 'row',
-            fields: [
-              {
-                key: 'phone',
-                type: 'input',
-                label: 'Phone',
-              },
-              {
-                key: 'removePhoneButton',
-                type: 'removeArrayItem',
-                label: 'Remove',
-                className: 'array-remove-button',
-              },
-            ],
+            key: 'phone',
+            type: 'input',
+            label: 'Phone',
           },
         ],
+      },
+      {
+        key: 'removePhoneButton',
+        type: 'removeArrayItem',
+        label: 'Remove Last',
+        className: 'array-remove-button',
+        arrayKey: 'phones',
       },
     ],
   } as const satisfies FormConfig;

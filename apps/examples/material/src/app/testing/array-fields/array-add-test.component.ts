@@ -49,25 +49,20 @@ export class ArrayAddTestComponent {
         type: 'array',
         fields: [
           {
-            key: 'emailRow',
-            type: 'row',
-            fields: [
-              {
-                key: 'email',
-                type: 'input',
-                label: 'Email',
-                props: { type: 'email' },
-              },
-              {
-                key: 'addEmailButton',
-                type: 'addArrayItem',
-                label: 'Add Email',
-                className: 'array-add-button',
-                props: { color: 'primary' },
-              },
-            ],
+            key: 'email',
+            type: 'input',
+            label: 'Email',
+            props: { type: 'email' },
           },
         ],
+      },
+      {
+        key: 'addEmailButton',
+        type: 'addArrayItem',
+        arrayKey: 'emails',
+        label: 'Add Email',
+        className: 'array-add-button',
+        props: { color: 'primary' },
       },
     ],
   } as const satisfies FormConfig;

@@ -47,23 +47,18 @@ export class ArrayMaxLengthTestComponent {
         // maxLength: 3,
         fields: [
           {
-            key: 'tagRow',
-            type: 'row',
-            fields: [
-              {
-                key: 'tag',
-                type: 'input',
-                label: 'Tag',
-              },
-              {
-                key: 'addTagButton',
-                type: 'addArrayItem',
-                label: 'Add Tag',
-                className: 'array-add-button',
-              },
-            ],
+            key: 'tag',
+            type: 'input',
+            label: 'Tag',
           },
         ],
+      },
+      {
+        key: 'addTagButton',
+        type: 'addArrayItem',
+        arrayKey: 'tags',
+        label: 'Add Tag',
+        className: 'array-add-button',
       },
     ],
   } as const satisfies FormConfig;

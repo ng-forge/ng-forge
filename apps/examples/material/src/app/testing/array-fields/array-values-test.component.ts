@@ -1,16 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
-import { AddArrayItemEvent, DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
-
-class AddTasksEvent extends AddArrayItemEvent {
-  constructor() {
-    super('tasks', {
-      key: 'taskName',
-      type: 'input',
-      label: 'Task',
-    });
-  }
-}
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
 /**
  * Array Values Test Component
@@ -54,15 +44,17 @@ export class ArrayValuesTestComponent {
       },
       {
         key: 'addTaskButton',
-        type: 'button',
+        type: 'addArrayItem',
+        arrayKey: 'tasks',
         label: 'Add Task',
         className: 'array-add-button',
-        event: AddTasksEvent,
         props: { color: 'primary' },
       },
     ],
   } as const satisfies FormConfig;
-  value = signal<Record<string, unknown>>({});
+  value = signal<Record<string, unknown>>({
+    tasks: [''], // Start with one empty item so array field renders
+  });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
