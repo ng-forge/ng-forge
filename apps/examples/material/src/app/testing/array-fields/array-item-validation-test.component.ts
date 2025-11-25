@@ -60,21 +60,27 @@ export class ArrayItemValidationTestComponent {
         type: 'array',
         fields: [
           {
-            key: 'member',
-            type: 'group',
+            key: 'memberRow',
+            type: 'row',
             fields: [
               {
-                key: 'name',
-                type: 'input',
-                label: 'Name',
-                required: true,
-              },
-              {
-                key: 'email',
-                type: 'input',
-                label: 'Email',
-                required: true,
-                email: true,
+                key: 'member',
+                type: 'group',
+                fields: [
+                  {
+                    key: 'name',
+                    type: 'input',
+                    label: 'Name',
+                    required: true,
+                  },
+                  {
+                    key: 'email',
+                    type: 'input',
+                    label: 'Email',
+                    required: true,
+                    email: true,
+                  },
+                ],
               },
             ],
           },
@@ -83,12 +89,15 @@ export class ArrayItemValidationTestComponent {
       {
         key: 'addMemberButton',
         type: 'addArrayItem',
+        arrayKey: 'members',
         label: 'Add Member',
         className: 'array-add-button',
       },
     ],
   } as const satisfies FormConfig;
-  value = signal<Record<string, unknown>>({});
+  value = signal<Record<string, unknown>>({
+    members: [{ member: { name: '', email: '' } }], // Start with one empty item (group key preserved)
+  });
   submissionLog = signal<Array<{ timestamp: string; testId: string; data: Record<string, unknown> }>>([]);
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
