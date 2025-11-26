@@ -44,10 +44,11 @@ describe('DynamicFormComponent', () => {
    * Call this after createComponent() and before querying for test harness components.
    */
   const waitForDynamicComponents = async (fixture: any) => {
-    // Two-pass approach: first for async loading, second for rendering
+    // Two-pass approach balances reliability with performance
     await delay();
     fixture.detectChanges();
     TestBed.flushEffects();
+
     await delay();
     fixture.detectChanges();
     TestBed.flushEffects();
