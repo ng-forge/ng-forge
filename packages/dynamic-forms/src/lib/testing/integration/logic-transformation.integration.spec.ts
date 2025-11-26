@@ -113,8 +113,9 @@ describe('Logic Transformation Pipeline Integration', () => {
         // Email field should be hidden when contactMethod is not 'email'
         expect(formInstance.email().hidden()).toBe(true);
 
-        // Change contactMethod to 'email'
+        // Change contactMethod to 'email' and let effects settle
         formValue.set({ contactMethod: 'email', email: 'test@example.com' });
+        TestBed.flushEffects();
         expect(formInstance.email().hidden()).toBe(false);
       });
     });
@@ -143,8 +144,9 @@ describe('Logic Transformation Pipeline Integration', () => {
         // Field should be hidden when showAdvanced is false
         expect(formInstance.advancedOption().hidden()).toBe(true);
 
-        // Show advanced options
+        // Show advanced options and let effects settle
         formValue.set({ showAdvanced: true, advancedOption: '' });
+        TestBed.flushEffects();
         expect(formInstance.advancedOption().hidden()).toBe(false);
       });
     });
@@ -173,8 +175,9 @@ describe('Logic Transformation Pipeline Integration', () => {
         // Username readonly for guests
         expect(formInstance.username().readonly()).toBe(true);
 
-        // Change to admin
+        // Change to admin and let effects settle
         formValue.set({ userType: 'admin', username: 'admin_user' });
+        TestBed.flushEffects();
         expect(formInstance.username().readonly()).toBe(false);
       });
     });
