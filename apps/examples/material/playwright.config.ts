@@ -41,7 +41,7 @@ const getProjects = () => {
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: '../src/app/testing' }),
+  ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: './src/app/testing' }),
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
@@ -53,7 +53,7 @@ export default defineConfig({
     actionTimeout: 10000,
   },
   /* Configure output directories */
-  outputDir: '../screenshots',
+  outputDir: './screenshots',
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'pnpm exec nx run material-examples:serve --port 4201',
