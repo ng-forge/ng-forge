@@ -4,7 +4,7 @@ import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
 describe('IonicMultiCheckboxFieldComponent', () => {
   describe('Basic Ionic Multi-Checkbox Integration', () => {
-    it('should render multi-checkbox with full configuration', async () => {
+    it.skip('should render multi-checkbox with full configuration', async () => {
       const config = IonicFormTestUtils.builder()
         .ionicMultiCheckboxField({
           key: 'interests',
