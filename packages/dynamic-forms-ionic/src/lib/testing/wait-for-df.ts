@@ -44,8 +44,12 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
  * Waits until Ionic component count stabilizes for 3 consecutive checks
  * and no loading placeholders remain. Uses timeout-based safety net instead
  * of arbitrary iteration limits.
+ *
+ * Note: Timeout is set to 500ms to leave margin for test assertions within
+ * the 1000ms test timeout. Ionic web components with shadow DOM typically
+ * stabilize well within this window.
  */
-async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs = 1000): Promise<void> {
+async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs = 500): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form, form');
   if (!formElement) return;
 
