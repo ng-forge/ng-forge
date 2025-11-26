@@ -20,11 +20,14 @@ declare global {
 }
 
 // Use Vitest's environment detection
-// In browser mode, use import.meta.env; in Node mode use process.env
+// Browser mode is detected by checking if we're actually in a browser environment
+// with vitest-specific browser globals, not just window existing
 const isBrowserMode =
-  typeof window !== 'undefined' && typeof import.meta !== 'undefined'
-    ? import.meta.env?.VITEST_BROWSER === 'true'
-    : typeof process !== 'undefined' && process.env?.VITEST_BROWSER === 'true';
+  typeof window !== 'undefined' &&
+  typeof navigator !== 'undefined' &&
+  typeof document !== 'undefined' &&
+  // Check for vitest browser-specific global
+  (import.meta.env?.MODE === 'test' || typeof (globalThis as Record<string, unknown>).__vitest_browser__ !== 'undefined');
 
 if (isBrowserMode && typeof window !== 'undefined') {
   // In browser mode with parallel file execution, only initialize once
