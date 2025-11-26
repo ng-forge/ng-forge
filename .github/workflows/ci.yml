@@ -352,12 +352,8 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-all
 
-      - name: Install Playwright system dependencies
-        run: pnpm exec playwright install-deps
-
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install
+        run: pnpm exec playwright install --with-deps
 
       - name: Run E2E tests
         run: pnpm nx run material-examples:e2e
