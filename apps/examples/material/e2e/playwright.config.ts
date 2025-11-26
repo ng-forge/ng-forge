@@ -41,7 +41,7 @@ const getProjects = () => {
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: './src' }),
+  ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: '../src/app/testing' }),
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
