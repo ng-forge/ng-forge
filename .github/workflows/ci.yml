@@ -306,7 +306,7 @@ jobs:
   e2e:
     name: E2E Tests (All Browsers)
     runs-on: ubuntu-latest
-    needs: build
+    needs: [lint, test, build-examples, package-integrity]
 
     steps:
       - name: Checkout
