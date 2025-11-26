@@ -8,6 +8,7 @@ import { playwright } from '@vitest/browser-playwright';
 export default defineConfig(({ mode }) => {
   // Conditionally add --no-sandbox only in CI environments
   const isCI = process.env.CI === 'true';
+  // Check for browser mode via CLI or ENV - CLI takes precedence to bypass vitest env bug
   const useBrowserMode = process.env.VITEST_BROWSER === 'true';
   const chromeArgs = [
     '--disable-dev-shm-usage', // Prevents shared memory issues in containers
