@@ -60,9 +60,9 @@ packages/dynamic-forms-superui/
   "version": "1.0.0",
   "description": "SuperUI integration for ng-forge dynamic forms",
   "peerDependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0",
-    "@angular/forms": "^21.0.0",
+    "@angular/common": "^^21.0.1",
+    "@angular/core": "^^21.0.1",
+    "@angular/forms": "^^21.0.1",
     "@ng-forge/dynamic-forms": "^1.0.0",
     "superui": "^5.0.0"
   },

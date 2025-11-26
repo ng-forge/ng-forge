@@ -4,9 +4,9 @@
   "version": "0.0.1",
   "peerDependencies": {
     "@analogjs/vite-plugin-angular": "^1.21.3",
-    "@angular/common": "~21.0.0",
-    "@angular/core": "~21.0.0",
-    "@angular/forms": "~21.0.0",
+    "@angular/common": "~^21.0.1",
+    "@angular/core": "~^21.0.1",
+    "@angular/forms": "~^21.0.1",
     "@nx/vite": "22.1.0",
     "@vitest/browser-playwright": "4.0.10",
     "ngxtension": "^6.0.0",
