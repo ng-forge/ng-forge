@@ -62,9 +62,10 @@ export type {
   TextProps,
   ToggleField,
   ValueFieldComponent,
+  ValueType,
 } from './definitions';
 
-export { isCheckedField, isValueField, ValueType } from './definitions';
+export { isCheckedField, isValueField } from './definitions';
 
 // Validation Config Types
 export type {

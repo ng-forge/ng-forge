@@ -7,8 +7,9 @@ export type {
   FieldDef,
   FieldWithValidation,
   ValueFieldComponent,
+  ValueType,
 } from './base';
-export { isCheckedField, isValueField, ValueType } from './base';
+export { isCheckedField, isValueField } from './base';
 
 // Default field definitions
 export type {
