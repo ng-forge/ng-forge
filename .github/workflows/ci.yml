@@ -341,8 +341,23 @@ jobs:
           restore-keys: |
             build-${{ github.sha }}-
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | head -1)" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-all
+
+      - name: Install Playwright system dependencies
+        run: pnpm exec playwright install-deps
+
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install
 
       - name: Run E2E tests
         run: pnpm nx run material-examples:e2e
