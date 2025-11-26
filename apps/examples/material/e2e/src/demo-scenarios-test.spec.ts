@@ -138,7 +138,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@example.com',
-        age: '25', // FIXME: Should be number, not string - this is a bug in the form
+        age: 25,
         country: 'us',
       });
     });
@@ -301,7 +301,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
       });
 
       expect(formValue).toMatchObject({
-        age: '25', // FIXME: Should be number, not string - this is a bug in the form
+        age: 25,
         country: 'us',
       });
     });
@@ -340,7 +340,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
       });
 
       expect(formValue).toMatchObject({
-        age: '30',
+        age: 30,
         country: 'ca',
         state: 'ca',
         city: 'San Francisco',

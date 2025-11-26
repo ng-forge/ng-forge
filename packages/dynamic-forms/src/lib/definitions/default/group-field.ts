@@ -16,7 +16,7 @@ export interface GroupField<TFields extends readonly GroupAllowedChildren[] = re
   readonly fields: TFields;
 
   /** Array fields do not have a label property **/
-  readonly label?: undefined;
+  readonly label?: never;
 }
 
 /**
