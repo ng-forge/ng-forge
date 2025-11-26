@@ -48,6 +48,10 @@ export default defineConfig(({ mode }) => {
         headless: true,
         fileParallelism: false,
         slowTestThreshold: 1000,
+        // Increase port range for CI environments with multiple processes
+        api: {
+          port: isCI ? undefined : 63315, // Let CI auto-assign ports
+        },
       },
       testTimeout: 1000,
       hookTimeout: 1000,
