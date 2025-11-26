@@ -46,7 +46,7 @@ export default defineConfig(({ mode }) => {
           },
         ],
         headless: true,
-        fileParallelism: false,
+        fileParallelism: true, // Enable parallel execution with auto-port assignment
         slowTestThreshold: 1000,
         // Increase port range for CI environments with multiple processes
         api: {
