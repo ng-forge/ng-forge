@@ -6,6 +6,31 @@ import { fileURLToPath } from 'node:url';
 // For CI, you may want to set BASE_URL to the deployed application.
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4201';
 
+// Browser selection: 'all' (default), 'chromium', 'firefox', or 'webkit'
+const browserSelection = process.env['E2E_BROWSERS'] || 'all';
+
+const allProjects = [
+  {
+    name: 'chromium',
+    use: { ...devices['Desktop Chrome'] },
+  },
+  {
+    name: 'firefox',
+    use: { ...devices['Desktop Firefox'] },
+  },
+  {
+    name: 'webkit',
+    use: { ...devices['Desktop Safari'] },
+  },
+];
+
+const getProjects = () => {
+  if (browserSelection === 'all') {
+    return allProjects;
+  }
+  return allProjects.filter((p) => p.name === browserSelection);
+};
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -16,7 +41,7 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4201';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: './src' }),
+  ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: './src/app/testing' }),
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
@@ -28,7 +53,7 @@ export default defineConfig({
     actionTimeout: 10000,
   },
   /* Configure output directories */
-  outputDir: '../screenshots',
+  outputDir: './screenshots',
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'pnpm exec nx run material-examples:serve --port 4201',
@@ -36,40 +61,5 @@ export default defineConfig({
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    // Uncomment for mobile browsers support
-    /* {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    }, */
-
-    // Uncomment for branded browsers
-    /* {
-      name: 'Microsoft Edge',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    },
-    {
-      name: 'Google Chrome',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    } */
-  ],
+  projects: getProjects(),
 });
