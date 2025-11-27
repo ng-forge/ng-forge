@@ -1,8 +1,9 @@
 import { disabled, email, max, maxLength, min, minLength, pattern, required, SchemaPathRules, PathKind } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
-import { FieldDef, FieldWithValidation } from '../definitions';
-import { applyValidator } from './validation';
-import { applyLogic } from './logic';
+import { FieldDef } from '../definitions/base/field-def';
+import { FieldWithValidation } from '../definitions/base/field-with-validation';
+import { applyValidator } from './validation/validator-factory';
+import { applyLogic } from './logic/logic-applicator';
 import { applySchema } from './schema-application';
 import { isGroupField } from '../definitions/default/group-field';
 import { isArrayField } from '../definitions/default/array-field';

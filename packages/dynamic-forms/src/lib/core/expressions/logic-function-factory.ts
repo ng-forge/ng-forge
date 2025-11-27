@@ -1,7 +1,8 @@
 import { inject } from '@angular/core';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { ConditionalExpression } from '../../models';
-import { FieldContextRegistryService, FunctionRegistryService } from '../registry';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { FieldContextRegistryService } from '../registry/field-context-registry.service';
+import { FunctionRegistryService } from '../registry/function-registry.service';
 import { evaluateCondition } from './condition-evaluator';
 
 /**

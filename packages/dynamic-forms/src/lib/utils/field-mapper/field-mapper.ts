@@ -1,7 +1,7 @@
-import { FieldDef } from '../../definitions/base';
+import { FieldDef } from '../../definitions/base/field-def';
 import { Binding } from '@angular/core';
 import { FieldTypeDefinition } from '../../models/field-type';
-import { baseFieldMapper } from '../../mappers';
+import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
 
 /**
  * Main field mapper function that uses the field registry to get the appropriate mapper

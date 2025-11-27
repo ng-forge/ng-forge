@@ -1,8 +1,8 @@
 import { disabled, hidden, readonly, required, SchemaPathRules, PathKind } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
-import { LogicConfig } from '../../models/logic';
-import { ConditionalExpression } from '../../models';
-import { createLogicFunction } from '../expressions';
+import { LogicConfig } from '../../models/logic/logic-config';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { createLogicFunction } from '../expressions/logic-function-factory';
 
 /**
  * Safely cast a SchemaPathTree to SchemaPath with Supported rules.

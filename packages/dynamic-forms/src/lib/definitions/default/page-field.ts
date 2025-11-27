@@ -1,5 +1,5 @@
-import { FieldDef } from '../base';
-import { PageAllowedChildren } from '../../models';
+import { FieldDef } from '../base/field-def';
+import { PageAllowedChildren } from '../../models/types/nesting-constraints';
 import { isRowField } from './row-field';
 import { isGroupField } from './group-field';
 

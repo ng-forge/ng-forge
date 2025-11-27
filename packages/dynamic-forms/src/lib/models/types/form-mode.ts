@@ -1,6 +1,6 @@
-import { FieldDef } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
 import { isPageField } from '../../definitions/default/page-field';
-import { RegisteredFieldTypes } from '../registry';
+import { RegisteredFieldTypes } from '../registry/field-registry';
 
 // Re-export isPageField for external usage
 export { isPageField };

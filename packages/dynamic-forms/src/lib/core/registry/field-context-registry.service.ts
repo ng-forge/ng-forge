@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
-import { EvaluationContext } from '../../models';
+import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { RootFormRegistryService } from './root-form-registry.service';
 
 /**

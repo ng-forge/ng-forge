@@ -1,8 +1,8 @@
 import { FieldDef } from './field-def';
 import { FieldWithValidation } from './field-with-validation';
-import { WithInputSignals } from '../../models';
+import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
-import { DynamicText } from '../../pipes';
+import { DynamicText } from '../../models/types/dynamic-text';
 
 export interface BaseCheckedField<TProps> extends FieldDef<TProps>, FieldWithValidation {
   value?: boolean;

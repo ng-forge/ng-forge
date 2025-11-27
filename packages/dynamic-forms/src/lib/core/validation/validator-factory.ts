@@ -17,13 +17,18 @@ import {
   ValidationError,
 } from '@angular/forms/signals';
 import { inject } from '@angular/core';
-import { AsyncValidatorConfig, CustomValidatorConfig, HttpValidatorConfig, ValidatorConfig } from '../../models';
-import { createLogicFunction } from '../expressions';
-import { createDynamicValueFunction } from '../values';
+import {
+  AsyncValidatorConfig,
+  CustomValidatorConfig,
+  HttpValidatorConfig,
+  ValidatorConfig,
+} from '../../models/validation/validator-config';
+import { createLogicFunction } from '../expressions/logic-function-factory';
+import { createDynamicValueFunction } from '../values/dynamic-value-factory';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
-import { ExpressionParser } from '../expressions/parser';
+import { ExpressionParser } from '../expressions/parser/expression-parser';
 
 /**
  * Helper to create conditional logic function from when expression.

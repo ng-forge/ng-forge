@@ -1,4 +1,4 @@
-import { EvaluationContext } from '../../models';
+import { EvaluationContext } from '../../models/expressions/evaluation-context';
 
 /**
  * Custom function signature for conditional expressions
