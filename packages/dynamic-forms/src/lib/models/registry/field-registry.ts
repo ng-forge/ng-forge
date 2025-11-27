@@ -1,4 +1,8 @@
-import { ArrayField, GroupField, PageField, RowField, TextField } from '../../definitions';
+import { ArrayField } from '../../definitions/default/array-field';
+import { GroupField } from '../../definitions/default/group-field';
+import { PageField } from '../../definitions/default/page-field';
+import { RowField } from '../../definitions/default/row-field';
+import { TextField } from '../../definitions/default/text-field';
 
 /**
  * Container fields registry - augment this interface to add custom container fields

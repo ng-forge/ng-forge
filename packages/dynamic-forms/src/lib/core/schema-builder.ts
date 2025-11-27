@@ -1,6 +1,6 @@
 import { Schema, schema } from '@angular/forms/signals';
 import type { SchemaPath } from '@angular/forms/signals';
-import { FieldDef } from '../definitions';
+import { FieldDef } from '../definitions/base/field-def';
 import { mapFieldToForm } from './form-mapping';
 import { FieldTypeDefinition, getFieldValueHandling } from '../models/field-type';
 import { getFieldDefaultValue } from '../utils/default-value/default-value';

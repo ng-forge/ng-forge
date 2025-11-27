@@ -4,7 +4,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
 import type { SchemaPath } from '@angular/forms/signals';
 import { applyValidator, applyValidators } from '../../core/validation/validator-factory';
-import { ValidatorConfig } from '../../models';
+import { ValidatorConfig } from '../../models/validation/validator-config';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 
 describe('Validator Transformation Pipeline Integration', () => {

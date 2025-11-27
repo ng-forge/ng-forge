@@ -1,12 +1,14 @@
 import { GroupFieldComponent } from './group-field.component';
-import { GroupField } from '../../definitions';
+import { GroupField } from '../../definitions/default/group-field';
 import { createSimpleTestField } from '../../testing';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { baseFieldMapper, FieldSignalContext } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
-import { FIELD_REGISTRY, FIELD_SIGNAL_CONTEXT, FieldTypeDefinition } from '../../models';
+import { FIELD_REGISTRY } from '../../models/field-type';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { FieldTypeDefinition } from '../../models/field-type';
 import { EventBus } from '../../events';
 
 describe('GroupFieldComponent', () => {

@@ -1,7 +1,7 @@
 import { RowFieldComponent } from './row-field.component';
 import { RowField } from '../../definitions/default/row-field';
 import { createSimpleTestField, setupSimpleTest } from '../../testing';
-import { FieldDef } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
 
 describe('RowFieldComponent', () => {
   it('should create', () => {

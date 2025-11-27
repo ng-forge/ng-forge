@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal, ResourceRef } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { form, schema, FieldContext } from '@angular/forms/signals';
-import { AsyncValidatorConfig, HttpValidatorConfig } from '../../models';
+import { AsyncValidatorConfig, HttpValidatorConfig } from '../../models/validation/validator-config';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { applyValidator } from './validator-factory';
 import { AsyncCustomValidator, HttpCustomValidator } from './validator-types';

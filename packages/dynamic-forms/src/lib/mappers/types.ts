@@ -1,4 +1,4 @@
-import { FieldDef } from '../definitions';
+import { FieldDef } from '../definitions/base/field-def';
 import { Binding, Injector, Signal, WritableSignal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { ValidationMessages } from '../models/validation-types';

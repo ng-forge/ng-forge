@@ -1,4 +1,4 @@
-import { DynamicText } from '../pipes';
+import { DynamicText } from './types/dynamic-text';
 
 export interface FieldOption<T = unknown> {
   label: DynamicText;

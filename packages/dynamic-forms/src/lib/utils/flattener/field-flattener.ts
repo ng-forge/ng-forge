@@ -1,4 +1,5 @@
-import { FieldDef, isRowField } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
+import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { isArrayField } from '../../definitions/default/array-field';
 import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';

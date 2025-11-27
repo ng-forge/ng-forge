@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
 import { vi } from 'vitest';
-import { ConditionalExpression } from '../../models';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { createLogicFunction } from './logic-function-factory';
 

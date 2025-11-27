@@ -1,4 +1,4 @@
-import { GroupField } from '../../definitions';
+import { GroupField } from '../../definitions/default/group-field';
 import { Binding, inputBinding } from '@angular/core';
 
 /**

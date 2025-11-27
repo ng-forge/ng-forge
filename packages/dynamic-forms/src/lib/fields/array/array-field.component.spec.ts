@@ -1,16 +1,19 @@
 import { ArrayFieldComponent } from './array-field.component';
-import { ArrayField, RowField } from '../../definitions';
+import { ArrayField } from '../../definitions/default/array-field';
+import { RowField } from '../../definitions/default/row-field';
 import { createSimpleTestField, delay } from '../../testing';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { baseFieldMapper, FieldSignalContext, valueFieldMapper } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
-import { FIELD_REGISTRY, FieldTypeDefinition, FIELD_SIGNAL_CONTEXT } from '../../models';
+import { FIELD_REGISTRY } from '../../models/field-type';
+import { FieldTypeDefinition } from '../../models/field-type';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
-import { FieldDef } from '../../definitions/base';
+import { FieldDef } from '../../definitions/base/field-def';
 
 describe('ArrayFieldComponent', () => {
   function setupArrayTest(field: ArrayField<any>, value?: Record<string, unknown>) {

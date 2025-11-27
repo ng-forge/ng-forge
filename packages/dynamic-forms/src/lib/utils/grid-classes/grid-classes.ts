@@ -1,4 +1,4 @@
-import { FieldDef } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
 
 /**
  * Generates CSS class string for responsive grid layout based on field column configuration.

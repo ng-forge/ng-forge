@@ -4,7 +4,8 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
 import type { SchemaPath } from '@angular/forms/signals';
 import { mapFieldToForm } from '../../core/form-mapping';
-import { FieldDef, FieldWithValidation } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
+import { FieldWithValidation } from '../../definitions/base/field-with-validation';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService, SchemaRegistryService } from '../../core/registry';
 
 describe('Form Mapping Pipeline Integration (End-to-End)', () => {

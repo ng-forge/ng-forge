@@ -2,11 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { inputBinding } from '@angular/core';
 import { ValidationError } from '@angular/forms/signals';
 import { DynamicForm } from '../dynamic-form.component';
-import { FormConfig } from '../models';
-import { FieldDef, InputField, SelectField } from '../definitions';
+import { FormConfig } from '../models/form-config';
+import { FieldDef } from '../definitions/base/field-def';
+import { InputField } from '../definitions/default/input-field';
+import { SelectField } from '../definitions/default/select-field';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { delay } from './delay';
-import { checkboxFieldMapper, valueFieldMapper } from '../mappers';
+import { checkboxFieldMapper } from '../mappers/checkbox/checkbox-field-mapper';
+import { valueFieldMapper } from '../mappers/value/value-field.mapper';
 import { BUILT_IN_FIELDS } from '../providers/built-in-fields';
 
 /**

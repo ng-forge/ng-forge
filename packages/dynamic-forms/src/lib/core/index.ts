@@ -16,12 +16,9 @@ export { mapFieldToForm } from './form-mapping';
 // Schema building - main entry point for dynamic form component (keeping original file location for now)
 export { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
 
-// Re-export types from organized models
-export type {
-  ValidatorConfig,
-  LogicConfig,
-  SchemaApplicationConfig,
-  SchemaDefinition,
-  ConditionalExpression,
-  EvaluationContext,
-} from '../models';
+// Re-export types from specific model files
+export type { ValidatorConfig } from '../models/validation/validator-config';
+export type { LogicConfig } from '../models/logic/logic-config';
+export type { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas/schema-definition';
+export type { ConditionalExpression } from '../models/expressions/conditional-expression';
+export type { EvaluationContext } from '../models/expressions/evaluation-context';
