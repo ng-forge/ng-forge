@@ -23,6 +23,7 @@
 ## Effects and Reactivity
 
 - **Use `explicitEffect` from ngxtension instead of `effect()`.** This ensures explicit dependency declaration and more predictable reactivity.
+
   ```typescript
   // ✅ Correct
   explicitEffect([this.someSignal], ([value]) => {
@@ -35,6 +36,7 @@
     // side effect logic
   });
   ```
+
 - Use modern Angular signal APIs: `input()`, `output()`, `model()`, `computed()`, `linkedSignal()`, `viewChild()`, `viewChildren()`, `contentChild()`, `contentChildren()`.
 - Use `runInInjectionContext()` when creating forms or other injection-dependent code outside of constructor/field initializers.
 
@@ -55,6 +57,7 @@
 ## Import Rules
 
 - **In the dynamic-forms library (`packages/dynamic-forms`), do NOT import from barrel files (index.ts).** Import directly from the specific file to avoid circular dependencies and improve build performance.
+
   ```typescript
   // ✅ Correct - direct import
   import { SomeType } from './models/types/some-type';
@@ -124,5 +127,6 @@
 ## Services
 
 - Design services around a single responsibility.
-- Use the `providedIn: 'root'` option for singleton services.
+- Prefer scoped services over global singletons when the service is only needed within a specific feature or component tree.
+- Use `providedIn: 'root'` only for truly application-wide singleton services.
 - Use the `inject()` function instead of constructor injection.
