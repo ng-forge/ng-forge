@@ -47,6 +47,7 @@
     return isPageField(field) || isRowField(field) || isGroupField(field);
   }
   ```
+- Use `isSignal()` from `@angular/core` to check if a value is a signal at runtime.
 - Use `as const satisfies` for configuration objects to get literal type inference with validation.
 - When type casting is truly necessary, document why it's safe with a comment.
 - Prefer conditional type mapping and generics over loose typing.
