@@ -68,6 +68,7 @@
 
 ## Code Patterns
 
+- **Write code declaratively whenever possible.** Prefer declarative patterns over imperative ones - use `computed()` for derived state, reactive streams for data flow, and configuration-driven approaches over procedural logic.
 - Use memoization for expensive computations that may be called multiple times with the same inputs.
 - Handle errors gracefully with proper error recovery patterns.
 - Use custom injection tokens with factory functions that throw descriptive errors when context is missing.
