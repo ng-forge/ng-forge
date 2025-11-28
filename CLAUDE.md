@@ -35,7 +35,7 @@
     // side effect logic
   });
   ```
-- Use modern Angular signal APIs: `input()`, `output()`, `model()`, `computed()`, `linkedSignal()`.
+- Use modern Angular signal APIs: `input()`, `output()`, `model()`, `computed()`, `linkedSignal()`, `viewChild()`, `viewChildren()`, `contentChild()`, `contentChildren()`.
 - Use `runInInjectionContext()` when creating forms or other injection-dependent code outside of constructor/field initializers.
 
 ## Type Safety
