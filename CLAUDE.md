@@ -73,6 +73,12 @@
 - Use custom injection tokens with factory functions that throw descriptive errors when context is missing.
 - Prefer `untracked()` when reading signals inside reactive contexts where you don't want to establish a dependency.
 
+## Quality Assurance
+
+- **When working on a feature, you MUST ensure all checks pass:** tests, build, lint, and format.
+- **Remove redundant code when refactoring.** Do not leave dead code, unused imports, or commented-out code behind.
+- **Update related documentation and imports accordingly.** When renaming, moving, or deleting code, ensure all references are updated.
+
 ---
 
 # Angular Official Best Practices
