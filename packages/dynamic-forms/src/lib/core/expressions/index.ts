@@ -1,3 +1,3 @@
-export * from './logic-function-factory';
-export * from './condition-evaluator';
-export * from './value-utils';
+export { createLogicFunction } from './logic-function-factory';
+export { evaluateCondition } from './condition-evaluator';
+export { compareValues, getNestedValue } from './value-utils';

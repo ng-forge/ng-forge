@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CustomFunction } from '../expressions/custom-function-types';
+import { CustomFunction, CustomFunctionOptions, CustomFunctionScope } from '../expressions/custom-function-types';
 import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../validation/validator-types';
 
 /**
@@ -59,6 +59,7 @@ import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../v
 @Injectable()
 export class FunctionRegistryService {
   private readonly customFunctions = new Map<string, CustomFunction>();
+  private readonly customFunctionScopes = new Map<string, CustomFunctionScope>();
   private readonly validators = new Map<string, CustomValidator>();
   private readonly asyncValidators = new Map<string, AsyncCustomValidator>();
   private readonly httpValidators = new Map<string, HttpCustomValidator>();
@@ -71,15 +72,41 @@ export class FunctionRegistryService {
    *
    * @param name - Unique identifier for the function
    * @param fn - Function that receives EvaluationContext and returns any value
+   * @param options - Optional configuration for the function
    *
    * @example
    * ```typescript
-   * registry.registerCustomFunction('isAdult', (ctx) => ctx.age >= 18);
-   * registry.registerCustomFunction('fullName', (ctx) => `${ctx.firstName} ${ctx.lastName}`);
+   * // Form-level function (default) - may access other fields
+   * registry.registerCustomFunction('isAdult', (ctx) => ctx.formValue.age >= 18);
+   *
+   * // Field-level function - only uses current field value (performance optimization)
+   * registry.registerCustomFunction('isEmpty', (ctx) => !ctx.fieldValue, { scope: 'field' });
    * ```
    */
-  registerCustomFunction(name: string, fn: CustomFunction): void {
+  registerCustomFunction(name: string, fn: CustomFunction, options?: CustomFunctionOptions): void {
     this.customFunctions.set(name, fn);
+    // Store scope (default to 'form' for conservative cross-field detection)
+    this.customFunctionScopes.set(name, options?.scope ?? 'form');
+  }
+
+  /**
+   * Get the scope of a registered custom function.
+   *
+   * @param name - The function name
+   * @returns The function scope, or undefined if not registered
+   */
+  getCustomFunctionScope(name: string): CustomFunctionScope | undefined {
+    return this.customFunctionScopes.get(name);
+  }
+
+  /**
+   * Check if a custom function is field-scoped (no cross-field dependencies).
+   *
+   * @param name - The function name
+   * @returns true if the function is field-scoped, false if form-scoped or not registered
+   */
+  isFieldScopedFunction(name: string): boolean {
+    return this.customFunctionScopes.get(name) === 'field';
   }
 
   /**
@@ -90,10 +117,11 @@ export class FunctionRegistryService {
   }
 
   /**
-   * Clear all custom functions
+   * Clear all custom functions and their scopes
    */
   clearCustomFunctions(): void {
     this.customFunctions.clear();
+    this.customFunctionScopes.clear();
   }
 
   /**

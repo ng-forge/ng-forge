@@ -1,11 +1,11 @@
 import { EnvironmentProviders, makeEnvironmentProviders, Provider } from '@angular/core';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
-import { FieldDef } from '../definitions/base';
+import { FieldDef } from '../definitions/base/field-def';
 
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
-export type { RegisteredFieldTypes, InferGlobalFormValue } from '../models/types';
+export type { RegisteredFieldTypes } from '../models/types';
 
 /**
  * Field type definitions with optional config providers
@@ -106,7 +106,7 @@ export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fie
         // Add custom field types
         fields.forEach((fieldType) => {
           if (registry.has(fieldType.name)) {
-            console.warn(`Field type "${fieldType.name}" is already registered. Overwriting.`);
+            console.warn(`[Dynamic Forms] Field type "${fieldType.name}" is already registered. Overwriting.`);
           }
           registry.set(fieldType.name, fieldType);
         });

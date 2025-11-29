@@ -1,1 +1,8 @@
-export * from './validator-config';
+export type {
+  AsyncValidatorConfig,
+  BaseValidatorConfig,
+  BuiltInValidatorConfig,
+  CustomValidatorConfig,
+  HttpValidatorConfig,
+  ValidatorConfig,
+} from './validator-config';

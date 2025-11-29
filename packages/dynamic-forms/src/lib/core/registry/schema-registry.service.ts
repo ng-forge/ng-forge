@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SchemaDefinition } from '../../models';
+import { SchemaDefinition } from '../../models/schemas/schema-definition';
 
 @Injectable()
 export class SchemaRegistryService {

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EvaluationContext } from '../../models';
+import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { FunctionRegistryService } from './function-registry.service';
 
 describe('FunctionRegistryService', () => {

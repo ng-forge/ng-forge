@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
 import { vi } from 'vitest';
-import { ConditionalExpression } from '../../models';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { createLogicFunction } from './logic-function-factory';
 
@@ -49,9 +49,15 @@ describe('logic-function-factory', () => {
         // Set up the root form registry with mock data
         const rootFormRegistry = TestBed.inject(RootFormRegistryService);
 
-        // Create a mock FieldTree that returns mock form data
+        // Create a mock form value signal and register it BEFORE creating the logic function
         const formValueObj = customFormValue || { username: 'test', email: 'test@example.com' };
         const mockFormValue = signal(formValueObj);
+
+        // Register the form value signal BEFORE creating logic functions
+        // This is the new pattern that enables cross-field logic to work
+        rootFormRegistry.registerFormValueSignal(mockFormValue as any);
+
+        // Also register a mock FieldTree for backward compatibility
         const mockRootField = Object.assign(
           () => ({
             value: mockFormValue,
@@ -62,7 +68,6 @@ describe('logic-function-factory', () => {
           }),
           { formValue: mockFormValue },
         ) as any;
-
         rootFormRegistry.registerRootForm(mockRootField);
 
         const logicFn = createLogicFunction(expression);

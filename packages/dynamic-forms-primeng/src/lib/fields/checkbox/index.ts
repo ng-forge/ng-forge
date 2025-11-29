@@ -1,2 +1,2 @@
-export * from './prime-checkbox.component';
-export * from './prime-checkbox.type';
+export { default as PrimeCheckboxFieldComponent } from './prime-checkbox.component';
+export type { PrimeCheckboxProps, PrimeCheckboxField, PrimeCheckboxComponent } from './prime-checkbox.type';

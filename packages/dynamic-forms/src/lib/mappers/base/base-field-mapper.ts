@@ -1,4 +1,4 @@
-import { FieldDef } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
 import { Binding, inputBinding } from '@angular/core';
 import { getGridClassString } from '../../utils/grid-classes/grid-classes';
 

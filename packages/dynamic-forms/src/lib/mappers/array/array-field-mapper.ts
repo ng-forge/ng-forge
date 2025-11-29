@@ -1,4 +1,4 @@
-import { ArrayField } from '../../definitions';
+import { ArrayField } from '../../definitions/default/array-field';
 import { Binding, inputBinding } from '@angular/core';
 
 /**

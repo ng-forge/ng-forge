@@ -1,19 +1,42 @@
-import { Schema, schema } from '@angular/forms/signals';
-import type { SchemaPath } from '@angular/forms/signals';
-import { FieldDef } from '../definitions';
+import { inject, untracked } from '@angular/core';
+import { Schema, schema, validateTree, FieldContext, ValidationError } from '@angular/forms/signals';
+import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
+import { FieldDef } from '../definitions/base/field-def';
 import { mapFieldToForm } from './form-mapping';
 import { FieldTypeDefinition, getFieldValueHandling } from '../models/field-type';
 import { getFieldDefaultValue } from '../utils/default-value/default-value';
+import { CrossFieldValidatorEntry } from './cross-field/cross-field-types';
+import { FunctionRegistryService } from './registry/function-registry.service';
+import { ExpressionParser } from './expressions/parser/expression-parser';
+import { evaluateCondition } from './expressions/condition-evaluator';
+import { CustomValidatorConfig, ValidatorConfig } from '../models/validation/validator-config';
+import { hasChildFields } from '../models/types/type-guards';
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Creates an Angular signal forms schema from field definitions
  * This is the single entry point at dynamic form level that replaces createSchemaFromFields
  * Uses the new modular signal forms adapter structure
+ *
+ * Cross-field logic (formValue.*) is handled automatically by createLogicFunction
+ * which uses RootFormRegistryService. No special context needed.
+ *
+ * Cross-field validators are passed directly and applied at form level using validateTree.
+ *
+ * @param fields Field definitions to create schema from
+ * @param registry Field type registry
+ * @param crossFieldValidators Optional array of collected cross-field validators
  */
 export function createSchemaFromFields<TModel = unknown>(
   fields: FieldDef<any>[],
   registry: Map<string, FieldTypeDefinition>,
+  crossFieldValidators?: CrossFieldValidatorEntry[],
 ): Schema<TModel> {
+  // Inject services for cross-field validation
+  // These will be available because createSchemaFromFields is called within runInInjectionContext
+  const functionRegistry = inject(FunctionRegistryService);
+
   return schema<TModel>((path) => {
     for (const fieldDef of fields) {
       const valueHandling = getFieldValueHandling(fieldDef.type, registry);
@@ -24,18 +47,15 @@ export function createSchemaFromFields<TModel = unknown>(
         continue;
       }
 
-      if (valueHandling === 'flatten' && 'fields' in fieldDef) {
-        // Flatten children to current level
-        if (fieldDef.fields) {
-          // Handle both array (page/row fields) and object (group fields)
-          const fieldsArray = Array.isArray(fieldDef.fields) ? fieldDef.fields : Object.values(fieldDef.fields);
-          for (const childField of fieldsArray) {
-            if (!childField.key) continue;
+      if (valueHandling === 'flatten' && hasChildFields(fieldDef)) {
+        // Handle both array (page/row fields) and object (group fields)
+        const fieldsArray = Array.isArray(fieldDef.fields) ? fieldDef.fields : Object.values(fieldDef.fields);
+        for (const childField of fieldsArray) {
+          if (!childField.key) continue;
 
-            const childPath = path[childField.key as keyof typeof path] as SchemaPath<unknown>;
-            if (childPath) {
-              mapFieldToForm(childField, childPath);
-            }
+          const childPath = path[childField.key as keyof typeof path] as SchemaPath<unknown>;
+          if (childPath) {
+            mapFieldToForm(childField, childPath);
           }
         }
         continue;
@@ -50,9 +70,289 @@ export function createSchemaFromFields<TModel = unknown>(
 
       // Use the new modular form mapping function
       // This will progressively apply validators, logic, and schemas
+      // Cross-field logic is handled automatically via RootFormRegistryService
       mapFieldToForm(fieldDef, fieldPath);
     }
+
+    // Apply cross-field validators using validateTree
+    if (crossFieldValidators && crossFieldValidators.length > 0) {
+      applyCrossFieldTreeValidator(path as SchemaPathTree<TModel>, crossFieldValidators, functionRegistry);
+    }
   });
+}
+
+/**
+ * Applies cross-field validators using Angular's validateTree API.
+ *
+ * This is the key integration point that routes cross-field validation errors
+ * to the appropriate target fields via Angular's form state system.
+ *
+ * The validateTree function allows returning errors with a `field` property
+ * that targets specific fields, which Angular automatically routes to those
+ * fields' errors() signal.
+ *
+ * Supports two types of hoisted validators:
+ * 1. Custom validators with cross-field expressions (e.g., `formValue.password === formValue.confirmPassword`)
+ * 2. Built-in validators with cross-field `when` conditions (e.g., `required` when `country === 'USA'`)
+ *
+ * @param rootPath The root schema path tree
+ * @param validators Array of collected cross-field validators
+ * @param functionRegistry Registry containing custom functions for expression evaluation
+ */
+function applyCrossFieldTreeValidator<TModel>(
+  rootPath: SchemaPathTree<TModel>,
+  validators: CrossFieldValidatorEntry[],
+  functionRegistry: FunctionRegistryService,
+): void {
+  // Get custom functions for expression evaluation
+  const customFunctions = functionRegistry.getCustomFunctions();
+
+  validateTree(rootPath as SchemaPath<TModel>, (ctx: FieldContext<TModel>) => {
+    if (validators.length === 0) {
+      return null; // ValidationSuccess - no errors
+    }
+
+    // Read form value reactively - don't wrap in untracked() so Angular can track dependencies
+    const formValue = ctx.value() as Record<string, unknown>;
+    const errors: ValidationError.WithOptionalField[] = [];
+
+    for (const entry of validators) {
+      const { sourceFieldKey, config } = entry;
+
+      try {
+        const error = evaluateCrossFieldValidator(entry, formValue, sourceFieldKey, rootPath, ctx, customFunctions);
+
+        if (error) {
+          errors.push(error);
+        }
+      } catch (err) {
+        console.error(`[DynamicForm] Error evaluating cross-field validator for ${sourceFieldKey}:`, err);
+
+        // On error, add a validation error to indicate the failure
+        const targetPath = (rootPath as Record<string, SchemaPathTree<unknown>>)[sourceFieldKey];
+
+        if (targetPath) {
+          const targetField = ctx.fieldTreeOf(targetPath);
+          const customConfig = config as CustomValidatorConfig;
+          errors.push({
+            kind: customConfig.kind || config.type || 'custom',
+            field: targetField,
+          });
+        }
+      }
+    }
+
+    return errors.length > 0 ? errors : null;
+  });
+}
+
+/**
+ * Evaluates a single cross-field validator entry and returns an error if validation fails.
+ */
+function evaluateCrossFieldValidator<TModel>(
+  entry: CrossFieldValidatorEntry,
+  formValue: Record<string, unknown>,
+  sourceFieldKey: string,
+  rootPath: SchemaPathTree<TModel>,
+  ctx: FieldContext<TModel>,
+  customFunctions: Record<string, unknown>,
+): ValidationError.WithOptionalField | null {
+  const { config } = entry;
+  const fieldValue = formValue[sourceFieldKey];
+
+  // Create evaluation context for condition/expression evaluation
+  const evaluationContext = {
+    fieldValue,
+    formValue,
+    fieldPath: sourceFieldKey,
+    customFunctions,
+  };
+
+  // Check if this is a custom validator (with expression) or a built-in validator (with when condition)
+  if (config.type === 'custom') {
+    return evaluateCustomCrossFieldValidator(config as CustomValidatorConfig, evaluationContext, sourceFieldKey, rootPath, ctx);
+  } else {
+    // Built-in validator with cross-field when condition
+    return evaluateBuiltInCrossFieldValidator(config, evaluationContext, sourceFieldKey, rootPath, ctx);
+  }
+}
+
+/**
+ * Evaluates a custom cross-field validator with an expression.
+ */
+function evaluateCustomCrossFieldValidator<TModel>(
+  config: CustomValidatorConfig,
+  evaluationContext: Record<string, unknown>,
+  sourceFieldKey: string,
+  rootPath: SchemaPathTree<TModel>,
+  ctx: FieldContext<TModel>,
+): ValidationError.WithOptionalField | null {
+  if (!config.expression) {
+    return null;
+  }
+
+  // Evaluate expression using the secure AST parser
+  const result = ExpressionParser.evaluate(config.expression, evaluationContext);
+
+  // If expression returns truthy, validation passes (no error)
+  if (result) {
+    return null;
+  }
+
+  // Validation failed - create error targeting the source field
+  const targetPath = (rootPath as Record<string, SchemaPathTree<unknown>>)[sourceFieldKey];
+
+  if (!targetPath) {
+    return null;
+  }
+
+  const targetField = ctx.fieldTreeOf(targetPath);
+  const errorObj: Record<string, unknown> = {
+    kind: config.kind || 'custom',
+    field: targetField,
+  };
+
+  // Evaluate and include errorParams for message interpolation
+  if (config.errorParams) {
+    for (const [key, expression] of Object.entries(config.errorParams)) {
+      try {
+        errorObj[key] = ExpressionParser.evaluate(expression, evaluationContext);
+      } catch {
+        // Ignore evaluation errors for params
+      }
+    }
+  }
+
+  return errorObj as unknown as ValidationError.WithOptionalField;
+}
+
+/**
+ * Evaluates a built-in validator with a cross-field when condition.
+ * First checks the when condition, then applies the built-in validation logic.
+ */
+function evaluateBuiltInCrossFieldValidator<TModel>(
+  config: ValidatorConfig,
+  evaluationContext: Record<string, unknown>,
+  sourceFieldKey: string,
+  rootPath: SchemaPathTree<TModel>,
+  ctx: FieldContext<TModel>,
+): ValidationError.WithOptionalField | null {
+  const { fieldValue, formValue } = evaluationContext as { fieldValue: unknown; formValue: Record<string, unknown> };
+
+  // First, evaluate the when condition
+  // If the condition is false, the validator doesn't apply (validation passes)
+  if (config.when) {
+    const conditionMet = evaluateCondition(config.when, {
+      fieldValue,
+      formValue,
+      fieldPath: sourceFieldKey,
+      customFunctions: (evaluationContext.customFunctions as Record<string, (ctx: unknown) => unknown>) || {},
+    });
+
+    if (!conditionMet) {
+      return null; // Condition not met, skip validation
+    }
+  }
+
+  // Now apply the built-in validation logic based on the validator type
+  const isValid = applyBuiltInValidationLogic(config, fieldValue);
+
+  if (isValid) {
+    return null; // Validation passed
+  }
+
+  // Validation failed - create error targeting the source field
+  const targetPath = (rootPath as Record<string, SchemaPathTree<unknown>>)[sourceFieldKey];
+  if (!targetPath) {
+    return null;
+  }
+
+  const targetField = ctx.fieldTreeOf(targetPath);
+  return {
+    kind: config.type,
+    field: targetField,
+  } as ValidationError.WithOptionalField;
+}
+
+/**
+ * Applies built-in validation logic based on the validator type.
+ * Returns true if validation passes, false if it fails.
+ */
+function applyBuiltInValidationLogic(config: ValidatorConfig, fieldValue: unknown): boolean {
+  switch (config.type) {
+    case 'required':
+      // Required: value must be non-null, non-undefined, and non-empty string
+      if (fieldValue === null || fieldValue === undefined) {
+        return false;
+      }
+      if (typeof fieldValue === 'string' && fieldValue.trim() === '') {
+        return false;
+      }
+      return true;
+
+    case 'min':
+      // Min: numeric value must be >= min
+      if (fieldValue === null || fieldValue === undefined) {
+        return true; // Empty values pass min validation (use required for emptiness)
+      }
+      if ('value' in config && typeof config.value === 'number') {
+        return (fieldValue as number) >= config.value;
+      }
+      return true;
+
+    case 'max':
+      // Max: numeric value must be <= max
+      if (fieldValue === null || fieldValue === undefined) {
+        return true;
+      }
+      if ('value' in config && typeof config.value === 'number') {
+        return (fieldValue as number) <= config.value;
+      }
+      return true;
+
+    case 'minLength':
+      // MinLength: string length must be >= minLength
+      if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
+        return true;
+      }
+      if ('value' in config && typeof config.value === 'number') {
+        return String(fieldValue).length >= config.value;
+      }
+      return true;
+
+    case 'maxLength':
+      // MaxLength: string length must be <= maxLength
+      if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
+        return true;
+      }
+      if ('value' in config && typeof config.value === 'number') {
+        return String(fieldValue).length <= config.value;
+      }
+      return true;
+
+    case 'email':
+      // Email: must match email pattern
+      if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
+        return true;
+      }
+
+      return emailPattern.test(String(fieldValue));
+
+    case 'pattern':
+      // Pattern: must match regex pattern
+      if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
+        return true;
+      }
+      if ('value' in config && config.value) {
+        const regex = config.value instanceof RegExp ? config.value : new RegExp(String(config.value));
+        return regex.test(String(fieldValue));
+      }
+      return true;
+
+    default:
+      // Unknown validator type, consider valid
+      return true;
+  }
 }
 
 /**

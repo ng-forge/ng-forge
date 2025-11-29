@@ -185,7 +185,7 @@ test.describe('Cross-Field Validation Tests', () => {
         category: 'electronics',
         subcategory: 'laptop',
         productName: 'MacBook Pro 16',
-        price: '2499.99',
+        price: 2499.99,
         currency: 'eur',
       });
 
@@ -218,7 +218,7 @@ test.describe('Cross-Field Validation Tests', () => {
         category: 'clothing',
         subcategory: 'shirt',
         productName: 'Cotton T-Shirt',
-        price: '29.99',
+        price: 29.99,
       });
     });
   });

@@ -1,2 +1,2 @@
 export { default as BsRadioFieldComponent } from './bs-radio.component';
-export * from './bs-radio.type';
+export type { BsRadioProps, BsRadioField, BsRadioComponent } from './bs-radio.type';

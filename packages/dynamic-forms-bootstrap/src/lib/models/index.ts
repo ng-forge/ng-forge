@@ -1,2 +1,2 @@
-export * from './bootstrap-config';
-export * from './bootstrap-config.token';
+export type { BootstrapConfig } from './bootstrap-config';
+export { BOOTSTRAP_CONFIG } from './bootstrap-config.token';

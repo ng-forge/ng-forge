@@ -1,4 +1,7 @@
+// Public API - builder functions for creating button fields
 export { submitButton, nextPageButton, previousPageButton, actionButton } from './bs-button.function';
+
+// Public API - types for type safety
 export type {
   BsButtonProps,
   BsButtonField,
@@ -8,12 +11,6 @@ export type {
   AddArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from './bs-button.type';
+
+// Public API - component
 export { default as BsButtonFieldComponent } from './bs-button.component';
-export {
-  submitButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-  addArrayItemButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
-} from './bs-specific-button.mapper';
-export { buttonFieldMapper } from './bs-button.mapper';

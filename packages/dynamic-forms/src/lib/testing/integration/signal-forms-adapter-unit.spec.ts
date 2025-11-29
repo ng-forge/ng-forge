@@ -1,13 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import {
-  ConditionalExpression,
-  evaluateCondition,
-  EvaluationContext,
-  FunctionRegistryService,
-  SchemaDefinition,
-  SchemaRegistryService,
-} from '../../core';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { evaluateCondition } from '../../core/expressions/condition-evaluator';
+import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { SchemaDefinition } from '../../models/schemas/schema-definition';
+import { SchemaRegistryService } from '../../core/registry/schema-registry.service';
 
 describe('SignalFormsAdapterService Unit Tests', () => {
   let schemaRegistry: SchemaRegistryService;

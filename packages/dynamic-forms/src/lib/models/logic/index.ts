@@ -1,1 +1,1 @@
-export * from './logic-config';
+export type { LogicConfig } from './logic-config';

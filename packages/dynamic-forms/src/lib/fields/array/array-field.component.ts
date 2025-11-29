@@ -22,15 +22,18 @@ import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
 import { FieldTree, form, FormUiControl } from '@angular/forms/signals';
-import { FieldDef } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
-import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
+import { AddArrayItemEvent } from '../../events/constants/add-array-item.event';
+import { RemoveArrayItemEvent } from '../../events/constants/remove-array-item.event';
+import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
-import { ArrayContext, FieldSignalContext } from '../../mappers';
+import { ArrayContext, FieldSignalContext } from '../../mappers/types';
 import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
-import { createSchemaFromFields } from '../../core';
-import { flattenFields, getChildrenMap } from '../../utils';
+import { createSchemaFromFields } from '../../core/schema-builder';
+import { flattenFields } from '../../utils/flattener/field-flattener';
+import { getChildrenMap } from '../../utils/form-internals/form-internals';
 
 /**
  * Tracked array item with stable identity for differential updates.

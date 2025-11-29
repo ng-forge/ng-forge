@@ -1,2 +1,2 @@
-export * from './mat-datepicker.component';
-export * from './mat-datepicker.type';
+export { default as MatDatepickerFieldComponent } from './mat-datepicker.component';
+export type { MatDatepickerProps, MatDatepickerField, MatDatepickerComponent } from './mat-datepicker.type';

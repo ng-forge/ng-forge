@@ -1,2 +1,2 @@
-export * from './primeng-config';
-export * from './primeng-config.token';
+export type { PrimeNGConfig } from './primeng-config';
+export { PRIMENG_CONFIG } from './primeng-config.token';

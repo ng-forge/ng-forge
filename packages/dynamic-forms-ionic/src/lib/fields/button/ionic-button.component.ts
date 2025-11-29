@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, isSignal, Signal } from '@angular/core';
 import { IonButton } from '@ionic/angular/standalone';
 import {
   ArrayItemContext,
@@ -30,7 +30,7 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color || 'primary'"
       [strong]="props()?.strong"
       [class]="className() || ''"
-      [disabled]="disabled() || false"
+      [disabled]="resolvedDisabled()"
       [attr.data-testid]="buttonTestId()"
       (click)="triggerEvent()"
     >
@@ -44,8 +44,14 @@ export default class IonicButtonFieldComponent<TEvent extends FormEvent> impleme
 
   readonly key = input.required<string>();
   readonly label = input.required<DynamicText>();
-  readonly disabled = input<boolean>(false);
+  readonly disabled = input<boolean | Signal<boolean>>(false);
   readonly hidden = input<boolean>(false);
+
+  // Resolve disabled value - unwrap signal if needed for reactive binding
+  readonly resolvedDisabled = computed(() => {
+    const value = this.disabled();
+    return isSignal(value) ? value() : value;
+  });
   readonly tabIndex = input<number>();
   readonly className = input<string>('');
 

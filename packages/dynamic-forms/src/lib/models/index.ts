@@ -1,17 +1,66 @@
-export * from './component-type';
-export * from './form-config';
-export * from './field-type';
-export * from './field-option';
-export * from './field-signal-context.token';
-export * from './validation-types';
-export * from './prettify';
+export type { WithInputSignals } from './component-type';
+export type { CustomFnConfig, FormConfig, FormOptions } from './form-config';
+export type { FieldTypeDefinition, ValueHandlingMode } from './field-type';
+export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';
+export type { FieldOption } from './field-option';
+export { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from './field-signal-context.token';
+export type { ValidationError, ValidationMessages } from './validation-types';
+export type { Prettify } from './prettify';
 
-// New organized exports
-export * from './validation';
-export * from './logic';
-export * from './expressions';
-export * from './schemas';
-export * from './registry';
+// Validation
+export type {
+  AsyncValidatorConfig,
+  BaseValidatorConfig,
+  BuiltInValidatorConfig,
+  CustomValidatorConfig,
+  HttpValidatorConfig,
+  ValidatorConfig,
+} from './validation';
 
-// Performance optimizations - parked for later
-export * from './types';
+// Logic
+export type { LogicConfig } from './logic';
+
+// Expressions
+export type { ConditionalExpression, EvaluationContext } from './expressions';
+
+// Schemas
+export type { SchemaApplicationConfig, SchemaDefinition } from './schemas';
+
+// Registry
+export type {
+  AvailableFieldTypes,
+  ContainerFieldTypes,
+  DynamicFormFieldRegistry,
+  FieldRegistryContainers,
+  FieldRegistryLeaves,
+  LeafFieldTypes,
+  RegisteredFieldTypes,
+} from './registry';
+
+// Types and helpers
+export type {
+  ArrayAllowedChildren,
+  DynamicText,
+  FieldPathAccess,
+  FormMode,
+  FormModeDetectionResult,
+  GroupAllowedChildren,
+  InferFormValue,
+  PageAllowedChildren,
+  RowAllowedChildren,
+} from './types';
+export {
+  detectFormMode,
+  isArrayField,
+  isContainerField,
+  isDisplayOnlyField,
+  isGroupField,
+  isLeafField,
+  isNonPagedForm,
+  isPagedForm,
+  isPageField,
+  isRowField,
+  isValidNonPagedForm,
+  isValidPagedForm,
+  isValueBearingField,
+} from './types';

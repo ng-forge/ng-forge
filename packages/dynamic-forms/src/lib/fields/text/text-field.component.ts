@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { DynamicTextPipe } from '../../pipes';
+import { DynamicTextPipe } from '../../pipes/dynamic-text/dynamic-text.pipe';
 import { TextProps } from '../../definitions/default/text-field';
-import { DynamicText } from '../../models';
+import { DynamicText } from '../../models/types/dynamic-text';
 
 @Component({
   selector: 'df-text',

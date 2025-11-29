@@ -1,2 +1,2 @@
-export * from './prime-slider.component';
-export * from './prime-slider.type';
+export { default as PrimeSliderFieldComponent } from './prime-slider.component';
+export type { PrimeSliderProps, PrimeSliderField, PrimeSliderComponent } from './prime-slider.type';

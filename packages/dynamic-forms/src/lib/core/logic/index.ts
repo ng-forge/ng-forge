@@ -1,1 +1,1 @@
-export * from './logic-applicator';
+export { applyLogic, applyMultipleLogic } from './logic-applicator';

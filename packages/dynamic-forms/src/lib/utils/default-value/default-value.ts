@@ -120,5 +120,17 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
     return [];
   }
 
+  // Number inputs need a number type default for Angular signal forms
+  // to use valueAsNumber for coercion. NaN is ideal because:
+  // - typeof NaN === 'number' (triggers Angular's valueAsNumber path)
+  // - NaN displays as empty in number inputs
+  // - valueAsNumber returns NaN when input is cleared
+  if (field.type === 'input' && 'props' in field) {
+    const props = field.props as { type?: string } | undefined;
+    if (props?.type === 'number') {
+      return NaN;
+    }
+  }
+
   return '';
 }

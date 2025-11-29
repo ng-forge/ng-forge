@@ -2,16 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { vi } from 'vitest';
-import {
-  ConditionalExpression,
-  evaluateCondition,
-  FunctionRegistryService,
-  SchemaDefinition,
-  SchemaRegistryService,
-  ValidatorConfig,
-} from '../../core';
-import { FormConfig } from '../../models';
-import { FieldDef, FieldWithValidation } from '../../definitions';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { evaluateCondition } from '../../core/expressions/condition-evaluator';
+import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { SchemaDefinition } from '../../models/schemas/schema-definition';
+import { SchemaRegistryService } from '../../core/registry/schema-registry.service';
+import { ValidatorConfig } from '../../models/validation/validator-config';
+import { FormConfig } from '../../models/form-config';
+import { FieldDef } from '../../definitions/base/field-def';
+import { FieldWithValidation } from '../../definitions/base/field-with-validation';
 
 // Mock component to test integration
 @Component({

@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
-import type { SchemaPath } from '@angular/forms/signals';
 import { applyLogic, applyMultipleLogic } from '../../core/logic/logic-applicator';
 import { LogicConfig } from '../../models/logic';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
@@ -31,7 +30,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ email: string }>((path) => {
             applyLogic(config, path.email);
           }),
         );
@@ -52,7 +51,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ username: string }>((path) => {
             applyLogic(config, path.username);
           }),
         );
@@ -73,7 +72,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ email: string }>((path) => {
             applyLogic(config, path.email);
           }),
         );
@@ -92,6 +91,9 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should hide field when condition evaluates to true', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ contactMethod: 'phone', email: 'test@example.com' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
+
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -104,7 +106,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ contactMethod: string; email: string }>((path) => {
             applyLogic(config, path.email);
           }),
         );
@@ -123,6 +125,9 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should show field when condition evaluates to false', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ showAdvanced: false, advancedOption: '' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
+
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -135,7 +140,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ showAdvanced: boolean; advancedOption: string }>((path) => {
             applyLogic(config, path.advancedOption);
           }),
         );
@@ -154,6 +159,9 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should make field readonly based on condition', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ userType: 'guest', username: 'guest_user' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
+
         const config: LogicConfig = {
           type: 'readonly',
           condition: {
@@ -166,7 +174,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ userType: string; username: string }>((path) => {
             applyLogic(config, path.username);
           }),
         );
@@ -185,6 +193,9 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should update logic state when dependencies change', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ country: 'USA', state: 'CA' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
+
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -197,7 +208,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ country: string; state: string }>((path) => {
             applyLogic(config, path.state);
           }),
         );
@@ -221,6 +232,9 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should apply logic with AND conditions', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ role: 'admin', department: 'IT', specialAccess: '' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
+
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -244,7 +258,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ role: string; department: string; specialAccess: string }>((path) => {
             applyLogic(config, path.specialAccess);
           }),
         );
@@ -266,6 +280,9 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should apply logic with OR conditions', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ isPremium: false, isVIP: false, exclusiveFeature: '' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
+
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -289,7 +306,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ isPremium: boolean; isVIP: boolean; exclusiveFeature: string }>((path) => {
             applyLogic(config, path.exclusiveFeature);
           }),
         );
@@ -330,7 +347,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ weekdayOption: string }>((path) => {
             applyLogic(config, path.weekdayOption);
           }),
         );
@@ -347,6 +364,9 @@ describe('Logic Transformation Pipeline Integration', () => {
     it('should apply multiple logic rules to same field', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ isLocked: true, isArchived: false, data: 'test' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
+
         const configs: LogicConfig[] = [
           {
             type: 'readonly',
@@ -370,7 +390,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ isLocked: boolean; isArchived: boolean; data: string }>((path) => {
             applyMultipleLogic(configs, path.data);
           }),
         );
@@ -404,7 +424,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ field: string }>((path) => {
             applyLogic(config, path.field);
           }),
         );
@@ -421,6 +441,9 @@ describe('Logic Transformation Pipeline Integration', () => {
           user: { role: 'admin' },
           adminPanel: '',
         });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
+
         const config: LogicConfig = {
           type: 'hidden',
           condition: {
@@ -433,7 +456,7 @@ describe('Logic Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ user: { role: string }; adminPanel: string }>((path) => {
             applyLogic(config, path.adminPanel);
           }),
         );

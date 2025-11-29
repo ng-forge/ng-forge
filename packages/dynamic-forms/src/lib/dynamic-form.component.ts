@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
@@ -13,6 +14,7 @@ import {
   OnDestroy,
   runInInjectionContext,
   signal,
+  Signal,
   untracked,
   ViewContainerRef,
 } from '@angular/core';
@@ -20,27 +22,32 @@ import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs';
-import { isEqual, memoize } from 'lodash-es';
-import { keyBy } from './utils/object-utils';
+import { keyBy, memoize, isEqual } from './utils/object-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
-import { FIELD_SIGNAL_CONTEXT, FieldTypeDefinition, FormConfig, FormOptions, RegisteredFieldTypes } from './models';
+import { FIELD_SIGNAL_CONTEXT } from './models/field-signal-context.token';
+import { FieldTypeDefinition } from './models/field-type';
+import { FormConfig, FormOptions } from './models/form-config';
+import { RegisteredFieldTypes } from './models/registry/field-registry';
 import { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
-import { createSchemaFromFields } from './core';
+import { createSchemaFromFields } from './core/schema-builder';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
-import { InferGlobalFormValue } from './models/types';
-import { flattenFields, flattenFieldsForRendering } from './utils';
-import { FieldDef } from './definitions';
+import { InferFormValue } from './models/types';
+import { flattenFields } from './utils/flattener/field-flattener';
+import { FieldDef } from './definitions/base/field-def';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
-import { FieldSignalContext } from './mappers';
+import { FieldSignalContext } from './mappers/types';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './core/registry';
 import { detectFormMode, FormModeDetectionResult } from './models/types/form-mode';
+import { collectCrossFieldEntries } from './core/cross-field/cross-field-collector';
 import { FormModeValidator } from './utils/form-validation/form-mode-validator';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
-import { FormClearEvent, FormResetEvent, PageChangeEvent } from './events';
+import { FormClearEvent } from './events/constants/form-clear.event';
+import { FormResetEvent } from './events/constants/form-reset.event';
+import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
 
 /**
@@ -113,7 +120,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = InferGlobalFormValue>
+export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = InferFormValue<TFields>>
   implements OnDestroy
 {
   private readonly destroyRef = inject(DestroyRef);
@@ -142,7 +149,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   private readonly memoizedFlattenFieldsForRendering = memoize(
-    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFieldsForRendering(fields, registry),
+    (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
     // Optimized key generation with stable registry keys
     (fields, registry) => {
       const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
@@ -407,15 +414,20 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
       let formInstance: ReturnType<typeof form<TModel>>;
 
+      // IMPORTANT: Register the entity signal BEFORE schema creation.
+      // This allows cross-field logic functions (hidden, disabled, etc.) to access
+      // form values during schema evaluation via createReactiveEvaluationContext.
+      untracked(() => this.rootFormRegistry.registerFormValueSignal(this.entity as Signal<Record<string, unknown>>));
+
       if (setup.schemaFields && setup.schemaFields.length > 0) {
-        const schema = createSchemaFromFields(setup.schemaFields, setup.registry);
+        const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
+        const schema = createSchemaFromFields(setup.schemaFields, setup.registry, crossFieldCollection.validators);
         formInstance = untracked(() => form(this.entity, schema));
       } else {
         formInstance = untracked(() => form(this.entity));
       }
 
-      // Register the root form field in the registry for context access
-      this.rootFormRegistry.registerRootForm(formInstance);
+      untracked(() => this.rootFormRegistry.registerRootForm(formInstance));
 
       return formInstance;
     });

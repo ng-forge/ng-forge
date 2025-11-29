@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
-import { FieldDef } from '../definitions';
-import { MapperFn } from '../mappers';
+import { FieldDef } from '../definitions/base/field-def';
+import { MapperFn } from '../mappers/types';
 
 /**
  * Defines how a field type handles form values and data collection.

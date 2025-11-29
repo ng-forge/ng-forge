@@ -2,7 +2,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form, schema } from '@angular/forms/signals';
 import { baseFieldMapper } from './base-field-mapper';
-import { FieldDef } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
 import { FieldSignalContext } from '../types';
 
 describe('baseFieldMapper', () => {

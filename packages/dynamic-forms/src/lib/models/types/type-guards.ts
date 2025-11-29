@@ -1,9 +1,19 @@
-import { FieldDef } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
 import { isPageField } from '../../definitions/default/page-field';
 import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { isArrayField } from '../../definitions/default/array-field';
 import { ContainerFieldTypes, LeafFieldTypes, RegisteredFieldTypes } from '../registry/field-registry';
+
+/**
+ * Type guard to check if a field definition has child fields.
+ * This is a looser check that works with FieldDef<unknown> without requiring RegisteredFieldTypes.
+ */
+export function hasChildFields<T>(
+  field: FieldDef<T>,
+): field is FieldDef<T> & { fields: FieldDef<unknown>[] | Record<string, FieldDef<unknown>> } {
+  return 'fields' in field && field.fields != null;
+}
 
 /**
  * Type guard to check if a field is a container field (page, row, group, or array)

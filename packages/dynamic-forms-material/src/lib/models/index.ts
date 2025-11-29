@@ -1,2 +1,2 @@
-export * from './material-config';
-export * from './material-config.token';
+export type { MaterialConfig } from './material-config';
+export { MATERIAL_CONFIG } from './material-config.token';
