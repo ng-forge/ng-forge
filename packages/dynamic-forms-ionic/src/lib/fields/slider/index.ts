@@ -1,2 +1,2 @@
-export * from './ionic-slider.component';
-export * from './ionic-slider.type';
+export { default as IonicSliderFieldComponent } from './ionic-slider.component';
+export type { IonicSliderProps, IonicSliderField, IonicSliderComponent } from './ionic-slider.type';

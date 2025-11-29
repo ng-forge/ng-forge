@@ -1,4 +1,4 @@
-export * from './function-registry.service';
-export * from './schema-registry.service';
-export * from './root-form-registry.service';
-export * from './field-context-registry.service';
+export { FunctionRegistryService } from './function-registry.service';
+export { SchemaRegistryService } from './schema-registry.service';
+export { RootFormRegistryService } from './root-form-registry.service';
+export { FieldContextRegistryService } from './field-context-registry.service';

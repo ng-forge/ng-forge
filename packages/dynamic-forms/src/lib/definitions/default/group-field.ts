@@ -1,4 +1,4 @@
-import { FieldComponent, FieldDef } from '../base';
+import { FieldComponent, FieldDef } from '../base/field-def';
 import { GroupAllowedChildren } from '../../models/types/nesting-constraints';
 
 /**

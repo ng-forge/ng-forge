@@ -3,7 +3,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
-import { FieldDef } from '../definitions';
+import { FieldDef } from '../definitions/base/field-def';
 import { FieldTypeDefinition } from '../models/field-type';
 import { RootFormRegistryService, SchemaRegistryService, FunctionRegistryService, FieldContextRegistryService } from './registry';
 import { applySchema, createSchemaFunction } from './schema-application';

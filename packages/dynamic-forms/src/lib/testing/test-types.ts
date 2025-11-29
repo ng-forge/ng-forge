@@ -1,6 +1,6 @@
 import { ComponentFixture } from '@angular/core/testing';
-import { FormConfig } from '../models';
-import { FieldDef } from '../definitions';
+import { FormConfig } from '../models/form-config';
+import { FieldDef } from '../definitions/base/field-def';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 
 /**

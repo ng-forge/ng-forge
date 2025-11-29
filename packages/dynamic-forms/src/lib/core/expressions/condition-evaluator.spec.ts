@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
-import { ConditionalExpression, EvaluationContext } from '../../models';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { evaluateCondition } from './condition-evaluator';
 
 describe('condition-evaluator', () => {

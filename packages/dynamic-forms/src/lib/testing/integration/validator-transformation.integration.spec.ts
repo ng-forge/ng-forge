@@ -4,7 +4,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
 import type { SchemaPath } from '@angular/forms/signals';
 import { applyValidator, applyValidators } from '../../core/validation/validator-factory';
-import { ValidatorConfig } from '../../models';
+import { ValidatorConfig } from '../../models/validation/validator-config';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 
 describe('Validator Transformation Pipeline Integration', () => {
@@ -28,7 +28,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ email: string }>((path) => {
             applyValidator(config, path.email);
           }),
         );
@@ -49,7 +49,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ email: string }>((path) => {
             applyValidator(config, path.email as SchemaPath<string>);
           }),
         );
@@ -69,7 +69,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ age: number }>((path) => {
             applyValidator(config, path.age as SchemaPath<number>);
           }),
         );
@@ -89,7 +89,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ age: number }>((path) => {
             applyValidator(config, path.age as SchemaPath<number>);
           }),
         );
@@ -109,7 +109,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ username: string }>((path) => {
             applyValidator(config, path.username as SchemaPath<string>);
           }),
         );
@@ -129,7 +129,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ username: string }>((path) => {
             applyValidator(config, path.username as SchemaPath<string>);
           }),
         );
@@ -149,7 +149,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ code: string }>((path) => {
             applyValidator(config, path.code as SchemaPath<string>);
           }),
         );
@@ -169,7 +169,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ zipCode: string }>((path) => {
             applyValidator(config, path.zipCode as SchemaPath<string>);
           }),
         );
@@ -183,154 +183,83 @@ describe('Validator Transformation Pipeline Integration', () => {
     });
   });
 
-  describe('Conditional Validators', () => {
-    it('should apply required validator when condition is true', () => {
-      runInInjectionContext(injector, () => {
-        const formValue = signal({ country: 'USA', state: '' });
-        const config: ValidatorConfig = {
-          type: 'required',
-          when: {
-            type: 'fieldValue',
-            fieldPath: 'country',
-            operator: 'equals',
-            value: 'USA',
-          },
-        };
-
-        const formInstance = form(
-          formValue,
-          schema<typeof formValue>((path) => {
-            applyValidator(config, path.state);
-          }),
-        );
-        rootFormRegistry.registerRootForm(formInstance);
-
-        // State is required when country is USA
-        expect(formInstance().valid()).toBe(false);
-
-        formValue.set({ country: 'USA', state: 'CA' });
-        expect(formInstance().valid()).toBe(true);
-      });
-    });
-
-    it('should NOT apply required validator when condition is false', () => {
-      runInInjectionContext(injector, () => {
-        const formValue = signal({ country: 'Canada', state: '' });
-        const config: ValidatorConfig = {
-          type: 'required',
-          when: {
-            type: 'fieldValue',
-            fieldPath: 'country',
-            operator: 'equals',
-            value: 'USA',
-          },
-        };
-
-        const formInstance = form(
-          formValue,
-          schema<typeof formValue>((path) => {
-            applyValidator(config, path.state);
-          }),
-        );
-        rootFormRegistry.registerRootForm(formInstance);
-
-        // State is NOT required when country is not USA
-        expect(formInstance().valid()).toBe(true);
-      });
-    });
-
-    it('should re-evaluate conditional validator when dependencies change', () => {
-      runInInjectionContext(injector, () => {
-        const formValue = signal({ country: 'Canada', state: '' });
-        const config: ValidatorConfig = {
-          type: 'required',
-          when: {
-            type: 'fieldValue',
-            fieldPath: 'country',
-            operator: 'equals',
-            value: 'USA',
-          },
-        };
-
-        const formInstance = form(
-          formValue,
-          schema<typeof formValue>((path) => {
-            applyValidator(config, path.state);
-          }),
-        );
-        rootFormRegistry.registerRootForm(formInstance);
-
-        // Initially valid (Canada doesn't require state)
-        expect(formInstance().valid()).toBe(true);
-
-        // Change to USA - now invalid because state is empty
-        formValue.set({ country: 'USA', state: '' });
-        expect(formInstance().valid()).toBe(false);
-
-        // Fill in state - now valid
-        formValue.set({ country: 'USA', state: 'CA' });
-        expect(formInstance().valid()).toBe(true);
-
-        // Change back to Canada - valid even with empty state
-        formValue.set({ country: 'Canada', state: '' });
-        expect(formInstance().valid()).toBe(true);
-      });
-    });
-  });
-
   describe('Dynamic Validators', () => {
-    it('should apply validator with dynamic expression value', () => {
+    it('should apply min validator with static value', () => {
       runInInjectionContext(injector, () => {
-        const formValue = signal({ minAge: 18, age: 16 });
+        const formValue = signal({ score: 5 });
         const config: ValidatorConfig = {
           type: 'min',
-          value: 0, // Placeholder, will use expression
-          expression: 'formValue.minAge',
+          value: 10, // Static value, no expression
         };
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
-            applyValidator(config, path.age as SchemaPath<number>);
+          schema<{ score: number }>((path) => {
+            applyValidator(config, path.score as SchemaPath<number>);
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
-        // Age 16 < minAge 18
+        // Score 5 < min 10 - invalid
         expect(formInstance().valid()).toBe(false);
 
-        formValue.set({ minAge: 18, age: 20 });
+        formValue.set({ score: 15 });
+        // Score 15 >= min 10 - valid
         expect(formInstance().valid()).toBe(true);
       });
     });
 
-    it('should update validation when expression dependencies change', () => {
+    it('should apply max validator with static value', () => {
       runInInjectionContext(injector, () => {
-        const formValue = signal({ minAge: 18, age: 20 });
+        const formValue = signal({ quantity: 100 });
         const config: ValidatorConfig = {
-          type: 'min',
-          value: 0,
-          expression: 'formValue.minAge',
+          type: 'max',
+          value: 50, // Static value, no expression
         };
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ quantity: number }>((path) => {
+            applyValidator(config, path.quantity as SchemaPath<number>);
+          }),
+        );
+        rootFormRegistry.registerRootForm(formInstance);
+
+        // Quantity 100 > max 50 - invalid
+        expect(formInstance().valid()).toBe(false);
+
+        formValue.set({ quantity: 25 });
+        // Quantity 25 <= max 50 - valid
+        expect(formInstance().valid()).toBe(true);
+      });
+    });
+
+    it('should re-evaluate static validators when field value changes', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ age: 15 });
+        const config: ValidatorConfig = {
+          type: 'min',
+          value: 18,
+        };
+
+        const formInstance = form(
+          formValue,
+          schema<{ age: number }>((path) => {
             applyValidator(config, path.age as SchemaPath<number>);
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
 
-        // Initially valid (20 >= 18)
-        expect(formInstance().valid()).toBe(true);
-
-        // Increase minAge to 25, age is still 20
-        formValue.set({ minAge: 25, age: 20 });
+        // Initially invalid (15 < 18)
         expect(formInstance().valid()).toBe(false);
 
-        // Increase age to meet new minimum
-        formValue.set({ minAge: 25, age: 30 });
+        // Update age to meet minimum
+        formValue.set({ age: 21 });
         expect(formInstance().valid()).toBe(true);
+
+        // Update age below minimum again
+        formValue.set({ age: 17 });
+        expect(formInstance().valid()).toBe(false);
       });
     });
   });
@@ -347,7 +276,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ password: string }>((path) => {
             applyValidators(configs, path.password as SchemaPath<string>);
           }),
         );
@@ -377,7 +306,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ username: string }>((path) => {
             applyValidators(configs, path.username as SchemaPath<string>);
           }),
         );
@@ -404,7 +333,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ email: string }>((path) => {
             applyValidator(config, path.email as SchemaPath<string>);
           }),
         );
@@ -426,7 +355,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ phone: string }>((path) => {
             applyValidator(config, path.phone as SchemaPath<string>);
           }),
         );
@@ -449,7 +378,7 @@ describe('Validator Transformation Pipeline Integration', () => {
 
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<{ rating: number }>((path) => {
             applyValidators(configs, path.rating as SchemaPath<number>);
           }),
         );

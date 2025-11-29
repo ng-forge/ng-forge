@@ -1,2 +1,2 @@
-export * from './bs-checkbox.component';
-export * from './bs-checkbox.type';
+export { default as BsCheckboxFieldComponent } from './bs-checkbox.component';
+export type { BsCheckboxProps, BsCheckboxField, BsCheckboxComponent } from './bs-checkbox.type';

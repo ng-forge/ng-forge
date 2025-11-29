@@ -1,2 +1,2 @@
-export * from './dynamic-value-factory';
-export * from './type-predicate-factory';
+export { createDynamicValueFunction } from './dynamic-value-factory';
+export { createTypePredicateFunction } from './type-predicate-factory';

@@ -1,5 +1,5 @@
-import { FieldDef } from '../base';
-import { FormEvent, FormEventConstructor } from '../../events';
+import { FieldDef } from '../base/field-def';
+import { FormEvent, FormEventConstructor } from '../../events/interfaces/form-event';
 
 /**
  * Event arguments that can contain static values or tokens to be resolved at runtime

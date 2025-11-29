@@ -1,2 +1,2 @@
-export * from './ionic-textarea.component';
-export * from './ionic-textarea.type';
+export { default as IonicTextareaFieldComponent } from './ionic-textarea.component';
+export type { IonicTextareaProps, IonicTextareaField, IonicTextareaComponent } from './ionic-textarea.type';

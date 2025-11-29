@@ -1,12 +1,7 @@
-import { FieldComponent, FieldDef } from '../base';
+import { FieldDef } from '../base/field-def';
 import { PageAllowedChildren } from '../../models/types/nesting-constraints';
-
-/**
- * Helper interface for container fields (row/group) within nested checking
- */
-interface ContainerFieldWithFields extends FieldDef<any> {
-  fields: FieldDef<any>[];
-}
+import { isRowField } from './row-field';
+import { isGroupField } from './group-field';
 
 /**
  * Page field interface for creating top-level page layouts
@@ -32,11 +27,9 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
 /**
  * Type guard for PageField with proper type narrowing
  */
-export function isPageField(field: FieldDef<any>): field is PageField {
+export function isPageField(field: FieldDef<unknown>): field is PageField {
   return field.type === 'page' && 'fields' in field && Array.isArray((field as PageField).fields);
 }
-
-export type PageComponent = FieldComponent<PageField>;
 
 /**
  * Validates that a page field doesn't contain nested page fields
@@ -44,14 +37,14 @@ export type PageComponent = FieldComponent<PageField>;
  * @returns true if valid (no nested pages), false otherwise
  */
 export function validatePageNesting(pageField: PageField): boolean {
-  return !hasNestedPages(pageField.fields as FieldDef<any>[]);
+  return !hasNestedPages(pageField.fields);
 }
 
 /**
  * Type guard to check if a field is a container with fields property
  */
-function isContainerWithFields(field: FieldDef<any>): field is ContainerFieldWithFields {
-  return (field.type === 'row' || field.type === 'group') && 'fields' in field && Array.isArray((field as ContainerFieldWithFields).fields);
+function isContainerWithFields(field: FieldDef<unknown>): field is FieldDef<unknown> & { readonly fields: readonly FieldDef<unknown>[] } {
+  return (isRowField(field) || isGroupField(field)) && 'fields' in field && Array.isArray((field as { fields: unknown }).fields);
 }
 
 /**
@@ -59,7 +52,7 @@ function isContainerWithFields(field: FieldDef<any>): field is ContainerFieldWit
  * @param fields Array of field definitions to check
  * @returns true if nested pages found, false otherwise
  */
-function hasNestedPages(fields: FieldDef<any>[]): boolean {
+function hasNestedPages(fields: readonly FieldDef<unknown>[]): boolean {
   for (const field of fields) {
     if (isPageField(field)) {
       return true;

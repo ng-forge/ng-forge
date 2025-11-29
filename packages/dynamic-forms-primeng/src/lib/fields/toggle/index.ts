@@ -1,2 +1,2 @@
-export * from './prime-toggle.component';
-export * from './prime-toggle.type';
+export { default as PrimeToggleFieldComponent } from './prime-toggle.component';
+export type { PrimeToggleProps, PrimeToggleField, PrimeToggleComponent } from './prime-toggle.type';

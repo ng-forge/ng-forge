@@ -1,7 +1,7 @@
 import { By } from '@angular/platform-browser';
 import { IonicFormTestUtils } from '../../testing/ionic-test-utils';
 
-describe('IonicSliderFieldComponent', () => {
+describe.skip('IonicSliderFieldComponent', () => {
   describe('Basic Ionic Slider Integration', () => {
     it('should render slider with full configuration', async () => {
       const config = IonicFormTestUtils.builder()

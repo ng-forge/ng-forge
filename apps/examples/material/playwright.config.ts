@@ -42,6 +42,12 @@ const getProjects = () => {
  */
 export default defineConfig({
   ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: './src/app/testing' }),
+  /* Global timeout for each test - prevents tests from hanging indefinitely */
+  timeout: 10000,
+  /* Expect timeout - how long to wait for expect() assertions */
+  expect: {
+    timeout: 5000,
+  },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
@@ -50,7 +56,9 @@ export default defineConfig({
     /* Save screenshots to material examples folder */
     screenshot: 'only-on-failure',
     /* Add action timeout to prevent hangs */
-    actionTimeout: 10000,
+    actionTimeout: 5000,
+    /* Navigation timeout - prevents page.goto() from hanging */
+    navigationTimeout: 10000,
   },
   /* Configure output directories */
   outputDir: './screenshots',

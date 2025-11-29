@@ -1,4 +1,4 @@
-import { BaseValueField } from '../../definitions';
+import { BaseValueField } from '../../definitions/base/base-value-field';
 import { Binding, inject, inputBinding, isSignal } from '@angular/core';
 import { baseFieldMapper } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';

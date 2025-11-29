@@ -1,6 +1,6 @@
-import { BaseValueField } from '../base';
+import { BaseValueField } from '../base/base-value-field';
 import { FieldOption } from '../../models/field-option';
-import { DynamicText } from '../../models';
+import { DynamicText } from '../../models/types/dynamic-text';
 
 export interface SelectProps {
   placeholder?: DynamicText;

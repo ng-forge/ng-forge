@@ -1,2 +1,2 @@
-export * from './bs-toggle.component';
-export * from './bs-toggle.type';
+export { default as BsToggleFieldComponent } from './bs-toggle.component';
+export type { BsToggleProps, BsToggleField, BsToggleComponent } from './bs-toggle.type';

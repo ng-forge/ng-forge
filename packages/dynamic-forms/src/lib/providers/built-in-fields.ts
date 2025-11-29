@@ -1,5 +1,8 @@
 import { FieldTypeDefinition } from '../models/field-type';
-import { arrayFieldMapper, baseFieldMapper, groupFieldMapper, rowFieldMapper } from '../mappers';
+import { arrayFieldMapper } from '../mappers/array/array-field-mapper';
+import { baseFieldMapper } from '../mappers/base/base-field-mapper';
+import { groupFieldMapper } from '../mappers/group/group-field-mapper';
+import { rowFieldMapper } from '../mappers/row/row-field-mapper';
 import { pageFieldMapper } from '../mappers/page/page-field-mapper';
 
 /**

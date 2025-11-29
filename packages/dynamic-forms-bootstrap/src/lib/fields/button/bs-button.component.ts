@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, isSignal, Signal } from '@angular/core';
 import {
   ArrayItemContext,
   DynamicText,
@@ -26,7 +26,7 @@ import { BsButtonComponent, BsButtonProps } from './bs-button.type';
     <button
       [id]="key()"
       [type]="props()?.type || 'button'"
-      [disabled]="disabled()"
+      [disabled]="resolvedDisabled()"
       [class]="buttonClasses()"
       [attr.tabindex]="tabIndex()"
       [attr.data-testid]="buttonTestId()"
@@ -42,8 +42,14 @@ export default class BsButtonFieldComponent<TEvent extends FormEvent> implements
 
   readonly key = input.required<string>();
   readonly label = input.required<DynamicText>();
-  readonly disabled = input<boolean>(false);
+  readonly disabled = input<boolean | Signal<boolean>>(false);
   readonly hidden = input<boolean>(false);
+
+  // Resolve disabled value - unwrap signal if needed for reactive binding
+  readonly resolvedDisabled = computed(() => {
+    const value = this.disabled();
+    return isSignal(value) ? value() : value;
+  });
   readonly tabIndex = input<number>();
   readonly className = input<string>('');
 

@@ -1,29 +1,197 @@
+/**
+ * @ng-forge/dynamic-forms
+ *
+ * Dynamic forms library for Angular applications.
+ *
+ * ## Public API (for end users)
+ * - DynamicForm component
+ * - provideDynamicForm() for configuration
+ * - FormConfig and field definition types
+ * - Event classes (SubmitEvent, PageChangeEvent, etc.)
+ *
+ * ## Integration API (for UI library authors building Material, Bootstrap, etc.)
+ * - Mappers (baseFieldMapper, valueFieldMapper, etc.)
+ * - FieldTypeDefinition for registering field types
+ * - DynamicTextPipe, shouldShowErrors, createResolvedErrorsSignal
+ * - EventBus for custom event handling
+ */
+
+// ============================================================
+// PUBLIC API - For end users
+// ============================================================
+
+// Core Component
 export { DynamicForm } from './dynamic-form.component';
-export { FieldRendererDirective } from './directives/dynamic-form.directive';
 
-// Core interfaces and types - clean signal forms API
-export * from './models';
-export * from './definitions';
+// Provider System
+export { provideDynamicForm } from './providers';
+export type { ExtractFieldDefs, ExtractFormValue } from './providers';
 
-// Provider system for dependency injection
-export * from './providers';
+// Configuration Types
+export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 
-// Services
-export * from './core/registry';
-export * from './core/validation';
+export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
 
-// Utilities
-export { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
-export * from './utils';
+// Field Definition Types
+export type {
+  ArrayField,
+  BaseCheckedField,
+  BaseValueField,
+  ButtonField,
+  CheckboxField,
+  CheckedFieldComponent,
+  DatepickerField,
+  DatepickerProps,
+  FieldComponent,
+  FieldDef,
+  FieldWithValidation,
+  GroupField,
+  InputField,
+  InputProps,
+  MultiCheckboxField,
+  PageField,
+  RadioField,
+  RowField,
+  SelectField,
+  SelectProps,
+  SliderField,
+  TextareaField,
+  TextareaProps,
+  TextElementType,
+  TextField,
+  TextProps,
+  ToggleField,
+  ValueFieldComponent,
+  ValueType,
+} from './definitions';
 
-// Field fields
-export * from './fields';
+export { isCheckedField, isValueField } from './definitions';
+
+// Validation Config Types
+export type {
+  AsyncValidatorConfig,
+  BaseValidatorConfig,
+  BuiltInValidatorConfig,
+  CustomValidatorConfig,
+  HttpValidatorConfig,
+  ValidatorConfig,
+} from './models';
+
+// Validator Function Types (for customFnConfig)
+export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from './core/validation';
+
+// Logic & Expression Types
+export type { ConditionalExpression, EvaluationContext, LogicConfig } from './models';
+
+// Schema Types
+export type { SchemaApplicationConfig, SchemaDefinition } from './models';
+
+// Registry Types (for module augmentation)
+export type {
+  AvailableFieldTypes,
+  ContainerFieldTypes,
+  DynamicFormFieldRegistry,
+  FieldRegistryContainers,
+  FieldRegistryLeaves,
+  LeafFieldTypes,
+  RegisteredFieldTypes,
+} from './models';
+
+// Utility Types
+export type {
+  ArrayAllowedChildren,
+  FieldPathAccess,
+  FormMode,
+  FormModeDetectionResult,
+  GroupAllowedChildren,
+  InferFormValue,
+  PageAllowedChildren,
+  Prettify,
+  RowAllowedChildren,
+  WithInputSignals,
+} from './models';
+
+// Type Guards
+export {
+  isArrayField,
+  isContainerField,
+  isDisplayOnlyField,
+  isGroupField,
+  isLeafField,
+  isPageField,
+  isRowField,
+  isValueBearingField,
+} from './models';
 
 // Events
-export * from './events';
+export {
+  AddArrayItemEvent,
+  FormClearEvent,
+  FormResetEvent,
+  NextPageEvent,
+  PageChangeEvent,
+  PreviousPageEvent,
+  RemoveArrayItemEvent,
+  SubmitEvent,
+} from './events';
 
-// Mappers
-export * from './mappers';
+export type { FormEvent } from './events';
 
-// Pipes
-export * from './pipes';
+// ============================================================
+// INTEGRATION API - For UI library authors
+// (Material, Bootstrap, PrimeNG, Ionic, etc.)
+// ============================================================
+
+// Mappers - for creating FieldTypeDefinition
+export {
+  arrayFieldMapper,
+  baseFieldMapper,
+  checkboxFieldMapper,
+  groupFieldMapper,
+  pageFieldMapper,
+  rowFieldMapper,
+  valueFieldMapper,
+} from './mappers';
+
+export type { ArrayContext, FieldSignalContext, MapperFn } from './mappers';
+
+// Field Type Definition - for registering custom field types
+export type { FieldTypeDefinition, ValueHandlingMode } from './models';
+export { FIELD_REGISTRY, getFieldValueHandling } from './models';
+
+// Signal Context - injection tokens for field components
+export { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from './models';
+
+// Error Display Utilities - for field components
+export { createResolvedErrorsSignal, shouldShowErrors } from './utils';
+export type { ResolvedError } from './utils';
+
+// Dynamic Text - for translatable labels
+export { dynamicTextToObservable } from './utils';
+export { DynamicTextPipe } from './pipes';
+
+// Directive - for custom field rendering layouts
+export { FieldRendererDirective } from './directives/dynamic-form.directive';
+
+// Container Components - for building custom containers
+export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent } from './fields';
+
+// Validation - for applying validators in custom fields
+export { applyValidator, applyValidators } from './core/validation';
+export type { HttpResourceRequest } from './core/validation';
+
+// Event Utilities - for custom event handling
+export { EventBus } from './events';
+export { resolveTokens } from './events';
+export type { ArrayItemContext, FormEventConstructor, TokenContext } from './events';
+
+// Registry Utilities
+export { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
+export { BUILT_IN_FIELDS } from './providers';
+
+// Event Args Type
+export type { EventArgs } from './definitions';
+
+// Form Internals - for advanced container field implementations
+export { getChildFieldTree, getChildrenMap, getFieldProxy, hasFormStructure } from './utils/form-internals';
+export type { FormInternals } from './utils/form-internals';

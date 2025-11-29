@@ -1,2 +1,2 @@
-export * from './ionic-select.component';
-export * from './ionic-select.type';
+export { default as IonicSelectFieldComponent } from './ionic-select.component';
+export type { IonicSelectProps, IonicSelectField, IonicSelectComponent } from './ionic-select.type';

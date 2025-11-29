@@ -1,2 +1,2 @@
-export * from './mat-checkbox.component';
-export * from './mat-checkbox.type';
+export { default as MatCheckboxFieldComponent } from './mat-checkbox.component';
+export type { MatCheckboxProps, MatCheckboxField, MatCheckboxComponent } from './mat-checkbox.type';

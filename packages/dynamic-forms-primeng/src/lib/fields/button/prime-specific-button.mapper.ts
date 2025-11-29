@@ -24,14 +24,15 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
   bindings.push(inputBinding('event', () => SubmitEvent));
 
   // Add disabled binding - disabled if explicitly set OR if form is invalid
-  const form = fieldSignalContext.form;
+  // form is a callable signal, calling form() returns the form instance with valid()/invalid() methods
+  const formInstance = fieldSignalContext.form;
   bindings.push(
     inputBinding('disabled', () =>
       computed(() => {
         const explicitlyDisabled = fieldDef.disabled || false;
-        const formInvalid = !form().valid();
-        return explicitlyDisabled || formInvalid;
-      })(),
+        // Call formInstance() to get the current form state and check invalid()
+        return explicitlyDisabled || formInstance().invalid();
+      }),
     ),
   );
 

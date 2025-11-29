@@ -1,16 +1,20 @@
 import { ArrayFieldComponent } from './array-field.component';
-import { ArrayField, RowField } from '../../definitions';
+import { ArrayField } from '../../definitions/default/array-field';
+import { RowField } from '../../definitions/default/row-field';
 import { createSimpleTestField, delay } from '../../testing';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { baseFieldMapper, FieldSignalContext, valueFieldMapper } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
-import { FIELD_REGISTRY, FieldTypeDefinition, FIELD_SIGNAL_CONTEXT } from '../../models';
+import { FIELD_REGISTRY } from '../../models/field-type';
+import { FieldTypeDefinition } from '../../models/field-type';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
-import { FieldDef } from '../../definitions/base';
+import { FieldDef } from '../../definitions/base/field-def';
+import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 
 describe('ArrayFieldComponent', () => {
   function setupArrayTest(field: ArrayField<any>, value?: Record<string, unknown>) {
@@ -30,6 +34,7 @@ describe('ArrayFieldComponent', () => {
       providers: [
         provideDynamicForm(),
         EventBus,
+        FunctionRegistryService,
         {
           provide: FIELD_REGISTRY,
           useValue: registry,
@@ -55,7 +60,7 @@ describe('ArrayFieldComponent', () => {
                 value: valueSignal,
                 defaultValues,
                 form: testForm,
-                defaultValidationMessages: signal({}),
+                defaultValidationMessages: undefined,
               };
 
               return mockFieldSignalContext;
@@ -476,6 +481,7 @@ describe('ArrayFieldComponent', () => {
         providers: [
           provideDynamicForm(),
           EventBus,
+          FunctionRegistryService,
           {
             provide: FIELD_REGISTRY,
             useValue: registry,
@@ -500,7 +506,7 @@ describe('ArrayFieldComponent', () => {
                   value: valueSignal,
                   defaultValues,
                   form: testForm,
-                  defaultValidationMessages: signal({}),
+                  defaultValidationMessages: undefined,
                 };
 
                 return mockFieldSignalContext;
@@ -803,14 +809,13 @@ describe('ArrayFieldComponent', () => {
     it('should produce field binding for array item context', () => {
       // Simulate what happens inside array-field.component when creating
       // a context for array items
-      const itemValue = { itemField: 'item value' };
-      const valueSignal = signal(itemValue);
-      const formInstance = runInInjectionContext(TestBed.inject(Injector), () => form(valueSignal));
+      const itemValue = signal<Record<string, unknown>>({ itemField: 'item value' });
+      const formInstance = runInInjectionContext(TestBed.inject(Injector), () => form(itemValue));
       formInstance();
 
       const fieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
         injector: TestBed.inject(Injector),
-        value: valueSignal,
+        value: itemValue,
         defaultValues: () => ({}) as Record<string, unknown>,
         form: formInstance,
         defaultValidationMessages: undefined,
@@ -843,7 +848,7 @@ describe('ArrayFieldComponent', () => {
     });
 
     it('should add defaultValidationMessages binding when context provides it', () => {
-      const valueSignal = signal({ test: 'value' });
+      const valueSignal = signal<Record<string, unknown>>({ test: 'value' });
       const formInstance = runInInjectionContext(TestBed.inject(Injector), () => form(valueSignal));
       formInstance();
 
@@ -852,7 +857,7 @@ describe('ArrayFieldComponent', () => {
         value: valueSignal,
         defaultValues: () => ({}) as Record<string, unknown>,
         form: formInstance,
-        defaultValidationMessages: signal({ required: 'This field is required' }),
+        defaultValidationMessages: { required: 'This field is required' },
       };
 
       const injector = Injector.create({
