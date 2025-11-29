@@ -102,7 +102,7 @@ function resolveErrorMessage(
   // If no message found, log warning and return null (will be filtered out)
   if (!messageToUse) {
     console.warn(
-      `[ng-forge] No validation message found for error kind "${error.kind}". ` +
+      `[Dynamic Forms] No validation message found for error kind "${error.kind}". ` +
         `Please provide a message via field-level validationMessages or form-level defaultValidationMessages.`,
     );
     return of(null);

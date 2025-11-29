@@ -93,7 +93,7 @@ export class FieldContextRegistryService {
         const fieldPaths = (formContext.fieldPaths as Record<string, string>) || {};
         return fieldPaths[String(key)] || String(key);
       } catch (error) {
-        console.warn('Unable to extract field key:', error);
+        console.warn('[Dynamic Forms] Unable to extract field key:', error);
       }
     }
 

@@ -106,7 +106,7 @@ export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fie
         // Add custom field types
         fields.forEach((fieldType) => {
           if (registry.has(fieldType.name)) {
-            console.warn(`Field type "${fieldType.name}" is already registered. Overwriting.`);
+            console.warn(`[Dynamic Forms] Field type "${fieldType.name}" is already registered. Overwriting.`);
           }
           registry.set(fieldType.name, fieldType);
         });
