@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('Material Components Tests', () => {
   test.describe('Datepicker Component', () => {
     test('should open calendar and select date', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/datepicker-basic');
+      await page.goto('http://localhost:4201/#/test/material-components/datepicker-basic');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -34,7 +34,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should respect min/max date constraints', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/datepicker-constraints');
+      await page.goto('http://localhost:4201/#/test/material-components/datepicker-constraints');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -56,7 +56,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should handle required field validation', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/datepicker-validation');
+      await page.goto('http://localhost:4201/#/test/material-components/datepicker-validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -72,7 +72,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should clear date value', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/datepicker-clear');
+      await page.goto('http://localhost:4201/#/test/material-components/datepicker-clear');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -93,7 +93,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/datepicker-disabled');
+      await page.goto('http://localhost:4201/#/test/material-components/datepicker-disabled');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -110,7 +110,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should work with initial value', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/datepicker-initial-value');
+      await page.goto('http://localhost:4201/#/test/material-components/datepicker-initial-value');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -127,7 +127,7 @@ test.describe('Material Components Tests', () => {
 
   test.describe('Slider Component', () => {
     test('should update value on interaction', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/slider-basic');
+      await page.goto('http://localhost:4201/#/test/material-components/slider-basic');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -153,7 +153,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should respect min and max bounds', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/slider-bounds');
+      await page.goto('http://localhost:4201/#/test/material-components/slider-bounds');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -172,7 +172,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should work with step increments', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/slider-steps');
+      await page.goto('http://localhost:4201/#/test/material-components/slider-steps');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -186,7 +186,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/slider-disabled');
+      await page.goto('http://localhost:4201/#/test/material-components/slider-disabled');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -198,7 +198,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should display current value', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/slider-value-display');
+      await page.goto('http://localhost:4201/#/test/material-components/slider-value-display');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -214,7 +214,7 @@ test.describe('Material Components Tests', () => {
 
   test.describe('Toggle Component', () => {
     test('should change state on click', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/toggle-basic');
+      await page.goto('http://localhost:4201/#/test/material-components/toggle-basic');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -235,7 +235,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should work with keyboard (Space/Enter)', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/toggle-keyboard');
+      await page.goto('http://localhost:4201/#/test/material-components/toggle-keyboard');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -260,7 +260,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/toggle-disabled');
+      await page.goto('http://localhost:4201/#/test/material-components/toggle-disabled');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -277,7 +277,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should handle required toggle validation', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/toggle-validation');
+      await page.goto('http://localhost:4201/#/test/material-components/toggle-validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -299,7 +299,7 @@ test.describe('Material Components Tests', () => {
 
   test.describe('Multi-Checkbox Component', () => {
     test('should select multiple options', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/multi-checkbox-basic');
+      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-basic');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -321,7 +321,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should collect values as array on submit', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/multi-checkbox-array');
+      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-array');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -348,7 +348,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should deselect options', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/multi-checkbox-deselect');
+      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-deselect');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -371,7 +371,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should handle disabled options', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/multi-checkbox-disabled-options');
+      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-disabled-options');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -391,7 +391,7 @@ test.describe('Material Components Tests', () => {
     });
 
     test('should handle required multi-checkbox validation', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/material-components/multi-checkbox-validation');
+      await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario

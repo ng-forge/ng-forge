@@ -1,4 +1,4 @@
-import { FieldDef } from '../definitions';
+import { FieldDef } from '../definitions/base/field-def';
 import { Binding, Injector, Signal, WritableSignal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { ValidationMessages } from '../models/validation-types';
@@ -18,10 +18,11 @@ import { FormOptions } from '../models/form-config';
  *
  * Container fields (Group, Array) create scoped contexts with nested forms.
  */
-export interface FieldSignalContext<TModel = any> {
+export interface FieldSignalContext<TModel = unknown> {
   injector: Injector;
   value: WritableSignal<Partial<TModel> | undefined>;
   defaultValues: () => TModel;
+  // TODO: enhance this type to support field tree from nested forms (to avoid () => formRef)
   form: ReturnType<typeof form<TModel>>;
   defaultValidationMessages?: ValidationMessages;
   /**
@@ -45,10 +46,16 @@ export interface FieldSignalContext<TModel = any> {
 export interface ArrayContext {
   /** The key of the parent array field */
   arrayKey: string;
-  /** The index of this item within the array */
-  index: number;
+  /**
+   * The index of this item within the array.
+   * This is a Signal (via linkedSignal) that automatically updates when items are
+   * added/removed, allowing index-dependent logic to react without component recreation.
+   */
+  index: Signal<number>;
   /** The current form value for token resolution */
   formValue: unknown;
+  /** The array field definition */
+  field: FieldDef<unknown>;
 }
 
 /**
@@ -67,4 +74,4 @@ export interface ArrayContext {
  * }
  * ```
  */
-export type MapperFn<T extends FieldDef<any>> = (input: T) => Binding[];
+export type MapperFn<T extends FieldDef<unknown>> = (input: T) => Binding[];

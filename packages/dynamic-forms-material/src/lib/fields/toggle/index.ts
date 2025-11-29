@@ -1,2 +1,2 @@
-export * from './mat-toggle.component';
-export * from './mat-toggle.type';
+export { default as MatToggleFieldComponent } from './mat-toggle.component';
+export type { MatToggleProps, MatToggleField, MatToggleComponent } from './mat-toggle.type';

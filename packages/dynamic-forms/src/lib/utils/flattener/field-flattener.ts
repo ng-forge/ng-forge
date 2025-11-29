@@ -1,4 +1,5 @@
-import { FieldDef, isRowField } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
+import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { isArrayField } from '../../definitions/default/array-field';
 import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
@@ -158,51 +159,4 @@ export function flattenFields(
   }
 
   return result;
-}
-
-/**
- * Flattens fields for DOM rendering, preserving structural container fields.
- *
- * This is a convenience wrapper around {@link flattenFields} with `preserveRows: true`.
- * It keeps row fields in the structure so they can render their container elements
- * in the DOM, which is essential for the grid system to work correctly.
- *
- * The difference from `flattenFields()`:
- * - **Row fields**: Preserved in structure with flattened children (for grid layout)
- * - **Page fields**: Still flattened (handled by page orchestrator)
- * - **Group/Array fields**: Same behavior (preserved with flattened children)
- *
- * @param fields - Array of field definitions that may contain nested structures
- * @param registry - Field type registry for determining value handling behavior
- * @returns Flattened array with row containers preserved
- *
- * @example
- * ```typescript
- * const fields = [
- *   {
- *     type: 'row',
- *     fields: [
- *       { type: 'input', key: 'firstName' },
- *       { type: 'input', key: 'lastName' }
- *     ]
- *   }
- * ];
- *
- * const rendered = flattenFieldsForRendering(fields, registry);
- * // Result: [
- * //   {
- * //     type: 'row',
- * //     fields: [
- * //       { type: 'input', key: 'firstName' },
- * //       { type: 'input', key: 'lastName' }
- * //     ]
- * //   }
- * // ]
- * // The row field is preserved so it can render its <div class="df-row"> container
- * ```
- *
- * @public
- */
-export function flattenFieldsForRendering(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>): FlattenedField[] {
-  return flattenFields(fields, registry, { preserveRows: true });
 }

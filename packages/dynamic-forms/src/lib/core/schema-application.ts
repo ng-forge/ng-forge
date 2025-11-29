@@ -1,12 +1,12 @@
 import { inject } from '@angular/core';
 import { apply, applyEach, applyWhen, applyWhenValue, SchemaOrSchemaFn } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
-import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas';
-import { SchemaRegistryService } from './registry';
-import { createLogicFunction } from './expressions';
-import { createTypePredicateFunction } from './values';
-import { applyValidator } from './validation';
-import { applyLogic } from './logic';
+import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas/schema-definition';
+import { SchemaRegistryService } from './registry/schema-registry.service';
+import { createLogicFunction } from './expressions/logic-function-factory';
+import { createTypePredicateFunction } from './values/type-predicate-factory';
+import { applyValidator } from './validation/validator-factory';
+import { applyLogic } from './logic/logic-applicator';
 
 /**
  * Apply schema configuration.

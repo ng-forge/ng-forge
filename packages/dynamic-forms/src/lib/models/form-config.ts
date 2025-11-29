@@ -1,6 +1,7 @@
 import { Schema } from '@angular/forms/signals';
-import { InferFormValue, RegisteredFieldTypes } from './types';
-import { SchemaDefinition } from './schemas';
+import { InferFormValue } from './types/form-value-inference';
+import { RegisteredFieldTypes } from './registry/field-registry';
+import { SchemaDefinition } from './schemas/schema-definition';
 import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../core/validation/validator-types';
 import { CustomFunction } from '../core/expressions/custom-function-types';
 import { ValidationMessages } from './validation-types';

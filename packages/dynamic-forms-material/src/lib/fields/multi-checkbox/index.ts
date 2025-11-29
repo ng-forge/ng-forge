@@ -1,2 +1,2 @@
-export * from './mat-multi-checkbox.component';
-export * from './mat-multi-checkbox.type';
+export { default as MatMultiCheckboxFieldComponent } from './mat-multi-checkbox.component';
+export type { MatMultiCheckboxProps, MatMultiCheckboxField, MatMultiCheckboxComponent } from './mat-multi-checkbox.type';

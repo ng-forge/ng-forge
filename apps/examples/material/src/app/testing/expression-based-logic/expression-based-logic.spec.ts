@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('Expression-Based Logic Tests', () => {
   test.describe('Hidden Logic', () => {
     test('should hide/show fields based on fieldValue condition', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/expression-based-logic/hidden-logic');
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/hidden-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="hidden-logic-test"]');
@@ -30,7 +30,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('Disabled Logic', () => {
     test('should disable fields using JavaScript expressions', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/expression-based-logic/disabled-logic');
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/disabled-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="disabled-logic-test"]');
@@ -52,7 +52,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('AND Logic', () => {
     test('should hide fields using AND conditional logic', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/expression-based-logic/and-logic');
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/and-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="and-logic-test"]');
@@ -82,7 +82,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('Readonly Logic', () => {
     test.skip('should make fields readonly using conditional logic', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/expression-based-logic/readonly-logic');
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/readonly-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="readonly-logic-test"]');
@@ -120,7 +120,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('OR Logic', () => {
     test('should apply OR conditional logic for multiple conditions', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/expression-based-logic/or-logic');
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/or-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="or-logic-test"]');
@@ -158,7 +158,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('Nested AND within OR', () => {
     test('should handle nested AND within OR conditions', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/expression-based-logic/nested-and-within-or');
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/nested-and-within-or');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="nested-and-within-or-test"]');
@@ -198,7 +198,7 @@ test.describe('Expression-Based Logic Tests', () => {
 
   test.describe('Nested OR within AND', () => {
     test('should handle nested OR within AND conditions', async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/expression-based-logic/nested-or-within-and');
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/nested-or-within-and');
       await page.waitForLoadState('networkidle');
 
       const scenario = page.locator('[data-testid="nested-or-within-and-test"]');

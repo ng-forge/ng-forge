@@ -2,7 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
-import { FieldDef, FieldWithValidation } from '../definitions';
+import { FieldDef } from '../definitions/base/field-def';
+import { FieldWithValidation } from '../definitions/base/field-with-validation';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, SchemaRegistryService } from './registry';
 import { mapFieldToForm } from './form-mapping';
 

@@ -1,5 +1,5 @@
-import { BaseValueField } from '../base';
-import { DynamicText } from '../../models';
+import { BaseValueField } from '../base/base-value-field';
+import { DynamicText } from '../../models/types/dynamic-text';
 
 export interface DatepickerProps {
   placeholder?: DynamicText;

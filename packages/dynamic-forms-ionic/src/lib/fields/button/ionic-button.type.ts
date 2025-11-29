@@ -50,3 +50,35 @@ export interface IonicPreviousButtonField extends Omit<FieldDef<IonicButtonProps
   className?: string;
   props?: IonicButtonProps;
 }
+
+/** Add array item button field - with preconfigured AddArrayItemEvent */
+export interface AddArrayItemButtonField extends Omit<FieldDef<IonicButtonProps>, 'event'> {
+  type: 'addArrayItem';
+  key: string;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+  props?: IonicButtonProps;
+  /**
+   * The key of the array field to add items to.
+   * Required when the button is placed outside the array.
+   * When inside an array, this is automatically determined from context.
+   */
+  arrayKey?: string;
+}
+
+/** Remove array item button field - with preconfigured RemoveArrayItemEvent */
+export interface RemoveArrayItemButtonField extends Omit<FieldDef<IonicButtonProps>, 'event'> {
+  type: 'removeArrayItem';
+  key: string;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+  props?: IonicButtonProps;
+  /**
+   * The key of the array field to remove items from.
+   * Required when the button is placed outside the array.
+   * When inside an array, this is automatically determined from context.
+   */
+  arrayKey?: string;
+}

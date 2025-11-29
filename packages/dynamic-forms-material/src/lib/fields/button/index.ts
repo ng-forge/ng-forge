@@ -1,18 +1,16 @@
+// Public API - builder functions for creating button fields
 export { submitButton, nextPageButton, previousPageButton, actionButton } from './mat-button.function';
+
+// Public API - types for type safety
 export type {
   MatButtonProps,
   MatButtonField,
   MatSubmitButtonField,
   MatNextButtonField,
   MatPreviousButtonField,
-  MatAddArrayItemButtonField,
-  MatRemoveArrayItemButtonField,
+  AddArrayItemButtonField,
+  RemoveArrayItemButtonField,
 } from './mat-button.type';
+
+// Public API - component
 export { default as MatButtonFieldComponent } from './mat-button.component';
-export {
-  submitButtonFieldMapper,
-  nextButtonFieldMapper,
-  previousButtonFieldMapper,
-  addArrayItemButtonFieldMapper,
-  removeArrayItemButtonFieldMapper,
-} from './mat-specific-button.mapper';

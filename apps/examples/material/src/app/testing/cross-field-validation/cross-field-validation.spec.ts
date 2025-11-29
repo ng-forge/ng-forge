@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('Cross-Field Validation Tests', () => {
   test.describe('Password Confirmation Validation', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/cross-field-validation/password-validation');
+      await page.goto('http://localhost:4201/#/test/cross-field-validation/password-validation');
       await page.waitForLoadState('networkidle');
     });
 
@@ -68,7 +68,7 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test.describe('Conditional Required Fields', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/cross-field-validation/conditional-fields');
+      await page.goto('http://localhost:4201/#/test/cross-field-validation/conditional-fields');
       await page.waitForLoadState('networkidle');
     });
 
@@ -130,7 +130,7 @@ test.describe('Cross-Field Validation Tests', () => {
 
   test.describe('Dependent Select Fields', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/cross-field-validation/dependent-fields');
+      await page.goto('http://localhost:4201/#/test/cross-field-validation/dependent-fields');
       await page.waitForLoadState('networkidle');
     });
 
@@ -185,7 +185,7 @@ test.describe('Cross-Field Validation Tests', () => {
         category: 'electronics',
         subcategory: 'laptop',
         productName: 'MacBook Pro 16',
-        price: '2499.99',
+        price: 2499.99,
         currency: 'eur',
       });
 
@@ -218,14 +218,14 @@ test.describe('Cross-Field Validation Tests', () => {
         category: 'clothing',
         subcategory: 'shirt',
         productName: 'Cotton T-Shirt',
-        price: '29.99',
+        price: 29.99,
       });
     });
   });
 
   test.describe('Field Enable/Disable', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4200/#/test/cross-field-validation/enable-disable');
+      await page.goto('http://localhost:4201/#/test/cross-field-validation/enable-disable');
       await page.waitForLoadState('networkidle');
     });
 

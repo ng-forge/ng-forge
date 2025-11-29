@@ -45,7 +45,7 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
  * and no loading placeholders remain. Uses timeout-based safety net instead
  * of arbitrary iteration limits.
  */
-async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs = 1000): Promise<void> {
+async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs = 500): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form');
   if (!formElement) return;
 

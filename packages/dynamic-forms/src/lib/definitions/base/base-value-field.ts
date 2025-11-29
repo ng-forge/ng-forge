@@ -1,11 +1,14 @@
 import { FieldDef } from './field-def';
 import { FieldWithValidation } from './field-with-validation';
-import { WithInputSignals } from '../../models';
+import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
-import { DynamicText } from '../../pipes';
+import { DynamicText } from '../../models/types/dynamic-text';
 
-export const ValueType = ['string', 'number', 'boolean', 'object', 'array', 'date'] as const;
-export type ValueType = (typeof ValueType)[number];
+/**
+ * Supported primitive value types for form fields.
+ * This type represents all possible value types that can be used in form fields.
+ */
+export type ValueType = string | number | boolean | Date | object | unknown[];
 
 export interface BaseValueField<TProps, TValue> extends FieldDef<TProps>, FieldWithValidation {
   value?: TValue;

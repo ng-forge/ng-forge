@@ -36,9 +36,9 @@ describe('dynamic-value-factory', () => {
         stateOf: vi.fn(),
       } as any;
 
-      // Add key function if fieldKey is provided
+      // Add key as a signal (required for isChildFieldContext check)
       if (fieldKey) {
-        context.key = () => fieldKey;
+        context.key = signal(fieldKey);
       }
 
       return context;
@@ -77,6 +77,10 @@ describe('dynamic-value-factory', () => {
       return runInInjectionContext(injector, () => {
         // Set up the root form registry with mock data if needed
         if (setupRoot) {
+          // Create mock form value signal and register BEFORE creating dynamic function
+          const mockFormValue = signal({ username: 'test', email: 'test@example.com' });
+          rootFormRegistry.registerFormValueSignal(mockFormValue as any);
+
           const mockRootField = createMockFieldTree();
           rootFormRegistry.registerRootForm(mockRootField);
 
@@ -108,7 +112,11 @@ describe('dynamic-value-factory', () => {
       const expression = 'formValue.username === "test"';
 
       const result = runInInjectionContext(injector, () => {
-        // Set up the root form registry with mock data
+        // Register the form value signal BEFORE creating the dynamic function
+        const mockFormValue = signal({ username: 'test', email: 'test@example.com' });
+        rootFormRegistry.registerFormValueSignal(mockFormValue as any);
+
+        // Also set up the root form registry with mock data
         const mockRootField = createMockFieldTree();
         rootFormRegistry.registerRootForm(mockRootField);
 

@@ -4,7 +4,8 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
 import type { SchemaPath } from '@angular/forms/signals';
 import { mapFieldToForm } from '../../core/form-mapping';
-import { FieldDef, FieldWithValidation } from '../../definitions';
+import { FieldDef } from '../../definitions/base/field-def';
+import { FieldWithValidation } from '../../definitions/base/field-with-validation';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService, SchemaRegistryService } from '../../core/registry';
 
 describe('Form Mapping Pipeline Integration (End-to-End)', () => {
@@ -86,6 +87,8 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
     it('should map field with logic', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ show: false, field: 'test' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'field',
@@ -160,6 +163,8 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         });
 
         const formValue = signal({ requirePassword: true, password: '' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'password',

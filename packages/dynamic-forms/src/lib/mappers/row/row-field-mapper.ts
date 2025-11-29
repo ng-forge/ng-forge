@@ -1,4 +1,4 @@
-import { RowField } from '../../definitions';
+import { RowField } from '../../definitions/default/row-field';
 import { Binding, inputBinding } from '@angular/core';
 
 /**

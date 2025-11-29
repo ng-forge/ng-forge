@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Age-Based Logic E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/#/test/essential-tests/age-based-logic');
+    await page.goto('http://localhost:4201/#/test/essential-tests/age-based-logic');
     await page.waitForLoadState('networkidle');
   });
 
@@ -128,8 +128,7 @@ test.describe('Age-Based Logic E2E Tests', () => {
 
       // Verify submitted data
       expect(submittedData).toMatchObject({
-        // TODO: adjust when numbers are supported
-        age: '16',
+        age: 16,
         guardianConsent: true,
       });
     });
@@ -170,7 +169,7 @@ test.describe('Age-Based Logic E2E Tests', () => {
       const submittedData = await submittedDataPromise;
 
       // Verify submitted data (guardianConsent should not be in the data or should be undefined)
-      expect(submittedData).toHaveProperty('age', '25');
+      expect(submittedData).toHaveProperty('age', 25);
     });
   });
 });

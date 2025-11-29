@@ -1,4 +1,5 @@
-import { BaseCheckedField, FieldDef } from '../../definitions';
+import { BaseCheckedField } from '../../definitions/base/base-checked-field';
+import { FieldDef } from '../../definitions/base/field-def';
 import { Binding, inject, inputBinding } from '@angular/core';
 import { baseFieldMapper } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';

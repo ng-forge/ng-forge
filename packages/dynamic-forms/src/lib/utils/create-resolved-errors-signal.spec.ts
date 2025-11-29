@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { form, schema } from '@angular/forms/signals';
 import type { SchemaPath } from '@angular/forms/signals';
+import { form, schema } from '@angular/forms/signals';
 import { createResolvedErrorsSignal } from './create-resolved-errors-signal';
 import { ValidationMessages } from '../models/validation-types';
 import { applyValidator } from '../core/validation/validator-factory';
-import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../core/registry';
+import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService } from '../core/registry';
 
 describe('createResolvedErrorsSignal', () => {
   let injector: Injector;
@@ -106,7 +106,9 @@ describe('createResolvedErrorsSignal', () => {
         expect(resolvedErrors().length).toBe(0);
 
         // Should log a warning
-        expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[ng-forge] No validation message found for error kind "required"'));
+        expect(warnSpy).toHaveBeenCalledWith(
+          expect.stringContaining('[Dynamic Forms] No validation message found for error kind "required"'),
+        );
 
         warnSpy.mockRestore();
       });

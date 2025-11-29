@@ -1,6 +1,7 @@
-import { ConditionalExpression, EvaluationContext } from '../../models';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { compareValues, getNestedValue } from './value-utils';
-import { ExpressionParser } from './parser';
+import { ExpressionParser } from './parser/expression-parser';
 
 /**
  * Evaluate conditional expression

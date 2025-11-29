@@ -1,4 +1,4 @@
-import { FieldComponent, FieldDef } from '../base';
+import { FieldComponent, FieldDef } from '../base/field-def';
 import { RowAllowedChildren } from '../../models/types/nesting-constraints';
 
 /**
@@ -18,7 +18,7 @@ export interface RowField<TFields extends readonly RowAllowedChildren[] = readon
   readonly fields: TFields;
 
   /** Row fields do not have a label property **/
-  readonly label?: undefined;
+  readonly label?: never;
 }
 
 /**

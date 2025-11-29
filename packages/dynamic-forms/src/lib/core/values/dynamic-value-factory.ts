@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { FieldContextRegistryService } from '../registry';
-import { ExpressionParser } from '../expressions/parser';
+import { FieldContextRegistryService } from '../registry/field-context-registry.service';
+import { ExpressionParser } from '../expressions/parser/expression-parser';
 
 /**
  * Create a dynamic value function from an expression string
