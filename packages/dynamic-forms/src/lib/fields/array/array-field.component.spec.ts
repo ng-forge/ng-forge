@@ -5,7 +5,7 @@ import { createSimpleTestField, delay } from '../../testing';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import { baseFieldMapper, FieldSignalContext, valueFieldMapper } from '../../mappers';
+import { baseFieldMapper, FieldSignalContext, rowFieldMapper, valueFieldMapper } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
 import { FIELD_REGISTRY } from '../../models/field-type';
 import { FieldTypeDefinition } from '../../models/field-type';
@@ -447,7 +447,7 @@ describe('ArrayFieldComponent', () => {
           const module = await import('../row/row-field.component');
           return module.default;
         },
-        mapper: baseFieldMapper,
+        mapper: rowFieldMapper,
         valueHandling: 'flatten', // Row fields flatten children to parent level
       };
 

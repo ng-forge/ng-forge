@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       setupFiles: ['src/test-setup.ts'],
+      // Always use browser mode (no jsdom)
       browser: {
         enabled: true,
         instances: [
@@ -44,7 +45,7 @@ export default defineConfig(({ mode }) => {
           },
         ],
         headless: true,
-        fileParallelism: false,
+        fileParallelism: true,
         slowTestThreshold: 1000,
       },
       testTimeout: 1000,
