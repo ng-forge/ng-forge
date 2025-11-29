@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('User Journey Flow Tests', () => {
+  test.afterEach(async (_, testInfo) => {
+    if (testInfo.status === 'passed') {
+      console.info(`✅ TEST PASSED: ${testInfo.title}`);
+    }
+  });
+
   test.describe('Registration Journey', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('http://localhost:4201/#/test/user-journey-flows/registration-journey');

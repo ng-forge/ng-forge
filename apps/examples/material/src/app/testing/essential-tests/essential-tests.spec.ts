@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Essential Tests - Quick Validation', () => {
+  test.afterEach(async (_, testInfo) => {
+    if (testInfo.status === 'passed') {
+      console.info(`✅ TEST PASSED: ${testInfo.title}`);
+    }
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:4201/#/test/essential-tests/basic-form');
     await page.waitForLoadState('networkidle');
@@ -55,8 +61,6 @@ test.describe('Essential Tests - Quick Validation', () => {
       password: 'SecurePass123',
       confirmPassword: 'SecurePass123',
     });
-
-    console.log('✅ Basic form functionality test passed');
   });
 
   test('age-based logic works correctly', async ({ page }) => {
@@ -93,8 +97,6 @@ test.describe('Essential Tests - Quick Validation', () => {
     await page.waitForTimeout(200);
 
     await expect(guardianConsentCheckbox).not.toBeVisible();
-
-    console.log('✅ Age logic test passed');
   });
 
   test('multi-page navigation works', async ({ page }) => {
@@ -154,7 +156,5 @@ test.describe('Essential Tests - Quick Validation', () => {
       lastName: 'Doe',
       email: 'john.doe@example.com',
     });
-
-    console.log('✅ Multi-page navigation test passed');
   });
 });

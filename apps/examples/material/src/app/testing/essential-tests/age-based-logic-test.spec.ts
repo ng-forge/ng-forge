@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Age-Based Logic E2E Tests', () => {
+  test.afterEach(async (_, testInfo) => {
+    if (testInfo.status === 'passed') {
+      console.info(`✅ TEST PASSED: ${testInfo.title}`);
+    }
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:4201/#/test/essential-tests/age-based-logic');
     await page.waitForLoadState('networkidle');

@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Error Handling and Edge Cases', () => {
+  test.afterEach(async (_, testInfo) => {
+    if (testInfo.status === 'passed') {
+      console.info(`✅ TEST PASSED: ${testInfo.title}`);
+    }
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:4201/#/test/error-handling');
     await page.waitForLoadState('networkidle');

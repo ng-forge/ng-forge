@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Form Reset and Clear Events Tests', () => {
+  test.afterEach(async (_, testInfo) => {
+    if (testInfo.status === 'passed') {
+      console.info(`✅ TEST PASSED: ${testInfo.title}`);
+    }
+  });
+
   test.describe('Form Reset Functionality', () => {
     test('should reset form to default values', async ({ page }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/reset-defaults');

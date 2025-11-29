@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Expression-Based Logic Tests', () => {
+  test.afterEach(async (_, testInfo) => {
+    if (testInfo.status === 'passed') {
+      console.info(`✅ TEST PASSED: ${testInfo.title}`);
+    }
+  });
+
   test.describe('Hidden Logic', () => {
     test('should hide/show fields based on fieldValue condition', async ({ page }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/hidden-logic');
