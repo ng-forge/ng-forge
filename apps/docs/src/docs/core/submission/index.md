@@ -17,37 +17,40 @@ The submission system provides:
 Configure form submission with the `submission` property:
 
 ```typescript
+import { Component, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
-const config: FormConfig = {
-  fields: [
-    { type: 'input', key: 'email', label: 'Email', validation: ['required', 'email'] },
-    { type: 'input', key: 'password', label: 'Password', props: { type: 'password' }, validation: ['required'] },
-    { type: 'button', key: 'submit', label: 'Sign In', buttonType: 'submit' },
-  ],
-  submission: {
-    action: async (form) => {
-      const value = form().value();
+@Component({...})
+export class LoginFormComponent {
+  private http = inject(HttpClient);
 
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        body: JSON.stringify(value),
-        headers: { 'Content-Type': 'application/json' },
-      });
+  config: FormConfig = {
+    fields: [
+      { type: 'input', key: 'email', label: 'Email', validation: ['required', 'email'] },
+      { type: 'input', key: 'password', label: 'Password', props: { type: 'password' }, validation: ['required'] },
+      { type: 'button', key: 'submit', label: 'Sign In', buttonType: 'submit' },
+    ],
+    submission: {
+      action: async (form) => {
+        const value = form().value();
 
-      if (!response.ok) {
-        // Return server errors to apply to form fields
-        const errors = await response.json();
-        return errors.map((e: { field: string; message: string }) => ({
-          field: form[e.field as keyof typeof form],
-          error: { kind: 'server', message: e.message },
-        }));
-      }
-
-      return undefined; // Success - no errors
+        try {
+          await firstValueFrom(this.http.post('/api/login', value));
+          return undefined; // Success - no errors
+        } catch (error) {
+          // Return server errors to apply to form fields
+          const errors = error.error as { field: string; message: string }[];
+          return errors.map((e) => ({
+            field: form[e.field as keyof typeof form],
+            error: { kind: 'server', message: e.message },
+          }));
+        }
+      },
     },
-  },
-};
+  };
+}
 ```
 
 ## SubmissionConfig
@@ -69,10 +72,10 @@ Return validation errors to apply them to specific fields:
 submission: {
   action: async (form) => {
     try {
-      await api.register(form().value());
+      await firstValueFrom(this.http.post('/api/register', form().value()));
       return undefined;
     } catch (error) {
-      if (error.code === 'EMAIL_EXISTS') {
+      if (error.error?.code === 'EMAIL_EXISTS') {
         return [
           {
             field: form.email,
@@ -82,7 +85,7 @@ submission: {
       }
       throw error; // Re-throw unexpected errors
     }
-  };
+  },
 }
 ```
 
@@ -218,15 +221,15 @@ export class MyFormComponent {
 ```typescript
 // Good - focused on submission
 action: async (form) => {
-  const result = await api.submit(form().value());
+  const result = await firstValueFrom(this.http.post<{ errors?: [] }>('/api/submit', form().value()));
   return result.errors ?? undefined;
-};
+},
 
 // Avoid - mixing concerns
 action: async (form) => {
   analytics.track('submit'); // Side effect
   showLoadingSpinner(); // UI concern
-  await api.submit(form().value());
+  await firstValueFrom(this.http.post('/api/submit', form().value()));
   redirectToSuccess(); // Navigation
-};
+},
 ```
