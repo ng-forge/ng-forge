@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
@@ -13,6 +14,7 @@ import {
   OnDestroy,
   runInInjectionContext,
   signal,
+  Signal,
   untracked,
   ViewContainerRef,
 } from '@angular/core';
@@ -40,6 +42,7 @@ import { FieldSignalContext } from './mappers/types';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './core/registry';
 import { detectFormMode, FormModeDetectionResult } from './models/types/form-mode';
+import { collectCrossFieldEntries } from './core/cross-field/cross-field-collector';
 import { FormModeValidator } from './utils/form-validation/form-mode-validator';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
 import { FormClearEvent } from './events/constants/form-clear.event';
@@ -411,15 +414,20 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
       let formInstance: ReturnType<typeof form<TModel>>;
 
+      // IMPORTANT: Register the entity signal BEFORE schema creation.
+      // This allows cross-field logic functions (hidden, disabled, etc.) to access
+      // form values during schema evaluation via createReactiveEvaluationContext.
+      untracked(() => this.rootFormRegistry.registerFormValueSignal(this.entity as Signal<Record<string, unknown>>));
+
       if (setup.schemaFields && setup.schemaFields.length > 0) {
-        const schema = createSchemaFromFields(setup.schemaFields, setup.registry);
+        const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
+        const schema = createSchemaFromFields(setup.schemaFields, setup.registry, crossFieldCollection.validators);
         formInstance = untracked(() => form(this.entity, schema));
       } else {
         formInstance = untracked(() => form(this.entity));
       }
 
-      // Register the root form field in the registry for context access
-      this.rootFormRegistry.registerRootForm(formInstance);
+      untracked(() => this.rootFormRegistry.registerRootForm(formInstance));
 
       return formInstance;
     });

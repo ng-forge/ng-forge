@@ -149,6 +149,6 @@ export function isEqual(a: any, b: any): boolean {
     return keysA.every((key) => keysB.includes(key) && isEqual(a[key], b[key]));
   }
 
-  // Primitives
-  return a === b;
+  // Primitives - use Object.is to handle NaN correctly (NaN === NaN is false, but Object.is(NaN, NaN) is true)
+  return Object.is(a, b);
 }

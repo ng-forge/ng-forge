@@ -87,6 +87,8 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
     it('should map field with logic', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ show: false, field: 'test' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'field',
@@ -161,6 +163,8 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         });
 
         const formValue = signal({ requirePassword: true, password: '' });
+        // Register the form value signal BEFORE form creation for cross-field logic
+        rootFormRegistry.registerFormValueSignal(formValue as any);
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'password',

@@ -23,6 +23,15 @@ function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
 /**
  * Single entry point to map field data into form
  * This is the main function that should be called from the dynamic form component
+ *
+ * Cross-field logic (formValue.*) is handled automatically by createLogicFunction
+ * which uses RootFormRegistryService. No special context needed.
+ *
+ * Cross-field validators are skipped at field level - they are collected and
+ * applied at form level using validateTree.
+ *
+ * @param fieldDef The field definition to map
+ * @param fieldPath The Angular Signal Forms schema path
  */
 export function mapFieldToForm(fieldDef: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   // Cast to FieldWithValidation to access validation properties
@@ -56,13 +65,16 @@ export function mapFieldToForm(fieldDef: FieldDef<any>, fieldPath: SchemaPath<an
   applySimpleValidationRules(validationField, fieldPath);
 
   // Apply advanced validators if they exist
+  // Cross-field validators are skipped here (detected by validator-factory)
+  // and applied at form level via validateTree
   if (validationField.validators) {
     validationField.validators.forEach((validatorConfig) => {
-      applyValidator(validatorConfig, fieldPath);
+      applyValidator(validatorConfig, fieldPath, fieldDef.key);
     });
   }
 
   // Apply logic if it exists
+  // Cross-field logic (formValue.*) is handled automatically by createLogicFunction
   if (validationField.logic) {
     validationField.logic.forEach((logicConfig) => {
       applyLogic(logicConfig, fieldPath);
@@ -230,7 +242,7 @@ function mapGroupFieldToForm(groupField: FieldDef<any>, fieldPath: SchemaPath<an
  * by the ArrayFieldComponent which creates dynamic field instances
  * with indexed keys (e.g., 'items[0]', 'items[1]').
  */
-function mapArrayFieldToForm(arrayField: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
+function mapArrayFieldToForm(arrayField: FieldDef<any>, _fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   if (!isArrayField(arrayField) || !arrayField.fields) {
     return;
   }

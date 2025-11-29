@@ -32,7 +32,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
 
       const formInstance = form(
         formValue,
-        schema<typeof formValue>((path) => {
+        schema<{ email: string }>((path) => {
           applyLogic(config, path.email);
         }),
       );
@@ -47,7 +47,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
 
       // ❌ WRONG PATTERN: formInstance().controls (should fail or be undefined)
       const rootState = formInstance();
-      expect(rootState.controls).toBeUndefined(); // No controls property in Signal Forms!
+      expect('controls' in rootState).toBe(false); // No controls property in Signal Forms!
     });
   });
 
@@ -61,7 +61,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
 
       const formInstance = form(
         formValue,
-        schema<typeof formValue>((path) => {
+        schema<{ username: string }>((path) => {
           applyLogic(config, path.username);
         }),
       );
@@ -72,7 +72,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
 
       // ❌ WRONG PATTERN (would throw if we tried to access it)
       const rootState = formInstance();
-      expect(rootState.controls).toBeUndefined();
+      expect('controls' in rootState).toBe(false);
     });
   });
 
@@ -86,7 +86,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
 
       const formInstance = form(
         formValue,
-        schema<typeof formValue>((path) => {
+        schema<{ email: string }>((path) => {
           applyLogic(hiddenConfig, path.email);
         }),
       );
@@ -105,6 +105,8 @@ describe('Signal Forms API Pattern Confirmation', () => {
   it('should confirm conditional logic works with proper registry setup', () => {
     runInInjectionContext(injector, () => {
       const formValue = signal({ contactMethod: 'phone', email: 'test@example.com' });
+      // Register the form value signal BEFORE form creation for cross-field logic
+      rootFormRegistry.registerFormValueSignal(formValue as any);
 
       const hiddenConfig: LogicConfig = {
         type: 'hidden',
@@ -118,7 +120,7 @@ describe('Signal Forms API Pattern Confirmation', () => {
 
       const formInstance = form(
         formValue,
-        schema<typeof formValue>((path) => {
+        schema<{ contactMethod: string; email: string }>((path) => {
           applyLogic(hiddenConfig, path.email);
         }),
       );

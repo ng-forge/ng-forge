@@ -10,6 +10,7 @@ import { FIELD_REGISTRY } from '../../models/field-type';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { EventBus } from '../../events';
+import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 
 describe('GroupFieldComponent', () => {
   function setupGroupTest(field: GroupField<any>, value?: Record<string, unknown>) {
@@ -24,6 +25,7 @@ describe('GroupFieldComponent', () => {
       providers: [
         provideDynamicForm(),
         EventBus,
+        FunctionRegistryService,
         {
           provide: FIELD_REGISTRY,
           useValue: new Map([['test', mockFieldType]]),

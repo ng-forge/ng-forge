@@ -19,6 +19,7 @@ import {
 import { inject } from '@angular/core';
 import {
   AsyncValidatorConfig,
+  BuiltInValidatorConfig,
   CustomValidatorConfig,
   HttpValidatorConfig,
   ValidatorConfig,
@@ -29,6 +30,7 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
+import { isCrossFieldValidator, isCrossFieldBuiltInValidator, hasCrossFieldWhenCondition } from '../cross-field/cross-field-detector';
 
 /**
  * Helper to create conditional logic function from when expression.
@@ -68,9 +70,32 @@ function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
  * TypeScript type. The type assertions to specific types (string, number) are safe
  * because Angular's validators perform runtime value checks regardless of the static
  * type parameter.
+ *
+ * Cross-field validators (those referencing formValue.*) are skipped at field level.
+ * They are collected by the parent form component using collectCrossFieldEntries
+ * and executed at form level using validateTree.
+ *
+ * @param config The validator configuration
+ * @param fieldPath The field path to apply the validator to
+ * @param fieldKey Optional field key (used for logging)
  */
-export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
+export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>, fieldKey?: string): void {
   const path = toSupportedPath(fieldPath);
+
+  // Check if this is a built-in validator with a cross-field expression
+  // These are collected at form level - skip here
+  if (isCrossFieldBuiltInValidator(config)) {
+    // Cross-field validators are handled at form level via validateTree
+    return;
+  }
+
+  // Check if the validator has a cross-field `when` condition
+  // These are collected at form level - skip here
+  if (hasCrossFieldWhenCondition(config)) {
+    // Cross-field validators are handled at form level via validateTree
+    return;
+  }
+
   switch (config.type) {
     case 'required':
       if (config.when) {
@@ -147,7 +172,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       break;
 
     case 'custom':
-      applyCustomValidator(config, path);
+      applyCustomValidator(config, path, fieldKey);
       break;
 
     case 'customAsync':
@@ -162,10 +187,23 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
 
 /**
  * Apply custom validator to field path using Angular's public validate() API
- * Supports both function-based and expression-based validators
+ * Supports both function-based and expression-based validators.
+ *
+ * Cross-field validators (those referencing formValue.*) are skipped at field level.
+ * They are collected at form level and executed via validateTree.
+ *
+ * @param config The custom validator configuration
+ * @param fieldPath The field path to apply validation to
+ * @param fieldKey Optional field key (used for logging)
  */
-function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<any>): void {
-  // Determine validator type and create appropriate validator function
+function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<any>, fieldKey?: string): void {
+  // Check if this is a cross-field validator - skip at field level
+  if (isCrossFieldValidator(config)) {
+    // Cross-field validators are handled at form level via validateTree
+    return;
+  }
+
+  // Non-cross-field validators: apply at field level as before
   let validatorFn: (ctx: FieldContext<any>) => ValidationError | ValidationError[] | null;
 
   if (config.expression) {
@@ -370,7 +408,11 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
 
 /**
  * Apply multiple validators to a field path
+ *
+ * @param configs Array of validator configurations
+ * @param fieldPath The field path to apply validators to
+ * @param fieldKey Optional field key (used for logging)
  */
-export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
-  configs.forEach((config) => applyValidator(config, fieldPath));
+export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>, fieldKey?: string): void {
+  configs.forEach((config) => applyValidator(config, fieldPath, fieldKey));
 }

@@ -1,7 +1,11 @@
-import { inject, Injectable } from '@angular/core';
-import { FieldContext } from '@angular/forms/signals';
+import { inject, Injectable, isSignal, untracked } from '@angular/core';
+import { ChildFieldContext, FieldContext } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { RootFormRegistryService } from './root-form-registry.service';
+
+function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is ChildFieldContext<TValue> {
+  return 'key' in context && isSignal(context.key);
+}
 
 /**
  * Service that provides field evaluation context by combining
@@ -26,24 +30,27 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
     formId = 'default',
   ): EvaluationContext {
-    const fieldValue = fieldContext.value();
+    // Use untracked() to read the field value WITHOUT creating a reactive dependency.
+    // This prevents infinite loops when logic functions are evaluated inside computed signals.
+    const fieldValue = untracked(() => fieldContext.value());
 
-    // Get root form value from registry
-    const rootForm = this.rootFormRegistry.getRootForm(formId);
-    let formValue: Record<string, unknown> = {};
-
-    if (rootForm && typeof rootForm === 'function') {
-      try {
-        // Call rootForm() to get FieldState, then call value() to get the current form value reactively
-        // This establishes a reactive dependency so the logic function re-evaluates when form values change
-        const rootValue = rootForm().value();
-        if (rootValue && typeof rootValue === 'object' && !Array.isArray(rootValue)) {
-          formValue = rootValue as Record<string, unknown>;
-        }
-      } catch (error) {
-        console.warn('Failed to get root form value from registry:', error);
-      }
-    }
+    // Get form value using the unified method, wrapped in untracked() to prevent
+    // reactive dependencies. This allows validators and dynamic values to access
+    // form values without causing infinite loops.
+    //
+    // Without untracked():
+    // 1. Validator runs and reads formValue via this context
+    // 2. This creates a signal dependency on the form's value
+    // 3. Any field change updates the form value signal
+    // 4. All validators that read formValue re-run
+    // 5. They read formValue again, creating new dependencies
+    // 6. Infinite loop until browser freezes
+    //
+    // With untracked():
+    // - Form value is read as a snapshot, no dependency is created
+    // - Validators still run when their own field value changes (via fieldValue)
+    // - Cross-field validation still works, just without cascading re-evaluation
+    const formValue = untracked(() => this.rootFormRegistry.getFormValue(formId));
 
     // Get field path from form context
     const formContext = this.rootFormRegistry.getFormContext(formId);
@@ -78,9 +85,9 @@ export class FieldContextRegistryService {
    */
   private extractFieldPath(fieldContext: FieldContext<unknown>, formContext: Record<string, unknown>): string {
     // Check if the field context has a key property (for child fields)
-    const extendedContext = fieldContext as any;
+    const extendedContext = fieldContext;
 
-    if (extendedContext.key && typeof extendedContext.key === 'function') {
+    if (isChildFieldContext(extendedContext)) {
       try {
         const key = extendedContext.key();
         const fieldPaths = (formContext.fieldPaths as Record<string, string>) || {};
@@ -95,25 +102,44 @@ export class FieldContextRegistryService {
   }
 
   /**
-   * Creates a simplified evaluation context with just the current field value.
-   * Used as a fallback when root form registry is not available.
+   * Creates a REACTIVE evaluation context for logic functions.
+   *
+   * Unlike createEvaluationContext, this method does NOT use untracked(),
+   * which allows logic functions (hidden, readonly, disabled, required) to
+   * create reactive dependencies on form values.
+   *
+   * When a dependent field value changes, the logic function will be re-evaluated.
+   *
+   * IMPORTANT: For this to work correctly, the form value signal should be
+   * registered with rootFormRegistry.registerFormValueSignal() BEFORE the
+   * form is created. This ensures the logic function can read form values
+   * during schema evaluation.
+   *
+   * NOTE: This should ONLY be used for logic functions, not validators.
+   * Validators should use createEvaluationContext with untracked() to prevent
+   * infinite reactive loops. Validators with cross-field dependencies should be
+   * hoisted to form-level using validateTree.
    */
-  createFallbackContext<TValue>(
+  createReactiveEvaluationContext<TValue>(
     fieldContext: FieldContext<TValue>,
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
+    formId = 'default',
   ): EvaluationContext {
+    // Read field value reactively (creates a dependency)
     const fieldValue = fieldContext.value();
 
-    // Try to use current field value as form value if it's an object
-    let formValue: Record<string, unknown> = {};
-    if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {
-      formValue = fieldValue as Record<string, unknown>;
-    }
+    // Get form value using the new unified method that prefers the direct signal
+    // This creates reactive dependencies on the form value signal
+    const formValue = this.rootFormRegistry.getFormValue(formId);
+
+    // Get field path from form context
+    const formContext = this.rootFormRegistry.getFormContext(formId);
+    const fieldPath = this.extractFieldPath(fieldContext, formContext);
 
     return {
       fieldValue,
       formValue,
-      fieldPath: '',
+      fieldPath,
       customFunctions: customFunctions || {},
     };
   }
