@@ -1,4 +1,4 @@
-import { ButtonField, FieldComponent, FieldDef, FormEvent } from '@ng-forge/dynamic-forms';
+import { ButtonField, FieldComponent, FieldDef, FormEvent, LogicConfig } from '@ng-forge/dynamic-forms';
 
 export interface PrimeButtonProps {
   severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
@@ -26,6 +26,8 @@ export interface PrimeSubmitButtonField extends Omit<FieldDef<PrimeButtonProps>,
   disabled?: boolean;
   className?: string;
   props?: PrimeButtonProps;
+  /** Logic rules for dynamic disabled state (overrides form-level defaults) */
+  logic?: LogicConfig[];
 }
 
 /** Next page button field - with preconfigured NextPageEvent */
@@ -36,6 +38,8 @@ export interface PrimeNextButtonField extends Omit<FieldDef<PrimeButtonProps>, '
   disabled?: boolean;
   className?: string;
   props?: PrimeButtonProps;
+  /** Logic rules for dynamic disabled state (overrides form-level defaults) */
+  logic?: LogicConfig[];
 }
 
 /** Previous page button field - with preconfigured PreviousPageEvent */

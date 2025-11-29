@@ -1,40 +1,46 @@
-import { Binding, computed, inject, inputBinding, isSignal } from '@angular/core';
+import { Binding, inject, inputBinding, isSignal } from '@angular/core';
 import {
   AddArrayItemEvent,
   ARRAY_CONTEXT,
   baseFieldMapper,
   FIELD_SIGNAL_CONTEXT,
   FieldDef,
+  FieldWithValidation,
   NextPageEvent,
   PreviousPageEvent,
   RemoveArrayItemEvent,
+  resolveNextButtonDisabled,
+  resolveSubmitButtonDisabled,
   SubmitEvent,
 } from '@ng-forge/dynamic-forms';
 import { AddArrayItemButtonField, RemoveArrayItemButtonField } from './prime-button.type';
 
 /**
- * Mapper for submit button - preconfigures SubmitEvent and disables when form is invalid
+ * Mapper for submit button - preconfigures SubmitEvent
+ *
+ * Disabled state is resolved using the button-logic-resolver which considers:
+ * 1. Explicit `disabled: true` on the field definition
+ * 2. Field-level `logic` array (if present, overrides form-level defaults)
+ * 3. Form-level `options.submitButton` defaults (disableWhenInvalid, disableWhileSubmitting)
  */
 export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
-  // Inject field signal context to access form state
+  // Inject field signal context to access form state and options
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
 
   bindings.push(inputBinding('event', () => SubmitEvent));
 
-  // Add disabled binding - disabled if explicitly set OR if form is invalid
-  // form is a callable signal, calling form() returns the form instance with valid()/invalid() methods
-  const formInstance = fieldSignalContext.form;
-  bindings.push(
-    inputBinding('disabled', () =>
-      computed(() => {
-        const explicitlyDisabled = fieldDef.disabled || false;
-        // Call formInstance() to get the current form state and check invalid()
-        return explicitlyDisabled || formInstance().invalid();
-      }),
-    ),
-  );
+  // Use button-logic-resolver to compute disabled state
+  const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
+  const disabledSignal = resolveSubmitButtonDisabled({
+    form: fieldSignalContext.form,
+    formOptions: fieldSignalContext.formOptions,
+    fieldLogic: fieldWithLogic.logic,
+    explicitlyDisabled: fieldDef.disabled,
+  });
+
+  bindings.push(inputBinding('disabled', () => disabledSignal()));
 
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));
@@ -45,17 +51,31 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
 
 /**
  * Mapper for next page button - preconfigures NextPageEvent
- * Note: Does not auto-disable based on validation. Users can explicitly disable if needed.
+ *
+ * Disabled state is resolved using the button-logic-resolver which considers:
+ * 1. Explicit `disabled: true` on the field definition
+ * 2. Field-level `logic` array (if present, overrides form-level defaults)
+ * 3. Form-level `options.nextButton` defaults (disableWhenPageInvalid, disableWhileSubmitting)
  */
 export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
   const bindings: Binding[] = baseFieldMapper(fieldDef);
 
+  // Inject field signal context to access form state and options
+  const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
+
   bindings.push(inputBinding('event', () => NextPageEvent));
 
-  // Add disabled binding only if explicitly set by user
-  if (fieldDef.disabled !== undefined) {
-    bindings.push(inputBinding('disabled', () => fieldDef.disabled));
-  }
+  // Use button-logic-resolver to compute disabled state
+  const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
+  const disabledSignal = resolveNextButtonDisabled({
+    form: fieldSignalContext.form,
+    formOptions: fieldSignalContext.formOptions,
+    fieldLogic: fieldWithLogic.logic,
+    explicitlyDisabled: fieldDef.disabled,
+    currentPageValid: fieldSignalContext.currentPageValid,
+  });
+
+  bindings.push(inputBinding('disabled', () => disabledSignal()));
 
   if (fieldDef.hidden !== undefined) {
     bindings.push(inputBinding('hidden', () => fieldDef.hidden));

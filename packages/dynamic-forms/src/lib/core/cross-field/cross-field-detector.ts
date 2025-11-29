@@ -1,5 +1,5 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { LogicConfig } from '../../models/logic/logic-config';
+import { FormStateCondition, isFormStateCondition, LogicConfig } from '../../models/logic/logic-config';
 import { CustomValidatorConfig, ValidatorConfig } from '../../models/validation/validator-config';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 import { CustomFunctionScope } from '../expressions/custom-function-types';
@@ -44,9 +44,12 @@ export interface CrossFieldDetectionContext {
  * @param context Optional context providing function scope lookup
  * @returns true if the expression references other fields
  */
-export function isCrossFieldExpression(expr: ConditionalExpression | boolean | undefined, context?: CrossFieldDetectionContext): boolean {
-  // Boolean or undefined conditions are not cross-field
-  if (expr === undefined || typeof expr === 'boolean') {
+export function isCrossFieldExpression(
+  expr: ConditionalExpression | boolean | FormStateCondition | undefined,
+  context?: CrossFieldDetectionContext,
+): boolean {
+  // Boolean, undefined, or FormStateCondition (form-level state checks) are not cross-field
+  if (expr === undefined || typeof expr === 'boolean' || isFormStateCondition(expr)) {
     return false;
   }
 

@@ -91,6 +91,12 @@ export default [
     loadChildren: () => import('./scenario-list/scenario-list.routes'),
   },
 
+  // Submission Behavior Tests - Tests for form submission and button disabled states
+  {
+    path: 'submission-behavior',
+    loadChildren: () => import('./submission-behavior/submission-behavior.routes'),
+  },
+
   // User Journey Flows Tests - Refactored into folder structure
   {
     path: 'user-journey-flows',

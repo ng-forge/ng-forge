@@ -1,4 +1,4 @@
-import { ButtonField, FieldComponent, FieldDef, FormEvent } from '@ng-forge/dynamic-forms';
+import { ButtonField, FieldComponent, FieldDef, FormEvent, LogicConfig } from '@ng-forge/dynamic-forms';
 
 export interface MatButtonProps {
   color?: 'primary' | 'accent' | 'warn';
@@ -20,6 +20,8 @@ export interface MatSubmitButtonField extends Omit<FieldDef<MatButtonProps>, 'ev
   disabled?: boolean;
   className?: string;
   props?: MatButtonProps;
+  /** Logic rules for dynamic disabled state (overrides form-level defaults) */
+  logic?: LogicConfig[];
 }
 
 /** Next page button field - with preconfigured NextPageEvent */
@@ -30,6 +32,8 @@ export interface MatNextButtonField extends Omit<FieldDef<MatButtonProps>, 'even
   disabled?: boolean;
   className?: string;
   props?: MatButtonProps;
+  /** Logic rules for dynamic disabled state (overrides form-level defaults) */
+  logic?: LogicConfig[];
 }
 
 /** Previous page button field - with preconfigured PreviousPageEvent */
