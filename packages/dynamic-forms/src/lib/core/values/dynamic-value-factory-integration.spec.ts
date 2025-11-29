@@ -1,8 +1,8 @@
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { form, schema, type FieldContext } from '@angular/forms/signals';
+import { type FieldContext, form, schema } from '@angular/forms/signals';
 import { createDynamicValueFunction } from './dynamic-value-factory';
-import { RootFormRegistryService, FieldContextRegistryService } from '../registry';
+import { FieldContextRegistryService, RootFormRegistryService } from '../registry';
 
 describe('dynamic-value-factory (integration)', () => {
   let injector: Injector;
@@ -32,7 +32,7 @@ describe('dynamic-value-factory (integration)', () => {
       const formValue = signal({ testField: 'hello' });
       const formInstance = form(
         formValue,
-        schema<{ testField: string }>(() => {}),
+        schema<{ testField: string }>(() => void 0),
       );
       rootFormRegistry.registerRootForm(formInstance);
 
@@ -51,7 +51,7 @@ describe('dynamic-value-factory (integration)', () => {
 
       const formInstance = form(
         formValue,
-        schema<{ username: string; email: string }>(() => {}),
+        schema<{ username: string; email: string }>(() => void 0),
       );
       rootFormRegistry.registerRootForm(formInstance);
 
@@ -70,7 +70,7 @@ describe('dynamic-value-factory (integration)', () => {
 
       const formInstance = form(
         formValue,
-        schema<{ username: string; email: string }>(() => {}),
+        schema<{ username: string; email: string }>(() => void 0),
       );
       rootFormRegistry.registerRootForm(formInstance);
 
@@ -87,7 +87,7 @@ describe('dynamic-value-factory (integration)', () => {
       const formValue = signal({ testField: 'test' });
       const formInstance = form(
         formValue,
-        schema<{ testField: string }>(() => {}),
+        schema<{ testField: string }>(() => void 0),
       );
       rootFormRegistry.registerRootForm(formInstance);
 
@@ -104,7 +104,7 @@ describe('dynamic-value-factory (integration)', () => {
       const formValue = signal({ testField: 'test' });
       const formInstance = form(
         formValue,
-        schema<{ testField: string }>(() => {}),
+        schema<{ testField: string }>(() => void 0),
       );
       rootFormRegistry.registerRootForm(formInstance);
 
