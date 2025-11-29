@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { flattenFields, flattenFieldsForRendering, FlattenedField } from './field-flattener';
+import { flattenFields, FlattenedField } from './field-flattener';
 import { FieldDef } from '../../definitions';
 import { FieldTypeDefinition } from '../../models/field-type';
 
@@ -445,7 +445,7 @@ describe('field-flattener', () => {
     });
   });
 
-  describe('flattenFieldsForRendering', () => {
+  describe('flattenFields with preserveRows', () => {
     it('should preserve row fields for rendering', () => {
       const fields: FieldDef<any>[] = [
         {
@@ -458,7 +458,7 @@ describe('field-flattener', () => {
         },
       ];
 
-      const result = flattenFieldsForRendering(fields, registry);
+      const result = flattenFields(fields, registry, { preserveRows: true });
 
       expect(result).toHaveLength(1);
       expect(result[0].type).toBe('row');
@@ -480,7 +480,7 @@ describe('field-flattener', () => {
         },
       ];
 
-      const result = flattenFieldsForRendering(fields, registry);
+      const result = flattenFields(fields, registry, { preserveRows: true });
 
       expect(result).toEqual([
         { type: 'input', key: 'email' },
@@ -507,7 +507,7 @@ describe('field-flattener', () => {
         },
       ];
 
-      const result = flattenFieldsForRendering(fields, registry);
+      const result = flattenFields(fields, registry, { preserveRows: true });
 
       expect(result).toHaveLength(2);
       expect(result[0].type).toBe('row');
@@ -534,7 +534,7 @@ describe('field-flattener', () => {
         },
       ];
 
-      const result = flattenFieldsForRendering(fields, registry);
+      const result = flattenFields(fields, registry, { preserveRows: true });
 
       expect(result).toHaveLength(2);
       expect(result[0].type).toBe('group');
