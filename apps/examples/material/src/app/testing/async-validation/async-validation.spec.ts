@@ -1,13 +1,15 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Async Validation Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4201/#/test/async-validation');
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/async-validation');
   });
 
   test.describe('HTTP GET Validator', () => {
-    test('should validate username availability using HTTP GET validator', async ({ page }) => {
+    test('should validate username availability using HTTP GET validator', async ({ page, helpers }) => {
       // Mock API responses
       await page.route('**/api/users/check-username*', (route) => {
         const url = route.request().url();
@@ -30,7 +32,9 @@ test.describe('Async Validation Tests', () => {
         }
       });
 
-      const scenario = page.locator('[data-testid="http-get-validator-test"]');
+      const scenario = helpers.getScenario('http-get-validator-test');
+      await page.goto('http://localhost:4201/#/test/async-validation/http-get-validator');
+      await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
       // Try taken username
@@ -63,7 +67,7 @@ test.describe('Async Validation Tests', () => {
   });
 
   test.describe('HTTP POST Validator', () => {
-    test('should validate email using HTTP POST validator', async ({ page }) => {
+    test('should validate email using HTTP POST validator', async ({ page, helpers }) => {
       // Mock API responses
       await page.route('**/api/users/validate-email', async (route) => {
         const request = route.request();
@@ -86,7 +90,9 @@ test.describe('Async Validation Tests', () => {
         }
       });
 
-      const scenario = page.locator('[data-testid="http-post-validator-test"]');
+      const scenario = helpers.getScenario('http-post-validator-test');
+      await page.goto('http://localhost:4201/#/test/async-validation/http-post-validator');
+      await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
       // Try invalid email
@@ -119,8 +125,10 @@ test.describe('Async Validation Tests', () => {
   });
 
   test.describe('Resource-Based Async Validator', () => {
-    test('should validate product code using resource-based async validator', async ({ page }) => {
-      const scenario = page.locator('[data-testid="async-resource-validator-test"]');
+    test('should validate product code using resource-based async validator', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('async-resource-validator-test');
+      await page.goto('http://localhost:4201/#/test/async-validation/async-resource-validator');
+      await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
       // Try taken product code (defined in mock database in component)
@@ -153,13 +161,15 @@ test.describe('Async Validation Tests', () => {
   });
 
   test.describe('HTTP Error Handling', () => {
-    test('should handle HTTP validation network errors gracefully', async ({ page }) => {
+    test('should handle HTTP validation network errors gracefully', async ({ page, helpers }) => {
       // Mock API to return network error for username check
       await page.route('**/api/users/check-username*', (route) => {
         route.abort('failed');
       });
 
-      const scenario = page.locator('[data-testid="http-error-handling-test"]');
+      const scenario = helpers.getScenario('http-error-handling-test');
+      await page.goto('http://localhost:4201/#/test/async-validation/http-error-handling');
+      await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
       // Fill username
@@ -180,7 +190,7 @@ test.describe('Async Validation Tests', () => {
   });
 
   test.describe('Multiple Validators', () => {
-    test('should validate multiple async validators on same field', async ({ page }) => {
+    test('should validate multiple async validators on same field', async ({ page, helpers }) => {
       // Mock API responses
       await page.route('**/api/users/check-username*', (route) => {
         const url = route.request().url();
@@ -193,7 +203,9 @@ test.describe('Async Validation Tests', () => {
         });
       });
 
-      const scenario = page.locator('[data-testid="multiple-validators-test"]');
+      const scenario = helpers.getScenario('multiple-validators-test');
+      await page.goto('http://localhost:4201/#/test/async-validation/multiple-validators');
+      await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
       const usernameInput = scenario.locator('#username input');

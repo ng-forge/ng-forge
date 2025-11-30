@@ -1,15 +1,20 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('User Workflows E2E Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4201/#/test/user-workflows');
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/user-workflows');
   });
 
   test.describe('User Registration Workflow', () => {
-    test('should complete full registration workflow', async ({ page }) => {
+    test('should complete full registration workflow', async ({ page, helpers }) => {
+      // Navigate to the specific scenario
+      await helpers.navigateToScenario('/test/user-workflows/registration');
+
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="registration-workflow"]');
+      const scenario = helpers.getScenario('registration-workflow');
       await expect(scenario).toBeVisible();
 
       // Submit button should be disabled initially (form invalid)
@@ -64,9 +69,12 @@ test.describe('User Workflows E2E Tests', () => {
   });
 
   test.describe('Profile Edit Workflow', () => {
-    test('should edit and save user profile', async ({ page }) => {
+    test('should edit and save user profile', async ({ page, helpers }) => {
+      // Navigate to the specific scenario
+      await helpers.navigateToScenario('/test/user-workflows/profile-edit');
+
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="profile-edit"]');
+      const scenario = helpers.getScenario('profile-edit');
       await expect(scenario).toBeVisible();
 
       // Verify initial values
@@ -97,9 +105,12 @@ test.describe('User Workflows E2E Tests', () => {
   });
 
   test.describe('Multi-Field Validation Workflow', () => {
-    test('should validate required fields before allowing submission', async ({ page }) => {
+    test('should validate required fields before allowing submission', async ({ page, helpers }) => {
+      // Navigate to the specific scenario
+      await helpers.navigateToScenario('/test/user-workflows/validation');
+
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="validation-workflow"]');
+      const scenario = helpers.getScenario('validation-workflow');
       await expect(scenario).toBeVisible();
 
       const usernameInput = scenario.locator('#username input');
@@ -136,9 +147,12 @@ test.describe('User Workflows E2E Tests', () => {
   });
 
   test.describe('Form Reset Workflow', () => {
-    test('should reset form after modification', async ({ page }) => {
+    test('should reset form after modification', async ({ page, helpers }) => {
+      // Navigate to the specific scenario
+      await helpers.navigateToScenario('/test/user-workflows/reset');
+
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="reset-workflow"]');
+      const scenario = helpers.getScenario('reset-workflow');
       await expect(scenario).toBeVisible();
 
       const nameInput = scenario.locator('#name input');
@@ -173,9 +187,12 @@ test.describe('User Workflows E2E Tests', () => {
   });
 
   test.describe('Complex Form Workflow', () => {
-    test('should complete contact form', async ({ page }) => {
+    test('should complete contact form', async ({ page, helpers }) => {
+      // Navigate to the specific scenario
+      await helpers.navigateToScenario('/test/user-workflows/contact-form');
+
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="contact-form"]');
+      const scenario = helpers.getScenario('contact-form');
       await expect(scenario).toBeVisible();
 
       const submitButton = scenario.locator('#submit button');

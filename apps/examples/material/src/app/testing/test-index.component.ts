@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TEST_SUITE_REGISTRY } from './shared/test-suite.registry';
 
 @Component({
   selector: 'example-test-index',
@@ -7,13 +8,14 @@ import { RouterLink } from '@angular/router';
   template: `
     <div class="test-index-container">
       <h1>E2E Test Scenarios</h1>
-      <p class="subtitle">Browse and test all E2E test scenarios</p>
+      <p class="subtitle">Browse and test all E2E test scenarios ({{ testSuites.length }} suites)</p>
 
       <div class="test-suites">
-        @for (suite of testSuites; track suite) {
+        @for (suite of testSuites; track suite.id) {
           <div class="suite-card">
             <h2>{{ suite.title }}</h2>
             <p class="suite-description">{{ suite.description }}</p>
+            <span class="scenario-count">{{ suite.scenarios.length }} scenarios</span>
             <a [routerLink]="suite.path" class="suite-link">View Tests →</a>
           </div>
         }
@@ -86,95 +88,16 @@ import { RouterLink } from '@angular/router';
         background: #1976d2;
         color: white;
       }
+
+      .scenario-count {
+        display: block;
+        color: #888;
+        font-size: 0.8rem;
+        margin-bottom: 0.75rem;
+      }
     `,
   ],
 })
 export class TestIndexComponent {
-  testSuites = [
-    {
-      title: 'Advanced Validation',
-      description: 'Custom validators, cross-field validation, conditional validation',
-      path: '/test/advanced-validation',
-    },
-    {
-      title: 'Array Fields',
-      description: 'Dynamic array operations, add/remove items, nested arrays',
-      path: '/test/array-fields',
-    },
-    {
-      title: 'Async Validation',
-      description: 'HTTP validators, resource-based validation, error handling',
-      path: '/test/async-validation',
-    },
-    {
-      title: 'Comprehensive Field Tests',
-      description: 'All field types, validation, grid layouts, state management',
-      path: '/test/comprehensive-field-tests',
-    },
-    {
-      title: 'Cross-Field Validation',
-      description: 'Password matching, conditional requirements, dependent fields',
-      path: '/test/cross-field-validation',
-    },
-    {
-      title: 'Cross-Page Validation',
-      description: 'Multi-page forms with validation across pages',
-      path: '/test/cross-page-validation',
-    },
-    {
-      title: 'Demo Scenarios',
-      description: 'Real-world form scenarios and use cases',
-      path: '/test/demo-scenarios',
-    },
-    {
-      title: 'Error Handling',
-      description: 'Form errors, validation errors, submission errors',
-      path: '/test/error-handling',
-    },
-    {
-      title: 'Essential Tests',
-      description: 'Core functionality tests',
-      path: '/test/essential-tests',
-    },
-    {
-      title: 'Expression-Based Logic',
-      description: 'Dynamic expressions, conditional logic',
-      path: '/test/expression-based-logic',
-    },
-    {
-      title: 'Form Reset & Clear',
-      description: 'Reset to defaults, clear forms, state management',
-      path: '/test/form-reset-clear',
-    },
-    {
-      title: 'Material Components',
-      description: 'Datepicker, slider, toggle, multi-checkbox components',
-      path: '/test/material-components',
-    },
-    {
-      title: 'Multi-Page Navigation',
-      description: 'Page transitions, navigation, data persistence',
-      path: '/test/multi-page-navigation',
-    },
-    {
-      title: 'Navigation Edge Cases',
-      description: 'Page refresh, network interruptions, invalid navigation',
-      path: '/test/navigation-edge-cases',
-    },
-    {
-      title: 'Scenario List',
-      description: 'Browse all available test scenarios',
-      path: '/test/scenarios',
-    },
-    {
-      title: 'User Journey Flows',
-      description: 'Complete user workflows from start to finish',
-      path: '/test/user-journey-flows',
-    },
-    {
-      title: 'User Workflows',
-      description: 'Registration, profile editing, form submission',
-      path: '/test/user-workflows',
-    },
-  ];
+  testSuites = TEST_SUITE_REGISTRY;
 }

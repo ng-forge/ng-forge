@@ -1,19 +1,22 @@
-import { Route } from '@angular/router';
-import { InvalidConfigComponent } from './invalid-config.component';
-import { BasicTestComponent } from './basic-test.component';
+import { Routes } from '@angular/router';
+import { errorHandlingSuite, getErrorHandlingScenario } from './error-handling.suite';
 
-export default [
+const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: errorHandlingSuite },
+  },
   {
     path: 'invalid-config',
-    component: InvalidConfigComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getErrorHandlingScenario('invalid-config') },
   },
   {
     path: 'basic-test',
-    component: BasicTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getErrorHandlingScenario('basic-test') },
   },
-  {
-    path: '',
-    redirectTo: 'invalid-config',
-    pathMatch: 'full',
-  },
-] satisfies Route[];
+];
+
+export default routes;
