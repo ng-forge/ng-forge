@@ -1,8 +1,9 @@
-import { expect, setupTestLogging, test } from '../shared/fixtures';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('User Journey Flow Tests', () => {
-  setupTestLogging();
-
   test.describe('Registration Journey', () => {
     test.beforeEach(async ({ helpers }) => {
       await helpers.navigateToScenario('/test/user-journey-flows/registration-journey');

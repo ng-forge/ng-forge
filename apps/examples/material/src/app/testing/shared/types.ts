@@ -40,3 +40,7 @@ export interface FormSubmissionEvent {
   data: Record<string, unknown>;
   testId: string;
 }
+
+export interface ConsoleCheckOptions {
+  ignorePatterns?: RegExp[];
+}

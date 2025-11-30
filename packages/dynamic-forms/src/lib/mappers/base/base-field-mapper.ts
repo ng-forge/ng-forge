@@ -2,6 +2,29 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { Binding, inputBinding } from '@angular/core';
 import { getGridClassString } from '../../utils/grid-classes/grid-classes';
 
+const validationKeys = new Set(['required', 'email', 'min', 'max', 'minLength', 'maxLength', 'pattern', 'validators', 'logic']);
+
+const excludedKeys = new Set([
+  'col',
+  'type',
+  'conditionals',
+  'validation',
+  'label',
+  'className',
+  'tabIndex',
+  'props',
+  'disabled',
+  'readonly',
+  'hidden',
+  'required',
+  'minValue', // Handled by Field directive metadata (MIN)
+  'maxValue', // Handled by Field directive metadata (MAX)
+  'step', // Passed via props instead
+  'validationMessages', // Handled in value/checkbox mappers
+  'defaultValue', // Used for form reset/clear, not passed to components
+  'arrayKey',
+]);
+
 export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
   const { label, className, tabIndex, props } = fieldDef;
   const bindings: Binding[] = [];
@@ -33,28 +56,6 @@ export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
   if (props !== undefined) {
     bindings.push(inputBinding('props', () => props));
   }
-
-  const validationKeys = new Set(['required', 'email', 'min', 'max', 'minLength', 'maxLength', 'pattern', 'validators', 'logic']);
-
-  const excludedKeys = new Set([
-    'col',
-    'type',
-    'conditionals',
-    'validation',
-    'label',
-    'className',
-    'tabIndex',
-    'props',
-    'disabled',
-    'readonly',
-    'hidden',
-    'required',
-    'minValue', // Handled by Field directive metadata (MIN)
-    'maxValue', // Handled by Field directive metadata (MAX)
-    'step', // Passed via props instead
-    'validationMessages', // Handled in value/checkbox mappers
-    'defaultValue', // Used for form reset/clear, not passed to components
-  ]);
 
   for (const [key, value] of Object.entries(fieldDef)) {
     if (!excludedKeys.has(key) && !validationKeys.has(key) && value !== undefined) {

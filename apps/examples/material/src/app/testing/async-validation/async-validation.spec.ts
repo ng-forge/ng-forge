@@ -1,6 +1,7 @@
-import { expect, setupTestLogging, test } from '../shared/fixtures';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
 
 setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Async Validation Tests', () => {
   test.beforeEach(async ({ helpers }) => {

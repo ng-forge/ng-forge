@@ -1,8 +1,9 @@
-import { expect, setupTestLogging, test } from '../shared/fixtures';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Demo Scenarios E2E Tests', () => {
-  setupTestLogging();
-
   test.beforeEach(async ({ helpers }) => {
     await helpers.navigateToScenario('/test/demo-scenarios');
   });

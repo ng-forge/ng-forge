@@ -1,8 +1,9 @@
-import { expect, setupTestLogging, test } from '../shared/fixtures';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Form Reset and Clear Events Tests', () => {
-  setupTestLogging();
-
   test.beforeEach(async ({ helpers }) => {
     await helpers.navigateToScenario('/test/form-reset-clear');
   });

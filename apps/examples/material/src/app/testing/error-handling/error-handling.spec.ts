@@ -1,8 +1,11 @@
-import { expect, setupTestLogging, test } from '../shared/fixtures';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck({
+  ignorePatterns: [/Failed to load component for field type/i],
+});
 
 test.describe('Error Handling and Edge Cases', () => {
-  setupTestLogging();
-
   test.beforeEach(async ({ helpers }) => {
     await helpers.navigateToScenario('/test/error-handling');
   });

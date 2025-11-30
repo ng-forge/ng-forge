@@ -1,6 +1,7 @@
-import { expect, setupTestLogging, test } from '../shared/fixtures';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
 
 setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Array Fields E2E Tests', () => {
   test.beforeEach(async ({ helpers }) => {

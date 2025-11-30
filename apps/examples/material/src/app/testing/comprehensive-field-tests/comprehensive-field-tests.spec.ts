@@ -1,8 +1,9 @@
-import { expect, setupTestLogging, test } from '../shared/fixtures';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Comprehensive Material Field Tests', () => {
-  setupTestLogging();
-
   test.beforeEach(async ({ helpers }) => {
     await helpers.navigateToScenario('/test/comprehensive-field-tests');
   });

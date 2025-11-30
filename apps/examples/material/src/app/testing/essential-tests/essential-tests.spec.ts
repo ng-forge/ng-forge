@@ -1,6 +1,7 @@
-import { expect, setupTestLogging, test } from '../shared/fixtures';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
 
 setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Essential Tests - Quick Validation', () => {
   test('basic form functionality works', async ({ helpers }) => {
