@@ -107,6 +107,7 @@ export class SuiteIndexComponent {
   private readonly route = inject(ActivatedRoute);
 
   /** Suite passed directly as input */
+  // eslint-disable-next-line @angular-eslint/no-input-rename
   suiteInput = input<TestSuite | undefined>(undefined, { alias: 'suite' });
 
   /** Suite loaded from route data */
