@@ -61,43 +61,4 @@ export default [
     loadComponent: () => import('./shared/example-scenario.component').then((m) => m.ExampleScenarioComponent),
     data: { scenario: getScenarioById('complete-form') },
   },
-  {
-    path: 'user-registration',
-    loadComponent: () => import('./shared/example-scenario.component').then((m) => m.ExampleScenarioComponent),
-    data: { scenario: getScenarioById('user-registration') },
-  },
-  {
-    path: 'login',
-    loadComponent: () => import('./shared/example-scenario.component').then((m) => m.ExampleScenarioComponent),
-    data: { scenario: getScenarioById('login') },
-  },
-  {
-    path: 'paginated-form',
-    loadComponent: () => import('./shared/example-scenario.component').then((m) => m.ExampleScenarioComponent),
-    data: { scenario: getScenarioById('paginated-form') },
-  },
-  {
-    path: 'array',
-    loadComponent: () => import('./shared/example-scenario.component').then((m) => m.ExampleScenarioComponent),
-    data: { scenario: getScenarioById('array') },
-  },
-  {
-    path: 'group',
-    loadComponent: () => import('./shared/example-scenario.component').then((m) => m.ExampleScenarioComponent),
-    data: { scenario: getScenarioById('group') },
-  },
-  {
-    path: 'row',
-    loadComponent: () => import('./shared/example-scenario.component').then((m) => m.ExampleScenarioComponent),
-    data: { scenario: getScenarioById('row') },
-  },
-  // Special components with custom logic
-  {
-    path: 'conditional-logic-showcase',
-    loadComponent: () => import('./conditional-logic-showcase-demo.component').then((m) => m.ConditionalLogicShowcaseDemoComponent),
-  },
-  {
-    path: 'expression-validators-demo',
-    loadComponent: () => import('./expression-validators-demo.component').then((m) => m.ExpressionValidatorsDemoComponent),
-  },
 ] satisfies Route[];
