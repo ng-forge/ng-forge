@@ -1,28 +1,62 @@
-import { Route } from '@angular/router';
-import { BasicSubmissionComponent } from './basic-submission.component';
-import { ButtonDisabledStatesComponent } from './button-disabled-states.component';
-import { NextButtonPageValidationComponent } from './next-button-page-validation.component';
-import { CustomButtonLogicComponent } from './custom-button-logic.component';
+import { Routes } from '@angular/router';
+import { getSubmissionBehaviorScenario, submissionBehaviorSuite } from './submission-behavior.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./submission-behavior-index.component').then((m) => m.SubmissionBehaviorIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: submissionBehaviorSuite },
   },
   {
     path: 'basic-submission',
-    component: BasicSubmissionComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('basic-submission') },
   },
   {
-    path: 'button-disabled-states',
-    component: ButtonDisabledStatesComponent,
+    path: 'button-disabled-invalid',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('button-disabled-invalid') },
+  },
+  {
+    path: 'button-disabled-submitting',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('button-disabled-submitting') },
+  },
+  {
+    path: 'button-never-disabled',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('button-never-disabled') },
   },
   {
     path: 'next-button-page-validation',
-    component: NextButtonPageValidationComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('next-button-page-validation') },
   },
   {
-    path: 'custom-button-logic',
-    component: CustomButtonLogicComponent,
+    path: 'next-button-never-disabled',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('next-button-never-disabled') },
   },
-] satisfies Route[];
+  {
+    path: 'form-state-condition',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('form-state-condition') },
+  },
+  {
+    path: 'conditional-expression',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('conditional-expression') },
+  },
+  {
+    path: 'explicit-disabled',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('explicit-disabled') },
+  },
+  {
+    path: 'http-error-handling',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('http-error-handling') },
+  },
+];
+
+export default routes;

@@ -1,11 +1,16 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
 
 setupTestLogging();
-setupConsoleCheck();
+// Ignore "Failed to load resource" errors from intentional HTTP error responses (500, 422, etc.)
+setupConsoleCheck({
+  ignorePatterns: [/Failed to load resource/],
+});
 
 test.describe('Submission Behavior Tests', () => {
   test.describe('Basic Submission', () => {
-    test.beforeEach(async ({ helpers }) => {
+    test.beforeEach(async ({ helpers, mockApi }) => {
+      // Set up mock endpoint before navigating
+      await mockApi.mockSuccess('/api/basic-submit', { delay: 1000 });
       await helpers.navigateToScenario('/test/submission-behavior/basic-submission');
     });
 
@@ -30,17 +35,14 @@ test.describe('Submission Behavior Tests', () => {
       // Submitting indicator should be visible
       await expect(page.locator('[data-testid="submitting-indicator"]')).toBeVisible();
 
-      // Wait for submission to complete (1.5s delay in component)
-      await page.waitForTimeout(2000);
+      // Wait for submission to complete
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
 
       // Button should be enabled again after submission
       await expect(submitButton).toBeEnabled();
-
-      // Submission result should be visible
-      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible();
     });
 
-    test('should increment submission count on successful submission', async ({ page, helpers }) => {
+    test('should increment submission count on successful submission', async ({ page, helpers, mockApi }) => {
       const scenario = helpers.getScenario('basic-submission');
       await expect(scenario).toBeVisible();
 
@@ -55,19 +57,27 @@ test.describe('Submission Behavior Tests', () => {
       await scenario.locator('#submitForm button').click();
 
       // Wait for submission to complete
-      await page.waitForTimeout(2000);
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
 
       // Submission count should be incremented
       await expect(page.locator('[data-testid="submission-count"]')).toContainText('Submission count: 1');
+
+      // Verify request was made with correct data
+      const requests = mockApi.getInterceptedRequests('/api/basic-submit');
+      expect(requests).toHaveLength(1);
+      expect(requests[0].body).toEqual({
+        email: 'test@example.com',
+        name: 'Test User',
+      });
     });
   });
 
-  test.describe('Button Disabled States', () => {
+  test.describe('Button Disabled When Invalid', () => {
     test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/test/submission-behavior/button-disabled-states');
+      await helpers.navigateToScenario('/test/submission-behavior/button-disabled-invalid');
     });
 
-    test('should disable submit button when form is invalid', async ({ page, helpers }) => {
+    test('should disable submit button when form is invalid', async ({ helpers }) => {
       const scenario = helpers.getScenario('button-disabled-invalid');
       await expect(scenario).toBeVisible();
 
@@ -85,6 +95,14 @@ test.describe('Submission Behavior Tests', () => {
       // Submit button should be enabled
       await expect(submitButton).toBeEnabled();
     });
+  });
+
+  test.describe('Button Disabled While Submitting', () => {
+    test.beforeEach(async ({ helpers, mockApi }) => {
+      // Set up mock endpoint with delay to test disabled state
+      await mockApi.mockSuccess('/api/submit-disabled-test', { delay: 1500 });
+      await helpers.navigateToScenario('/test/submission-behavior/button-disabled-submitting');
+    });
 
     test('should disable submit button during submission', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('button-disabled-submitting');
@@ -99,13 +117,19 @@ test.describe('Submission Behavior Tests', () => {
 
       // Button should be disabled during submission
       await expect(submitButton).toBeDisabled();
-      await expect(page.locator('[data-testid="submitting-indicator-2"]')).toBeVisible();
+      await expect(page.locator('[data-testid="submitting-indicator"]')).toBeVisible();
 
-      // Wait for submission to complete (2s delay)
-      await page.waitForTimeout(2500);
+      // Wait for submission to complete
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
 
       // Button should be enabled again
       await expect(submitButton).toBeEnabled();
+    });
+  });
+
+  test.describe('Button Never Disabled', () => {
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/submission-behavior/button-never-disabled');
     });
 
     test('should allow submit button to stay enabled with custom options', async ({ helpers }) => {
@@ -151,6 +175,12 @@ test.describe('Submission Behavior Tests', () => {
       // Verify we're on page 2
       await expect(helpers.getInput(scenario, 'optionalField')).toBeVisible();
     });
+  });
+
+  test.describe('Next Button Never Disabled', () => {
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/submission-behavior/next-button-never-disabled');
+    });
 
     test('should allow next button to stay enabled with custom options', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('next-button-never-disabled');
@@ -176,9 +206,11 @@ test.describe('Submission Behavior Tests', () => {
     });
   });
 
-  test.describe('Custom Button Logic', () => {
-    test.beforeEach(async ({ helpers }) => {
-      await helpers.navigateToScenario('/test/submission-behavior/custom-button-logic');
+  test.describe('FormStateCondition Logic', () => {
+    test.beforeEach(async ({ helpers, mockApi }) => {
+      // Set up mock endpoint with delay to test formSubmitting condition
+      await mockApi.mockSuccess('/api/form-state-submit', { delay: 1500 });
+      await helpers.navigateToScenario('/test/submission-behavior/form-state-condition');
     });
 
     test('should use FormStateCondition for disabled logic', async ({ page, helpers }) => {
@@ -197,10 +229,16 @@ test.describe('Submission Behavior Tests', () => {
       await expect(page.locator('[data-testid="submitting-indicator"]')).toBeVisible();
 
       // Wait for submission to complete
-      await page.waitForTimeout(2500);
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
 
       // Button should be enabled again
       await expect(submitButton).toBeEnabled();
+    });
+  });
+
+  test.describe('Conditional Expression Logic', () => {
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/submission-behavior/conditional-expression');
     });
 
     test('should use conditional expression for disabled logic', async ({ page, helpers }) => {
@@ -225,8 +263,14 @@ test.describe('Submission Behavior Tests', () => {
       // Submit button should be enabled again
       await expect(submitButton).toBeEnabled();
     });
+  });
 
-    test('should always disable button with explicit disabled: true', async ({ page, helpers }) => {
+  test.describe('Explicit Disabled', () => {
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/submission-behavior/explicit-disabled');
+    });
+
+    test('should always disable button with explicit disabled: true', async ({ helpers }) => {
       const scenario = helpers.getScenario('explicit-disabled');
       await expect(scenario).toBeVisible();
 
@@ -239,6 +283,107 @@ test.describe('Submission Behavior Tests', () => {
 
       // Button should still be disabled
       await expect(submitButton).toBeDisabled();
+    });
+  });
+
+  test.describe('HTTP Error Handling', () => {
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/submission-behavior/http-error-handling');
+    });
+
+    test('should submit form via HTTP and show success', async ({ page, helpers, mockApi }) => {
+      // Set up mock endpoint with success response
+      await mockApi.mockSuccess('/api/error-handling-test', {
+        delay: 500,
+        body: { message: 'Form submitted successfully!' },
+      });
+
+      const scenario = helpers.getScenario('http-error-handling');
+      await expect(scenario).toBeVisible();
+
+      // Fill the form
+      await helpers.fillInput(helpers.getInput(scenario, 'username'), 'testuser');
+      await helpers.fillInput(helpers.getInput(scenario, 'email'), 'test@example.com');
+      await helpers.fillInput(helpers.getInput(scenario, 'message'), 'Hello world');
+
+      // Get the submit button
+      const submitButton = scenario.locator('#submitErrorTest button');
+      await expect(submitButton).toBeEnabled();
+
+      // Click submit
+      await submitButton.click();
+
+      // Button should be disabled during submission
+      await expect(submitButton).toBeDisabled();
+      await expect(page.locator('[data-testid="submitting-indicator"]')).toBeVisible();
+
+      // Wait for submission to complete
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+
+      // Check success message
+      await expect(page.locator('[data-testid="submission-result"]')).toContainText('Form submitted successfully!');
+
+      // Verify the request was intercepted
+      const requests = mockApi.getInterceptedRequests('/api/error-handling-test');
+      expect(requests).toHaveLength(1);
+      expect(requests[0].body).toEqual({
+        username: 'testuser',
+        email: 'test@example.com',
+        message: 'Hello world',
+      });
+    });
+
+    test('should handle HTTP error response', async ({ page, helpers, mockApi }) => {
+      // Set up mock endpoint with error response
+      await mockApi.mockError('/api/error-handling-test', {
+        delay: 300,
+        status: 500,
+        body: { error: 'Database connection failed' },
+      });
+
+      const scenario = helpers.getScenario('http-error-handling');
+      await expect(scenario).toBeVisible();
+
+      // Fill required fields
+      await helpers.fillInput(helpers.getInput(scenario, 'username'), 'testuser');
+      await helpers.fillInput(helpers.getInput(scenario, 'email'), 'test@example.com');
+
+      // Submit
+      const submitButton = scenario.locator('#submitErrorTest button');
+      await submitButton.click();
+
+      // Wait for error response
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+
+      // Check error message
+      await expect(page.locator('[data-testid="submission-result"]')).toContainText('Server error: 500');
+      await expect(page.locator('[data-testid="submission-result"]')).toHaveClass(/error/);
+    });
+
+    test('should handle validation error response', async ({ page, helpers, mockApi }) => {
+      // Set up mock endpoint with validation error
+      await mockApi.mockValidationError(
+        '/api/error-handling-test',
+        { email: 'Invalid email format', username: 'Username already taken' },
+        { delay: 200 },
+      );
+
+      const scenario = helpers.getScenario('http-error-handling');
+      await expect(scenario).toBeVisible();
+
+      // Fill fields
+      await helpers.fillInput(helpers.getInput(scenario, 'username'), 'testuser');
+      await helpers.fillInput(helpers.getInput(scenario, 'email'), 'invalid-email');
+
+      // Submit
+      const submitButton = scenario.locator('#submitErrorTest button');
+      await submitButton.click();
+
+      // Wait for response
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+
+      // Should show error status (422 is not 2xx)
+      await expect(page.locator('[data-testid="submission-result"]')).toHaveClass(/error/);
     });
   });
 });
