@@ -1,24 +1,27 @@
-import { Route } from '@angular/router';
-import { RegistrationJourneyTestComponent } from './registration-journey-test.component';
-import { CheckoutJourneyTestComponent } from './checkout-journey-test.component';
-import { SurveyJourneyTestComponent } from './survey-journey-test.component';
+import { Routes } from '@angular/router';
+import { getUserJourneyFlowsScenario, userJourneyFlowsSuite } from './user-journey-flows.suite';
 
-export default [
+const routes: Routes = [
   {
-    path: 'registration-journey',
-    component: RegistrationJourneyTestComponent,
+    path: '',
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: userJourneyFlowsSuite },
   },
   {
     path: 'checkout-journey',
-    component: CheckoutJourneyTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getUserJourneyFlowsScenario('checkout-journey') },
+  },
+  {
+    path: 'registration-journey',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getUserJourneyFlowsScenario('registration-journey') },
   },
   {
     path: 'survey-journey',
-    component: SurveyJourneyTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getUserJourneyFlowsScenario('survey-journey') },
   },
-  {
-    path: '',
-    redirectTo: 'registration-journey',
-    pathMatch: 'full',
-  },
-] satisfies Route[];
+];
+
+export default routes;

@@ -1,31 +1,37 @@
-export default [
+import { Routes } from '@angular/router';
+import { advancedValidationSuite, getAdvancedValidationScenario } from './advanced-validation.suite';
+
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./advanced-validation-index.component').then((m) => m.AdvancedValidationIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: advancedValidationSuite },
   },
   {
     path: 'custom-validator',
-    loadComponent: () => import('./custom-validator-test.component').then((m) => m.CustomValidatorTestComponent),
-    data: { title: 'Custom Validator Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('custom-validator-test') },
   },
   {
     path: 'cross-field-validator',
-    loadComponent: () => import('./cross-field-validator-test.component').then((m) => m.CrossFieldValidatorTestComponent),
-    data: { title: 'Cross-Field Validation Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('cross-field-test') },
   },
   {
     path: 'range-validation',
-    loadComponent: () => import('./range-validation-test.component').then((m) => m.RangeValidationTestComponent),
-    data: { title: 'Range Validation Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('range-validation-test') },
   },
   {
     path: 'conditional-validator',
-    loadComponent: () => import('./conditional-validator-test.component').then((m) => m.ConditionalValidatorTestComponent),
-    data: { title: 'Conditional Validator Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('conditional-validator-test') },
   },
   {
     path: 'multiple-validators',
-    loadComponent: () => import('./multiple-validators-test.component').then((m) => m.MultipleValidatorsTestComponent),
-    data: { title: 'Multiple Validators Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('multiple-validators-test') },
   },
 ];
+
+export default routes;

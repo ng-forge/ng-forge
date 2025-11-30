@@ -1,33 +1,28 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
 
 test.describe('Cross-Page Validation Tests', () => {
-  test.afterEach(async (_, testInfo) => {
-    if (testInfo.status === 'passed') {
-      console.info(`✅ TEST PASSED: ${testInfo.title}`);
-    }
-  });
-
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4201/#/test/cross-page-validation');
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/cross-page-validation');
   });
 
   test.describe('Email Verification Flow', () => {
-    test('should complete email verification across multiple pages', async ({ page }) => {
+    test('should complete email verification across multiple pages', async ({ page, helpers }) => {
       // Navigate to email verification scenario
       await page.goto('http://localhost:4201/#/test/cross-page-validation/email-verification');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
-      const scenario = page.locator('[data-testid="cross-page-email-verification"]');
+      const scenario = helpers.getScenario('cross-page-email-verification');
       await expect(scenario).toBeVisible();
 
       // Page 1: Email Collection
       await expect(scenario.locator('h2:has-text("Email Registration")')).toBeVisible();
 
       // Fill email information
-      await scenario.locator('[data-testid="primaryEmail"] input').fill('user@businesscorp.com');
-      await scenario.locator('[data-testid="emailType"] mat-radio-button:has-text("Business Email")').click();
+      await scenario.locator('#primaryEmail input').fill('user@businesscorp.com');
+      await scenario.locator('#emailType mat-radio-button:has-text("Business Email")').click();
 
       // Navigate to page 2
       await scenario.locator('button:has-text("Next"):visible').click();
@@ -36,9 +31,9 @@ test.describe('Cross-Page Validation Tests', () => {
       // Page 2: Personal Information
       await expect(scenario.locator('h2:has-text("Personal Information")')).toBeVisible();
 
-      await scenario.locator('[data-testid="fullName"] input').fill('John Doe');
-      await scenario.locator('[data-testid="companyName"] input').fill('Business Corp Inc.');
-      await scenario.locator('[data-testid="phoneNumber"] input').fill('+1-555-123-4567');
+      await scenario.locator('#fullName input').fill('John Doe');
+      await scenario.locator('#companyName input').fill('Business Corp Inc.');
+      await scenario.locator('#phoneNumber input').fill('+1-555-123-4567');
 
       // Navigate to page 3
       await scenario.locator('button:has-text("Next"):visible').click();
@@ -48,9 +43,9 @@ test.describe('Cross-Page Validation Tests', () => {
       await expect(scenario.locator('h2:has-text("Confirmation")')).toBeVisible();
 
       // Fill confirmation information
-      await scenario.locator('[data-testid="confirmEmail"] input').fill('user@businesscorp.com');
-      await scenario.locator('[data-testid="termsAgreement"] mat-checkbox').click();
-      await scenario.locator('[data-testid="emailNotifications"] mat-checkbox').click();
+      await scenario.locator('#confirmEmail input').fill('user@businesscorp.com');
+      await scenario.locator('#termsAgreement mat-checkbox').click();
+      await scenario.locator('#emailNotifications mat-checkbox').click();
       await page.waitForTimeout(200);
 
       // Set up event listener BEFORE clicking submit
@@ -68,7 +63,7 @@ test.describe('Cross-Page Validation Tests', () => {
       );
 
       // Submit the form
-      await scenario.locator('[data-testid="submitEmailVerification"] button').click();
+      await scenario.locator('#submitEmailVerification button').click();
 
       // Wait for formSubmitted event
       const submittedData = await submittedDataPromise;
@@ -86,48 +81,48 @@ test.describe('Cross-Page Validation Tests', () => {
       });
     });
 
-    test('should validate email confirmation matches primary email', async ({ page }) => {
+    test('should validate email confirmation matches primary email', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/email-verification');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="cross-page-email-verification"]');
+      const scenario = helpers.getScenario('cross-page-email-verification');
 
       // Page 1: Fill email
-      await scenario.locator('[data-testid="primaryEmail"] input').fill('user@example.com');
-      await scenario.locator('[data-testid="emailType"] mat-radio-button:has-text("Personal Email")').click();
+      await scenario.locator('#primaryEmail input').fill('user@example.com');
+      await scenario.locator('#emailType mat-radio-button:has-text("Personal Email")').click();
       await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Fill personal info
-      await scenario.locator('[data-testid="fullName"] input').fill('Jane Doe');
-      await scenario.locator('[data-testid="phoneNumber"] input').fill('+1-555-987-6543');
+      await scenario.locator('#fullName input').fill('Jane Doe');
+      await scenario.locator('#phoneNumber input').fill('+1-555-987-6543');
       await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Enter mismatched email confirmation
-      await scenario.locator('[data-testid="confirmEmail"] input').fill('different@email.com');
-      await scenario.locator('[data-testid="termsAgreement"] mat-checkbox').click();
+      await scenario.locator('#confirmEmail input').fill('different@email.com');
+      await scenario.locator('#termsAgreement mat-checkbox').click();
       await page.waitForTimeout(200);
 
       // Verify submit button state with mismatched emails
-      const submitButton = scenario.locator('[data-testid="submitEmailVerification"] button');
+      const submitButton = scenario.locator('#submitEmailVerification button');
       await expect(submitButton).toBeEnabled();
     });
   });
 
   test.describe('Conditional Pages Flow', () => {
-    test.skip('should navigate through individual account flow', async ({ page }) => {
+    test.skip('should navigate through individual account flow', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/conditional-pages');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="conditional-pages"]');
+      const scenario = helpers.getScenario('conditional-pages');
       await expect(scenario).toBeVisible();
 
       // Page 1: Account Type Selection
-      await expect(scenario.locator('[data-testid="accountType"]')).toBeVisible();
+      await expect(scenario.locator('#accountType')).toBeVisible();
 
-      await scenario.locator('[data-testid="accountType"] mat-radio-button:has-text("Individual Account")').click();
-      await scenario.locator('[data-testid="primaryUse"]').click();
+      await scenario.locator('#accountType mat-radio-button:has-text("Individual Account")').click();
+      await scenario.locator('#primaryUse').click();
       await page.locator('mat-option:has-text("Personal Use")').click();
       await page.waitForTimeout(200);
 
@@ -138,9 +133,9 @@ test.describe('Cross-Page Validation Tests', () => {
       // Page 2: Individual Information
       await expect(scenario.getByText('Personal account details')).toBeVisible();
 
-      await scenario.locator('[data-testid="firstName"] input').fill('Jane');
-      await scenario.locator('[data-testid="lastName"] input').fill('Smith');
-      await scenario.locator('[data-testid="birthDate"] input').fill('06/15/1985');
+      await scenario.locator('#firstName input').fill('Jane');
+      await scenario.locator('#lastName input').fill('Smith');
+      await scenario.locator('#birthDate input').fill('06/15/1985');
       await page.waitForTimeout(200);
 
       // Navigate to final page
@@ -150,8 +145,8 @@ test.describe('Cross-Page Validation Tests', () => {
       // Page 3: Final Confirmation (should skip business page)
       await expect(scenario.getByText('Review and submit your information')).toBeVisible({ timeout: 10000 });
 
-      await scenario.locator('[data-testid="confirmationCode"] input').fill('ABC123');
-      await scenario.locator('[data-testid="finalTerms"] mat-checkbox').click();
+      await scenario.locator('#confirmationCode input').fill('ABC123');
+      await scenario.locator('#finalTerms mat-checkbox').click();
       await page.waitForTimeout(200);
 
       // Set up event listener BEFORE clicking submit
@@ -169,7 +164,7 @@ test.describe('Cross-Page Validation Tests', () => {
       );
 
       // Submit the form
-      await scenario.locator('[data-testid="submitConditional"] button').click();
+      await scenario.locator('#submitConditional button').click();
 
       // Wait for formSubmitted event
       const submittedData = await submittedDataPromise;
@@ -189,15 +184,15 @@ test.describe('Cross-Page Validation Tests', () => {
       expect(submittedData).not.toHaveProperty('taxId');
     });
 
-    test.skip('should navigate through business account flow', async ({ page }) => {
+    test.skip('should navigate through business account flow', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/conditional-pages');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="conditional-pages"]');
+      const scenario = helpers.getScenario('conditional-pages');
 
       // Page 1: Select business account
-      await scenario.locator('[data-testid="accountType"] mat-radio-button:has-text("Business Account")').click();
-      await scenario.locator('[data-testid="primaryUse"]').click();
+      await scenario.locator('#accountType mat-radio-button:has-text("Business Account")').click();
+      await scenario.locator('#primaryUse').click();
       await page.locator('mat-option:has-text("Professional Use")').click();
       await page.waitForTimeout(200);
 
@@ -205,10 +200,10 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(500);
 
       // Page 2: Business Information (should skip individual page)
-      await expect(scenario.locator('[data-testid="businessName"]')).toBeVisible({ timeout: 10000 });
-      await scenario.locator('[data-testid="businessName"] input').fill('TechCorp Solutions');
-      await scenario.locator('[data-testid="taxId"] input').fill('12-3456789');
-      await scenario.locator('[data-testid="businessType"]').click();
+      await expect(scenario.locator('#businessName')).toBeVisible({ timeout: 10000 });
+      await scenario.locator('#businessName input').fill('TechCorp Solutions');
+      await scenario.locator('#taxId input').fill('12-3456789');
+      await scenario.locator('#businessType').click();
       await page.locator('mat-option:has-text("LLC")').click();
       await page.waitForTimeout(200);
 
@@ -216,8 +211,8 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(300);
 
       // Page 3: Final Confirmation
-      await scenario.locator('[data-testid="confirmationCode"] input').fill('XYZ789');
-      await scenario.locator('[data-testid="finalTerms"] mat-checkbox').click();
+      await scenario.locator('#confirmationCode input').fill('XYZ789');
+      await scenario.locator('#finalTerms mat-checkbox').click();
       await page.waitForTimeout(200);
 
       // Set up event listener and submit
@@ -234,7 +229,7 @@ test.describe('Cross-Page Validation Tests', () => {
           }),
       );
 
-      await scenario.locator('[data-testid="submitConditional"] button').click();
+      await scenario.locator('#submitConditional button').click();
       const submittedData = await submittedDataPromise;
 
       // Verify business account submission
@@ -252,26 +247,26 @@ test.describe('Cross-Page Validation Tests', () => {
   });
 
   test.describe('Business Flow', () => {
-    test.skip('should validate Tax ID format', async ({ page }) => {
+    test.skip('should validate Tax ID format', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/business-flow');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="business-flow"]');
+      const scenario = helpers.getScenario('business-flow');
       await expect(scenario).toBeVisible();
 
       // Page 1: Select business account
-      await scenario.locator('[data-testid="accountType"] mat-radio-button:has-text("Business Account")').click();
+      await scenario.locator('#accountType mat-radio-button:has-text("Business Account")').click();
       await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Business Information
-      await expect(scenario.locator('[data-testid="businessName"]')).toBeVisible();
+      await expect(scenario.locator('#businessName')).toBeVisible();
 
-      const taxIdInput = scenario.locator('[data-testid="taxId"] input');
-      const submitButton = scenario.locator('[data-testid="submitBusiness"] button');
+      const taxIdInput = scenario.locator('#taxId input');
+      const submitButton = scenario.locator('#submitBusiness button');
 
       // Fill business name
-      await scenario.locator('[data-testid="businessName"] input').fill('TechCorp Solutions');
+      await scenario.locator('#businessName input').fill('TechCorp Solutions');
 
       // Test invalid Tax ID format
       await taxIdInput.fill('invalid-format');
@@ -282,7 +277,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(500);
 
       // Should still be on business page due to validation
-      await expect(scenario.locator('[data-testid="businessName"]')).toBeVisible({ timeout: 10000 });
+      await expect(scenario.locator('#businessName')).toBeVisible({ timeout: 10000 });
 
       // Enter valid Tax ID format
       await taxIdInput.fill('12-3456789');
@@ -293,7 +288,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(300);
 
       // Page 3: Final Confirmation
-      await expect(scenario.locator('[data-testid="submitBusiness"]')).toBeVisible();
+      await expect(scenario.locator('#submitBusiness')).toBeVisible();
 
       // Set up event listener and submit
       const submittedDataPromise = page.evaluate(
@@ -322,23 +317,23 @@ test.describe('Cross-Page Validation Tests', () => {
   });
 
   test.describe('Cascade Dependencies Flow', () => {
-    test('should maintain consistent data across pages', async ({ page }) => {
+    test('should maintain consistent data across pages', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/cascade-dependencies');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="cascade-dependencies"]');
+      const scenario = helpers.getScenario('cascade-dependencies');
       await expect(scenario).toBeVisible();
 
       // Page 1: Region Selection
       await expect(scenario.getByText('Select your region and preferences')).toBeVisible();
 
-      await scenario.locator('[data-testid="country"]').click();
+      await scenario.locator('#country').click();
       await page.locator('mat-option:has-text("Canada")').click();
 
-      await scenario.locator('[data-testid="language"]').click();
+      await scenario.locator('#language').click();
       await page.locator('mat-option:has-text("English")').click();
 
-      await scenario.locator('[data-testid="currency"]').click();
+      await scenario.locator('#currency').click();
       await page.locator('mat-option:has-text("Canadian Dollar (CAD)")').click();
       await page.waitForTimeout(200);
 
@@ -349,11 +344,11 @@ test.describe('Cross-Page Validation Tests', () => {
       // Page 2: Address Information
       await expect(scenario.getByText('Provide your address details')).toBeVisible();
 
-      await scenario.locator('[data-testid="streetAddress"] input').fill('123 Maple Street');
-      await scenario.locator('[data-testid="city"] input').fill('Toronto');
-      await scenario.locator('[data-testid="postalCode"] input').fill('M5V 3A1');
+      await scenario.locator('#streetAddress input').fill('123 Maple Street');
+      await scenario.locator('#city input').fill('Toronto');
+      await scenario.locator('#postalCode input').fill('M5V 3A1');
 
-      await scenario.locator('[data-testid="stateProvince"]').click();
+      await scenario.locator('#stateProvince').click();
       await page.locator('mat-option:has-text("Ontario")').click();
       await page.waitForTimeout(200);
 
@@ -364,9 +359,9 @@ test.describe('Cross-Page Validation Tests', () => {
       // Page 3: Payment Information
       await expect(scenario.getByText('Set up your payment preferences')).toBeVisible();
 
-      await scenario.locator('[data-testid="paymentMethod"] mat-radio-button:has-text("Bank Transfer")').click();
+      await scenario.locator('#paymentMethod mat-radio-button:has-text("Bank Transfer")').click();
 
-      await scenario.locator('[data-testid="bankCountry"]').click();
+      await scenario.locator('#bankCountry').click();
       await page.locator('mat-option:has-text("Canada")').click();
       await page.waitForTimeout(200);
 
@@ -384,7 +379,7 @@ test.describe('Cross-Page Validation Tests', () => {
           }),
       );
 
-      await scenario.locator('[data-testid="submitCascade"] button').click();
+      await scenario.locator('#submitCascade button').click();
       const submittedData = await submittedDataPromise;
 
       // Verify consistent data across all pages
@@ -403,17 +398,17 @@ test.describe('Cross-Page Validation Tests', () => {
   });
 
   test.describe('Progressive Validation Flow', () => {
-    test.skip('should enforce validation at each page level', async ({ page }) => {
+    test.skip('should enforce validation at each page level', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/progressive-validation');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="progressive-validation"]');
+      const scenario = helpers.getScenario('progressive-validation');
       await expect(scenario).toBeVisible();
 
       // Page 1: Basic Information
-      await expect(scenario.locator('[data-testid="username"]')).toBeVisible();
+      await expect(scenario.locator('#username')).toBeVisible();
 
-      const usernameInput = scenario.locator('[data-testid="username"] input');
+      const usernameInput = scenario.locator('#username input');
 
       // Test minimum length validation
       await usernameInput.fill('ab'); // Too short (min 3)
@@ -424,7 +419,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(500);
 
       // Should still be on page 1
-      await expect(scenario.locator('[data-testid="username"]')).toBeVisible({ timeout: 10000 });
+      await expect(scenario.locator('#username')).toBeVisible({ timeout: 10000 });
 
       // Fix username
       await usernameInput.fill('validuser123');
@@ -435,17 +430,17 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(300);
 
       // Page 2: Enhanced Security
-      await expect(scenario.locator('[data-testid="password"]')).toBeVisible();
+      await expect(scenario.locator('#password')).toBeVisible();
 
-      const passwordInput = scenario.locator('[data-testid="password"] input');
+      const passwordInput = scenario.locator('#password input');
 
       // Test password length validation
       await passwordInput.fill('short'); // Too short (min 8)
 
-      await scenario.locator('[data-testid="securityQuestion"]').click();
+      await scenario.locator('#securityQuestion').click();
       await page.locator('mat-option:has-text("What was your first pet\'s name?")').click();
 
-      await scenario.locator('[data-testid="securityAnswer"] input').fill('Fluffy');
+      await scenario.locator('#securityAnswer input').fill('Fluffy');
       await page.waitForTimeout(200);
 
       // Try to navigate (should fail due to password)
@@ -453,7 +448,7 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(300);
 
       // Should still be on page 2
-      await expect(scenario.locator('[data-testid="password"]')).toBeVisible();
+      await expect(scenario.locator('#password')).toBeVisible();
 
       // Fix password
       await passwordInput.fill('securepassword123');
@@ -464,10 +459,10 @@ test.describe('Cross-Page Validation Tests', () => {
       await page.waitForTimeout(300);
 
       // Page 3: Final Verification
-      await expect(scenario.locator('[data-testid="confirmUsername"]')).toBeVisible();
+      await expect(scenario.locator('#confirmUsername')).toBeVisible();
 
-      await scenario.locator('[data-testid="confirmUsername"] input').fill('validuser123');
-      await scenario.locator('[data-testid="verificationCode"] input').fill('123456');
+      await scenario.locator('#confirmUsername input').fill('validuser123');
+      await scenario.locator('#verificationCode input').fill('123456');
       await page.waitForTimeout(200);
 
       // Set up event listener and submit
@@ -484,7 +479,7 @@ test.describe('Cross-Page Validation Tests', () => {
           }),
       );
 
-      await scenario.locator('[data-testid="submitProgressive"] button').click();
+      await scenario.locator('#submitProgressive button').click();
       const submittedData = await submittedDataPromise;
 
       // Verify all validation levels passed
@@ -497,32 +492,32 @@ test.describe('Cross-Page Validation Tests', () => {
       });
     });
 
-    test('should validate username confirmation matches original', async ({ page }) => {
+    test('should validate username confirmation matches original', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/progressive-validation');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="progressive-validation"]');
+      const scenario = helpers.getScenario('progressive-validation');
 
       // Page 1: Enter username
-      await scenario.locator('[data-testid="username"] input').fill('testuser');
+      await scenario.locator('#username input').fill('testuser');
       await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 2: Enter security info
-      await scenario.locator('[data-testid="password"] input').fill('password123');
-      await scenario.locator('[data-testid="securityQuestion"]').click();
+      await scenario.locator('#password input').fill('password123');
+      await scenario.locator('#securityQuestion').click();
       await page.locator('mat-option:has-text("What was your first school?")').click();
-      await scenario.locator('[data-testid="securityAnswer"] input').fill('Elementary');
+      await scenario.locator('#securityAnswer input').fill('Elementary');
       await scenario.locator('button:has-text("Next"):visible').click();
       await page.waitForTimeout(300);
 
       // Page 3: Enter mismatched username confirmation
-      await scenario.locator('[data-testid="confirmUsername"] input').fill('differentuser');
-      await scenario.locator('[data-testid="verificationCode"] input').fill('654321');
+      await scenario.locator('#confirmUsername input').fill('differentuser');
+      await scenario.locator('#verificationCode input').fill('654321');
       await page.waitForTimeout(200);
 
       // Verify submit button state
-      const submitButton = scenario.locator('[data-testid="submitProgressive"] button');
+      const submitButton = scenario.locator('#submitProgressive button');
       await expect(submitButton).toBeEnabled();
     });
   });

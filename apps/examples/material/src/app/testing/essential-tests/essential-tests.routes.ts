@@ -1,22 +1,27 @@
-import { BasicFormTestComponent } from './basic-form.component';
-import { AgeBasedLogicTestComponent } from './age-based-logic.component';
-import { MultiPageNavigationTestComponent } from './multi-page-navigation.component';
+import { Routes } from '@angular/router';
+import { essentialTestsSuite, getEssentialTestScenario } from './essential-tests.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./essential-tests-index.component').then((m) => m.EssentialTestsIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: essentialTestsSuite },
   },
   {
     path: 'basic-form',
-    component: BasicFormTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getEssentialTestScenario('basic-form') },
   },
   {
     path: 'age-based-logic',
-    component: AgeBasedLogicTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getEssentialTestScenario('age-based-logic') },
   },
   {
     path: 'multi-page-navigation',
-    component: MultiPageNavigationTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getEssentialTestScenario('multi-page-navigation') },
   },
 ];
+
+export default routes;

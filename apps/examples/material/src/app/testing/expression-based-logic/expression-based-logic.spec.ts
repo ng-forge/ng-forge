@@ -1,18 +1,18 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupTestLogging, test } from '../shared/fixtures';
 
 test.describe('Expression-Based Logic Tests', () => {
-  test.afterEach(async (_, testInfo) => {
-    if (testInfo.status === 'passed') {
-      console.info(`✅ TEST PASSED: ${testInfo.title}`);
-    }
+  setupTestLogging();
+
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/expression-based-logic');
   });
 
   test.describe('Hidden Logic', () => {
-    test('should hide/show fields based on fieldValue condition', async ({ page }) => {
+    test('should hide/show fields based on fieldValue condition', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/hidden-logic');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="hidden-logic-test"]');
+      const scenario = helpers.getScenario('hidden-logic-test');
       await expect(scenario).toBeVisible();
 
       // Select free - payment should be hidden
@@ -35,11 +35,11 @@ test.describe('Expression-Based Logic Tests', () => {
   });
 
   test.describe('Disabled Logic', () => {
-    test('should disable fields using JavaScript expressions', async ({ page }) => {
+    test('should disable fields using JavaScript expressions', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/disabled-logic');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="disabled-logic-test"]');
+      const scenario = helpers.getScenario('disabled-logic-test');
       await expect(scenario).toBeVisible();
 
       // Initially unchecked - vehicle type should be disabled
@@ -57,11 +57,11 @@ test.describe('Expression-Based Logic Tests', () => {
   });
 
   test.describe('AND Logic', () => {
-    test('should hide fields using AND conditional logic', async ({ page }) => {
+    test('should hide fields using AND conditional logic', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/and-logic');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="and-logic-test"]');
+      const scenario = helpers.getScenario('and-logic-test');
       await expect(scenario).toBeVisible();
 
       const regularPriceField = scenario.locator('#regularPrice');
@@ -87,11 +87,11 @@ test.describe('Expression-Based Logic Tests', () => {
   });
 
   test.describe('Readonly Logic', () => {
-    test.skip('should make fields readonly using conditional logic', async ({ page }) => {
+    test.skip('should make fields readonly using conditional logic', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/readonly-logic');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="readonly-logic-test"]');
+      const scenario = helpers.getScenario('readonly-logic-test');
       await expect(scenario).toBeVisible();
 
       // Behavior test: Initially editMode is unchecked, so readonly logic is active
@@ -125,11 +125,11 @@ test.describe('Expression-Based Logic Tests', () => {
   });
 
   test.describe('OR Logic', () => {
-    test('should apply OR conditional logic for multiple conditions', async ({ page }) => {
+    test('should apply OR conditional logic for multiple conditions', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/or-logic');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="or-logic-test"]');
+      const scenario = helpers.getScenario('or-logic-test');
       await expect(scenario).toBeVisible();
 
       const discountInfoField = scenario.locator('#discountInfo');
@@ -163,11 +163,11 @@ test.describe('Expression-Based Logic Tests', () => {
   });
 
   test.describe('Nested AND within OR', () => {
-    test('should handle nested AND within OR conditions', async ({ page }) => {
+    test('should handle nested AND within OR conditions', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/nested-and-within-or');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="nested-and-within-or-test"]');
+      const scenario = helpers.getScenario('nested-and-within-or-test');
       await expect(scenario).toBeVisible();
 
       const specialOfferField = scenario.locator('#specialOffer');
@@ -203,11 +203,11 @@ test.describe('Expression-Based Logic Tests', () => {
   });
 
   test.describe('Nested OR within AND', () => {
-    test('should handle nested OR within AND conditions', async ({ page }) => {
+    test('should handle nested OR within AND conditions', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/nested-or-within-and');
       await page.waitForLoadState('networkidle');
 
-      const scenario = page.locator('[data-testid="nested-or-within-and-test"]');
+      const scenario = helpers.getScenario('nested-or-within-and-test');
       await expect(scenario).toBeVisible();
 
       const premiumField = scenario.locator('#premiumFeatures');

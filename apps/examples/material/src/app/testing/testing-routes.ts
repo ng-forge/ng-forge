@@ -85,12 +85,6 @@ export default [
     loadChildren: () => import('./multi-page-navigation/multi-page-navigation.routes'),
   },
 
-  // Scenario List Tests - Refactored into folder structure
-  {
-    path: 'scenarios',
-    loadChildren: () => import('./scenario-list/scenario-list.routes'),
-  },
-
   // User Journey Flows Tests - Refactored into folder structure
   {
     path: 'user-journey-flows',

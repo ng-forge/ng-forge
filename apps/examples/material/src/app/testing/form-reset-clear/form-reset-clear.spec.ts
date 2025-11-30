@@ -1,19 +1,18 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupTestLogging, test } from '../shared/fixtures';
 
 test.describe('Form Reset and Clear Events Tests', () => {
-  test.afterEach(async (_, testInfo) => {
-    if (testInfo.status === 'passed') {
-      console.info(`✅ TEST PASSED: ${testInfo.title}`);
-    }
+  setupTestLogging();
+
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/form-reset-clear');
   });
 
   test.describe('Form Reset Functionality', () => {
-    test('should reset form to default values', async ({ page }) => {
+    test('should reset form to default values', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/reset-defaults');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="reset-defaults"]');
+      const scenario = helpers.getScenario('reset-defaults');
       await expect(scenario).toBeVisible();
 
       // Verify default values are set
@@ -46,12 +45,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await emailInput.inputValue()).toBe('john.doe@example.com');
     });
 
-    test('should reset select fields to default values', async ({ page }) => {
+    test('should reset select fields to default values', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/reset-select');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="reset-select"]');
+      const scenario = helpers.getScenario('reset-select');
       await expect(scenario).toBeVisible();
 
       // Verify default value is set (US)
@@ -73,12 +71,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
       await expect(scenario.locator('#country mat-select')).toContainText('United States');
     });
 
-    test('should reset checkbox fields to default values', async ({ page }) => {
+    test('should reset checkbox fields to default values', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/reset-checkbox');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="reset-checkbox"]');
+      const scenario = helpers.getScenario('reset-checkbox');
       await expect(scenario).toBeVisible();
 
       const subscribeCheckbox = scenario.locator('#subscribe mat-checkbox');
@@ -106,12 +103,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
       await expect(termsCheckbox).not.toHaveClass(/mat-mdc-checkbox-checked/);
     });
 
-    test('should reset form validation state', async ({ page }) => {
+    test('should reset form validation state', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/reset-validation');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="reset-validation"]');
+      const scenario = helpers.getScenario('reset-validation');
       await expect(scenario).toBeVisible();
 
       const emailInput = scenario.locator('#email input');
@@ -137,12 +133,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
   });
 
   test.describe('Form Clear Functionality', () => {
-    test('should clear all form fields', async ({ page }) => {
+    test('should clear all form fields', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/clear-all');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="clear-all"]');
+      const scenario = helpers.getScenario('clear-all');
       await expect(scenario).toBeVisible();
 
       const firstNameInput = scenario.locator('#firstName input');
@@ -169,12 +164,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await emailInput.inputValue()).toBe('');
     });
 
-    test('should clear select fields', async ({ page }) => {
+    test('should clear select fields', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/clear-select');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="clear-select"]');
+      const scenario = helpers.getScenario('clear-select');
       await expect(scenario).toBeVisible();
 
       // Select Spanish
@@ -195,12 +189,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(selectText?.trim()).not.toBe('Spanish');
     });
 
-    test('should clear checkbox fields', async ({ page }) => {
+    test('should clear checkbox fields', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/clear-checkbox');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="clear-checkbox"]');
+      const scenario = helpers.getScenario('clear-checkbox');
       await expect(scenario).toBeVisible();
 
       const checkbox = scenario.locator('#subscribe mat-checkbox');
@@ -222,12 +215,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
   });
 
   test.describe('Reset vs Clear Behavior', () => {
-    test('should differentiate between reset and clear actions', async ({ page }) => {
+    test('should differentiate between reset and clear actions', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/reset-vs-clear');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="reset-vs-clear"]');
+      const scenario = helpers.getScenario('reset-vs-clear');
       await expect(scenario).toBeVisible();
 
       const nameInput = scenario.locator('#name input');
@@ -260,12 +252,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await emailInput.inputValue()).toBe(''); // No default, so empty
     });
 
-    test('should handle reset and clear with required fields', async ({ page }) => {
+    test('should handle reset and clear with required fields', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/required-reset-clear');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="required-reset-clear"]');
+      const scenario = helpers.getScenario('required-reset-clear');
       await expect(scenario).toBeVisible();
 
       const input = scenario.locator('#requiredField input');
@@ -291,12 +282,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
   });
 
   test.describe('Complex Reset/Clear Scenarios', () => {
-    test('should reset nested group fields', async ({ page }) => {
+    test('should reset nested group fields', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/reset-nested');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="reset-nested"]');
+      const scenario = helpers.getScenario('reset-nested');
       await expect(scenario).toBeVisible();
 
       const firstNameInput = scenario.locator('#firstName input');
@@ -319,12 +309,11 @@ test.describe('Form Reset and Clear Events Tests', () => {
       expect(await lastNameInput.inputValue()).toBe('Doe');
     });
 
-    test('should handle multiple reset/clear cycles', async ({ page }) => {
+    test('should handle multiple reset/clear cycles', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/form-reset-clear/multiple-cycles');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="multiple-cycles"]');
+      const scenario = helpers.getScenario('multiple-cycles');
       await expect(scenario).toBeVisible();
 
       const input = scenario.locator('#field input');

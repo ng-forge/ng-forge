@@ -1,39 +1,31 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
 
 test.describe('Advanced Validation E2E Tests', () => {
-  test.afterEach(async (_, testInfo) => {
-    if (testInfo.status === 'passed') {
-      console.info(`✅ TEST PASSED: ${testInfo.title}`);
-    }
-  });
-
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4201/#/test/advanced-validation');
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/advanced-validation');
   });
 
   test.describe('Custom Validator', () => {
-    test('should validate password strength using custom validator', async ({ page }) => {
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="custom-validator-test"]');
+    test('should validate password strength using custom validator', async ({ helpers }) => {
+      const scenario = helpers.getScenario('custom-validator-test');
       await expect(scenario).toBeVisible();
 
-      const passwordInput = scenario.locator('#password input');
-      const submitButton = scenario.locator('#submit button');
+      const passwordInput = helpers.getInput(scenario, 'password');
+      const submitButton = helpers.getSubmitButton(scenario);
 
       // Submit should be disabled initially (no value)
       await expect(submitButton).toBeDisabled();
 
       // Try weak password (missing special character, uppercase, etc.)
-      await passwordInput.fill('weak');
-      await page.waitForTimeout(300);
+      await helpers.fillInput(passwordInput, 'weak');
 
       // Submit should still be disabled (invalid password)
       await expect(submitButton).toBeDisabled();
 
       // Fill strong password that meets requirements
-      await passwordInput.fill('Strong@123');
-      await page.waitForTimeout(300);
+      await helpers.fillInput(passwordInput, 'Strong@123');
 
       // Submit should now be enabled (valid password)
       await expect(submitButton).toBeEnabled();
@@ -41,36 +33,32 @@ test.describe('Advanced Validation E2E Tests', () => {
   });
 
   test.describe('Cross-Field Validation', () => {
-    test('should validate password matching across fields', async ({ page }) => {
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="cross-field-test"]');
+    test('should validate password matching across fields', async ({ helpers }) => {
+      const scenario = helpers.getScenario('cross-field-test');
       await expect(scenario).toBeVisible();
 
-      const passwordInput = scenario.locator('#password input');
-      const confirmPasswordInput = scenario.locator('#confirmPassword input');
-      const submitButton = scenario.locator('#submit button');
+      const passwordInput = helpers.getInput(scenario, 'password');
+      const confirmPasswordInput = helpers.getInput(scenario, 'confirmPassword');
+      const submitButton = helpers.getSubmitButton(scenario);
 
       // Submit disabled initially
       await expect(submitButton).toBeDisabled();
 
       // Enter matching passwords
-      await passwordInput.fill('MyPassword123');
-      await confirmPasswordInput.fill('MyPassword123');
-      await page.waitForTimeout(300);
+      await helpers.fillInput(passwordInput, 'MyPassword123');
+      await helpers.fillInput(confirmPasswordInput, 'MyPassword123');
 
       // Submit should be enabled (passwords match)
       await expect(submitButton).toBeEnabled();
 
       // Now try mismatched passwords
-      await confirmPasswordInput.fill('DifferentPassword');
-      await page.waitForTimeout(300);
+      await helpers.clearAndFill(confirmPasswordInput, 'DifferentPassword');
 
       // Submit should be disabled (passwords don't match)
       await expect(submitButton).toBeDisabled();
 
       // Fix the mismatch
-      await confirmPasswordInput.fill('MyPassword123');
-      await page.waitForTimeout(300);
+      await helpers.clearAndFill(confirmPasswordInput, 'MyPassword123');
 
       // Submit should be enabled again
       await expect(submitButton).toBeEnabled();
@@ -78,36 +66,32 @@ test.describe('Advanced Validation E2E Tests', () => {
   });
 
   test.describe('Range Validation', () => {
-    test('should validate that maximum is greater than minimum', async ({ page }) => {
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="range-validation-test"]');
+    test('should validate that maximum is greater than minimum', async ({ helpers }) => {
+      const scenario = helpers.getScenario('range-validation-test');
       await expect(scenario).toBeVisible();
 
-      const minInput = scenario.locator('#minValue input');
-      const maxInput = scenario.locator('#maxValue input');
-      const submitButton = scenario.locator('#submit button');
+      const minInput = helpers.getInput(scenario, 'minValue');
+      const maxInput = helpers.getInput(scenario, 'maxValue');
+      const submitButton = helpers.getSubmitButton(scenario);
 
       // Submit disabled initially
       await expect(submitButton).toBeDisabled();
 
       // Enter valid range
-      await minInput.fill('10');
-      await maxInput.fill('20');
-      await page.waitForTimeout(300);
+      await helpers.fillInput(minInput, '10');
+      await helpers.fillInput(maxInput, '20');
 
       // Submit should be enabled (valid range)
       await expect(submitButton).toBeEnabled();
 
       // Enter invalid range (max < min)
-      await maxInput.fill('5');
-      await page.waitForTimeout(300);
+      await helpers.clearAndFill(maxInput, '5');
 
       // Submit should be disabled (invalid range)
       await expect(submitButton).toBeDisabled();
 
       // Fix the range
-      await maxInput.fill('25');
-      await page.waitForTimeout(300);
+      await helpers.clearAndFill(maxInput, '25');
 
       // Submit should be enabled again
       await expect(submitButton).toBeEnabled();
@@ -115,17 +99,15 @@ test.describe('Advanced Validation E2E Tests', () => {
   });
 
   test.describe('Conditional Validation', () => {
-    test('should apply validators conditionally based on field values', async ({ page }) => {
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="conditional-validator-test"]');
+    test('should apply validators conditionally based on field values', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('conditional-validator-test');
       await expect(scenario).toBeVisible();
 
       const isAdultCheckbox = scenario.locator('#isAdult input[type="checkbox"]');
-      const ageInput = scenario.locator('#age input');
-      const submitButton = scenario.locator('#submit button');
+      const ageInput = helpers.getInput(scenario, 'age');
+      const submitButton = helpers.getSubmitButton(scenario);
 
       // Initially, form should be valid without age (checkbox unchecked, age not required)
-      // Submit should be enabled
       await expect(submitButton).toBeEnabled();
 
       // Check the "I am 18 or older" checkbox
@@ -136,15 +118,14 @@ test.describe('Advanced Validation E2E Tests', () => {
       await expect(submitButton).toBeDisabled();
 
       // Fill age less than 18 (invalid - below minimum)
-      await ageInput.fill('16');
-      await page.waitForTimeout(500);
+      await helpers.fillInput(ageInput, '16');
+      await page.waitForTimeout(300);
 
       // Submit should still be disabled (age below minimum)
       await expect(submitButton).toBeDisabled();
 
       // Fill valid age (18 or older)
-      await ageInput.fill('25');
-      await page.waitForTimeout(300);
+      await helpers.clearAndFill(ageInput, '25');
 
       // Submit should now be enabled (valid age)
       await expect(submitButton).toBeEnabled();
@@ -166,36 +147,30 @@ test.describe('Advanced Validation E2E Tests', () => {
   });
 
   test.describe('Multiple Validators', () => {
-    test('should apply multiple validators to a single field', async ({ page }) => {
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="multiple-validators-test"]');
+    test('should apply multiple validators to a single field', async ({ helpers }) => {
+      const scenario = helpers.getScenario('multiple-validators-test');
       await expect(scenario).toBeVisible();
 
-      const usernameInput = scenario.locator('#username input');
-      const submitButton = scenario.locator('#submit button');
+      const usernameInput = helpers.getInput(scenario, 'username');
+      const submitButton = helpers.getSubmitButton(scenario);
 
       // Test empty (required validator) - submit should be disabled
       await expect(submitButton).toBeDisabled();
 
       // Test too short (minLength validator)
-      await usernameInput.fill('ab');
-      await page.waitForTimeout(300);
+      await helpers.fillInput(usernameInput, 'ab');
 
       // Test invalid pattern (spaces not allowed)
-      await usernameInput.fill('user name');
-      await page.waitForTimeout(300);
+      await helpers.clearAndFill(usernameInput, 'user name');
 
       // Test reserved word (custom validator)
-      await usernameInput.fill('admin');
-      await page.waitForTimeout(300);
+      await helpers.clearAndFill(usernameInput, 'admin');
 
       // Test another reserved word
-      await usernameInput.fill('root');
-      await page.waitForTimeout(300);
+      await helpers.clearAndFill(usernameInput, 'root');
 
       // Test valid username - submit should be enabled
-      await usernameInput.fill('valid_user_123');
-      await page.waitForTimeout(300);
+      await helpers.clearAndFill(usernameInput, 'valid_user_123');
       await expect(submitButton).toBeEnabled();
     });
   });
