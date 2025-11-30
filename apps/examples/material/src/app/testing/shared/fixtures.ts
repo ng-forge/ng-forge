@@ -1,6 +1,6 @@
 import { expect, Locator, test as base } from '@playwright/test';
 import { logTestResult, testUrl } from './test-utils';
-import { ConsoleCheckOptions } from './types';
+import { ConsoleCheckOptions, MockResponse } from './types';
 
 /**
  * Console message tracking for E2E tests
@@ -14,6 +14,53 @@ export interface ConsoleTracker {
   pageErrors: string[];
   /** Clear all captured messages */
   clear: () => void;
+}
+
+/**
+ * Mock API helpers for intercepting HTTP requests
+ */
+export interface MockApiHelpers {
+  /**
+   * Set up a mock endpoint that returns a success response
+   * @param urlPattern - URL pattern to match (string or regex)
+   * @param response - Optional response configuration
+   */
+  mockSuccess: (urlPattern: string | RegExp, response?: MockResponse) => Promise<void>;
+
+  /**
+   * Set up a mock endpoint that returns an error response
+   * @param urlPattern - URL pattern to match (string or regex)
+   * @param response - Optional response configuration (status defaults to 500)
+   */
+  mockError: (urlPattern: string | RegExp, response?: MockResponse) => Promise<void>;
+
+  /**
+   * Set up a mock endpoint that returns validation errors
+   * @param urlPattern - URL pattern to match (string or regex)
+   * @param errors - Validation errors to return
+   * @param response - Optional additional response configuration
+   */
+  mockValidationError: (urlPattern: string | RegExp, errors: Record<string, string>, response?: MockResponse) => Promise<void>;
+
+  /**
+   * Get all intercepted requests for a URL pattern
+   */
+  getInterceptedRequests: (urlPattern: string | RegExp) => InterceptedRequest[];
+
+  /**
+   * Clear all intercepted requests
+   */
+  clearInterceptedRequests: () => void;
+}
+
+/**
+ * Intercepted request data
+ */
+export interface InterceptedRequest {
+  url: string;
+  method: string;
+  body: Record<string, unknown> | null;
+  timestamp: number;
 }
 
 /**
@@ -47,9 +94,126 @@ export interface TestHelpers {
 }
 
 /**
- * Extended test fixture with helper methods and console tracking
+ * Extended test fixture with helper methods, console tracking, and mock API support
  */
-export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleTracker }>({
+export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleTracker; mockApi: MockApiHelpers }>({
+  mockApi: async ({ page }, use) => {
+    const interceptedRequests: InterceptedRequest[] = [];
+
+    const helpers: MockApiHelpers = {
+      mockSuccess: async (urlPattern, response = {}) => {
+        await page.route(urlPattern, async (route) => {
+          // Capture the request
+          const request = route.request();
+          let body: Record<string, unknown> | null = null;
+          try {
+            const postData = request.postData();
+            if (postData) {
+              body = JSON.parse(postData);
+            }
+          } catch {
+            // Not JSON body
+          }
+          interceptedRequests.push({
+            url: request.url(),
+            method: request.method(),
+            body,
+            timestamp: Date.now(),
+          });
+
+          // Apply delay if specified
+          if (response.delay) {
+            await new Promise((resolve) => setTimeout(resolve, response.delay));
+          }
+
+          await route.fulfill({
+            status: response.status ?? 200,
+            contentType: 'application/json',
+            headers: response.headers,
+            body: JSON.stringify(response.body ?? { success: true }),
+          });
+        });
+      },
+
+      mockError: async (urlPattern, response = {}) => {
+        await page.route(urlPattern, async (route) => {
+          const request = route.request();
+          let body: Record<string, unknown> | null = null;
+          try {
+            const postData = request.postData();
+            if (postData) {
+              body = JSON.parse(postData);
+            }
+          } catch {
+            // Not JSON body
+          }
+          interceptedRequests.push({
+            url: request.url(),
+            method: request.method(),
+            body,
+            timestamp: Date.now(),
+          });
+
+          if (response.delay) {
+            await new Promise((resolve) => setTimeout(resolve, response.delay));
+          }
+
+          await route.fulfill({
+            status: response.status ?? 500,
+            contentType: 'application/json',
+            headers: response.headers,
+            body: JSON.stringify(response.body ?? { error: 'Internal server error' }),
+          });
+        });
+      },
+
+      mockValidationError: async (urlPattern, errors, response = {}) => {
+        await page.route(urlPattern, async (route) => {
+          const request = route.request();
+          let body: Record<string, unknown> | null = null;
+          try {
+            const postData = request.postData();
+            if (postData) {
+              body = JSON.parse(postData);
+            }
+          } catch {
+            // Not JSON body
+          }
+          interceptedRequests.push({
+            url: request.url(),
+            method: request.method(),
+            body,
+            timestamp: Date.now(),
+          });
+
+          if (response.delay) {
+            await new Promise((resolve) => setTimeout(resolve, response.delay));
+          }
+
+          await route.fulfill({
+            status: response.status ?? 422,
+            contentType: 'application/json',
+            headers: response.headers,
+            body: JSON.stringify({ errors, ...response.body }),
+          });
+        });
+      },
+
+      getInterceptedRequests: (urlPattern) => {
+        if (typeof urlPattern === 'string') {
+          return interceptedRequests.filter((r) => r.url.includes(urlPattern));
+        }
+        return interceptedRequests.filter((r) => urlPattern.test(r.url));
+      },
+
+      clearInterceptedRequests: () => {
+        interceptedRequests.length = 0;
+      },
+    };
+
+    await use(helpers);
+  },
+
   consoleTracker: async ({ page }, use) => {
     const errors: string[] = [];
     const warnings: string[] = [];
