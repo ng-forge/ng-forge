@@ -1,31 +1,32 @@
-import { CrossFieldValidationScenarioComponent } from './cross-field-validation.component';
-import { ConditionalFieldsScenarioComponent } from './conditional-fields.component';
-import { UserRegistrationScenarioComponent } from './user-registration.component';
-import { ProfileManagementScenarioComponent } from './profile-management.component';
+import { Routes } from '@angular/router';
+import { demoScenariosSuite, getDemoScenario } from './demo-scenarios.suite';
 
-/**
- * Demo Scenarios Routes
- * Individual routes for each demo scenario test component
- */
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./demo-scenarios-index.component').then((m) => m.DemoScenariosIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: demoScenariosSuite },
   },
   {
     path: 'cross-field-validation',
-    component: CrossFieldValidationScenarioComponent,
-  },
-  {
-    path: 'conditional-fields',
-    component: ConditionalFieldsScenarioComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDemoScenario('cross-field-validation') },
   },
   {
     path: 'user-registration',
-    component: UserRegistrationScenarioComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDemoScenario('user-registration') },
   },
   {
     path: 'profile-management',
-    component: ProfileManagementScenarioComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDemoScenario('profile-management') },
+  },
+  {
+    path: 'conditional-fields',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getDemoScenario('conditional-fields') },
   },
 ];
+
+export default routes;

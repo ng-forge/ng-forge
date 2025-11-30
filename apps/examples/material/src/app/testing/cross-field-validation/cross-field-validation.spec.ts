@@ -1,14 +1,19 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Cross-Field Validation Tests', () => {
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/cross-field-validation');
+  });
+
   test.describe('Password Confirmation Validation', () => {
-    test.beforeEach(async ({ page }) => {
+    test('should validate password matching', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-field-validation/password-validation');
       await page.waitForLoadState('networkidle');
-    });
 
-    test('should validate password matching', async ({ page }) => {
-      const scenario = page.locator('[data-testid="password-validation"]');
+      const scenario = helpers.getScenario('password-validation');
       await expect(scenario).toBeVisible();
 
       const submitButton = scenario.locator('#submitPassword button');
@@ -67,13 +72,11 @@ test.describe('Cross-Field Validation Tests', () => {
   });
 
   test.describe('Conditional Required Fields', () => {
-    test.beforeEach(async ({ page }) => {
+    test('should handle conditional field requirements', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-field-validation/conditional-fields');
       await page.waitForLoadState('networkidle');
-    });
 
-    test('should handle conditional field requirements', async ({ page }) => {
-      const scenario = page.locator('[data-testid="conditional-validation"]');
+      const scenario = helpers.getScenario('conditional-validation');
       await expect(scenario).toBeVisible();
 
       const submitButton = scenario.locator('#submitConditional button');
@@ -129,13 +132,11 @@ test.describe('Cross-Field Validation Tests', () => {
   });
 
   test.describe('Dependent Select Fields', () => {
-    test.beforeEach(async ({ page }) => {
+    test('should handle dependent field selections', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-field-validation/dependent-fields');
       await page.waitForLoadState('networkidle');
-    });
 
-    test('should handle dependent field selections', async ({ page }) => {
-      const scenario = page.locator('[data-testid="dependent-fields"]');
+      const scenario = helpers.getScenario('dependent-fields');
       await expect(scenario).toBeVisible();
 
       const submitButton = scenario.locator('#submitDependent button');
@@ -224,13 +225,11 @@ test.describe('Cross-Field Validation Tests', () => {
   });
 
   test.describe('Field Enable/Disable', () => {
-    test.beforeEach(async ({ page }) => {
+    test('should handle field enabling/disabling based on selections', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-field-validation/enable-disable');
       await page.waitForLoadState('networkidle');
-    });
 
-    test('should handle field enabling/disabling based on selections', async ({ page }) => {
-      const scenario = page.locator('[data-testid="enable-disable"]');
+      const scenario = helpers.getScenario('enable-disable');
       await expect(scenario).toBeVisible();
 
       const submitButton = scenario.locator('#submitEnableDisable button');

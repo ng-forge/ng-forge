@@ -1,37 +1,37 @@
-import { EmailVerificationComponent } from './email-verification.component';
-import { ConditionalPagesComponent } from './conditional-pages.component';
-import { BusinessFlowComponent } from './business-flow.component';
-import { CascadeDependenciesComponent } from './cascade-dependencies.component';
-import { ProgressiveValidationComponent } from './progressive-validation.component';
+import { Routes } from '@angular/router';
+import { crossPageValidationSuite, getCrossPageValidationScenario } from './cross-page-validation.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./cross-page-validation-index.component').then((m) => m.CrossPageValidationIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: crossPageValidationSuite },
   },
   {
     path: 'email-verification',
-    component: EmailVerificationComponent,
-    data: { testId: 'cross-page-email-verification' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getCrossPageValidationScenario('cross-page-email-verification') },
   },
   {
     path: 'conditional-pages',
-    component: ConditionalPagesComponent,
-    data: { testId: 'conditional-pages' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getCrossPageValidationScenario('conditional-pages') },
   },
   {
     path: 'business-flow',
-    component: BusinessFlowComponent,
-    data: { testId: 'business-flow' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getCrossPageValidationScenario('business-flow') },
   },
   {
     path: 'cascade-dependencies',
-    component: CascadeDependenciesComponent,
-    data: { testId: 'cascade-dependencies' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getCrossPageValidationScenario('cascade-dependencies') },
   },
   {
     path: 'progressive-validation',
-    component: ProgressiveValidationComponent,
-    data: { testId: 'progressive-validation' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getCrossPageValidationScenario('progressive-validation') },
   },
 ];
+
+export default routes;

@@ -1,14 +1,16 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('User Journey Flow Tests', () => {
   test.describe('Registration Journey', () => {
-    test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4201/#/test/user-journey-flows/registration-journey');
-      await page.waitForLoadState('networkidle');
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/user-journey-flows/registration-journey');
     });
 
-    test('should complete full user registration journey', async ({ page }) => {
-      const scenario = page.locator('[data-testid="registration-journey"]');
+    test('should complete full user registration journey', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('registration-journey');
       await expect(scenario).toBeVisible();
 
       // Page 1: Welcome & Account Type
@@ -133,13 +135,12 @@ test.describe('User Journey Flow Tests', () => {
   });
 
   test.describe('Checkout Journey', () => {
-    test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4201/#/test/user-journey-flows/checkout-journey');
-      await page.waitForLoadState('networkidle');
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/user-journey-flows/checkout-journey');
     });
 
-    test('should complete e-commerce checkout journey', async ({ page }) => {
-      const scenario = page.locator('[data-testid="checkout-journey"]');
+    test('should complete e-commerce checkout journey', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('checkout-journey');
       await expect(scenario).toBeVisible();
 
       // Page 1: Cart Review
@@ -254,13 +255,12 @@ test.describe('User Journey Flow Tests', () => {
   });
 
   test.describe('Survey Journey', () => {
-    test.beforeEach(async ({ page }) => {
-      await page.goto('http://localhost:4201/#/test/user-journey-flows/survey-journey');
-      await page.waitForLoadState('networkidle');
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/user-journey-flows/survey-journey');
     });
 
-    test('should complete customer satisfaction survey journey', async ({ page }) => {
-      const scenario = page.locator('[data-testid="survey-journey"]');
+    test('should complete customer satisfaction survey journey', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('survey-journey');
       await expect(scenario).toBeVisible();
 
       // Page 1: Introduction & Demographics

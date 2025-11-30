@@ -1,33 +1,37 @@
-import { Route } from '@angular/router';
-import { MultiPageRegistrationComponent } from './multi-page-registration.component';
-import { ValidationNavigationComponent } from './validation-navigation.component';
-import { BackwardNavigationComponent } from './backward-navigation.component';
-import { DirectNavigationComponent } from './direct-navigation.component';
-import { PageTransitionsComponent } from './page-transitions.component';
+import { Routes } from '@angular/router';
+import { getMultiPageNavigationScenario, multiPageNavigationSuite } from './multi-page-navigation.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./multi-page-navigation-index.component').then((m) => m.MultiPageNavigationIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: multiPageNavigationSuite },
   },
   {
     path: 'multi-page-registration',
-    component: MultiPageRegistrationComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMultiPageNavigationScenario('multi-page-registration') },
   },
   {
     path: 'validation-navigation',
-    component: ValidationNavigationComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMultiPageNavigationScenario('validation-navigation') },
   },
   {
     path: 'backward-navigation',
-    component: BackwardNavigationComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMultiPageNavigationScenario('backward-navigation') },
   },
   {
     path: 'direct-navigation',
-    component: DirectNavigationComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMultiPageNavigationScenario('direct-navigation') },
   },
   {
     path: 'page-transitions',
-    component: PageTransitionsComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMultiPageNavigationScenario('page-transitions') },
   },
-] satisfies Route[];
+];
+
+export default routes;

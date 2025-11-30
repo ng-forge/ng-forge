@@ -1,62 +1,67 @@
-import { ResetDefaultsTestComponent } from './reset-defaults-test.component';
-import { ResetSelectTestComponent } from './reset-select-test.component';
-import { ResetCheckboxTestComponent } from './reset-checkbox-test.component';
-import { ResetValidationTestComponent } from './reset-validation-test.component';
-import { ClearAllTestComponent } from './clear-all-test.component';
-import { ClearSelectTestComponent } from './clear-select-test.component';
-import { ClearCheckboxTestComponent } from './clear-checkbox-test.component';
-import { ResetVsClearTestComponent } from './reset-vs-clear-test.component';
-import { RequiredResetClearTestComponent } from './required-reset-clear-test.component';
-import { ResetNestedTestComponent } from './reset-nested-test.component';
-import { MultipleCyclesTestComponent } from './multiple-cycles-test.component';
+import { Routes } from '@angular/router';
+import { formResetClearSuite, getFormResetClearScenario } from './form-reset-clear.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./form-reset-clear-index.component').then((m) => m.FormResetClearIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: formResetClearSuite },
   },
   {
     path: 'reset-defaults',
-    component: ResetDefaultsTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('reset-defaults') },
   },
   {
     path: 'reset-select',
-    component: ResetSelectTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('reset-select') },
   },
   {
     path: 'reset-checkbox',
-    component: ResetCheckboxTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('reset-checkbox') },
   },
   {
     path: 'reset-validation',
-    component: ResetValidationTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('reset-validation') },
   },
   {
     path: 'clear-all',
-    component: ClearAllTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('clear-all') },
   },
   {
     path: 'clear-select',
-    component: ClearSelectTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('clear-select') },
   },
   {
     path: 'clear-checkbox',
-    component: ClearCheckboxTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('clear-checkbox') },
   },
   {
     path: 'reset-vs-clear',
-    component: ResetVsClearTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('reset-vs-clear') },
   },
   {
     path: 'required-reset-clear',
-    component: RequiredResetClearTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('required-reset-clear') },
   },
   {
     path: 'reset-nested',
-    component: ResetNestedTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('reset-nested') },
   },
   {
     path: 'multiple-cycles',
-    component: MultipleCyclesTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getFormResetClearScenario('multiple-cycles') },
   },
 ];
+
+export default routes;

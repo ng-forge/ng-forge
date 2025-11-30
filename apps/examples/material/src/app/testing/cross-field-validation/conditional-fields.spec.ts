@@ -1,38 +1,27 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Conditional Fields E2E Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4201/#/test/cross-field-validation/conditional-fields');
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/cross-field-validation/conditional-fields');
   });
 
-  test('should display conditional fields component without errors', async ({ page }) => {
-    const consoleErrors: string[] = [];
-
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        consoleErrors.push(msg.text());
-      }
-    });
-
+  test('should display conditional fields component without errors', async ({ helpers }) => {
     // Locate the specific test scenario
-    const scenario = page.locator('[data-testid="conditional-validation"]');
+    const scenario = helpers.getScenario('conditional-validation');
     await expect(scenario).toBeVisible();
 
     // Verify the heading is visible
     await expect(scenario.getByRole('heading', { name: 'Conditional Field Validation' })).toBeVisible();
 
-    // Check for any console errors, specifically injection context errors
-    const injectionErrors = consoleErrors.filter(
-      (error) => error.includes('FunctionRegistryService') || error.includes('inject()') || error.includes('injection context'),
-    );
-
-    expect(injectionErrors).toHaveLength(0);
+    // Console error checking is now handled by setupConsoleCheck()
   });
 
-  test('should toggle conditional address fields based on checkbox', async ({ page }) => {
+  test('should toggle conditional address fields based on checkbox', async ({ page, helpers }) => {
     // Locate the specific test scenario
-    const scenario = page.locator('[data-testid="conditional-validation"]');
+    const scenario = helpers.getScenario('conditional-validation');
     await expect(scenario).toBeVisible();
 
     const hasAddressCheckbox = scenario.locator('#hasAddress mat-checkbox');
@@ -79,9 +68,9 @@ test.describe('Conditional Fields E2E Tests', () => {
     await expect(hasAddressCheckbox).not.toHaveClass(/mat-mdc-checkbox-checked/);
   });
 
-  test('should validate ZIP code format', async ({ page }) => {
+  test('should validate ZIP code format', async ({ page, helpers }) => {
     // Locate the specific test scenario
-    const scenario = page.locator('[data-testid="conditional-validation"]');
+    const scenario = helpers.getScenario('conditional-validation');
     await expect(scenario).toBeVisible();
 
     const hasAddressCheckbox = scenario.locator('#hasAddress mat-checkbox');
@@ -120,9 +109,9 @@ test.describe('Conditional Fields E2E Tests', () => {
     expect(await zipCodeInput.inputValue()).toBe('12345-6789');
   });
 
-  test('should submit form with address data', async ({ page }) => {
+  test('should submit form with address data', async ({ page, helpers }) => {
     // Locate the specific test scenario
-    const scenario = page.locator('[data-testid="conditional-validation"]');
+    const scenario = helpers.getScenario('conditional-validation');
     await expect(scenario).toBeVisible();
 
     const hasAddressCheckbox = scenario.locator('#hasAddress mat-checkbox');
@@ -173,9 +162,9 @@ test.describe('Conditional Fields E2E Tests', () => {
     });
   });
 
-  test('should submit form without address data when checkbox is unchecked', async ({ page }) => {
+  test('should submit form without address data when checkbox is unchecked', async ({ page, helpers }) => {
     // Locate the specific test scenario
-    const scenario = page.locator('[data-testid="conditional-validation"]');
+    const scenario = helpers.getScenario('conditional-validation');
     await expect(scenario).toBeVisible();
 
     const submitButton = scenario.locator('#submitConditional button');

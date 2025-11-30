@@ -1,0 +1,222 @@
+import { expect, Locator, test as base } from '@playwright/test';
+import { logTestResult, testUrl } from './test-utils';
+import { ConsoleCheckOptions } from './types';
+
+/**
+ * Console message tracking for E2E tests
+ */
+export interface ConsoleTracker {
+  /** Array of console errors captured during the test (will fail tests) */
+  errors: string[];
+  /** Array of console warnings captured during the test (will be logged) */
+  warnings: string[];
+  /** Array of uncaught page errors (Angular RuntimeErrors, etc.) */
+  pageErrors: string[];
+  /** Clear all captured messages */
+  clear: () => void;
+}
+
+/**
+ * Extended test context with common page helpers
+ */
+export interface TestHelpers {
+  /** Navigate to a test scenario */
+  navigateToScenario: (path: string) => Promise<void>;
+  /** Get a scenario container by testId */
+  getScenario: (testId: string) => Locator;
+  /** Get an input field within a scenario */
+  getInput: (scenario: Locator, fieldId: string) => Locator;
+  /** Get a Material checkbox within a scenario */
+  getCheckbox: (scenario: Locator, fieldId: string) => Locator;
+  /** Get a Material select within a scenario */
+  getSelect: (scenario: Locator, fieldId: string) => Locator;
+  /** Get the submit button within a scenario */
+  getSubmitButton: (scenario: Locator) => Locator;
+  /** Fill an input and wait for debounce */
+  fillInput: (input: Locator, value: string) => Promise<void>;
+  /** Clear and fill an input */
+  clearAndFill: (input: Locator, value: string) => Promise<void>;
+  /** Select an option from a Material select */
+  selectOption: (select: Locator, optionText: string) => Promise<void>;
+  /** Submit form and capture submitted data */
+  submitFormAndCapture: (scenario: Locator) => Promise<Record<string, unknown>>;
+  /** Wait for field to become visible */
+  waitForFieldVisible: (field: Locator, timeout?: number) => Promise<void>;
+  /** Wait for field to become hidden */
+  waitForFieldHidden: (field: Locator, timeout?: number) => Promise<void>;
+}
+
+/**
+ * Extended test fixture with helper methods and console tracking
+ */
+export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleTracker }>({
+  consoleTracker: async ({ page }, use) => {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const pageErrors: string[] = [];
+
+    // Listen for console messages
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      } else if (msg.type() === 'warning') {
+        warnings.push(msg.text());
+      }
+    });
+
+    // Listen for uncaught page errors (Angular RuntimeErrors, etc.)
+    page.on('pageerror', (error) => {
+      pageErrors.push(error.message);
+    });
+
+    const tracker: ConsoleTracker = {
+      errors,
+      warnings,
+      pageErrors,
+      clear: () => {
+        errors.length = 0;
+        warnings.length = 0;
+        pageErrors.length = 0;
+      },
+    };
+
+    await use(tracker);
+  },
+
+  helpers: async ({ page }, use) => {
+    const helpers: TestHelpers = {
+      navigateToScenario: async (path: string) => {
+        await page.goto(testUrl(path));
+        await page.waitForLoadState('networkidle');
+      },
+
+      getScenario: (testId: string) => {
+        return page.locator(`[data-testid="${testId}"]`);
+      },
+
+      getInput: (scenario: Locator, fieldId: string) => {
+        return scenario.locator(`#${fieldId} input`);
+      },
+
+      getCheckbox: (scenario: Locator, fieldId: string) => {
+        return scenario.locator(`#${fieldId} mat-checkbox`);
+      },
+
+      getSelect: (scenario: Locator, fieldId: string) => {
+        return scenario.locator(`#${fieldId} mat-select`);
+      },
+
+      getSubmitButton: (scenario: Locator) => {
+        return scenario.locator('#submit button');
+      },
+
+      fillInput: async (input: Locator, value: string) => {
+        await input.fill(value);
+        await page.waitForTimeout(200); // Wait for debounce
+      },
+
+      clearAndFill: async (input: Locator, value: string) => {
+        await input.clear();
+        await input.fill(value);
+        await page.waitForTimeout(200);
+      },
+
+      selectOption: async (select: Locator, optionText: string) => {
+        await select.click();
+        await page.locator(`mat-option:has-text("${optionText}")`).click();
+      },
+
+      submitFormAndCapture: async (scenario: Locator) => {
+        const submitButton = scenario.locator('#submit button');
+
+        const submittedDataPromise = page.evaluate(
+          () =>
+            new Promise((resolve) => {
+              window.addEventListener(
+                'formSubmitted',
+                (event: Event) => {
+                  resolve((event as CustomEvent).detail.data);
+                },
+                { once: true },
+              );
+            }),
+        );
+
+        await submitButton.click();
+
+        return submittedDataPromise as Promise<Record<string, unknown>>;
+      },
+
+      waitForFieldVisible: async (field: Locator, timeout = 5000) => {
+        await expect(field).toBeVisible({ timeout });
+      },
+
+      waitForFieldHidden: async (field: Locator, timeout = 5000) => {
+        await expect(field).not.toBeVisible({ timeout });
+      },
+    };
+
+    await use(helpers);
+  },
+});
+
+// Re-export expect for convenience
+export { expect };
+
+/**
+ * Creates afterEach hook for logging test results
+ */
+export function setupTestLogging() {
+  // eslint-disable-next-line no-empty-pattern
+  test.afterEach(async ({}, testInfo) => {
+    logTestResult(testInfo);
+  });
+}
+
+/**
+ * Creates beforeEach and afterEach hooks for checking console errors, page errors, and warnings.
+ * - Console errors and uncaught page errors (Angular RuntimeErrors, etc.) will fail the test
+ * - Console warnings will be logged but won't fail the test
+ *
+ * @param options - Configuration options
+ * @param options.ignorePatterns - Array of regex patterns to ignore certain errors/warnings
+ */
+export function setupConsoleCheck(options?: ConsoleCheckOptions) {
+  const ignorePatterns = options?.ignorePatterns ?? [];
+
+  // IMPORTANT: This beforeEach hook ensures consoleTracker is instantiated BEFORE the test runs.
+  // Without this, consoleTracker would only be set up when afterEach runs (after the test),
+  // which means the page.on('console') listeners would be attached too late to capture errors.
+  test.beforeEach(async ({ consoleTracker }) => {
+    // Clear any errors from previous tests (ensures clean slate)
+    consoleTracker.clear();
+  });
+
+  test.afterEach(async ({ consoleTracker }, testInfo) => {
+    // Filter out ignored errors
+    const relevantErrors = consoleTracker.errors.filter((error) => !ignorePatterns.some((pattern) => pattern.test(error)));
+
+    // Filter out ignored page errors (Angular RuntimeErrors, etc.)
+    const relevantPageErrors = consoleTracker.pageErrors.filter((error) => !ignorePatterns.some((pattern) => pattern.test(error)));
+
+    // Filter out ignored warnings
+    const relevantWarnings = consoleTracker.warnings.filter((warning) => !ignorePatterns.some((pattern) => pattern.test(warning)));
+
+    // Log warnings (don't fail)
+    if (relevantWarnings.length > 0) {
+      console.warn(`⚠️ ${relevantWarnings.length} console warning(s) in "${testInfo.title}":`);
+      relevantWarnings.forEach((warning, i) => {
+        console.warn(`  ${i + 1}. ${warning}`);
+      });
+    }
+
+    // Combine all errors for reporting
+    const allErrors = [...relevantErrors.map((e) => `[Console] ${e}`), ...relevantPageErrors.map((e) => `[Page Error] ${e}`)];
+
+    // Fail test on errors
+    if (allErrors.length > 0) {
+      const errorMessage = allErrors.map((e, i) => `  ${i + 1}. ${e}`).join('\n');
+      throw new Error(`❌ Test "${testInfo.title}" failed due to ${allErrors.length} error(s):\n${errorMessage}`);
+    }
+  });
+}

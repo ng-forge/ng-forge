@@ -1,88 +1,112 @@
-import { Route } from '@angular/router';
+import { Routes } from '@angular/router';
+import { getMaterialComponentsScenario, materialComponentsSuite } from './material-components.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./material-components-index.component').then((m) => m.MaterialComponentsIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: materialComponentsSuite },
   },
   {
     path: 'datepicker-basic',
-    loadComponent: () => import('./datepicker-basic.component').then((m) => m.DatepickerBasicComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('datepicker-basic') },
   },
   {
     path: 'datepicker-constraints',
-    loadComponent: () => import('./datepicker-constraints.component').then((m) => m.DatepickerConstraintsComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('datepicker-constraints') },
   },
   {
     path: 'datepicker-validation',
-    loadComponent: () => import('./datepicker-validation.component').then((m) => m.DatepickerValidationComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('datepicker-validation') },
   },
   {
     path: 'datepicker-clear',
-    loadComponent: () => import('./datepicker-clear.component').then((m) => m.DatepickerClearComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('datepicker-clear') },
   },
   {
     path: 'datepicker-disabled',
-    loadComponent: () => import('./datepicker-disabled.component').then((m) => m.DatepickerDisabledComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('datepicker-disabled') },
   },
   {
     path: 'datepicker-initial-value',
-    loadComponent: () => import('./datepicker-initial-value.component').then((m) => m.DatepickerInitialValueComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('datepicker-initial-value') },
   },
   {
     path: 'slider-basic',
-    loadComponent: () => import('./slider-basic.component').then((m) => m.SliderBasicComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('slider-basic') },
   },
   {
     path: 'slider-bounds',
-    loadComponent: () => import('./slider-bounds.component').then((m) => m.SliderBoundsComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('slider-bounds') },
   },
   {
     path: 'slider-steps',
-    loadComponent: () => import('./slider-steps.component').then((m) => m.SliderStepsComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('slider-steps') },
   },
   {
     path: 'slider-disabled',
-    loadComponent: () => import('./slider-disabled.component').then((m) => m.SliderDisabledComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('slider-disabled') },
   },
   {
     path: 'slider-value-display',
-    loadComponent: () => import('./slider-value-display.component').then((m) => m.SliderValueDisplayComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('slider-value-display') },
   },
   {
     path: 'toggle-basic',
-    loadComponent: () => import('./toggle-basic.component').then((m) => m.ToggleBasicComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('toggle-basic') },
   },
   {
     path: 'toggle-keyboard',
-    loadComponent: () => import('./toggle-keyboard.component').then((m) => m.ToggleKeyboardComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('toggle-keyboard') },
   },
   {
     path: 'toggle-disabled',
-    loadComponent: () => import('./toggle-disabled.component').then((m) => m.ToggleDisabledComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('toggle-disabled') },
   },
   {
     path: 'toggle-validation',
-    loadComponent: () => import('./toggle-validation.component').then((m) => m.ToggleValidationComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('toggle-validation') },
   },
   {
     path: 'multi-checkbox-basic',
-    loadComponent: () => import('./multi-checkbox-basic.component').then((m) => m.MultiCheckboxBasicComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('multi-checkbox-basic') },
   },
   {
     path: 'multi-checkbox-array',
-    loadComponent: () => import('./multi-checkbox-array.component').then((m) => m.MultiCheckboxArrayComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('multi-checkbox-array') },
   },
   {
     path: 'multi-checkbox-deselect',
-    loadComponent: () => import('./multi-checkbox-deselect.component').then((m) => m.MultiCheckboxDeselectComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('multi-checkbox-deselect') },
   },
   {
     path: 'multi-checkbox-disabled-options',
-    loadComponent: () => import('./multi-checkbox-disabled-options.component').then((m) => m.MultiCheckboxDisabledOptionsComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('multi-checkbox-disabled-options') },
   },
   {
     path: 'multi-checkbox-validation',
-    loadComponent: () => import('./multi-checkbox-validation.component').then((m) => m.MultiCheckboxValidationComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('multi-checkbox-validation') },
   },
-] satisfies Route[];
+];
+
+export default routes;
