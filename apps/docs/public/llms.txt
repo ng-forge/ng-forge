@@ -1,0 +1,102 @@
+# ng-forge
+
+> A configuration-driven dynamic forms library for Angular. Build complex, reactive forms with minimal code using JSON/TypeScript configurations.
+
+## Overview
+
+ng-forge provides a powerful way to create dynamic forms in Angular applications. Instead of manually building form templates, you define form structure through configuration objects, and ng-forge renders the appropriate UI components automatically.
+
+## Key Features
+
+- Configuration-driven form generation
+- Multiple UI library integrations (Material, PrimeNG, Ionic, Bootstrap)
+- Built-in validation with expression-based validators
+- Conditional logic for showing/hiding fields
+- Type-safe form configurations
+- Reactive forms under the hood
+
+## Documentation Structure
+
+### Getting Started
+- /what-is-dynamic-forms: Introduction to ng-forge and its concepts
+- /installation: How to install and set up ng-forge in your project
+
+### UI Library Integrations
+- /ui-libs-integrations/material: Angular Material integration
+- /ui-libs-integrations/primeng: PrimeNG integration
+- /ui-libs-integrations/ionic: Ionic integration
+- /ui-libs-integrations/bootstrap: Bootstrap integration
+
+### Core Concepts
+- /core/field-types: Available field types (input, select, checkbox, etc.)
+- /core/validation: Validation configuration and custom validators
+- /core/conditional-logic: Show/hide fields based on conditions
+- /core/events: Form and field event handling
+- /core/i18n: Internationalization support
+- /core/type-safety: TypeScript type safety features
+
+### Advanced Topics
+- /deep-dive/expression-parser: Expression syntax for validators and conditions
+- /deep-dive/custom-integrations: Creating custom UI library integrations
+
+### Examples
+- /examples/login-form: Simple login form example
+- /examples/contact-form: Contact form with validation
+- /examples/user-registration: Multi-field registration form
+- /examples/paginated-form: Multi-page wizard form
+
+### Prebuilt Components
+- /prebuilt/form-pages: Page container components
+- /prebuilt/form-groups: Field grouping components
+- /prebuilt/form-rows: Row layout components
+- /prebuilt/form-arrays: Dynamic array fields
+
+### API Reference
+- /api-reference: Complete API documentation for all packages
+
+## Installation
+
+```bash
+npm install @ng-forge/dynamic-forms
+# Plus your preferred UI library integration
+npm install @ng-forge/dynamic-forms-material
+```
+
+## Quick Example
+
+```typescript
+import { DynamicForm } from '@ng-forge/dynamic-forms';
+import '@ng-forge/dynamic-forms-material';
+
+const formConfig = {
+  fields: [
+    {
+      key: 'email',
+      type: 'input',
+      props: {
+        label: 'Email',
+        type: 'email',
+        required: true
+      }
+    },
+    {
+      key: 'password',
+      type: 'input',
+      props: {
+        label: 'Password',
+        type: 'password',
+        required: true
+      }
+    }
+  ]
+};
+```
+
+## Repository
+
+- GitHub: https://github.com/ng-forge/ng-forge
+- Documentation: https://ng-forge.github.io/ng-forge/
+
+## License
+
+MIT
