@@ -21,12 +21,61 @@
 
 html,
 body {
-  height: 100%;
+  // Use auto height for iframe embedding - content determines height
+  height: auto;
+  min-height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Roboto', sans-serif;
   overflow: auto !important;
   // ng-doc light mode colors
   background-color: #f6f6f6;
   color: rgb(78, 78, 78);
+}
+
+// Override Ionic's fixed positioning for iframe embedding
+// This allows content to flow naturally and body to report correct height
+ion-app {
+  position: relative !important;
+  height: auto !important;
+  min-height: 100%;
+}
+
+ion-router-outlet {
+  position: relative !important;
+  height: auto !important;
+  display: block !important;
+  contain: none !important;
+
+  // Override .ion-page styles for iframe embedding
+  .ion-page,
+  .ion-page.ion-page-invisible,
+  .ion-page.ion-page-hidden {
+    position: relative !important;
+    height: auto !important;
+    min-height: auto !important;
+    contain: none !important;
+    display: block !important;
+  }
+}
+
+// Additional .ion-page override with high specificity
+.ion-page.ion-page,
+ion-router-outlet > .ion-page {
+  position: relative !important;
+  height: auto !important;
+  min-height: auto !important;
+  contain: none !important;
+  display: block !important;
+}
+
+ion-content {
+  position: relative !important;
+  height: auto !important;
+  contain: none !important;
+
+  &::part(scroll) {
+    position: relative !important;
+    overflow: visible !important;
+  }
 }
 
 // ng-doc light mode - Ionic CSS variables (must come after Ionic imports)

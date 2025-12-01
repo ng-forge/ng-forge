@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { DynamicForm } from '@ng-forge/dynamic-forms';
-import { IonContent } from '@ionic/angular/standalone';
 import { ExampleScenario } from './types';
 import '@ng-forge/dynamic-forms-ionic';
 
@@ -14,26 +13,17 @@ import '@ng-forge/dynamic-forms-ionic';
  */
 @Component({
   selector: 'ion-example-scenario',
-  imports: [DynamicForm, JsonPipe, IonContent],
+  imports: [DynamicForm, JsonPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'example-container',
   },
-  styles: `
-    ion-content {
-      --background: var(--ion-background-color, #f6f6f6);
-    }
-  `,
   template: `
-    <ion-content>
-      <div>
-        <dynamic-form [config]="scenario().config" [(value)]="formValue" />
-        <div class="example-result">
-          <h4>Form Data:</h4>
-          <pre>{{ formValue() | json }}</pre>
-        </div>
-      </div>
-    </ion-content>
+    <dynamic-form [config]="scenario().config" [(value)]="formValue" />
+    <div class="example-result">
+      <h4>Form Data:</h4>
+      <pre>{{ formValue() | json }}</pre>
+    </div>
   `,
 })
 export default class ExampleScenarioComponent {
