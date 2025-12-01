@@ -1,84 +1,103 @@
 import { Route } from '@angular/router';
+import { getScenarioById } from './scenarios';
 
 export default [
   {
     path: '',
-    loadComponent: () => import('./index/index.component').then((m) => m.IndexComponent),
+    loadComponent: () => import('./index/index.component'),
   },
   {
     path: 'input',
-    loadComponent: () => import('./input-demo.component').then((m) => m.InputDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('input') },
   },
   {
     path: 'select',
-    loadComponent: () => import('./select-demo.component').then((m) => m.SelectDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('select') },
   },
   {
     path: 'checkbox',
-    loadComponent: () => import('./checkbox-demo.component').then((m) => m.CheckboxDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('checkbox') },
   },
   {
     path: 'toggle',
-    loadComponent: () => import('./toggle-demo.component').then((m) => m.ToggleDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('toggle') },
   },
   {
     path: 'radio',
-    loadComponent: () => import('./radio-demo.component').then((m) => m.RadioDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('radio') },
   },
   {
     path: 'multi-checkbox',
-    loadComponent: () => import('./multi-checkbox-demo.component').then((m) => m.MultiCheckboxDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('multi-checkbox') },
   },
   {
     path: 'textarea',
-    loadComponent: () => import('./textarea-demo.component').then((m) => m.TextareaDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('textarea') },
   },
   {
     path: 'datepicker',
-    loadComponent: () => import('./datepicker-demo.component').then((m) => m.DatepickerDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('datepicker') },
   },
   {
     path: 'slider',
-    loadComponent: () => import('./slider-demo.component').then((m) => m.SliderDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('slider') },
   },
   {
     path: 'button',
-    loadComponent: () => import('./button-demo.component').then((m) => m.ButtonDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('button') },
   },
   {
     path: 'complete-form',
-    loadComponent: () => import('./complete-form-demo.component').then((m) => m.CompleteFormDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('complete-form') },
   },
   {
     path: 'user-registration',
-    loadComponent: () => import('./user-registration-demo.component').then((m) => m.UserRegistrationDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('user-registration') },
   },
   {
     path: 'login',
-    loadComponent: () => import('./login-demo.component').then((m) => m.LoginDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('login') },
   },
   {
     path: 'paginated-form',
-    loadComponent: () => import('./paginated-form-demo.component').then((m) => m.PaginatedFormDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('paginated-form') },
   },
   {
     path: 'array',
-    loadComponent: () => import('./array-demo.component').then((m) => m.ArrayDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('array') },
   },
   {
     path: 'group',
-    loadComponent: () => import('./group-demo.component').then((m) => m.GroupDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('group') },
   },
   {
     path: 'row',
-    loadComponent: () => import('./row-demo.component').then((m) => m.RowDemoComponent),
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('row') },
   },
+  // Special components with custom logic
   {
     path: 'conditional-logic-showcase',
-    loadComponent: () => import('./conditional-logic-showcase-demo.component').then((m) => m.ConditionalLogicShowcaseDemoComponent),
+    loadComponent: () => import('./conditional-logic-showcase-demo.component'),
   },
   {
     path: 'expression-validators-demo',
-    loadComponent: () => import('./expression-validators-demo.component').then((m) => m.ExpressionValidatorsDemoComponent),
+    loadComponent: () => import('./expression-validators-demo.component'),
   },
 ] satisfies Route[];

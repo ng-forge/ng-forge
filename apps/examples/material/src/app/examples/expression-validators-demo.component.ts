@@ -69,7 +69,7 @@ const noSpaces: CustomValidator = (ctx) => {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExpressionValidatorsDemoComponent {
+export default class ExpressionValidatorsDemoComponent {
   formValue = signal({
     // Expression-based examples
     username: '',

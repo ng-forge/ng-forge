@@ -13,8 +13,10 @@
       "options": {
         "outputPath": "dist/apps/docs",
         "browser": "apps/docs/src/main.ts",
+        "server": "apps/docs/src/main.server.ts",
         "tsConfig": "apps/docs/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
+        "prerender": true,
         "assets": [
           {
             "glob": "**/*",
@@ -64,6 +66,7 @@
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true,
+          "prerender": false,
           "define": {
             "MATERIAL_EXAMPLES_URL": "'http://localhost:4201'",
             "PRIMENG_EXAMPLES_URL": "'http://localhost:4202'",

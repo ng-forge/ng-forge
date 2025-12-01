@@ -1,11 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, PLATFORM_ID, signal, viewChild } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ENVIRONMENT } from '../../config/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { fromEvent, NEVER } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'example-iframe',
   template: `
-    <div class="example-iframe-container" [style.height]="height()">
+    <div class="example-iframe-container" [style.height.px]="iframeHeight()">
       @if (loading()) {
         <div class="example-loading">
           <div class="spinner"></div>
@@ -13,8 +17,9 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
         </div>
       }
       <iframe
+        #iframeEl
         [src]="trustedSrc()"
-        [style.height]="height()"
+        [style.height.px]="iframeHeight()"
         [style.width]="width()"
         (load)="onLoad()"
         [class.loaded]="!loading()"
@@ -150,14 +155,41 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 export class ExampleIframeComponent {
   library = input.required<'material' | 'primeng' | 'ionic' | 'bootstrap'>();
   example = input.required<string>();
-  height = input<string>('500px');
   width = input<string>('100%');
   code = input<string>(); // Optional code snippet to display
 
-  private env = inject(ENVIRONMENT);
-  private sanitizer = inject(DomSanitizer);
+  private readonly env = inject(ENVIRONMENT);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
+
+  private readonly iframeEl = viewChild<ElementRef<HTMLIFrameElement>>('iframeEl');
 
   loading = signal(true);
+
+  // Listen for height messages from iframe (only in browser)
+  private readonly heightFromIframe = toSignal(
+    this.isBrowser
+      ? fromEvent<MessageEvent>(window, 'message').pipe(
+          filter((event) => event.data?.type === 'iframe-height'),
+          filter((event) => {
+            // Only accept messages from our iframe
+            const iframe = this.iframeEl()?.nativeElement;
+            return iframe?.contentWindow === event.source;
+          }),
+          map((event) => event.data.height as number),
+          filter((height) => height > 0),
+          takeUntilDestroyed(),
+        )
+      : NEVER,
+    { initialValue: 300 },
+  );
+
+  // Computed height from iframe messages - reactive and declarative
+  iframeHeight = computed(() => {
+    const height = this.heightFromIframe();
+    return height > 0 ? height : 300;
+  });
 
   iframeSrc = computed(() => {
     const baseUrl = this.env.exampleBaseUrls[this.library()];
