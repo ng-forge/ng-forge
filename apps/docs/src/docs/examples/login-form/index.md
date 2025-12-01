@@ -2,7 +2,7 @@ Simple login form demonstrating authentication UI with email and password fields
 
 ## Live Demo
 
-{{ NgDocActions.demo("LoginFormDemoComponent") }}
+{{ NgDocActions.demo("LoginFormDemoComponent", { container: false }) }}
 
 ## Overview
 
