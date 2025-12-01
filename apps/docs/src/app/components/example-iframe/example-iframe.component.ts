@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, PLATFORM_ID, signal, viewChild } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ENVIRONMENT } from '../../config/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { fromEvent } from 'rxjs';
+import { fromEvent, NEVER } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 @Component({
@@ -159,24 +160,28 @@ export class ExampleIframeComponent {
 
   private readonly env = inject(ENVIRONMENT);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   private readonly iframeEl = viewChild<ElementRef<HTMLIFrameElement>>('iframeEl');
 
   loading = signal(true);
 
-  // Listen for height messages from iframe
+  // Listen for height messages from iframe (only in browser)
   private readonly heightFromIframe = toSignal(
-    fromEvent<MessageEvent>(window, 'message').pipe(
-      filter((event) => event.data?.type === 'iframe-height'),
-      filter((event) => {
-        // Only accept messages from our iframe
-        const iframe = this.iframeEl()?.nativeElement;
-        return iframe?.contentWindow === event.source;
-      }),
-      map((event) => event.data.height as number),
-      filter((height) => height > 0),
-      takeUntilDestroyed(),
-    ),
+    this.isBrowser
+      ? fromEvent<MessageEvent>(window, 'message').pipe(
+          filter((event) => event.data?.type === 'iframe-height'),
+          filter((event) => {
+            // Only accept messages from our iframe
+            const iframe = this.iframeEl()?.nativeElement;
+            return iframe?.contentWindow === event.source;
+          }),
+          map((event) => event.data.height as number),
+          filter((height) => height > 0),
+          takeUntilDestroyed(),
+        )
+      : NEVER,
     { initialValue: 300 },
   );
 
