@@ -8,8 +8,7 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgDocButtonIconComponent, NgDocIconComponent, NgDocTooltipDirective } from '@ng-doc/ui-kit';
 
 const THEME_STORAGE_KEY = 'ng-forge-docs-theme';
-const VALID_THEMES = ['auto', 'light', 'dark'] as const;
-type ThemeType = (typeof VALID_THEMES)[number];
+type ThemeType = 'auto' | 'light' | 'dark';
 
 // NgDoc uses null for light theme (removes data-theme attribute)
 function themeToStorageValue(theme: string | null): ThemeType {
@@ -88,7 +87,7 @@ export class App implements OnInit {
             takeUntilDestroyed(this.destroyRef),
           )
           .subscribe((event) => {
-            event.source?.postMessage({ type: 'theme-change', theme: this.theme() }, '*' as any);
+            (event.source as Window)?.postMessage({ type: 'theme-change', theme: this.theme() }, '*');
           });
       });
 
