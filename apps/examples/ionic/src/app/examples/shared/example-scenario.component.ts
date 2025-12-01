@@ -19,6 +19,11 @@ import '@ng-forge/dynamic-forms-ionic';
   host: {
     class: 'example-container',
   },
+  styles: `
+    ion-content {
+      --background: var(--ion-background-color, #f6f6f6);
+    }
+  `,
   template: `
     <ion-content>
       <div>
