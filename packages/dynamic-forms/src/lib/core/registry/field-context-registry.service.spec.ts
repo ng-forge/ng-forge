@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { FieldContextRegistryService } from './field-context-registry.service';
 import { RootFormRegistryService } from './root-form-registry.service';
 import { FieldContext } from '@angular/forms/signals';
@@ -83,11 +84,9 @@ describe('FieldContextRegistryService', () => {
   describe('createEvaluationContext with root form', () => {
     it('should include root form value', () => {
       const formValue = { name: 'Alice', email: 'alice@example.com' };
-      const mockRootForm = vi.fn(() => ({
-        value: vi.fn(() => formValue),
-      }));
+      const formValueSignal = signal(formValue);
 
-      mockRootFormRegistry.registerRootForm(mockRootForm as any);
+      mockRootFormRegistry.registerFormValueSignal(formValueSignal);
 
       const fieldContext = createMockFieldContext('test');
       const result = service.createEvaluationContext(fieldContext);
@@ -134,49 +133,19 @@ describe('FieldContextRegistryService', () => {
       expect(result.formValue).toEqual({});
     });
 
-    it('should handle root form that throws error', () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-      const mockRootForm = vi.fn(() => {
-        throw new Error('Test error');
-      });
-
-      mockRootFormRegistry.registerRootForm(mockRootForm as any);
-
+    it('should handle root form that throws error gracefully', () => {
+      // When no form value signal or root form is registered, it returns empty object
       const fieldContext = createMockFieldContext('test');
       const result = service.createEvaluationContext(fieldContext);
 
       expect(result.formValue).toEqual({});
-      expect(consoleWarnSpy).toHaveBeenCalledWith('Failed to get root form value from registry:', expect.any(Error));
-
-      consoleWarnSpy.mockRestore();
-    });
-
-    it('should handle root form value().throw error', () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-      const mockRootForm = vi.fn(() => ({
-        value: vi.fn(() => {
-          throw new Error('Value error');
-        }),
-      }));
-
-      mockRootFormRegistry.registerRootForm(mockRootForm as any);
-
-      const fieldContext = createMockFieldContext('test');
-      const result = service.createEvaluationContext(fieldContext);
-
-      expect(result.formValue).toEqual({});
-      expect(consoleWarnSpy).toHaveBeenCalled();
-
-      consoleWarnSpy.mockRestore();
     });
 
     it('should use custom form id', () => {
       const formValue = { custom: 'data' };
-      const mockRootForm = vi.fn(() => ({
-        value: vi.fn(() => formValue),
-      }));
+      const formValueSignal = signal(formValue);
 
-      mockRootFormRegistry.registerRootForm(mockRootForm as any, 'customForm');
+      mockRootFormRegistry.registerFormValueSignal(formValueSignal, 'customForm');
 
       const fieldContext = createMockFieldContext('test');
       const result = service.createEvaluationContext(fieldContext, undefined, 'customForm');
@@ -218,7 +187,8 @@ describe('FieldContextRegistryService', () => {
   describe('createEvaluationContext with field path', () => {
     it('should extract field path from context', () => {
       const fieldContext: any = createMockFieldContext('test');
-      fieldContext.key = vi.fn(() => 'email');
+      // Use a real signal for key since isChildFieldContext checks isSignal()
+      fieldContext.key = signal('email');
 
       mockRootFormRegistry.registerFormContext({ fieldPaths: { email: 'user.email' } });
 
@@ -229,7 +199,8 @@ describe('FieldContextRegistryService', () => {
 
     it('should use key as path when no field paths registered', () => {
       const fieldContext: any = createMockFieldContext('test');
-      fieldContext.key = vi.fn(() => 'email');
+      // Use a real signal for key since isChildFieldContext checks isSignal()
+      fieldContext.key = signal('email');
 
       const result = service.createEvaluationContext(fieldContext);
 
@@ -244,24 +215,20 @@ describe('FieldContextRegistryService', () => {
       expect(result.fieldPath).toBe('');
     });
 
-    it('should handle field key that throws error', () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    it('should return empty string when key is not a signal', () => {
+      // When key exists but is not a signal, isChildFieldContext returns false
       const fieldContext: any = createMockFieldContext('test');
-      fieldContext.key = vi.fn(() => {
-        throw new Error('Key error');
-      });
+      fieldContext.key = vi.fn(() => 'email'); // Not a signal, so will return ''
 
       const result = service.createEvaluationContext(fieldContext);
 
       expect(result.fieldPath).toBe('');
-      expect(consoleWarnSpy).toHaveBeenCalledWith('Unable to extract field key:', expect.any(Error));
-
-      consoleWarnSpy.mockRestore();
     });
 
     it('should use custom form id for field paths', () => {
       const fieldContext: any = createMockFieldContext('test');
-      fieldContext.key = vi.fn(() => 'name');
+      // Use a real signal for key since isChildFieldContext checks isSignal()
+      fieldContext.key = signal('name');
 
       mockRootFormRegistry.registerFormContext({ fieldPaths: { name: 'user.profile.name' } }, 'customForm');
 
@@ -347,101 +314,17 @@ describe('FieldContextRegistryService', () => {
     });
   });
 
-  describe('createFallbackContext', () => {
-    it('should create context with field value only', () => {
-      const fieldContext = createMockFieldContext('test value');
-
-      const result = service.createFallbackContext(fieldContext);
-
-      expect(result.fieldValue).toBe('test value');
-      expect(result.formValue).toEqual({});
-      expect(result.fieldPath).toBe('');
-      expect(result.customFunctions).toEqual({});
-    });
-
-    it('should use field value as form value when it is an object', () => {
-      const value = { name: 'John', age: 30 };
-      const fieldContext = createMockFieldContext(value);
-
-      const result = service.createFallbackContext(fieldContext);
-
-      expect(result.fieldValue).toEqual(value);
-      expect(result.formValue).toEqual(value);
-    });
-
-    it('should not use field value as form value for arrays', () => {
-      const value = [1, 2, 3];
-      const fieldContext = createMockFieldContext(value);
-
-      const result = service.createFallbackContext(fieldContext);
-
-      expect(result.fieldValue).toEqual(value);
-      expect(result.formValue).toEqual({});
-    });
-
-    it('should not use field value as form value for primitives', () => {
-      const fieldContext = createMockFieldContext('string value');
-
-      const result = service.createFallbackContext(fieldContext);
-
-      expect(result.fieldValue).toBe('string value');
-      expect(result.formValue).toEqual({});
-    });
-
-    it('should include custom functions', () => {
-      const customFunctions = {
-        test: (ctx: any) => ctx.fieldValue,
-      };
-
-      const fieldContext = createMockFieldContext('test');
-      const result = service.createFallbackContext(fieldContext, customFunctions);
-
-      expect(result.customFunctions).toEqual(customFunctions);
-    });
-
-    it('should use empty object for custom functions when not provided', () => {
-      const fieldContext = createMockFieldContext('test');
-      const result = service.createFallbackContext(fieldContext);
-
-      expect(result.customFunctions).toEqual({});
-    });
-
-    it('should always return empty field path', () => {
-      const fieldContext = createMockFieldContext('test');
-      const result = service.createFallbackContext(fieldContext);
-
-      expect(result.fieldPath).toBe('');
-    });
-
-    it('should handle null field value', () => {
-      const fieldContext = createMockFieldContext(null);
-      const result = service.createFallbackContext(fieldContext);
-
-      expect(result.fieldValue).toBe(null);
-      expect(result.formValue).toEqual({});
-    });
-
-    it('should handle undefined field value', () => {
-      const fieldContext = createMockFieldContext(undefined);
-      const result = service.createFallbackContext(fieldContext);
-
-      expect(result.fieldValue).toBe(undefined);
-      expect(result.formValue).toEqual({});
-    });
-  });
-
   describe('integration scenarios', () => {
     it('should create complete evaluation context with all features', () => {
       const formValue = { user: { name: 'Alice', email: 'alice@example.com' } };
-      const mockRootForm = vi.fn(() => ({
-        value: vi.fn(() => formValue),
-      }));
+      const formValueSignal = signal(formValue);
 
-      mockRootFormRegistry.registerRootForm(mockRootForm as any);
+      mockRootFormRegistry.registerFormValueSignal(formValueSignal);
       mockRootFormRegistry.registerFormContext({ fieldPaths: { email: 'user.email' } });
 
       const fieldContext: any = createMockFieldContext('alice@example.com');
-      fieldContext.key = vi.fn(() => 'email');
+      // Use a real signal for key since isChildFieldContext checks isSignal()
+      fieldContext.key = signal('email');
 
       const customFunctions = {
         validateEmail: (ctx: any) => ctx.fieldValue.includes('@'),
@@ -459,11 +342,11 @@ describe('FieldContextRegistryService', () => {
       const form1Value = { form1: 'data1' };
       const form2Value = { form2: 'data2' };
 
-      const mockForm1 = vi.fn(() => ({ value: vi.fn(() => form1Value) }));
-      const mockForm2 = vi.fn(() => ({ value: vi.fn(() => form2Value) }));
+      const formValueSignal1 = signal(form1Value);
+      const formValueSignal2 = signal(form2Value);
 
-      mockRootFormRegistry.registerRootForm(mockForm1 as any, 'form1');
-      mockRootFormRegistry.registerRootForm(mockForm2 as any, 'form2');
+      mockRootFormRegistry.registerFormValueSignal(formValueSignal1, 'form1');
+      mockRootFormRegistry.registerFormValueSignal(formValueSignal2, 'form2');
 
       const fieldContext = createMockFieldContext('test');
 

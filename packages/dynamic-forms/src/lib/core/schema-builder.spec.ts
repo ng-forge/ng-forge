@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { Injector, runInInjectionContext } from '@angular/core';
 import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
 import { FieldTypeDefinition } from '../models/field-type';
 import { FieldDef } from '../definitions';
+import { FunctionRegistryService } from './registry/function-registry.service';
 import * as formMapping from './form-mapping';
 
 // Mock the mapFieldToForm function
@@ -16,8 +19,14 @@ vi.mock('./form-mapping', async () => {
 describe('schema-builder', () => {
   let registry: Map<string, FieldTypeDefinition>;
   let mapFieldToFormSpy: ReturnType<typeof vi.fn>;
+  let injector: Injector;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [FunctionRegistryService],
+    });
+
+    injector = TestBed.inject(Injector);
     registry = new Map<string, FieldTypeDefinition>();
     mapFieldToFormSpy = vi.mocked(formMapping.mapFieldToForm);
     mapFieldToFormSpy.mockClear();
@@ -80,16 +89,21 @@ describe('schema-builder', () => {
 
   // Test Suite 1.1: createSchemaFromFields()
   describe('createSchemaFromFields()', () => {
+    // Helper to run schema creation in injection context
+    function createSchema<TModel = unknown>(fields: FieldDef<any>[], reg: Map<string, FieldTypeDefinition>) {
+      return runInInjectionContext(injector, () => createSchemaFromFields<TModel>(fields, reg));
+    }
+
     // 1.1.1 Basic Field Processing
     describe('Basic Field Processing', () => {
       it('should create schema from empty fields array', () => {
-        const schema = createSchemaFromFields([], registry);
+        const schema = createSchema([], registry);
         expect(schema).toBeDefined();
       });
 
       it('should create schema from single field with include value handling', () => {
         const fields: FieldDef<any>[] = [{ type: 'input', key: 'name' }];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -99,7 +113,7 @@ describe('schema-builder', () => {
           { type: 'input', key: 'email' },
           { type: 'checkbox', key: 'subscribe' },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -109,13 +123,13 @@ describe('schema-builder', () => {
           { type: 'input' } as any, // No key
           { type: 'input', key: 'email' },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
       it('should handle fields where path is undefined/null', () => {
         const fields: FieldDef<any>[] = [{ type: 'input', key: 'nonexistent' }];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
     });
@@ -127,7 +141,7 @@ describe('schema-builder', () => {
           { type: 'text', key: 'label' },
           { type: 'input', key: 'name' },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -136,13 +150,13 @@ describe('schema-builder', () => {
           { type: 'input', key: 'name' },
           { type: 'button', key: 'submit' },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
       it('should not call mapFieldToForm for excluded fields', () => {
         const fields: FieldDef<any>[] = [{ type: 'text', key: 'label' }];
-        createSchemaFromFields(fields, registry);
+        createSchema(fields, registry);
         expect(mapFieldToFormSpy).not.toHaveBeenCalled();
       });
 
@@ -153,7 +167,7 @@ describe('schema-builder', () => {
           { type: 'button', key: 'submit' },
           { type: 'input', key: 'email' },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
     });
@@ -171,7 +185,7 @@ describe('schema-builder', () => {
             ],
           },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -186,7 +200,7 @@ describe('schema-builder', () => {
             ],
           },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -201,7 +215,7 @@ describe('schema-builder', () => {
             ],
           },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -216,13 +230,13 @@ describe('schema-builder', () => {
             },
           } as any,
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
       it('should skip flatten fields without fields property', () => {
         const fields: FieldDef<any>[] = [{ type: 'page', key: 'page1' }];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -234,7 +248,7 @@ describe('schema-builder', () => {
             fields: [{ type: 'input' } as any, { type: 'input', key: 'name' }],
           },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -246,7 +260,7 @@ describe('schema-builder', () => {
             fields: [{ type: 'input', key: 'nonexistent' }],
           },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -260,7 +274,7 @@ describe('schema-builder', () => {
           },
           { type: 'checkbox', key: 'agree' },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
     });
@@ -269,25 +283,25 @@ describe('schema-builder', () => {
     describe("Value Handling Mode: 'include' (regular fields)", () => {
       it('should process input fields with include handling', () => {
         const fields: FieldDef<any>[] = [{ type: 'input', key: 'name' }];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
       it('should process checkbox fields with include handling', () => {
         const fields: FieldDef<any>[] = [{ type: 'checkbox', key: 'agree' }];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
       it('should process select fields with include handling', () => {
         const fields: FieldDef<any>[] = [{ type: 'select', key: 'country' }];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
       it('should handle fields where fieldPath is undefined', () => {
         const fields: FieldDef<any>[] = [{ type: 'input', key: 'nonexistent' }];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
     });
@@ -311,7 +325,7 @@ describe('schema-builder', () => {
             ],
           },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -329,7 +343,7 @@ describe('schema-builder', () => {
           },
           { type: 'checkbox', key: 'agree' }, // include
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -339,7 +353,7 @@ describe('schema-builder', () => {
           { type: 'input', key: 'field2' },
           { type: 'input', key: 'field3' },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -348,7 +362,7 @@ describe('schema-builder', () => {
           type: 'input',
           key: `field${i}`,
         }));
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
     });
@@ -360,20 +374,20 @@ describe('schema-builder', () => {
           { type: 'input', key: 'name' },
           { type: 'text', key: 'label' },
         ];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
       it('should default to include when field type not in registry', () => {
         const fields: FieldDef<any>[] = [{ type: 'unknown', key: 'field' }];
-        const schema = createSchemaFromFields(fields, registry);
+        const schema = createSchema(fields, registry);
         expect(schema).toBeDefined();
       });
 
       it('should handle undefined/null registry gracefully', () => {
         const fields: FieldDef<any>[] = [{ type: 'input', key: 'name' }];
         const emptyRegistry = new Map<string, FieldTypeDefinition>();
-        const schema = createSchemaFromFields(fields, emptyRegistry);
+        const schema = createSchema(fields, emptyRegistry);
         expect(schema).toBeDefined();
       });
     });
@@ -390,7 +404,7 @@ describe('schema-builder', () => {
           { type: 'input', key: 'name' },
           { type: 'input', key: 'age' },
         ];
-        const schema = createSchemaFromFields<MyModel>(fields, registry);
+        const schema = createSchema<MyModel>(fields, registry);
         expect(schema).toBeDefined();
       });
 
@@ -409,7 +423,7 @@ describe('schema-builder', () => {
           { type: 'input', key: 'name' },
           { type: 'input', key: 'email' },
         ];
-        const schema = createSchemaFromFields<ComplexModel>(fields, registry);
+        const schema = createSchema<ComplexModel>(fields, registry);
         expect(schema).toBeDefined();
       });
     });

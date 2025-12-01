@@ -183,7 +183,7 @@ describe('provideDynamicForm', () => {
 
       registryProvider.useFactory();
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith('Field type "row" is already registered. Overwriting.');
+      expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms] Field type "row" is already registered. Overwriting.');
     });
 
     it('should overwrite built-in field with custom field', () => {
@@ -231,7 +231,7 @@ describe('provideDynamicForm', () => {
 
       registryProvider.useFactory();
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith('Field type "myfield" is already registered. Overwriting.');
+      expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms] Field type "myfield" is already registered. Overwriting.');
     });
   });
 

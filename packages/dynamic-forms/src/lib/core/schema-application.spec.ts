@@ -5,10 +5,10 @@ import { applySchema, createSchemaFunction } from './schema-application';
 import { SchemaRegistryService } from './registry/schema-registry.service';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models';
 import * as angularForms from '@angular/forms/signals';
-import * as validation from './validation';
-import * as logic from './logic';
-import * as expressions from './expressions';
-import * as values from './values';
+import * as validation from './validation/validator-factory';
+import * as logic from './logic/logic-applicator';
+import * as expressions from './expressions/logic-function-factory';
+import * as values from './values/type-predicate-factory';
 
 // Mock Angular forms functions
 vi.mock('@angular/forms/signals', async () => {
@@ -22,33 +22,33 @@ vi.mock('@angular/forms/signals', async () => {
   };
 });
 
-// Mock validation, logic, and expression functions
-vi.mock('./validation', async () => {
-  const actual = await vi.importActual<typeof validation>('./validation');
+// Mock validation, logic, and expression functions - using exact import paths from schema-application.ts
+vi.mock('./validation/validator-factory', async () => {
+  const actual = await vi.importActual<typeof validation>('./validation/validator-factory');
   return {
     ...actual,
     applyValidator: vi.fn(),
   };
 });
 
-vi.mock('./logic', async () => {
-  const actual = await vi.importActual<typeof logic>('./logic');
+vi.mock('./logic/logic-applicator', async () => {
+  const actual = await vi.importActual<typeof logic>('./logic/logic-applicator');
   return {
     ...actual,
     applyLogic: vi.fn(),
   };
 });
 
-vi.mock('./expressions', async () => {
-  const actual = await vi.importActual<typeof expressions>('./expressions');
+vi.mock('./expressions/logic-function-factory', async () => {
+  const actual = await vi.importActual<typeof expressions>('./expressions/logic-function-factory');
   return {
     ...actual,
     createLogicFunction: vi.fn(() => () => true),
   };
 });
 
-vi.mock('./values', async () => {
-  const actual = await vi.importActual<typeof values>('./values');
+vi.mock('./values/type-predicate-factory', async () => {
+  const actual = await vi.importActual<typeof values>('./values/type-predicate-factory');
   return {
     ...actual,
     createTypePredicateFunction: vi.fn(() => () => true),
