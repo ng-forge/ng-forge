@@ -85,10 +85,10 @@ export default [
     loadChildren: () => import('./multi-page-navigation/multi-page-navigation.routes'),
   },
 
-  // Scenario List Tests - Refactored into folder structure
+  // Submission Behavior Tests - Tests for form submission and button disabled states
   {
-    path: 'scenarios',
-    loadChildren: () => import('./scenario-list/scenario-list.routes'),
+    path: 'submission-behavior',
+    loadChildren: () => import('./submission-behavior/submission-behavior.routes'),
   },
 
   // User Journey Flows Tests - Refactored into folder structure

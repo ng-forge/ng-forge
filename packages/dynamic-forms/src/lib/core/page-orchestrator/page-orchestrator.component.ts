@@ -71,7 +71,7 @@ import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
   providers: [
     {
       provide: FIELD_SIGNAL_CONTEXT,
-      useFactory: (orchestrator: PageOrchestratorComponent) => orchestrator.fieldSignalContext(),
+      useFactory: (orchestrator: PageOrchestratorComponent) => orchestrator.extendedFieldSignalContext(),
       deps: [PageOrchestratorComponent],
     },
   ],
@@ -122,6 +122,59 @@ export class PageOrchestratorComponent {
       navigationDisabled: false,
     };
   });
+
+  /**
+   * Signal indicating whether all fields on the current page are valid.
+   *
+   * This is used by next page buttons to determine their disabled state.
+   * Returns `true` if all fields on the current page pass validation,
+   * `false` otherwise.
+   *
+   * @returns `true` if current page is valid, `false` otherwise
+   */
+  readonly currentPageValid = computed(() => {
+    const currentIndex = this.currentPageIndex();
+    const pages = this.pageFields();
+    const form = this.form();
+
+    // No pages or invalid index
+    if (pages.length === 0 || currentIndex >= pages.length) {
+      return true;
+    }
+
+    const currentPage = pages[currentIndex];
+    const pageFields = currentPage.fields || [];
+
+    // Check validity of each field on the current page
+    // Fields are stored at root level in the form (pages don't add nesting)
+    for (const fieldDef of pageFields) {
+      const fieldKey = fieldDef.key;
+      if (!fieldKey) continue;
+
+      // Access the field from the form using dynamic key access
+      const field = (form as Record<string, unknown>)[fieldKey];
+      if (field && typeof field === 'function') {
+        const fieldState = (field as () => { valid: () => boolean })();
+        if (fieldState && typeof fieldState.valid === 'function' && !fieldState.valid()) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  });
+
+  /**
+   * Extended field signal context that includes currentPageValid.
+   *
+   * This extends the parent context from DynamicForm with page-specific
+   * information needed by button mappers (e.g., next button needs to know
+   * if the current page is valid).
+   */
+  readonly extendedFieldSignalContext = computed(() => ({
+    ...this.fieldSignalContext(),
+    currentPageValid: this.currentPageValid,
+  }));
 
   constructor() {
     // Setup event listeners for navigation

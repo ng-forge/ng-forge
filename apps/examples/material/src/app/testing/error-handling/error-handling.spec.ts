@@ -1,19 +1,23 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck({
+  ignorePatterns: [/Failed to load component for field type/i],
+});
 
 test.describe('Error Handling and Edge Cases', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4201/#/test/error-handling');
-    await page.waitForLoadState('networkidle');
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/error-handling');
   });
 
   test.describe('Invalid Configuration Handling', () => {
-    test('should handle invalid field configurations gracefully', async ({ page }) => {
+    test('should handle invalid field configurations gracefully', async ({ page, helpers }) => {
       // Navigate to invalid config test
       await page.goto('http://localhost:4201/#/test/error-handling/invalid-config');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="invalid-config"]');
+      const scenario = helpers.getScenario('invalid-config');
       await expect(scenario).toBeVisible();
 
       // Verify that valid fields still render even if invalid ones fail
@@ -57,13 +61,13 @@ test.describe('Error Handling and Edge Cases', () => {
   });
 
   test.describe('Basic Form Functionality', () => {
-    test('should handle form submission without errors', async ({ page }) => {
+    test('should handle form submission without errors', async ({ page, helpers }) => {
       // Navigate to basic test
       await page.goto('http://localhost:4201/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="basic-test"]');
+      const scenario = helpers.getScenario('basic-test');
       await expect(scenario).toBeVisible();
 
       // Submit button should be disabled initially (form invalid)
@@ -122,13 +126,13 @@ test.describe('Error Handling and Edge Cases', () => {
       });
     });
 
-    test('should handle rapid form interactions without errors', async ({ page }) => {
+    test('should handle rapid form interactions without errors', async ({ page, helpers }) => {
       // Navigate to basic test
       await page.goto('http://localhost:4201/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="basic-test"]');
+      const scenario = helpers.getScenario('basic-test');
       await expect(scenario).toBeVisible();
 
       const firstNameInput = scenario.locator('#firstName input');
@@ -157,13 +161,13 @@ test.describe('Error Handling and Edge Cases', () => {
       expect(await emailInput.inputValue()).toBe('test4@example.com');
     });
 
-    test('should handle accessibility interactions', async ({ page }) => {
+    test('should handle accessibility interactions', async ({ page, helpers }) => {
       // Navigate to basic test
       await page.goto('http://localhost:4201/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="basic-test"]');
+      const scenario = helpers.getScenario('basic-test');
       await expect(scenario).toBeVisible();
 
       const firstNameField = scenario.locator('#firstName input');
@@ -191,13 +195,13 @@ test.describe('Error Handling and Edge Cases', () => {
   });
 
   test.describe('Form State Management', () => {
-    test('should maintain form state during browser navigation', async ({ page }) => {
+    test('should maintain form state during browser navigation', async ({ page, helpers }) => {
       // Navigate to basic test
       await page.goto('http://localhost:4201/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="basic-test"]');
+      const scenario = helpers.getScenario('basic-test');
       await expect(scenario).toBeVisible();
 
       // Fill some form data
@@ -214,14 +218,14 @@ test.describe('Error Handling and Edge Cases', () => {
       await page.waitForLoadState('networkidle');
 
       // Form should be fresh (not persisted in this case)
-      const newScenario = page.locator('[data-testid="basic-test"]');
+      const newScenario = helpers.getScenario('basic-test');
       await expect(newScenario).toBeVisible();
 
       const newFirstNameValue = await newScenario.locator('#firstName input').inputValue();
       expect(newFirstNameValue).toBe('');
     });
 
-    test('should handle multiple form reloads without memory issues', async ({ page }) => {
+    test('should handle multiple form reloads without memory issues', async ({ page, helpers }) => {
       // Perform repeated navigation to test memory cleanup
       for (let i = 0; i < 3; i++) {
         // Navigate to basic test
@@ -229,7 +233,7 @@ test.describe('Error Handling and Edge Cases', () => {
         await page.waitForLoadState('networkidle');
 
         // Locate the scenario
-        const scenario = page.locator('[data-testid="basic-test"]');
+        const scenario = helpers.getScenario('basic-test');
         await expect(scenario).toBeVisible();
 
         // Fill some data
@@ -244,7 +248,7 @@ test.describe('Error Handling and Edge Cases', () => {
       await page.goto('http://localhost:4201/#/test/error-handling/basic-test');
       await page.waitForLoadState('networkidle');
 
-      const finalScenario = page.locator('[data-testid="basic-test"]');
+      const finalScenario = helpers.getScenario('basic-test');
       await expect(finalScenario).toBeVisible();
 
       // Form should be functional

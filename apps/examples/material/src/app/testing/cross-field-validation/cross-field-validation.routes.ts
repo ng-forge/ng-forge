@@ -1,31 +1,32 @@
-import { PasswordValidationTestComponent } from './password-validation.component';
-import { ConditionalFieldsTestComponent } from './conditional-fields.component';
-import { DependentFieldsTestComponent } from './dependent-fields.component';
-import { EnableDisableTestComponent } from './enable-disable.component';
+import { Routes } from '@angular/router';
+import { crossFieldValidationSuite, getCrossFieldValidationScenario } from './cross-field-validation.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./cross-field-validation-index.component').then((m) => m.CrossFieldValidationIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: crossFieldValidationSuite },
   },
   {
     path: 'password-validation',
-    component: PasswordValidationTestComponent,
-    data: { testId: 'password-validation' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getCrossFieldValidationScenario('password-validation') },
   },
   {
     path: 'conditional-fields',
-    component: ConditionalFieldsTestComponent,
-    data: { testId: 'conditional-validation' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getCrossFieldValidationScenario('conditional-validation') },
   },
   {
     path: 'dependent-fields',
-    component: DependentFieldsTestComponent,
-    data: { testId: 'dependent-fields' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getCrossFieldValidationScenario('dependent-fields') },
   },
   {
     path: 'enable-disable',
-    component: EnableDisableTestComponent,
-    data: { testId: 'enable-disable' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getCrossFieldValidationScenario('enable-disable') },
   },
 ];
+
+export default routes;

@@ -1,36 +1,47 @@
-import { Route } from '@angular/router';
+import { Routes } from '@angular/router';
+import { expressionBasedLogicSuite, getExpressionBasedLogicScenario } from './expression-based-logic.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./expression-based-logic-index.component').then((m) => m.ExpressionBasedLogicIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: expressionBasedLogicSuite },
   },
   {
     path: 'hidden-logic',
-    loadComponent: () => import('./hidden-logic-test.component').then((m) => m.HiddenLogicTestComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getExpressionBasedLogicScenario('hidden-logic-test') },
   },
   {
     path: 'disabled-logic',
-    loadComponent: () => import('./disabled-logic-test.component').then((m) => m.DisabledLogicTestComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getExpressionBasedLogicScenario('disabled-logic-test') },
   },
   {
     path: 'and-logic',
-    loadComponent: () => import('./and-logic-test.component').then((m) => m.AndLogicTestComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getExpressionBasedLogicScenario('and-logic-test') },
   },
   {
     path: 'readonly-logic',
-    loadComponent: () => import('./readonly-logic-test.component').then((m) => m.ReadonlyLogicTestComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getExpressionBasedLogicScenario('readonly-logic-test') },
   },
   {
     path: 'or-logic',
-    loadComponent: () => import('./or-logic-test.component').then((m) => m.OrLogicTestComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getExpressionBasedLogicScenario('or-logic-test') },
   },
   {
     path: 'nested-and-within-or',
-    loadComponent: () => import('./nested-and-within-or-test.component').then((m) => m.NestedAndWithinOrTestComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getExpressionBasedLogicScenario('nested-and-within-or-test') },
   },
   {
     path: 'nested-or-within-and',
-    loadComponent: () => import('./nested-or-within-and-test.component').then((m) => m.NestedOrWithinAndTestComponent),
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getExpressionBasedLogicScenario('nested-or-within-and-test') },
   },
-] satisfies Route[];
+];
+
+export default routes;

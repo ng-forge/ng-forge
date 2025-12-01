@@ -1,33 +1,37 @@
-import { HttpGetValidatorTestComponent } from './http-get-validator.component';
-import { HttpPostValidatorTestComponent } from './http-post-validator.component';
-import { AsyncResourceValidatorTestComponent } from './async-resource-validator.component';
-import { HttpErrorHandlingTestComponent } from './http-error-handling.component';
-import { MultipleValidatorsTestComponent } from './multiple-validators.component';
-import { AsyncValidationPageComponent } from './async-validation-page.component';
+import { Routes } from '@angular/router';
+import { asyncValidationSuite, getAsyncValidationScenario } from './async-validation.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    component: AsyncValidationPageComponent,
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: asyncValidationSuite },
   },
   {
     path: 'http-get-validator',
-    component: HttpGetValidatorTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAsyncValidationScenario('http-get-validator-test') },
   },
   {
     path: 'http-post-validator',
-    component: HttpPostValidatorTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAsyncValidationScenario('http-post-validator-test') },
   },
   {
     path: 'async-resource-validator',
-    component: AsyncResourceValidatorTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAsyncValidationScenario('async-resource-validator-test') },
   },
   {
     path: 'http-error-handling',
-    component: HttpErrorHandlingTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAsyncValidationScenario('http-error-handling-test') },
   },
   {
     path: 'multiple-validators',
-    component: MultipleValidatorsTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAsyncValidationScenario('multiple-validators-test') },
   },
 ];
+
+export default routes;

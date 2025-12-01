@@ -1,32 +1,37 @@
-import { RegistrationWorkflowComponent } from './registration-workflow.component';
-import { ProfileEditWorkflowComponent } from './profile-edit-workflow.component';
-import { ValidationWorkflowComponent } from './validation-workflow.component';
-import { ResetWorkflowComponent } from './reset-workflow.component';
-import { ContactFormWorkflowComponent } from './contact-form-workflow.component';
+import { Routes } from '@angular/router';
+import { getUserWorkflowsScenario, userWorkflowsSuite } from './user-workflows.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./user-workflows-index.component').then((m) => m.UserWorkflowsIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: userWorkflowsSuite },
   },
   {
     path: 'registration',
-    component: RegistrationWorkflowComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getUserWorkflowsScenario('registration-workflow') },
   },
   {
     path: 'profile-edit',
-    component: ProfileEditWorkflowComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getUserWorkflowsScenario('profile-edit') },
   },
   {
     path: 'validation',
-    component: ValidationWorkflowComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getUserWorkflowsScenario('validation-workflow') },
   },
   {
     path: 'reset',
-    component: ResetWorkflowComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getUserWorkflowsScenario('reset-workflow') },
   },
   {
     path: 'contact-form',
-    component: ContactFormWorkflowComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getUserWorkflowsScenario('contact-form') },
   },
 ];
+
+export default routes;

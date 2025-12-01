@@ -32,6 +32,17 @@ export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
 
+// Submission Config
+export type { SubmissionConfig, SubmitButtonOptions, NextButtonOptions } from './models';
+
+// Form State Condition
+export type { FormStateCondition } from './models';
+export { isFormStateCondition } from './models';
+
+// Button Logic Resolver (for UI library authors)
+export { resolveSubmitButtonDisabled, resolveNextButtonDisabled } from './core/logic';
+export type { ButtonLogicContext } from './core/logic';
+
 // Field Definition Types
 export type {
   ArrayField,

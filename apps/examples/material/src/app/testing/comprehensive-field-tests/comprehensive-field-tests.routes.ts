@@ -1,27 +1,32 @@
-import { ComprehensiveFieldsTestComponent } from './comprehensive-fields.component';
-import { ValidationTestComponent } from './validation-test.component';
-import { GridLayoutTestComponent } from './grid-layout-test.component';
-import { StateManagementTestComponent } from './state-management-test.component';
+import { Routes } from '@angular/router';
+import { comprehensiveFieldTestsSuite, getComprehensiveFieldTestsScenario } from './comprehensive-field-tests.suite';
 
-export default [
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./comprehensive-field-tests-index.component').then((m) => m.ComprehensiveFieldTestsIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: comprehensiveFieldTestsSuite },
   },
   {
     path: 'comprehensive-fields',
-    component: ComprehensiveFieldsTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getComprehensiveFieldTestsScenario('comprehensive-fields-test') },
   },
   {
     path: 'validation',
-    component: ValidationTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getComprehensiveFieldTestsScenario('validation-test') },
   },
   {
     path: 'grid-layout',
-    component: GridLayoutTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getComprehensiveFieldTestsScenario('grid-layout-test') },
   },
   {
     path: 'state-management',
-    component: StateManagementTestComponent,
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getComprehensiveFieldTestsScenario('state-management-test') },
   },
 ];
+
+export default routes;

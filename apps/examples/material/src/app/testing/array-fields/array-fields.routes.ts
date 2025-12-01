@@ -1,51 +1,57 @@
-export default [
+import { Routes } from '@angular/router';
+import { arrayFieldsSuite, getArrayFieldsScenario } from './array-fields.suite';
+
+const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./array-fields-index.component').then((m) => m.ArrayFieldsIndexComponent),
+    loadComponent: () => import('../shared/suite-index.component').then((m) => m.SuiteIndexComponent),
+    data: { suite: arrayFieldsSuite },
   },
   {
     path: 'array-add',
-    loadComponent: () => import('./array-add-test.component').then((m) => m.ArrayAddTestComponent),
-    data: { title: 'Array Add Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-add') },
   },
   {
     path: 'array-remove',
-    loadComponent: () => import('./array-remove-test.component').then((m) => m.ArrayRemoveTestComponent),
-    data: { title: 'Array Remove Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-remove') },
   },
   {
     path: 'array-values',
-    loadComponent: () => import('./array-values-test.component').then((m) => m.ArrayValuesTestComponent),
-    data: { title: 'Array Values Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-values') },
   },
   {
     path: 'array-initial-values',
-    loadComponent: () => import('./array-initial-values-test.component').then((m) => m.ArrayInitialValuesTestComponent),
-    data: { title: 'Array Initial Values Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-initial-values') },
   },
   {
     path: 'array-item-validation',
-    loadComponent: () => import('./array-item-validation-test.component').then((m) => m.ArrayItemValidationTestComponent),
-    data: { title: 'Array Item Validation Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-item-validation') },
   },
   {
     path: 'array-min-length',
-    loadComponent: () => import('./array-min-length-test.component').then((m) => m.ArrayMinLengthTestComponent),
-    data: { title: 'Array Min Length Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-min-length') },
   },
   {
     path: 'array-max-length',
-    loadComponent: () => import('./array-max-length-test.component').then((m) => m.ArrayMaxLengthTestComponent),
-    data: { title: 'Array Max Length Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-max-length') },
   },
   {
     path: 'array-nested',
-    loadComponent: () => import('./array-nested-test.component').then((m) => m.ArrayNestedTestComponent),
-    data: { title: 'Array Nested Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-nested') },
   },
   {
     path: 'array-multiple-ops',
-    loadComponent: () => import('./array-multiple-ops-test.component').then((m) => m.ArrayMultipleOpsTestComponent),
-    data: { title: 'Array Multiple Operations Test' },
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getArrayFieldsScenario('array-multiple-ops') },
   },
 ];
+
+export default routes;

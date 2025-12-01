@@ -1,13 +1,19 @@
-import { expect, test } from '@playwright/test';
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+
+setupTestLogging();
+setupConsoleCheck();
 
 test.describe('Material Components Tests', () => {
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.navigateToScenario('/test/material-components');
+  });
+
   test.describe('Datepicker Component', () => {
-    test('should open calendar and select date', async ({ page }) => {
+    test('should open calendar and select date', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/datepicker-basic');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="datepicker-basic"]');
+      const scenario = helpers.getScenario('datepicker-basic');
       await expect(scenario).toBeVisible();
 
       // Click the calendar button to open calendar
@@ -33,12 +39,11 @@ test.describe('Material Components Tests', () => {
       expect(await input.inputValue()).toBeTruthy();
     });
 
-    test('should respect min/max date constraints', async ({ page }) => {
+    test('should respect min/max date constraints', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/datepicker-constraints');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="datepicker-constraints"]');
+      const scenario = helpers.getScenario('datepicker-constraints');
       await expect(scenario).toBeVisible();
 
       // Click the calendar button to open calendar
@@ -55,12 +60,11 @@ test.describe('Material Components Tests', () => {
       // The actual date validation is enforced by the form framework
     });
 
-    test('should handle required field validation', async ({ page }) => {
+    test('should handle required field validation', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/datepicker-validation');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="datepicker-validation"]');
+      const scenario = helpers.getScenario('datepicker-validation');
       await expect(scenario).toBeVisible();
 
       // Verify required field is marked as required
@@ -71,12 +75,11 @@ test.describe('Material Components Tests', () => {
       await expect(scenario.locator('#submit button')).toBeVisible();
     });
 
-    test('should clear date value', async ({ page }) => {
+    test('should clear date value', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/datepicker-clear');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="datepicker-clear"]');
+      const scenario = helpers.getScenario('datepicker-clear');
       await expect(scenario).toBeVisible();
 
       // Verify date is initially set
@@ -92,12 +95,11 @@ test.describe('Material Components Tests', () => {
       expect(await input.inputValue()).toBe('');
     });
 
-    test('should be disabled when disabled prop is true', async ({ page }) => {
+    test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/datepicker-disabled');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="datepicker-disabled"]');
+      const scenario = helpers.getScenario('datepicker-disabled');
       await expect(scenario).toBeVisible();
 
       // Input should be disabled
@@ -109,12 +111,11 @@ test.describe('Material Components Tests', () => {
       await expect(button).toBeDisabled();
     });
 
-    test('should work with initial value', async ({ page }) => {
+    test('should work with initial value', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/datepicker-initial-value');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="datepicker-initial-value"]');
+      const scenario = helpers.getScenario('datepicker-initial-value');
       await expect(scenario).toBeVisible();
 
       // Input should show the date
@@ -126,12 +127,11 @@ test.describe('Material Components Tests', () => {
   });
 
   test.describe('Slider Component', () => {
-    test('should update value on interaction', async ({ page }) => {
+    test('should update value on interaction', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/slider-basic');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="slider-basic"]');
+      const scenario = helpers.getScenario('slider-basic');
       await expect(scenario).toBeVisible();
 
       const slider = scenario.locator('#volume mat-slider input[type="range"]');
@@ -152,12 +152,11 @@ test.describe('Material Components Tests', () => {
       }
     });
 
-    test('should respect min and max bounds', async ({ page }) => {
+    test('should respect min and max bounds', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/slider-bounds');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="slider-bounds"]');
+      const scenario = helpers.getScenario('slider-bounds');
       await expect(scenario).toBeVisible();
 
       const slider = scenario.locator('#temperature input[type="range"]');
@@ -171,12 +170,11 @@ test.describe('Material Components Tests', () => {
       // Testing exact HTML attributes would require additional mapper implementation
     });
 
-    test('should work with step increments', async ({ page }) => {
+    test('should work with step increments', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/slider-steps');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="slider-steps"]');
+      const scenario = helpers.getScenario('slider-steps');
       await expect(scenario).toBeVisible();
 
       const slider = scenario.locator('#rating mat-slider input[type="range"]');
@@ -185,24 +183,22 @@ test.describe('Material Components Tests', () => {
       expect(step).toBe('1');
     });
 
-    test('should be disabled when disabled prop is true', async ({ page }) => {
+    test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/slider-disabled');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="slider-disabled"]');
+      const scenario = helpers.getScenario('slider-disabled');
       await expect(scenario).toBeVisible();
 
       const slider = scenario.locator('#lockedSlider mat-slider input[type="range"]');
       await expect(slider).toBeDisabled();
     });
 
-    test('should display current value', async ({ page }) => {
+    test('should display current value', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/slider-value-display');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="slider-value-display"]');
+      const scenario = helpers.getScenario('slider-value-display');
       await expect(scenario).toBeVisible();
 
       const slider = scenario.locator('#brightness mat-slider input[type="range"]');
@@ -213,12 +209,11 @@ test.describe('Material Components Tests', () => {
   });
 
   test.describe('Toggle Component', () => {
-    test('should change state on click', async ({ page }) => {
+    test('should change state on click', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/toggle-basic');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="toggle-basic"]');
+      const scenario = helpers.getScenario('toggle-basic');
       await expect(scenario).toBeVisible();
 
       const toggle = scenario.locator('#notifications mat-slide-toggle');
@@ -234,12 +229,11 @@ test.describe('Material Components Tests', () => {
       await expect(toggle).toHaveClass(/mat-mdc-slide-toggle-checked/);
     });
 
-    test('should work with keyboard (Space/Enter)', async ({ page }) => {
+    test('should work with keyboard (Space/Enter)', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/toggle-keyboard');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="toggle-keyboard"]');
+      const scenario = helpers.getScenario('toggle-keyboard');
       await expect(scenario).toBeVisible();
 
       const toggle = scenario.locator('#darkMode mat-slide-toggle button');
@@ -259,12 +253,11 @@ test.describe('Material Components Tests', () => {
       await expect(parent).toHaveClass(/mat-mdc-slide-toggle-checked/);
     });
 
-    test('should be disabled when disabled prop is true', async ({ page }) => {
+    test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/toggle-disabled');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="toggle-disabled"]');
+      const scenario = helpers.getScenario('toggle-disabled');
       await expect(scenario).toBeVisible();
 
       // Button should be disabled
@@ -276,12 +269,11 @@ test.describe('Material Components Tests', () => {
       await expect(toggle).toHaveClass(/mat-mdc-slide-toggle-checked/);
     });
 
-    test('should handle required toggle validation', async ({ page }) => {
+    test('should handle required toggle validation', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/toggle-validation');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="toggle-validation"]');
+      const scenario = helpers.getScenario('toggle-validation');
       await expect(scenario).toBeVisible();
 
       // Verify toggle exists and is initially unchecked
@@ -298,12 +290,11 @@ test.describe('Material Components Tests', () => {
   });
 
   test.describe('Multi-Checkbox Component', () => {
-    test('should select multiple options', async ({ page }) => {
+    test('should select multiple options', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-basic');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="multi-checkbox-basic"]');
+      const scenario = helpers.getScenario('multi-checkbox-basic');
       await expect(scenario).toBeVisible();
 
       // Select multiple options by clicking checkboxes with specific labels
@@ -320,12 +311,11 @@ test.describe('Material Components Tests', () => {
       await expect(musicCheckbox).not.toHaveClass(/mat-mdc-checkbox-checked/);
     });
 
-    test('should collect values as array on submit', async ({ page }) => {
+    test('should collect values as array on submit', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-array');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="multi-checkbox-array"]');
+      const scenario = helpers.getScenario('multi-checkbox-array');
       await expect(scenario).toBeVisible();
 
       // Select multiple by clicking checkboxes
@@ -347,12 +337,11 @@ test.describe('Material Components Tests', () => {
       });
     });
 
-    test('should deselect options', async ({ page }) => {
+    test('should deselect options', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-deselect');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="multi-checkbox-deselect"]');
+      const scenario = helpers.getScenario('multi-checkbox-deselect');
       await expect(scenario).toBeVisible();
 
       const readCheckbox = scenario.locator('#permissions mat-checkbox').filter({ hasText: 'Read' });
@@ -370,12 +359,11 @@ test.describe('Material Components Tests', () => {
       await expect(writeCheckbox).not.toHaveClass(/mat-mdc-checkbox-checked/);
     });
 
-    test('should handle disabled options', async ({ page }) => {
+    test('should handle disabled options', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-disabled-options');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="multi-checkbox-disabled-options"]');
+      const scenario = helpers.getScenario('multi-checkbox-disabled-options');
       await expect(scenario).toBeVisible();
 
       const feature1 = scenario.locator('#features mat-checkbox').filter({ hasText: 'Feature 1' });
@@ -390,12 +378,11 @@ test.describe('Material Components Tests', () => {
       await expect(feature3).not.toHaveClass(/mat-mdc-checkbox-disabled/);
     });
 
-    test('should handle required multi-checkbox validation', async ({ page }) => {
+    test('should handle required multi-checkbox validation', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/material-components/multi-checkbox-validation');
       await page.waitForLoadState('networkidle');
 
-      // Locate the specific test scenario
-      const scenario = page.locator('[data-testid="multi-checkbox-validation"]');
+      const scenario = helpers.getScenario('multi-checkbox-validation');
       await expect(scenario).toBeVisible();
 
       // Verify checkboxes exist and are initially unchecked

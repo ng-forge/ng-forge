@@ -19,9 +19,9 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
-import { form, FormUiControl } from '@angular/forms/signals';
+import { form, FormUiControl, submit } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { filter, forkJoin, map, of, ReplaySubject, switchMap, take } from 'rxjs';
+import { EMPTY, filter, forkJoin, from, map, of, ReplaySubject, switchMap, take } from 'rxjs';
 import { keyBy, memoize, isEqual } from './utils/object-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from './models/field-signal-context.token';
@@ -192,6 +192,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     defaultValues: this.defaultValues,
     form: this.form(),
     defaultValidationMessages: this.config().defaultValidationMessages,
+    formOptions: this.effectiveFormOptions(),
   }));
 
   // Injector that provides FIELD_SIGNAL_CONTEXT for mappers and child components
@@ -491,6 +492,29 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   });
 
   /**
+   * Signal indicating whether the form is currently being submitted.
+   *
+   * This signal is automatically managed by Angular Signal Forms' native `submit()` function
+   * when a `submission.action` is configured. It is `true` while the submission action
+   * is executing and `false` otherwise.
+   *
+   * Use this signal to:
+   * - Show loading indicators during submission
+   * - Disable form elements during submission
+   * - Prevent duplicate submissions
+   *
+   * @returns `true` if form is currently submitting, `false` otherwise
+   *
+   * @example
+   * ```html
+   * <button [disabled]="form.submitting()">
+   *   {{ form.submitting() ? 'Submitting...' : 'Submit' }}
+   * </button>
+   * ```
+   */
+  readonly submitting = computed(() => this.form()().submitting());
+
+  /**
    * Emitted when form validity state changes.
    *
    * Subscribe to this output to react to validation state changes in real-time.
@@ -608,6 +632,32 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       .subscribe(() => {
         this.onFormClear();
       });
+
+    // Handle submission with optional submission action
+    // Uses switchMap to cancel any in-flight submission when a new one starts
+    this.eventBus
+      .on<SubmitEvent>('submit')
+      .pipe(
+        switchMap(() => {
+          const submissionConfig = this.config().submission;
+
+          // If no submission action is configured, let the submitted output handle it
+          // This maintains backward compatibility for users handling submission manually
+          if (!submissionConfig?.action) {
+            return EMPTY;
+          }
+
+          // Use Angular Signal Forms' native submit() function
+          // This automatically:
+          // - Sets form.submitting() to true during execution
+          // - Applies server errors to form fields on completion
+          // - Sets form.submitting() to false when done
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return from(submit(this.form() as any, submissionConfig.action as any));
+        }),
+        takeUntilDestroyed(),
+      )
+      .subscribe();
   }
 
   /**
