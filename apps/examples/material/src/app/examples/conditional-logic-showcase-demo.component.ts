@@ -28,7 +28,7 @@ import { JsonPipe } from '@angular/common';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConditionalLogicShowcaseDemoComponent {
+export default class ConditionalLogicShowcaseDemoComponent {
   formValue = signal({
     employmentStatus: 'employed',
     hasPortfolio: false,

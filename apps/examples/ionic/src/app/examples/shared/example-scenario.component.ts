@@ -36,7 +36,7 @@ import '@ng-forge/dynamic-forms-ionic';
     </ion-content>
   `,
 })
-export class ExampleScenarioComponent {
+export default class ExampleScenarioComponent {
   private readonly route = inject(ActivatedRoute);
 
   /** Scenario passed directly as input (for embedding in other components) */
