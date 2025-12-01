@@ -212,7 +212,7 @@ export class PaginatedFormComponent {
             key: 'newsletter',
             type: 'checkbox',
             label: 'Subscribe to newsletter',
-            checked: true,
+            value: true,
           },
           {
             key: 'terms',

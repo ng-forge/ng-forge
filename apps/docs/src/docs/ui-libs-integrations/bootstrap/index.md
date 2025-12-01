@@ -344,7 +344,7 @@ Boolean checkbox control for single true/false selections.
 {
   key: 'terms',
   type: 'checkbox',
-  checked: false,
+  value: false,
   label: 'I accept the terms and conditions',
   required: true,
 }
@@ -413,7 +413,7 @@ Slide toggle switch for boolean on/off selections (renders as Bootstrap switch).
 {
   key: 'notifications',
   type: 'toggle',
-  checked: false,
+  value: false,
   label: 'Enable notifications',
 }
 ```

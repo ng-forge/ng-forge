@@ -117,11 +117,11 @@ Group fields can be used within:
 
 - Pages (top-level container)
 - Rows (for horizontal layouts)
+- Array fields (for creating object arrays where each array item is an object)
 
 Groups **cannot** be nested inside:
 
-- Other group fields
-- Array fields
+- Other group fields (no nested groups)
 
 ## Allowed Children
 

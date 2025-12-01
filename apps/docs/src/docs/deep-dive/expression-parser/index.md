@@ -231,11 +231,11 @@ import { FunctionRegistryService } from '@ng-forge/dynamic-forms';
 
 const functionRegistry = inject(FunctionRegistryService);
 
-functionRegistry.registerFunction('isValidEmail', (ctx) => {
+functionRegistry.registerCustomFunction('isValidEmail', (ctx) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ctx.fieldValue);
 });
 
-functionRegistry.registerFunction('isAdult', (ctx) => {
+functionRegistry.registerCustomFunction('isAdult', (ctx) => {
   return ctx.formValue.age >= 18;
 });
 ```
@@ -264,7 +264,7 @@ Then use them with `type: 'custom'`:
 
 ```typescript
 // ❌ BAD - Side effects
-functionRegistry.registerFunction('logValue', (ctx) => {
+functionRegistry.registerCustomFunction('logValue', (ctx) => {
   console.log(ctx.fieldValue); // Side effect!
   trackAnalytics(ctx); // Side effect!
   return true;

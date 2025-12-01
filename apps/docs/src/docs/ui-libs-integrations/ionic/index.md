@@ -342,7 +342,7 @@ Boolean checkbox control optimized for touch interaction.
 {
   key: 'terms',
   type: 'checkbox',
-  checked: false,
+  value: false,
   label: 'I accept the terms and conditions',
   required: true,
 }
@@ -414,7 +414,7 @@ Slide toggle switch for boolean on/off selections with smooth animations.
 {
   key: 'notifications',
   type: 'toggle',
-  checked: false,
+  value: false,
   label: 'Enable notifications',
 }
 ```

@@ -276,24 +276,60 @@ At least one condition must be true:
 }
 ```
 
-## ValidatorConfig Interface
+## ValidatorConfig Types
+
+ValidatorConfig is a discriminated union type with four variants:
 
 ```typescript
-interface ValidatorConfig {
-  type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
+// Built-in validators (required, email, min, max, etc.)
+interface BuiltInValidatorConfig {
+  type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern';
   value?: number | string | RegExp;
   expression?: string;
-  kind?: string;
   when?: ConditionalExpression;
 }
+
+// Custom synchronous validators
+interface CustomValidatorConfig {
+  type: 'custom';
+  functionName?: string;
+  params?: Record<string, unknown>;
+  expression?: string;
+  kind?: string;
+  errorParams?: Record<string, string>;
+  when?: ConditionalExpression;
+}
+
+// Async validators (for debounced validation, database lookups)
+interface AsyncValidatorConfig {
+  type: 'customAsync';
+  functionName: string;
+  params?: Record<string, unknown>;
+  when?: ConditionalExpression;
+}
+
+// HTTP validators (optimized HTTP validation with auto-cancellation)
+interface HttpValidatorConfig {
+  type: 'customHttp';
+  functionName: string;
+  params?: Record<string, unknown>;
+  when?: ConditionalExpression;
+}
+
+type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | HttpValidatorConfig;
 ```
 
 ## ConditionalExpression Interface
 
 ```typescript
 interface ConditionalExpression {
-  type: 'fieldValue' | 'formValue' | 'javascript' | 'custom';
+  // Expression type - includes 'and' and 'or' for combining conditions
+  type: 'fieldValue' | 'formValue' | 'custom' | 'javascript' | 'and' | 'or';
+
+  // Field path for fieldValue type
   fieldPath?: string;
+
+  // Comparison operator
   operator?:
     | 'equals'
     | 'notEquals'
@@ -302,18 +338,18 @@ interface ConditionalExpression {
     | 'greaterOrEqual'
     | 'lessOrEqual'
     | 'contains'
-    | 'notContains'
     | 'startsWith'
     | 'endsWith'
-    | 'matches'
-    | 'in'
-    | 'notIn';
+    | 'matches';
+
+  // Value to compare against
   value?: unknown;
+
+  // JavaScript expression for custom logic
   expression?: string;
-  conditions?: {
-    type: 'and' | 'or';
-    expressions: ConditionalExpression[];
-  };
+
+  // Array of sub-conditions for 'and' and 'or' types
+  conditions?: ConditionalExpression[];
 }
 ```
 

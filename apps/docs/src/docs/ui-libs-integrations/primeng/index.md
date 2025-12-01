@@ -356,7 +356,7 @@ Boolean checkbox control for single true/false selections.
 {
   key: 'terms',
   type: 'checkbox',
-  checked: false,
+  value: false,
   label: 'I accept the terms and conditions',
   required: true,
   props: {
@@ -431,7 +431,7 @@ Slide toggle switch (InputSwitch) for boolean on/off selections.
 {
   key: 'notifications',
   type: 'toggle',
-  checked: false,
+  value: false,
   label: 'Enable email notifications',
   props: {
     hint: 'Receive updates via email',
