@@ -30,7 +30,6 @@ export default class ExampleScenarioComponent {
   private readonly route = inject(ActivatedRoute);
 
   /** Scenario passed directly as input (for embedding in other components) */
-  // eslint-disable-next-line @angular-eslint/no-input-rename
   scenarioInput = input<ExampleScenario | undefined>(undefined, { alias: 'scenario' });
 
   /** Scenario loaded from route data */
