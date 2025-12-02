@@ -1,17 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  effect,
-  ElementRef,
-  inject,
-  input,
-  signal,
-  untracked,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, input, viewChild } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { loadRemoteModule } from '@angular-architects/native-federation';
+import { from } from 'rxjs';
 
 type LibraryType = 'material' | 'primeng' | 'ionic' | 'bootstrap';
 
@@ -19,20 +9,33 @@ interface RemoteEntry {
   renderComponent: (container: HTMLElement, examplePath: string, inputs?: Record<string, unknown>) => Promise<() => void>;
 }
 
+interface LoadParams {
+  library: LibraryType;
+  example: string;
+  container: HTMLElement;
+}
+
+const REMOTE_NAMES: Record<LibraryType, string> = {
+  material: 'material-examples',
+  primeng: 'primeng-examples',
+  ionic: 'ionic-examples',
+  bootstrap: 'bootstrap-examples',
+};
+
 @Component({
   selector: 'remote-example',
   template: `
     <div class="remote-example-container" [class]="containerClass()">
       @defer (on viewport; prefetch on idle) {
-        @if (loading()) {
+        @if (remoteResource.isLoading()) {
           <div class="remote-loading">
             <div class="spinner"></div>
             <p>Loading example...</p>
           </div>
         }
-        @if (error()) {
+        @if (remoteResource.error(); as error) {
           <div class="remote-error">
-            <p>Failed to load example: {{ error() }}</p>
+            <p>Failed to load example: {{ error }}</p>
           </div>
         }
         <div #remoteContainer class="remote-content"></div>
@@ -181,62 +184,37 @@ export default class RemoteExampleComponent {
   code = input<string>();
 
   private readonly remoteContainer = viewChild<ElementRef<HTMLDivElement>>('remoteContainer');
-  private readonly destroyRef = inject(DestroyRef);
-
-  loading = signal(true);
-  error = signal<string | null>(null);
-  private loadStarted = signal(false);
 
   containerClass = computed(() => `remote-${this.library()}`);
 
-  private readonly remoteNames: Record<LibraryType, string> = {
-    material: 'material-examples',
-    primeng: 'primeng-examples',
-    ionic: 'ionic-examples',
-    bootstrap: 'bootstrap-examples',
-  };
-
-  private cleanupFn: (() => void) | null = null;
+  protected remoteResource = rxResource({
+    params: () => {
+      const container = this.remoteContainer();
+      if (!container) return undefined;
+      return {
+        library: this.library(),
+        example: this.example(),
+        container: container.nativeElement,
+      };
+    },
+    stream: ({ params }) => from(this.loadAndRender(params)),
+  });
 
   constructor() {
-    // Load when container becomes available (after @defer triggers on viewport)
-    effect(() => {
-      const container = this.remoteContainer();
-      if (container && !untracked(() => this.loadStarted())) {
-        this.loadStarted.set(true);
-        untracked(() => this.loadRemote());
+    effect((onCleanup) => {
+      const cleanup = this.remoteResource.value();
+      if (cleanup) {
+        onCleanup(() => cleanup());
       }
     });
   }
 
-  private async loadRemote(): Promise<void> {
-    try {
-      const remoteName = this.remoteNames[this.library()];
+  private async loadAndRender(params: LoadParams): Promise<() => void> {
+    const remoteName = REMOTE_NAMES[params.library];
 
-      const module = (await loadRemoteModule({
-        remoteName,
-        exposedModule: './routes',
-      })) as RemoteEntry;
-
-      const containerEl = this.remoteContainer()?.nativeElement;
-      if (!containerEl) {
-        this.error.set('Container element not found');
-        return;
-      }
-
-      this.cleanupFn = await module.renderComponent(containerEl, this.example());
-
-      this.destroyRef.onDestroy(() => {
-        if (this.cleanupFn) {
-          this.cleanupFn();
-          this.cleanupFn = null;
-        }
-      });
-    } catch (err) {
-      console.error('Failed to load remote module:', err);
-      this.error.set(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      this.loading.set(false);
-    }
+    return loadRemoteModule({
+      remoteName,
+      exposedModule: './routes',
+    }).then((module) => module.renderComponent(params.container, params.example));
   }
 }

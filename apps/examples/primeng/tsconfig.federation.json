@@ -34,6 +34,10 @@
     "typeCheckHostBindings": true,
     "strictTemplates": true
   },
-  "include": ["src/**/*.ts", "src/app/remote-entry.ts"],
+  "include": [
+    "src/**/*.ts",
+    "../../../dist/packages/dynamic-forms/fesm2022/ng-forge-dynamic-forms.mjs",
+    "../../../dist/packages/dynamic-forms-primeng/fesm2022/ng-forge-dynamic-forms-primeng.mjs"
+  ],
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts", "node_modules"]
 }
