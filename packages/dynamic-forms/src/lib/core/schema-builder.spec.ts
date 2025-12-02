@@ -5,20 +5,23 @@ import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder'
 import { FieldTypeDefinition } from '../models/field-type';
 import { FieldDef } from '../definitions';
 import { FunctionRegistryService } from './registry/function-registry.service';
-import * as formMapping from './form-mapping';
+
+// Use vi.hoisted() to declare mocks before vi.mock() hoisting
+const { mockMapFieldToForm } = vi.hoisted(() => ({
+  mockMapFieldToForm: vi.fn(),
+}));
 
 // Mock the mapFieldToForm function
-vi.mock('./form-mapping', async () => {
-  const actual = await vi.importActual<typeof formMapping>('./form-mapping');
+vi.mock('./form-mapping', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./form-mapping')>();
   return {
     ...actual,
-    mapFieldToForm: vi.fn(),
+    mapFieldToForm: mockMapFieldToForm,
   };
 });
 
 describe('schema-builder', () => {
   let registry: Map<string, FieldTypeDefinition>;
-  let mapFieldToFormSpy: ReturnType<typeof vi.fn>;
   let injector: Injector;
 
   beforeEach(() => {
@@ -28,8 +31,7 @@ describe('schema-builder', () => {
 
     injector = TestBed.inject(Injector);
     registry = new Map<string, FieldTypeDefinition>();
-    mapFieldToFormSpy = vi.mocked(formMapping.mapFieldToForm);
-    mapFieldToFormSpy.mockClear();
+    mockMapFieldToForm.mockClear();
 
     // Register common field types
     registry.set('input', {
@@ -157,7 +159,7 @@ describe('schema-builder', () => {
       it('should not call mapFieldToForm for excluded fields', () => {
         const fields: FieldDef<any>[] = [{ type: 'text', key: 'label' }];
         createSchema(fields, registry);
-        expect(mapFieldToFormSpy).not.toHaveBeenCalled();
+        expect(mockMapFieldToForm).not.toHaveBeenCalled();
       });
 
       it('should process subsequent fields after excluded fields', () => {
