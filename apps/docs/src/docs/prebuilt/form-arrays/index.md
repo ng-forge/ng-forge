@@ -2,7 +2,7 @@ Arrays create dynamic collections of field values. The fields array defines a **
 
 ## Interactive Demo
 
-{{ NgDocActions.demo("ArrayFieldDemoComponent") }}
+{{ NgDocActions.demo("ArrayFieldDemoComponent", { container: false }) }}
 
 ## Flat Arrays (Primitive Values)
 

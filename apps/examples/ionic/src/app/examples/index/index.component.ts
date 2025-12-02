@@ -36,4 +36,4 @@ import { IonContent, IonHeader, IonItem, IonList, IonTitle, IonToolbar } from '@
     `,
   ],
 })
-export class IndexComponent {}
+export default class IndexComponent {}
