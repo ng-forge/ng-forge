@@ -1,6 +1,6 @@
 import { NgDocPage } from '@ng-doc/core';
 import ExamplesCategory from '../ng-doc.category';
-import { ContactFormIframeDemoComponent } from './contact-form-iframe-demo.component';
+import { ContactFormDemoComponent } from './contact-form-demo.component';
 
 const ContactFormExamplePage: NgDocPage = {
   title: 'Contact Form',
@@ -8,7 +8,7 @@ const ContactFormExamplePage: NgDocPage = {
   category: ExamplesCategory,
   order: 2,
   demos: {
-    ContactFormDemoComponent: ContactFormIframeDemoComponent,
+    ContactFormDemoComponent: ContactFormDemoComponent,
   },
 };
 

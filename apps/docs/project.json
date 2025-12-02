@@ -52,6 +52,12 @@
           ],
           "outputHashing": "all",
           "baseHref": "/ng-forge/",
+          "fileReplacements": [
+            {
+              "replace": "apps/docs/public/assets/federation.manifest.json",
+              "with": "apps/docs/public/assets/federation.manifest.production.json"
+            }
+          ],
           "define": {
             "MATERIAL_EXAMPLES_URL": "'/ng-forge/examples/material'",
             "PRIMENG_EXAMPLES_URL": "'/ng-forge/examples/primeng'",
@@ -69,9 +75,9 @@
           "prerender": false,
           "define": {
             "MATERIAL_EXAMPLES_URL": "'http://localhost:4201'",
-            "PRIMENG_EXAMPLES_URL": "'http://localhost:4202'",
+            "BOOTSTRAP_EXAMPLES_URL": "'http://localhost:4202'",
             "IONIC_EXAMPLES_URL": "'http://localhost:4203'",
-            "BOOTSTRAP_EXAMPLES_URL": "'http://localhost:4204'"
+            "PRIMENG_EXAMPLES_URL": "'http://localhost:4204'"
           },
           "ngDoc": {
             "config": "apps/docs/ng-doc.config.ts"
@@ -132,7 +138,7 @@
           "nx serve bootstrap-examples",
           "nx serve ionic-examples",
           "nx serve primeng-examples",
-          "npx wait-on http://localhost:4201 http://localhost:4202 http://localhost:4203 http://localhost:4204 -t 60000 && nx serve docs"
+          "npx wait-on http://localhost:4201 http://localhost:4202 http://localhost:4203 http://localhost:4204 -t 120000 && nx serve docs"
         ],
         "parallel": true
       }

@@ -4,17 +4,61 @@
   "projectType": "application",
   "prefix": "bs-example",
   "sourceRoot": "apps/examples/bootstrap/src",
-  "tags": ["examples"],
+  "tags": ["examples", "e2e"],
   "implicitDependencies": ["dynamic-forms", "dynamic-forms-bootstrap"],
   "targets": {
     "build": {
-      "executor": "@angular/build:application",
+      "executor": "@angular-architects/native-federation:build",
       "outputs": ["{options.outputPath}"],
       "dependsOn": ["^build"],
       "options": {
+        "target": "bootstrap-examples:esbuild",
         "outputPath": "dist/apps/examples/bootstrap",
         "browser": "apps/examples/bootstrap/src/main.ts",
-        "tsConfig": "apps/examples/bootstrap/tsconfig.app.json",
+        "tsConfig": "apps/examples/bootstrap/tsconfig.build.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/examples/bootstrap/public"
+          }
+        ],
+        "styles": ["apps/examples/bootstrap/src/styles.scss"]
+      },
+      "configurations": {
+        "production": {
+          "target": "bootstrap-examples:esbuild:production",
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "1.5mb",
+              "maximumError": "2mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "8kb",
+              "maximumError": "16kb"
+            }
+          ],
+          "outputHashing": "all",
+          "baseHref": "/ng-forge/examples/bootstrap/"
+        },
+        "development": {
+          "target": "bootstrap-examples:esbuild:development",
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "esbuild": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/examples/bootstrap",
+        "browser": "apps/examples/bootstrap/src/main.ts",
+        "tsConfig": "apps/examples/bootstrap/tsconfig.build.json",
         "inlineStyleLanguage": "scss",
         "assets": [
           {
@@ -51,24 +95,44 @@
     },
     "serve": {
       "continuous": true,
+      "executor": "@angular-architects/native-federation:build",
+      "options": {
+        "target": "bootstrap-examples:serve-esbuild:development",
+        "dev": true,
+        "port": 4202
+      },
+      "configurations": {
+        "production": {
+          "target": "bootstrap-examples:serve-esbuild:production",
+          "dev": false
+        },
+        "development": {
+          "target": "bootstrap-examples:serve-esbuild:development",
+          "dev": true
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "serve-esbuild": {
+      "continuous": true,
       "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "bootstrap-examples:build:production"
+          "buildTarget": "bootstrap-examples:esbuild:production"
         },
         "development": {
-          "buildTarget": "bootstrap-examples:build:development"
+          "buildTarget": "bootstrap-examples:esbuild:development"
         }
       },
       "defaultConfiguration": "development",
       "options": {
-        "port": 4204
+        "port": 4202
       }
     },
     "extract-i18n": {
       "executor": "@angular/build:extract-i18n",
       "options": {
-        "buildTarget": "bootstrap-examples:build"
+        "buildTarget": "bootstrap-examples:esbuild"
       }
     },
     "lint": {
@@ -79,9 +143,16 @@
       "executor": "@nx/web:file-server",
       "options": {
         "buildTarget": "bootstrap-examples:build",
-        "port": 4204,
+        "port": 4202,
         "staticFilePath": "dist/apps/examples/bootstrap/browser",
         "spa": true
+      }
+    },
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/bootstrap"],
+      "options": {
+        "config": "apps/examples/bootstrap/playwright.config.ts"
       }
     }
   }

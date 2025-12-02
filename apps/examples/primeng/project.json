@@ -4,17 +4,61 @@
   "projectType": "application",
   "prefix": "example",
   "sourceRoot": "apps/examples/primeng/src",
-  "tags": ["examples"],
+  "tags": ["examples", "e2e"],
   "implicitDependencies": ["dynamic-forms", "dynamic-forms-primeng"],
   "targets": {
     "build": {
-      "executor": "@angular/build:application",
+      "executor": "@angular-architects/native-federation:build",
       "outputs": ["{options.outputPath}"],
       "dependsOn": ["^build"],
       "options": {
+        "target": "primeng-examples:esbuild",
         "outputPath": "dist/apps/examples/primeng",
         "browser": "apps/examples/primeng/src/main.ts",
-        "tsConfig": "apps/examples/primeng/tsconfig.app.json",
+        "tsConfig": "apps/examples/primeng/tsconfig.build.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/examples/primeng/public"
+          }
+        ],
+        "styles": ["apps/examples/primeng/src/styles.scss"]
+      },
+      "configurations": {
+        "production": {
+          "target": "primeng-examples:esbuild:production",
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "1mb",
+              "maximumError": "1.5mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "8kb",
+              "maximumError": "16kb"
+            }
+          ],
+          "outputHashing": "all",
+          "baseHref": "/ng-forge/examples/primeng/"
+        },
+        "development": {
+          "target": "primeng-examples:esbuild:development",
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "esbuild": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/examples/primeng",
+        "browser": "apps/examples/primeng/src/main.ts",
+        "tsConfig": "apps/examples/primeng/tsconfig.build.json",
         "inlineStyleLanguage": "scss",
         "assets": [
           {
@@ -51,24 +95,44 @@
     },
     "serve": {
       "continuous": true,
+      "executor": "@angular-architects/native-federation:build",
+      "options": {
+        "target": "primeng-examples:serve-esbuild:development",
+        "dev": true,
+        "port": 4204
+      },
+      "configurations": {
+        "production": {
+          "target": "primeng-examples:serve-esbuild:production",
+          "dev": false
+        },
+        "development": {
+          "target": "primeng-examples:serve-esbuild:development",
+          "dev": true
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "serve-esbuild": {
+      "continuous": true,
       "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "primeng-examples:build:production"
+          "buildTarget": "primeng-examples:esbuild:production"
         },
         "development": {
-          "buildTarget": "primeng-examples:build:development"
+          "buildTarget": "primeng-examples:esbuild:development"
         }
       },
       "defaultConfiguration": "development",
       "options": {
-        "port": 4202
+        "port": 4204
       }
     },
     "extract-i18n": {
       "executor": "@angular/build:extract-i18n",
       "options": {
-        "buildTarget": "primeng-examples:build"
+        "buildTarget": "primeng-examples:esbuild"
       }
     },
     "lint": {
@@ -79,9 +143,16 @@
       "executor": "@nx/web:file-server",
       "options": {
         "buildTarget": "primeng-examples:build",
-        "port": 4202,
+        "port": 4204,
         "staticFilePath": "dist/apps/examples/primeng/browser",
         "spa": true
+      }
+    },
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/examples/primeng"],
+      "options": {
+        "config": "apps/examples/primeng/playwright.config.ts"
       }
     }
   }

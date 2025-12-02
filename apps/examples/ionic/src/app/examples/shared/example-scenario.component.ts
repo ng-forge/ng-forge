@@ -19,11 +19,15 @@ import '@ng-forge/dynamic-forms-ionic';
     class: 'example-container',
   },
   template: `
-    <dynamic-form [config]="scenario().config" [(value)]="formValue" />
-    <div class="example-result">
-      <h4>Form Data:</h4>
-      <pre>{{ formValue() | json }}</pre>
-    </div>
+    @if (scenario(); as s) {
+      <dynamic-form [config]="s.config" [(value)]="formValue" />
+      <div class="example-result">
+        <h4>Form Data:</h4>
+        <pre>{{ formValue() | json }}</pre>
+      </div>
+    } @else {
+      <p>Loading scenario...</p>
+    }
   `,
 })
 export default class ExampleScenarioComponent {
@@ -39,14 +43,8 @@ export default class ExampleScenarioComponent {
   scenario = computed(() => {
     const fromInput = this.scenarioInput();
     const fromRoute = this.routeScenario();
-    const resolved = fromInput ?? fromRoute;
-
-    if (!resolved) {
-      throw new Error('ExampleScenarioComponent requires a scenario via input or route data');
-    }
-
-    return resolved;
+    return fromInput ?? fromRoute ?? null;
   });
 
-  formValue = linkedSignal<Record<string, unknown>>(() => this.scenario().initialValue ?? {});
+  formValue = linkedSignal<Record<string, unknown>>(() => this.scenario()?.initialValue ?? {});
 }

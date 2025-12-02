@@ -1,7 +1,7 @@
 import { NgDocPage } from '@ng-doc/core';
 import CoreCategory from '../ng-doc.category';
-import { CustomValidatorsIframeDemoComponent } from './custom-validators-iframe-demo.component';
-import ExpressionValidatorsIframeDemoComponent from './expression-validators-iframe-demo.component';
+import { CustomValidatorsDemoComponent } from './custom-validators-demo.component';
+import ExpressionValidatorsDemoComponent from './expression-validators-demo.component';
 
 const ValidationPage: NgDocPage = {
   title: 'Validation',
@@ -9,8 +9,8 @@ const ValidationPage: NgDocPage = {
   category: CoreCategory,
   order: 2,
   demos: {
-    CustomValidatorsDemoComponent: CustomValidatorsIframeDemoComponent,
-    ExpressionValidatorsIframeDemoComponent: ExpressionValidatorsIframeDemoComponent,
+    CustomValidatorsDemoComponent: CustomValidatorsDemoComponent,
+    ExpressionValidatorsDemoComponent: ExpressionValidatorsDemoComponent,
   },
 };
 

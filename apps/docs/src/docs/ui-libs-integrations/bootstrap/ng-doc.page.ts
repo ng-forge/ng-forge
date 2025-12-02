@@ -1,17 +1,17 @@
 import { NgDocPage } from '@ng-doc/core';
 import UiLibsIntegrationCategory from '../ng-doc.category';
-import { InputIframeDemoComponent } from './examples/input-iframe-demo.component';
-import { SelectIframeDemoComponent } from './examples/select-iframe-demo.component';
-import { CheckboxIframeDemoComponent } from './examples/checkbox-iframe-demo.component';
-import { ToggleIframeDemoComponent } from './examples/toggle-iframe-demo.component';
-import { ButtonIframeDemoComponent } from './examples/button-iframe-demo.component';
-import { TextareaIframeDemoComponent } from './examples/textarea-iframe-demo.component';
-import { RadioIframeDemoComponent } from './examples/radio-iframe-demo.component';
-import { MultiCheckboxIframeDemoComponent } from './examples/multi-checkbox-iframe-demo.component';
-import { DatepickerIframeDemoComponent } from './examples/datepicker-iframe-demo.component';
-import { SliderIframeDemoComponent } from './examples/slider-iframe-demo.component';
-import { CompleteFormIframeDemoComponent } from './examples/complete-form-iframe-demo.component';
-import { UserRegistrationIframeDemoComponent } from './examples/user-registration-iframe-demo.component';
+import { InputDemoComponent } from './examples/input-demo.component';
+import { SelectDemoComponent } from './examples/select-demo.component';
+import { CheckboxDemoComponent } from './examples/checkbox-demo.component';
+import { ToggleDemoComponent } from './examples/toggle-demo.component';
+import { ButtonDemoComponent } from './examples/button-demo.component';
+import { TextareaDemoComponent } from './examples/textarea-demo.component';
+import { RadioDemoComponent } from './examples/radio-demo.component';
+import { MultiCheckboxDemoComponent } from './examples/multi-checkbox-demo.component';
+import { DatepickerDemoComponent } from './examples/datepicker-demo.component';
+import { SliderDemoComponent } from './examples/slider-demo.component';
+import { CompleteFormDemoComponent } from './examples/complete-form-demo.component';
+import { UserRegistrationDemoComponent } from './examples/user-registration-demo.component';
 
 /**
  * @status:warning PREVIEW
@@ -22,18 +22,18 @@ const BootstrapPage: NgDocPage = {
   category: UiLibsIntegrationCategory,
   order: 2,
   demos: {
-    InputIframeDemoComponent,
-    SelectIframeDemoComponent,
-    CheckboxIframeDemoComponent,
-    ToggleIframeDemoComponent,
-    ButtonIframeDemoComponent,
-    TextareaIframeDemoComponent,
-    RadioIframeDemoComponent,
-    MultiCheckboxIframeDemoComponent,
-    DatepickerIframeDemoComponent,
-    SliderIframeDemoComponent,
-    CompleteFormIframeDemoComponent,
-    UserRegistrationIframeDemoComponent,
+    InputDemoComponent,
+    SelectDemoComponent,
+    CheckboxDemoComponent,
+    ToggleDemoComponent,
+    ButtonDemoComponent,
+    TextareaDemoComponent,
+    RadioDemoComponent,
+    MultiCheckboxDemoComponent,
+    DatepickerDemoComponent,
+    SliderDemoComponent,
+    CompleteFormDemoComponent,
+    UserRegistrationDemoComponent,
   },
 };
 

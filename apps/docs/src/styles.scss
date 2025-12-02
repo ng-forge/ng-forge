@@ -56,14 +56,14 @@ body[data-theme='light'] .logo-dark {
 }
 
 // ============================================
-// IFRAME EXAMPLES
+// FEDERATED EXAMPLES
 // ============================================
-// PrimeNG and Ionic examples are loaded via iframes
+// Examples are loaded via Native Federation from remote apps
 // Their styles are isolated in their respective example apps
 
-// Hide ng-doc's built-in code viewer for iframe wrapper components
+// Hide ng-doc's built-in code viewer for remote wrapper components
 // The wrapper code is not useful - users see the actual FormConfig
-// via the custom "View Config" section in ExampleIframeComponent
+// via the custom "View Config" section in RemoteExampleComponent
 ng-doc-demo-displayer {
   ::ng-deep ng-doc-code,
   ::ng-deep .ng-doc-code-viewer {

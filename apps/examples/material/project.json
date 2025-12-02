@@ -8,13 +8,57 @@
   "implicitDependencies": ["dynamic-forms", "dynamic-forms-material"],
   "targets": {
     "build": {
-      "executor": "@angular/build:application",
+      "executor": "@angular-architects/native-federation:build",
       "outputs": ["{options.outputPath}"],
       "dependsOn": ["^build"],
       "options": {
+        "target": "material-examples:esbuild",
         "outputPath": "dist/apps/examples/material",
         "browser": "apps/examples/material/src/main.ts",
-        "tsConfig": "apps/examples/material/tsconfig.app.json",
+        "tsConfig": "apps/examples/material/tsconfig.build.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/examples/material/public"
+          }
+        ],
+        "styles": ["apps/examples/material/src/styles.scss"]
+      },
+      "configurations": {
+        "production": {
+          "target": "material-examples:esbuild:production",
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "2mb",
+              "maximumError": "3mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "8kb",
+              "maximumError": "16kb"
+            }
+          ],
+          "outputHashing": "all",
+          "baseHref": "/ng-forge/examples/material/"
+        },
+        "development": {
+          "target": "material-examples:esbuild:development",
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "esbuild": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/examples/material",
+        "browser": "apps/examples/material/src/main.ts",
+        "tsConfig": "apps/examples/material/tsconfig.build.json",
         "inlineStyleLanguage": "scss",
         "assets": [
           {
@@ -29,8 +73,8 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "1.5mb",
-              "maximumError": "2mb"
+              "maximumWarning": "2mb",
+              "maximumError": "3mb"
             },
             {
               "type": "anyComponentStyle",
@@ -51,13 +95,33 @@
     },
     "serve": {
       "continuous": true,
+      "executor": "@angular-architects/native-federation:build",
+      "options": {
+        "target": "material-examples:serve-esbuild:development",
+        "dev": true,
+        "port": 4201
+      },
+      "configurations": {
+        "production": {
+          "target": "material-examples:serve-esbuild:production",
+          "dev": false
+        },
+        "development": {
+          "target": "material-examples:serve-esbuild:development",
+          "dev": true
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "serve-esbuild": {
+      "continuous": true,
       "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "material-examples:build:production"
+          "buildTarget": "material-examples:esbuild:production"
         },
         "development": {
-          "buildTarget": "material-examples:build:development"
+          "buildTarget": "material-examples:esbuild:development"
         }
       },
       "defaultConfiguration": "development",
@@ -68,7 +132,7 @@
     "extract-i18n": {
       "executor": "@angular/build:extract-i18n",
       "options": {
-        "buildTarget": "material-examples:build"
+        "buildTarget": "material-examples:esbuild"
       }
     },
     "lint": {

@@ -1,9 +1,9 @@
-import { Component, inject, OnInit, PLATFORM_ID, afterNextRender, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
-import { fromEvent, map, startWith, of, skip, filter } from 'rxjs';
+import { map, startWith, of, skip } from 'rxjs';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgDocButtonIconComponent, NgDocIconComponent, NgDocTooltipDirective } from '@ng-doc/ui-kit';
 
@@ -44,7 +44,6 @@ function storageValueToTheme(value: string | null): string | undefined {
 export class App implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
-  private readonly destroyRef = inject(DestroyRef);
   readonly themeService = inject(NgDocThemeService);
 
   theme = toSignal(
@@ -67,30 +66,6 @@ export class App implements OnInit {
   constructor() {
     // Only run browser-specific code in the browser
     if (this.isBrowser) {
-      // Send theme changes to all iframes after first render
-      afterNextRender(() => {
-        // Subscribe to theme changes and broadcast to iframes
-        this.themeService
-          .themeChanges()
-          .pipe(startWith(this.themeService.currentTheme), takeUntilDestroyed(this.destroyRef))
-          .subscribe((theme) => {
-            const iframes = document.querySelectorAll<HTMLIFrameElement>('iframe');
-            iframes.forEach((iframe) => {
-              iframe.contentWindow?.postMessage({ type: 'theme-change', theme }, '*');
-            });
-          });
-
-        // Listen for theme requests from iframes
-        fromEvent<MessageEvent>(window, 'message')
-          .pipe(
-            filter((event) => event.data?.type === 'request-theme'),
-            takeUntilDestroyed(this.destroyRef),
-          )
-          .subscribe((event) => {
-            (event.source as Window)?.postMessage({ type: 'theme-change', theme: this.theme() }, '*');
-          });
-      });
-
       // Save theme changes to localStorage (skip initial emission)
       this.themeService
         .themeChanges()

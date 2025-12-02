@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ExampleIframeComponent } from '../../app/components/example-iframe';
+import { RemoteExampleComponent } from '../../app/components/remote-example';
 
 @Component({
   selector: 'demo-form-playground',
-  imports: [ExampleIframeComponent],
-  template: `<example-iframe library="material" example="user-registration" height="700px" />`,
+  imports: [RemoteExampleComponent],
+  template: `<remote-example library="material" example="user-registration" height="700px" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DemoFormPlayground {}

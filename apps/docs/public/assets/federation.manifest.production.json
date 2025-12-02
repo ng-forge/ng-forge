@@ -1,0 +1,6 @@
+{
+  "material-examples": "/ng-forge/examples/material/remoteEntry.json",
+  "bootstrap-examples": "/ng-forge/examples/bootstrap/remoteEntry.json",
+  "ionic-examples": "/ng-forge/examples/ionic/remoteEntry.json",
+  "primeng-examples": "/ng-forge/examples/primeng/remoteEntry.json"
+}

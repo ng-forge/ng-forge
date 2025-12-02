@@ -1,6 +1,6 @@
 import { NgDocPage } from '@ng-doc/core';
 import PrebuiltCategory from '../ng-doc.category';
-import { ArrayFieldIframeDemoComponent } from '../../examples/array-field/array-field-iframe-demo.component';
+import { ArrayFieldDemoComponent } from '../../examples/array-field/array-field-demo.component';
 
 const FormArraysPage: NgDocPage = {
   title: 'Form Arrays',
@@ -8,7 +8,7 @@ const FormArraysPage: NgDocPage = {
   category: PrebuiltCategory,
   order: 3,
   demos: {
-    ArrayFieldDemoComponent: ArrayFieldIframeDemoComponent,
+    ArrayFieldDemoComponent: ArrayFieldDemoComponent,
   },
 };
 

@@ -2,6 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- ES Module Shims - must load synchronously and be in shim mode for Native Federation -->
+    <script type="esms-options">
+      { "shimMode": true }
+    </script>
+    <script src="https://ga.jspm.io/npm:es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+    <!-- Empty importmap-shim triggers shim mode for dynamically added import maps -->
+    <script type="importmap-shim">
+      { "imports": {} }
+    </script>
     <title>ng-forge - Dynamic Forms for Angular</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

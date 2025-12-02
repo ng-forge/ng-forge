@@ -1,6 +1,6 @@
 import { NgDocPage } from '@ng-doc/core';
 import ExamplesCategory from '../ng-doc.category';
-import { ConditionalLogicShowcaseIframeDemoComponent } from './conditional-logic-showcase-iframe-demo.component';
+import { ConditionalLogicShowcaseDemoComponent } from './conditional-logic-showcase-demo.component';
 
 const ConditionalLogicShowcasePage: NgDocPage = {
   title: 'Conditional Logic Showcase',
@@ -8,7 +8,7 @@ const ConditionalLogicShowcasePage: NgDocPage = {
   category: ExamplesCategory,
   order: 5,
   demos: {
-    ConditionalLogicShowcaseDemoComponent: ConditionalLogicShowcaseIframeDemoComponent,
+    ConditionalLogicShowcaseDemoComponent: ConditionalLogicShowcaseDemoComponent,
   },
 };
 

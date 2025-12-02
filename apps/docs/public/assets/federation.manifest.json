@@ -1,0 +1,6 @@
+{
+  "material-examples": "http://localhost:4201/remoteEntry.json",
+  "bootstrap-examples": "http://localhost:4202/remoteEntry.json",
+  "ionic-examples": "http://localhost:4203/remoteEntry.json",
+  "primeng-examples": "http://localhost:4204/remoteEntry.json"
+}
