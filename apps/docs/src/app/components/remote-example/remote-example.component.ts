@@ -1,13 +1,14 @@
 import {
-  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   input,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { loadRemoteModule } from '@angular-architects/native-federation';
@@ -22,19 +23,30 @@ interface RemoteEntry {
   selector: 'remote-example',
   template: `
     <div class="remote-example-container" [class]="containerClass()">
-      @if (loading()) {
-        <div class="remote-loading">
+      @defer (on viewport; prefetch on idle) {
+        @if (loading()) {
+          <div class="remote-loading">
+            <div class="spinner"></div>
+            <p>Loading example...</p>
+          </div>
+        }
+        @if (error()) {
+          <div class="remote-error">
+            <p>Failed to load example: {{ error() }}</p>
+          </div>
+        }
+        <div #remoteContainer class="remote-content"></div>
+      } @placeholder {
+        <div class="remote-placeholder">
           <noscript><p>This demo requires JavaScript to run.</p></noscript>
+          <p>Scroll to load demo</p>
+        </div>
+      } @loading (minimum 200ms) {
+        <div class="remote-loading">
           <div class="spinner"></div>
           <p>Loading example...</p>
         </div>
       }
-      @if (error()) {
-        <div class="remote-error">
-          <p>Failed to load example: {{ error() }}</p>
-        </div>
-      }
-      <div #remoteContainer class="remote-content"></div>
     </div>
     @if (code()) {
       <details>
@@ -65,13 +77,20 @@ interface RemoteEntry {
       }
 
       .remote-loading,
-      .remote-error {
+      .remote-error,
+      .remote-placeholder {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         padding: 2rem;
         text-align: center;
+        min-height: 150px;
+      }
+
+      .remote-placeholder {
+        background: var(--ng-doc-base-1, #f5f5f5);
+        color: var(--ng-doc-text-muted, #757575);
       }
 
       .remote-error {
@@ -95,9 +114,11 @@ interface RemoteEntry {
       }
 
       .remote-loading p,
-      .remote-error p {
+      .remote-error p,
+      .remote-placeholder p {
         color: var(--ng-doc-text-muted, #757575);
         font-size: 0.875rem;
+        margin: 0;
       }
 
       details {
@@ -164,6 +185,7 @@ export default class RemoteExampleComponent {
 
   loading = signal(true);
   error = signal<string | null>(null);
+  private loadStarted = signal(false);
 
   containerClass = computed(() => `remote-${this.library()}`);
 
@@ -177,9 +199,13 @@ export default class RemoteExampleComponent {
   private cleanupFn: (() => void) | null = null;
 
   constructor() {
-    // Use afterNextRender to ensure the view is ready and we're in the browser
-    afterNextRender(() => {
-      this.loadRemote();
+    // Load when container becomes available (after @defer triggers on viewport)
+    effect(() => {
+      const container = this.remoteContainer();
+      if (container && !untracked(() => this.loadStarted())) {
+        this.loadStarted.set(true);
+        untracked(() => this.loadRemote());
+      }
     });
   }
 
@@ -192,18 +218,14 @@ export default class RemoteExampleComponent {
         exposedModule: './routes',
       })) as RemoteEntry;
 
-      // Get the container element
       const containerEl = this.remoteContainer()?.nativeElement;
       if (!containerEl) {
         this.error.set('Container element not found');
         return;
       }
 
-      // Use the remote's renderComponent function
-      // This ensures the component is created using the remote's Angular instance
       this.cleanupFn = await module.renderComponent(containerEl, this.example());
 
-      // Register cleanup on destroy
       this.destroyRef.onDestroy(() => {
         if (this.cleanupFn) {
           this.cleanupFn();
