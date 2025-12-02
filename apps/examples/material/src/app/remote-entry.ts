@@ -1,4 +1,4 @@
-import { createComponent, EnvironmentProviders, Provider, Type } from '@angular/core';
+import { ApplicationRef, ComponentRef, createComponent, EnvironmentProviders, Provider, Type } from '@angular/core';
 import { Route, Routes } from '@angular/router';
 import { appConfig } from './app.config';
 import appRoutes from './app.routes';
@@ -21,49 +21,67 @@ interface RouteMatch {
   data?: Record<string, unknown>;
 }
 
+// Cached ApplicationRef - shared across all components from this remote
+let cachedAppRef: ApplicationRef | null = null;
+let appRefPromise: Promise<ApplicationRef> | null = null;
+const mountedComponents = new Set<ComponentRef<unknown>>();
+
+/**
+ * Gets or creates a shared Angular application instance.
+ * Uses a promise to handle concurrent initialization requests.
+ */
+async function getOrCreateAppRef(): Promise<ApplicationRef> {
+  if (cachedAppRef) {
+    return cachedAppRef;
+  }
+
+  if (appRefPromise) {
+    return appRefPromise;
+  }
+
+  appRefPromise = (async () => {
+    const { createApplication } = await import('@angular/platform-browser');
+    cachedAppRef = await createApplication({
+      providers: [...providers],
+    });
+    return cachedAppRef;
+  })();
+
+  return appRefPromise;
+}
+
 /**
  * Renders a component into a container element using this remote's Angular runtime.
  * This avoids injection context issues when host and remote use different Angular instances.
+ * Components share a single ApplicationRef for better performance.
  */
 export async function renderComponent(container: HTMLElement, examplePath: string, inputs?: Record<string, unknown>): Promise<() => void> {
-  // Find the component and route data for the given path
   const match = await findComponentForPath(routes, examplePath);
 
   if (!match) {
     throw new Error(`Component for path "${examplePath}" not found in remote`);
   }
 
-  // Create an Angular application with the remote's providers
-  const { createApplication } = await import('@angular/platform-browser');
+  const appRef = await getOrCreateAppRef();
 
-  const appRef = await createApplication({
-    providers: [...providers],
-  });
-
-  // Create the component using the remote's Angular
   const componentRef = createComponent(match.component, {
     environmentInjector: appRef.injector,
     hostElement: container,
   });
 
-  // Merge route data with explicit inputs (explicit inputs take precedence)
   const allInputs = { ...match.data, ...inputs };
 
-  // Set inputs (including route data as inputs)
   for (const [key, value] of Object.entries(allInputs)) {
     componentRef.setInput(key, value);
   }
 
-  // Attach to ApplicationRef for change detection
   appRef.attachView(componentRef.hostView);
-
-  // Trigger change detection for zoneless mode
   componentRef.changeDetectorRef.detectChanges();
+  mountedComponents.add(componentRef);
 
-  // Return cleanup function
   return () => {
     componentRef.destroy();
-    appRef.destroy();
+    mountedComponents.delete(componentRef);
   };
 }
 

@@ -24,6 +24,7 @@ interface RemoteEntry {
     <div class="remote-example-container" [class]="containerClass()">
       @if (loading()) {
         <div class="remote-loading">
+          <noscript><p>This demo requires JavaScript to run.</p></noscript>
           <div class="spinner"></div>
           <p>Loading example...</p>
         </div>
