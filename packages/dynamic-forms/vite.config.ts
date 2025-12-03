@@ -45,7 +45,7 @@ export default defineConfig(({ mode }) => {
           },
         ],
         headless: true,
-        fileParallelism: true,
+        fileParallelism: false,
         slowTestThreshold: 1000,
       },
       testTimeout: 1000,
