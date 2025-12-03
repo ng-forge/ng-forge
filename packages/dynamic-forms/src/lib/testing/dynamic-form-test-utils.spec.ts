@@ -125,10 +125,8 @@ describe('DynamicFormTestUtils', () => {
         initialValue: { name: '' },
       });
 
-      // Trigger validation by simulating user interaction
-      await DynamicFormTestUtils.simulateBlur(fixture, 'input[type="text"]');
-
-      // Ensure all effects are processed and validation state is updated
+      // Angular Signal Forms validates eagerly on form creation
+      // No blur simulation needed - form should be invalid immediately with empty required field
       TestBed.flushEffects();
       fixture.detectChanges();
       await fixture.whenStable();
