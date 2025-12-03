@@ -74,8 +74,8 @@ The form consists of 4 pages with increasingly complex conditional logic:
 ## Complete Implementation
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
 
 const certificationConfig = {
   defaultValidationMessages: {
@@ -1178,7 +1178,7 @@ const certificationConfig = {
   ],
 } as const satisfies FormConfig;
 
-type CertificationFormValue = ExtractFormValue<typeof certificationConfig>;
+type CertificationFormValue = InferFormValue<typeof certificationConfig.fields>;
 
 @Component({
   selector: 'app-conditional-logic-showcase',

@@ -19,7 +19,7 @@ This example demonstrates:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { FormConfig, DynamicForm, ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { FormConfig, DynamicForm, InferFormValue } from '@ng-forge/dynamic-forms';
 
 const registrationConfig = {
   fields: [
@@ -27,13 +27,12 @@ const registrationConfig = {
     {
       type: 'page',
       key: 'accountPage',
-      title: 'Account Information',
       fields: [
         {
           type: 'text',
           key: 'accountText',
           label: 'Create your account',
-          props: { class: 'text-lg font-semibold' },
+          props: { elementType: 'h3' },
         },
         {
           key: 'username',
@@ -126,7 +125,6 @@ const registrationConfig = {
     {
       type: 'page',
       key: 'profilePage',
-      title: 'Profile Information',
       fields: [
         {
           type: 'row',
@@ -271,7 +269,6 @@ const registrationConfig = {
     {
       type: 'page',
       key: 'preferencesPage',
-      title: 'Preferences & Terms',
       fields: [
         {
           key: 'interests',
@@ -347,7 +344,7 @@ const registrationConfig = {
   ],
 } as const satisfies FormConfig;
 
-type RegistrationValue = ExtractFormValue<typeof registrationConfig>;
+type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
 
 @Component({
   selector: 'app-user-registration',
@@ -515,7 +512,7 @@ Uses datepicker `maxDate` to ensure users are at least 13 years old:
 Full type inference for form values:
 
 ```typescript
-type RegistrationValue = ExtractFormValue<typeof registrationConfig>;
+type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
 
 // TypeScript knows the exact structure:
 // {

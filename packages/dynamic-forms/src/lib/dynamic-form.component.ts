@@ -73,8 +73,8 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
  * export class MyComponent {
  *   formConfig: FormConfig = {
  *     fields: [
- *       { type: 'input', key: 'email', label: 'Email', validation: ['required', 'email'] },
- *       { type: 'input', key: 'password', label: 'Password', validation: ['required'] }
+ *       { type: 'input', key: 'email', value: '', label: 'Email', required: true, email: true },
+ *       { type: 'input', key: 'password', value: '', label: 'Password', required: true }
  *     ]
  *   };
  *
@@ -221,13 +221,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * ```typescript
    * const config: FormConfig = {
    *   fields: [
-   *     { type: 'input', key: 'name', label: 'Full Name', validation: ['required'] },
+   *     { type: 'input', key: 'name', value: '', label: 'Full Name', required: true },
    *     { type: 'group', key: 'address', label: 'Address', fields: [
-   *       { type: 'input', key: 'street', label: 'Street' },
-   *       { type: 'input', key: 'city', label: 'City' }
+   *       { type: 'input', key: 'street', value: '', label: 'Street' },
+   *       { type: 'input', key: 'city', value: '', label: 'City' }
    *     ]}
-   *   ],
-   *   options: { validateOnChange: true }
+   *   ]
    * };
    * ```
    */

@@ -208,15 +208,15 @@ Text input field with HTML5 type support and optional floating labels.
 
 **Props (Bootstrap-Specific):**
 
-| Prop              | Type                                                                        | Default  | Description                  |
-| ----------------- | --------------------------------------------------------------------------- | -------- | ---------------------------- |
-| `type`            | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url' \| 'search'` | `'text'` | HTML input type              |
-| `size`            | `'sm' \| 'lg'`                                                              | -        | Bootstrap size class         |
-| `floatingLabel`   | `boolean`                                                                   | `false`  | Enable floating label design |
-| `plaintext`       | `boolean`                                                                   | `false`  | Render as plaintext          |
-| `helpText`        | `string`                                                                    | -        | Helper text below input      |
-| `validFeedback`   | `string`                                                                    | -        | Success message when valid   |
-| `invalidFeedback` | `string`                                                                    | -        | Error message when invalid   |
+| Prop              | Type                                                            | Default  | Description                  |
+| ----------------- | --------------------------------------------------------------- | -------- | ---------------------------- |
+| `type`            | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'` | `'text'` | HTML input type              |
+| `size`            | `'sm' \| 'lg'`                                                  | -        | Bootstrap size class         |
+| `floatingLabel`   | `boolean`                                                       | `false`  | Enable floating label design |
+| `plaintext`       | `boolean`                                                       | `false`  | Render as plaintext          |
+| `helpText`        | `string`                                                        | -        | Helper text below input      |
+| `validFeedback`   | `string`                                                        | -        | Success message when valid   |
+| `invalidFeedback` | `string`                                                        | -        | Error message when invalid   |
 
 #### Textarea
 
@@ -481,14 +481,27 @@ Native HTML5 date input with Bootstrap styling.
 }
 ```
 
+**Field Properties:**
+
+| Property  | Type                     | Description             |
+| --------- | ------------------------ | ----------------------- |
+| `minDate` | `Date \| string \| null` | Minimum selectable date |
+| `maxDate` | `Date \| string \| null` | Maximum selectable date |
+
 **Props (Bootstrap-Specific):**
 
-| Prop       | Type           | Default | Description             |
-| ---------- | -------------- | ------- | ----------------------- |
-| `min`      | `string`       | -       | Minimum date (ISO)      |
-| `max`      | `string`       | -       | Maximum date (ISO)      |
-| `size`     | `'sm' \| 'lg'` | -       | Bootstrap size class    |
-| `helpText` | `string`       | -       | Helper text below field |
+| Prop              | Type                                   | Default | Description                                |
+| ----------------- | -------------------------------------- | ------- | ------------------------------------------ |
+| `size`            | `'sm' \| 'lg'`                         | -       | Bootstrap size class                       |
+| `floatingLabel`   | `boolean`                              | `false` | Enable floating label design               |
+| `helpText`        | `string`                               | -       | Helper text below field                    |
+| `validFeedback`   | `string`                               | -       | Success message when valid                 |
+| `invalidFeedback` | `string`                               | -       | Error message when invalid                 |
+| `useNgBootstrap`  | `boolean`                              | -       | Use ng-bootstrap datepicker                |
+| `displayMonths`   | `number`                               | -       | Number of months to display (ng-bootstrap) |
+| `navigation`      | `'select' \| 'arrows' \| 'none'`       | -       | Navigation style (ng-bootstrap)            |
+| `outsideDays`     | `'visible' \| 'collapsed' \| 'hidden'` | -       | How to display outside days (ng-bootstrap) |
+| `showWeekNumbers` | `boolean`                              | -       | Show week numbers (ng-bootstrap)           |
 
 ---
 
@@ -547,7 +560,6 @@ Navigation buttons for multi-step (paged) forms.
     {
       key: 'step1',
       type: 'page',
-      title: 'Step 1',
       fields: [
         { key: 'name', type: 'input', value: '', label: 'Name', required: true },
         {
@@ -561,7 +573,6 @@ Navigation buttons for multi-step (paged) forms.
     {
       key: 'step2',
       type: 'page',
-      title: 'Step 2',
       fields: [
         { key: 'email', type: 'input', value: '', label: 'Email', required: true },
         { type: 'previous', key: 'back', label: 'Back', props: { variant: 'secondary' } },

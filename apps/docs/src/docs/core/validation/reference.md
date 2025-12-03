@@ -169,12 +169,14 @@ Use in `when` conditions:
   value: '@company.com',
 }
 
-// in
+// Check if role is one of multiple values (use 'or' compound condition)
 {
-  type: 'fieldValue',
-  fieldPath: 'role',
-  operator: 'in',
-  value: ['admin', 'moderator', 'owner'],
+  type: 'or',
+  conditions: [
+    { type: 'fieldValue', fieldPath: 'role', operator: 'equals', value: 'admin' },
+    { type: 'fieldValue', fieldPath: 'role', operator: 'equals', value: 'moderator' },
+    { type: 'fieldValue', fieldPath: 'role', operator: 'equals', value: 'owner' },
+  ],
 }
 ```
 

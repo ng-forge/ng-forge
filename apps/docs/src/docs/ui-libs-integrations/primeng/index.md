@@ -213,13 +213,13 @@ Text input field with HTML5 type support and PrimeNG styling.
 
 **Props (PrimeNG-Specific):**
 
-| Prop         | Type                                                                        | Default      | Description             |
-| ------------ | --------------------------------------------------------------------------- | ------------ | ----------------------- |
-| `type`       | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url' \| 'search'` | `'text'`     | HTML input type         |
-| `variant`    | `'outlined' \| 'filled'`                                                    | `'outlined'` | Visual style            |
-| `size`       | `'small' \| 'large'`                                                        | -            | Input size              |
-| `hint`       | `string`                                                                    | -            | Helper text below input |
-| `styleClass` | `string`                                                                    | -            | CSS class for input     |
+| Prop         | Type                                                            | Default      | Description             |
+| ------------ | --------------------------------------------------------------- | ------------ | ----------------------- |
+| `type`       | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'` | `'text'`     | HTML input type         |
+| `variant`    | `'outlined' \| 'filled'`                                        | `'outlined'` | Visual style            |
+| `size`       | `'small' \| 'large'`                                            | -            | Input size              |
+| `hint`       | `string`                                                        | -            | Helper text below input |
+| `styleClass` | `string`                                                        | -            | CSS class for input     |
 
 #### Textarea
 
@@ -254,8 +254,8 @@ Multi-line text input field with PrimeNG styling and auto-resize support.
 | Prop         | Type      | Default | Description                  |
 | ------------ | --------- | ------- | ---------------------------- |
 | `rows`       | `number`  | `4`     | Number of visible rows       |
-| `cols`       | `number`  | -       | Number of visible columns    |
 | `autoResize` | `boolean` | `false` | Auto-resize based on content |
+| `maxlength`  | `number`  | -       | Maximum character limit      |
 | `hint`       | `string`  | -       | Help text below field        |
 | `styleClass` | `string`  | -       | CSS class for textarea       |
 
@@ -298,14 +298,14 @@ Dropdown selection field with search capability and virtual scrolling support.
 
 **Props (PrimeNG-Specific):**
 
-| Prop                    | Type      | Default | Description                            |
-| ----------------------- | --------- | ------- | -------------------------------------- |
-| `filter`                | `boolean` | `false` | Enable search/filter                   |
-| `showClear`             | `boolean` | `false` | Show clear button                      |
-| `virtualScroll`         | `boolean` | `false` | Enable virtual scrolling               |
-| `virtualScrollItemSize` | `number`  | -       | Height of each item for virtual scroll |
-| `placeholder`           | `string`  | -       | Dropdown placeholder text              |
-| `styleClass`            | `string`  | -       | CSS class for dropdown                 |
+| Prop          | Type      | Default | Description               |
+| ------------- | --------- | ------- | ------------------------- |
+| `filter`      | `boolean` | `false` | Enable search/filter      |
+| `showClear`   | `boolean` | `false` | Show clear button         |
+| `multiple`    | `boolean` | `false` | Enable multiple selection |
+| `placeholder` | `string`  | -       | Dropdown placeholder text |
+| `hint`        | `string`  | -       | Help text below select    |
+| `styleClass`  | `string`  | -       | CSS class for dropdown    |
 
 #### Radio
 
@@ -443,8 +443,6 @@ Slide toggle switch (InputSwitch) for boolean on/off selections.
 
 | Prop         | Type     | Default | Description            |
 | ------------ | -------- | ------- | ---------------------- |
-| `trueValue`  | `any`    | `true`  | Value when toggled on  |
-| `falseValue` | `any`    | `false` | Value when toggled off |
 | `hint`       | `string` | -       | Help text below toggle |
 | `styleClass` | `string` | -       | CSS class for toggle   |
 
@@ -483,11 +481,12 @@ Numeric slider control for selecting values from a range.
 
 **Props (PrimeNG-Specific):**
 
-| Prop          | Type                         | Default        | Description            |
-| ------------- | ---------------------------- | -------------- | ---------------------- |
-| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Slider orientation     |
-| `hint`        | `string`                     | -              | Help text below slider |
-| `styleClass`  | `string`                     | -              | CSS class for slider   |
+| Prop          | Type                         | Default        | Description                 |
+| ------------- | ---------------------------- | -------------- | --------------------------- |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Slider orientation          |
+| `range`       | `boolean`                    | `false`        | Enable range mode (2 knobs) |
+| `hint`        | `string`                     | -              | Help text below slider      |
+| `styleClass`  | `string`                     | -              | CSS class for slider        |
 
 #### Datepicker
 
@@ -526,14 +525,17 @@ Date selection field with calendar popup (p-calendar).
 
 **Props (PrimeNG-Specific):**
 
-| Prop            | Type      | Default      | Description              |
-| --------------- | --------- | ------------ | ------------------------ |
-| `dateFormat`    | `string`  | `'mm/dd/yy'` | Date format string       |
-| `showIcon`      | `boolean` | `false`      | Show calendar icon       |
-| `showButtonBar` | `boolean` | `false`      | Show today/clear buttons |
-| `inline`        | `boolean` | `false`      | Display calendar inline  |
-| `hint`          | `string`  | -            | Help text below field    |
-| `styleClass`    | `string`  | -            | CSS class for datepicker |
+| Prop            | Type                                | Default      | Description              |
+| --------------- | ----------------------------------- | ------------ | ------------------------ |
+| `dateFormat`    | `string`                            | `'mm/dd/yy'` | Date format string       |
+| `showIcon`      | `boolean`                           | `false`      | Show calendar icon       |
+| `showButtonBar` | `boolean`                           | `false`      | Show today/clear buttons |
+| `inline`        | `boolean`                           | `false`      | Display calendar inline  |
+| `selectionMode` | `'single' \| 'multiple' \| 'range'` | `'single'`   | Date selection mode      |
+| `view`          | `'date' \| 'month' \| 'year'`       | `'date'`     | Initial calendar view    |
+| `touchUI`       | `boolean`                           | `false`      | Touch-optimized UI       |
+| `hint`          | `string`                            | -            | Help text below field    |
+| `styleClass`    | `string`                            | -            | CSS class for datepicker |
 
 ---
 
@@ -606,9 +608,9 @@ Navigation buttons for multi-step (paged) forms.
     {
       key: 'step1',
       type: 'page',
-      title: 'Personal Information',
-      description: 'Tell us about yourself',
       fields: [
+        { key: 'step1Title', type: 'text', label: 'Personal Information', props: { elementType: 'h3' } },
+        { key: 'step1Desc', type: 'text', label: 'Tell us about yourself' },
         { key: 'firstName', type: 'input', value: '', label: 'First Name', required: true },
         { key: 'lastName', type: 'input', value: '', label: 'Last Name', required: true },
         {
@@ -622,8 +624,8 @@ Navigation buttons for multi-step (paged) forms.
     {
       key: 'step2',
       type: 'page',
-      title: 'Contact Information',
       fields: [
+        { key: 'step2Title', type: 'text', label: 'Contact Information', props: { elementType: 'h3' } },
         { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
         { key: 'phone', type: 'input', value: '', label: 'Phone', props: { type: 'tel' } },
         {
@@ -665,8 +667,8 @@ Generic button for custom events. Use this for application-specific actions.
 import { FormEvent } from '@ng-forge/dynamic-forms';
 
 // Define your custom event
-class SaveDraftEvent extends FormEvent {
-  static override readonly eventName = 'SaveDraft';
+class SaveDraftEvent implements FormEvent {
+  readonly type = 'save-draft' as const;
 }
 
 const config = {
@@ -711,7 +713,7 @@ class MyComponent {
   private eventBus = inject(EventBus);
 
   ngOnInit() {
-    this.eventBus.on(SaveDraftEvent).subscribe(() => {
+    this.eventBus.on<SaveDraftEvent>('SaveDraft').subscribe(() => {
       console.log('Save draft clicked', this.form.value);
       // Handle draft saving logic
     });

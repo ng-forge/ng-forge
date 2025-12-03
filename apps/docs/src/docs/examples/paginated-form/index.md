@@ -416,7 +416,6 @@ Show/hide pages based on user choices:
 {
   key: 'businessInfo',
   type: 'page',
-  title: 'Business Information',
   logic: [{
     type: 'hidden',
     condition: {

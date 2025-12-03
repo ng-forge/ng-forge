@@ -18,7 +18,7 @@ This example shows a basic contact form with:
 
 ```typescript
 import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-contact-form',
@@ -125,7 +125,7 @@ export class ContactFormComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: ExtractFormValue<typeof this.config>) {
+  onSubmit(value: InferFormValue<typeof this.config.fields>) {
     console.log('Contact form submitted:', value);
     this.submitted.set(true);
 

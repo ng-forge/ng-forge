@@ -82,12 +82,12 @@ describe('Page Orchestration Integration', () => {
         .pageField(
           'personalInfo',
           [
-            { key: 'firstName', type: 'input', label: 'First Name', validation: ['required'] },
-            { key: 'lastName', type: 'input', label: 'Last Name', validation: ['required'] },
+            { key: 'firstName', type: 'input', value: '', label: 'First Name', required: true },
+            { key: 'lastName', type: 'input', value: '', label: 'Last Name', required: true },
           ],
           'Personal Information',
         )
-        .pageField('preferences', [{ key: 'newsletter', type: 'checkbox', label: 'Subscribe to newsletter' }], 'Preferences')
+        .pageField('preferences', [{ key: 'newsletter', type: 'checkbox', value: false, label: 'Subscribe to newsletter' }], 'Preferences')
         .build();
 
       const validation = FormModeValidator.validateFormConfiguration(pagedConfig.fields);

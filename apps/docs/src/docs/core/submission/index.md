@@ -28,9 +28,9 @@ export class LoginFormComponent {
 
   config: FormConfig = {
     fields: [
-      { type: 'input', key: 'email', label: 'Email', validation: ['required', 'email'] },
-      { type: 'input', key: 'password', label: 'Password', props: { type: 'password' }, validation: ['required'] },
-      { type: 'button', key: 'submit', label: 'Sign In', buttonType: 'submit' },
+      { type: 'input', key: 'email', label: 'Email', value: '', required: true, email: true },
+      { type: 'input', key: 'password', label: 'Password', value: '', required: true, props: { type: 'password' } },
+      { type: 'submit', key: 'submit', label: 'Sign In' },
     ],
     submission: {
       action: async (form) => {
@@ -57,10 +57,12 @@ export class LoginFormComponent {
 
 The `submission.action` function receives the form's `FieldTree` and returns a Promise:
 
-| Return Value             | Meaning                           |
-| ------------------------ | --------------------------------- |
-| `undefined` or `null`    | Successful submission             |
-| `TreeValidationResult[]` | Array of server validation errors |
+| Return Value           | Meaning                                    |
+| ---------------------- | ------------------------------------------ |
+| `undefined` or `null`  | Successful submission                      |
+| `TreeValidationResult` | Server validation errors (single or array) |
+
+**Note:** `TreeValidationResult` from Angular Signal Forms supports both single errors and arrays. You can return a single error object or an array of errors.
 
 While the action is executing, `form().submitting()` is `true`, enabling automatic button disabling and loading states.
 
@@ -129,16 +131,17 @@ Override form-level defaults on individual buttons using the `logic` array:
 
 ```typescript
 {
-  type: 'button',
+  type: 'submit',
   key: 'submit',
   label: 'Submit',
-  buttonType: 'submit',
   logic: [
     { type: 'disabled', condition: 'formInvalid' },
     { type: 'disabled', condition: 'formSubmitting' }
   ]
 }
 ```
+
+**Note:** `type: 'submit'` is a UI-integration convenience type that pre-configures the button with `SubmitEvent`. Use `type: 'button'` with `event: SubmitEvent` for the core API.
 
 ### FormStateCondition
 
@@ -164,17 +167,24 @@ Combine form state conditions with custom expressions:
 
 ```typescript
 {
-  type: 'button',
+  type: 'submit',
   key: 'submit',
   label: 'Submit',
-  buttonType: 'submit',
   logic: [
     // Disable when form is invalid
     { type: 'disabled', condition: 'formInvalid' },
     // Disable when submitting
     { type: 'disabled', condition: 'formSubmitting' },
     // Also disable if terms not accepted
-    { type: 'disabled', condition: { '===': [{ var: 'acceptTerms' }, false] } }
+    {
+      type: 'disabled',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'acceptTerms',
+        operator: 'equals',
+        value: false,
+      }
+    }
   ]
 }
 ```

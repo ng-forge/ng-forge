@@ -79,10 +79,12 @@ interface LogicConfig {
   /** Logic type */
   type: 'hidden' | 'readonly' | 'disabled' | 'required';
 
-  /** Boolean expression or static value */
-  condition: ConditionalExpression | boolean;
+  /** Boolean expression, static value, or form state condition */
+  condition: ConditionalExpression | boolean | FormStateCondition;
 }
 ```
+
+`FormStateCondition` values (`'formInvalid'`, `'formSubmitting'`, `'pageInvalid'`) are primarily used for button disabled logic.
 
 ### Conditional Visibility (hidden)
 
@@ -319,6 +321,42 @@ Conditional logic is evaluated:
 - **On form value change** - Any time a dependent field changes
 - **On initialization** - When the form is created
 - **Reactively** - Uses Angular's signal forms for automatic updates
+
+### Evaluation Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    LOGIC EVALUATION FLOW                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Form Value Changes                                         │
+│         │                                                   │
+│         ▼                                                   │
+│  ┌─────────────────┐                                       │
+│  │ Signal Updates  │◄──── Angular's reactive system        │
+│  └────────┬────────┘                                       │
+│           │                                                 │
+│           ▼                                                 │
+│  ┌─────────────────┐                                       │
+│  │ Evaluate logic  │                                       │
+│  │    conditions   │                                       │
+│  └────────┬────────┘                                       │
+│           │                                                 │
+│     ┌─────┴─────┐                                          │
+│     ▼           ▼                                          │
+│  ┌──────┐   ┌──────┐                                       │
+│  │ true │   │false │                                       │
+│  └──┬───┘   └──┬───┘                                       │
+│     │          │                                            │
+│     ▼          ▼                                            │
+│  Apply      Remove                                          │
+│  effect     effect                                          │
+│  (hide,     (show,                                          │
+│  require,   optional,                                       │
+│  readonly)  editable)                                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ## Next Steps
 

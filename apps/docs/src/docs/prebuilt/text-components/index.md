@@ -6,6 +6,7 @@ Display a paragraph of text:
 
 ```typescript
 {
+  key: 'instructions',
   type: 'text',
   label: 'Please review the terms and conditions before proceeding.',
 }
@@ -17,6 +18,7 @@ Render text as different HTML elements:
 
 ```typescript
 {
+  key: 'pageTitle',
   type: 'text',
   label: 'User Registration',
   props: {
@@ -25,7 +27,7 @@ Render text as different HTML elements:
 }
 ```
 
-**Default**: `'p'` (paragraph)
+**Options**: `'p'` | `'h1'` | `'h2'` | `'h3'` | `'h4'` | `'h5'` | `'h6'` | `'span'`
 
 ## With i18n
 
@@ -33,6 +35,7 @@ Text fields support dynamic content via Observables and Signals:
 
 ```typescript
 {
+  key: 'formInstructions',
   type: 'text',
   label: translationService.translate('form.instructions'),  // Observable<string>
   props: {
@@ -107,6 +110,7 @@ Add custom classes via the `className` property:
 
 ```typescript
 {
+  key: 'notice',
   type: 'text',
   label: 'Important Notice',
   className: 'my-custom-class highlight-text',

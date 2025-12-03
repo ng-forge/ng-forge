@@ -25,9 +25,4 @@ export interface FieldWithValidation {
 
   // Schema applications for complex configurations
   readonly schemas?: SchemaApplicationConfig[];
-
-  // Dynamic properties
-  readonly dynamicProperties?: {
-    [propertyName: string]: ConditionalExpression | unknown;
-  };
 }

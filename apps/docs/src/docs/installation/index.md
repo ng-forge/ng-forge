@@ -1,6 +1,6 @@
 > Prerequisites: [What is Dynamic Forms?](../what-is-dynamic-forms)
 
-Get ng-forge dynamic forms up and running in your Angular project in 3 minutes.
+Get ng-forge dynamic forms up and running in your Angular project.
 
 ## Requirements
 
@@ -50,7 +50,7 @@ Create a simple login form to verify everything works:
 
 ```typescript name="login.component.ts"
 import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-login',
@@ -86,19 +86,19 @@ export class LoginComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: ExtractFormValue<typeof this.config>) {
+  onSubmit(value: InferFormValue<typeof this.config.fields>) {
     // TypeScript knows: { email: string, password: string }
     console.log('Login:', value);
   }
 }
 ```
 
-**That's it!** You now have a fully functional, type-safe form with:
+You now have a working form with:
 
 - ✅ Real-time validation with error messages
-- ✅ Full TypeScript type inference
-- ✅ Beautiful Material Design UI
-- ✅ Accessibility built-in
+- ✅ TypeScript type inference
+- ✅ Material Design styling
+- ✅ Accessibility support
 - ✅ Submit button auto-disables when invalid
 
 ## UI Framework Options
@@ -229,7 +229,7 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 - **[Field Types](../core/field-types)** - Understand all available field types (input, select, checkbox, group, etc.)
 - **[Validation](../core/validation)** - Add validation rules with shorthand syntax or conditional validators
 - **[Conditional Logic](../core/conditional-logic)** - Show/hide fields based on other field values
-- **[Type Safety](../core/type-safety)** - Master TypeScript type inference for forms
+- **[Type Safety](../core/type-safety)** - TypeScript type inference for forms
 
 ### Build Advanced Forms
 
@@ -287,10 +287,3 @@ If you see import errors for `@ng-forge/dynamic-forms`, ensure:
 - 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions and get help
 - 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs
 - 📖 **[Documentation](../)** - Browse full documentation
-
-## Related Topics
-
-- **[What is Dynamic Forms?](../what-is-dynamic-forms)** - Learn about features and benefits
-- **[Field Types](../core/field-types)** - Explore all available field types
-- **[Validation](../core/validation)** - Add validation to your forms
-- **[Material Integration](../ui-libs-integrations/material)** - Material Design field reference

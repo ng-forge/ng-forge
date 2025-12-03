@@ -58,7 +58,6 @@ export class UserProfileFormComponent {
       {
         key: 'address',
         type: 'group',
-        label: 'Address Information',
         fields: [
           {
             key: 'street',

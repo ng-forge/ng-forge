@@ -6,13 +6,13 @@ Declarative, lightweight forms for Angular 21+, powered by signal forms. Build c
 - 🎯 **Type-Safe or Dynamic** - Full TypeScript inference with `as const`, or load JSON configs at runtime
 - ⚡ **Zoneless Ready** - Built for Angular's zoneless future, works with or without Zone.js
 - 🔥 **Signal Forms Native** - Direct integration with `@angular/forms/signals`, not a wrapper
-- 🌍 **Production Ready** - Battle-tested with comprehensive validation, conditional logic, and i18n support
+- 🌍 **Production Ready** - Comprehensive validation, conditional logic, and i18n support
 
 ### Quick Example
 
 ```typescript
 import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-registration',
@@ -44,12 +44,10 @@ export class RegistrationComponent {
         type: 'select',
         value: 'personal' as const,
         label: 'Account Type',
-        props: {
-          options: [
-            { label: 'Personal', value: 'personal' },
-            { label: 'Business', value: 'business' },
-          ],
-        },
+        options: [
+          { label: 'Personal', value: 'personal' },
+          { label: 'Business', value: 'business' },
+        ],
       },
       {
         key: 'companyName',
@@ -77,7 +75,7 @@ export class RegistrationComponent {
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: ExtractFormValue<typeof this.config>) {
+  onSubmit(value: InferFormValue<typeof this.config.fields>) {
     // TypeScript knows: { email: string, password: string, accountType: 'personal' | 'business', companyName: string }
     console.log('Account created:', value);
   }
@@ -99,7 +97,7 @@ export class RegistrationComponent {
 
 ## Full Type Safety with Zero Type Annotations
 
-The killer feature: **TypeScript infers your entire form's type from the config.** No manual type definitions. No type assertions. Just pure inference.
+TypeScript infers your form's type from the config. No manual type definitions or type assertions needed.
 
 ```typescript
 const config = {
@@ -132,7 +130,7 @@ type FormValue = {
 };
 
 // In your submit handler:
-onSubmit(value: ExtractFormValue<typeof this.config>) {
+onSubmit(value: InferFormValue<typeof this.config.fields>) {
   // TypeScript knows the exact structure!
   value.username.toUpperCase(); // ✓ Valid
   value.age.toFixed(2);         // ✓ Valid
@@ -159,7 +157,7 @@ config = {
   ],
 } as const satisfies FormConfig;
 
-onSubmit(value: ExtractFormValue<typeof this.config>) {
+onSubmit(value: InferFormValue<typeof this.config.fields>) {
   value. // ← TypeScript autocomplete shows: email, password
   value.email. // ← Shows: string methods (charAt, substring, toLowerCase, ...)
   value.password. // ← Shows: string methods
@@ -188,11 +186,11 @@ Even your conditional expressions are type-checked:
 }
 ```
 
-## Why It's a Game-Changer
+## Key Capabilities
 
 ### ⚡ Native Signal Forms Integration
 
-Not a wrapper or polyfill - true integration with Angular 21's signal forms API. ng-forge dynamic forms maps your config directly to `required()`, `email()`, `min()`, `hidden()`, and other signal form validators.
+ng-forge maps your config directly to Angular 21's signal forms API—`required()`, `email()`, `min()`, `hidden()`, and other validators.
 
 ```typescript
 // Your config
@@ -216,7 +214,7 @@ provideDynamicForm(...withMaterialFields());
 provideDynamicForm(...withBootstrapFields());
 
 // Or use your custom components
-provideDynamicForm({ name: 'my-input', loadComponent: () => MyCustomInput });
+provideDynamicForm([{ name: 'my-input', loadComponent: () => MyCustomInput }]);
 ```
 
 ### 🔥 Complex Features, Simple API
@@ -260,13 +258,13 @@ provideDynamicForm({ name: 'my-input', loadComponent: () => MyCustomInput });
 }
 ```
 
-**Multi-Step Forms** - Complex wizards in minutes:
+**Multi-Step Forms** - Wizard-style forms with page navigation:
 
 ```typescript
 {
   fields: [
-    { key: 'step1', type: 'page', title: 'Personal Info', fields: [...] },
-    { key: 'step2', type: 'page', title: 'Payment', fields: [...] },
+    { key: 'step1', type: 'page', fields: [/* personal info fields */] },
+    { key: 'step2', type: 'page', fields: [/* payment fields */] },
   ],
 }
 ```
@@ -285,38 +283,11 @@ provideDynamicForm({ name: 'my-input', loadComponent: () => MyCustomInput });
 
 ### 🚀 Simple Custom Field Components
 
-Creating custom field components is straightforward - no `ControlValueAccessor` boilerplate required. Just use Angular's signal forms primitives:
-
-{% raw %}
-
-```typescript
-// Create a custom field component with minimal code
-@Component({
-  selector: 'df-star-rating',
-  template: `
-    <label>{{ label() }}</label>
-    <div class="stars">
-      @for (star of [1, 2, 3, 4, 5]; track star) {
-        <button (click)="rating.set(star)" type="button">
-          {{ star <= rating() ? '⭐' : '☆' }}
-        </button>
-      }
-    </div>
-  `,
-})
-export class StarRatingComponent {
-  label = input<string>();
-  rating = model<number>(0); // Signal forms integration - that's it!
-}
-```
-
-{% endraw %}
-
-**No `writeValue()`, no `registerOnChange()`, no `registerOnTouched()`.** Just signals and Angular's `Field` directive.
+No `ControlValueAccessor` boilerplate required - just use Angular's signal forms primitives. See [Extend with Custom Field Types](#extend-with-custom-field-types) below for a complete example.
 
 ## Real-World Example: E-Commerce Checkout
 
-Here's a multi-step checkout flow - **fully typed, validated, and beautiful** - in under 60 lines:
+A multi-step checkout flow with full type inference:
 
 ```typescript
 @Component({
@@ -328,13 +299,12 @@ export class CheckoutComponent {
   config = {
     fields: [
       {
-        key: 'customer',
+        key: 'customerPage',
         type: 'page',
-        title: 'Customer Information',
         fields: [
           { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
           {
-            key: 'name',
+            key: 'nameRow',
             type: 'row',
             fields: [
               { key: 'firstName', type: 'input', value: '', label: 'First Name', required: true },
@@ -345,14 +315,13 @@ export class CheckoutComponent {
         ],
       },
       {
-        key: 'shipping',
+        key: 'shippingPage',
         type: 'page',
-        title: 'Shipping Address',
         fields: [
           { key: 'address', type: 'input', value: '', label: 'Street Address', required: true },
           { key: 'city', type: 'input', value: '', label: 'City', required: true },
           {
-            key: 'region',
+            key: 'regionRow',
             type: 'row',
             fields: [
               {
@@ -368,7 +337,7 @@ export class CheckoutComponent {
             ],
           },
           {
-            key: 'nav',
+            key: 'nav1',
             type: 'row',
             fields: [
               { type: 'previous', key: 'back1', label: 'Back' },
@@ -378,13 +347,12 @@ export class CheckoutComponent {
         ],
       },
       {
-        key: 'payment',
+        key: 'paymentPage',
         type: 'page',
-        title: 'Payment Details',
         fields: [
           { key: 'cardNumber', type: 'input', value: '', label: 'Card Number', required: true },
           {
-            key: 'cardInfo',
+            key: 'cardInfoRow',
             type: 'row',
             fields: [
               { key: 'expiry', type: 'input', value: '', label: 'MM/YY', required: true },
@@ -392,7 +360,7 @@ export class CheckoutComponent {
             ],
           },
           {
-            key: 'nav',
+            key: 'nav2',
             type: 'row',
             fields: [
               { type: 'previous', key: 'back2', label: 'Back' },
@@ -404,18 +372,25 @@ export class CheckoutComponent {
     ],
   } as const satisfies FormConfig;
 
-  processOrder(order: ExtractFormValue<typeof this.config>) {
-    // TypeScript automatically infers:
+  processOrder(order: InferFormValue<typeof this.config.fields>) {
+    // TypeScript automatically infers (pages and rows flatten their children):
     // {
-    //   customer: { email: string, name: { firstName: string, lastName: string } },
-    //   shipping: { address: string, city: string, region: { state: string, zip: string } },
-    //   payment: { cardNumber: string, cardInfo: { expiry: string, cvv: string } }
+    //   email: string,
+    //   firstName: string,
+    //   lastName: string,
+    //   address: string,
+    //   city: string,
+    //   state: string,
+    //   zip: string,
+    //   cardNumber: string,
+    //   expiry: string,
+    //   cvv: string
     // }
 
     // Full autocomplete and type safety!
-    order.customer.email.toLowerCase();
-    order.shipping.region.state;
-    order.payment.cardInfo.cvv;
+    order.email.toLowerCase();
+    order.state;
+    order.cvv;
 
     console.log('Processing order:', order);
   }
@@ -429,7 +404,7 @@ export class CheckoutComponent {
 - ✅ Row layouts for compact fields
 - ✅ Full type inference for nested structure
 - ✅ Back/Next navigation
-- ✅ **Zero** subscriptions, **zero** cleanup
+- ✅ No subscriptions or manual cleanup
 
 ## Extend with Custom Field Types
 
@@ -476,7 +451,7 @@ provideDynamicForm([
 
 {% endraw %}
 
-**No** `writeValue()`, **no** `registerOnChange()`, **no** `registerOnTouched()`. Just signals.
+No `ControlValueAccessor` boilerplate—just use `model()` for two-way binding.
 
 ## Choose Your UI Framework
 
@@ -527,4 +502,4 @@ provideDynamicForm([
 
 ---
 
-**Ready to transform your Angular forms?** Check out the [Installation](../installation) guide to get started!
+See the [Installation](../installation) guide to get started.

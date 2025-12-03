@@ -248,8 +248,6 @@ describe('Button Logic Integration', () => {
   describe('FormOptions Configuration', () => {
     it('should support full FormOptions with button defaults', () => {
       const options: FormOptions = {
-        validateOnChange: true,
-        validateOnBlur: true,
         disabled: false,
         submitButton: {
           disableWhenInvalid: true,
