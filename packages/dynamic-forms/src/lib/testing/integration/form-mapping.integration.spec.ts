@@ -2,20 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
+import type { SchemaPath } from '@angular/forms/signals';
 import { mapFieldToForm } from '../../core/form-mapping';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService, SchemaRegistryService } from '../../core/registry';
-
-/**
- * Utility to flush effects and wait for microtasks to settle.
- * This ensures Angular Signal Forms validators are fully applied.
- */
-async function flushAndSettle(): Promise<void> {
-  TestBed.flushEffects();
-  await Promise.resolve();
-  TestBed.flushEffects();
-}
 
 describe('Form Mapping Pipeline Integration (End-to-End)', () => {
   let injector: Injector;
@@ -33,8 +24,8 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
   });
 
   describe('Simple Field Mapping', () => {
-    it('should map field with simple validation', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should map field with simple validation', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ username: '' });
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
@@ -51,25 +42,22 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Should be invalid (empty + required)
         expect(formInstance().valid()).toBe(false);
 
         // Too short (< 3 chars)
         formValue.set({ username: 'ab' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         // Valid
         formValue.set({ username: 'alice' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
 
-    it('should map field with advanced validators', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should map field with advanced validators', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
@@ -85,22 +73,19 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'invalid' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'valid@example.com' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
 
-    it('should map field with logic', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should map field with logic', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ show: false, field: 'test' });
         // Register the form value signal BEFORE form creation for cross-field logic
         rootFormRegistry.registerFormValueSignal(formValue as any);
@@ -128,19 +113,17 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Hidden when show is false
         expect(formInstance.field().hidden()).toBe(true);
 
         formValue.set({ show: true, field: 'test' });
-        await flushAndSettle();
         expect(formInstance.field().hidden()).toBe(false);
       });
     });
 
-    it('should map field with schemas', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should map field with schemas', () => {
+      runInInjectionContext(injector, () => {
         // Register a schema
         schemaRegistry.registerSchema({
           name: 'emailSchema',
@@ -162,20 +145,18 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'test@example.com' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
   });
 
   describe('Complex Field Mapping', () => {
-    it('should map field with validators + logic + schemas', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should map field with validators + logic + schemas', () => {
+      runInInjectionContext(injector, () => {
         schemaRegistry.registerSchema({
           name: 'strongPassword',
           validators: [{ type: 'minLength', value: 8 }],
@@ -210,7 +191,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Visible and invalid (required + too short)
         expect(formInstance.password().hidden()).toBe(false);
@@ -218,23 +198,20 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         // Still invalid (too short)
         formValue.set({ requirePassword: true, password: 'pass' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         // Valid
         formValue.set({ requirePassword: true, password: 'password123' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
 
         // Hidden but still validated
         formValue.set({ requirePassword: false, password: 'password123' });
-        await flushAndSettle();
         expect(formInstance.password().hidden()).toBe(true);
       });
     });
 
-    it('should apply transformations in correct order', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should apply transformations in correct order', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ username: '' });
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
@@ -256,21 +233,17 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // All validators should be applied
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ username: 'ab' }); // Too short
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ username: 'alice' }); // Valid
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
 
         formValue.set({ username: 'a'.repeat(25) }); // Too long
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         // Logic should be applied
@@ -280,8 +253,8 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
   });
 
   describe('Special Field Types', () => {
-    it('should flatten page field children to root', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should flatten page field children to root', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ firstName: '', lastName: '' });
         const formSchema = schema<typeof formValue>((path) => {
           const pageField: FieldDef<any> = {
@@ -307,23 +280,20 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Both fields should be required at root level
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ firstName: 'John', lastName: '' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ firstName: 'John', lastName: 'Doe' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
 
-    it('should nest group field children correctly', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should nest group field children correctly', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({
           address: { street: '', city: '' },
         });
@@ -351,7 +321,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Nested fields should be validated
         expect(formInstance().valid()).toBe(false);
@@ -359,19 +328,17 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         formValue.set({
           address: { street: '123 Main St', city: '' },
         });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({
           address: { street: '123 Main St', city: 'Springfield' },
         });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
 
-    it('should handle row field flattening', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should handle row field flattening', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ email: '', phone: '' });
         const formSchema = schema<typeof formValue>((path) => {
           const rowField: FieldDef<any> = {
@@ -396,22 +363,19 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Invalid email and phone
         formValue.set({ email: 'invalid', phone: '123' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         // Valid
         formValue.set({ email: 'test@example.com', phone: '1234567890' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
 
-    it('should handle flat array field with primitive values', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should handle flat array field with primitive values', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({
           tags: ['', '', ''],
         });
@@ -435,7 +399,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Array itself is registered (no validation on empty array for now)
         // TODO: Add array-level validation (minLength, maxLength) once implemented
@@ -447,8 +410,8 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       });
     });
 
-    it('should handle object array field with nested group', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should handle object array field with nested group', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({
           contacts: [
             { name: '', email: '' },
@@ -485,7 +448,6 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Array itself is registered
         expect(formInstance.contacts).toBeDefined();
@@ -498,8 +460,8 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
   });
 
   describe('Backward Compatibility', () => {
-    it('should apply simple validation rules from field properties', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should apply simple validation rules from field properties', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ email: '' });
 
         // Using deprecated properties
@@ -519,18 +481,16 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'test@example.com' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
 
-    it('should combine simple and advanced validators', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should combine simple and advanced validators', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ password: '' });
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
@@ -550,30 +510,26 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Empty - fails required
         expect(formInstance().valid()).toBe(false);
 
         // Too short - fails minLength
         formValue.set({ password: 'pass' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         // No uppercase - fails pattern
         formValue.set({ password: 'password' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         // All validators pass
         formValue.set({ password: 'Password123' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
 
-    it('should handle numeric validation properties', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should handle numeric validation properties', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ age: 0 });
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
@@ -590,27 +546,23 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Too young
         formValue.set({ age: 10 });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         // Valid
         formValue.set({ age: 25 });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
 
         // Too old
         formValue.set({ age: 150 });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
       });
     });
 
-    it('should apply pattern validation from field property', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should apply pattern validation from field property', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ zipCode: '' });
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
@@ -626,22 +578,19 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         formValue.set({ zipCode: '123' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ zipCode: '12345' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
   });
 
   describe('Edge Cases', () => {
-    it('should handle field with disabled property', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should handle field with disabled property', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ field: 'test' });
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
@@ -657,14 +606,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         expect(formInstance.field().disabled()).toBe(true);
       });
     });
 
-    it('should handle field with no validation', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should handle field with no validation', () => {
+      runInInjectionContext(injector, () => {
         const formValue = signal({ field: '' });
 
         const fieldDef: FieldDef<any> = {
@@ -680,15 +628,14 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Should be valid (no validation rules)
         expect(formInstance().valid()).toBe(true);
       });
     });
 
-    it('should handle complex nested schema structures', async () => {
-      await runInInjectionContext(injector, async () => {
+    it('should handle complex nested schema structures', () => {
+      runInInjectionContext(injector, () => {
         // Register nested schemas
         schemaRegistry.registerSchema({
           name: 'baseValidation',
@@ -716,17 +663,14 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
-        await flushAndSettle();
 
         // Should have both required (from nested schema) and email validation
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'invalid' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'valid@example.com' });
-        await flushAndSettle();
         expect(formInstance().valid()).toBe(true);
       });
     });
