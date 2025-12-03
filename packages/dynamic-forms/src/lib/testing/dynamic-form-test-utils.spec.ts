@@ -128,6 +128,11 @@ describe('DynamicFormTestUtils', () => {
       // Trigger validation by simulating user interaction
       await DynamicFormTestUtils.simulateBlur(fixture, 'input[type="text"]');
 
+      // Ensure all effects are processed and validation state is updated
+      TestBed.flushEffects();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
       expect(DynamicFormTestUtils.isFormValid(component)).toBe(false);
     });
   });

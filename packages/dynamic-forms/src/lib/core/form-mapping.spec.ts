@@ -410,11 +410,11 @@ describe('form-mapping', () => {
             formValue,
             schema<typeof formValue>((path) => {
               mapFieldToForm(fieldDef, path.email);
+              // Assert inside the schema callback to ensure the code has executed
+              expect(consoleLogSpy).toHaveBeenCalledWith('Custom form configuration detected for field:', 'email');
             }),
           );
           rootFormRegistry.registerRootForm(formInstance);
-
-          expect(consoleLogSpy).toHaveBeenCalledWith('Custom form configuration detected for field:', 'email');
           consoleLogSpy.mockRestore();
         });
       });
