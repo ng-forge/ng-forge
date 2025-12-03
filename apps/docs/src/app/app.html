@@ -4,8 +4,13 @@
       <img src="logo-light.svg" alt="ng-forge" style="height: 116px; width: auto" class="logo-light" />
       <img src="logo-dark.svg" alt="ng-forge" style="height: 116px; width: auto; display: none" class="logo-dark" />
     </a>
-    <ng-doc-theme-toggle ngDocNavbarRight></ng-doc-theme-toggle>
+    <div class="ng-doc-header-controls" ngDocNavbarRight>
+      <ng-doc-theme-toggle />
+      <a href="https://github.com/ng-forge/ng-forge" ng-doc-button-icon ngDocTooltip="Repository on GitHub" size="large" target="_blank">
+        <ng-doc-icon [size]="24" customIcon="github"></ng-doc-icon>
+      </a>
+    </div>
   </ng-doc-navbar>
-  <ng-doc-sidebar></ng-doc-sidebar>
-  <router-outlet></router-outlet>
+  <ng-doc-sidebar />
+  <router-outlet />
 </ng-doc-root>

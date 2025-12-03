@@ -54,24 +54,27 @@ html,
 body {
   height: 100%;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
-  background-color: white;
-  color: rgba(0, 0, 0, 0.87);
+  // ng-doc light mode colors
+  background-color: #f6f6f6;
+  color: rgb(78, 78, 78);
 }
 
 // Auto mode - use system preference when no data-theme is set
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]),
   html:not([data-theme]) body {
-    background-color: #303030;
-    color: rgba(255, 255, 255, 0.87);
+    // ng-doc dark mode colors
+    background-color: rgb(41, 41, 41);
+    color: #a9a9a9;
   }
 }
 
 // Explicit dark theme
 html[data-theme='dark'],
 html[data-theme='dark'] body {
-  background-color: #303030;
-  color: rgba(255, 255, 255, 0.87);
+  // ng-doc dark mode colors
+  background-color: rgb(41, 41, 41);
+  color: #a9a9a9;
 }
 
 // ============================================
@@ -79,28 +82,30 @@ html[data-theme='dark'] body {
 // ============================================
 
 :root {
-  // Light mode colors (default)
-  --example-result-bg: #efefef;
+  // ng-doc light mode colors
+  --example-result-bg: #ebebeb;
   --example-result-border: #ddd;
-  --example-result-text: #1a1a1a;
+  --example-result-text: rgb(78, 78, 78);
 }
 
 // Auto mode - use system preference when no data-theme is set
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]),
   :root:not([data-theme]) {
-    --example-result-bg: #1e1e1e;
-    --example-result-border: #404040;
-    --example-result-text: #f0f0f0;
+    // ng-doc dark mode colors
+    --example-result-bg: rgb(48, 48, 48);
+    --example-result-border: rgb(71, 71, 71);
+    --example-result-text: #a9a9a9;
   }
 }
 
 // Explicit dark theme
 html[data-theme='dark'],
 :root[data-theme='dark'] {
-  --example-result-bg: #1e1e1e;
-  --example-result-border: #404040;
-  --example-result-text: #f0f0f0;
+  // ng-doc dark mode colors
+  --example-result-bg: rgb(48, 48, 48);
+  --example-result-border: rgb(71, 71, 71);
+  --example-result-text: #a9a9a9;
 }
 
 // Example demo component shared styles

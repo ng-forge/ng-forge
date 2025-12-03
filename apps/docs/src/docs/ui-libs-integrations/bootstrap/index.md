@@ -132,7 +132,7 @@ export class ContactFormComponent {
 
 Here's a full registration form showcasing multiple Bootstrap field types:
 
-{{ NgDocActions.demo("CompleteFormIframeDemoComponent") }}
+{{ NgDocActions.demo("CompleteFormIframeDemoComponent", { container: false }) }}
 
 This example demonstrates:
 
@@ -161,7 +161,7 @@ Text input field with HTML5 type support and optional floating labels.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("InputIframeDemoComponent") }}
+{{ NgDocActions.demo("InputIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
@@ -224,7 +224,7 @@ Multi-line text input field with Bootstrap form styling.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("TextareaIframeDemoComponent") }}
+{{ NgDocActions.demo("TextareaIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
@@ -264,7 +264,7 @@ Dropdown selection field with native HTML select element. Supports both single a
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SelectIframeDemoComponent") }}
+{{ NgDocActions.demo("SelectIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
@@ -301,7 +301,7 @@ Radio button group for selecting a single option with optional button group styl
 
 **Live Demo:**
 
-{{ NgDocActions.demo("RadioIframeDemoComponent") }}
+{{ NgDocActions.demo("RadioIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
@@ -336,7 +336,7 @@ Boolean checkbox control for single true/false selections.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("CheckboxIframeDemoComponent") }}
+{{ NgDocActions.demo("CheckboxIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
@@ -364,7 +364,7 @@ Multiple checkbox selection field for choosing multiple options.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent") }}
+{{ NgDocActions.demo("MultiCheckboxIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
@@ -405,7 +405,7 @@ Slide toggle switch for boolean on/off selections (renders as Bootstrap switch).
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ToggleIframeDemoComponent") }}
+{{ NgDocActions.demo("ToggleIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
@@ -431,7 +431,7 @@ Native HTML5 range input for selecting values from a numeric range.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("SliderIframeDemoComponent") }}
+{{ NgDocActions.demo("SliderIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
@@ -463,7 +463,7 @@ Native HTML5 date input with Bootstrap styling.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("DatepickerIframeDemoComponent") }}
+{{ NgDocActions.demo("DatepickerIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
@@ -502,7 +502,7 @@ Form submission button that's automatically disabled when the form is invalid.
 
 **Live Demo:**
 
-{{ NgDocActions.demo("ButtonIframeDemoComponent") }}
+{{ NgDocActions.demo("ButtonIframeDemoComponent", { container: false }) }}
 
 **Basic Usage:**
 
