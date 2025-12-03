@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { DynamicTextPipe } from './dynamic-text.pipe';
 import { signal, WritableSignal } from '@angular/core';
-import { firstValueFrom, lastValueFrom, of, Subject, toArray } from 'rxjs';
+import { firstValueFrom, lastValueFrom, of, Subject, take, toArray } from 'rxjs';
 
 describe('DynamicTextPipe', () => {
   let pipe: DynamicTextPipe;
@@ -12,8 +12,10 @@ describe('DynamicTextPipe', () => {
   }
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    pipe = new DynamicTextPipe();
+    TestBed.configureTestingModule({
+      providers: [DynamicTextPipe],
+    });
+    pipe = TestBed.inject(DynamicTextPipe);
   });
 
   describe('static strings', () => {
@@ -102,45 +104,32 @@ describe('DynamicTextPipe', () => {
   });
 
   describe('signals', () => {
-    it('should convert signal to observable', async () => {
+    it('should convert signal to reactive observable', async () => {
       const textSignal = createSignal('Signal Value');
       const result = pipe.transform(textSignal);
       expect(await firstValueFrom(result)).toBe('Signal Value');
     });
 
-    it('should read current signal value', async () => {
+    it('should emit when signal value changes', async () => {
       const textSignal = createSignal('Initial');
-      textSignal.set('Updated');
-
       const result = pipe.transform(textSignal);
-      expect(await firstValueFrom(result)).toBe('Updated');
+
+      // Collect first 2 emissions
+      const emissionsPromise = lastValueFrom(result.pipe(take(2), toArray()));
+
+      // Update signal after subscribing
+      TestBed.flushEffects();
+      textSignal.set('Updated');
+      TestBed.flushEffects();
+
+      const emissions = await emissionsPromise;
+      expect(emissions).toEqual(['Initial', 'Updated']);
     });
 
     it('should handle signal with empty string', async () => {
       const textSignal = createSignal('');
       const result = pipe.transform(textSignal);
       expect(await firstValueFrom(result)).toBe('');
-    });
-
-    it('should create new observable from signal on each transform', async () => {
-      const textSignal = createSignal('Test');
-      const result1 = pipe.transform(textSignal);
-      const result2 = pipe.transform(textSignal);
-
-      expect(result1).not.toBe(result2);
-      expect(await firstValueFrom(result1)).toBe('Test');
-      expect(await firstValueFrom(result2)).toBe('Test');
-    });
-
-    it('should capture signal value at transform time', async () => {
-      const textSignal = createSignal('First');
-      const result1 = pipe.transform(textSignal);
-
-      textSignal.set('Second');
-      const result2 = pipe.transform(textSignal);
-
-      expect(await firstValueFrom(result1)).toBe('First');
-      expect(await firstValueFrom(result2)).toBe('Second');
     });
 
     it('should handle readonly signal', async () => {
@@ -155,13 +144,6 @@ describe('DynamicTextPipe', () => {
   describe('type handling', () => {
     it('should emit once for static string', async () => {
       const result = pipe.transform('Static');
-      const emissions = await lastValueFrom(result.pipe(toArray()));
-      expect(emissions).toHaveLength(1);
-    });
-
-    it('should emit once for signal', async () => {
-      const textSignal = createSignal('Test');
-      const result = pipe.transform(textSignal);
       const emissions = await lastValueFrom(result.pipe(toArray()));
       expect(emissions).toHaveLength(1);
     });
@@ -212,12 +194,6 @@ describe('DynamicTextPipe', () => {
 
     it('should complete observable for static values', async () => {
       const result = pipe.transform('Test');
-      const emissions = await lastValueFrom(result.pipe(toArray()));
-      expect(emissions).toEqual(['Test']);
-    });
-
-    it('should complete observable for signal values', async () => {
-      const result = pipe.transform(createSignal('Test'));
       const emissions = await lastValueFrom(result.pipe(toArray()));
       expect(emissions).toEqual(['Test']);
     });
