@@ -175,4 +175,47 @@ test.describe('Advanced Validation E2E Tests', () => {
       await expect(submitButton).toBeEnabled();
     });
   });
+
+  test.describe('Expression-Based Min/Max Validators', () => {
+    test('should validate age against dynamic minAge value', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/expression-based-min-max');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('expression-based-min-max-test');
+      await expect(scenario).toBeVisible();
+
+      const minAgeInput = helpers.getInput(scenario, 'minAge');
+      const ageInput = helpers.getInput(scenario, 'age');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // Initially minAge is 18 and age is empty - submit disabled (required)
+      await expect(submitButton).toBeDisabled();
+
+      // Age valid when >= minAge field value (18)
+      await helpers.fillInput(ageInput, '20');
+      await expect(submitButton).toBeEnabled();
+
+      // Age invalid when < minAge field value
+      await helpers.clearAndFill(ageInput, '15');
+      await expect(submitButton).toBeDisabled();
+
+      // Validation updates when minAge field changes - set minAge to 10
+      await helpers.clearAndFill(minAgeInput, '10');
+      await page.waitForTimeout(300);
+
+      // Now age 15 should be valid since minAge is 10
+      await expect(submitButton).toBeEnabled();
+
+      // Change minAge back to 21
+      await helpers.clearAndFill(minAgeInput, '21');
+      await page.waitForTimeout(300);
+
+      // Now age 15 should be invalid again since minAge is 21
+      await expect(submitButton).toBeDisabled();
+
+      // Set age to satisfy the new minAge
+      await helpers.clearAndFill(ageInput, '25');
+      await expect(submitButton).toBeEnabled();
+    });
+  });
 });

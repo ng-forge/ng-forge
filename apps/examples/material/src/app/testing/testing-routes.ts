@@ -85,6 +85,12 @@ export default [
     loadChildren: () => import('./multi-page-navigation/multi-page-navigation.routes'),
   },
 
+  // Schema System Tests - Reusable schema configurations for validation and logic
+  {
+    path: 'schema-system',
+    loadChildren: () => import('./schema-system/schema-system.routes'),
+  },
+
   // Submission Behavior Tests - Tests for form submission and button disabled states
   {
     path: 'submission-behavior',

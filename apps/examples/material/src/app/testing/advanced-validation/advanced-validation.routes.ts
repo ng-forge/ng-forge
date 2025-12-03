@@ -32,6 +32,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAdvancedValidationScenario('multiple-validators-test') },
   },
+  {
+    path: 'expression-based-min-max',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('expression-based-min-max-test') },
+  },
 ];
 
 export default routes;
