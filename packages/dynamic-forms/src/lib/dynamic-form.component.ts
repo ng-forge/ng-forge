@@ -21,7 +21,7 @@ import {
 import { FieldRendererDirective } from './directives/dynamic-form.directive';
 import { form, FormUiControl, submit } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { EMPTY, filter, forkJoin, from, map, of, ReplaySubject, switchMap, take } from 'rxjs';
+import { EMPTY, filter, firstValueFrom, forkJoin, from, isObservable, map, of, ReplaySubject, switchMap, take } from 'rxjs';
 import { keyBy, memoize, isEqual } from './utils/object-utils';
 import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from './models/field-signal-context.token';
@@ -73,8 +73,8 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
  * export class MyComponent {
  *   formConfig: FormConfig = {
  *     fields: [
- *       { type: 'input', key: 'email', label: 'Email', validation: ['required', 'email'] },
- *       { type: 'input', key: 'password', label: 'Password', validation: ['required'] }
+ *       { type: 'input', key: 'email', value: '', label: 'Email', required: true, email: true },
+ *       { type: 'input', key: 'password', value: '', label: 'Password', required: true }
  *     ]
  *   };
  *
@@ -221,13 +221,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * ```typescript
    * const config: FormConfig = {
    *   fields: [
-   *     { type: 'input', key: 'name', label: 'Full Name', validation: ['required'] },
+   *     { type: 'input', key: 'name', value: '', label: 'Full Name', required: true },
    *     { type: 'group', key: 'address', label: 'Address', fields: [
-   *       { type: 'input', key: 'street', label: 'Street' },
-   *       { type: 'input', key: 'city', label: 'City' }
+   *       { type: 'input', key: 'street', value: '', label: 'Street' },
+   *       { type: 'input', key: 'city', value: '', label: 'City' }
    *     ]}
-   *   ],
-   *   options: { validateOnChange: true }
+   *   ]
    * };
    * ```
    */
@@ -550,6 +549,10 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * The event contains the complete form values object with proper typing
    * based on the form configuration.
    *
+   * **Important:** When using `submission.action` in the config, do not also use
+   * the `(submitted)` output - they serve the same purpose. If both are configured,
+   * `submission.action` takes precedence and `(submitted)` will not emit.
+   *
    * @example
    * ```typescript
    * handleSubmit(values: Partial<UserProfile>) {
@@ -558,7 +561,26 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * }
    * ```
    */
-  readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit').pipe(map(() => this.value())));
+  readonly submitted = outputFromObservable(
+    this.eventBus.on<SubmitEvent>('submit').pipe(
+      switchMap(() => {
+        const submissionConfig = this.config().submission;
+
+        // If submission action is configured, warn and skip emitting to (submitted) output
+        // The submission.action handler already handles the submission
+        if (submissionConfig?.action) {
+          console.warn(
+            '[Dynamic Forms] Both `submission.action` and `(submitted)` output are configured. ' +
+              'When using `submission.action`, the `(submitted)` output will not emit. ' +
+              'Use either `submission.action` OR `(submitted)`, not both.',
+          );
+          return EMPTY;
+        }
+
+        return of(this.value());
+      }),
+    ),
+  );
 
   /**
    * Emitted when the form is reset to its default values.
@@ -647,13 +669,24 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
             return EMPTY;
           }
 
+          // Wrap the action to handle Observable returns
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const wrappedAction = (formTree: any): Promise<any> => {
+            const result = submissionConfig.action(formTree);
+            // If the action returns an Observable, convert it to a Promise
+            if (isObservable(result)) {
+              return firstValueFrom(result);
+            }
+            return result;
+          };
+
           // Use Angular Signal Forms' native submit() function
           // This automatically:
           // - Sets form.submitting() to true during execution
           // - Applies server errors to form fields on completion
           // - Sets form.submitting() to false when done
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return from(submit(this.form() as any, submissionConfig.action as any));
+          return from(submit(this.form() as any, wrappedAction));
         }),
         takeUntilDestroyed(),
       )

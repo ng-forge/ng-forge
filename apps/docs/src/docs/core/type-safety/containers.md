@@ -184,17 +184,19 @@ Pages organize multi-step forms, flattening all children to the root level:
 const config = {
   fields: [
     {
+      key: 'page1',
       type: 'page',
-      title: 'Personal Information',
       fields: [
+        { key: 'page1Title', type: 'text', label: 'Personal Information', props: { elementType: 'h3' } },
         { key: 'email', type: 'input', value: '' },
         { key: 'password', type: 'input', value: '' },
       ],
     },
     {
+      key: 'page2',
       type: 'page',
-      title: 'Profile Details',
       fields: [
+        { key: 'page2Title', type: 'text', label: 'Profile Details', props: { elementType: 'h3' } },
         { key: 'firstName', type: 'input', value: '' },
         { key: 'lastName', type: 'input', value: '' },
       ],
@@ -223,23 +225,25 @@ const config = {
 const config = {
   fields: [
     {
+      key: 'accountPage',
       type: 'page',
-      title: 'Account',
       fields: [
+        { key: 'accountTitle', type: 'text', label: 'Account', props: { elementType: 'h3' } },
         { key: 'username', type: 'input', value: '', required: true },
         { key: 'email', type: 'input', value: '', required: true },
         { key: 'password', type: 'input', value: '', required: true },
-        { type: 'next', label: 'Continue' },
+        { type: 'next', key: 'next', label: 'Continue' },
       ],
     },
     {
+      key: 'profilePage',
       type: 'page',
-      title: 'Profile',
       fields: [
+        { key: 'profileTitle', type: 'text', label: 'Profile', props: { elementType: 'h3' } },
         { key: 'firstName', type: 'input', value: '', required: true },
         { key: 'lastName', type: 'input', value: '', required: true },
-        { type: 'previous', label: 'Back' },
-        { type: 'submit', label: 'Complete' },
+        { type: 'previous', key: 'back', label: 'Back' },
+        { type: 'submit', key: 'submit', label: 'Complete' },
       ],
     },
   ],
@@ -257,13 +261,33 @@ const config = {
 
 ## Nesting Rules
 
-Container fields enforce nesting constraints at compile-time to prevent invalid structures:
+Container fields enforce nesting constraints at compile-time to prevent invalid structures.
+
+### Visual Reference
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      NESTING RULES                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  PAGE ──────┬──► ROW ────────┬──► GROUP ──┬──► LEAF FIELD  │
+│             │                │            │                 │
+│             ├──► GROUP ──────┼──► ROW ────┴──► LEAF FIELD  │
+│             │                │                              │
+│             └──► LEAF FIELD  └──► LEAF FIELD               │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│  ✗ PAGE cannot contain PAGE                                 │
+│  ✗ ROW cannot contain ROW or PAGE                          │
+│  ✗ GROUP cannot contain GROUP or PAGE                      │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ### Valid Nesting
 
 - **Pages** can contain: rows, groups, leaf fields (not other pages)
 - **Rows** can contain: groups, leaf fields (not pages or rows)
-- **Groups** can contain: rows, groups, leaf fields (not pages)
+- **Groups** can contain: rows, leaf fields (not pages or other groups)
 
 ```typescript
 // ✓ Valid nesting
@@ -334,7 +358,7 @@ const config3 = {
 
 ### Deep Nesting Example
 
-Groups can contain rows, which can contain groups:
+Groups can contain rows, and rows can contain groups (but groups cannot directly contain other groups):
 
 ```typescript
 const config = {
@@ -351,11 +375,16 @@ const config = {
           ],
         },
         {
-          type: 'group',
-          key: 'contact',
+          type: 'row',
           fields: [
-            { key: 'email', type: 'input', value: '' },
-            { key: 'phone', type: 'input', value: '' },
+            {
+              type: 'group',
+              key: 'contact',
+              fields: [
+                { key: 'email', type: 'input', value: '' },
+                { key: 'phone', type: 'input', value: '' },
+              ],
+            },
           ],
         },
       ],
@@ -368,7 +397,7 @@ const config = {
 //   personalInfo: {
 //     firstName?: string;    // From row (flattened)
 //     lastName?: string;     // From row (flattened)
-//     contact: {             // From group (nested)
+//     contact: {             // From group inside row (nested)
 //       email?: string;
 //       phone?: string;
 //     }

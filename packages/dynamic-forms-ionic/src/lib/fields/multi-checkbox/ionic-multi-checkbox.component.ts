@@ -11,7 +11,7 @@ import {
   ValueType,
 } from '@ng-forge/dynamic-forms';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
-import { isEqual } from 'lodash-es';
+import { isEqual } from '../../utils/is-equal';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { IonicMultiCheckboxComponent, IonicMultiCheckboxProps } from './ionic-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';

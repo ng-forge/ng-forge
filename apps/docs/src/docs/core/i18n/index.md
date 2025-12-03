@@ -8,7 +8,7 @@ ng-forge uses the `DynamicText` type for all text properties:
 type DynamicText = string | Observable<string> | Signal<string>;
 ```
 
-Any property that accepts text (`label`, `placeholder`, `hint`, `validationMessages`, etc.) accepts:
+Any property that accepts text (`label`, `placeholder`, `validationMessages`, and UI-integration specific props like `hint`) accepts:
 
 - Static strings
 - Observables (from translation libraries like Transloco, ngx-translate, etc.)
@@ -189,7 +189,7 @@ export class MyFormComponent {
 
 ## Example with Signals
 
-Use Angular signals for translations:
+Use Angular signals for translations by wrapping the config in `computed()`:
 
 ```typescript
 import { Component, signal, computed } from '@angular/core';
@@ -213,10 +213,10 @@ export class MyFormComponent {
     },
   }[this.currentLang()]));
 
+  // Wrap entire config in computed() - rebuilds when language changes
   formConfig = computed(() => ({
-    // Define default validation messages for all fields
     defaultValidationMessages: {
-      required: this.translations().required,  // Signal<string>
+      required: this.translations().required,
       email: this.translations().email_format,
     },
     fields: [
@@ -226,7 +226,6 @@ export class MyFormComponent {
         label: this.translations().username,
         value: '',
         required: true,
-        // Uses defaultValidationMessages for required
       },
       {
         key: 'email',
@@ -235,17 +234,18 @@ export class MyFormComponent {
         value: '',
         required: true,
         email: true,
-        // Uses defaultValidationMessages for required and email
       },
     ],
   }));
 
   switchLanguage(lang: 'en' | 'es') {
     this.currentLang.set(lang);
-    // Form automatically updates
+    // Config recomputes → form updates with new translations
   }
 }
 ```
+
+**How it works:** The `computed()` wrapper tracks the `currentLang` signal dependency. When `currentLang` changes, the entire config is recomputed with new translation values, and the form updates automatically.
 
 ## Translated Select Options
 

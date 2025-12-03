@@ -48,7 +48,6 @@ type ExcludedKeys =
   | 'pattern'
   | 'validators'
   | 'logic'
-  | 'schemas'
-  | 'dynamicProperties';
+  | 'schemas';
 
 export type ValueFieldComponent<T extends BaseValueField<any, unknown>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;

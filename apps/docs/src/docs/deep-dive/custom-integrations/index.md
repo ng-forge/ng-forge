@@ -174,7 +174,13 @@ Similar to ValueFieldComponent but specifically for boolean checkbox fields.
 
 ## Field Binding with [field]
 
-The key to connecting your component to Angular's signal forms is the `[field]` binding:
+The key to connecting your component to Angular's signal forms is the `[field]` binding. Import `Field` and `FieldTree` from Angular's signal forms package:
+
+```typescript
+import { Field, FieldTree } from '@angular/forms/signals';
+```
+
+Then use the `[field]` directive on form controls:
 
 ```typescript
 <input [field]="f" ... />
@@ -271,7 +277,7 @@ Register your field types with TypeScript for full type inference:
 ```typescript
 // In your field types file
 declare module '@ng-forge/dynamic-forms' {
-  interface DynamicFormFieldRegistry {
+  interface FieldRegistryLeaves {
     input: CustomInputField;
     select: CustomSelectField;
     checkbox: CustomCheckboxField;

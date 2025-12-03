@@ -290,9 +290,14 @@ Toggle shipping address visibility based on "same as billing" checkbox.
 const config = {
   fields: [
     {
+      key: 'billingTitle',
+      type: 'text',
+      label: 'Billing Address',
+      props: { elementType: 'h4' },
+    },
+    {
       key: 'billingAddress',
       type: 'group',
-      label: 'Billing Address',
       fields: [
         { key: 'street', type: 'input', value: '', label: 'Street', required: true },
         { key: 'city', type: 'input', value: '', label: 'City', required: true },
@@ -306,9 +311,25 @@ const config = {
       label: 'Shipping address is same as billing address',
     },
     {
+      key: 'shippingTitle',
+      type: 'text',
+      label: 'Shipping Address',
+      props: { elementType: 'h4' },
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'sameAsBilling',
+            operator: 'equals',
+            value: true,
+          },
+        },
+      ],
+    },
+    {
       key: 'shippingAddress',
       type: 'group',
-      label: 'Shipping Address',
       logic: [
         {
           type: 'hidden',
@@ -499,10 +520,21 @@ const config = {
         {
           type: 'hidden',
           condition: {
-            type: 'fieldValue',
-            fieldPath: 'accountType',
-            operator: 'in',
-            value: ['free', 'pro'],
+            type: 'or',
+            conditions: [
+              {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'free',
+              },
+              {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'pro',
+              },
+            ],
           },
         },
       ],
@@ -574,7 +606,7 @@ logic: [
 
 ## Related
 
-- **[Conditional Logic Basics](../basics/)** - Getting started
+- **[Conditional Logic](../)** - Getting started
 - **[Conditional Expressions](../expressions/)** - All operators
 - **[Validation](../../validation/)** - Conditional validation
 - **[Type Safety](../../type-safety/)** - TypeScript integration

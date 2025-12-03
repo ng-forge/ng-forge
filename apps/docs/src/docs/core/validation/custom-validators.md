@@ -87,7 +87,7 @@ Expression-based validators have access to:
 - **`fieldValue`** - Current field value
 - **`formValue`** - Complete form value object (e.g., `formValue.password`, `formValue.email`)
 - **`fieldPath`** - Current field path
-- Custom functions registered in `signalFormsConfig.customFunctions`
+- Custom functions registered in `customFnConfig.customFunctions`
 
 ### Safe Member Access
 
@@ -197,7 +197,7 @@ const config = {
       },
     },
   ],
-  signalFormsConfig: {
+  customFnConfig: {
     validators: {
       noSpaces,
     },
@@ -252,7 +252,7 @@ const config = {
       },
     },
   ],
-  signalFormsConfig: {
+  customFnConfig: {
     validators: { greaterThanMin },
   },
 };
@@ -303,6 +303,7 @@ Async validators use Angular's resource API for database lookups or complex asyn
 import { AsyncCustomValidator } from '@ng-forge/dynamic-forms';
 import { inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
 import { UserService } from './user.service';
 
 const checkUsernameAvailable: AsyncCustomValidator = {
@@ -345,7 +346,7 @@ const config = {
       },
     },
   ],
-  signalFormsConfig: {
+  customFnConfig: {
     asyncValidators: {
       checkUsernameAvailable,
     },
@@ -426,7 +427,7 @@ const config = {
       },
     },
   ],
-  signalFormsConfig: {
+  customFnConfig: {
     httpValidators: {
       checkEmailDomain,
     },
@@ -467,7 +468,7 @@ interface HttpResourceRequest {
 
 ## Conditional Custom Validators
 
-Apply validators conditionally using the `condition` function:
+Apply validators conditionally using the `when` property with a `ConditionalExpression`:
 
 ```typescript
 const businessEmailValidator: CustomValidator = (ctx) => {
@@ -501,7 +502,12 @@ const config = {
           type: 'custom',
           functionName: 'businessEmailValidator',
           // Only apply when account type is "business"
-          condition: (config, formValue) => formValue?.accountType === 'business',
+          when: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'business',
+          },
         },
       ],
       validationMessages: {
@@ -509,13 +515,13 @@ const config = {
       },
     },
   ],
-  signalFormsConfig: {
+  customFnConfig: {
     validators: { businessEmailValidator },
   },
 };
 ```
 
-The validator is only active when the condition returns `true`, allowing dynamic validation based on form state.
+The validator is only active when the `when` condition evaluates to `true`, allowing dynamic validation based on form state. See [Conditional Logic](/docs/core/conditional-logic) for all expression types and operators.
 
 ## Common Validation Patterns
 
@@ -658,8 +664,8 @@ Messages can interpolate params from ValidatorConfig using Angular template synt
     }
   ],
   validationMessages: {
-    // Interpolate params.label using Angular template syntax
-    notLessThan: 'Must be less than (label)'  // Replace (label) with double-curly-brace syntax
+    // Interpolate params.label using double curly braces
+    notLessThan: 'Must be less than {{label}}'
   }
 }
 ```
@@ -711,7 +717,7 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 };
 ```
 
-**Note:** When registering validators in `signalFormsConfig.validators`, use the simple form without type parameters to avoid TypeScript compatibility issues.
+**Note:** When registering validators in `customFnConfig.validators`, use the simple form without type parameters to avoid TypeScript compatibility issues.
 
 ## Best Practices
 
@@ -721,11 +727,11 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 4. **Cross-Field Validation**: Use `ctx.valueOf()` for accessing related fields
 5. **Type Safety**: Leverage TypeScript generics for type-safe validation
 6. **Message Priority**: Use field-level messages for customization, form-level for common errors
-7. **Conditional Validation**: Use `condition` function for dynamic validators
+7. **Conditional Validation**: Use `when` property with `ConditionalExpression` for dynamic validators
 8. **Inverted Logic**: HTTP validators check validity, not data fetching success
 
 ## Related Documentation
 
-- [Validation Basics](./basics) - Core validation concepts
-- [Built-in Validators](./built-in) - Standard validation rules
-- [Type Safety](../../type-safety/basics) - TypeScript integration
+- [Validation Basics](../basics/) - Core validation concepts
+- [Validation Reference](../reference/) - Standard validation rules
+- [Type Safety](../../type-safety/basics/) - TypeScript integration

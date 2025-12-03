@@ -66,8 +66,7 @@ This creates an array of objects:
 Array items can be added or removed dynamically at runtime using the event bus:
 
 ```typescript
-import { EventBus } from '@ng-forge/dynamic-forms';
-import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms/events';
+import { EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms';
 
 // Inject the event bus
 eventBus = inject(EventBus);
@@ -108,14 +107,13 @@ Here's a complete working example of a flat array field with dynamic add/remove:
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { DynamicForm, EventBus } from '@ng-forge/dynamic-forms';
-import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms/events';
+import { DynamicForm, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-tags-form',
   imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" />
+    <dynamic-form [config]="formConfig" />
     <button (click)="addTag()">Add Tag</button>
   `,
 })
@@ -124,10 +122,11 @@ export class TagsFormComponent {
 
   formConfig = {
     fields: [
+      // Note: Array fields don't support the 'label' property.
+      // Use a text field above if you need a section header.
       {
         key: 'tags',
         type: 'array',
-        label: 'Tags',
         fields: [
           {
             key: 'tag',
@@ -149,11 +148,6 @@ export class TagsFormComponent {
   removeTag(index: number) {
     this.eventBus.dispatch(RemoveArrayItemEvent, 'tags', index);
   }
-
-  onSubmit(formValue: any) {
-    console.log('Form submitted:', formValue);
-    // Output: { tags: ['angular', 'typescript', 'forms'] }
-  }
 }
 ```
 
@@ -163,14 +157,13 @@ Here's a complete working example of an object array field with validation:
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { DynamicForm, EventBus } from '@ng-forge/dynamic-forms';
-import { AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms/events';
+import { DynamicForm, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-contacts-form',
   imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" />
+    <dynamic-form [config]="formConfig" />
     <button (click)="addContact()">Add Contact</button>
   `,
 })
@@ -179,10 +172,11 @@ export class ContactsFormComponent {
 
   formConfig = {
     fields: [
+      // Note: Array fields don't support the 'label' property.
+      // Use a text field above if you need a section header.
       {
         key: 'contacts',
         type: 'array',
-        label: 'Emergency Contacts',
         fields: [
           {
             type: 'group',
@@ -227,17 +221,6 @@ export class ContactsFormComponent {
 
   removeContact(index: number) {
     this.eventBus.dispatch(RemoveArrayItemEvent, 'contacts', index);
-  }
-
-  onSubmit(formValue: any) {
-    console.log('Form submitted:', formValue);
-    // Output:
-    // {
-    //   contacts: [
-    //     { name: 'John Doe', phone: '5551234567', relationship: 'family' },
-    //     { name: 'Jane Smith', phone: '5559876543', relationship: 'friend' },
-    //   ]
-    // }
   }
 }
 ```
