@@ -96,6 +96,7 @@ export class SimpleTestUtils {
     }
 
     fixture.detectChanges();
+    TestBed.flushEffects();
     return { component, fixture };
   }
 
@@ -105,6 +106,7 @@ export class SimpleTestUtils {
   static async waitForInit(fixture: any): Promise<void> {
     await delay(0);
     fixture.detectChanges();
+    TestBed.flushEffects();
     await delay(0);
   }
 
@@ -170,6 +172,13 @@ export class SimpleTestUtils {
   template: '<div>Test Field: {{ value() }}</div>',
 })
 export class TestFieldComponent {
+  // Accept the inputs that array field components bind to child fields
+  field = input<any>();
+  key = input<string>();
+  arrayContext = input<any>();
+  label = input<string>();
+  placeholder = input<string>();
+
   value = signal('test');
   // Required inputs from baseFieldMapper
   key = input<string>('');
