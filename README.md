@@ -42,7 +42,7 @@ import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dyn
 
 @Component({
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
+  template: `<dynamic-form [config]="config" />`,
 })
 export class LoginComponent {
   config = {
@@ -52,24 +52,24 @@ export class LoginComponent {
       { type: 'submit', key: 'submit', label: 'Sign In' },
     ],
   } as const satisfies FormConfig;
-
-  onSubmit(value: InferFormValue<typeof this.config.fields>) {
-    console.log('Login:', value); // TypeScript knows: { email: string, password: string }
-  }
 }
 ```
 
 ## ✨ Features
 
-|                          |                                                   |
-| ------------------------ | ------------------------------------------------- |
-| ⚡ **Signal Forms**      | Native Angular 21+ signal forms integration       |
-| 🎯 **Type-Safe**         | Full TypeScript inference for form values         |
-| 🎨 **UI Agnostic**       | Material, Bootstrap, PrimeNG, Ionic, or custom    |
-| ✅ **Validation**        | Shorthand validators and conditional validation   |
-| 🎭 **Conditional Logic** | Dynamic field visibility and requirements         |
-| 📄 **Multi-Step Forms**  | Built-in wizard and pagination support            |
-| 🌍 **i18n Ready**        | Observable/Signal support for labels and messages |
+⚡ **Signal Forms** – Native Angular 21+ signal forms integration
+
+🎯 **Type-Safe** – Full TypeScript inference for form values
+
+🎨 **UI Agnostic** – Material, Bootstrap, PrimeNG, Ionic, or custom
+
+✅ **Validation** – Shorthand validators and conditional validation
+
+🎭 **Conditional Logic** – Dynamic field visibility and requirements
+
+📄 **Multi-Step Forms** – Built-in wizard and pagination support
+
+🌍 **i18n Ready** – Observable/Signal support for labels and messages
 
 ## 📦 Packages
 
