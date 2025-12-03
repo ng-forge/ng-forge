@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 import { DynamicTextPipe } from './dynamic-text.pipe';
 import { signal } from '@angular/core';
 import { of, Subject } from 'rxjs';
@@ -7,6 +8,7 @@ describe('DynamicTextPipe', () => {
   let pipe: DynamicTextPipe;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({});
     pipe = new DynamicTextPipe();
   });
 
