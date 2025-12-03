@@ -42,16 +42,19 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Should be invalid (empty + required)
         expect(formInstance().valid()).toBe(false);
 
         // Too short (< 3 chars)
         formValue.set({ username: 'ab' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         // Valid
         formValue.set({ username: 'alice' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
@@ -73,13 +76,16 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'invalid' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'valid@example.com' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
@@ -113,11 +119,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Hidden when show is false
         expect(formInstance.field().hidden()).toBe(true);
 
         formValue.set({ show: true, field: 'test' });
+        TestBed.flushEffects();
         expect(formInstance.field().hidden()).toBe(false);
       });
     });
@@ -145,10 +153,12 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'test@example.com' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
@@ -191,6 +201,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Visible and invalid (required + too short)
         expect(formInstance.password().hidden()).toBe(false);
@@ -198,14 +209,17 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         // Still invalid (too short)
         formValue.set({ requirePassword: true, password: 'pass' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         // Valid
         formValue.set({ requirePassword: true, password: 'password123' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
 
         // Hidden but still validated
         formValue.set({ requirePassword: false, password: 'password123' });
+        TestBed.flushEffects();
         expect(formInstance.password().hidden()).toBe(true);
       });
     });
@@ -233,17 +247,21 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // All validators should be applied
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ username: 'ab' }); // Too short
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ username: 'alice' }); // Valid
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
 
         formValue.set({ username: 'a'.repeat(25) }); // Too long
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         // Logic should be applied
@@ -280,14 +298,17 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Both fields should be required at root level
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ firstName: 'John', lastName: '' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ firstName: 'John', lastName: 'Doe' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
@@ -321,6 +342,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Nested fields should be validated
         expect(formInstance().valid()).toBe(false);
@@ -328,11 +350,13 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         formValue.set({
           address: { street: '123 Main St', city: '' },
         });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({
           address: { street: '123 Main St', city: 'Springfield' },
         });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
@@ -363,13 +387,16 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Invalid email and phone
         formValue.set({ email: 'invalid', phone: '123' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         // Valid
         formValue.set({ email: 'test@example.com', phone: '1234567890' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
@@ -399,6 +426,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Array itself is registered (no validation on empty array for now)
         // TODO: Add array-level validation (minLength, maxLength) once implemented
@@ -448,6 +476,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formInstance = form(formValue, formSchema);
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Array itself is registered
         expect(formInstance.contacts).toBeDefined();
@@ -481,10 +510,12 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'test@example.com' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
@@ -510,20 +541,24 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Empty - fails required
         expect(formInstance().valid()).toBe(false);
 
         // Too short - fails minLength
         formValue.set({ password: 'pass' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         // No uppercase - fails pattern
         formValue.set({ password: 'password' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         // All validators pass
         formValue.set({ password: 'Password123' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
@@ -546,17 +581,21 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Too young
         formValue.set({ age: 10 });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         // Valid
         formValue.set({ age: 25 });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
 
         // Too old
         formValue.set({ age: 150 });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
       });
     });
@@ -578,11 +617,14 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         formValue.set({ zipCode: '123' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ zipCode: '12345' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
@@ -606,6 +648,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         expect(formInstance.field().disabled()).toBe(true);
       });
@@ -628,6 +671,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Should be valid (no validation rules)
         expect(formInstance().valid()).toBe(true);
@@ -663,14 +707,17 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           }),
         );
         rootFormRegistry.registerRootForm(formInstance);
+        TestBed.flushEffects();
 
         // Should have both required (from nested schema) and email validation
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'invalid' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(false);
 
         formValue.set({ email: 'valid@example.com' });
+        TestBed.flushEffects();
         expect(formInstance().valid()).toBe(true);
       });
     });
