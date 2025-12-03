@@ -11,7 +11,7 @@ import {
   ValidationMessages,
   ValueType,
 } from '@ng-forge/dynamic-forms';
-import { isEqual } from 'lodash-es';
+import { isEqual } from '../../utils/is-equal';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PrimeMultiCheckboxComponent, PrimeMultiCheckboxProps } from './prime-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';

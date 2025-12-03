@@ -43,7 +43,7 @@ import { DynamicForm } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-user-profile-form',
   imports: [DynamicForm],
-  template: ` <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" /> `,
+  template: `<dynamic-form [config]="formConfig" />`,
 })
 export class UserProfileFormComponent {
   formConfig = {
@@ -93,19 +93,19 @@ export class UserProfileFormComponent {
       },
     ],
   };
+}
+```
 
-  onSubmit(formValue: any) {
-    console.log('Form submitted:', formValue);
-    // Output:
-    // {
-    //   name: 'John Doe',
-    //   address: {
-    //     street: '123 Main St',
-    //     city: 'Springfield',
-    //     state: 'IL',
-    //     zip: '62701'
-    //   }
-    // }
+This produces a form value with nested structure:
+
+```typescript
+{
+  name: 'John Doe',
+  address: {
+    street: '123 Main St',
+    city: 'Springfield',
+    state: 'IL',
+    zip: '62701'
   }
 }
 ```

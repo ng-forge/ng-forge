@@ -307,26 +307,6 @@ export class FormActionsComponent {
 - Include necessary payload data
 - Use readonly properties
 
-**Clean up subscriptions:**
-
-```typescript
-private destroy$ = new Subject<void>();
-
-ngOnInit() {
-  this.eventBus
-    .on<SubmitEvent>('submit')
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      // Handle event
-    });
-}
-
-ngOnDestroy() {
-  this.destroy$.next();
-  this.destroy$.complete();
-}
-```
-
 **Type safety:**
 
 ```typescript

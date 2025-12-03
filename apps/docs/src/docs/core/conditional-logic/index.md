@@ -211,108 +211,38 @@ The most common conditional expression checks a specific field's value:
 
 ## Quick Example
 
-Contact form that shows different fields based on contact method:
+Show a field only when another field has a specific value:
 
 ```typescript
-const config = {
-  fields: [
+{
+  key: 'email',
+  type: 'input',
+  value: '',
+  label: 'Email Address',
+  logic: [
     {
-      key: 'contactMethod',
-      type: 'select',
-      value: '',
-      label: 'Preferred Contact Method',
-      required: true,
-      options: [
-        { value: 'email', label: 'Email' },
-        { value: 'phone', label: 'Phone' },
-        { value: 'mail', label: 'Postal Mail' },
-      ],
+      type: 'hidden',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'contactMethod',
+        operator: 'notEquals',
+        value: 'email',
+      },
     },
     {
-      key: 'email',
-      type: 'input',
-      value: '',
-      label: 'Email Address',
-      email: true,
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'contactMethod',
-            operator: 'notEquals',
-            value: 'email',
-          },
-        },
-        {
-          type: 'required',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'contactMethod',
-            operator: 'equals',
-            value: 'email',
-          },
-        },
-      ],
-    },
-    {
-      key: 'phone',
-      type: 'input',
-      value: '',
-      label: 'Phone Number',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'contactMethod',
-            operator: 'notEquals',
-            value: 'phone',
-          },
-        },
-        {
-          type: 'required',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'contactMethod',
-            operator: 'equals',
-            value: 'phone',
-          },
-        },
-      ],
-      props: { type: 'tel' },
-    },
-    {
-      key: 'address',
-      type: 'input',
-      value: '',
-      label: 'Mailing Address',
-      logic: [
-        {
-          type: 'hidden',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'contactMethod',
-            operator: 'notEquals',
-            value: 'mail',
-          },
-        },
-        {
-          type: 'required',
-          condition: {
-            type: 'fieldValue',
-            fieldPath: 'contactMethod',
-            operator: 'equals',
-            value: 'mail',
-          },
-        },
-      ],
+      type: 'required',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'contactMethod',
+        operator: 'equals',
+        value: 'email',
+      },
     },
   ],
-} as const satisfies FormConfig;
+}
 ```
 
-This form shows only the relevant contact field based on the user's selection.
+This field is hidden unless `contactMethod === 'email'`, and required when visible. See [Examples](./examples/) for complete form implementations.
 
 ## When Logic Runs
 

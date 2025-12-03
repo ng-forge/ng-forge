@@ -50,12 +50,12 @@ Create a simple login form to verify everything works:
 
 ```typescript name="login.component.ts"
 import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dynamic-forms';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-login',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
+  template: `<dynamic-form [config]="config" />`,
 })
 export class LoginComponent {
   config = {
@@ -85,11 +85,6 @@ export class LoginComponent {
       },
     ],
   } as const satisfies FormConfig;
-
-  onSubmit(value: InferFormValue<typeof this.config.fields>) {
-    // TypeScript knows: { email: string, password: string }
-    console.log('Login:', value);
-  }
 }
 ```
 
@@ -242,45 +237,6 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 - **[i18n Setup](../core/i18n)** - Add multi-language support to your forms
 - **[Events](../core/events)** - Handle custom form events
 - **[Custom Fields](../deep-dive/custom-integrations)** - Create your own field types
-
-## Troubleshooting
-
-### TypeScript Errors
-
-If you see TypeScript errors about missing types, ensure you're using `as const satisfies FormConfig`:
-
-```typescript
-// ✓ Correct - enables type inference
-const config = { fields: [...] } as const satisfies FormConfig;
-
-// ✗ Wrong - no type inference
-const config = { fields: [...] };
-```
-
-### Material Theme Not Applied
-
-If Material fields appear unstyled, ensure you've included a Material theme in your `styles.scss`:
-
-```scss
-@use 'index' as mat;
-
-@include mat.core();
-
-$theme: mat.define-theme();
-html {
-  @include mat.all-component-themes($theme);
-}
-```
-
-See [Angular Material Theming Guide](https://material.angular.io/guide/theming) for more details.
-
-### Module Not Found
-
-If you see import errors for `@ng-forge/dynamic-forms`, ensure:
-
-1. You've run `npm install` (or yarn/pnpm equivalent)
-2. Your package.json includes the dependency
-3. Your TypeScript paths are configured correctly
 
 ## Get Help
 

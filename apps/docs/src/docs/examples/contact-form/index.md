@@ -17,27 +17,15 @@ This example shows a basic contact form with:
 ## Implementation
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
+import { Component } from '@angular/core';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-contact-form',
   imports: [DynamicForm],
-  template: `
-    <div class="contact-form-container">
-      <h2>Contact Us</h2>
-      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
-
-      @if (submitted()) {
-        <div class="success-message">Thank you for your message! We'll get back to you soon.</div>
-      }
-    </div>
-  `,
+  template: `<dynamic-form [config]="config" />`,
 })
 export class ContactFormComponent {
-  formValue = signal({});
-  submitted = signal(false);
-
   config = {
     fields: [
       {
@@ -124,14 +112,6 @@ export class ContactFormComponent {
       },
     ],
   } as const satisfies FormConfig;
-
-  onSubmit(value: InferFormValue<typeof this.config.fields>) {
-    console.log('Contact form submitted:', value);
-    this.submitted.set(true);
-
-    // In a real app: send to API, show confirmation, handle errors
-    setTimeout(() => this.submitted.set(false), 3000);
-  }
 }
 ```
 

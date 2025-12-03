@@ -74,8 +74,8 @@ The form consists of 4 pages with increasingly complex conditional logic:
 ## Complete Implementation
 
 ```typescript
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
 const certificationConfig = {
   defaultValidationMessages: {
@@ -1178,70 +1178,14 @@ const certificationConfig = {
   ],
 } as const satisfies FormConfig;
 
-type CertificationFormValue = InferFormValue<typeof certificationConfig.fields>;
-
 @Component({
   selector: 'app-conditional-logic-showcase',
   imports: [DynamicForm],
-  template: `
-    <div class="certification-container">
-      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
-
-      @let message = submitMessage();
-      @if (message) {
-        <div class="success-message">
-          {{ message }}
-        </div>
-      }
-    </div>
-  `,
+  template: `<dynamic-form [config]="config" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConditionalLogicShowcaseComponent {
   config = certificationConfig;
-
-  formValue = signal<CertificationFormValue>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    dateOfBirth: null,
-    certificationType: '',
-    country: '',
-    educationLevel: '',
-    graduationYear: '',
-    yearsExperience: '',
-    employmentStatus: 'employed',
-    reference1Name: '',
-    reference1Email: '',
-    reference1Relationship: '',
-    backgroundCheck: false,
-    ethicsAgreement: false,
-    hasPortfolio: false,
-    acknowledgement: false,
-    marketingConsent: false,
-    professionalMemberships: [],
-  });
-
-  submitMessage = signal<string>('');
-
-  onSubmit(value: CertificationFormValue) {
-    console.log('Certification application submitted:', value);
-
-    const certType =
-      value.certificationType === 'associate'
-        ? 'Associate'
-        : value.certificationType === 'professional'
-          ? 'Professional'
-          : value.certificationType === 'expert'
-            ? 'Expert'
-            : 'Specialist';
-
-    this.submitMessage.set(
-      `Thank you, ${value.firstName}! Your ${certType} certification application has been submitted successfully. ` +
-        `You will receive a confirmation email at ${value.email} within 24 hours.`,
-    );
-  }
 }
 ```
 

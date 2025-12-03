@@ -17,22 +17,15 @@ A minimal login form showing:
 ## Implementation
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
+import { Component } from '@angular/core';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-login-form',
   imports: [DynamicForm],
-  template: `
-    <div class="login-container">
-      <h2>Sign In</h2>
-      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
-    </div>
-  `,
+  template: `<dynamic-form [config]="config" />`,
 })
 export class LoginFormComponent {
-  formValue = signal({});
-
   config = {
     // Define common validation messages at the form level
     defaultValidationMessages: {
@@ -95,15 +88,6 @@ export class LoginFormComponent {
       },
     ],
   } as const satisfies FormConfig;
-
-  onSubmit(value: InferFormValue<typeof this.config.fields>) {
-    console.log('Login attempt:', { email: value.email });
-    // In a real app:
-    // - Call authentication API
-    // - Store tokens
-    // - Navigate to dashboard
-    // - Handle errors
-  }
 }
 ```
 

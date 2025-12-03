@@ -1,16 +1,36 @@
 {
   "name": "@ng-forge/dynamic-forms",
-  "type": "module",
   "version": "0.0.1",
+  "description": "Type-safe, signal-powered dynamic forms for Angular. Build complex forms from configuration with full TypeScript inference.",
+  "type": "module",
+  "license": "MIT",
+  "author": "ng-forge",
+  "homepage": "https://ng-forge.github.io/ng-forge",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ng-forge/ng-forge.git",
+    "directory": "packages/dynamic-forms"
+  },
+  "bugs": {
+    "url": "https://github.com/ng-forge/ng-forge/issues"
+  },
+  "keywords": [
+    "angular",
+    "forms",
+    "dynamic-forms",
+    "reactive-forms",
+    "signal-forms",
+    "form-builder",
+    "form-generator",
+    "type-safe",
+    "typescript",
+    "angular-forms"
+  ],
   "peerDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.1.1",
-    "@angular/common": "^21.0.1",
-    "@angular/core": "^21.0.1",
-    "@angular/forms": "^21.0.1",
-    "@nx/vite": "^22.1.0",
-    "@vitest/browser-playwright": "^4.0.14",
-    "ngxtension": "^7.0.2",
-    "rxjs": "~7.8.0",
-    "vite": "^7.1.11"
+    "@angular/common": ">=19.0.0",
+    "@angular/core": ">=19.0.0",
+    "@angular/forms": ">=19.0.0",
+    "ngxtension": ">=4.0.0",
+    "rxjs": ">=7.0.0"
   }
 }

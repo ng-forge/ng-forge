@@ -3,8 +3,8 @@ import { JsonPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { catchError, firstValueFrom, map, of } from 'rxjs';
-import { DynamicForm } from '@ng-forge/dynamic-forms';
+import { catchError, delay, finalize, isObservable, map, Observable, of, tap, timer } from 'rxjs';
+import { DynamicForm, SubmissionActionResult } from '@ng-forge/dynamic-forms';
 import { TestScenario } from './types';
 
 /**
@@ -163,44 +163,48 @@ export class TestScenarioComponent {
   submissionLog = signal<Array<{ timestamp: string; data: Record<string, unknown> }>>([]);
 
   /**
-   * Creates a simulated submission action with configurable delay
+   * Creates a simulated submission action with configurable delay.
+   * Returns an Observable instead of a Promise for better RxJS integration.
    */
   private createSimulatedAction(delayMs: number, simulateError?: boolean, errorMessage?: string) {
-    return async (): Promise<undefined> => {
+    return (): Observable<undefined> => {
       this.isSubmitting.set(true);
       this.submissionResult.set(null);
 
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-
-      this.isSubmitting.set(false);
-      this.submissionCount.update((c) => c + 1);
-
-      if (simulateError) {
-        this.submissionResult.set({
-          message: errorMessage ?? 'Submission failed',
-          error: true,
-        });
-        // For test scenarios, we track errors via UI state, not form validation
-        return undefined;
-      }
-
-      this.submissionResult.set({
-        message: `Submission successful at ${new Date().toISOString()}`,
-        error: false,
-      });
-      return undefined;
+      return timer(delayMs).pipe(
+        map(() => {
+          if (simulateError) {
+            this.submissionResult.set({
+              message: errorMessage ?? 'Submission failed',
+              error: true,
+            });
+          } else {
+            this.submissionResult.set({
+              message: `Submission successful at ${new Date().toISOString()}`,
+              error: false,
+            });
+          }
+          // For test scenarios, we track errors via UI state, not form validation
+          return undefined;
+        }),
+        finalize(() => {
+          this.isSubmitting.set(false);
+          this.submissionCount.update((c) => c + 1);
+        }),
+      );
     };
   }
 
   /**
-   * Creates an HTTP-based submission action that calls a real endpoint (intercepted by Playwright)
+   * Creates an HTTP-based submission action that calls a real endpoint (intercepted by Playwright).
+   * Returns an Observable directly without converting to Promise.
    */
   private createHttpAction(url: string, method: 'POST' | 'PUT' | 'PATCH') {
-    return async (): Promise<undefined> => {
+    return (): Observable<undefined> => {
       this.isSubmitting.set(true);
       this.submissionResult.set(null);
 
-      const request$ = this.http
+      return this.http
         .request<{ message?: string }>(method, url, {
           body: this.formValue(),
         })
@@ -219,49 +223,86 @@ export class TestScenarioComponent {
             });
             return of(undefined);
           }),
+          finalize(() => {
+            this.isSubmitting.set(false);
+            this.submissionCount.update((c) => c + 1);
+          }),
         );
-
-      await firstValueFrom(request$);
-      this.isSubmitting.set(false);
-      this.submissionCount.update((c) => c + 1);
-      return undefined;
     };
   }
 
   /**
-   * Wraps a custom submission action to track submission state
+   * Wraps a custom submission action to track submission state.
+   * Handles both Observable and Promise returns.
    */
   private wrapSubmissionAction(action: NonNullable<TestScenario['submissionAction']>) {
-    return async (form: Parameters<typeof action>[0]) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (form: Parameters<typeof action>[0]): any => {
       this.isSubmitting.set(true);
       this.submissionResult.set(null);
 
-      try {
-        const result = await action(form);
-        this.isSubmitting.set(false);
-        this.submissionCount.update((c) => c + 1);
+      const result = action(form);
 
-        if (result) {
+      // Handle Observable returns
+      if (isObservable(result)) {
+        return result.pipe(
+          tap((validationResult) => {
+            if (validationResult) {
+              this.submissionResult.set({
+                message: 'Submission completed with validation errors',
+                error: true,
+              });
+            } else {
+              this.submissionResult.set({
+                message: `Submission successful at ${new Date().toISOString()}`,
+                error: false,
+              });
+            }
+          }),
+          catchError((err) => {
+            this.submissionResult.set({
+              message: `Submission error: ${err}`,
+              error: true,
+            });
+            throw err;
+          }),
+          finalize(() => {
+            this.isSubmitting.set(false);
+            this.submissionCount.update((c) => c + 1);
+          }),
+        );
+      }
+
+      // Handle Promise returns (backwards compatibility)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (result as Promise<any>).then(
+        (validationResult: unknown) => {
+          this.isSubmitting.set(false);
+          this.submissionCount.update((c) => c + 1);
+
+          if (validationResult) {
+            this.submissionResult.set({
+              message: 'Submission completed with validation errors',
+              error: true,
+            });
+          } else {
+            this.submissionResult.set({
+              message: `Submission successful at ${new Date().toISOString()}`,
+              error: false,
+            });
+          }
+
+          return validationResult;
+        },
+        (err: unknown) => {
+          this.isSubmitting.set(false);
           this.submissionResult.set({
-            message: 'Submission completed with validation errors',
+            message: `Submission error: ${err}`,
             error: true,
           });
-        } else {
-          this.submissionResult.set({
-            message: `Submission successful at ${new Date().toISOString()}`,
-            error: false,
-          });
-        }
-
-        return result;
-      } catch (err) {
-        this.isSubmitting.set(false);
-        this.submissionResult.set({
-          message: `Submission error: ${err}`,
-          error: true,
-        });
-        throw err;
-      }
+          throw err;
+        },
+      );
     };
   }
 

@@ -113,7 +113,7 @@ import { DynamicForm, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '
   selector: 'app-tags-form',
   imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" />
+    <dynamic-form [config]="formConfig" />
     <button (click)="addTag()">Add Tag</button>
   `,
 })
@@ -148,11 +148,6 @@ export class TagsFormComponent {
   removeTag(index: number) {
     this.eventBus.dispatch(RemoveArrayItemEvent, 'tags', index);
   }
-
-  onSubmit(formValue: any) {
-    console.log('Form submitted:', formValue);
-    // Output: { tags: ['angular', 'typescript', 'forms'] }
-  }
 }
 ```
 
@@ -168,7 +163,7 @@ import { DynamicForm, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '
   selector: 'app-contacts-form',
   imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" />
+    <dynamic-form [config]="formConfig" />
     <button (click)="addContact()">Add Contact</button>
   `,
 })
@@ -226,17 +221,6 @@ export class ContactsFormComponent {
 
   removeContact(index: number) {
     this.eventBus.dispatch(RemoveArrayItemEvent, 'contacts', index);
-  }
-
-  onSubmit(formValue: any) {
-    console.log('Form submitted:', formValue);
-    // Output:
-    // {
-    //   contacts: [
-    //     { name: 'John Doe', phone: '5551234567', relationship: 'family' },
-    //     { name: 'Jane Smith', phone: '5559876543', relationship: 'friend' },
-    //   ]
-    // }
   }
 }
 ```

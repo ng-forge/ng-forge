@@ -18,8 +18,8 @@ This example demonstrates:
 ## Complete Implementation
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { FormConfig, DynamicForm, InferFormValue } from '@ng-forge/dynamic-forms';
+import { Component } from '@angular/core';
+import { FormConfig, DynamicForm } from '@ng-forge/dynamic-forms';
 
 const registrationConfig = {
   fields: [
@@ -344,80 +344,13 @@ const registrationConfig = {
   ],
 } as const satisfies FormConfig;
 
-type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
-
 @Component({
   selector: 'app-user-registration',
   imports: [DynamicForm],
-  template: `
-    <div class="registration-container">
-      <h1>Create Your Account</h1>
-
-      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
-
-      @let message = submitMessage();
-      @if (message) {
-        <div class="success-message">
-          {{ message }}
-        </div>
-      }
-    </div>
-  `,
-  styles: [
-    `
-      .registration-container {
-        max-width: 600px;
-        margin: 2rem auto;
-        padding: 2rem;
-      }
-
-      h1 {
-        margin-bottom: 2rem;
-        text-align: center;
-      }
-
-      .success-message {
-        margin-top: 2rem;
-        padding: 1rem;
-        background-color: #4caf50;
-        color: white;
-        border-radius: 4px;
-        text-align: center;
-      }
-    `,
-  ],
+  template: `<dynamic-form [config]="config" />`,
 })
 export class UserRegistrationComponent {
   config = registrationConfig;
-
-  formValue = signal<RegistrationValue>({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    dateOfBirth: null,
-    accountType: 'personal',
-    interests: [],
-    newsletter: false,
-    notifications: true,
-    terms: false,
-    privacy: false,
-  });
-
-  submitMessage = signal<string>('');
-
-  onSubmit(value: RegistrationValue) {
-    console.log('Registration submitted:', value);
-
-    // In a real application, you would:
-    // 1. Send data to API
-    // 2. Handle errors
-    // 3. Navigate to success page
-
-    this.submitMessage.set(`Welcome, ${value.firstName}! Your account has been created successfully.`);
-  }
 }
 ```
 
