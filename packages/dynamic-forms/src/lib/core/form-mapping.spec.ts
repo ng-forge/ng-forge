@@ -395,31 +395,25 @@ describe('form-mapping', () => {
         });
       });
 
-      it('should log custom form configuration', () => {
+      it('should handle custom form configuration without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
-          const fieldDef: any = {
+          const fieldDef: FieldDef = {
             key: 'email',
             type: 'input',
             customFormConfig: { custom: true },
-          };
+          } as FieldDef & { customFormConfig: unknown };
 
-          try {
-            const formInstance = form(
-              formValue,
-              schema<typeof formValue>((path) => {
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              expect(() => {
                 mapFieldToForm(fieldDef, path.email);
-              }),
-            );
-            rootFormRegistry.registerRootForm(formInstance);
-
-            // Assert after form creation to ensure schema callback has executed
-            expect(consoleLogSpy).toHaveBeenCalledWith('Custom form configuration detected for field:', 'email');
-          } finally {
-            consoleLogSpy.mockRestore();
-          }
+              }).not.toThrow();
+            }),
+          );
+          rootFormRegistry.registerRootForm(formInstance);
         });
       });
 

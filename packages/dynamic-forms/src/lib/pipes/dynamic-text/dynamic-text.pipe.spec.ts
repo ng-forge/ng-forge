@@ -1,11 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { DynamicTextPipe } from './dynamic-text.pipe';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { of, Subject } from 'rxjs';
 
 describe('DynamicTextPipe', () => {
   let pipe: DynamicTextPipe;
+
+  // Helper to create signals within injection context
+  function createSignal<T>(value: T): WritableSignal<T> {
+    return TestBed.runInInjectionContext(() => signal(value));
+  }
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
@@ -71,7 +76,7 @@ describe('DynamicTextPipe', () => {
     });
 
     it('should return empty string for null', async () => {
-      const result = pipe.transform(null as any);
+      const result = pipe.transform(null as unknown as undefined);
       const value = await new Promise((resolve) => {
         result.subscribe(resolve);
       });
@@ -148,7 +153,7 @@ describe('DynamicTextPipe', () => {
 
   describe('signals', () => {
     it('should convert signal to observable', async () => {
-      const textSignal = signal('Signal Value');
+      const textSignal = createSignal('Signal Value');
       const result = pipe.transform(textSignal);
       const value = await new Promise((resolve) => {
         result.subscribe(resolve);
@@ -158,7 +163,7 @@ describe('DynamicTextPipe', () => {
     });
 
     it('should read current signal value', async () => {
-      const textSignal = signal('Initial');
+      const textSignal = createSignal('Initial');
       textSignal.set('Updated');
 
       const result = pipe.transform(textSignal);
@@ -170,7 +175,7 @@ describe('DynamicTextPipe', () => {
     });
 
     it('should handle signal with empty string', async () => {
-      const textSignal = signal('');
+      const textSignal = createSignal('');
       const result = pipe.transform(textSignal);
       const value = await new Promise((resolve) => {
         result.subscribe(resolve);
@@ -180,7 +185,7 @@ describe('DynamicTextPipe', () => {
     });
 
     it('should create new observable from signal value', async () => {
-      const textSignal = signal('Test');
+      const textSignal = createSignal('Test');
       const result1 = pipe.transform(textSignal);
       const result2 = pipe.transform(textSignal);
 
@@ -199,7 +204,7 @@ describe('DynamicTextPipe', () => {
     });
 
     it('should handle signal updates between transforms', async () => {
-      const textSignal = signal('First');
+      const textSignal = createSignal('First');
       const result1 = pipe.transform(textSignal);
 
       textSignal.set('Second');
@@ -217,7 +222,7 @@ describe('DynamicTextPipe', () => {
     });
 
     it('should handle readonly signal', async () => {
-      const writableSignal = signal('Readonly Test');
+      const writableSignal = createSignal('Readonly Test');
       const readonlySignal = writableSignal.asReadonly();
 
       const result = pipe.transform(readonlySignal);
@@ -242,7 +247,7 @@ describe('DynamicTextPipe', () => {
     });
 
     it('should emit observable once for signal', async () => {
-      const textSignal = signal('Test');
+      const textSignal = createSignal('Test');
       const result = pipe.transform(textSignal);
 
       let emissionCount = 0;
@@ -265,7 +270,7 @@ describe('DynamicTextPipe', () => {
 
     it('should distinguish between string and signal', async () => {
       const stringResult = pipe.transform('string');
-      const signalResult = pipe.transform(signal('signal'));
+      const signalResult = pipe.transform(createSignal('signal'));
 
       const stringValue = await new Promise((resolve) => {
         stringResult.subscribe(resolve);
@@ -311,7 +316,7 @@ describe('DynamicTextPipe', () => {
       const results = [
         pipe.transform('string'),
         pipe.transform(of('observable')),
-        pipe.transform(signal('signal')),
+        pipe.transform(createSignal('signal')),
         pipe.transform(undefined),
       ];
 
@@ -337,7 +342,7 @@ describe('DynamicTextPipe', () => {
     });
 
     it('should complete observable for signal values', async () => {
-      const result = pipe.transform(signal('Test'));
+      const result = pipe.transform(createSignal('Test'));
 
       let completed = false;
       result.subscribe({
@@ -374,7 +379,7 @@ describe('DynamicTextPipe', () => {
     });
 
     it('should handle multiple signal transforms', async () => {
-      const signals = Array.from({ length: 50 }, (_, i) => signal(`Signal ${i}`));
+      const signals = Array.from({ length: 50 }, (_, i) => createSignal(`Signal ${i}`));
       const results = signals.map((s) => pipe.transform(s));
 
       const values = await Promise.all(
