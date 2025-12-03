@@ -130,6 +130,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
+  private readonly schemaRegistry = inject(SchemaRegistryService);
 
   /**
    * Signal tracking field loading errors for error boundary pattern.
@@ -308,7 +309,14 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     return this.createEmptyFormSetup(registry);
   });
 
-  private registerValidatorsFromConfig({ customFnConfig }: FormConfig<TFields>): void {
+  private registerValidatorsFromConfig({ customFnConfig, schemas }: FormConfig<TFields>): void {
+    // Register schemas from config
+    if (schemas) {
+      schemas.forEach((schema) => {
+        this.schemaRegistry.registerSchema(schema);
+      });
+    }
+
     if (!customFnConfig) {
       return;
     }
