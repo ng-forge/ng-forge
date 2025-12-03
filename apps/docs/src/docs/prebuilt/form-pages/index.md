@@ -10,8 +10,8 @@ Create a multi-step form by adding multiple page fields to your form configurati
     {
       key: 'account',
       type: 'page',
-      title: 'Account Information',
       fields: [
+        { key: 'accountTitle', type: 'text', label: 'Account Information', props: { elementType: 'h3' } },
         { key: 'username', type: 'input', label: 'Username', value: '', required: true },
         { key: 'password', type: 'input', label: 'Password', value: '', props: { type: 'password' }, required: true },
       ],
@@ -19,8 +19,8 @@ Create a multi-step form by adding multiple page fields to your form configurati
     {
       key: 'profile',
       type: 'page',
-      title: 'Profile Details',
       fields: [
+        { key: 'profileTitle', type: 'text', label: 'Profile Details', props: { elementType: 'h3' } },
         { key: 'firstName', type: 'input', label: 'First Name', value: '' },
         { key: 'lastName', type: 'input', label: 'Last Name', value: '' },
       ],

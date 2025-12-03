@@ -331,7 +331,7 @@ Boolean checkbox control for single true/false selections.
 {
   key: 'terms',
   type: 'checkbox',
-  checked: false,
+  value: false,
   label: 'I accept the terms and conditions',
   required: true,
 }
@@ -390,7 +390,7 @@ Slide toggle switch for boolean on/off selections.
 {
   key: 'notifications',
   type: 'toggle',
-  checked: false,
+  value: false,
   label: 'Enable notifications',
 }
 ```
@@ -515,8 +515,8 @@ Navigation buttons for multi-step (paged) forms.
     {
       key: 'step1',
       type: 'page',
-      title: 'Step 1',
       fields: [
+        { key: 'step1Title', type: 'text', label: 'Step 1', props: { elementType: 'h3' } },
         { key: 'name', type: 'input', value: '', label: 'Name', required: true },
         {
           type: 'next',
@@ -529,8 +529,8 @@ Navigation buttons for multi-step (paged) forms.
     {
       key: 'step2',
       type: 'page',
-      title: 'Step 2',
       fields: [
+        { key: 'step2Title', type: 'text', label: 'Step 2', props: { elementType: 'h3' } },
         { key: 'email', type: 'input', value: '', label: 'Email', required: true },
         { type: 'previous', key: 'back', label: 'Back' },
         { type: 'submit', key: 'submit', label: 'Submit', props: { color: 'primary' } },

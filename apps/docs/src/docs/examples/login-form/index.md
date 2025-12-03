@@ -17,22 +17,15 @@ A minimal login form showing:
 ## Implementation
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { Component } from '@angular/core';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-login-form',
   imports: [DynamicForm],
-  template: `
-    <div class="login-container">
-      <h2>Sign In</h2>
-      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
-    </div>
-  `,
+  template: `<dynamic-form [config]="config" />`,
 })
 export class LoginFormComponent {
-  formValue = signal({});
-
   config = {
     // Define common validation messages at the form level
     defaultValidationMessages: {
@@ -95,15 +88,6 @@ export class LoginFormComponent {
       },
     ],
   } as const satisfies FormConfig;
-
-  onSubmit(value: ExtractFormValue<typeof this.config>) {
-    console.log('Login attempt:', { email: value.email });
-    // In a real app:
-    // - Call authentication API
-    // - Store tokens
-    // - Navigate to dashboard
-    // - Handle errors
-  }
 }
 ```
 
@@ -133,7 +117,6 @@ Minimum length requirement and masked input:
   minLength: 8,
   props: {
     type: 'password',  // Masks input
-    autocomplete: 'current-password',
   },
 }
 ```
@@ -164,16 +147,17 @@ Simple checkbox for persistent login:
 
 ### Social Login Buttons
 
+For social login buttons, you can use text fields with links or handle this outside the form:
+
 ```typescript
 {
-  type: 'row',
-  key: 'socialRow',
-  fields: [
-    { type: 'button', key: 'google', label: 'Google', col: 6 },
-    { type: 'button', key: 'github', label: 'GitHub', col: 6 },
-  ],
+  type: 'text',
+  key: 'socialText',
+  label: 'Or sign in with Google or GitHub',
 }
 ```
+
+**Note:** Social login typically involves OAuth flows handled outside the form. Consider placing social login buttons in your component template rather than in the form configuration.
 
 ### Add Sign Up Link
 

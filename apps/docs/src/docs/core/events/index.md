@@ -41,7 +41,7 @@ export class CustomSubmitButton {
 Fired when form is submitted.
 
 ```typescript
-eventBus.on(SubmitEvent).subscribe(() => {
+eventBus.on<SubmitEvent>('submit').subscribe(() => {
   // Handle form submission
   console.log('Form submitted');
 });
@@ -52,7 +52,7 @@ eventBus.on(SubmitEvent).subscribe(() => {
 Fired when navigating between wizard pages.
 
 ```typescript
-eventBus.on(PageChangeEvent).subscribe((event) => {
+eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
   console.log(`Page ${event.currentPageIndex + 1} of ${event.totalPages}`);
   console.log(`Previous page: ${event.previousPageIndex}`);
 });
@@ -80,12 +80,79 @@ Navigate to previous page in wizard.
 eventBus.dispatch(PreviousPageEvent);
 ```
 
-## Multiple Event Subscriptions
+### FormResetEvent
 
-Subscribe to multiple event types:
+Reset form to default values.
 
 ```typescript
-eventBus.on([SubmitEvent, PageChangeEvent, NextPageEvent]).subscribe((event) => {
+// Dispatch reset event
+eventBus.dispatch(FormResetEvent);
+
+// Listen for reset
+eventBus.on<FormResetEvent>('form-reset').subscribe(() => {
+  console.log('Form was reset to defaults');
+});
+```
+
+### FormClearEvent
+
+Clear all form values (empty state, not defaults).
+
+```typescript
+// Dispatch clear event
+eventBus.dispatch(FormClearEvent);
+
+// Listen for clear
+eventBus.on<FormClearEvent>('form-clear').subscribe(() => {
+  console.log('Form was cleared');
+});
+```
+
+### AddArrayItemEvent
+
+Add an item to an array field.
+
+```typescript
+// Add item using array's template
+eventBus.dispatch(AddArrayItemEvent, 'contacts');
+
+// Add item with custom field template
+const fieldTemplate = { key: 'email', type: 'input', value: '' };
+eventBus.dispatch(AddArrayItemEvent, 'contacts', fieldTemplate);
+
+// Add item at specific index
+eventBus.dispatch(AddArrayItemEvent, 'contacts', fieldTemplate, 2);
+```
+
+**Constructor parameters:**
+
+- `arrayKey: string` - Key of the array field
+- `field?: ArrayAllowedChildren` - Optional field template (uses array's template if omitted)
+- `index?: number` - Optional index to insert at (defaults to end)
+
+### RemoveArrayItemEvent
+
+Remove an item from an array field.
+
+```typescript
+// Remove item at index 1
+eventBus.dispatch(RemoveArrayItemEvent, 'contacts', 1);
+
+// Remove last item
+eventBus.dispatch(RemoveArrayItemEvent, 'contacts');
+```
+
+**Constructor parameters:**
+
+- `arrayKey: string` - Key of the array field
+- `index?: number` - Index to remove (defaults to last item)
+
+## Multiple Event Subscriptions
+
+Subscribe to multiple event types by passing an array of type strings:
+
+```typescript
+eventBus.on<SubmitEvent | PageChangeEvent | NextPageEvent>(['submit', 'page-change', 'next-page']).subscribe((event) => {
   switch (event.type) {
     case 'submit':
       handleSubmit();
@@ -133,11 +200,11 @@ eventBus.dispatch(SaveDraftEvent);
 eventBus.dispatch(ValidationErrorEvent, 'email', 'Invalid email format');
 
 // Subscribe to custom event
-eventBus.on(SaveDraftEvent).subscribe(() => {
+eventBus.on<SaveDraftEvent>('save-draft').subscribe(() => {
   saveDraft();
 });
 
-eventBus.on(ValidationErrorEvent).subscribe((event) => {
+eventBus.on<ValidationErrorEvent>('validation-error').subscribe((event) => {
   showError(event.fieldKey, event.errorMessage);
 });
 ```
@@ -153,7 +220,7 @@ export class AutoSaveFormComponent {
 
   ngOnInit() {
     // Auto-save on page change
-    this.eventBus.on(PageChangeEvent).subscribe(() => {
+    this.eventBus.on<PageChangeEvent>('page-change').subscribe(() => {
       this.saveDraft();
     });
   }
@@ -200,7 +267,7 @@ export class ProgressTrackerComponent {
   progress = signal(0);
 
   ngOnInit() {
-    this.eventBus.on(PageChangeEvent).subscribe((event) => {
+    this.eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
       const percentage = ((event.currentPageIndex + 1) / event.totalPages) * 100;
       this.progress.set(percentage);
     });
@@ -208,20 +275,21 @@ export class ProgressTrackerComponent {
 }
 ```
 
-### Conditional Field Updates
+### Form Reset and Clear
 
 ```typescript
 @Component({...})
-export class DynamicFieldsComponent {
+export class FormActionsComponent {
   eventBus = inject(EventBus);
 
-  ngOnInit() {
-    // Listen for custom field change events
-    this.eventBus.on(FieldChangeEvent).subscribe((event) => {
-      if (event.fieldKey === 'accountType') {
-        this.updateVisibleFields(event.value);
-      }
-    });
+  resetForm() {
+    // Reset form to default values
+    this.eventBus.dispatch(FormResetEvent);
+  }
+
+  clearForm() {
+    // Clear all form values
+    this.eventBus.dispatch(FormClearEvent);
   }
 }
 ```
@@ -239,37 +307,22 @@ export class DynamicFieldsComponent {
 - Include necessary payload data
 - Use readonly properties
 
-**Clean up subscriptions:**
-
-```typescript
-private destroy$ = new Subject<void>();
-
-ngOnInit() {
-  this.eventBus
-    .subscribe('submit')
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      // Handle event
-    });
-}
-
-ngOnDestroy() {
-  this.destroy$.next();
-  this.destroy$.complete();
-}
-```
-
 **Type safety:**
 
 ```typescript
-// ✓ Type-safe event
+// ✓ Type-safe event subscription
 class UserUpdatedEvent implements FormEvent {
   readonly type = 'user-updated' as const;
   constructor(public readonly userId: string) {}
 }
 
-// ✗ Avoid string types
-eventBus.on('some-random-event'); // No type checking
+// ✓ Use generic parameter for type inference
+eventBus.on<UserUpdatedEvent>('user-updated').subscribe((event) => {
+  console.log(event.userId); // TypeScript knows event has userId
+});
+
+// ✗ Avoid subscriptions without generic type parameter
+eventBus.on('some-random-event'); // No type checking on event properties
 ```
 
 ## Event Flow
@@ -304,8 +357,9 @@ Field components can inject and use the event bus:
 export class CustomFieldComponent extends BaseFieldComponent {
   eventBus = inject(EventBus);
 
-  onValueChange(value: any) {
-    this.eventBus.dispatch(FieldChangedEvent, this.field().key, value);
+  onSubmit() {
+    // Trigger form submission from custom component
+    this.eventBus.dispatch(SubmitEvent);
   }
 }
 ```

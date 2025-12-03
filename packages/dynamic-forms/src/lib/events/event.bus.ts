@@ -17,12 +17,12 @@ import { FormEvent, FormEventConstructor } from './interfaces/form-event';
  * export class MyFormComponent {
  *   constructor(private eventBus: EventBus) {
  *     // Subscribe to form submission events
- *     this.eventBus.on(SubmitEvent).subscribe(() => {
+ *     this.eventBus.on<SubmitEvent>('submit').subscribe(() => {
  *       console.log('Form was submitted');
  *     });
  *
  *     // Subscribe to multiple event types
- *     this.eventBus.on([SubmitEvent, ResetEvent]).subscribe(event => {
+ *     this.eventBus.on<SubmitEvent | FormResetEvent>(['submit', 'form-reset']).subscribe(event => {
  *       console.log('Form event:', event.type);
  *     });
  *   }
@@ -87,17 +87,17 @@ export class EventBus {
    * @example
    * ```typescript
    * // Subscribe to a single event type
-   * eventBus.on(SubmitEvent).subscribe(event => {
+   * eventBus.on<SubmitEvent>('submit').subscribe(event => {
    *   console.log('Submit event received');
    * });
    *
    * // Subscribe to multiple event types
-   * eventBus.subscribe(['submit', 'reset', 'validation-error']).subscribe(event => {
+   * eventBus.on<SubmitEvent | FormResetEvent | ValidationErrorEvent>(['submit', 'form-reset', 'validation-error']).subscribe(event => {
    *   switch (event.type) {
    *     case 'submit':
    *       handleSubmit();
    *       break;
-   *     case 'reset':
+   *     case 'form-reset':
    *       handleReset();
    *       break;
    *     case 'validation-error':

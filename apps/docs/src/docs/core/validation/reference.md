@@ -125,175 +125,84 @@ Regular expression validation.
 }
 ```
 
-## Conditional Operators
+## Conditional Expressions
 
-Use in `when` conditions:
+Validators support a `when` property for conditional validation. See **[Conditional Logic Expressions](../conditional-logic/expressions/)** for the complete reference on:
 
-| Operator         | Description           | Example               |
-| ---------------- | --------------------- | --------------------- |
-| `equals`         | Exact match           | `value: 'business'`   |
-| `notEquals`      | Not equal to          | `value: 'pending'`    |
-| `greater`        | Greater than          | `value: 100`          |
-| `less`           | Less than             | `value: 0`            |
-| `greaterOrEqual` | Greater than or equal | `value: 18`           |
-| `lessOrEqual`    | Less than or equal    | `value: 120`          |
-| `contains`       | String/array contains | `value: '@gmail.com'` |
-| `startsWith`     | String starts with    | `value: 'https://'`   |
-| `endsWith`       | String ends with      | `value: '.com'`       |
-| `matches`        | RegEx match           | `value: '^[A-Z]'`     |
+- All operators (`equals`, `notEquals`, `greater`, `less`, `contains`, `matches`, etc.)
+- Expression types (`fieldValue`, `formValue`, `javascript`, `custom`)
+- Combining conditions with `and`/`or` logic
 
-### Operator Examples
-
-```typescript
-// equals
-{
-  type: 'fieldValue',
-  fieldPath: 'status',
-  operator: 'equals',
-  value: 'active',
-}
-
-// greater
-{
-  type: 'fieldValue',
-  fieldPath: 'age',
-  operator: 'greater',
-  value: 18,
-}
-
-// contains
-{
-  type: 'fieldValue',
-  fieldPath: 'email',
-  operator: 'contains',
-  value: '@company.com',
-}
-
-// in
-{
-  type: 'fieldValue',
-  fieldPath: 'role',
-  operator: 'in',
-  value: ['admin', 'moderator', 'owner'],
-}
-```
-
-## Conditional Expression Types
-
-### fieldValue
-
-Check a specific field's value:
+**Quick example:**
 
 ```typescript
 {
-  type: 'fieldValue',
-  fieldPath: 'accountType',
-  operator: 'equals',
-  value: 'business',
-}
-```
-
-### formValue
-
-Use JavaScript expression on entire form:
-
-```typescript
-{
-  type: 'formValue',
-  expression: 'formValue.hasShipping && formValue.country === "US"',
-}
-```
-
-### javascript
-
-Custom JavaScript validation:
-
-```typescript
-{
-  type: 'javascript',
-  expression: 'new Date(fieldValue) > new Date()',
-}
-```
-
-### custom
-
-Advanced custom logic:
-
-```typescript
-{
-  type: 'custom',
-  expression: 'fieldValue === formValue.confirmPassword',
-}
-```
-
-## Combining Conditions
-
-### AND Logic
-
-All conditions must be true:
-
-```typescript
-{
-  type: 'and',
-  conditions: [
-    {
+  validators: [{
+    type: 'required',
+    when: {
       type: 'fieldValue',
       fieldPath: 'accountType',
       operator: 'equals',
       value: 'business',
     },
-    {
-      type: 'fieldValue',
-      fieldPath: 'hasTeam',
-      operator: 'equals',
-      value: true,
-    },
-  ],
+  }],
 }
 ```
 
-### OR Logic
+## ValidatorConfig Types
 
-At least one condition must be true:
-
-```typescript
-{
-  type: 'or',
-  conditions: [
-    {
-      type: 'fieldValue',
-      fieldPath: 'role',
-      operator: 'equals',
-      value: 'admin',
-    },
-    {
-      type: 'fieldValue',
-      fieldPath: 'role',
-      operator: 'equals',
-      value: 'owner',
-    },
-  ],
-}
-```
-
-## ValidatorConfig Interface
+ValidatorConfig is a discriminated union type with four variants:
 
 ```typescript
-interface ValidatorConfig {
-  type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
+// Built-in validators (required, email, min, max, etc.)
+interface BuiltInValidatorConfig {
+  type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern';
   value?: number | string | RegExp;
   expression?: string;
-  kind?: string;
   when?: ConditionalExpression;
 }
+
+// Custom synchronous validators
+interface CustomValidatorConfig {
+  type: 'custom';
+  functionName?: string;
+  params?: Record<string, unknown>;
+  expression?: string;
+  kind?: string;
+  errorParams?: Record<string, string>;
+  when?: ConditionalExpression;
+}
+
+// Async validators (for debounced validation, database lookups)
+interface AsyncValidatorConfig {
+  type: 'customAsync';
+  functionName: string;
+  params?: Record<string, unknown>;
+  when?: ConditionalExpression;
+}
+
+// HTTP validators (optimized HTTP validation with auto-cancellation)
+interface HttpValidatorConfig {
+  type: 'customHttp';
+  functionName: string;
+  params?: Record<string, unknown>;
+  when?: ConditionalExpression;
+}
+
+type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | HttpValidatorConfig;
 ```
 
 ## ConditionalExpression Interface
 
 ```typescript
 interface ConditionalExpression {
-  type: 'fieldValue' | 'formValue' | 'javascript' | 'custom';
+  // Expression type - includes 'and' and 'or' for combining conditions
+  type: 'fieldValue' | 'formValue' | 'custom' | 'javascript' | 'and' | 'or';
+
+  // Field path for fieldValue type
   fieldPath?: string;
+
+  // Comparison operator
   operator?:
     | 'equals'
     | 'notEquals'
@@ -302,18 +211,18 @@ interface ConditionalExpression {
     | 'greaterOrEqual'
     | 'lessOrEqual'
     | 'contains'
-    | 'notContains'
     | 'startsWith'
     | 'endsWith'
-    | 'matches'
-    | 'in'
-    | 'notIn';
+    | 'matches';
+
+  // Value to compare against
   value?: unknown;
+
+  // JavaScript expression for custom logic
   expression?: string;
-  conditions?: {
-    type: 'and' | 'or';
-    expressions: ConditionalExpression[];
-  };
+
+  // Array of sub-conditions for 'and' and 'or' types
+  conditions?: ConditionalExpression[];
 }
 ```
 

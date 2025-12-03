@@ -1,26 +1,39 @@
 {
   "name": "@ng-forge/dynamic-forms-ionic",
-  "type": "module",
   "version": "0.0.1",
-  "peerDependencies": {
-    "@angular/common": "^21.0.1",
-    "@angular/core": "^21.0.1",
-    "@angular/forms": "^21.0.1",
-    "@angular/platform-browser": "^21.0.1",
-    "@ionic/angular": "^8.0.0",
-    "@ng-forge/dynamic-forms": "^0.0.1",
-    "lodash-es": "^4.17.21",
-    "date-fns": "^4.0.0",
-    "rxjs": "^7.8.0",
-    "ngxtension": "^7.0.2",
-    "vite": "^7.1.11",
-    "@analogjs/vite-plugin-angular": "^2.1.1",
-    "@nx/vite": "^22.1.2",
-    "@vitest/browser-playwright": "^4.0.14"
+  "description": "Ionic integration for @ng-forge/dynamic-forms. Pre-built Ionic form components for mobile and desktop.",
+  "type": "module",
+  "license": "MIT",
+  "author": "ng-forge",
+  "homepage": "https://ng-forge.github.io/ng-forge/docs/ui-libs-integrations/ionic",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ng-forge/ng-forge.git",
+    "directory": "packages/dynamic-forms-ionic"
   },
-  "sideEffects": [
-    "src/index.ts",
-    "src/lib/index.ts",
-    "src/lib/types/registry-augmentation.ts"
-  ]
+  "bugs": {
+    "url": "https://github.com/ng-forge/ng-forge/issues"
+  },
+  "keywords": [
+    "angular",
+    "ionic",
+    "mobile",
+    "hybrid",
+    "forms",
+    "dynamic-forms",
+    "form-builder",
+    "ng-forge"
+  ],
+  "peerDependencies": {
+    "@angular/common": ">=19.0.0",
+    "@angular/core": ">=19.0.0",
+    "@angular/forms": ">=19.0.0",
+    "@ionic/angular": ">=7.0.0",
+    "@ng-forge/dynamic-forms": "0.0.1",
+    "rxjs": ">=7.0.0"
+  },
+  "dependencies": {
+    "date-fns": "^4.0.0"
+  },
+  "sideEffects": false
 }

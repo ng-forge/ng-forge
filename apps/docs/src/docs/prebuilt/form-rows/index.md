@@ -54,7 +54,7 @@ import { DynamicForm } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-address-form',
   imports: [DynamicForm],
-  template: ` <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" /> `,
+  template: `<dynamic-form [config]="formConfig" />`,
 })
 export class AddressFormComponent {
   formConfig = {
@@ -121,19 +121,19 @@ export class AddressFormComponent {
       },
     ],
   };
+}
+```
 
-  onSubmit(formValue: any) {
-    console.log('Form submitted:', formValue);
-    // Output (note: rows don't create nesting):
-    // {
-    //   firstName: 'John',
-    //   lastName: 'Doe',
-    //   email: 'john.doe@example.com',
-    //   city: 'Springfield',
-    //   state: 'IL',
-    //   zip: '62701'
-    // }
-  }
+This produces a flat form value (rows don't create nesting):
+
+```typescript
+{
+  firstName: 'John',
+  lastName: 'Doe',
+  email: 'john.doe@example.com',
+  city: 'Springfield',
+  state: 'IL',
+  zip: '62701'
 }
 ```
 

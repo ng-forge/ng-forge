@@ -33,7 +33,7 @@ export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
 
 // Submission Config
-export type { SubmissionConfig, SubmitButtonOptions, NextButtonOptions } from './models';
+export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, NextButtonOptions } from './models';
 
 // Form State Condition
 export type { FormStateCondition } from './models';

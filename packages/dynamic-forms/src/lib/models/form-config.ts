@@ -18,14 +18,13 @@ import { SubmissionConfig } from './submission-config';
  * ```typescript
  * const formConfig: FormConfig = {
  *   fields: [
- *     { type: 'input', key: 'email', label: 'Email', validation: ['required', 'email'] },
+ *     { type: 'input', key: 'email', value: '', label: 'Email', required: true, email: true },
  *     { type: 'group', key: 'address', label: 'Address', fields: [
- *       { type: 'input', key: 'street', label: 'Street' },
- *       { type: 'input', key: 'city', label: 'City' }
+ *       { type: 'input', key: 'street', value: '', label: 'Street' },
+ *       { type: 'input', key: 'city', value: '', label: 'City' }
  *     ]},
  *     { type: 'button', key: 'submit', label: 'Submit', buttonType: 'submit' }
  *   ],
- *   options: { validateOnChange: true },
  *   schemas: [
  *     { name: 'emailSchema', schema: { email: validators.email } }
  *   ]
@@ -406,41 +405,20 @@ export interface CustomFnConfig {
 /**
  * Global form configuration options.
  *
- * Controls form-wide behavior including validation timing,
- * disabled state, and user interaction handling.
+ * Controls form-wide behavior including disabled state
+ * and button behavior configuration.
  *
  * @example
  * ```typescript
  * options: {
- *   validateOnChange: true,
- *   validateOnBlur: false,
- *   disabled: false
+ *   disabled: false,
+ *   submitButton: { disableWhenInvalid: true }
  * }
  * ```
  *
  * @public
  */
 export interface FormOptions {
-  /**
-   * Enable validation on value change.
-   *
-   * When enabled, form fields are validated immediately when
-   * their values change, providing real-time feedback.
-   *
-   * @value false
-   */
-  validateOnChange?: boolean;
-
-  /**
-   * Enable validation on field blur.
-   *
-   * When enabled, form fields are validated when they lose focus,
-   * providing validation feedback after user interaction.
-   *
-   * @value true
-   */
-  validateOnBlur?: boolean;
-
   /**
    * Disable the entire form.
    *

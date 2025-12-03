@@ -1,4 +1,5 @@
-import { FormConfig, SubmissionConfig } from '@ng-forge/dynamic-forms';
+import { FormConfig, SubmissionActionResult, SubmissionConfig } from '@ng-forge/dynamic-forms';
+import { FieldTree } from '@angular/forms/signals';
 
 /**
  * Simulated submission configuration for test scenarios (no HTTP call)
@@ -59,9 +60,10 @@ export interface TestScenario {
   simulateSubmission?: SimulatedSubmission;
   /**
    * Optional: provide a custom submission action.
+   * Can return either a Promise or an Observable.
    * Takes precedence over simulateSubmission and mockEndpoint.
    */
-  submissionAction?: SubmissionConfig['action'];
+  submissionAction?: (form: FieldTree<unknown>) => SubmissionActionResult;
   /**
    * Optional: use a mock HTTP endpoint for submission.
    * The endpoint will be intercepted by Playwright in E2E tests.
