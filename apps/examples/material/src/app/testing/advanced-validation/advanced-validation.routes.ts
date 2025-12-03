@@ -37,6 +37,16 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAdvancedValidationScenario('expression-based-min-max-test') },
   },
+  {
+    path: 'cross-field-error-targeting',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('cross-field-error-targeting-test') },
+  },
+  {
+    path: 'when-with-and-or',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('when-with-and-or-test') },
+  },
 ];
 
 export default routes;

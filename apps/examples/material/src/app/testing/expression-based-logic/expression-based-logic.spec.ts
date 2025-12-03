@@ -246,4 +246,270 @@ test.describe('Expression-Based Logic Tests', () => {
       await expect(premiumField).toBeVisible();
     });
   });
+
+  test.describe('Comparison Operators', () => {
+    test('should show underage warning when age < 18', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/comparison-operators');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comparison-operators-test');
+      await expect(scenario).toBeVisible();
+
+      const ageInput = helpers.getInput(scenario, 'age');
+      const underageWarning = scenario.locator('#underageWarning');
+
+      // Initial age is 25 - warning should be hidden (age >= 18)
+      await expect(underageWarning).toBeHidden();
+
+      // Set age below 18 - warning should appear
+      await helpers.clearAndFill(ageInput, '16');
+      await page.waitForTimeout(500);
+      await expect(underageWarning).toBeVisible();
+
+      // Set age to exactly 18 - warning should be hidden (greaterOrEqual)
+      await helpers.clearAndFill(ageInput, '18');
+      await page.waitForTimeout(500);
+      await expect(underageWarning).toBeHidden();
+    });
+
+    test('should show senior discount when age > 65', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/comparison-operators');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comparison-operators-test');
+      await expect(scenario).toBeVisible();
+
+      const ageInput = helpers.getInput(scenario, 'age');
+      const seniorDiscount = scenario.locator('#seniorDiscount');
+
+      // Initial age is 25 - discount should be hidden
+      await expect(seniorDiscount).toBeHidden();
+
+      // Set age to 65 - still hidden (needs > 65, not >=)
+      await helpers.clearAndFill(ageInput, '65');
+      await page.waitForTimeout(500);
+      await expect(seniorDiscount).toBeHidden();
+
+      // Set age to 66 - discount should appear
+      await helpers.clearAndFill(ageInput, '66');
+      await page.waitForTimeout(500);
+      await expect(seniorDiscount).toBeVisible();
+    });
+
+    test('should show bulk order note when quantity > 10', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/comparison-operators');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comparison-operators-test');
+      await expect(scenario).toBeVisible();
+
+      const quantityInput = helpers.getInput(scenario, 'quantity');
+      const bulkOrderNote = scenario.locator('#bulkOrderNote');
+
+      // Initial quantity is 5 - note should be hidden
+      await expect(bulkOrderNote).toBeHidden();
+
+      // Set quantity to 10 - still hidden
+      await helpers.clearAndFill(quantityInput, '10');
+      await page.waitForTimeout(500);
+      await expect(bulkOrderNote).toBeHidden();
+
+      // Set quantity to 11 - note should appear
+      await helpers.clearAndFill(quantityInput, '11');
+      await page.waitForTimeout(500);
+      await expect(bulkOrderNote).toBeVisible();
+    });
+
+    test('should show reactivate option when status != active', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/comparison-operators');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comparison-operators-test');
+      await expect(scenario).toBeVisible();
+
+      const statusSelect = scenario.locator('#status');
+      const reactivateButton = scenario.locator('#reactivateButton');
+
+      // Initial status is active - reactivate should be hidden
+      await expect(reactivateButton).toBeHidden();
+
+      // Set status to pending - reactivate should appear
+      await statusSelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Pending")').click();
+      await page.waitForTimeout(500);
+      await expect(reactivateButton).toBeVisible();
+
+      // Set status to inactive - reactivate should still be visible
+      await statusSelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Inactive")').click();
+      await page.waitForTimeout(500);
+      await expect(reactivateButton).toBeVisible();
+
+      // Set status back to active - reactivate should be hidden
+      await statusSelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Active")').click();
+      await page.waitForTimeout(500);
+      await expect(reactivateButton).toBeHidden();
+    });
+
+    test('should show pass/fail messages based on score threshold', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/comparison-operators');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('comparison-operators-test');
+      await expect(scenario).toBeVisible();
+
+      const scoreInput = helpers.getInput(scenario, 'score');
+      const passMessage = scenario.locator('#passMessage');
+      const failMessage = scenario.locator('#failMessage');
+
+      // Initial score is 75 - pass visible, fail hidden
+      await expect(passMessage).toBeVisible();
+      await expect(failMessage).toBeHidden();
+
+      // Set score to exactly 60 - pass visible, fail hidden
+      await helpers.clearAndFill(scoreInput, '60');
+      await page.waitForTimeout(500);
+      await expect(passMessage).toBeVisible();
+      await expect(failMessage).toBeHidden();
+
+      // Set score to 59 - pass hidden, fail visible
+      await helpers.clearAndFill(scoreInput, '59');
+      await page.waitForTimeout(500);
+      await expect(passMessage).toBeHidden();
+      await expect(failMessage).toBeVisible();
+    });
+  });
+
+  test.describe('String Operators', () => {
+    test('should show corporate note when email contains "company"', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/string-operators');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('string-operators-test');
+      await expect(scenario).toBeVisible();
+
+      const emailInput = helpers.getInput(scenario, 'email');
+      const corporateNote = scenario.locator('#corporateNote');
+
+      // Initial email contains "company" - note should be visible
+      await expect(corporateNote).toBeVisible();
+
+      // Change email to not contain "company"
+      await helpers.clearAndFill(emailInput, 'user@gmail.com');
+      await page.waitForTimeout(500);
+      await expect(corporateNote).toBeHidden();
+
+      // Add "company" back
+      await helpers.clearAndFill(emailInput, 'user@mycompany.org');
+      await page.waitForTimeout(500);
+      await expect(corporateNote).toBeVisible();
+    });
+
+    test('should show secure/insecure notes based on URL prefix', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/string-operators');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('string-operators-test');
+      await expect(scenario).toBeVisible();
+
+      const urlInput = helpers.getInput(scenario, 'url');
+      const secureNote = scenario.locator('#secureNote');
+      const insecureWarning = scenario.locator('#insecureWarning');
+
+      // Initial URL starts with https - secure visible, insecure hidden
+      await expect(secureNote).toBeVisible();
+      await expect(insecureWarning).toBeHidden();
+
+      // Change URL to http
+      await helpers.clearAndFill(urlInput, 'http://example.com');
+      await page.waitForTimeout(500);
+      await expect(secureNote).toBeHidden();
+      await expect(insecureWarning).toBeVisible();
+
+      // Change back to https
+      await helpers.clearAndFill(urlInput, 'https://secure.example.com');
+      await page.waitForTimeout(500);
+      await expect(secureNote).toBeVisible();
+      await expect(insecureWarning).toBeHidden();
+    });
+
+    test('should show PDF viewer when filename ends with .pdf', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/string-operators');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('string-operators-test');
+      await expect(scenario).toBeVisible();
+
+      const filenameInput = helpers.getInput(scenario, 'filename');
+      const pdfViewer = scenario.locator('#pdfViewer');
+      const imageViewer = scenario.locator('#imageViewer');
+
+      // Initial filename ends with .pdf - PDF viewer visible, image viewer hidden
+      await expect(pdfViewer).toBeVisible();
+      await expect(imageViewer).toBeHidden();
+
+      // Change to .jpg
+      await helpers.clearAndFill(filenameInput, 'photo.jpg');
+      await page.waitForTimeout(500);
+      await expect(pdfViewer).toBeHidden();
+      await expect(imageViewer).toBeVisible();
+
+      // Change to .png
+      await helpers.clearAndFill(filenameInput, 'screenshot.png');
+      await page.waitForTimeout(500);
+      await expect(pdfViewer).toBeHidden();
+      await expect(imageViewer).toBeVisible();
+
+      // Change to .txt (neither)
+      await helpers.clearAndFill(filenameInput, 'notes.txt');
+      await page.waitForTimeout(500);
+      await expect(pdfViewer).toBeHidden();
+      await expect(imageViewer).toBeHidden();
+
+      // Change back to .pdf
+      await helpers.clearAndFill(filenameInput, 'report.pdf');
+      await page.waitForTimeout(500);
+      await expect(pdfViewer).toBeVisible();
+      await expect(imageViewer).toBeHidden();
+    });
+
+    test('should show international shipping note when country != US', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/string-operators');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('string-operators-test');
+      await expect(scenario).toBeVisible();
+
+      const countrySelect = scenario.locator('#country');
+      const internationalShipping = scenario.locator('#internationalShipping');
+
+      // Initial country is US - international shipping hidden
+      await expect(internationalShipping).toBeHidden();
+
+      // Change to UK
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United Kingdom")').click();
+      await page.waitForTimeout(500);
+      await expect(internationalShipping).toBeVisible();
+
+      // Change to Canada
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("Canada")').click();
+      await page.waitForTimeout(500);
+      await expect(internationalShipping).toBeVisible();
+
+      // Change back to US
+      await countrySelect.click();
+      await page.waitForTimeout(300);
+      await page.locator('mat-option:has-text("United States")').click();
+      await page.waitForTimeout(500);
+      await expect(internationalShipping).toBeHidden();
+    });
+  });
 });
