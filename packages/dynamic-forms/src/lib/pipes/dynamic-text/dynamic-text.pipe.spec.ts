@@ -2,12 +2,11 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { DynamicTextPipe } from './dynamic-text.pipe';
 import { signal, WritableSignal } from '@angular/core';
-import { of, Subject } from 'rxjs';
+import { firstValueFrom, lastValueFrom, of, Subject, toArray } from 'rxjs';
 
 describe('DynamicTextPipe', () => {
   let pipe: DynamicTextPipe;
 
-  // Helper to create signals within injection context
   function createSignal<T>(value: T): WritableSignal<T> {
     return TestBed.runInInjectionContext(() => signal(value));
   }
@@ -20,133 +19,84 @@ describe('DynamicTextPipe', () => {
   describe('static strings', () => {
     it('should return static string as observable', async () => {
       const result = pipe.transform('Hello World');
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('Hello World');
+      expect(await firstValueFrom(result)).toBe('Hello World');
     });
 
     it('should handle empty string', async () => {
       const result = pipe.transform('');
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('');
+      expect(await firstValueFrom(result)).toBe('');
     });
 
     it('should handle string with special characters', async () => {
       const result = pipe.transform('Hello\nWorld\t!');
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('Hello\nWorld\t!');
+      expect(await firstValueFrom(result)).toBe('Hello\nWorld\t!');
     });
 
     it('should handle unicode characters', async () => {
       const result = pipe.transform('Hello 世界 🌍');
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('Hello 世界 🌍');
+      expect(await firstValueFrom(result)).toBe('Hello 世界 🌍');
     });
 
     it('should handle very long strings', async () => {
       const longString = 'a'.repeat(10000);
       const result = pipe.transform(longString);
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe(longString);
+      expect(await firstValueFrom(result)).toBe(longString);
     });
   });
 
   describe('undefined handling', () => {
     it('should return empty string for undefined', async () => {
       const result = pipe.transform(undefined);
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('');
+      expect(await firstValueFrom(result)).toBe('');
     });
 
     it('should return empty string for null', async () => {
       const result = pipe.transform(null as unknown as undefined);
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('');
+      expect(await firstValueFrom(result)).toBe('');
     });
   });
 
   describe('observables', () => {
-    it('should pass through observable', async () => {
+    it('should pass through observable unchanged', async () => {
       const observable = of('Observable Value');
       const result = pipe.transform(observable);
 
       expect(result).toBe(observable);
-
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('Observable Value');
+      expect(await firstValueFrom(result)).toBe('Observable Value');
     });
 
     it('should handle observable with multiple emissions', async () => {
       const subject = new Subject<string>();
       const result = pipe.transform(subject);
 
-      const emissions: string[] = [];
-      result.subscribe((value) => emissions.push(value));
+      const emissions = lastValueFrom(result.pipe(toArray()));
 
       subject.next('First');
       subject.next('Second');
       subject.next('Third');
       subject.complete();
 
-      expect(emissions).toEqual(['First', 'Second', 'Third']);
+      expect(await emissions).toEqual(['First', 'Second', 'Third']);
     });
 
     it('should handle observable that emits empty string', async () => {
-      const observable = of('');
-      const result = pipe.transform(observable);
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('');
+      const result = pipe.transform(of(''));
+      expect(await firstValueFrom(result)).toBe('');
     });
 
-    it('should handle cold observable', async () => {
+    it('should handle cold observable with multiple subscriptions', async () => {
       const observable = of('Cold Observable');
       const result = pipe.transform(observable);
 
-      // Subscribe twice to verify it's a cold observable
-      const value1 = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-      const value2 = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value1).toBe('Cold Observable');
-      expect(value2).toBe('Cold Observable');
+      expect(await firstValueFrom(result)).toBe('Cold Observable');
+      expect(await firstValueFrom(result)).toBe('Cold Observable');
     });
 
-    it('should handle observable of any string type', async () => {
+    it('should handle observable with multiple sync emissions', async () => {
       const observable = of('test', 'another', 'value');
       const result = pipe.transform(observable);
 
-      const emissions: string[] = [];
-      result.subscribe((value) => emissions.push(value));
-
+      const emissions = await lastValueFrom(result.pipe(toArray()));
       expect(emissions).toEqual(['test', 'another', 'value']);
     });
   });
@@ -155,11 +105,7 @@ describe('DynamicTextPipe', () => {
     it('should convert signal to observable', async () => {
       const textSignal = createSignal('Signal Value');
       const result = pipe.transform(textSignal);
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('Signal Value');
+      expect(await firstValueFrom(result)).toBe('Signal Value');
     });
 
     it('should read current signal value', async () => {
@@ -167,58 +113,34 @@ describe('DynamicTextPipe', () => {
       textSignal.set('Updated');
 
       const result = pipe.transform(textSignal);
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('Updated');
+      expect(await firstValueFrom(result)).toBe('Updated');
     });
 
     it('should handle signal with empty string', async () => {
       const textSignal = createSignal('');
       const result = pipe.transform(textSignal);
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('');
+      expect(await firstValueFrom(result)).toBe('');
     });
 
-    it('should create new observable from signal value', async () => {
+    it('should create new observable from signal on each transform', async () => {
       const textSignal = createSignal('Test');
       const result1 = pipe.transform(textSignal);
       const result2 = pipe.transform(textSignal);
 
-      // Should create new observables each time
       expect(result1).not.toBe(result2);
-
-      const value1 = await new Promise((resolve) => {
-        result1.subscribe(resolve);
-      });
-      const value2 = await new Promise((resolve) => {
-        result2.subscribe(resolve);
-      });
-
-      expect(value1).toBe('Test');
-      expect(value2).toBe('Test');
+      expect(await firstValueFrom(result1)).toBe('Test');
+      expect(await firstValueFrom(result2)).toBe('Test');
     });
 
-    it('should handle signal updates between transforms', async () => {
+    it('should capture signal value at transform time', async () => {
       const textSignal = createSignal('First');
       const result1 = pipe.transform(textSignal);
 
       textSignal.set('Second');
       const result2 = pipe.transform(textSignal);
 
-      const value1 = await new Promise((resolve) => {
-        result1.subscribe(resolve);
-      });
-      const value2 = await new Promise((resolve) => {
-        result2.subscribe(resolve);
-      });
-
-      expect(value1).toBe('First');
-      expect(value2).toBe('Second');
+      expect(await firstValueFrom(result1)).toBe('First');
+      expect(await firstValueFrom(result2)).toBe('Second');
     });
 
     it('should handle readonly signal', async () => {
@@ -226,90 +148,53 @@ describe('DynamicTextPipe', () => {
       const readonlySignal = writableSignal.asReadonly();
 
       const result = pipe.transform(readonlySignal);
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('Readonly Test');
+      expect(await firstValueFrom(result)).toBe('Readonly Test');
     });
   });
 
   describe('type handling', () => {
-    it('should emit observable once for static string', async () => {
+    it('should emit once for static string', async () => {
       const result = pipe.transform('Static');
-
-      let emissionCount = 0;
-      result.subscribe(() => emissionCount++);
-
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      expect(emissionCount).toBe(1);
+      const emissions = await lastValueFrom(result.pipe(toArray()));
+      expect(emissions).toHaveLength(1);
     });
 
-    it('should emit observable once for signal', async () => {
+    it('should emit once for signal', async () => {
       const textSignal = createSignal('Test');
       const result = pipe.transform(textSignal);
-
-      let emissionCount = 0;
-      result.subscribe(() => emissionCount++);
-
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      expect(emissionCount).toBe(1);
+      const emissions = await lastValueFrom(result.pipe(toArray()));
+      expect(emissions).toHaveLength(1);
     });
 
     it('should distinguish between string and observable', () => {
       const stringResult = pipe.transform('string');
-      const observableResult = pipe.transform(of('observable'));
+      const observableInput = of('observable');
+      const observableResult = pipe.transform(observableInput);
 
-      // Both should be observables, but different instances for string
-      expect(stringResult).toBeDefined();
-      expect(observableResult).toBeDefined();
       expect(stringResult).not.toBe(observableResult);
+      expect(observableResult).toBe(observableInput);
     });
 
     it('should distinguish between string and signal', async () => {
       const stringResult = pipe.transform('string');
       const signalResult = pipe.transform(createSignal('signal'));
 
-      const stringValue = await new Promise((resolve) => {
-        stringResult.subscribe(resolve);
-      });
-      const signalValue = await new Promise((resolve) => {
-        signalResult.subscribe(resolve);
-      });
-
-      expect(stringValue).toBe('string');
-      expect(signalValue).toBe('signal');
+      expect(await firstValueFrom(stringResult)).toBe('string');
+      expect(await firstValueFrom(signalResult)).toBe('signal');
     });
   });
 
   describe('edge cases', () => {
     it('should handle whitespace-only string', async () => {
-      const result = pipe.transform('   ');
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('   ');
+      expect(await firstValueFrom(pipe.transform('   '))).toBe('   ');
     });
 
     it('should handle newline-only string', async () => {
-      const result = pipe.transform('\n');
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('\n');
+      expect(await firstValueFrom(pipe.transform('\n'))).toBe('\n');
     });
 
     it('should handle string with null character', async () => {
-      const result = pipe.transform('test\0value');
-      const value = await new Promise((resolve) => {
-        result.subscribe(resolve);
-      });
-
-      expect(value).toBe('test\0value');
+      expect(await firstValueFrom(pipe.transform('test\0value'))).toBe('test\0value');
     });
 
     it('should return observable for all input types', () => {
@@ -321,57 +206,26 @@ describe('DynamicTextPipe', () => {
       ];
 
       results.forEach((result) => {
-        expect(result.subscribe).toBeDefined();
         expect(typeof result.subscribe).toBe('function');
       });
     });
 
     it('should complete observable for static values', async () => {
       const result = pipe.transform('Test');
-
-      let completed = false;
-      result.subscribe({
-        complete: () => {
-          completed = true;
-        },
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      expect(completed).toBe(true);
+      const emissions = await lastValueFrom(result.pipe(toArray()));
+      expect(emissions).toEqual(['Test']);
     });
 
     it('should complete observable for signal values', async () => {
       const result = pipe.transform(createSignal('Test'));
-
-      let completed = false;
-      result.subscribe({
-        complete: () => {
-          completed = true;
-        },
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      expect(completed).toBe(true);
+      const emissions = await lastValueFrom(result.pipe(toArray()));
+      expect(emissions).toEqual(['Test']);
     });
   });
 
   describe('performance', () => {
     it('should handle rapid successive transforms', async () => {
-      const results = [];
-      for (let i = 0; i < 100; i++) {
-        results.push(pipe.transform(`Value ${i}`));
-      }
-
-      const values = await Promise.all(
-        results.map(
-          (result) =>
-            new Promise((resolve) => {
-              result.subscribe(resolve);
-            }),
-        ),
-      );
+      const values = await Promise.all(Array.from({ length: 100 }, (_, i) => firstValueFrom(pipe.transform(`Value ${i}`))));
 
       expect(values).toHaveLength(100);
       expect(values[0]).toBe('Value 0');
@@ -380,16 +234,7 @@ describe('DynamicTextPipe', () => {
 
     it('should handle multiple signal transforms', async () => {
       const signals = Array.from({ length: 50 }, (_, i) => createSignal(`Signal ${i}`));
-      const results = signals.map((s) => pipe.transform(s));
-
-      const values = await Promise.all(
-        results.map(
-          (result) =>
-            new Promise((resolve) => {
-              result.subscribe(resolve);
-            }),
-        ),
-      );
+      const values = await Promise.all(signals.map((s) => firstValueFrom(pipe.transform(s))));
 
       expect(values).toHaveLength(50);
       expect(values[0]).toBe('Signal 0');
@@ -399,15 +244,11 @@ describe('DynamicTextPipe', () => {
 
   describe('Angular pipe behavior', () => {
     it('should implement PipeTransform', () => {
-      expect(pipe.transform).toBeDefined();
       expect(typeof pipe.transform).toBe('function');
     });
 
-    it('should have transform method with correct signature', () => {
+    it('should return observable from transform', () => {
       const result = pipe.transform('test');
-
-      expect(result).toBeDefined();
-      expect(result.subscribe).toBeDefined();
       expect(typeof result.subscribe).toBe('function');
     });
   });
