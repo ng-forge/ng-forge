@@ -251,6 +251,50 @@ test.describe('Advanced Validation E2E Tests', () => {
 
       // Submit should be disabled due to password mismatch
       await expect(submitButton).toBeDisabled();
+
+      // Verify error message is displayed on the confirmPassword field
+      await helpers.blurInput(confirmPasswordInput);
+      const errorMessage = helpers.getFieldError(scenario, 'confirmPassword');
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText('Passwords must match');
+    });
+
+    test('should display correct error message for age validation', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/cross-field-error-targeting');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('cross-field-error-targeting-test');
+      await expect(scenario).toBeVisible();
+
+      const ageInput = helpers.getInput(scenario, 'age');
+
+      // Enter age below minimum (18)
+      await helpers.fillInput(ageInput, '15');
+      await helpers.blurInput(ageInput);
+
+      // Verify error message is displayed
+      const errorMessage = helpers.getFieldError(scenario, 'age');
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText('Age must be at least the minimum requirement');
+    });
+
+    test('should display correct error message for range validation', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/cross-field-error-targeting');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('cross-field-error-targeting-test');
+      await expect(scenario).toBeVisible();
+
+      const targetValueInput = helpers.getInput(scenario, 'targetValue');
+
+      // Enter value outside range (min=10, max=100)
+      await helpers.fillInput(targetValueInput, '5');
+      await helpers.blurInput(targetValueInput);
+
+      // Verify error message is displayed
+      const errorMessage = helpers.getFieldError(scenario, 'targetValue');
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText('Value must be between min and max');
     });
 
     test('should validate age against dynamic minAge field', async ({ page, helpers }) => {
@@ -466,6 +510,250 @@ test.describe('Advanced Validation E2E Tests', () => {
       // Fill order above min
       await helpers.clearAndFill(orderAmountInput, '60');
       await expect(submitButton).toBeEnabled();
+    });
+  });
+
+  test.describe('Nested Field Paths', () => {
+    test('should validate with nested field paths', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/nested-field-paths');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('nested-field-paths-test');
+      await expect(scenario).toBeVisible();
+
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // Initially form should be valid (contact.primaryEmail has default value)
+      await expect(submitButton).toBeEnabled();
+    });
+
+    test('should hide shipping zip field when sameAsBilling is checked', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/nested-field-paths');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('nested-field-paths-test');
+      await expect(scenario).toBeVisible();
+
+      const sameAsBillingCheckbox = scenario.locator('#sameAsBilling input[type="checkbox"]');
+      const shippingZipField = scenario.locator('#shippingZip');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // Initially the shipping zip field should be visible
+      await expect(shippingZipField).toBeVisible();
+
+      // Check sameAsBilling - field should be hidden
+      await sameAsBillingCheckbox.check();
+      await page.waitForTimeout(500);
+      await expect(shippingZipField).not.toBeVisible();
+
+      // Form should still be valid
+      await expect(submitButton).toBeEnabled();
+
+      // Uncheck - field should reappear
+      await sameAsBillingCheckbox.uncheck();
+      await page.waitForTimeout(500);
+      await expect(shippingZipField).toBeVisible();
+    });
+
+    test('should validate shipping zip matches billing zip via nested path', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/nested-field-paths');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('nested-field-paths-test');
+      await expect(scenario).toBeVisible();
+
+      const shippingZipInput = helpers.getInput(scenario, 'shippingZip');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // Enter different zip than billing (12345)
+      await helpers.fillInput(shippingZipInput, '99999');
+      await helpers.blurInput(shippingZipInput);
+
+      // Form should be invalid due to zip mismatch
+      await expect(submitButton).toBeDisabled();
+
+      // Verify error message contains expected text
+      const errorMessage = helpers.getFieldError(scenario, 'shippingZip');
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toContainText('Shipping zip must match billing zip');
+
+      // Enter matching zip - form should be valid
+      await helpers.clearAndFill(shippingZipInput, '12345');
+      await expect(submitButton).toBeEnabled();
+    });
+
+    test('should validate secondary email differs from nested primary email', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/nested-field-paths');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('nested-field-paths-test');
+      await expect(scenario).toBeVisible();
+
+      const secondaryEmailInput = helpers.getInput(scenario, 'secondaryEmail');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // Enter same as primary (primary@example.com)
+      await helpers.fillInput(secondaryEmailInput, 'primary@example.com');
+      await helpers.blurInput(secondaryEmailInput);
+
+      // Form should be invalid due to duplicate email
+      await expect(submitButton).toBeDisabled();
+
+      // Verify error message
+      const errorMessage = helpers.getFieldError(scenario, 'secondaryEmail');
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toContainText('Secondary email must be different from primary email');
+
+      // Enter different email - form should be valid
+      await helpers.clearAndFill(secondaryEmailInput, 'secondary@example.com');
+      await expect(submitButton).toBeEnabled();
+    });
+
+    test('should show phone required when SMS notifications enabled via nested path', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/nested-field-paths');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('nested-field-paths-test');
+      await expect(scenario).toBeVisible();
+
+      const phoneForSmsField = scenario.locator('#phoneForSms');
+      const smsCheckbox = scenario.locator('#settingsRow\\.settings\\.smsNotifications input[type="checkbox"]');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // Initially SMS is not checked, phone field should be hidden
+      await expect(phoneForSmsField).not.toBeVisible();
+      await expect(submitButton).toBeEnabled();
+
+      // Check SMS - phone field should appear and form be invalid
+      await smsCheckbox.check();
+      await page.waitForTimeout(500);
+      await expect(phoneForSmsField).toBeVisible();
+      await expect(submitButton).toBeDisabled();
+
+      // Verify error message
+      const phoneInput = helpers.getInput(scenario, 'phoneForSms');
+      await helpers.blurInput(phoneInput);
+      const errorMessage = helpers.getFieldError(scenario, 'phoneForSms');
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toContainText('Phone number is required when SMS notifications are enabled');
+
+      // Fill phone - form should be valid
+      await helpers.fillInput(phoneInput, '555-1234');
+      await expect(submitButton).toBeEnabled();
+
+      // Uncheck SMS - phone field hidden, form still valid
+      await smsCheckbox.uncheck();
+      await page.waitForTimeout(500);
+      await expect(phoneForSmsField).not.toBeVisible();
+      await expect(submitButton).toBeEnabled();
+    });
+  });
+
+  test.describe('Array Cross-Validation', () => {
+    test('should validate array item email conditionally based on root checkbox', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/array-cross-validation');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('array-cross-validation-test');
+      await expect(scenario).toBeVisible();
+
+      const requireEmailCheckbox = scenario.locator('#requireEmail input[type="checkbox"]');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // Fill required name field in the first contact
+      const nameInput = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.name input');
+      await helpers.fillInput(nameInput, 'John Doe');
+
+      // Initially email not required (checkbox unchecked) - form should be valid
+      await expect(submitButton).toBeEnabled();
+
+      // Check require email - now email is required
+      await requireEmailCheckbox.check();
+      await page.waitForTimeout(500);
+      await expect(submitButton).toBeDisabled();
+
+      // Fill valid email with company domain
+      const emailInput = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.email input');
+      await helpers.fillInput(emailInput, 'john@company.com');
+      await expect(submitButton).toBeEnabled();
+
+      // Uncheck - email no longer required
+      await requireEmailCheckbox.uncheck();
+      await page.waitForTimeout(500);
+
+      // Clear email - should still be valid
+      await emailInput.fill('');
+      await page.waitForTimeout(300);
+      await expect(submitButton).toBeEnabled();
+    });
+
+    test('should validate array item email matches company domain from root field', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/array-cross-validation');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('array-cross-validation-test');
+      await expect(scenario).toBeVisible();
+
+      const defaultDomainInput = helpers.getInput(scenario, 'defaultDomain');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // Fill required name
+      const nameInput = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.name input');
+      await helpers.fillInput(nameInput, 'John Doe');
+
+      // Fill email with wrong domain
+      const emailInput = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.email input');
+      await helpers.fillInput(emailInput, 'john@otherdomain.com');
+      await helpers.blurInput(emailInput);
+
+      // Should be invalid due to domain mismatch
+      await expect(submitButton).toBeDisabled();
+
+      // Verify error message
+      const errorMessage = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.email mat-error');
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText('Email must use the company domain');
+
+      // Change default domain to match
+      await helpers.clearAndFill(defaultDomainInput, 'otherdomain.com');
+      await page.waitForTimeout(500);
+
+      // Should now be valid
+      await expect(submitButton).toBeEnabled();
+
+      // Or fix the email
+      await helpers.clearAndFill(defaultDomainInput, 'company.com');
+      await page.waitForTimeout(300);
+      await helpers.clearAndFill(emailInput, 'john@company.com');
+      await expect(submitButton).toBeEnabled();
+    });
+
+    test('should display correct error message for email validation in array item', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/advanced-validation/array-cross-validation');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('array-cross-validation-test');
+      await expect(scenario).toBeVisible();
+
+      const requireEmailCheckbox = scenario.locator('#requireEmail input[type="checkbox"]');
+
+      // Fill required name
+      const nameInput = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.name input');
+      await helpers.fillInput(nameInput, 'John Doe');
+
+      // Check require email
+      await requireEmailCheckbox.check();
+      await page.waitForTimeout(500);
+
+      // Fill invalid email format
+      const emailInput = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.email input');
+      await helpers.fillInput(emailInput, 'invalid-email');
+      await helpers.blurInput(emailInput);
+
+      // Should show email format error
+      const errorMessage = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.email mat-error');
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText('Please enter a valid email address');
     });
   });
 });

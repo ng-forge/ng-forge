@@ -47,6 +47,16 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAdvancedValidationScenario('when-with-and-or-test') },
   },
+  {
+    path: 'nested-field-paths',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('nested-field-paths-test') },
+  },
+  {
+    path: 'array-cross-validation',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('array-cross-validation-test') },
+  },
 ];
 
 export default routes;
