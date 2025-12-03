@@ -74,8 +74,8 @@ The form consists of 4 pages with increasingly complex conditional logic:
 ## Complete Implementation
 
 ```typescript
-import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig, ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
 const certificationConfig = {
   defaultValidationMessages: {
@@ -983,7 +983,7 @@ const certificationConfig = {
         {
           key: 'backgroundCheck',
           type: 'checkbox',
-          checked: false,
+          value: false,
           label: 'I consent to a background check as part of the certification process',
           required: true,
           validationMessages: {
@@ -994,7 +994,7 @@ const certificationConfig = {
         {
           key: 'ethicsAgreement',
           type: 'checkbox',
-          checked: false,
+          value: false,
           label: 'I agree to abide by the professional code of ethics',
           required: true,
           validationMessages: {
@@ -1023,7 +1023,7 @@ const certificationConfig = {
         {
           key: 'hasPortfolio',
           type: 'toggle',
-          checked: false,
+          value: false,
           label: 'I will submit a professional portfolio',
           props: { color: 'primary' },
           logic: [
@@ -1139,7 +1139,7 @@ const certificationConfig = {
         {
           key: 'acknowledgement',
           type: 'checkbox',
-          checked: false,
+          value: false,
           label: 'I certify that all information provided in this application is true and accurate',
           required: true,
           validationMessages: {
@@ -1150,7 +1150,7 @@ const certificationConfig = {
         {
           key: 'marketingConsent',
           type: 'checkbox',
-          checked: false,
+          value: false,
           label: 'I would like to receive updates about certification programs and professional development opportunities',
           props: { color: 'primary' },
         },
@@ -1178,70 +1178,14 @@ const certificationConfig = {
   ],
 } as const satisfies FormConfig;
 
-type CertificationFormValue = ExtractFormValue<typeof certificationConfig>;
-
 @Component({
   selector: 'app-conditional-logic-showcase',
   imports: [DynamicForm],
-  template: `
-    <div class="certification-container">
-      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
-
-      @let message = submitMessage();
-      @if (message) {
-        <div class="success-message">
-          {{ message }}
-        </div>
-      }
-    </div>
-  `,
+  template: `<dynamic-form [config]="config" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConditionalLogicShowcaseComponent {
   config = certificationConfig;
-
-  formValue = signal<CertificationFormValue>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    dateOfBirth: null,
-    certificationType: '',
-    country: '',
-    educationLevel: '',
-    graduationYear: '',
-    yearsExperience: '',
-    employmentStatus: 'employed',
-    reference1Name: '',
-    reference1Email: '',
-    reference1Relationship: '',
-    backgroundCheck: false,
-    ethicsAgreement: false,
-    hasPortfolio: false,
-    acknowledgement: false,
-    marketingConsent: false,
-    professionalMemberships: [],
-  });
-
-  submitMessage = signal<string>('');
-
-  onSubmit(value: CertificationFormValue) {
-    console.log('Certification application submitted:', value);
-
-    const certType =
-      value.certificationType === 'associate'
-        ? 'Associate'
-        : value.certificationType === 'professional'
-          ? 'Professional'
-          : value.certificationType === 'expert'
-            ? 'Expert'
-            : 'Specialist';
-
-    this.submitMessage.set(
-      `Thank you, ${value.firstName}! Your ${certType} certification application has been submitted successfully. ` +
-        `You will receive a confirmation email at ${value.email} within 24 hours.`,
-    );
-  }
 }
 ```
 

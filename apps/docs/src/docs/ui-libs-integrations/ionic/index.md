@@ -202,15 +202,17 @@ Text input field with mobile keyboard optimization and platform-adaptive styling
 
 **Props (Ionic-Specific):**
 
-| Prop           | Type                                                                           | Default  | Description                     |
-| -------------- | ------------------------------------------------------------------------------ | -------- | ------------------------------- |
-| `type`         | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url' \| 'search'`    | `'text'` | HTML input type                 |
-| `placeholder`  | `string`                                                                       | -        | Placeholder text                |
-| `clearInput`   | `boolean`                                                                      | `false`  | Show clear button               |
-| `inputmode`    | `'text' \| 'decimal' \| 'numeric' \| 'tel' \| 'search' \| 'email' \| 'url'`    | -        | Mobile keyboard type            |
-| `autocomplete` | `string`                                                                       | -        | Autocomplete attribute          |
-| `mode`         | `'ios' \| 'md'`                                                                | -        | Force platform-specific styling |
-| `color`        | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -        | Ionic theme color               |
+| Prop             | Type                                                                           | Default   | Description             |
+| ---------------- | ------------------------------------------------------------------------------ | --------- | ----------------------- |
+| `type`           | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'`                | `'text'`  | HTML input type         |
+| `placeholder`    | `string`                                                                       | -         | Placeholder text        |
+| `clearInput`     | `boolean`                                                                      | `false`   | Show clear button       |
+| `fill`           | `'solid' \| 'outline'`                                                         | `'solid'` | Input fill style        |
+| `shape`          | `'round'`                                                                      | -         | Rounded input shape     |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                       | `'start'` | Position of the label   |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -         | Ionic theme color       |
+| `helperText`     | `string`                                                                       | -         | Helper text below input |
+| `counter`        | `boolean`                                                                      | `false`   | Show character counter  |
 
 #### Textarea
 
@@ -240,13 +242,16 @@ Multi-line text input field with auto-grow support for mobile devices.
 
 **Props (Ionic-Specific):**
 
-| Prop          | Type                                                                           | Default | Description                   |
-| ------------- | ------------------------------------------------------------------------------ | ------- | ----------------------------- |
-| `rows`        | `number`                                                                       | `4`     | Number of visible rows        |
-| `autoGrow`    | `boolean`                                                                      | `false` | Auto-resize based on content  |
-| `placeholder` | `string`                                                                       | -       | Placeholder text              |
-| `mode`        | `'ios' \| 'md'`                                                                | -       | Force platform-specific style |
-| `color`       | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color             |
+| Prop             | Type                                                                           | Default   | Description                  |
+| ---------------- | ------------------------------------------------------------------------------ | --------- | ---------------------------- |
+| `rows`           | `number`                                                                       | `4`       | Number of visible rows       |
+| `autoGrow`       | `boolean`                                                                      | `false`   | Auto-resize based on content |
+| `placeholder`    | `string`                                                                       | -         | Placeholder text             |
+| `fill`           | `'solid' \| 'outline'`                                                         | `'solid'` | Textarea fill style          |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                       | `'start'` | Position of the label        |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -         | Ionic theme color            |
+| `helperText`     | `string`                                                                       | -         | Helper text below field      |
+| `counter`        | `boolean`                                                                      | `false`   | Show character counter       |
 
 ---
 
@@ -284,14 +289,16 @@ Dropdown selection field with native action sheets on mobile devices.
 
 **Props (Ionic-Specific):**
 
-| Prop          | Type                                     | Default          | Description                   |
-| ------------- | ---------------------------------------- | ---------------- | ----------------------------- |
-| `interface`   | `'action-sheet' \| 'alert' \| 'popover'` | `'action-sheet'` | Mobile selection UI           |
-| `multiple`    | `boolean`                                | `false`          | Enable multi-select           |
-| `placeholder` | `string`                                 | -                | Placeholder text              |
-| `cancelText`  | `string`                                 | `'Cancel'`       | Cancel button text            |
-| `okText`      | `string`                                 | `'OK'`           | OK button text                |
-| `mode`        | `'ios' \| 'md'`                          | -                | Force platform-specific style |
+| Prop             | Type                                                                           | Default          | Description           |
+| ---------------- | ------------------------------------------------------------------------------ | ---------------- | --------------------- |
+| `interface`      | `'action-sheet' \| 'alert' \| 'popover'`                                       | `'action-sheet'` | Mobile selection UI   |
+| `multiple`       | `boolean`                                                                      | `false`          | Enable multi-select   |
+| `placeholder`    | `string`                                                                       | -                | Placeholder text      |
+| `cancelText`     | `string`                                                                       | `'Cancel'`       | Cancel button text    |
+| `okText`         | `string`                                                                       | `'OK'`           | OK button text        |
+| `fill`           | `'solid' \| 'outline'`                                                         | `'solid'`        | Select fill style     |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                       | `'start'`        | Position of the label |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -                | Ionic theme color     |
 
 #### Radio
 
@@ -322,11 +329,9 @@ Radio button group for selecting a single option with mobile-friendly spacing.
 
 | Prop             | Type                                                                           | Default | Description               |
 | ---------------- | ------------------------------------------------------------------------------ | ------- | ------------------------- |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed'`                                                  | `'end'` | Position of option labels |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'end'` | Position of option labels |
 | `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification      |
-| `alignment`      | `'start' \| 'center'`                                                          | -       | Vertical alignment        |
 | `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color         |
-| `mode`           | `'ios' \| 'md'`                                                                | -       | Platform-specific style   |
 
 #### Checkbox
 
@@ -342,7 +347,7 @@ Boolean checkbox control optimized for touch interaction.
 {
   key: 'terms',
   type: 'checkbox',
-  checked: false,
+  value: false,
   label: 'I accept the terms and conditions',
   required: true,
 }
@@ -350,13 +355,11 @@ Boolean checkbox control optimized for touch interaction.
 
 **Props (Ionic-Specific):**
 
-| Prop             | Type                                                                           | Default | Description             |
-| ---------------- | ------------------------------------------------------------------------------ | ------- | ----------------------- |
-| `labelPlacement` | `'start' \| 'end'`                                                             | `'end'` | Position of label text  |
-| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification    |
-| `alignment`      | `'start' \| 'center'`                                                          | -       | Vertical alignment      |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color       |
-| `mode`           | `'ios' \| 'md'`                                                                | -       | Platform-specific style |
+| Prop             | Type                                                                           | Default | Description            |
+| ---------------- | ------------------------------------------------------------------------------ | ------- | ---------------------- |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'end'` | Position of label text |
+| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification   |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color      |
 
 #### Multi-Checkbox
 
@@ -386,13 +389,11 @@ Multiple checkbox selection field for choosing multiple options.
 
 **Props (Ionic-Specific):**
 
-| Prop             | Type                                                                           | Default | Description             |
-| ---------------- | ------------------------------------------------------------------------------ | ------- | ----------------------- |
-| `labelPlacement` | `'start' \| 'end' \| 'fixed'`                                                  | `'end'` | Position of labels      |
-| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification    |
-| `alignment`      | `'start' \| 'center'`                                                          | -       | Vertical alignment      |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color       |
-| `mode`           | `'ios' \| 'md'`                                                                | -       | Platform-specific style |
+| Prop             | Type                                                                           | Default | Description          |
+| ---------------- | ------------------------------------------------------------------------------ | ------- | -------------------- |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'end'` | Position of labels   |
+| `justify`        | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color    |
 
 ---
 
@@ -414,20 +415,19 @@ Slide toggle switch for boolean on/off selections with smooth animations.
 {
   key: 'notifications',
   type: 'toggle',
-  checked: false,
+  value: false,
   label: 'Enable notifications',
 }
 ```
 
 **Props (Ionic-Specific):**
 
-| Prop                | Type                                                                           | Default | Description             |
-| ------------------- | ------------------------------------------------------------------------------ | ------- | ----------------------- |
-| `labelPlacement`    | `'start' \| 'end' \| 'fixed'`                                                  | `'end'` | Position of label text  |
-| `justify`           | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification    |
-| `enableOnOffLabels` | `boolean`                                                                      | `false` | Show on/off labels      |
-| `color`             | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color       |
-| `mode`              | `'ios' \| 'md'`                                                                | -       | Platform-specific style |
+| Prop                | Type                                                                           | Default | Description            |
+| ------------------- | ------------------------------------------------------------------------------ | ------- | ---------------------- |
+| `labelPlacement`    | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'end'` | Position of label text |
+| `justify`           | `'start' \| 'end' \| 'space-between'`                                          | -       | Layout justification   |
+| `enableOnOffLabels` | `boolean`                                                                      | `false` | Show on/off labels     |
+| `color`             | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color      |
 
 #### Slider
 
@@ -465,14 +465,15 @@ Range slider control with pin display and snap-to-tick support.
 
 **Props (Ionic-Specific):**
 
-| Prop             | Type                                                                           | Default | Description                  |
-| ---------------- | ------------------------------------------------------------------------------ | ------- | ---------------------------- |
-| `pin`            | `boolean`                                                                      | `false` | Show value pin above knob    |
-| `ticks`          | `boolean`                                                                      | `false` | Show tick marks              |
-| `snaps`          | `boolean`                                                                      | `false` | Snap to tick marks           |
-| `activeBarStart` | `number`                                                                       | -       | Start position of active bar |
-| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -       | Ionic theme color            |
-| `mode`           | `'ios' \| 'md'`                                                                | -       | Platform-specific style      |
+| Prop             | Type                                                                           | Default   | Description                    |
+| ---------------- | ------------------------------------------------------------------------------ | --------- | ------------------------------ |
+| `pin`            | `boolean`                                                                      | `false`   | Show value pin above knob      |
+| `pinFormatter`   | `(value: number) => string \| number`                                          | -         | Custom formatter for pin value |
+| `ticks`          | `boolean`                                                                      | `false`   | Show tick marks                |
+| `snaps`          | `boolean`                                                                      | `false`   | Snap to tick marks             |
+| `dualKnobs`      | `boolean`                                                                      | `false`   | Enable dual knob mode          |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'` | -         | Ionic theme color              |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked'`                                     | `'start'` | Position of label              |
 
 #### Datepicker
 
@@ -506,14 +507,19 @@ Date and time selection with native mobile pickers for iOS and Android.
 
 **Props (Ionic-Specific):**
 
-| Prop                 | Type                                                   | Default    | Description              |
-| -------------------- | ------------------------------------------------------ | ---------- | ------------------------ |
-| `presentation`       | `'date' \| 'time' \| 'date-time' \| 'month' \| 'year'` | `'date'`   | Picker type              |
-| `placeholder`        | `string`                                               | -          | Placeholder text         |
-| `showDefaultButtons` | `boolean`                                              | `true`     | Show cancel/done buttons |
-| `cancelText`         | `string`                                               | `'Cancel'` | Cancel button text       |
-| `doneText`           | `string`                                               | `'Done'`   | Done button text         |
-| `mode`               | `'ios' \| 'md'`                                        | -          | Platform-specific style  |
+| Prop                   | Type                                                                                  | Default    | Description              |
+| ---------------------- | ------------------------------------------------------------------------------------- | ---------- | ------------------------ |
+| `presentation`         | `'date' \| 'time' \| 'date-time' \| 'time-date' \| 'month' \| 'month-year' \| 'year'` | `'date'`   | Picker type              |
+| `showDefaultButtons`   | `boolean`                                                                             | `true`     | Show cancel/done buttons |
+| `showDefaultTitle`     | `boolean`                                                                             | -          | Show default title       |
+| `showDefaultTimeLabel` | `boolean`                                                                             | -          | Show default time label  |
+| `showClearButton`      | `boolean`                                                                             | -          | Show clear button        |
+| `cancelText`           | `string`                                                                              | `'Cancel'` | Cancel button text       |
+| `doneText`             | `string`                                                                              | `'Done'`   | Done button text         |
+| `multiple`             | `boolean`                                                                             | `false`    | Allow multiple selection |
+| `preferWheel`          | `boolean`                                                                             | `false`    | Use wheel picker style   |
+| `size`                 | `'cover' \| 'fixed'`                                                                  | -          | Picker overlay size      |
+| `color`                | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger'`        | -          | Ionic theme color        |
 
 ---
 
@@ -584,8 +590,8 @@ Navigation buttons for multi-step (paged) forms with platform-adaptive styling.
     {
       key: 'step1',
       type: 'page',
-      title: 'Step 1',
       fields: [
+        { key: 'step1Title', type: 'text', label: 'Step 1', props: { elementType: 'h3' } },
         { key: 'name', type: 'input', value: '', label: 'Name', required: true },
         {
           type: 'next',
@@ -598,8 +604,8 @@ Navigation buttons for multi-step (paged) forms with platform-adaptive styling.
     {
       key: 'step2',
       type: 'page',
-      title: 'Step 2',
       fields: [
+        { key: 'step2Title', type: 'text', label: 'Step 2', props: { elementType: 'h3' } },
         { key: 'email', type: 'input', value: '', label: 'Email', required: true },
         { type: 'previous', key: 'back', label: 'Back' },
         { type: 'submit', key: 'submit', label: 'Submit', props: { color: 'primary' } },
@@ -633,8 +639,8 @@ Generic button for custom events with full Ionic styling support.
 import { actionButton } from '@ng-forge/dynamic-forms-ionic';
 import { FormEvent } from '@ng-forge/dynamic-forms';
 
-class SaveDraftEvent extends FormEvent {
-  static override readonly eventName = 'SaveDraft';
+class SaveDraftEvent implements FormEvent {
+  readonly type = 'save-draft' as const;
 }
 
 actionButton({

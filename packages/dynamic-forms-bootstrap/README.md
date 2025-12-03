@@ -4,64 +4,26 @@
 
 # @ng-forge/dynamic-forms-bootstrap
 
-Bootstrap 5 field components for `@ng-forge/dynamic-forms` - Build dynamic forms with native HTML elements styled with Bootstrap CSS classes.
+Bootstrap 5 field components for ng-forge dynamic forms.
 
-## Overview
-
-This library provides 13 field types that integrate Bootstrap 5 styling with the ng-forge dynamic form system. Unlike component libraries (Material, PrimeNG, Ionic), Bootstrap is a CSS framework, so these components use native HTML form elements with Bootstrap CSS classes.
-
-## Features
-
-- ✅ **13 Field Types**: Input, Select, Checkbox, Toggle, Button (4 types), Textarea, Radio, Multi-Checkbox, Datepicker, Slider
-- ✅ **Native HTML Elements**: Uses standard form elements with Bootstrap 5 CSS classes
-- ✅ **No JavaScript Required**: Most features work with CSS only (except datepicker with ng-bootstrap)
-- ✅ **Responsive by Default**: Bootstrap's responsive utilities work out of the box
-- ✅ **Grid Integration**: Easy integration with Bootstrap's 12-column grid system
-- ✅ **Validation Feedback**: Built-in styles for validation states (.is-invalid, .is-valid)
-- ✅ **Floating Labels**: Modern floating label design pattern
-- ✅ **Flexible Layouts**: Support for inline, horizontal, and stacked form layouts
-- ✅ **Type-Safe**: Full TypeScript support with module augmentation
+[![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-forms-bootstrap.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-bootstrap)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Installation
 
-```bash group="install" name="npm"
-npm install @ng-forge/dynamic-forms-bootstrap bootstrap
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-forge/dynamic-forms-bootstrap bootstrap
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-forge/dynamic-forms-bootstrap bootstrap
-```
-
-Optional: For advanced datepicker features
-
-```bash group="install" name="npm"
-npm install @ng-bootstrap/ng-bootstrap
-```
-
-```bash group="install" name="yarn"
-yarn add @ng-bootstrap/ng-bootstrap
-```
-
-```bash group="install" name="pnpm"
-pnpm add @ng-bootstrap/ng-bootstrap
+```bash
+npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-bootstrap bootstrap
 ```
 
 ## Setup
 
-### 1. Import Bootstrap styles in your `styles.scss`:
-
 ```scss
+// styles.scss
 @import 'bootstrap/dist/css/bootstrap.min.css';
 ```
 
-### 2. Configure providers in your app config:
-
 ```typescript
-import { ApplicationConfig } from '@angular/core';
+// app.config.ts
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
 
@@ -70,38 +32,24 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-### 3. Use the form in your components:
+## Usage
 
 ```typescript
-import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
-  selector: 'app-my-form',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submit)="onSubmit($event)" />`,
+  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
 })
 export class MyFormComponent {
   config = {
     fields: [
-      {
-        key: 'email',
-        type: 'input',
-        value: '',
-        label: 'Email',
-        required: true,
-        email: true,
-        props: {
-          type: 'email',
-          size: 'lg',
-          floatingLabel: true,
-        },
-      },
+      { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true, props: { floatingLabel: true } },
+      { type: 'submit', key: 'submit', label: 'Submit', props: { variant: 'primary' } },
     ],
   } as const satisfies FormConfig;
 
-  onSubmit(value: ExtractFormValue<typeof this.config>) {
-    // TypeScript knows: { email: string }
+  onSubmit(value: InferFormValue<typeof this.config.fields>) {
     console.log('Form submitted:', value);
   }
 }
@@ -109,155 +57,27 @@ export class MyFormComponent {
 
 ## Global Configuration
 
-You can configure default props for all Bootstrap form fields using the global configuration option:
-
 ```typescript
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(
-      ...withBootstrapFields({
-        floatingLabel: true,
-        size: 'lg',
-        variant: 'primary',
-      }),
-    ),
-  ],
-};
+provideDynamicForm(
+  ...withBootstrapFields({
+    floatingLabel: true,
+    size: 'lg',
+    variant: 'primary',
+  }),
+);
 ```
-
-### Configuration Options
-
-| Option          | Type                                                                                                      | Default     | Description                                      |
-| --------------- | --------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------ |
-| `size`          | `'sm' \| 'lg'`                                                                                            | `undefined` | Default size for form controls                   |
-| `floatingLabel` | `boolean`                                                                                                 | `false`     | Use floating labels for inputs by default        |
-| `variant`       | `'primary' \| 'secondary' \| 'success' \| 'danger' \| 'warning' \| 'info' \| 'light' \| 'dark' \| 'link'` | `'primary'` | Default variant for buttons                      |
-| `outline`       | `boolean`                                                                                                 | `false`     | Whether buttons should be outlined by default    |
-| `block`         | `boolean`                                                                                                 | `false`     | Whether buttons should be block-level by default |
-
-These settings will be applied to all Bootstrap form fields unless overridden by individual field props.
 
 ## Field Types
 
-All 13 field types are documented in detail in the main documentation. Here are the available types:
+Input, Select, Checkbox, Toggle, Button, Submit, Next, Previous, Textarea, Radio, Multi-Checkbox, Datepicker, Slider
 
-- **Input**: Text-based inputs (text, email, password, number, tel, url, search, date, time, etc.)
-- **Select**: Dropdown selection (single or multiple)
-- **Checkbox**: Single checkbox for boolean values
-- **Toggle**: Switch-style toggle
-- **Button**: Action button with custom events
-- **Submit**: Form submission button (auto-disabled when form invalid)
-- **Next**: Multi-step form next button
-- **Previous**: Multi-step form previous button
-- **Textarea**: Multi-line text input
-- **Radio**: Radio button group for single selection
-- **Multi-Checkbox**: Multiple checkboxes for array values
-- **Datepicker**: Date selection (native HTML5 or ng-bootstrap)
-- **Slider**: Range slider for numeric input
+## Documentation
 
-## Bootstrap-Specific Features
-
-### Sizing
-
-Most fields support `size` prop: `'sm'` | `'lg'` | default
-
-### Validation Feedback
-
-Automatic validation styling with `.is-invalid` and `.is-valid` classes.
-
-### Floating Labels
-
-Enable floating labels for input, textarea, and select with `floatingLabel: true`.
-
-### Button Variants
-
-Bootstrap button colors: `primary`, `secondary`, `success`, `danger`, `warning`, `info`, `light`, `dark`, `link`
-
-Use `outline: true` for outline variants.
-
-### Grid System Integration
-
-Use `className` to add Bootstrap grid classes:
-
-```typescript
-{
-  key: 'firstName',
-  type: 'input',
-  label: 'First Name',
-  className: 'col-md-6'
-}
-```
-
-## Customization
-
-All field components use customizable CSS variables for consistent styling across your application.
-
-### CSS Variables
-
-```scss
-:root {
-  // Spacing
-  --df-bs-field-gap: 0.5rem; // Gap between label, input, and hint
-
-  // Label styling
-  --df-bs-label-font-weight: 500; // Label font weight
-  --df-bs-label-color: inherit; // Label text color
-
-  // Hint text styling
-  --df-bs-hint-color: #6c757d; // Hint text color (default: Bootstrap secondary)
-  --df-bs-hint-font-size: 0.875rem; // Hint text size
-
-  // Error styling
-  --df-bs-error-color: #dc3545; // Error text color (default: Bootstrap danger)
-  --df-bs-error-font-size: 0.875rem; // Error text size
-}
-```
-
-### Component-Specific Styling
-
-All Bootstrap field components use these consistent classes:
-
-- `.df-bs-field` - Wrapper div for vertical layout
-- `.df-bs-label` - Label element styling
-- `.df-bs-hint` - Hint text element
-
-You can override these in your global styles or target specific components:
-
-```scss
-// Global customization
-.df-bs-field {
-  --df-bs-field-gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-// Component-specific
-df-bs-input {
-  --df-bs-label-font-weight: 600;
-}
-```
-
-## Testing
-
-Import testing utilities from the `/testing` entry point:
-
-```typescript
-import { FakeTranslationService, createTestTranslationService, waitForDFInit, delay } from '@ng-forge/dynamic-forms-bootstrap/testing';
-```
-
-## Running unit tests
-
-Run `nx test dynamic-forms-bootstrap` to execute the unit tests.
+- [Bootstrap Integration](https://ng-forge.github.io/ng-forge/docs/ui-libs-integrations/bootstrap)
+- [Field Types](https://ng-forge.github.io/ng-forge/docs/core/field-types)
+- [Validation](https://ng-forge.github.io/ng-forge/docs/core/validation)
+- [Conditional Logic](https://ng-forge.github.io/ng-forge/docs/core/conditional-logic)
 
 ## License
 
-MIT
-
-## Links
-
-- [Documentation](https://docs.ng-forge.com)
-- [GitHub](https://github.com/ng-forge/ng-forge)
-- [Bootstrap Documentation](https://getbootstrap.com/docs/5.3/)
+MIT © ng-forge

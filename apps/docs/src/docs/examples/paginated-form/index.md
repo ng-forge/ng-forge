@@ -212,7 +212,7 @@ export class PaginatedFormComponent {
             key: 'newsletter',
             type: 'checkbox',
             label: 'Subscribe to newsletter',
-            checked: true,
+            value: true,
           },
           {
             key: 'terms',
@@ -416,7 +416,6 @@ Show/hide pages based on user choices:
 {
   key: 'businessInfo',
   type: 'page',
-  title: 'Business Information',
   logic: [{
     type: 'hidden',
     condition: {

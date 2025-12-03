@@ -6,83 +6,126 @@ Declarative, lightweight forms for Angular 21+, powered by signal forms. Build c
 - 🎯 **Type-Safe or Dynamic** - Full TypeScript inference with `as const`, or load JSON configs at runtime
 - ⚡ **Zoneless Ready** - Built for Angular's zoneless future, works with or without Zone.js
 - 🔥 **Signal Forms Native** - Direct integration with `@angular/forms/signals`, not a wrapper
-- 🌍 **Production Ready** - Battle-tested with comprehensive validation, conditional logic, and i18n support
+- 🌍 **Production Ready** - Comprehensive validation, conditional logic, and i18n support
 
 ### Quick Example
 
 ```typescript
-import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { Component, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dynamic-forms';
+
+// 1. Define fields config separately for type inference
+const formFields = {
+  fields: [
+    {
+      key: 'email',
+      type: 'input',
+      value: '',
+      label: 'Email',
+      required: true,
+      email: true,
+    },
+    {
+      key: 'password',
+      type: 'input',
+      value: '',
+      label: 'Password',
+      required: true,
+      minLength: 8,
+      props: { type: 'password' },
+    },
+    {
+      key: 'accountType',
+      type: 'select',
+      value: 'personal',
+      label: 'Account Type',
+      options: [
+        { label: 'Personal', value: 'personal' },
+        { label: 'Business', value: 'business' },
+      ],
+    },
+    {
+      key: 'companyName',
+      type: 'input',
+      value: '',
+      label: 'Company Name',
+      logic: [
+        {
+          type: 'required',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'equals',
+            value: 'business',
+          },
+        },
+      ],
+    },
+    {
+      type: 'submit',
+      key: 'submit',
+      label: 'Create Account',
+      props: { color: 'primary' },
+    },
+  ],
+} as const satisfies FormConfig;
+
+// 2. Infer the form value type from fields
+type RegistrationForm = InferFormValue<typeof formFields.fields>;
 
 @Component({
   selector: 'app-registration',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
+  template: `<dynamic-form [config]="config" />`,
 })
 export class RegistrationComponent {
-  config = {
-    fields: [
-      {
-        key: 'email',
-        type: 'input',
-        value: '',
-        label: 'Email',
-        required: true,
-        email: true,
-      },
-      {
-        key: 'password',
-        type: 'input',
-        value: '',
-        label: 'Password',
-        required: true,
-        minLength: 8,
-        props: { type: 'password' },
-      },
-      {
-        key: 'accountType',
-        type: 'select',
-        value: 'personal' as const,
-        label: 'Account Type',
-        props: {
-          options: [
-            { label: 'Personal', value: 'personal' },
-            { label: 'Business', value: 'business' },
-          ],
-        },
-      },
-      {
-        key: 'companyName',
-        type: 'input',
-        value: '',
-        label: 'Company Name',
-        logic: [
-          {
-            type: 'required',
-            condition: {
-              type: 'fieldValue',
-              fieldPath: 'accountType',
-              operator: 'equals',
-              value: 'business',
-            },
-          },
-        ],
-      },
-      {
-        type: 'submit',
-        key: 'submit',
-        label: 'Create Account',
-        props: { color: 'primary' },
-      },
-    ],
-  } as const satisfies FormConfig;
+  private http = inject(HttpClient);
 
-  onSubmit(value: ExtractFormValue<typeof this.config>) {
-    // TypeScript knows: { email: string, password: string, accountType: 'personal' | 'business', companyName: string }
-    console.log('Account created:', value);
-  }
+  // 3. Compose full config with typed submission handler
+  config = {
+    ...formFields,
+    submission: {
+      action: (form: RegistrationForm) => {
+        // TypeScript knows: { email: string, password: string, accountType: string, companyName: string }
+        return this.http.post('/api/register', form);
+      },
+    },
+  };
 }
 ```
+
+#### Submission Options
+
+There are two ways to handle form submission:
+
+**1. Config-based (recommended)** - Define submission in the config for automatic loading states and server error handling. Supports both Observables and Promises:
+
+```typescript
+// Define fields separately for type inference
+const formFields = { fields: [...] } as const satisfies FormConfig;
+type FormValue = InferFormValue<typeof formFields.fields>;
+
+// Compose with submission - return Observable or Promise
+config = {
+  ...formFields,
+  submission: {
+    action: (form: FormValue) => this.http.post('/api/submit', form),
+  },
+};
+```
+
+**2. Output-based** - Use the `(submitted)` output for manual control:
+
+```typescript
+template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`
+
+onSubmit(value: FormValue) {
+  // Handle submission manually
+}
+```
+
+See **[Submission](../core/submission)** for full documentation on server error handling, button states, and more.
 
 **What you get:**
 
@@ -99,7 +142,7 @@ export class RegistrationComponent {
 
 ## Full Type Safety with Zero Type Annotations
 
-The killer feature: **TypeScript infers your entire form's type from the config.** No manual type definitions. No type assertions. Just pure inference.
+TypeScript infers your form's type from the config. No manual type definitions or type assertions needed.
 
 ```typescript
 const config = {
@@ -132,7 +175,7 @@ type FormValue = {
 };
 
 // In your submit handler:
-onSubmit(value: ExtractFormValue<typeof this.config>) {
+onSubmit(value: InferFormValue<typeof this.config.fields>) {
   // TypeScript knows the exact structure!
   value.username.toUpperCase(); // ✓ Valid
   value.age.toFixed(2);         // ✓ Valid
@@ -159,7 +202,7 @@ config = {
   ],
 } as const satisfies FormConfig;
 
-onSubmit(value: ExtractFormValue<typeof this.config>) {
+onSubmit(value: InferFormValue<typeof this.config.fields>) {
   value. // ← TypeScript autocomplete shows: email, password
   value.email. // ← Shows: string methods (charAt, substring, toLowerCase, ...)
   value.password. // ← Shows: string methods
@@ -188,11 +231,11 @@ Even your conditional expressions are type-checked:
 }
 ```
 
-## Why It's a Game-Changer
+## Key Capabilities
 
 ### ⚡ Native Signal Forms Integration
 
-Not a wrapper or polyfill - true integration with Angular 21's signal forms API. ng-forge dynamic forms maps your config directly to `required()`, `email()`, `min()`, `hidden()`, and other signal form validators.
+ng-forge maps your config directly to Angular 21's signal forms API—`required()`, `email()`, `min()`, `hidden()`, and other validators.
 
 ```typescript
 // Your config
@@ -216,7 +259,7 @@ provideDynamicForm(...withMaterialFields());
 provideDynamicForm(...withBootstrapFields());
 
 // Or use your custom components
-provideDynamicForm({ name: 'my-input', loadComponent: () => MyCustomInput });
+provideDynamicForm([{ name: 'my-input', loadComponent: () => MyCustomInput }]);
 ```
 
 ### 🔥 Complex Features, Simple API
@@ -260,13 +303,13 @@ provideDynamicForm({ name: 'my-input', loadComponent: () => MyCustomInput });
 }
 ```
 
-**Multi-Step Forms** - Complex wizards in minutes:
+**Multi-Step Forms** - Wizard-style forms with page navigation:
 
 ```typescript
 {
   fields: [
-    { key: 'step1', type: 'page', title: 'Personal Info', fields: [...] },
-    { key: 'step2', type: 'page', title: 'Payment', fields: [...] },
+    { key: 'step1', type: 'page', fields: [/* personal info fields */] },
+    { key: 'step2', type: 'page', fields: [/* payment fields */] },
   ],
 }
 ```
@@ -283,187 +326,81 @@ provideDynamicForm({ name: 'my-input', loadComponent: () => MyCustomInput });
 }
 ```
 
-### 🚀 Simple Custom Field Components
-
-Creating custom field components is straightforward - no `ControlValueAccessor` boilerplate required. Just use Angular's signal forms primitives:
-
-{% raw %}
-
-```typescript
-// Create a custom field component with minimal code
-@Component({
-  selector: 'df-star-rating',
-  template: `
-    <label>{{ label() }}</label>
-    <div class="stars">
-      @for (star of [1, 2, 3, 4, 5]; track star) {
-        <button (click)="rating.set(star)" type="button">
-          {{ star <= rating() ? '⭐' : '☆' }}
-        </button>
-      }
-    </div>
-  `,
-})
-export class StarRatingComponent {
-  label = input<string>();
-  rating = model<number>(0); // Signal forms integration - that's it!
-}
-```
-
-{% endraw %}
-
-**No `writeValue()`, no `registerOnChange()`, no `registerOnTouched()`.** Just signals and Angular's `Field` directive.
-
-## Real-World Example: E-Commerce Checkout
-
-Here's a multi-step checkout flow - **fully typed, validated, and beautiful** - in under 60 lines:
-
-```typescript
-@Component({
-  selector: 'app-checkout',
-  imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submitted)="processOrder($event)" />`,
-})
-export class CheckoutComponent {
-  config = {
-    fields: [
-      {
-        key: 'customer',
-        type: 'page',
-        title: 'Customer Information',
-        fields: [
-          { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
-          {
-            key: 'name',
-            type: 'row',
-            fields: [
-              { key: 'firstName', type: 'input', value: '', label: 'First Name', required: true },
-              { key: 'lastName', type: 'input', value: '', label: 'Last Name', required: true },
-            ],
-          },
-          { type: 'next', key: 'next1', label: 'Continue to Shipping' },
-        ],
-      },
-      {
-        key: 'shipping',
-        type: 'page',
-        title: 'Shipping Address',
-        fields: [
-          { key: 'address', type: 'input', value: '', label: 'Street Address', required: true },
-          { key: 'city', type: 'input', value: '', label: 'City', required: true },
-          {
-            key: 'region',
-            type: 'row',
-            fields: [
-              {
-                key: 'state',
-                type: 'select',
-                value: '',
-                label: 'State',
-                required: true,
-                options: STATES,
-                props: { placeholder: 'Select state' },
-              },
-              { key: 'zip', type: 'input', value: '', label: 'ZIP', required: true, pattern: '^[0-9]{5}$' },
-            ],
-          },
-          {
-            key: 'nav',
-            type: 'row',
-            fields: [
-              { type: 'previous', key: 'back1', label: 'Back' },
-              { type: 'next', key: 'next2', label: 'Continue to Payment' },
-            ],
-          },
-        ],
-      },
-      {
-        key: 'payment',
-        type: 'page',
-        title: 'Payment Details',
-        fields: [
-          { key: 'cardNumber', type: 'input', value: '', label: 'Card Number', required: true },
-          {
-            key: 'cardInfo',
-            type: 'row',
-            fields: [
-              { key: 'expiry', type: 'input', value: '', label: 'MM/YY', required: true },
-              { key: 'cvv', type: 'input', value: '', label: 'CVV', required: true },
-            ],
-          },
-          {
-            key: 'nav',
-            type: 'row',
-            fields: [
-              { type: 'previous', key: 'back2', label: 'Back' },
-              { type: 'submit', key: 'submit', label: 'Complete Purchase', props: { color: 'primary' } },
-            ],
-          },
-        ],
-      },
-    ],
-  } as const satisfies FormConfig;
-
-  processOrder(order: ExtractFormValue<typeof this.config>) {
-    // TypeScript automatically infers:
-    // {
-    //   customer: { email: string, name: { firstName: string, lastName: string } },
-    //   shipping: { address: string, city: string, region: { state: string, zip: string } },
-    //   payment: { cardNumber: string, cardInfo: { expiry: string, cvv: string } }
-    // }
-
-    // Full autocomplete and type safety!
-    order.customer.email.toLowerCase();
-    order.shipping.region.state;
-    order.payment.cardInfo.cvv;
-
-    console.log('Processing order:', order);
-  }
-}
-```
-
-**What you get:**
-
-- ✅ 3-page wizard with navigation
-- ✅ Complete validation (email, patterns, required)
-- ✅ Row layouts for compact fields
-- ✅ Full type inference for nested structure
-- ✅ Back/Next navigation
-- ✅ **Zero** subscriptions, **zero** cleanup
-
 ## Extend with Custom Field Types
 
-Need a custom control? Create one in minutes with no `ControlValueAccessor` boilerplate:
+Need a custom control? Create one following the same pattern as the built-in field components:
 
 {% raw %}
 
 ```typescript
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
+import {
+  createResolvedErrorsSignal,
+  DynamicText,
+  DynamicTextPipe,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-forms';
+import { AsyncPipe } from '@angular/common';
+
 // 1. Create your field component
 @Component({
   selector: 'app-star-rating',
+  imports: [DynamicTextPipe, AsyncPipe],
   template: `
-    <label>{{ label() }}</label>
+    @let f = field();
+    @if (label(); as label) {
+      <label>{{ label | dynamicText | async }}</label>
+    }
     <div class="stars">
-      @for (star of [1,2,3,4,5]; track star) {
-        <button (click)="rating.set(star)" type="button">
-          {{ star <= rating() ? '⭐' : '☆' }}
+      @for (star of [1, 2, 3, 4, 5]; track star) {
+        <button (click)="setRating(star)" type="button">
+          {{ star <= f().value() ? '⭐' : '☆' }}
         </button>
       }
     </div>
+    @for (error of errorsToDisplay(); track error.kind) {
+      <span class="error">{{ error.message }}</span>
+    }
   `,
   styles: `
     .stars button { border: none; background: none; font-size: 24px; cursor: pointer; }
+    .error { color: red; font-size: 12px; }
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[id]': 'key()',
+    '[attr.data-testid]': 'key()',
+  },
 })
-export class StarRatingComponent {
-  label = input<string>();
-  rating = model<number>(0); // That's it! No ControlValueAccessor needed
+export default class StarRatingComponent {
+  // Required inputs - the form passes these automatically
+  readonly field = input.required<FieldTree<number>>();
+  readonly key = input.required<string>();
+
+  // Optional inputs for customization
+  readonly label = input<DynamicText>();
+  readonly className = input<string>('');
+  readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
+
+  // Validation handling
+  readonly resolvedErrors = createResolvedErrorsSignal(
+    this.field,
+    this.validationMessages,
+    this.defaultValidationMessages
+  );
+  readonly showErrors = shouldShowErrors(this.field);
+  readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  setRating(rating: number): void {
+    this.field()().value.set(rating);
+  }
 }
 
-// 2. Register it
-provideDynamicForm([
-  { name: 'star-rating', loadComponent: () => StarRatingComponent }
-]);
+// 2. Register it with provideDynamicForm
+provideDynamicForm([{ name: 'star-rating', loadComponent: () => StarRatingComponent }]);
 
 // 3. Use it in your forms
 {
@@ -476,7 +413,7 @@ provideDynamicForm([
 
 {% endraw %}
 
-**No** `writeValue()`, **no** `registerOnChange()`, **no** `registerOnTouched()`. Just signals.
+Custom fields receive a `FieldTree` signal and interact directly with `field()().value` for reads and writes.
 
 ## Choose Your UI Framework
 
@@ -527,4 +464,4 @@ provideDynamicForm([
 
 ---
 
-**Ready to transform your Angular forms?** Check out the [Installation](../installation) guide to get started!
+See the [Installation](../installation) guide to get started.

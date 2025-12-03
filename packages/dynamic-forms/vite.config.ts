@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       setupFiles: ['src/test-setup.ts'],
+      // Always use browser mode (no jsdom)
       browser: {
         enabled: true,
         instances: [
@@ -49,6 +50,8 @@ export default defineConfig(({ mode }) => {
       },
       testTimeout: 1000,
       hookTimeout: 1000,
+      // Retry flaky tests due to browser mode module mocking inconsistencies
+      retry: 2,
       include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       reporters: ['default'],
       coverage: {

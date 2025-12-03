@@ -19,35 +19,26 @@ Configure form submission with the `submission` property:
 ```typescript
 import { Component, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-import { FormConfig } from '@ng-forge/dynamic-forms';
+import { FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
+
+const formFields = {
+  fields: [
+    { type: 'input', key: 'email', label: 'Email', value: '', required: true, email: true },
+    { type: 'input', key: 'password', label: 'Password', value: '', required: true, props: { type: 'password' } },
+    { type: 'submit', key: 'submit', label: 'Sign In' },
+  ],
+} as const satisfies FormConfig;
+
+type LoginForm = InferFormValue<typeof formFields.fields>;
 
 @Component({...})
 export class LoginFormComponent {
   private http = inject(HttpClient);
 
-  config: FormConfig = {
-    fields: [
-      { type: 'input', key: 'email', label: 'Email', validation: ['required', 'email'] },
-      { type: 'input', key: 'password', label: 'Password', props: { type: 'password' }, validation: ['required'] },
-      { type: 'button', key: 'submit', label: 'Sign In', buttonType: 'submit' },
-    ],
+  config = {
+    ...formFields,
     submission: {
-      action: async (form) => {
-        const value = form().value();
-
-        try {
-          await firstValueFrom(this.http.post('/api/login', value));
-          return undefined; // Success - no errors
-        } catch (error) {
-          // Return server errors to apply to form fields
-          const errors = error.error as { field: string; message: string }[];
-          return errors.map((e) => ({
-            field: form[e.field as keyof typeof form],
-            error: { kind: 'server', message: e.message },
-          }));
-        }
-      },
+      action: (form: LoginForm) => this.http.post('/api/login', form),
     },
   };
 }
@@ -55,37 +46,36 @@ export class LoginFormComponent {
 
 ## SubmissionConfig
 
-The `submission.action` function receives the form's `FieldTree` and returns a Promise:
+The `submission.action` function receives the typed form value and can return an Observable or Promise:
 
-| Return Value             | Meaning                           |
-| ------------------------ | --------------------------------- |
-| `undefined` or `null`    | Successful submission             |
-| `TreeValidationResult[]` | Array of server validation errors |
+| Return Value           | Meaning                                    |
+| ---------------------- | ------------------------------------------ |
+| Completes successfully | Successful submission                      |
+| `TreeValidationResult` | Server validation errors (single or array) |
 
-While the action is executing, `form().submitting()` is `true`, enabling automatic button disabling and loading states.
+**Note:** `TreeValidationResult` from Angular Signal Forms supports both single errors and arrays. You can return a single error object or an array of errors.
+
+While the action is executing, the form is in a submitting state, enabling automatic button disabling and loading states.
 
 ### Server Error Handling
 
-Return validation errors to apply them to specific fields:
+Return validation errors to apply them to specific fields using `catchError`:
 
 ```typescript
+import { catchError, of } from 'rxjs';
+
 submission: {
-  action: async (form) => {
-    try {
-      await firstValueFrom(this.http.post('/api/register', form().value()));
-      return undefined;
-    } catch (error) {
+  action: (form: FormValue) => this.http.post('/api/register', form).pipe(
+    catchError((error) => {
       if (error.error?.code === 'EMAIL_EXISTS') {
-        return [
-          {
-            field: form.email,
-            error: { kind: 'server', message: 'Email already exists' },
-          },
-        ];
+        return of([{
+          field: 'email',
+          error: { kind: 'server', message: 'Email already exists' },
+        }]);
       }
       throw error; // Re-throw unexpected errors
-    }
-  },
+    }),
+  ),
 }
 ```
 
@@ -129,16 +119,17 @@ Override form-level defaults on individual buttons using the `logic` array:
 
 ```typescript
 {
-  type: 'button',
+  type: 'submit',
   key: 'submit',
   label: 'Submit',
-  buttonType: 'submit',
   logic: [
     { type: 'disabled', condition: 'formInvalid' },
     { type: 'disabled', condition: 'formSubmitting' }
   ]
 }
 ```
+
+**Note:** `type: 'submit'` is a UI-integration convenience type that pre-configures the button with `SubmitEvent`. Use `type: 'button'` with `event: SubmitEvent` for the core API.
 
 ### FormStateCondition
 
@@ -164,17 +155,24 @@ Combine form state conditions with custom expressions:
 
 ```typescript
 {
-  type: 'button',
+  type: 'submit',
   key: 'submit',
   label: 'Submit',
-  buttonType: 'submit',
   logic: [
     // Disable when form is invalid
     { type: 'disabled', condition: 'formInvalid' },
     // Disable when submitting
     { type: 'disabled', condition: 'formSubmitting' },
     // Also disable if terms not accepted
-    { type: 'disabled', condition: { '===': [{ var: 'acceptTerms' }, false] } }
+    {
+      type: 'disabled',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'acceptTerms',
+        operator: 'equals',
+        value: false,
+      }
+    }
   ]
 }
 ```
@@ -185,51 +183,11 @@ If you prefer manual control, use the `(submitted)` output instead:
 
 ```typescript
 @Component({
-  template: ` <dynamic-form [config]="config" [value]="value" (submitted)="onSubmit($event)" /> `,
+  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
 })
 export class MyFormComponent {
-  async onSubmit(event: { form: FieldTree<FormValue>; value: FormValue }) {
-    try {
-      await this.api.submit(event.value);
-    } catch (error) {
-      // Handle errors manually
-    }
+  onSubmit(value: FormValue) {
+    this.http.post('/api/submit', value).subscribe();
   }
 }
-```
-
-## Best Practices
-
-**Use submission config for server interactions:**
-
-- Automatic loading state management
-- Built-in server error handling
-- Button states managed automatically
-
-**Configure form-level defaults:**
-
-- Set defaults in `options.submitButton` for consistent behavior
-- Override on specific buttons only when needed
-
-**Handle errors gracefully:**
-
-- Return validation errors for user-correctable issues
-- Re-throw unexpected errors for error boundaries
-
-**Keep actions simple:**
-
-```typescript
-// Good - focused on submission
-action: async (form) => {
-  const result = await firstValueFrom(this.http.post<{ errors?: [] }>('/api/submit', form().value()));
-  return result.errors ?? undefined;
-},
-
-// Avoid - mixing concerns
-action: async (form) => {
-  analytics.track('submit'); // Side effect
-  showLoadingSpinner(); // UI concern
-  await firstValueFrom(this.http.post('/api/submit', form().value()));
-  redirectToSuccess(); // Navigation
-},
 ```

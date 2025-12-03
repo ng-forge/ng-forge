@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
 import { FieldDef } from '../definitions/base/field-def';
 import { FieldWithValidation } from '../definitions/base/field-with-validation';
@@ -395,27 +395,25 @@ describe('form-mapping', () => {
         });
       });
 
-      it('should log custom form configuration', () => {
+      it('should handle custom form configuration without throwing', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ email: '' });
-          const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
-          const fieldDef: any = {
+          const fieldDef: FieldDef = {
             key: 'email',
             type: 'input',
             customFormConfig: { custom: true },
-          };
+          } as FieldDef & { customFormConfig: unknown };
 
           const formInstance = form(
             formValue,
             schema<typeof formValue>((path) => {
-              mapFieldToForm(fieldDef, path.email);
+              expect(() => {
+                mapFieldToForm(fieldDef, path.email);
+              }).not.toThrow();
             }),
           );
           rootFormRegistry.registerRootForm(formInstance);
-
-          expect(consoleLogSpy).toHaveBeenCalledWith('Custom form configuration detected for field:', 'email');
-          consoleLogSpy.mockRestore();
         });
       });
 

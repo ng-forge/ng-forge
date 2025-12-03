@@ -377,29 +377,6 @@ describe('Signal Forms Integration Types', () => {
       expect(config.schemas).toHaveLength(2);
     });
 
-    it('should create field config with dynamic properties', () => {
-      const config: FieldWithValidation = {
-        dynamicProperties: {
-          placeholder: {
-            type: 'javascript',
-            expression: 'formValue.language === "es" ? "Ingrese su email" : "Enter your email"',
-          },
-          maxLength: {
-            type: 'fieldValue',
-            fieldPath: 'accountType',
-            operator: 'equals',
-            value: 'premium',
-          },
-        },
-      };
-
-      expect(config.dynamicProperties?.placeholder).toBeDefined();
-      expect(typeof config.dynamicProperties?.placeholder).toBe('object');
-
-      expect(config.dynamicProperties?.maxLength).toBeDefined();
-      expect(typeof config.dynamicProperties?.maxLength).toBe('object');
-    });
-
     it('should create comprehensive field config', () => {
       const config: FieldWithValidation = {
         validators: [{ type: 'required' }, { type: 'email' }],
@@ -415,20 +392,11 @@ describe('Signal Forms Integration Types', () => {
           },
         ],
         schemas: [{ type: 'apply', schema: 'standardEmail' }],
-        dynamicProperties: {
-          disabled: {
-            type: 'fieldValue',
-            fieldPath: 'formLocked',
-            operator: 'equals',
-            value: true,
-          },
-        },
       };
 
       expect(config.validators).toHaveLength(2);
       expect(config.logic).toHaveLength(1);
       expect(config.schemas).toHaveLength(1);
-      expect(config.dynamicProperties?.disabled).toBeDefined();
     });
   });
 

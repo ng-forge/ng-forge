@@ -43,7 +43,7 @@ import { DynamicForm } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-user-profile-form',
   imports: [DynamicForm],
-  template: ` <dynamic-form [config]="formConfig" (submitted)="onSubmit($event)" /> `,
+  template: `<dynamic-form [config]="formConfig" />`,
 })
 export class UserProfileFormComponent {
   formConfig = {
@@ -58,7 +58,6 @@ export class UserProfileFormComponent {
       {
         key: 'address',
         type: 'group',
-        label: 'Address Information',
         fields: [
           {
             key: 'street',
@@ -94,19 +93,19 @@ export class UserProfileFormComponent {
       },
     ],
   };
+}
+```
 
-  onSubmit(formValue: any) {
-    console.log('Form submitted:', formValue);
-    // Output:
-    // {
-    //   name: 'John Doe',
-    //   address: {
-    //     street: '123 Main St',
-    //     city: 'Springfield',
-    //     state: 'IL',
-    //     zip: '62701'
-    //   }
-    // }
+This produces a form value with nested structure:
+
+```typescript
+{
+  name: 'John Doe',
+  address: {
+    street: '123 Main St',
+    city: 'Springfield',
+    state: 'IL',
+    zip: '62701'
   }
 }
 ```
@@ -117,11 +116,11 @@ Group fields can be used within:
 
 - Pages (top-level container)
 - Rows (for horizontal layouts)
+- Array fields (for creating object arrays where each array item is an object)
 
 Groups **cannot** be nested inside:
 
-- Other group fields
-- Array fields
+- Other group fields (no nested groups)
 
 ## Allowed Children
 

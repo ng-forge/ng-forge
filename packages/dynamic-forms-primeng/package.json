@@ -1,20 +1,34 @@
 {
   "name": "@ng-forge/dynamic-forms-primeng",
-  "type": "module",
   "version": "0.0.1",
+  "description": "PrimeNG integration for @ng-forge/dynamic-forms. Pre-built PrimeNG form components.",
+  "type": "module",
+  "license": "MIT",
+  "author": "ng-forge",
+  "homepage": "https://ng-forge.github.io/ng-forge/docs/ui-libs-integrations/primeng",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ng-forge/ng-forge.git",
+    "directory": "packages/dynamic-forms-primeng"
+  },
+  "bugs": {
+    "url": "https://github.com/ng-forge/ng-forge/issues"
+  },
+  "keywords": [
+    "angular",
+    "primeng",
+    "primefaces",
+    "forms",
+    "dynamic-forms",
+    "form-builder",
+    "ng-forge"
+  ],
   "peerDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.1.1",
-    "@angular/core": "^21.0.1",
-    "@angular/common": "^21.0.1",
-    "@angular/forms": "^21.0.1",
-    "@angular/platform-browser": "^21.0.1",
-    "@ng-forge/dynamic-forms": "^0.0.1",
-    "@nx/vite": "^22.1.0",
-    "@vitest/browser-playwright": "^4.0.14",
-    "lodash-es": "^4.17.21",
-    "ngxtension": "^7.0.2",
-    "primeng": "^20.3.0",
-    "rxjs": "~7.8.0",
-    "vite": "^7.1.11"
+    "@angular/common": ">=19.0.0",
+    "@angular/core": ">=19.0.0",
+    "@angular/forms": ">=19.0.0",
+    "@ng-forge/dynamic-forms": "0.0.1",
+    "primeng": ">=17.0.0",
+    "rxjs": ">=7.0.0"
   }
 }

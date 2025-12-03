@@ -44,7 +44,7 @@ export class FieldRendererDirective implements OnDestroy {
 
     // Render each field component directly into the form
     fields.forEach((fieldComponent) => {
-      if (fieldComponent && fieldComponent.location) {
+      if (fieldComponent && fieldComponent.location && fieldComponent.location.nativeElement) {
         // Append the field component's DOM element to the form
         this.renderer.appendChild(this.elementRef.nativeElement, fieldComponent.location.nativeElement);
 

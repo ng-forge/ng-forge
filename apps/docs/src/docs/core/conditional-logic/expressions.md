@@ -44,47 +44,23 @@ Check a specific field's value - the most common expression type.
 
 ### formValue
 
-Use JavaScript expressions to check the entire form state.
+Compare the entire form value object against a specific value using operators.
 
 ```typescript
 {
   type: 'formValue',
-  expression: 'formValue.hasShipping && formValue.country === "US"',
+  operator: 'equals',
+  value: { status: 'active', role: 'admin' },
 }
 ```
 
-**Use when:** Complex logic involving multiple fields
+**Use when:** Checking if the entire form matches a specific state
 
-**Example:**
-
-```typescript
-{
-  key: 'stateProvince',
-  type: 'select',
-  value: '',
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'formValue',
-      expression: 'formValue.country !== "US" && formValue.country !== "CA"',
-    },
-  }],
-}
-```
-
-**Safe member access:** Accessing nested properties on `null` or `undefined` returns `undefined` (no errors thrown):
-
-```typescript
-{
-  type: 'formValue',
-  // Safe even when user, profile, or preferences is null/undefined
-  expression: 'formValue.user.profile.preferences.notifications === true',
-}
-```
+**Note:** For complex logic involving multiple fields with JavaScript expressions, use `javascript` or `custom` type instead.
 
 ### javascript
 
-Custom JavaScript validation on the field value.
+JavaScript expressions with access to `fieldValue` (current field) and `formValue` (entire form).
 
 ```typescript
 {
@@ -93,11 +69,12 @@ Custom JavaScript validation on the field value.
 }
 ```
 
-**Use when:** Custom logic on the current field
+**Use when:** Custom logic on field value or complex multi-field conditions
 
-**Example:**
+**Examples:**
 
 ```typescript
+// Check current field value
 {
   key: 'eventDate',
   type: 'datepicker',
@@ -109,6 +86,30 @@ Custom JavaScript validation on the field value.
       expression: 'new Date(fieldValue) < new Date()',
     },
   }],
+}
+
+// Check multiple form fields (replaces old formValue expression pattern)
+{
+  key: 'stateProvince',
+  type: 'select',
+  value: '',
+  logic: [{
+    type: 'hidden',
+    condition: {
+      type: 'javascript',
+      expression: 'formValue.country !== "US" && formValue.country !== "CA"',
+    },
+  }],
+}
+```
+
+**Safe member access:** Accessing nested properties on `null` or `undefined` returns `undefined` (no errors thrown):
+
+```typescript
+{
+  type: 'javascript',
+  // Safe even when user, profile, or preferences is null/undefined
+  expression: 'formValue.user.profile.preferences.notifications === true',
 }
 ```
 
@@ -232,19 +233,6 @@ Check if string/array contains value.
 }
 ```
 
-#### notContains
-
-Check if string/array doesn't contain value.
-
-```typescript
-{
-  type: 'fieldValue',
-  fieldPath: 'username',
-  operator: 'notContains',
-  value: 'admin',
-}
-```
-
 #### startsWith
 
 Check if string starts with value.
@@ -281,34 +269,6 @@ Regular expression match.
   fieldPath: 'zipCode',
   operator: 'matches',
   value: '^[0-9]{5}$',
-}
-```
-
-### Array Operators
-
-#### in
-
-Value is in array.
-
-```typescript
-{
-  type: 'fieldValue',
-  fieldPath: 'role',
-  operator: 'in',
-  value: ['admin', 'moderator', 'owner'],
-}
-```
-
-#### notIn
-
-Value is not in array.
-
-```typescript
-{
-  type: 'fieldValue',
-  fieldPath: 'status',
-  operator: 'notIn',
-  value: ['banned', 'suspended', 'deleted'],
 }
 ```
 
@@ -428,25 +388,6 @@ At least one condition must be true.
 }
 ```
 
-Better version using `in` operator:
-
-```typescript
-{
-  key: 'adminPanel',
-  type: 'group',
-  label: 'Administration',
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'fieldValue',
-      fieldPath: 'role',
-      operator: 'notIn',
-      value: ['admin', 'owner'],
-    },
-  }],
-}
-```
-
 ### Nested Logic
 
 Combine AND/OR logic for complex conditions.
@@ -544,10 +485,21 @@ Hidden for free accounts OR unverified accounts.
           value: true,
         },
         {
-          type: 'fieldValue',
-          fieldPath: 'country',
-          operator: 'in',
-          value: ['US', 'CA'],
+          type: 'or',
+          conditions: [
+            {
+              type: 'fieldValue',
+              fieldPath: 'country',
+              operator: 'equals',
+              value: 'US',
+            },
+            {
+              type: 'fieldValue',
+              fieldPath: 'country',
+              operator: 'equals',
+              value: 'CA',
+            },
+          ],
         },
       ],
     },
@@ -565,10 +517,27 @@ Hidden for free accounts OR unverified accounts.
   logic: [{
     type: 'readonly',
     condition: {
-      type: 'fieldValue',
-      fieldPath: 'orderStatus',
-      operator: 'in',
-      value: ['shipped', 'delivered', 'cancelled'],
+      type: 'or',
+      conditions: [
+        {
+          type: 'fieldValue',
+          fieldPath: 'orderStatus',
+          operator: 'equals',
+          value: 'shipped',
+        },
+        {
+          type: 'fieldValue',
+          fieldPath: 'orderStatus',
+          operator: 'equals',
+          value: 'delivered',
+        },
+        {
+          type: 'fieldValue',
+          fieldPath: 'orderStatus',
+          operator: 'equals',
+          value: 'cancelled',
+        },
+      ],
     },
   }],
 }
@@ -577,27 +546,6 @@ Hidden for free accounts OR unverified accounts.
 Order items become read-only once order is shipped, delivered, or cancelled.
 
 ## Best Practices
-
-**Use the simplest operator:**
-
-```typescript
-// ✅ Good - Simple and clear
-{
-  type: 'fieldValue',
-  fieldPath: 'role',
-  operator: 'in',
-  value: ['admin', 'owner'],
-}
-
-// ❌ Avoid - Unnecessarily complex
-{
-  type: 'or',
-  conditions: [
-    { type: 'fieldValue', fieldPath: 'role', operator: 'equals', value: 'admin' },
-    { type: 'fieldValue', fieldPath: 'role', operator: 'equals', value: 'owner' },
-  ],
-}
-```
 
 **Keep conditions readable:**
 
@@ -621,8 +569,17 @@ Order items become read-only once order is shipped, delivered, or cancelled.
 
 ```typescript
 interface ConditionalExpression {
-  type: 'fieldValue' | 'formValue' | 'javascript' | 'custom';
+  /** Expression type - includes 'and' and 'or' for combining conditions */
+  type: 'fieldValue' | 'formValue' | 'javascript' | 'custom' | 'and' | 'or';
+
+  /** Field path for fieldValue type */
   fieldPath?: string;
+
+  /**
+   * Comparison operator
+   * - For 'fieldValue': compares field at fieldPath against value
+   * - For 'formValue': compares entire form object against value
+   */
   operator?:
     | 'equals'
     | 'notEquals'
@@ -631,24 +588,38 @@ interface ConditionalExpression {
     | 'greaterOrEqual'
     | 'lessOrEqual'
     | 'contains'
-    | 'notContains'
     | 'startsWith'
     | 'endsWith'
-    | 'matches'
-    | 'in'
-    | 'notIn';
+    | 'matches';
+
+  /** Value to compare against (for fieldValue/formValue with operator) */
   value?: unknown;
+
+  /**
+   * JavaScript expression string
+   * - For 'javascript': Has access to fieldValue and formValue
+   * - For 'custom': Name of registered custom function
+   */
   expression?: string;
-  conditions?: {
-    type: 'and' | 'or';
-    expressions: ConditionalExpression[];
-  };
+
+  /** Array of sub-conditions for 'and' and 'or' types */
+  conditions?: ConditionalExpression[];
 }
 ```
 
+**Expression types summary:**
+
+| Type         | Uses                             | Purpose                                        |
+| ------------ | -------------------------------- | ---------------------------------------------- |
+| `fieldValue` | `fieldPath`, `operator`, `value` | Compare a specific field's value               |
+| `formValue`  | `operator`, `value`              | Compare entire form object                     |
+| `javascript` | `expression`                     | Custom JS with `fieldValue`/`formValue` access |
+| `custom`     | `expression`                     | Call registered custom function                |
+| `and`/`or`   | `conditions`                     | Combine multiple conditions                    |
+
 ## Related
 
-- **[Conditional Logic Basics](../basics/)** - Getting started
+- **[Conditional Logic](../)** - Getting started
 - **[Examples](../examples/)** - Real-world patterns
 - **[Validation](../../validation/)** - Conditional validation
 - **[Type Safety](../../type-safety/)** - TypeScript integration

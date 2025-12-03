@@ -29,14 +29,3 @@ export function isRowField(field: FieldDef<any>): field is RowField {
 }
 
 export type RowComponent = FieldComponent<RowField<RowAllowedChildren[]>>;
-
-/**
- * Row child field with column layout properties
- */
-export interface RowChildField extends Omit<FieldDef<any>, 'col'> {
-  col?: {
-    span?: number;
-    start?: number;
-    end?: number;
-  };
-}

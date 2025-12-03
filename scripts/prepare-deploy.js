@@ -18,7 +18,7 @@
  *     └── ionic/              (Ionic examples)
  */
 
-import { cpSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -54,6 +54,22 @@ try {
 } catch (error) {
   console.error('   ❌ Failed to copy docs app:', error.message);
   process.exit(1);
+}
+
+// Copy index.csr.html to index.html for SPA fallback on GitHub Pages
+// Angular SSR generates index.csr.html as the client-side rendering fallback.
+// GitHub Pages needs this at the root as index.html to handle the SPA routing.
+const indexCsrPath = join(deployDir, 'index.csr.html');
+const indexHtmlPath = join(deployDir, 'index.html');
+if (existsSync(indexCsrPath)) {
+  console.log('📄 Creating index.html from index.csr.html for SPA fallback...');
+  try {
+    copyFileSync(indexCsrPath, indexHtmlPath);
+    console.log('   ✅ index.html created');
+  } catch (error) {
+    console.error('   ❌ Failed to create index.html:', error.message);
+    process.exit(1);
+  }
 }
 
 // Create examples directory

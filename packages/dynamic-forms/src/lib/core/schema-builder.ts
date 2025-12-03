@@ -361,6 +361,12 @@ export function fieldsToDefaultValues<TModel = unknown>(fields: FieldDef<any>[],
   for (const field of fields) {
     if (!field.key) continue;
 
+    // Skip flatten fields (row/page) at top level - they are presentational containers
+    const valueHandling = getFieldValueHandling(field.type, registry);
+    if (valueHandling === 'flatten') {
+      continue;
+    }
+
     const value = getFieldDefaultValue(field, registry);
     if (value !== undefined) {
       defaultValues[field.key] = value;

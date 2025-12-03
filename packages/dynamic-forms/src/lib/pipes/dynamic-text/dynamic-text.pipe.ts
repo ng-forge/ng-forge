@@ -1,4 +1,5 @@
-import { isSignal, Pipe, PipeTransform } from '@angular/core';
+import { inject, Injector, isSignal, Pipe, PipeTransform } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { isObservable, Observable, of } from 'rxjs';
 import { DynamicText } from '../../models/types/dynamic-text';
 
@@ -9,18 +10,18 @@ import { DynamicText } from '../../models/types/dynamic-text';
  * Supports:
  * - Static strings (pass-through)
  * - Observables (subscribed internally)
- * - Signals (converted to Observable using toObservable)
+ * - Signals (converted to Observable using toObservable for reactivity)
  *
  * @example
  * ```html
  * <!-- Static string -->
- * {{ 'Hello World' | dynamicText }}
+ * {{ 'Hello World' | dynamicText | async }}
  *
  * <!-- Observable -->
- * {{ transloco.selectTranslate('key') | dynamicText }}
+ * {{ transloco.selectTranslate('key') | dynamicText | async }}
  *
  * <!-- Signal -->
- * {{ myTextSignal | dynamicText }}
+ * {{ myTextSignal | dynamicText | async }}
  * ```
  *
  * @public
@@ -30,11 +31,13 @@ import { DynamicText } from '../../models/types/dynamic-text';
   standalone: true,
 })
 export class DynamicTextPipe implements PipeTransform {
+  private readonly injector = inject(Injector);
+
   /**
    * Transforms dynamic text input into a resolved string value
    *
    * @param value - The dynamic text value to resolve
-   * @returns The resolved string value
+   * @returns The resolved string value as an Observable
    */
   transform(value: DynamicText | undefined): Observable<string> {
     if (isObservable(value)) {
@@ -42,7 +45,7 @@ export class DynamicTextPipe implements PipeTransform {
     }
 
     if (isSignal(value)) {
-      return of(value());
+      return toObservable(value, { injector: this.injector });
     }
 
     return of(value || '');

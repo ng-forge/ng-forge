@@ -38,45 +38,25 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
     return undefined;
   }
 
-  // Flatten fields (row/page) when used as array templates need special handling
+  // Flatten fields (row/page) return flattened object of children's values
+  // This is used by array fields to get the template structure
+  // Note: fieldsToDefaultValues will skip these at top-level since they have keys and return objects
   if (valueHandling === 'flatten' && 'fields' in field && field.fields) {
     const childFields = field.fields as readonly FieldDef<unknown>[];
 
     // Collect only fields that contribute values (exclude buttons, text, etc.)
-    const valueFields: Array<{ key: string; value: unknown }> = [];
+    const flattenedValues: Record<string, unknown> = {};
     for (const childField of childFields) {
       if ('key' in childField && childField.key) {
         const childValue = getFieldDefaultValue(childField, registry);
         if (childValue !== undefined) {
-          valueFields.push({ key: childField.key, value: childValue });
+          flattenedValues[childField.key] = childValue;
         }
       }
     }
 
-    // For a single value field with a primitive value, return it directly (flattened)
-    // This matches how simple array values are structured: ['value1', 'value2']
-    // For complex values (objects/arrays), preserve the key to maintain structure
-    if (valueFields.length === 1) {
-      const singleValue = valueFields[0].value;
-      const isPrimitive = singleValue === null || typeof singleValue !== 'object';
-      if (isPrimitive) {
-        return singleValue;
-      }
-      // Complex value (group, nested object) - preserve the key
-      return { [valueFields[0].key]: singleValue };
-    }
-
-    // For multiple value fields, create object structure
-    if (valueFields.length > 1) {
-      const defaults: Record<string, unknown> = {};
-      for (const valueField of valueFields) {
-        defaults[valueField.key] = valueField.value;
-      }
-      return defaults;
-    }
-
-    // No value fields found: return undefined (flatten fields used standalone don't contribute values)
-    return undefined;
+    // Return flattened object if there are any values, otherwise undefined
+    return Object.keys(flattenedValues).length > 0 ? flattenedValues : undefined;
   }
 
   // Group fields with 'include' handling create nested objects
@@ -88,7 +68,20 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
 
     const groupDefaults: Record<string, unknown> = {};
     for (const childField of fields) {
-      if ('key' in childField && childField.key) {
+      const childValueHandling = getFieldValueHandling(childField.type, registry);
+
+      // Flatten row/page fields into the group (they are presentational containers)
+      if (childValueHandling === 'flatten' && 'fields' in childField && childField.fields) {
+        const nestedFields = childField.fields as readonly FieldDef<unknown>[];
+        for (const nestedField of nestedFields) {
+          if ('key' in nestedField && nestedField.key) {
+            const nestedValue = getFieldDefaultValue(nestedField, registry);
+            if (nestedValue !== undefined) {
+              groupDefaults[nestedField.key] = nestedValue;
+            }
+          }
+        }
+      } else if ('key' in childField && childField.key) {
         const childValue = getFieldDefaultValue(childField, registry);
         if (childValue !== undefined) {
           groupDefaults[childField.key] = childValue;

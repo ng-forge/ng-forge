@@ -69,7 +69,14 @@ Only safe methods can be called in expressions:
 }
 ```
 
-Common safe methods: `toUpperCase`, `toLowerCase`, `includes`, `startsWith`, `slice`, `map`, `filter`, `some`, `every`, `toFixed`
+### Whitelisted Methods Reference
+
+| Category   | Methods                                                                                                                                                           |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **String** | `toUpperCase`, `toLowerCase`, `trim`, `includes`, `startsWith`, `endsWith`, `slice`, `substring`, `charAt`, `indexOf`, `lastIndexOf`, `split`, `replace`, `match` |
+| **Array**  | `map`, `filter`, `some`, `every`, `find`, `findIndex`, `includes`, `indexOf`, `join`, `slice`, `flat`, `flatMap`                                                  |
+| **Number** | `toFixed`, `toString`, `valueOf`                                                                                                                                  |
+| **Object** | `hasOwnProperty`, `toString`, `valueOf`                                                                                                                           |
 
 ### Properties: Open Access (Except Dangerous Ones)
 
@@ -231,11 +238,11 @@ import { FunctionRegistryService } from '@ng-forge/dynamic-forms';
 
 const functionRegistry = inject(FunctionRegistryService);
 
-functionRegistry.registerFunction('isValidEmail', (ctx) => {
+functionRegistry.registerCustomFunction('isValidEmail', (ctx) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ctx.fieldValue);
 });
 
-functionRegistry.registerFunction('isAdult', (ctx) => {
+functionRegistry.registerCustomFunction('isAdult', (ctx) => {
   return ctx.formValue.age >= 18;
 });
 ```
@@ -264,7 +271,7 @@ Then use them with `type: 'custom'`:
 
 ```typescript
 // ❌ BAD - Side effects
-functionRegistry.registerFunction('logValue', (ctx) => {
+functionRegistry.registerCustomFunction('logValue', (ctx) => {
   console.log(ctx.fieldValue); // Side effect!
   trackAnalytics(ctx); // Side effect!
   return true;
@@ -275,11 +282,14 @@ functionRegistry.registerFunction('logValue', (ctx) => {
 
 In JavaScript expressions (`type: 'javascript'`), you can use:
 
-**Basic Operations**: Property access (`formValue.name`), comparisons (`===`, `!==`, `>`, `<`), logical operators (`&&`, `||`, `!`)
-
-**String Methods**: `toUpperCase`, `toLowerCase`, `includes`, `startsWith`, `endsWith`, `slice`, `trim`
-
-**Array Methods**: `map`, `filter`, `some`, `every`, `find`, `includes`, `join`
+| Feature               | Examples                                                        |
+| --------------------- | --------------------------------------------------------------- |
+| **Property access**   | `formValue.name`, `formValue.user.profile.email`                |
+| **Comparisons**       | `===`, `!==`, `>`, `<`, `>=`, `<=`                              |
+| **Logical operators** | `&&`, `\|\|`, `!`                                               |
+| **Arithmetic**        | `+`, `-`, `*`, `/`, `%`                                         |
+| **String methods**    | See [Whitelisted Methods](#whitelisted-methods-reference) above |
+| **Array methods**     | See [Whitelisted Methods](#whitelisted-methods-reference) above |
 
 **Example**:
 
@@ -287,7 +297,7 @@ In JavaScript expressions (`type: 'javascript'`), you can use:
 expression: 'formValue.age >= 18 && formValue.email.includes("@example.com")';
 ```
 
-**Not Supported**: Object literals `{}`, ternary `a ? b : c`, assignment `x = 5`
+**Not Supported**: Object literals `{}`, ternary `a ? b : c`, assignment `x = 5`, `new` keyword, function declarations
 
 ## Summary
 

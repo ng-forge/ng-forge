@@ -1,6 +1,6 @@
 > Prerequisites: [What is Dynamic Forms?](../what-is-dynamic-forms)
 
-Get ng-forge dynamic forms up and running in your Angular project in 3 minutes.
+Get ng-forge dynamic forms up and running in your Angular project.
 
 ## Requirements
 
@@ -50,12 +50,12 @@ Create a simple login form to verify everything works:
 
 ```typescript name="login.component.ts"
 import { Component } from '@angular/core';
-import { DynamicForm, type FormConfig, type ExtractFormValue } from '@ng-forge/dynamic-forms';
+import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'app-login',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
+  template: `<dynamic-form [config]="config" />`,
 })
 export class LoginComponent {
   config = {
@@ -85,20 +85,15 @@ export class LoginComponent {
       },
     ],
   } as const satisfies FormConfig;
-
-  onSubmit(value: ExtractFormValue<typeof this.config>) {
-    // TypeScript knows: { email: string, password: string }
-    console.log('Login:', value);
-  }
 }
 ```
 
-**That's it!** You now have a fully functional, type-safe form with:
+You now have a working form with:
 
 - ✅ Real-time validation with error messages
-- ✅ Full TypeScript type inference
-- ✅ Beautiful Material Design UI
-- ✅ Accessibility built-in
+- ✅ TypeScript type inference
+- ✅ Material Design styling
+- ✅ Accessibility support
 - ✅ Submit button auto-disables when invalid
 
 ## UI Framework Options
@@ -229,7 +224,7 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 - **[Field Types](../core/field-types)** - Understand all available field types (input, select, checkbox, group, etc.)
 - **[Validation](../core/validation)** - Add validation rules with shorthand syntax or conditional validators
 - **[Conditional Logic](../core/conditional-logic)** - Show/hide fields based on other field values
-- **[Type Safety](../core/type-safety)** - Master TypeScript type inference for forms
+- **[Type Safety](../core/type-safety)** - TypeScript type inference for forms
 
 ### Build Advanced Forms
 
@@ -243,54 +238,8 @@ Now that you have ng-forge dynamic forms installed, explore the core features:
 - **[Events](../core/events)** - Handle custom form events
 - **[Custom Fields](../deep-dive/custom-integrations)** - Create your own field types
 
-## Troubleshooting
-
-### TypeScript Errors
-
-If you see TypeScript errors about missing types, ensure you're using `as const satisfies FormConfig`:
-
-```typescript
-// ✓ Correct - enables type inference
-const config = { fields: [...] } as const satisfies FormConfig;
-
-// ✗ Wrong - no type inference
-const config = { fields: [...] };
-```
-
-### Material Theme Not Applied
-
-If Material fields appear unstyled, ensure you've included a Material theme in your `styles.scss`:
-
-```scss
-@use 'index' as mat;
-
-@include mat.core();
-
-$theme: mat.define-theme();
-html {
-  @include mat.all-component-themes($theme);
-}
-```
-
-See [Angular Material Theming Guide](https://material.angular.io/guide/theming) for more details.
-
-### Module Not Found
-
-If you see import errors for `@ng-forge/dynamic-forms`, ensure:
-
-1. You've run `npm install` (or yarn/pnpm equivalent)
-2. Your package.json includes the dependency
-3. Your TypeScript paths are configured correctly
-
 ## Get Help
 
 - 💬 **[GitHub Discussions](https://github.com/ng-forge/ng-forge/discussions)** - Ask questions and get help
 - 🐛 **[Issue Tracker](https://github.com/ng-forge/ng-forge/issues)** - Report bugs
 - 📖 **[Documentation](../)** - Browse full documentation
-
-## Related Topics
-
-- **[What is Dynamic Forms?](../what-is-dynamic-forms)** - Learn about features and benefits
-- **[Field Types](../core/field-types)** - Explore all available field types
-- **[Validation](../core/validation)** - Add validation to your forms
-- **[Material Integration](../ui-libs-integrations/material)** - Material Design field reference
