@@ -494,6 +494,10 @@ test.describe('Advanced Validation E2E Tests', () => {
       await orderAmountInput.fill('');
       await page.waitForTimeout(300);
 
+      // Fill payment method first - required when premium is checked
+      const paymentMethodInput = helpers.getInput(scenario, 'paymentMethod');
+      await helpers.fillInput(paymentMethodInput, 'Credit Card');
+
       // Check premium only - nested AND not satisfied
       await isPremiumCheckbox.check();
       await page.waitForTimeout(500);

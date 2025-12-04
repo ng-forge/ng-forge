@@ -350,7 +350,7 @@ test.describe('Expression-Based Logic Tests', () => {
       // Set status back to active - reactivate should be hidden
       await statusSelect.click();
       await page.waitForTimeout(300);
-      await page.locator('mat-option:has-text("Active")').click();
+      await page.getByRole('option', { name: 'Active', exact: true }).click();
       await page.waitForTimeout(500);
       await expect(reactivateButton).toBeHidden();
     });

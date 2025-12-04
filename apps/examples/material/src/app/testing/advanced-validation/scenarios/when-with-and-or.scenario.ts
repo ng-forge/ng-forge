@@ -169,4 +169,14 @@ export const whenWithAndOrScenario: TestScenario = {
   title: 'When Clause with AND/OR Logic',
   description: 'Tests validators with complex when conditions using AND, OR, and nested combinations',
   config,
+  initialValue: {
+    accountType: 'personal',
+    isVerified: false,
+    companyName: '',
+    isPremium: false,
+    hasDiscount: false,
+    paymentMethod: '',
+    minOrder: 50,
+    orderAmount: null,
+  },
 };

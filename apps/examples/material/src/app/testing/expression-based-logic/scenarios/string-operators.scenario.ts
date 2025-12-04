@@ -26,7 +26,7 @@ const config = {
           // Hidden when email does NOT contain "company"
           condition: {
             type: 'javascript',
-            expression: '!String(formValue.email || "").includes("company")',
+            expression: '!(formValue.email || "").includes("company")',
           },
         },
       ],
@@ -50,7 +50,7 @@ const config = {
           // Hidden when URL does NOT start with "https"
           condition: {
             type: 'javascript',
-            expression: '!String(formValue.url || "").startsWith("https")',
+            expression: '!(formValue.url || "").startsWith("https")',
           },
         },
       ],
@@ -92,7 +92,7 @@ const config = {
           // Hidden when filename does NOT end with ".pdf"
           condition: {
             type: 'javascript',
-            expression: '!String(formValue.filename || "").endsWith(".pdf")',
+            expression: '!(formValue.filename || "").endsWith(".pdf")',
           },
         },
       ],
@@ -109,7 +109,7 @@ const config = {
           // Hidden when filename ends with neither ".jpg" nor ".png"
           condition: {
             type: 'javascript',
-            expression: '!(String(formValue.filename || "").endsWith(".jpg") || String(formValue.filename || "").endsWith(".png"))',
+            expression: '!((formValue.filename || "").endsWith(".jpg") || (formValue.filename || "").endsWith(".png"))',
           },
         },
       ],

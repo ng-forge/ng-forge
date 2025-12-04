@@ -189,6 +189,23 @@ function evaluateCustomCrossFieldValidator<TModel>(
     return null;
   }
 
+  const { fieldValue, formValue } = evaluationContext as { fieldValue: unknown; formValue: Record<string, unknown> };
+
+  // First, evaluate the when condition if present
+  // If the condition is false, the validator doesn't apply (validation passes)
+  if (config.when) {
+    const conditionMet = evaluateCondition(config.when, {
+      fieldValue,
+      formValue,
+      fieldPath: sourceFieldKey,
+      customFunctions: (evaluationContext.customFunctions as Record<string, (ctx: unknown) => unknown>) || {},
+    });
+
+    if (!conditionMet) {
+      return null; // Condition not met, skip validation
+    }
+  }
+
   // Evaluate expression using the secure AST parser
   const result = ExpressionParser.evaluate(config.expression, evaluationContext);
 
