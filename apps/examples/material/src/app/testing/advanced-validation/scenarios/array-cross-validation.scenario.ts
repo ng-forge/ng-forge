@@ -8,8 +8,9 @@ import { TestScenario } from '../../shared/types';
  * - Cross-field validation within array items (referencing formValue)
  * - Conditional validation for array items based on external field values
  *
- * Note: Array-level validation (min/max items, unique values) is not yet implemented.
- * This scenario focuses on item-level validation that references the root form.
+ * Note: String methods like endsWith/indexOf are blocked by the expression parser
+ * for security reasons. This scenario focuses on conditional required validation
+ * that references the root form.
  */
 const config = {
   fields: [
@@ -18,14 +19,7 @@ const config = {
       type: 'checkbox',
       label: 'Require email for all contacts',
       value: false,
-      col: 6,
-    },
-    {
-      key: 'defaultDomain',
-      type: 'input',
-      label: 'Default Email Domain (e.g., company.com)',
-      value: 'company.com',
-      col: 6,
+      col: 12,
     },
     {
       key: 'contacts',
@@ -64,21 +58,10 @@ const config = {
                         value: true,
                       },
                     },
-                    {
-                      // Validate email contains the default domain from root form
-                      type: 'custom',
-                      expression: '!fieldValue || String(fieldValue).endsWith("@" + formValue.defaultDomain)',
-                      kind: 'domainMismatch',
-                      when: {
-                        type: 'javascript',
-                        expression: '!!formValue.defaultDomain && !!fieldValue',
-                      },
-                    },
                   ],
                   validationMessages: {
                     email: 'Please enter a valid email address',
                     required: 'Email is required when checkbox is checked',
-                    domainMismatch: 'Email must use the company domain',
                   },
                   col: 4,
                 },
@@ -120,11 +103,10 @@ const config = {
 export const arrayCrossValidationScenario: TestScenario = {
   testId: 'array-cross-validation-test',
   title: 'Array Cross-Validation',
-  description: 'Tests validation within array items that references root form fields (conditional required, domain validation)',
+  description: 'Tests conditional validation within array items that references root form fields',
   config,
   initialValue: {
     requireEmail: false,
-    defaultDomain: 'company.com',
     contacts: [{ contact: { name: '', email: '', role: 'user' } }],
   },
 };

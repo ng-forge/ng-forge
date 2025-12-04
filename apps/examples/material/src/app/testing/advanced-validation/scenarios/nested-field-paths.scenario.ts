@@ -156,7 +156,8 @@ const config = {
       validators: [
         {
           type: 'custom',
-          expression: '!formValue.settings?.smsNotifications || !!fieldValue',
+          // Use explicit null check instead of optional chaining (not supported by expression parser)
+          expression: '!(formValue.settings && formValue.settings.smsNotifications) || !!fieldValue',
           kind: 'phoneRequired',
         },
       ],
@@ -168,7 +169,8 @@ const config = {
           type: 'hidden',
           condition: {
             type: 'javascript',
-            expression: '!formValue.settings?.smsNotifications',
+            // Use explicit null check instead of optional chaining (not supported by expression parser)
+            expression: '!(formValue.settings && formValue.settings.smsNotifications)',
           },
         },
       ],

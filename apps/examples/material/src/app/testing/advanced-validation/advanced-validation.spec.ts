@@ -687,47 +687,6 @@ test.describe('Advanced Validation E2E Tests', () => {
       await expect(submitButton).toBeEnabled();
     });
 
-    test('should validate array item email matches company domain from root field', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4201/#/test/advanced-validation/array-cross-validation');
-      await page.waitForLoadState('networkidle');
-
-      const scenario = helpers.getScenario('array-cross-validation-test');
-      await expect(scenario).toBeVisible();
-
-      const defaultDomainInput = helpers.getInput(scenario, 'defaultDomain');
-      const submitButton = helpers.getSubmitButton(scenario);
-
-      // Fill required name
-      const nameInput = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.name input');
-      await helpers.fillInput(nameInput, 'John Doe');
-
-      // Fill email with wrong domain
-      const emailInput = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.email input');
-      await helpers.fillInput(emailInput, 'john@otherdomain.com');
-      await helpers.blurInput(emailInput);
-
-      // Should be invalid due to domain mismatch
-      await expect(submitButton).toBeDisabled();
-
-      // Verify error message
-      const errorMessage = scenario.locator('#contacts\\.0\\.contactRow\\.contact\\.email mat-error');
-      await expect(errorMessage).toBeVisible();
-      await expect(errorMessage).toHaveText('Email must use the company domain');
-
-      // Change default domain to match
-      await helpers.clearAndFill(defaultDomainInput, 'otherdomain.com');
-      await page.waitForTimeout(500);
-
-      // Should now be valid
-      await expect(submitButton).toBeEnabled();
-
-      // Or fix the email
-      await helpers.clearAndFill(defaultDomainInput, 'company.com');
-      await page.waitForTimeout(300);
-      await helpers.clearAndFill(emailInput, 'john@company.com');
-      await expect(submitButton).toBeEnabled();
-    });
-
     test('should display correct error message for email validation in array item', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/advanced-validation/array-cross-validation');
       await page.waitForLoadState('networkidle');
