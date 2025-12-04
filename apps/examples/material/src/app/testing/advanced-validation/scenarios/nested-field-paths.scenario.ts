@@ -58,6 +58,7 @@ const config = {
       key: 'shippingZip',
       type: 'input',
       label: 'Shipping Zip Code (must match billing when not same)',
+      value: '12345',
       validators: [
         {
           type: 'custom',
@@ -156,8 +157,8 @@ const config = {
       validators: [
         {
           type: 'custom',
-          // Use explicit null check instead of optional chaining (not supported by expression parser)
-          expression: '!(formValue.settings && formValue.settings.smsNotifications) || !!fieldValue',
+          // Safe property access is built-in - accessing null.property returns undefined
+          expression: '!formValue.settings.smsNotifications || !!fieldValue',
           kind: 'phoneRequired',
         },
       ],
@@ -169,8 +170,8 @@ const config = {
           type: 'hidden',
           condition: {
             type: 'javascript',
-            // Use explicit null check instead of optional chaining (not supported by expression parser)
-            expression: '!(formValue.settings && formValue.settings.smsNotifications)',
+            // Safe property access is built-in - accessing null.property returns undefined
+            expression: '!formValue.settings.smsNotifications',
           },
         },
       ],
