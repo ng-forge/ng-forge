@@ -9,6 +9,10 @@ export const buttonNeverDisabledScenario: TestScenario = {
   title: 'Submit Button Never Auto-Disabled',
   description: 'Tests that form options can disable the default behavior. This submit button should never be auto-disabled.',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+      email: 'Please enter a valid email address',
+    },
     fields: [
       {
         key: 'email3',

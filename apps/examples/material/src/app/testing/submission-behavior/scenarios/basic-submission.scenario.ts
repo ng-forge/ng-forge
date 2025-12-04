@@ -9,6 +9,9 @@ export const basicSubmissionScenario: TestScenario = {
   title: 'Basic Submission',
   description: 'Tests form submission using HTTP POST. The submit button should be disabled while submitting.',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'email',

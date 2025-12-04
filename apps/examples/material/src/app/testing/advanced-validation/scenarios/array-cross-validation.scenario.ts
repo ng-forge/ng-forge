@@ -13,6 +13,10 @@ import { TestScenario } from '../../shared/types';
  * that references the root form.
  */
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+  },
   fields: [
     {
       key: 'requireEmail',

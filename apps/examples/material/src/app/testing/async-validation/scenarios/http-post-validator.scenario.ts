@@ -1,7 +1,11 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
+import { validateEmail } from '../custom-validators';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+  },
   fields: [
     {
       key: 'email',
@@ -36,4 +40,9 @@ export const httpPostValidatorScenario: TestScenario = {
   title: 'HTTP POST Validator',
   description: 'Validate Email Address using HTTP POST validator',
   config,
+  customFnConfig: {
+    httpValidators: {
+      validateEmail,
+    },
+  },
 };

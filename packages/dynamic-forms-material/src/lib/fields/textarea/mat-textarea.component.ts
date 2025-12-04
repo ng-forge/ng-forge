@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
@@ -6,6 +6,7 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'df-mat-textarea',
@@ -20,6 +21,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
       <textarea
         matInput
+        #textareaEl
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
@@ -74,6 +76,8 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
+  readonly textareaEl = viewChild<ElementRef<HTMLTextAreaElement>>('textareaEl');
+
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 
   readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
@@ -82,4 +86,20 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  readonly isReadonly = computed(() => this.field()().readonly());
+
+  constructor() {
+    // Use explicitEffect to imperatively set the readonly attribute since Angular Signal Forms
+    // restricts binding [attr.readonly] on elements with [field] directive
+    explicitEffect([this.textareaEl, this.isReadonly], ([textareaEl, isReadonly]) => {
+      if (textareaEl?.nativeElement) {
+        if (isReadonly) {
+          textareaEl.nativeElement.setAttribute('readonly', '');
+        } else {
+          textareaEl.nativeElement.removeAttribute('readonly');
+        }
+      }
+    });
+  }
 }

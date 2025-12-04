@@ -2,6 +2,13 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+    minLength: 'Must be at least {{requiredLength}} characters',
+    min: 'Value must be at least {{min}}',
+    max: 'Value must be at most {{max}}',
+  },
   fields: [
     // Text Input
     {

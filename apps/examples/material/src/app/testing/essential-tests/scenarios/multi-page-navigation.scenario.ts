@@ -10,6 +10,10 @@ export const multiPageNavigationScenario: TestScenario = {
   title: 'Multi-Page Navigation',
   description: 'Tests form submission with multiple input fields',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+      email: 'Please enter a valid email address',
+    },
     fields: [
       {
         key: 'firstName',

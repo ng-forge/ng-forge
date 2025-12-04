@@ -1,7 +1,11 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
+import { checkProductCode } from '../custom-validators';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+  },
   fields: [
     {
       key: 'productCode',
@@ -33,4 +37,9 @@ export const asyncResourceValidatorScenario: TestScenario = {
   title: 'Async Resource Validator',
   description: 'Check Product Code Availability using resource-based async validator',
   config,
+  customFnConfig: {
+    asyncValidators: {
+      checkProductCode,
+    },
+  },
 };

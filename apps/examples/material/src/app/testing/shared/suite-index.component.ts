@@ -3,8 +3,8 @@ import { JsonPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { DynamicForm } from '@ng-forge/dynamic-forms';
-import { TestSuite } from './types';
+import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
+import { TestScenario, TestSuite } from './types';
 
 /**
  * Generic component for rendering a suite index page.
@@ -27,7 +27,7 @@ import { TestSuite } from './types';
               <p class="scenario-description">{{ scenario.description }}</p>
             }
             <dynamic-form
-              [config]="scenario.config"
+              [config]="getEffectiveConfig(scenario)"
               [value]="getFormValue(scenario.testId)"
               (valueChange)="updateFormValue(scenario.testId, $event)"
               (submitted)="onSubmitted($event, scenario.testId)"
@@ -128,6 +128,32 @@ export class SuiteIndexComponent {
 
   /** Form values for each scenario, keyed by testId */
   private readonly formValues = signal<Record<string, Record<string, unknown>>>({});
+
+  /** Cache for effective configs to avoid recalculating on every render */
+  private readonly effectiveConfigs = new Map<string, FormConfig>();
+
+  /**
+   * Returns the effective config for a scenario, merging customFnConfig if present.
+   */
+  getEffectiveConfig(scenario: TestScenario): FormConfig {
+    const cached = this.effectiveConfigs.get(scenario.testId);
+    if (cached) return cached;
+
+    let effectiveConfig: FormConfig = scenario.config;
+
+    if (scenario.customFnConfig) {
+      effectiveConfig = {
+        ...scenario.config,
+        customFnConfig: {
+          ...scenario.config.customFnConfig,
+          ...scenario.customFnConfig,
+        },
+      };
+    }
+
+    this.effectiveConfigs.set(scenario.testId, effectiveConfig);
+    return effectiveConfig;
+  }
 
   getFormValue(testId: string): Record<string, unknown> {
     return this.formValues()[testId] ?? {};

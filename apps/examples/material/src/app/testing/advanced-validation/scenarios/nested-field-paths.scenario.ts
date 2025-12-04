@@ -15,6 +15,9 @@ import { TestScenario } from '../../shared/types';
  * - Expression-based validators with nested paths
  */
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+  },
   fields: [
     {
       key: 'addressRow',

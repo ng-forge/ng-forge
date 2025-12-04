@@ -88,40 +88,38 @@ test.describe('Expression-Based Logic Tests', () => {
   });
 
   test.describe('Readonly Logic', () => {
-    test.skip('should make fields readonly using conditional logic', async ({ page, helpers }) => {
+    test('should make fields readonly using conditional logic', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/readonly-logic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('readonly-logic-test');
       await expect(scenario).toBeVisible();
 
-      // Behavior test: Initially editMode is unchecked, so readonly logic is active
+      // Initially editMode is unchecked, so readonly logic is active
       const usernameInput = scenario.locator('#username input');
-      const initialValue = await usernameInput.inputValue();
 
-      // Clear the field and try to type - the field should prevent modification when readonly
-      await usernameInput.click();
-      await usernameInput.fill('');
-      await page.waitForTimeout(100);
-      await usernameInput.type('modified_value');
-      await page.waitForTimeout(200);
-      const valueWhileReadonly = await usernameInput.inputValue();
-
-      // The field should still have the initial value or be empty (readonly prevents typing)
-      expect(valueWhileReadonly).toBe(initialValue);
+      // Verify the field has the readonly attribute when editMode is unchecked
+      await expect(usernameInput).toHaveAttribute('readonly', '');
 
       // Enable edit mode - readonly logic should no longer be active
       await scenario.locator('#editMode input[type="checkbox"]').check();
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(300);
+
+      // Verify the field no longer has the readonly attribute
+      await expect(usernameInput).not.toHaveAttribute('readonly', '');
 
       // Now user should be able to edit the field
-      await usernameInput.click();
-      await usernameInput.fill('');
-      await page.waitForTimeout(100);
-      await usernameInput.type('new_username');
+      await usernameInput.fill('new_username');
       await page.waitForTimeout(200);
       const finalValue = await usernameInput.inputValue();
-      expect(finalValue).toBe('new_username'); // Value should change when not readonly
+      expect(finalValue).toBe('new_username');
+
+      // Disable edit mode again - readonly should be reapplied
+      await scenario.locator('#editMode input[type="checkbox"]').uncheck();
+      await page.waitForTimeout(300);
+
+      // Verify the field is readonly again
+      await expect(usernameInput).toHaveAttribute('readonly', '');
     });
   });
 

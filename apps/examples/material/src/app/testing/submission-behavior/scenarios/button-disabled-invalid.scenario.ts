@@ -10,6 +10,9 @@ export const buttonDisabledInvalidScenario: TestScenario = {
   description:
     'Tests that the submit button is disabled when the form is invalid (default behavior). Fill all required fields to enable the submit button.',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'email',

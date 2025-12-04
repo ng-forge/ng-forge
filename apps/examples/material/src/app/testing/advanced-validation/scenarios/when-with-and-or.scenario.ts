@@ -7,6 +7,10 @@ import { TestScenario } from '../../shared/types';
  * composite conditions work correctly with cross-field dependencies.
  */
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    min: 'Value must be at least {{min}}',
+  },
   fields: [
     {
       key: 'accountType',

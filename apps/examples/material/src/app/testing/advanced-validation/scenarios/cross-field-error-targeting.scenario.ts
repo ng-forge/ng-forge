@@ -10,6 +10,10 @@ import { TestScenario } from '../../shared/types';
  * ctx.fieldTreeOf was used incorrectly instead of ctx.field[key].
  */
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    minLength: 'Must be at least {{requiredLength}} characters',
+  },
   fields: [
     {
       key: 'password',

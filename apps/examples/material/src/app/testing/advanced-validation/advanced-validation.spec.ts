@@ -701,8 +701,8 @@ test.describe('Advanced Validation E2E Tests', () => {
       await helpers.fillInput(emailInput, 'invalid-email');
       await helpers.blurInput(emailInput);
 
-      // Should show email format error
-      const errorMessage = scenario.locator('#contacts mat-error').first();
+      // Should show email format error - filter by expected text to avoid picking up other field errors
+      const errorMessage = scenario.locator('#contacts mat-error').filter({ hasText: 'valid email' });
       await expect(errorMessage).toBeVisible();
       await expect(errorMessage).toHaveText('Please enter a valid email address');
     });

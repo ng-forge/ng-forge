@@ -1,7 +1,11 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
+import { checkUsernameAvailability } from '../custom-validators';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+  },
   fields: [
     {
       key: 'username',
@@ -33,4 +37,9 @@ export const httpErrorHandlingScenario: TestScenario = {
   title: 'HTTP Error Handling',
   description: 'Error Handling with Network Requests',
   config,
+  customFnConfig: {
+    httpValidators: {
+      checkUsernameAvailability,
+    },
+  },
 };

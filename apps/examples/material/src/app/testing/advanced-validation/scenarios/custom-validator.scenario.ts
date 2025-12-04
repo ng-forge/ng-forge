@@ -2,6 +2,10 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    minLength: 'Must be at least {{requiredLength}} characters',
+  },
   fields: [
     {
       key: 'password',

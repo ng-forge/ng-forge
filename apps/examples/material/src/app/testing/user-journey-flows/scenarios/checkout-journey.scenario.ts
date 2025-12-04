@@ -2,6 +2,13 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    min: 'Value must be at least {{min}}',
+    max: 'Value must be at most {{max}}',
+    maxLength: 'Must be no more than {{requiredLength}} characters',
+    pattern: 'Invalid format',
+  },
   fields: [
     // Page 1: Cart Review
     {

@@ -6,6 +6,10 @@ import { TestScenario } from '../../shared/types';
  * The email field uses a reusable schema that combines required + email validators.
  */
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+  },
   fields: [
     {
       key: 'email',

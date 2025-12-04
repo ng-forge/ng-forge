@@ -7,6 +7,10 @@ import { TestScenario } from '../../shared/types';
  * the user checks "I want to be contacted".
  */
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+  },
   fields: [
     {
       key: 'needsContact',

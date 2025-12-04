@@ -6,6 +6,10 @@ import { TestScenario } from '../../shared/types';
  * use dynamic values from other form fields via the "expression" property.
  */
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    min: 'Value must be at least {{min}}',
+  },
   fields: [
     {
       key: 'minAge',
