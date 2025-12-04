@@ -9,6 +9,9 @@ export const httpErrorHandlingScenario: TestScenario = {
   title: 'HTTP Error Handling',
   description: 'Tests HTTP error responses (500 server errors, 422 validation errors) and how the form handles them.',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'username',

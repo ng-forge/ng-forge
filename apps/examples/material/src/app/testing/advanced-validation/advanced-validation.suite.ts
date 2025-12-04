@@ -1,9 +1,14 @@
 import { TestSuite } from '../shared/types';
-import { customValidatorScenario } from './scenarios/custom-validator.scenario';
-import { crossFieldValidatorScenario } from './scenarios/cross-field-validator.scenario';
-import { rangeValidationScenario } from './scenarios/range-validation.scenario';
+import { arrayCrossValidationScenario } from './scenarios/array-cross-validation.scenario';
 import { conditionalValidatorScenario } from './scenarios/conditional-validator.scenario';
+import { crossFieldErrorTargetingScenario } from './scenarios/cross-field-error-targeting.scenario';
+import { crossFieldValidatorScenario } from './scenarios/cross-field-validator.scenario';
+import { customValidatorScenario } from './scenarios/custom-validator.scenario';
+import { expressionBasedMinMaxScenario } from './scenarios/expression-based-min-max.scenario';
 import { multipleValidatorsScenario } from './scenarios/multiple-validators.scenario';
+import { nestedFieldPathsScenario } from './scenarios/nested-field-paths.scenario';
+import { rangeValidationScenario } from './scenarios/range-validation.scenario';
+import { whenWithAndOrScenario } from './scenarios/when-with-and-or.scenario';
 
 /**
  * Advanced Validation Suite
@@ -21,6 +26,11 @@ export const advancedValidationSuite: TestSuite = {
     rangeValidationScenario,
     conditionalValidatorScenario,
     multipleValidatorsScenario,
+    expressionBasedMinMaxScenario,
+    crossFieldErrorTargetingScenario,
+    whenWithAndOrScenario,
+    nestedFieldPathsScenario,
+    arrayCrossValidationScenario,
   ],
 };
 

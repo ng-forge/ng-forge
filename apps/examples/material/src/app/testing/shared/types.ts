@@ -1,4 +1,4 @@
-import { FormConfig, SubmissionActionResult, SubmissionConfig } from '@ng-forge/dynamic-forms';
+import { CustomFnConfig, FormConfig, SubmissionActionResult, SubmissionConfig } from '@ng-forge/dynamic-forms';
 import { FieldTree } from '@angular/forms/signals';
 
 /**
@@ -70,6 +70,11 @@ export interface TestScenario {
    * Takes precedence over simulateSubmission.
    */
   mockEndpoint?: MockEndpointConfig;
+  /**
+   * Optional: custom function configuration for validators and expressions.
+   * This is merged into the form config when rendering the scenario.
+   */
+  customFnConfig?: CustomFnConfig;
 }
 
 /**

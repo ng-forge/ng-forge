@@ -2,6 +2,10 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    pattern: 'Invalid format',
+  },
   fields: [
     // Page 1: Account Type Selection
     {
@@ -51,18 +55,17 @@ const config = {
     {
       key: 'individualPage',
       type: 'page',
-      // TODO: uncomment when page hiding logic is supported
-      // logic: [
-      //   {
-      //     type: 'hidden',
-      //     condition: {
-      //       type: 'fieldValue',
-      //       fieldPath: 'accountType',
-      //       operator: 'notEquals',
-      //       value: 'individual',
-      //     },
-      //   },
-      // ],
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'notEquals',
+            value: 'individual',
+          },
+        },
+      ],
       fields: [
         {
           key: 'individual-description',
@@ -76,7 +79,17 @@ const config = {
           props: {
             placeholder: 'Enter first name',
           },
-          required: true,
+          validators: [
+            {
+              type: 'required',
+              when: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'individual',
+              },
+            },
+          ],
           col: 6,
         },
         {
@@ -86,14 +99,34 @@ const config = {
           props: {
             placeholder: 'Enter last name',
           },
-          required: true,
+          validators: [
+            {
+              type: 'required',
+              when: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'individual',
+              },
+            },
+          ],
           col: 6,
         },
         {
           key: 'birthDate',
           type: 'datepicker',
           label: 'Date of Birth',
-          required: true,
+          validators: [
+            {
+              type: 'required',
+              when: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'individual',
+              },
+            },
+          ],
           col: 12,
         },
         {
@@ -114,18 +147,17 @@ const config = {
     {
       key: 'businessPage',
       type: 'page',
-      // TODO: uncomment when page hiding logic is supported
-      // logic: [
-      //   {
-      //     type: 'hidden',
-      //     condition: {
-      //       type: 'fieldValue',
-      //       fieldPath: 'accountType',
-      //       operator: 'notEquals',
-      //       value: 'business',
-      //     },
-      //   },
-      // ],
+      logic: [
+        {
+          type: 'hidden',
+          condition: {
+            type: 'fieldValue',
+            fieldPath: 'accountType',
+            operator: 'notEquals',
+            value: 'business',
+          },
+        },
+      ],
       fields: [
         {
           key: 'business-page-description',
@@ -139,7 +171,17 @@ const config = {
           props: {
             placeholder: 'Enter business name',
           },
-          required: true,
+          validators: [
+            {
+              type: 'required',
+              when: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'business',
+              },
+            },
+          ],
           col: 12,
         },
         {
@@ -149,8 +191,27 @@ const config = {
           props: {
             placeholder: 'Enter tax identification number',
           },
-          pattern: '^[0-9]{2}-[0-9]{7}$',
-          required: true,
+          validators: [
+            {
+              type: 'required',
+              when: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'business',
+              },
+            },
+            {
+              type: 'pattern',
+              value: '^[0-9]{2}-[0-9]{7}$',
+              when: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'business',
+              },
+            },
+          ],
           col: 6,
         },
         {
@@ -163,7 +224,17 @@ const config = {
             { value: 'partnership', label: 'Partnership' },
             { value: 'sole_proprietorship', label: 'Sole Proprietorship' },
           ],
-          required: true,
+          validators: [
+            {
+              type: 'required',
+              when: {
+                type: 'fieldValue',
+                fieldPath: 'accountType',
+                operator: 'equals',
+                value: 'business',
+              },
+            },
+          ],
           col: 6,
         },
         {

@@ -79,6 +79,10 @@ export interface TestHelpers {
   getSelect: (scenario: Locator, fieldId: string) => Locator;
   /** Get the submit button within a scenario */
   getSubmitButton: (scenario: Locator) => Locator;
+  /** Get the error message for a field (mat-error element) */
+  getFieldError: (scenario: Locator, fieldId: string) => Locator;
+  /** Get all error messages for a field */
+  getFieldErrors: (scenario: Locator, fieldId: string) => Locator;
   /** Fill an input and wait for debounce */
   fillInput: (input: Locator, value: string) => Promise<void>;
   /** Clear and fill an input */
@@ -91,6 +95,8 @@ export interface TestHelpers {
   waitForFieldVisible: (field: Locator, timeout?: number) => Promise<void>;
   /** Wait for field to become hidden */
   waitForFieldHidden: (field: Locator, timeout?: number) => Promise<void>;
+  /** Blur (unfocus) an input to trigger error display */
+  blurInput: (input: Locator) => Promise<void>;
 }
 
 /**
@@ -274,6 +280,14 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
         return scenario.locator('#submit button');
       },
 
+      getFieldError: (scenario: Locator, fieldId: string) => {
+        return scenario.locator(`#${fieldId} mat-error`).first();
+      },
+
+      getFieldErrors: (scenario: Locator, fieldId: string) => {
+        return scenario.locator(`#${fieldId} mat-error`);
+      },
+
       fillInput: async (input: Locator, value: string) => {
         await input.fill(value);
         await page.waitForTimeout(200); // Wait for debounce
@@ -317,6 +331,11 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
 
       waitForFieldHidden: async (field: Locator, timeout = 5000) => {
         await expect(field).not.toBeVisible({ timeout });
+      },
+
+      blurInput: async (input: Locator) => {
+        await input.blur();
+        await page.waitForTimeout(200); // Wait for validation to trigger
       },
     };
 

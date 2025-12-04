@@ -2,6 +2,10 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    min: 'Value must be at least {{min}}',
+  },
   fields: [
     {
       key: 'isAdult',

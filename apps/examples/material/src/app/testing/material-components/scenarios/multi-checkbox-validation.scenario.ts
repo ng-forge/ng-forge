@@ -2,6 +2,9 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'At least one option must be selected',
+  },
   fields: [
     {
       key: 'requiredChoices',

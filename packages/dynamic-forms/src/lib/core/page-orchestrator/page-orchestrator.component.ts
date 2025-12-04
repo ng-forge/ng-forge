@@ -3,13 +3,18 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { NavigationResult, PageOrchestratorState } from './page-orchestrator.interfaces';
-import { PageField } from '../../definitions/default/page-field';
+import { PageField, PageLogicConfig } from '../../definitions/default/page-field';
 import { FieldSignalContext } from '../../mappers/types';
 import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
 import { FieldTree } from '@angular/forms/signals';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { RootFormRegistryService } from '../registry/root-form-registry.service';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { evaluateCondition } from '../expressions/condition-evaluator';
+import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import { FunctionRegistryService } from '../registry/function-registry.service';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -79,6 +84,8 @@ import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 })
 export class PageOrchestratorComponent {
   private readonly eventBus = inject(EventBus);
+  private readonly rootFormRegistry = inject(RootFormRegistryService);
+  private readonly functionRegistry = inject(FunctionRegistryService);
 
   /**
    * Array of page field definitions to render
@@ -96,15 +103,44 @@ export class PageOrchestratorComponent {
   fieldSignalContext = input.required<FieldSignalContext>();
 
   /**
-   * Internal signal for current page index that tracks with page fields
+   * Computed signal that tracks which pages are hidden.
+   * Returns an array of booleans where true means the page is hidden.
+   * This signal is reactive and will re-evaluate when form values change.
+   */
+  readonly pageHiddenStates = computed(() => {
+    const pages = this.pageFields();
+    const formValue = this.rootFormRegistry.getFormValue();
+
+    return pages.map((page) => this.evaluatePageHidden(page, formValue));
+  });
+
+  /**
+   * Computed signal that returns indices of visible (non-hidden) pages.
+   * This is used for navigation to skip hidden pages.
+   */
+  readonly visiblePageIndices = computed(() => {
+    const hiddenStates = this.pageHiddenStates();
+    return hiddenStates
+      .map((hidden, index) => ({ index, hidden }))
+      .filter((item) => !item.hidden)
+      .map((item) => item.index);
+  });
+
+  /**
+   * Internal signal for current page index that tracks with page fields.
+   * This tracks the actual page index, not the visible page index.
+   *
+   * Note: We only track pageFields().length to handle page additions/removals.
+   * The hidden state changes should NOT reset the current page index -
+   * that would cause unwanted navigation when form values change.
    */
   private readonly currentPageIndex = linkedSignal(() => {
     const totalPages = this.pageFields().length;
 
     if (totalPages === 0) return 0;
 
-    // Clamp initial index within valid page range
-    return Math.max(0, Math.min(0, totalPages - 1));
+    // Start on page 0 (will be adjusted if page 0 is hidden by initial navigation)
+    return 0;
   });
 
   /**
@@ -113,12 +149,18 @@ export class PageOrchestratorComponent {
   readonly state = computed<PageOrchestratorState>(() => {
     const currentIndex = this.currentPageIndex();
     const totalPages = this.pageFields().length;
+    const visibleIndices = this.visiblePageIndices();
+
+    // Find where the current index is in the visible pages list
+    const currentVisiblePosition = visibleIndices.indexOf(currentIndex);
+    const isFirstVisiblePage = currentVisiblePosition === 0 || currentVisiblePosition === -1;
+    const isLastVisiblePage = currentVisiblePosition >= visibleIndices.length - 1;
 
     return {
       currentPageIndex: currentIndex,
       totalPages,
-      isFirstPage: currentIndex === 0,
-      isLastPage: currentIndex >= totalPages - 1,
+      isFirstPage: isFirstVisiblePage,
+      isLastPage: isLastVisiblePage,
       navigationDisabled: false,
     };
   });
@@ -182,17 +224,18 @@ export class PageOrchestratorComponent {
   }
 
   /**
-   * Navigate to the next page
+   * Navigate to the next visible page, skipping hidden pages.
    * @returns Navigation result
    */
   navigateToNextPage(): NavigationResult {
     const currentState = this.state();
+    const visibleIndices = this.visiblePageIndices();
 
     if (currentState.isLastPage) {
       return {
         success: false,
         newPageIndex: currentState.currentPageIndex,
-        error: 'Already on the last page',
+        error: 'Already on the last visible page',
       };
     }
 
@@ -204,22 +247,33 @@ export class PageOrchestratorComponent {
       };
     }
 
-    const newIndex = currentState.currentPageIndex + 1;
-    return this.navigateToPage(newIndex);
+    // Find the next visible page after the current index
+    const currentVisiblePosition = visibleIndices.indexOf(currentState.currentPageIndex);
+    if (currentVisiblePosition === -1 || currentVisiblePosition >= visibleIndices.length - 1) {
+      return {
+        success: false,
+        newPageIndex: currentState.currentPageIndex,
+        error: 'No next visible page available',
+      };
+    }
+
+    const nextVisiblePageIndex = visibleIndices[currentVisiblePosition + 1];
+    return this.navigateToPage(nextVisiblePageIndex);
   }
 
   /**
-   * Navigate to the previous page
+   * Navigate to the previous visible page, skipping hidden pages.
    * @returns Navigation result
    */
   navigateToPreviousPage(): NavigationResult {
     const currentState = this.state();
+    const visibleIndices = this.visiblePageIndices();
 
     if (currentState.isFirstPage) {
       return {
         success: false,
         newPageIndex: currentState.currentPageIndex,
-        error: 'Already on the first page',
+        error: 'Already on the first visible page',
       };
     }
 
@@ -231,8 +285,18 @@ export class PageOrchestratorComponent {
       };
     }
 
-    const newIndex = currentState.currentPageIndex - 1;
-    return this.navigateToPage(newIndex);
+    // Find the previous visible page before the current index
+    const currentVisiblePosition = visibleIndices.indexOf(currentState.currentPageIndex);
+    if (currentVisiblePosition <= 0) {
+      return {
+        success: false,
+        newPageIndex: currentState.currentPageIndex,
+        error: 'No previous visible page available',
+      };
+    }
+
+    const prevVisiblePageIndex = visibleIndices[currentVisiblePosition - 1];
+    return this.navigateToPage(prevVisiblePageIndex);
   }
 
   /**
@@ -295,5 +359,54 @@ export class PageOrchestratorComponent {
       });
 
     explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PageNavigationStateChangeEvent, state));
+  }
+
+  /**
+   * Evaluates whether a page should be hidden based on its logic configuration.
+   * A page is hidden if ANY of its hidden logic conditions evaluate to true.
+   *
+   * @param page The page field to evaluate
+   * @param formValue The current form value to evaluate against
+   * @returns true if the page should be hidden, false otherwise
+   */
+  private evaluatePageHidden(page: PageField, formValue: unknown): boolean {
+    // If no logic defined, page is visible
+    if (!page.logic || page.logic.length === 0) {
+      return false;
+    }
+
+    // Filter to only hidden logic (pages only support hidden type)
+    const hiddenLogic = page.logic.filter((l): l is PageLogicConfig => l.type === 'hidden');
+
+    // If no hidden logic, page is visible
+    if (hiddenLogic.length === 0) {
+      return false;
+    }
+
+    // Check each hidden logic - if ANY condition is true, the page is hidden
+    for (const logic of hiddenLogic) {
+      // Handle static boolean conditions
+      if (typeof logic.condition === 'boolean') {
+        if (logic.condition) {
+          return true;
+        }
+        continue;
+      }
+
+      // Evaluate conditional expression
+      const condition = logic.condition as ConditionalExpression;
+      const context: EvaluationContext = {
+        fieldValue: null, // Pages don't have field values
+        formValue: (formValue ?? {}) as Record<string, unknown>,
+        fieldPath: page.key || '',
+        customFunctions: this.functionRegistry.getCustomFunctions(),
+      };
+
+      if (evaluateCondition(condition, context)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

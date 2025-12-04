@@ -10,6 +10,9 @@ export const formStateConditionScenario: TestScenario = {
   description:
     "Tests that submit button uses FormStateCondition logic. The button is disabled when 'formSubmitting' is true (during HTTP request).",
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'email',

@@ -42,6 +42,16 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getExpressionBasedLogicScenario('nested-or-within-and-test') },
   },
+  {
+    path: 'comparison-operators',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getExpressionBasedLogicScenario('comparison-operators-test') },
+  },
+  {
+    path: 'string-operators',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getExpressionBasedLogicScenario('string-operators-test') },
+  },
 ];
 
 export default routes;
