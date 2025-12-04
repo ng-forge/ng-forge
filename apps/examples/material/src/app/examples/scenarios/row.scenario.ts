@@ -1,5 +1,4 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
-import { submitButton } from '@ng-forge/dynamic-forms-material';
 import { ExampleScenario } from '../shared/types';
 
 export const rowScenario: ExampleScenario = {
@@ -103,13 +102,14 @@ export const rowScenario: ExampleScenario = {
           },
         ],
       },
-      submitButton({
+      {
         key: 'submit',
+        type: 'submit',
         label: 'Submit',
         props: {
           color: 'primary',
         },
-      }),
+      },
     ],
   } as const satisfies FormConfig,
 };

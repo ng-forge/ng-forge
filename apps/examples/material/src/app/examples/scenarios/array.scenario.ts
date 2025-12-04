@@ -1,5 +1,4 @@
 import { AddArrayItemEvent, FormConfig } from '@ng-forge/dynamic-forms';
-import { submitButton } from '@ng-forge/dynamic-forms-material';
 import { ExampleScenario } from '../shared/types';
 
 // Array item templates
@@ -171,13 +170,14 @@ export const arrayScenario: ExampleScenario = {
           color: 'primary',
         },
       },
-      submitButton({
+      {
         key: 'submit',
+        type: 'submit',
         label: 'Save All',
         props: {
           color: 'primary',
         },
-      }),
+      },
     ],
   } as const satisfies FormConfig,
 };
