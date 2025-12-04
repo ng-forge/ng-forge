@@ -1,7 +1,10 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
 
 setupTestLogging();
-setupConsoleCheck();
+setupConsoleCheck({
+  // HTTP error handling test deliberately aborts network requests
+  ignorePatterns: [/net::ERR_FAILED/, /Failed to load resource/],
+});
 
 test.describe('Async Validation Tests', () => {
   test.beforeEach(async ({ helpers }) => {

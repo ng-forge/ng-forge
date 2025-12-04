@@ -10,6 +10,9 @@ export const ageBasedLogicScenario: TestScenario = {
   title: 'Age-Based Logic',
   description: 'Tests conditional field visibility based on age value',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'age',

@@ -2,6 +2,9 @@ import { FormClearEvent, FormConfig, FormResetEvent } from '@ng-forge/dynamic-fo
 import { TestScenario } from '../../shared/types';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+  },
   fields: [
     {
       key: 'requiredField',

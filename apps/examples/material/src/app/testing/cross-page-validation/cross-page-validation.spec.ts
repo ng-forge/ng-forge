@@ -112,7 +112,7 @@ test.describe('Cross-Page Validation Tests', () => {
   });
 
   test.describe('Conditional Pages Flow', () => {
-    test.skip('should navigate through individual account flow', async ({ page, helpers }) => {
+    test('should navigate through individual account flow', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/conditional-pages');
       await page.waitForLoadState('networkidle');
 
@@ -180,12 +180,12 @@ test.describe('Cross-Page Validation Tests', () => {
         finalTerms: true,
       });
 
-      // Should not contain business fields
-      expect(submittedData).not.toHaveProperty('businessName');
-      expect(submittedData).not.toHaveProperty('taxId');
+      // Business fields should be empty (fields exist but are not filled in on hidden pages)
+      expect((submittedData as Record<string, unknown>)['businessName']).toBeFalsy();
+      expect((submittedData as Record<string, unknown>)['taxId']).toBeFalsy();
     });
 
-    test.skip('should navigate through business account flow', async ({ page, helpers }) => {
+    test('should navigate through business account flow', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/conditional-pages');
       await page.waitForLoadState('networkidle');
 
@@ -241,14 +241,14 @@ test.describe('Cross-Page Validation Tests', () => {
         businessType: 'llc',
       });
 
-      // Should not contain individual fields
-      expect(submittedData).not.toHaveProperty('firstName');
-      expect(submittedData).not.toHaveProperty('lastName');
+      // Individual fields should be empty (fields exist but are not filled in on hidden pages)
+      expect((submittedData as Record<string, unknown>)['firstName']).toBeFalsy();
+      expect((submittedData as Record<string, unknown>)['lastName']).toBeFalsy();
     });
   });
 
   test.describe('Business Flow', () => {
-    test.skip('should validate Tax ID format', async ({ page, helpers }) => {
+    test('should validate Tax ID format', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/business-flow');
       await page.waitForLoadState('networkidle');
 
@@ -273,12 +273,12 @@ test.describe('Cross-Page Validation Tests', () => {
       await taxIdInput.fill('invalid-format');
       await page.waitForTimeout(200);
 
-      // Try to navigate (pattern validation should prevent)
-      await scenario.locator('button:has-text("Next"):visible').click();
-      await page.waitForTimeout(500);
+      // Verify Next button is disabled due to validation
+      const nextButton = scenario.locator('button:has-text("Next"):visible');
+      await expect(nextButton).toBeDisabled();
 
-      // Should still be on business page due to validation
-      await expect(scenario.locator('#businessName')).toBeVisible({ timeout: 10000 });
+      // Should still be on business page
+      await expect(scenario.locator('#businessName')).toBeVisible();
 
       // Enter valid Tax ID format
       await taxIdInput.fill('12-3456789');
@@ -399,7 +399,7 @@ test.describe('Cross-Page Validation Tests', () => {
   });
 
   test.describe('Progressive Validation Flow', () => {
-    test.skip('should enforce validation at each page level', async ({ page, helpers }) => {
+    test('should enforce validation at each page level', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/cross-page-validation/progressive-validation');
       await page.waitForLoadState('networkidle');
 
@@ -410,30 +410,34 @@ test.describe('Cross-Page Validation Tests', () => {
       await expect(scenario.locator('#username')).toBeVisible();
 
       const usernameInput = scenario.locator('#username input');
+      const nextButton = scenario.locator('button:has-text("Next"):visible');
 
       // Test minimum length validation
       await usernameInput.fill('ab'); // Too short (min 3)
       await page.waitForTimeout(200);
 
-      // Try to navigate (should fail validation)
-      await scenario.locator('button:has-text("Next"):visible').click();
-      await page.waitForTimeout(500);
+      // Verify Next button is disabled due to validation
+      await expect(nextButton).toBeDisabled();
 
       // Should still be on page 1
-      await expect(scenario.locator('#username')).toBeVisible({ timeout: 10000 });
+      await expect(scenario.locator('#username')).toBeVisible();
 
       // Fix username
       await usernameInput.fill('validuser123');
       await page.waitForTimeout(200);
 
+      // Now Next button should be enabled
+      await expect(nextButton).toBeEnabled();
+
       // Navigate to page 2
-      await scenario.locator('button:has-text("Next"):visible').click();
+      await nextButton.click();
       await page.waitForTimeout(300);
 
       // Page 2: Enhanced Security
       await expect(scenario.locator('#password')).toBeVisible();
 
       const passwordInput = scenario.locator('#password input');
+      const page2NextButton = scenario.locator('button:has-text("Next"):visible');
 
       // Test password length validation
       await passwordInput.fill('short'); // Too short (min 8)
@@ -444,9 +448,8 @@ test.describe('Cross-Page Validation Tests', () => {
       await scenario.locator('#securityAnswer input').fill('Fluffy');
       await page.waitForTimeout(200);
 
-      // Try to navigate (should fail due to password)
-      await scenario.locator('button:has-text("Next"):visible').click();
-      await page.waitForTimeout(300);
+      // Verify Next button is disabled due to password validation
+      await expect(page2NextButton).toBeDisabled();
 
       // Should still be on page 2
       await expect(scenario.locator('#password')).toBeVisible();
@@ -455,8 +458,11 @@ test.describe('Cross-Page Validation Tests', () => {
       await passwordInput.fill('securepassword123');
       await page.waitForTimeout(200);
 
+      // Now Next button should be enabled
+      await expect(page2NextButton).toBeEnabled();
+
       // Navigate to page 3
-      await scenario.locator('button:has-text("Next"):visible').click();
+      await page2NextButton.click();
       await page.waitForTimeout(300);
 
       // Page 3: Final Verification

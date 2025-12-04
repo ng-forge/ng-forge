@@ -23,6 +23,7 @@ const excludedKeys = new Set([
   'validationMessages', // Handled in value/checkbox mappers
   'defaultValue', // Used for form reset/clear, not passed to components
   'arrayKey',
+  'schemas', // Handled at form level by SchemaRegistryService
 ]);
 
 export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {

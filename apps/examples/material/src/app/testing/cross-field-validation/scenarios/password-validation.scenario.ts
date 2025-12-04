@@ -2,6 +2,11 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+    minLength: 'Must be at least {{requiredLength}} characters',
+  },
   fields: [
     {
       key: 'password',
@@ -28,11 +33,12 @@ const config = {
       validators: [
         {
           type: 'custom',
-          functionName: 'passwordMatch',
+          expression: 'fieldValue === formValue.password',
+          kind: 'passwordMatch',
         },
       ],
       validationMessages: {
-        custom: 'Passwords must match',
+        passwordMatch: 'Passwords must match',
       },
     },
     {

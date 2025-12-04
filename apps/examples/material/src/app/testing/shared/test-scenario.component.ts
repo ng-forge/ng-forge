@@ -3,8 +3,8 @@ import { JsonPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { catchError, delay, finalize, isObservable, map, Observable, of, tap, timer } from 'rxjs';
-import { DynamicForm, SubmissionActionResult } from '@ng-forge/dynamic-forms';
+import { catchError, finalize, isObservable, map, Observable, of, tap, timer } from 'rxjs';
+import { DynamicForm } from '@ng-forge/dynamic-forms';
 import { TestScenario } from './types';
 
 /**
@@ -28,7 +28,11 @@ import { TestScenario } from './types';
         @if (scenario().description) {
           <p class="scenario-description">{{ scenario().description }}</p>
         }
-        <dynamic-form [config]="effectiveConfig()" [(value)]="formValue" (submitted)="onSubmitted($event)" />
+        @if (hasSubmissionTracking()) {
+          <dynamic-form [config]="effectiveConfig()" [(value)]="formValue" />
+        } @else {
+          <dynamic-form [config]="effectiveConfig()" [(value)]="formValue" (submitted)="onSubmitted($event)" />
+        }
 
         @if (hasSubmissionTracking()) {
           @if (isSubmitting()) {
@@ -110,15 +114,26 @@ export class TestScenarioComponent {
     return !!(s.simulateSubmission || s.submissionAction || s.mockEndpoint);
   });
 
-  /** Effective config with submission action injected if needed */
+  /** Effective config with submission action and custom functions injected if needed */
   effectiveConfig = computed(() => {
     const s = this.scenario();
-    const baseConfig = s.config;
+    let effectiveConfig = { ...s.config };
+
+    // Merge customFnConfig if provided
+    if (s.customFnConfig) {
+      effectiveConfig = {
+        ...effectiveConfig,
+        customFnConfig: {
+          ...effectiveConfig.customFnConfig,
+          ...s.customFnConfig,
+        },
+      };
+    }
 
     // If custom submission action provided, inject it
     if (s.submissionAction) {
       return {
-        ...baseConfig,
+        ...effectiveConfig,
         submission: {
           action: this.wrapSubmissionAction(s.submissionAction),
         },
@@ -128,7 +143,7 @@ export class TestScenarioComponent {
     // If mock endpoint configured, create HTTP-based action
     if (s.mockEndpoint) {
       return {
-        ...baseConfig,
+        ...effectiveConfig,
         submission: {
           action: this.createHttpAction(s.mockEndpoint.url, s.mockEndpoint.method ?? 'POST'),
         },
@@ -138,7 +153,7 @@ export class TestScenarioComponent {
     // If simulated submission configured, create and inject action
     if (s.simulateSubmission) {
       return {
-        ...baseConfig,
+        ...effectiveConfig,
         submission: {
           action: this.createSimulatedAction(
             s.simulateSubmission.delayMs,
@@ -149,7 +164,7 @@ export class TestScenarioComponent {
       };
     }
 
-    return baseConfig;
+    return effectiveConfig;
   });
 
   /** Form value - initialized from scenario's initialValue if provided, resets when scenario changes */
@@ -187,6 +202,7 @@ export class TestScenarioComponent {
           // For test scenarios, we track errors via UI state, not form validation
           return undefined;
         }),
+        tap(() => this.dispatchSubmissionEvent()),
         finalize(() => {
           this.isSubmitting.set(false);
           this.submissionCount.update((c) => c + 1);
@@ -223,6 +239,7 @@ export class TestScenarioComponent {
             });
             return of(undefined);
           }),
+          tap(() => this.dispatchSubmissionEvent()),
           finalize(() => {
             this.isSubmitting.set(false);
             this.submissionCount.update((c) => c + 1);
@@ -258,6 +275,7 @@ export class TestScenarioComponent {
                 error: false,
               });
             }
+            this.dispatchSubmissionEvent();
           }),
           catchError((err) => {
             this.submissionResult.set({
@@ -292,6 +310,7 @@ export class TestScenarioComponent {
             });
           }
 
+          this.dispatchSubmissionEvent();
           return validationResult;
         },
         (err: unknown) => {
@@ -308,15 +327,21 @@ export class TestScenarioComponent {
 
   onSubmitted(value: Record<string, unknown> | undefined): void {
     if (!value) return;
+    this.dispatchSubmissionEvent();
+  }
 
+  /**
+   * Dispatches a custom event for E2E test interception.
+   * Used by both (submitted) handler and submission actions.
+   */
+  private dispatchSubmissionEvent(): void {
     const submission = {
       timestamp: new Date().toISOString(),
-      data: value,
+      data: this.formValue(),
     };
 
     this.submissionLog.update((log) => [...log, submission]);
 
-    // Dispatch custom event for E2E test interception
     window.dispatchEvent(
       new CustomEvent('formSubmitted', {
         detail: { ...submission, testId: this.scenario().testId },

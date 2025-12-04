@@ -10,6 +10,9 @@ export const nextButtonNeverDisabledScenario: TestScenario = {
   description:
     'Tests that form options can disable the page validation behavior. This next button should never be auto-disabled based on page validity.',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'page1b',

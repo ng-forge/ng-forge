@@ -10,6 +10,9 @@ export const nextButtonPageValidationScenario: TestScenario = {
   description:
     'Tests that the next button is disabled when the current page has invalid fields. Fill the required field on page 1 to enable the next button.',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'page1',

@@ -3,6 +3,9 @@ import { TestScenario } from '../../shared/types';
 
 // Note: minDate and maxDate are computed at runtime to use the current month
 const config = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+  },
   fields: [
     {
       key: 'appointmentDate',

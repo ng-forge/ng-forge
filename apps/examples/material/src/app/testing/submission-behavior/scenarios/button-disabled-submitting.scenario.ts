@@ -10,6 +10,9 @@ export const buttonDisabledSubmittingScenario: TestScenario = {
   description:
     'Tests that the submit button is disabled while the form is submitting. Click submit to see the button become disabled during the HTTP request.',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'email2',

@@ -1,11 +1,13 @@
 import { TestSuite } from '../shared/types';
 import { andLogicScenario } from './scenarios/and-logic.scenario';
+import { comparisonOperatorsScenario } from './scenarios/comparison-operators.scenario';
 import { disabledLogicScenario } from './scenarios/disabled-logic.scenario';
 import { hiddenLogicScenario } from './scenarios/hidden-logic.scenario';
 import { nestedAndWithinOrScenario } from './scenarios/nested-and-within-or.scenario';
 import { nestedOrWithinAndScenario } from './scenarios/nested-or-within-and.scenario';
 import { orLogicScenario } from './scenarios/or-logic.scenario';
 import { readonlyLogicScenario } from './scenarios/readonly-logic.scenario';
+import { stringOperatorsScenario } from './scenarios/string-operators.scenario';
 
 export const expressionBasedLogicSuite: TestSuite = {
   id: 'expression-based-logic',
@@ -20,6 +22,8 @@ export const expressionBasedLogicSuite: TestSuite = {
     orLogicScenario,
     nestedAndWithinOrScenario,
     nestedOrWithinAndScenario,
+    comparisonOperatorsScenario,
+    stringOperatorsScenario,
   ],
 };
 

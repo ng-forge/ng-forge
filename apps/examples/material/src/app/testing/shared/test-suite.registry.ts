@@ -14,6 +14,7 @@ import { expressionBasedLogicSuite } from '../expression-based-logic/expression-
 import { formResetClearSuite } from '../form-reset-clear/form-reset-clear.suite';
 import { materialComponentsSuite } from '../material-components/material-components.suite';
 import { multiPageNavigationSuite } from '../multi-page-navigation/multi-page-navigation.suite';
+import { schemaSystemSuite } from '../schema-system/schema-system.suite';
 import { userJourneyFlowsSuite } from '../user-journey-flows/user-journey-flows.suite';
 import { userWorkflowsSuite } from '../user-workflows/user-workflows.suite';
 
@@ -38,6 +39,7 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   formResetClearSuite,
   materialComponentsSuite,
   multiPageNavigationSuite,
+  schemaSystemSuite,
   userJourneyFlowsSuite,
   userWorkflowsSuite,
 ];

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
@@ -6,6 +6,7 @@ import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErr
 import { MatInputComponent, MatInputProps } from './mat-input.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'df-mat-input',
@@ -21,6 +22,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         @case ('email') {
           <input
             matInput
+            #inputEl
             type="email"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -30,6 +32,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         @case ('password') {
           <input
             matInput
+            #inputEl
             type="password"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -39,6 +42,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         @case ('number') {
           <input
             matInput
+            #inputEl
             type="number"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -46,14 +50,29 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
           />
         }
         @case ('tel') {
-          <input matInput type="tel" [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
+          <input
+            matInput
+            #inputEl
+            type="tel"
+            [field]="f"
+            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+            [attr.tabindex]="tabIndex()"
+          />
         }
         @case ('url') {
-          <input matInput type="url" [field]="f" [placeholder]="(placeholder() | dynamicText | async) ?? ''" [attr.tabindex]="tabIndex()" />
+          <input
+            matInput
+            #inputEl
+            type="url"
+            [field]="f"
+            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+            [attr.tabindex]="tabIndex()"
+          />
         }
         @default {
           <input
             matInput
+            #inputEl
             type="text"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -107,6 +126,8 @@ export default class MatInputFieldComponent implements MatInputComponent {
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
+  readonly inputEl = viewChild<ElementRef<HTMLInputElement>>('inputEl');
+
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 
   readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
@@ -115,4 +136,20 @@ export default class MatInputFieldComponent implements MatInputComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  readonly isReadonly = computed(() => this.field()().readonly());
+
+  constructor() {
+    // Use explicitEffect to imperatively set the readonly attribute since Angular Signal Forms
+    // restricts binding [attr.readonly] on elements with [field] directive
+    explicitEffect([this.inputEl, this.isReadonly], ([inputEl, isReadonly]) => {
+      if (inputEl?.nativeElement) {
+        if (isReadonly) {
+          inputEl.nativeElement.setAttribute('readonly', '');
+        } else {
+          inputEl.nativeElement.removeAttribute('readonly');
+        }
+      }
+    });
+  }
 }

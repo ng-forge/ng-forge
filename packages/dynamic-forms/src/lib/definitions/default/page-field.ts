@@ -2,6 +2,23 @@ import { FieldDef } from '../base/field-def';
 import { PageAllowedChildren } from '../../models/types/nesting-constraints';
 import { isRowField } from './row-field';
 import { isGroupField } from './group-field';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+
+/**
+ * Logic configuration for page fields.
+ * Pages only support the 'hidden' logic type since they are layout containers,
+ * not form controls (they can't be readonly, disabled, or required).
+ */
+export interface PageLogicConfig {
+  /** Only 'hidden' is supported for pages */
+  type: 'hidden';
+
+  /**
+   * Condition that determines when this page is hidden.
+   * Can be a boolean or a conditional expression evaluated against form values.
+   */
+  condition: ConditionalExpression | boolean;
+}
 
 /**
  * Page field interface for creating top-level page layouts
@@ -22,6 +39,30 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
 
   /** Page fields do not have a label property **/
   readonly label?: never;
+
+  /**
+   * Logic configurations for conditional page visibility.
+   * Only 'hidden' type logic is supported for pages.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   key: 'businessPage',
+   *   type: 'page',
+   *   logic: [{
+   *     type: 'hidden',
+   *     condition: {
+   *       type: 'fieldValue',
+   *       fieldPath: 'accountType',
+   *       operator: 'notEquals',
+   *       value: 'business',
+   *     },
+   *   }],
+   *   fields: [...]
+   * }
+   * ```
+   */
+  readonly logic?: PageLogicConfig[];
 }
 
 /**

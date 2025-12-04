@@ -9,12 +9,12 @@ const TAKEN_PRODUCT_CODES = ['PROD-001', 'PROD-002', 'PROD-123'];
 /**
  * Resource-based async validator (simulates database lookup)
  */
-export const checkProductCode: AsyncCustomValidator<string, string, boolean | undefined> = {
-  params: (ctx) => ctx.value(),
+export const checkProductCode: AsyncCustomValidator = {
+  params: (ctx) => ctx.value() as string,
   factory: (params) => {
     return rxResource({
       stream: () => {
-        const currentParams = params();
+        const currentParams = params() as string | undefined;
 
         if (!currentParams) {
           return of(false);
@@ -40,8 +40,8 @@ export const checkProductCode: AsyncCustomValidator<string, string, boolean | un
 /**
  * HTTP GET validator for username availability
  */
-export const checkUsernameAvailability: HttpCustomValidator<string, string> = {
-  request: (ctx) => `/api/users/check-username?username=${encodeURIComponent(ctx.value())}`,
+export const checkUsernameAvailability: HttpCustomValidator = {
+  request: (ctx) => `/api/users/check-username?username=${encodeURIComponent(String(ctx.value()))}`,
   onSuccess: (response: unknown) => {
     const result = response as { available: boolean };
     return result.available ? null : { kind: 'usernameTaken' };
@@ -52,7 +52,7 @@ export const checkUsernameAvailability: HttpCustomValidator<string, string> = {
 /**
  * HTTP POST validator for email validation
  */
-export const validateEmail: HttpCustomValidator<string, string> = {
+export const validateEmail: HttpCustomValidator = {
   request: (ctx) => ({
     url: '/api/users/validate-email',
     method: 'POST' as const,

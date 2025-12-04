@@ -10,6 +10,9 @@ export const basicFormScenario: TestScenario = {
   title: 'Basic Form Functionality',
   description: 'Tests fundamental form functionality with password fields',
   config: {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'password',
