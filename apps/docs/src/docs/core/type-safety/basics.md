@@ -335,6 +335,6 @@ If your form configuration is built dynamically (from API data, conditional logi
 ## Related
 
 - **[Container Fields & Nesting](../containers/)** - Groups, rows, pages, and nesting rules
-- **[Custom Types](../custom-types/)** - Extending the type system with custom fields
+- **[Advanced Types](../advanced-types/)** - Runtime validation patterns
 - **[Validation](../../validation/basics/)** - How validators affect inferred types
 - **[Field Types](../../field-types/)** - Understanding available field types

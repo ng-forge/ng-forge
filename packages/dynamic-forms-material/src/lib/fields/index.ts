@@ -21,7 +21,7 @@ export type { MatSelectProps, MatSelectField, MatSelectComponent } from './selec
 export { MatSliderFieldComponent } from './slider';
 export type { MatSliderProps, MatSliderField, MatSliderComponent } from './slider';
 
-export { submitButton, nextPageButton, previousPageButton, actionButton, MatButtonFieldComponent } from './button';
+export { MatButtonFieldComponent } from './button';
 export type {
   MatButtonProps,
   MatButtonField,

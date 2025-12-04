@@ -555,18 +555,6 @@ The submit button automatically:
 - Emits a `SubmitEvent` when clicked
 - Validates all fields before submission
 
-**Helper Function:**
-
-```typescript
-import { submitButton } from '@ng-forge/dynamic-forms-ionic';
-
-submitButton({
-  key: 'submit',
-  label: 'Create Account',
-  props: { color: 'primary', expand: 'block' },
-});
-```
-
 **Props:**
 
 | Prop     | Type                                                                                                            | Default     | Description       |
@@ -615,41 +603,10 @@ Navigation buttons for multi-step (paged) forms with platform-adaptive styling.
 }
 ```
 
-**Helper Functions:**
-
-```typescript
-import { nextPageButton, previousPageButton } from '@ng-forge/dynamic-forms-ionic';
-
-nextPageButton({ key: 'next', label: 'Continue', props: { color: 'primary' } });
-previousPageButton({ key: 'back', label: 'Back' });
-```
-
 **Button Types:**
 
 - **Next Button**: Navigates to the next page. Automatically disabled when current page has validation errors.
 - **Previous Button**: Navigates to the previous page. Always enabled to allow users to go back.
-
-#### Custom Action Button
-
-Generic button for custom events with full Ionic styling support.
-
-**Basic Usage:**
-
-```typescript
-import { actionButton } from '@ng-forge/dynamic-forms-ionic';
-import { FormEvent } from '@ng-forge/dynamic-forms';
-
-class SaveDraftEvent implements FormEvent {
-  readonly type = 'save-draft' as const;
-}
-
-actionButton({
-  key: 'saveDraft',
-  label: 'Save as Draft',
-  event: SaveDraftEvent,
-  props: { color: 'secondary', fill: 'outline' },
-});
-```
 
 ---
 

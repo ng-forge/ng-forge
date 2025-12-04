@@ -631,6 +631,6 @@ const config = {
 ## Related
 
 - **[Type Safety Basics](../basics/)** - Getting started with type inference
-- **[Custom Types](../custom-types/)** - Creating custom field types
+- **[Advanced Types](../advanced-types/)** - Runtime validation patterns
 - **[Form Layout](../../../prebuilt/)** - Visual guide to container fields
 - **[Validation](../../validation/basics/)** - Validating nested fields
