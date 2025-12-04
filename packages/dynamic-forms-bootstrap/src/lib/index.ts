@@ -1,9 +1,5 @@
 // Field components
 export {
-  submitButton,
-  nextPageButton,
-  previousPageButton,
-  actionButton,
   BsButtonFieldComponent,
   BsCheckboxFieldComponent,
   BsDatepickerFieldComponent,

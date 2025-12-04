@@ -9,14 +9,15 @@ import { ConditionalExpression } from '../expressions/conditional-expression';
  * @example
  * ```typescript
  * // Disable submit button when form is invalid or submitting
- * submitButton({
+ * {
  *   key: 'submit',
+ *   type: 'submit',
  *   label: 'Submit',
  *   logic: [
  *     { type: 'disabled', condition: 'formInvalid' },
  *     { type: 'disabled', condition: 'formSubmitting' },
  *   ]
- * })
+ * }
  *
  * // Disable next button when current page is invalid
  * nextButton({

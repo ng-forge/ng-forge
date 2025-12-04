@@ -1,7 +1,7 @@
 // Public exports for ionic field fields and types
 
 // Button
-export { submitButton, nextPageButton, previousPageButton, actionButton, IonicButtonFieldComponent } from './button';
+export { IonicButtonFieldComponent } from './button';
 export type {
   IonicButtonProps,
   IonicButtonField,

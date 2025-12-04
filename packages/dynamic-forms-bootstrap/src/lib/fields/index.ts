@@ -1,6 +1,6 @@
 // Public exports for bootstrap field components and types
 
-export { submitButton, nextPageButton, previousPageButton, actionButton, BsButtonFieldComponent } from './button';
+export { BsButtonFieldComponent } from './button';
 export type {
   BsButtonProps,
   BsButtonField,

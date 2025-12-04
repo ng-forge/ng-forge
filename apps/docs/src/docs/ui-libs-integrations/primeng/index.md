@@ -572,18 +572,6 @@ The submit button automatically:
 - Emits a `SubmitEvent` when clicked
 - Validates all fields before submission
 
-You can also use the helper function:
-
-```typescript
-import { submitButton } from '@ng-forge/dynamic-forms-primeng';
-
-submitButton({
-  key: 'submit',
-  label: 'Create Account',
-  props: { severity: 'primary' },
-});
-```
-
 **Props:**
 
 | Prop       | Type                                                                                            | Default     | Description     |
@@ -640,16 +628,6 @@ Navigation buttons for multi-step (paged) forms.
     },
   ],
 }
-```
-
-You can also use helper functions:
-
-```typescript
-import { nextPageButton, previousPageButton, submitButton } from '@ng-forge/dynamic-forms-primeng';
-
-nextPageButton({ key: 'next', label: 'Continue', props: { severity: 'primary' } });
-previousPageButton({ key: 'back', label: 'Back' });
-submitButton({ key: 'submit', label: 'Complete', props: { severity: 'primary' } });
 ```
 
 **Button Types:**
@@ -719,19 +697,6 @@ class MyComponent {
     });
   }
 }
-```
-
-You can also use the helper function:
-
-```typescript
-import { actionButton } from '@ng-forge/dynamic-forms-primeng';
-
-actionButton({
-  key: 'saveDraft',
-  label: 'Save as Draft',
-  event: SaveDraftEvent,
-  props: { severity: 'secondary' },
-});
 ```
 
 ---

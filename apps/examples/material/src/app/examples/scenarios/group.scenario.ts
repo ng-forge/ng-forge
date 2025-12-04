@@ -1,5 +1,4 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
-import { submitButton } from '@ng-forge/dynamic-forms-material';
 import { ExampleScenario } from '../shared/types';
 
 export const groupScenario: ExampleScenario = {
@@ -81,13 +80,14 @@ export const groupScenario: ExampleScenario = {
           },
         ],
       },
-      submitButton({
+      {
         key: 'submit',
+        type: 'submit',
         label: 'Save Profile',
         props: {
           color: 'primary',
         },
-      }),
+      },
     ],
   } as const satisfies FormConfig,
 };

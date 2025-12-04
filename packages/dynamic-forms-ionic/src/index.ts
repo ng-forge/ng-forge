@@ -1,8 +1,4 @@
 export {
-  submitButton,
-  nextPageButton,
-  previousPageButton,
-  actionButton,
   IonicButtonFieldComponent,
   IonicCheckboxFieldComponent,
   IonicDatepickerFieldComponent,

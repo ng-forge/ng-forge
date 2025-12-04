@@ -1,37 +1,4 @@
-Field types define form control behavior and rendering. All fields extend the `FieldDef` base interface:
-
-```typescript
-interface FieldDef<TProps> {
-  key: string; // Form model property
-  type: string; // Field type identifier
-  label?: DynamicText; // Field label (string, Observable, or Signal)
-  props?: TProps; // Type-specific properties
-  className?: string; // CSS classes
-  disabled?: boolean; // Disabled state
-  readonly?: boolean; // Read-only state
-  hidden?: boolean; // Hidden state
-  tabIndex?: number; // Tab order
-  col?: number; // Column width (1-12)
-}
-```
-
-Value fields (inputs, selects, etc.) extend this with validation properties:
-
-```typescript
-interface BaseValueField<TProps, TValue> extends FieldDef<TProps> {
-  value?: TValue; // Initial value (optional, determines inferred type)
-  required?: boolean; // Required validation shorthand
-  email?: boolean; // Email validation shorthand
-  min?: number; // Min value
-  max?: number; // Max value
-  minLength?: number; // Min length
-  maxLength?: number; // Max length
-  pattern?: string | RegExp; // Pattern validation
-  validators?: ValidatorConfig[]; // Additional validators
-  validationMessages?: ValidationMessages; // Error messages
-  logic?: LogicConfig[]; // Conditional logic rules
-}
-```
+Field types define form control behavior and rendering. Each UI integration (Material, Bootstrap, PrimeNG, Ionic) provides implementations for these core field types.
 
 **Note**: For nested form structures, use [group fields](../field-types#group) instead of dot notation in keys.
 
@@ -262,29 +229,6 @@ Display-only text content (not a form control). Useful for instructions, headers
 - `elementType`: HTML element to render (`'p'` | `'h1'` - `'h6'` | `'span'`)
 
 **Note:** Text fields don't have a `value` - they display the `label` content.
-
-## Custom Field Types
-
-Register custom field types using `FieldTypeDefinition` with `provideDynamicForm`:
-
-```typescript
-import { FieldTypeDefinition, provideDynamicForm, valueFieldMapper } from '@ng-forge/dynamic-forms';
-import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
-import type { CustomDatePickerField } from './custom-date-picker';
-
-export const CustomDatePickerType: FieldTypeDefinition<CustomDatePickerField> = {
-  name: 'custom-datepicker',
-  loadComponent: () => import('./custom-date-picker.component'),
-  mapper: valueFieldMapper,
-};
-
-// In app.config.ts
-export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withMaterialFields(), CustomDatePickerType)],
-};
-```
-
-See [Type Safety & Inference](../type-safety) for the complete custom field type workflow including type definitions and module augmentation.
 
 ## Validation
 

@@ -1,5 +1,4 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
-import { submitButton } from '@ng-forge/dynamic-forms-primeng';
 import { ExampleScenario } from '../shared/types';
 
 export const completeFormScenario: ExampleScenario = {
@@ -153,14 +152,15 @@ export const completeFormScenario: ExampleScenario = {
       },
 
       // Submit button
-      submitButton({
+      {
         key: 'submit',
+        type: 'submit',
         label: 'Create Account',
         props: {
           severity: 'primary',
           raised: true,
         },
-      }),
+      },
     ],
   } as const satisfies FormConfig,
 };

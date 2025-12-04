@@ -21,7 +21,7 @@ export type { PrimeSelectProps, PrimeSelectField, PrimeSelectComponent } from '.
 export { PrimeSliderFieldComponent } from './slider';
 export type { PrimeSliderProps, PrimeSliderField, PrimeSliderComponent } from './slider';
 
-export { submitButton, nextPageButton, previousPageButton, actionButton, PrimeButtonFieldComponent } from './button';
+export { PrimeButtonFieldComponent } from './button';
 export type {
   PrimeButtonProps,
   PrimeButtonField,
