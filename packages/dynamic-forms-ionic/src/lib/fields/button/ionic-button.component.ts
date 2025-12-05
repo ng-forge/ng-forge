@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, isSignal, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { IonButton } from '@ionic/angular/standalone';
 import {
+  ARRAY_CONTEXT,
   ArrayItemContext,
   DynamicText,
   DynamicTextPipe,
@@ -30,7 +31,7 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color || 'primary'"
       [strong]="props()?.strong"
       [class]="className() || ''"
-      [disabled]="resolvedDisabled()"
+      [disabled]="disabled()"
       [attr.data-testid]="buttonTestId()"
       (click)="triggerEvent()"
     >
@@ -42,16 +43,12 @@ import { AsyncPipe } from '@angular/common';
 export default class IonicButtonFieldComponent<TEvent extends FormEvent> implements IonicButtonComponent<TEvent> {
   private readonly eventBus = inject(EventBus);
 
+  private readonly arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+
   readonly key = input.required<string>();
   readonly label = input.required<DynamicText>();
-  readonly disabled = input<boolean | Signal<boolean>>(false);
+  readonly disabled = input<boolean>(false);
   readonly hidden = input<boolean>(false);
-
-  // Resolve disabled value - unwrap signal if needed for reactive binding
-  readonly resolvedDisabled = computed(() => {
-    const value = this.disabled();
-    return isSignal(value) ? value() : value;
-  });
   readonly tabIndex = input<number>();
   readonly className = input<string>('');
 
@@ -67,8 +64,16 @@ export default class IonicButtonFieldComponent<TEvent extends FormEvent> impleme
     const args = this.eventArgs();
 
     if (args && args.length > 0) {
-      // Get context or build default from key
-      const context = this.eventContext() || { key: this.key() };
+      // Build context from injected ARRAY_CONTEXT (with linkedSignal index) or fallback to eventContext
+      const context: ArrayItemContext = this.arrayContext
+        ? {
+            key: this.key(),
+            // Read signal to get current index (automatically updates via linkedSignal)
+            index: this.arrayContext.index(),
+            arrayKey: this.arrayContext.arrayKey,
+            formValue: this.arrayContext.formValue,
+          }
+        : this.eventContext() || { key: this.key() };
 
       // Resolve tokens in event args using the provided context
       const resolvedArgs = resolveTokens(args, context);

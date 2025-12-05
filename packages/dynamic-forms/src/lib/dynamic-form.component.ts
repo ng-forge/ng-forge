@@ -2,7 +2,6 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
-  ComponentRef,
   computed,
   DestroyRef,
   inject,
@@ -16,14 +15,15 @@ import {
   signal,
   Signal,
   untracked,
-  ViewContainerRef,
 } from '@angular/core';
-import { FieldRendererDirective } from './directives/dynamic-form.directive';
-import { form, FormUiControl, submit } from '@angular/forms/signals';
-import { outputFromObservable, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { EMPTY, filter, firstValueFrom, forkJoin, from, isObservable, map, of, ReplaySubject, switchMap, take } from 'rxjs';
+import { NgComponentOutlet } from '@angular/common';
+import { form } from '@angular/forms/signals';
+import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { EMPTY, forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
+import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-deferred';
+import { reconcileFields, ResolvedField, resolveField } from './utils/resolve-field/resolve-field';
+import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
 import { keyBy, memoize, isEqual } from './utils/object-utils';
-import { mapFieldToBindings } from './utils/field-mapper/field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from './models/field-signal-context.token';
 import { FieldTypeDefinition } from './models/field-type';
 import { FormConfig, FormOptions } from './models/form-config';
@@ -33,10 +33,11 @@ import { createSchemaFromFields } from './core/schema-builder';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
-import { createInitializationTracker } from './utils/initialization-tracker/initialization-tracker';
-import { InferFormValue } from './models/types';
+import { setupInitializationTracking } from './utils/initialization-tracker/initialization-tracker';
+import { FormMode, InferFormValue, isContainerField } from './models/types';
 import { flattenFields } from './utils/flattener/field-flattener';
 import { FieldDef } from './definitions/base/field-def';
+import { isPageField, PageField } from './definitions/default/page-field';
 import { getFieldDefaultValue } from './utils/default-value/default-value';
 import { FieldSignalContext } from './mappers/types';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -93,7 +94,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
  */
 @Component({
   selector: 'dynamic-form',
-  imports: [FieldRendererDirective, PageOrchestratorComponent],
+  imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
     <form
       class="df-form"
@@ -105,9 +106,11 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
         <!-- Paged form: Use page orchestrator with page field definitions -->
         <page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()" />
       } @else {
-        <!-- Non-paged form: Render fields directly with grid system -->
-        <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-          <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+        <!-- Non-paged form: Render fields declaratively with ngComponentOutlet -->
+        <div class="df-form">
+          @for (field of resolvedFields(); track field.key) {
+            <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+          }
         </div>
       }
     </form>
@@ -125,7 +128,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
-  private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
@@ -333,7 +335,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
   }
 
-  private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: 'paged' | 'non-paged', registry: Map<string, FieldTypeDefinition>) {
+  private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>) {
     // Use memoized functions for expensive operations with registry
     const flattenedFields = this.memoizedFlattenFields(fields, registry);
     const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
@@ -375,10 +377,10 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const mode = this.formModeDetection().mode;
 
     if (mode === 'paged' && config.fields) {
-      return config.fields.filter((field) => field.type === 'page') as any[];
+      return config.fields.filter(isPageField);
     }
 
-    return [];
+    return [] as PageField[];
   });
 
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
@@ -623,16 +625,80 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly componentId = 'dynamic-form';
 
   /**
-   * Observable that emits when all components (pages + rows + groups + dynamic-form) are initialized.
-   * Uses a ReplaySubject to ensure exactly one emission that can be received by late subscribers.
+   * Total count of container components (dynamic-form + pages + rows + groups).
+   * Used for initialization tracking.
    */
-  private readonly initializedSubject = new ReplaySubject<boolean>(1);
-  readonly initialized$ = this.initializedSubject.asObservable();
+  private readonly totalComponentsCount = computed(() => {
+    const fields = this.formSetup().fields;
+    if (!fields) return 1; // Just the dynamic-form component
+
+    const registry = this.rawFieldRegistry();
+    const flatFields = flattenFields(fields, registry);
+    const componentCount = flatFields.filter(isContainerField).length;
+
+    return componentCount + 1; // +1 for dynamic-form component
+  });
+
+  /**
+   * Observable that emits when all components (pages + rows + groups + dynamic-form) are initialized.
+   * Uses shareReplay(1) to ensure exactly one emission that can be received by late subscribers.
+   */
+  readonly initialized$ = setupInitializationTracking({
+    eventBus: this.eventBus,
+    totalComponentsCount: this.totalComponentsCount,
+    injector: this.injector,
+    componentId: this.componentId,
+  });
+
+  /**
+   * Source signal for fields to render.
+   */
+  private readonly fieldsSource = computed(() => this.formSetup().fields);
+
+  /**
+   * Resolved fields for declarative rendering using derivedFromDeferred.
+   * This wraps toObservable in defer() to avoid injection context issues.
+   */
+  protected readonly resolvedFields = derivedFromDeferred(
+    this.fieldsSource,
+    pipe(
+      switchMap((fields) => {
+        if (!fields || fields.length === 0) {
+          return of([] as (ResolvedField | undefined)[]);
+        }
+        const context = {
+          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+          registry: this.rawFieldRegistry(),
+          injector: this.fieldInjector(),
+          destroyRef: this.destroyRef,
+          onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
+            const fieldKey = fieldDef.key || '<no key>';
+            this.fieldLoadingErrors.update((errors) => [
+              ...errors,
+              {
+                fieldType: fieldDef.type,
+                fieldKey,
+                error: error instanceof Error ? error : new Error(String(error)),
+              },
+            ]);
+            console.error(
+              `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
+                `Ensure the field type is registered in your field registry.`,
+              error,
+            );
+          },
+        };
+        return forkJoin(fields.map((f) => resolveField(f, context)));
+      }),
+      // Filter out undefined (failed loads) and cast to ResolvedField[]
+      map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
+      // Reconcile to reuse injectors for unchanged fields
+      scan(reconcileFields, [] as ResolvedField[]),
+    ),
+    { initialValue: [] as ResolvedField[], injector: this.injector },
+  );
 
   constructor() {
-    // Set up initialization tracking
-    this.setupInitializationTracking();
-
     // Clear field loading errors when config changes
     explicitEffect([this.config], () => {
       this.fieldLoadingErrors.set([]);
@@ -644,6 +710,18 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         // Emit initialization for dynamic-form component in paged mode
         // This happens after the page orchestrator is set up
         this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+      }
+    });
+
+    // Track initialization for non-paged forms when fields are resolved
+    explicitEffect([this.resolvedFields, this.formModeDetection], ([fields, { mode }]) => {
+      if (mode === 'non-paged' && fields.length > 0) {
+        afterNextRender(
+          () => {
+            this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+          },
+          { injector: this.injector },
+        );
       }
     });
 
@@ -664,40 +742,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       });
 
     // Handle submission with optional submission action
-    // Uses switchMap to cancel any in-flight submission when a new one starts
-    this.eventBus
-      .on<SubmitEvent>('submit')
-      .pipe(
-        switchMap(() => {
-          const submissionConfig = this.config().submission;
-
-          // If no submission action is configured, let the submitted output handle it
-          // This maintains backward compatibility for users handling submission manually
-          if (!submissionConfig?.action) {
-            return EMPTY;
-          }
-
-          // Wrap the action to handle Observable returns
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const wrappedAction = (formTree: any): Promise<any> => {
-            const result = submissionConfig.action(formTree);
-            // If the action returns an Observable, convert it to a Promise
-            if (isObservable(result)) {
-              return firstValueFrom(result);
-            }
-            return result;
-          };
-
-          // Use Angular Signal Forms' native submit() function
-          // This automatically:
-          // - Sets form.submitting() to true during execution
-          // - Applies server errors to form fields on completion
-          // - Sets form.submitting() to false when done
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return from(submit(this.form() as any, wrappedAction));
-        }),
-        takeUntilDestroyed(),
-      )
+    createSubmissionHandler({
+      eventBus: this.eventBus,
+      configSignal: this.config,
+      formSignal: this.form,
+    })
+      .pipe(takeUntilDestroyed())
       .subscribe();
   }
 
@@ -723,74 +773,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change'),
   );
 
-  private fields$ = toObservable(computed(() => this.formSetup().fields));
-
-  protected fields = toSignal(
-    this.fields$.pipe(
-      switchMap((fields) => {
-        if (!fields || fields.length === 0) {
-          return of([]);
-        }
-
-        return forkJoin(this.mapFields(fields));
-      }),
-      map((components) => components.filter(Boolean)),
-    ),
-    { initialValue: [] },
-  );
-
-  private mapFields(fields: FieldDef<unknown>[]): Promise<ComponentRef<FormUiControl>>[] {
-    return fields
-      .map((fieldDef) => this.mapSingleField(fieldDef))
-      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
-  }
-
-  private async mapSingleField(fieldDef: FieldDef<unknown>): Promise<ComponentRef<FormUiControl> | undefined> {
-    return this.fieldRegistry
-      .loadTypeComponent(fieldDef.type)
-      .then((componentType) => {
-        // Check if component is destroyed before creating new components
-        if (this.destroyRef.destroyed) {
-          return undefined;
-        }
-
-        // Run mapper in injection context so it can inject FIELD_SIGNAL_CONTEXT
-        const bindings = runInInjectionContext(this.fieldInjector(), () => {
-          return mapFieldToBindings(fieldDef, this.rawFieldRegistry());
-        });
-
-        // Create component with field injector so child components can also inject FIELD_SIGNAL_CONTEXT
-        return this.vcr.createComponent(componentType, { bindings, injector: this.fieldInjector() }) as ComponentRef<FormUiControl>;
-      })
-      .catch((error) => {
-        // Only log and track errors if component hasn't been destroyed
-        if (!this.destroyRef.destroyed) {
-          const fieldKey = fieldDef.key || '<no key>';
-
-          // Track error in signal for error boundary pattern
-          this.fieldLoadingErrors.update((errors) => [
-            ...errors,
-            {
-              fieldType: fieldDef.type,
-              fieldKey,
-              error: error instanceof Error ? error : new Error(String(error)),
-            },
-          ]);
-
-          console.error(
-            `[DynamicForm] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
-              `Ensure the field type is registered in your field registry.`,
-            error,
-          );
-        }
-        return undefined;
-      });
-  }
-
-  protected onFieldsInitialized(): void {
-    this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
-  }
-
   /**
    * Handles form reset. Restores all form field values to their
    * initial default values as defined in the form configuration.
@@ -798,6 +780,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private onFormReset(): void {
     const defaults = this.defaultValues();
     // Update both the form instance and the value model
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.form()().value.set(defaults as any);
     this.value.set(defaults as Partial<TModel>);
   }
@@ -809,53 +792,9 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private onFormClear(): void {
     const emptyValue = {} as Partial<TModel>;
     // Update both the form instance and the value model
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.form()().value.set(emptyValue as any);
     this.value.set(emptyValue);
-  }
-
-  /**
-   * Creates an observable that tracks when all form components are initialized.
-   * The count includes: 1 dynamic-form + pages + rows + groups
-   */
-  private setupInitializationTracking(): void {
-    const totalComponentsCount = computed(() => {
-      const fields = this.formSetup().fields;
-      if (!fields) return 1; // Just the dynamic-form component
-
-      const registry = this.rawFieldRegistry();
-      const flatFields = flattenFields(fields, registry);
-      const componentCount = flatFields.filter((field) => field.type === 'page' || field.type === 'row' || field.type === 'group').length;
-
-      return componentCount + 1; // +1 for dynamic-form component
-    });
-
-    // Only track initialization for the initial component count
-    // Use take(1) to prevent re-subscriptions if totalComponentsCount changes
-    toObservable(totalComponentsCount)
-      .pipe(
-        take(1),
-        switchMap((count) => {
-          if (count === 1) {
-            // Only dynamic-form component, emit immediately when it initializes
-            return this.eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
-              filter((event) => event.componentType === 'dynamic-form' && event.componentId === this.componentId),
-              map(() => true),
-              take(1), // Only take the first initialization event
-            );
-          }
-
-          return createInitializationTracker(this.eventBus, count);
-        }),
-      )
-      .subscribe({
-        next: (initialized) => {
-          this.initializedSubject.next(initialized);
-          this.initializedSubject.complete();
-        },
-        error: (error) => {
-          this.initializedSubject.error(error);
-        },
-      });
   }
 
   ngOnDestroy(): void {

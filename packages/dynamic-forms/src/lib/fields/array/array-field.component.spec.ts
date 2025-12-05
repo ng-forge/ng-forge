@@ -142,7 +142,7 @@ describe('ArrayFieldComponent', () => {
 
     const { component } = setupArrayTest(field, { testArray: [] });
 
-    expect(component.fields()).toHaveLength(0);
+    expect(component.resolvedItems()).toHaveLength(0);
   });
 
   it('should create field instances for existing array items', async () => {
@@ -161,7 +161,7 @@ describe('ArrayFieldComponent', () => {
     const maxAttempts = 50; // 5 seconds max
     let attempts = 0;
 
-    while (component.fields().length < 3 && attempts < maxAttempts) {
+    while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
       await fixture.whenStable();
       fixture.detectChanges();
       TestBed.flushEffects();
@@ -169,7 +169,7 @@ describe('ArrayFieldComponent', () => {
       attempts++;
     }
 
-    expect(component.fields()).toHaveLength(3);
+    expect(component.resolvedItems()).toHaveLength(3);
   });
 
   it('should render array container in template', () => {
@@ -211,7 +211,7 @@ describe('ArrayFieldComponent', () => {
       const eventBus = TestBed.inject(EventBus);
 
       // Initially empty
-      expect(component.fields()).toHaveLength(0);
+      expect(component.resolvedItems()).toHaveLength(0);
 
       // Dispatch event with custom field template
       const customField = createSimpleTestField('customItem', 'Custom Item');
@@ -220,7 +220,7 @@ describe('ArrayFieldComponent', () => {
       // Wait for async component loading
       const maxAttempts = 50;
       let attempts = 0;
-      while (component.fields().length < 1 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -228,7 +228,7 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(1);
+      expect(component.resolvedItems()).toHaveLength(1);
     });
 
     it('should add item using array template as fallback when AddArrayItemEvent has no field', async () => {
@@ -242,7 +242,7 @@ describe('ArrayFieldComponent', () => {
       const eventBus = TestBed.inject(EventBus);
 
       // Initially empty
-      expect(component.fields()).toHaveLength(0);
+      expect(component.resolvedItems()).toHaveLength(0);
 
       // Dispatch event WITHOUT field parameter - should use array's template
       eventBus.dispatch(AddArrayItemEvent, 'items');
@@ -250,7 +250,7 @@ describe('ArrayFieldComponent', () => {
       // Wait for async component loading
       const maxAttempts = 50;
       let attempts = 0;
-      while (component.fields().length < 1 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -258,7 +258,7 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(1);
+      expect(component.resolvedItems()).toHaveLength(1);
     });
 
     it('should add item at specific index when index is provided', async () => {
@@ -277,7 +277,7 @@ describe('ArrayFieldComponent', () => {
       // Wait for initial items to load
       const maxAttempts = 50;
       let attempts = 0;
-      while (component.fields().length < 3 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -285,14 +285,14 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(3);
+      expect(component.resolvedItems()).toHaveLength(3);
 
       // Add at index 1 (between first and second)
       eventBus.dispatch(AddArrayItemEvent, 'items', undefined, 1);
 
       // Wait for new item
       attempts = 0;
-      while (component.fields().length < 4 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 4 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -300,7 +300,7 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(4);
+      expect(component.resolvedItems()).toHaveLength(4);
     });
 
     it('should not add item if array has no template', async () => {
@@ -320,7 +320,7 @@ describe('ArrayFieldComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      expect(component.fields()).toHaveLength(0);
+      expect(component.resolvedItems()).toHaveLength(0);
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cannot add item to array'));
     });
   });
@@ -342,7 +342,7 @@ describe('ArrayFieldComponent', () => {
       // Wait for initial items
       const maxAttempts = 50;
       let attempts = 0;
-      while (component.fields().length < 3 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -350,14 +350,14 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(3);
+      expect(component.resolvedItems()).toHaveLength(3);
 
       // Remove last item
       eventBus.dispatch(RemoveArrayItemEvent, 'items');
 
       // Wait for the component to update
       attempts = 0;
-      while (component.fields().length > 2 && attempts < maxAttempts) {
+      while (component.resolvedItems().length > 2 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -365,7 +365,7 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(2);
+      expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should remove item at specific index when index is provided', async () => {
@@ -384,7 +384,7 @@ describe('ArrayFieldComponent', () => {
       // Wait for initial items
       const maxAttempts = 50;
       let attempts = 0;
-      while (component.fields().length < 3 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -392,14 +392,14 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(3);
+      expect(component.resolvedItems()).toHaveLength(3);
 
       // Remove item at index 1 (middle item)
       eventBus.dispatch(RemoveArrayItemEvent, 'items', 1);
 
       // Wait for the component to update
       attempts = 0;
-      while (component.fields().length > 2 && attempts < maxAttempts) {
+      while (component.resolvedItems().length > 2 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -407,7 +407,7 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(2);
+      expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should not remove from empty array', async () => {
@@ -420,7 +420,7 @@ describe('ArrayFieldComponent', () => {
       const { component, fixture } = setupArrayTest(field, { items: [] });
       const eventBus = TestBed.inject(EventBus);
 
-      expect(component.fields()).toHaveLength(0);
+      expect(component.resolvedItems()).toHaveLength(0);
 
       // Try to remove from empty array
       eventBus.dispatch(RemoveArrayItemEvent, 'items');
@@ -428,7 +428,7 @@ describe('ArrayFieldComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      expect(component.fields()).toHaveLength(0);
+      expect(component.resolvedItems()).toHaveLength(0);
     });
   });
 
@@ -555,7 +555,7 @@ describe('ArrayFieldComponent', () => {
       // Wait for async component loading
       const maxAttempts = 50;
       let attempts = 0;
-      while (component.fields().length < 2 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -564,7 +564,7 @@ describe('ArrayFieldComponent', () => {
       }
 
       // Should have 2 field instances (one per contact object)
-      expect(component.fields()).toHaveLength(2);
+      expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should handle adding items to array with nested object structure', async () => {
@@ -592,7 +592,7 @@ describe('ArrayFieldComponent', () => {
       // Wait for initial item
       const maxAttempts = 50;
       let attempts = 0;
-      while (component.fields().length < 1 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 1 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -600,7 +600,7 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(1);
+      expect(component.resolvedItems()).toHaveLength(1);
 
       // Add another contact using row template
       const rowTemplate: RowField<any> = {
@@ -615,7 +615,7 @@ describe('ArrayFieldComponent', () => {
 
       // Wait for new item
       attempts = 0;
-      while (component.fields().length < 2 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -623,7 +623,7 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(2);
+      expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should handle removing items from array with nested object structure', async () => {
@@ -655,7 +655,7 @@ describe('ArrayFieldComponent', () => {
       // Wait for initial items
       const maxAttempts = 50;
       let attempts = 0;
-      while (component.fields().length < 3 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 3 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -663,14 +663,14 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(3);
+      expect(component.resolvedItems()).toHaveLength(3);
 
       // Remove middle item (index 1)
       eventBus.dispatch(RemoveArrayItemEvent, 'contacts', 1);
 
       // Wait for removal
       attempts = 0;
-      while (component.fields().length > 2 && attempts < maxAttempts) {
+      while (component.resolvedItems().length > 2 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -678,7 +678,7 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(2);
+      expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should create fields for array with simple input template', async () => {
@@ -695,7 +695,7 @@ describe('ArrayFieldComponent', () => {
 
       const maxAttempts = 50;
       let attempts = 0;
-      while (component.fields().length < 2 && attempts < maxAttempts) {
+      while (component.resolvedItems().length < 2 && attempts < maxAttempts) {
         await fixture.whenStable();
         fixture.detectChanges();
         TestBed.flushEffects();
@@ -703,7 +703,7 @@ describe('ArrayFieldComponent', () => {
         attempts++;
       }
 
-      expect(component.fields()).toHaveLength(2);
+      expect(component.resolvedItems()).toHaveLength(2);
     });
 
     it('should handle empty nested object array gracefully', async () => {
@@ -729,7 +729,7 @@ describe('ArrayFieldComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      expect(component.fields()).toHaveLength(0);
+      expect(component.resolvedItems()).toHaveLength(0);
     });
   });
 
@@ -777,19 +777,21 @@ describe('ArrayFieldComponent', () => {
       });
     });
 
-    it('should produce field binding for schemaless form with data', () => {
+    it('should produce field input for schemaless form with data', () => {
       const injector = createSchemalessFormInjector({ username: 'testuser' });
       const fieldDef = { key: 'username', type: 'input', label: 'Username' };
 
-      const bindings = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputsSignal = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputs = inputsSignal(); // Call the signal to get the actual inputs
 
-      // Expected bindings:
-      // From baseFieldMapper: 'label' (1) + 'key' (2) = 2 bindings
-      // From valueFieldMapper: 'validationMessages' (3) + 'field' (4) = 2 more bindings
-      // Total: 4 bindings
+      // Expected inputs:
+      // From baseFieldMapper: 'label' (1) + 'key' (2) = 2 inputs
+      // From valueFieldMapper: 'validationMessages' (3) + 'field' (4) = 2 more inputs
+      // Total: 4 inputs
       //
-      // If the fix is broken, 'field' won't be added and we'd have only 3 bindings
-      expect(bindings.length).toBe(4);
+      // If the fix is broken, 'field' won't be added and we'd have only 3 inputs
+      expect(Object.keys(inputs)).toHaveLength(4);
+      expect(inputs).toHaveProperty('field');
     });
 
     it('should handle field access when form value has nested structure', () => {
@@ -800,13 +802,15 @@ describe('ArrayFieldComponent', () => {
       });
 
       const fieldDef = { key: 'name', type: 'input', label: 'Name' };
-      const bindings = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputsSignal = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputs = inputsSignal(); // Call the signal to get the actual inputs
 
-      // Should still produce 4 bindings including 'field'
-      expect(bindings.length).toBe(4);
+      // Should still produce 4 inputs including 'field'
+      expect(Object.keys(inputs)).toHaveLength(4);
+      expect(inputs).toHaveProperty('field');
     });
 
-    it('should produce field binding for array item context', () => {
+    it('should produce field input for array item context', () => {
       // Simulate what happens inside array-field.component when creating
       // a context for array items
       const itemValue = signal<Record<string, unknown>>({ itemField: 'item value' });
@@ -827,11 +831,13 @@ describe('ArrayFieldComponent', () => {
       });
 
       const fieldDef = { key: 'itemField', type: 'input', label: 'Item Field' };
-      const bindings = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputsSignal = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputs = inputsSignal(); // Call the signal to get the actual inputs
 
-      // This should produce 4 bindings including 'field' - the critical binding
+      // This should produce 4 inputs including 'field' - the critical input
       // for the array item to work correctly
-      expect(bindings.length).toBe(4);
+      expect(Object.keys(inputs)).toHaveLength(4);
+      expect(inputs).toHaveProperty('field');
     });
 
     it('should handle field without label', () => {
@@ -839,15 +845,17 @@ describe('ArrayFieldComponent', () => {
       // Field without label
       const fieldDef = { key: 'noLabel', type: 'input' };
 
-      const bindings = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputsSignal = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputs = inputsSignal(); // Call the signal to get the actual inputs
 
       // baseFieldMapper: key (1) = 1
       // valueFieldMapper: validationMessages (2) + field (3) = 2
       // Total: 3
-      expect(bindings.length).toBe(3);
+      expect(Object.keys(inputs)).toHaveLength(3);
+      expect(inputs).toHaveProperty('field');
     });
 
-    it('should add defaultValidationMessages binding when context provides it', () => {
+    it('should add defaultValidationMessages input when context provides it', () => {
       const valueSignal = signal<Record<string, unknown>>({ test: 'value' });
       const formInstance = runInInjectionContext(TestBed.inject(Injector), () => form(valueSignal));
       formInstance();
@@ -866,12 +874,15 @@ describe('ArrayFieldComponent', () => {
       });
 
       const fieldDef = { key: 'test', type: 'input', label: 'Test' };
-      const bindings = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputsSignal = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
+      const inputs = inputsSignal(); // Call the signal to get the actual inputs
 
       // baseFieldMapper: label (1) + key (2) = 2
       // valueFieldMapper: validationMessages (3) + defaultValidationMessages (4) + field (5) = 3
       // Total: 5
-      expect(bindings.length).toBe(5);
+      expect(Object.keys(inputs)).toHaveLength(5);
+      expect(inputs).toHaveProperty('field');
+      expect(inputs).toHaveProperty('defaultValidationMessages');
     });
   });
 });

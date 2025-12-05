@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { inputBinding } from '@angular/core';
+import { computed, Signal } from '@angular/core';
 import { ValidationError } from '@angular/forms/signals';
 import { DynamicForm } from '../dynamic-form.component';
 import { FormConfig } from '../models/form-config';
@@ -164,36 +164,36 @@ export class DynamicFormTestUtils {
    * Registers common test field types including built-in types like page, row, group
    */
   static registerTestFields(fieldRegistry: ReturnType<typeof injectFieldRegistry>): void {
-    // Input field mapper that extends value field mapper
-    const inputMapper = (fieldDef: FieldDef<any>) => {
-      const bindings = valueFieldMapper(fieldDef);
+    // Input field mapper that extends value field mapper (returns Signal)
+    const inputMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
+      const baseInputsSignal = valueFieldMapper(fieldDef);
 
-      // Add input-specific bindings
-      bindings.push(
-        inputBinding('type', () => (fieldDef.props as Record<string, unknown>)?.['type'] || 'text'),
-        inputBinding('placeholder', () => (fieldDef.props as Record<string, unknown>)?.['placeholder'] || ''),
-      );
-
-      return bindings;
+      // Return computed signal that adds input-specific inputs
+      return computed(() => ({
+        ...baseInputsSignal(),
+        type: (fieldDef.props as Record<string, unknown>)?.['type'] || 'text',
+        placeholder: (fieldDef.props as Record<string, unknown>)?.['placeholder'] || '',
+      }));
     };
 
-    // Select field mapper that extends value field mapper
-    const selectMapper = (fieldDef: FieldDef<any>) => {
-      const bindings = valueFieldMapper(fieldDef);
+    // Select field mapper that extends value field mapper (returns Signal)
+    const selectMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
+      const baseInputsSignal = valueFieldMapper(fieldDef);
 
-      // Add select-specific bindings - options should be at root level
-      bindings.push(inputBinding('options', () => (fieldDef as any).options || []));
-
-      return bindings;
+      // Return computed signal that adds select-specific inputs
+      return computed(() => ({
+        ...baseInputsSignal(),
+        options: (fieldDef as any).options || [],
+      }));
     };
 
-    // Checkbox field mapper - uses checked instead of value
-    const checkboxMapper = (fieldDef: FieldDef<any>) => {
+    // Checkbox field mapper - uses checked instead of value (already returns Signal)
+    const checkboxMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
       return checkboxFieldMapper(fieldDef);
     };
 
-    // Button field mapper that extends value field mapper
-    const buttonMapper = (fieldDef: FieldDef<any>) => {
+    // Button field mapper that extends value field mapper (already returns Signal)
+    const buttonMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
       return valueFieldMapper(fieldDef);
     };
 

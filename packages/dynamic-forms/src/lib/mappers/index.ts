@@ -1,5 +1,5 @@
 export type { ArrayContext, FieldSignalContext, MapperFn } from './types';
-export { baseFieldMapper } from './base/base-field-mapper';
+export { baseFieldMapper, buildBaseInputs } from './base/base-field-mapper';
 export { valueFieldMapper } from './value/value-field.mapper';
 export { checkboxFieldMapper } from './checkbox/checkbox-field-mapper';
 export { rowFieldMapper } from './row/row-field-mapper';

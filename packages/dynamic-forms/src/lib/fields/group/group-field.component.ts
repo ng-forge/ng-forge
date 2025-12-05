@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ComponentRef,
   computed,
   DestroyRef,
   inject,
@@ -9,31 +8,39 @@ import {
   input,
   linkedSignal,
   runInInjectionContext,
+  Signal,
+  Type,
   untracked,
-  ViewContainerRef,
 } from '@angular/core';
-import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, switchMap } from 'rxjs';
+import { NgComponentOutlet } from '@angular/common';
+import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
+import { forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
+import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
+import { reconcileFields, ResolvedField, resolveField } from '../../utils/resolve-field/resolve-field';
+import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { keyBy, mapValues, memoize } from '../../utils/object-utils';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
-import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { form, FormUiControl } from '@angular/forms/signals';
+import { FieldTypeDefinition } from '../../models/field-type';
+import { form } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldSignalContext } from '../../mappers';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
-import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
+import { mapFieldToInputs } from '../../utils/field-mapper/field-mapper';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus, SubmitEvent } from '../../events';
-import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 import { flattenFields } from '../../utils';
 
 @Component({
   selector: 'group-field',
+  imports: [NgComponentOutlet],
   template: `
-    <form [class.disabled]="disabled()" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-      <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+    <form [class.disabled]="disabled()">
+      @for (field of resolvedFields(); track field.key) {
+        <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+      }
     </form>
   `,
   styleUrl: './group-field.component.scss',
@@ -43,19 +50,17 @@ import { flattenFields } from '../../utils';
     '[attr.data-testid]': 'key()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FieldRendererDirective],
 })
-export default class GroupFieldComponent<T extends any[], TModel = Record<string, unknown>> {
+export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
-  private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
 
   // Type-safe memoized functions for performance optimization
   private readonly memoizedFlattenFields = memoize(
-    (fields: FieldDef<any>[], registry: Map<string, any>) => flattenFields(fields, registry),
+    (fields: readonly FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields([...fields], registry),
     (fields, registry) =>
       JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(','),
   );
@@ -66,39 +71,52 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   );
 
   private readonly memoizedDefaultValues = memoize(
-    <T extends FieldDef<any>>(fieldsById: Record<string, T>, registry: Map<string, any>) =>
+    <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) =>
       mapValues(fieldsById, (field) => getFieldDefaultValue(field, registry)),
     (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(','),
   );
 
   /** Field configuration input */
-  field = input.required<GroupField<T>>();
+  field = input.required<GroupField>();
   key = input.required<string>();
 
-  private readonly formSetup = computed(() => {
-    const groupField = this.field();
-    const registry = this.fieldRegistry.raw;
+  // Memoized field registry raw access
+  private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
-    if (groupField.fields && groupField.fields.length > 0) {
-      // Use memoized functions for expensive operations with registry
-      const flattenedFields = this.memoizedFlattenFields(groupField.fields, registry);
-      const fieldsById = this.memoizedKeyBy(flattenedFields);
-      const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
+  private readonly formSetup = computed(() => {
+    // Safety check: return empty setup if inputs aren't set yet
+    try {
+      const groupField = this.field();
+      const registry = this.rawFieldRegistry();
+
+      if (groupField.fields && groupField.fields.length > 0) {
+        // Use memoized functions for expensive operations with registry
+        const flattenedFields = this.memoizedFlattenFields(groupField.fields, registry);
+        const fieldsById = this.memoizedKeyBy(flattenedFields);
+        const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
+
+        return {
+          fields: flattenedFields,
+          originalFields: groupField.fields,
+          defaultValues,
+          registry, // Include registry for schema creation
+        };
+      }
 
       return {
-        fields: flattenedFields,
-        originalFields: groupField.fields,
-        defaultValues,
-        registry, // Include registry for schema creation
+        fields: [],
+        originalFields: [],
+        defaultValues: {},
+        registry, // Include registry even for empty forms
+      };
+    } catch {
+      return {
+        fields: [],
+        originalFields: [],
+        defaultValues: {},
+        registry: this.rawFieldRegistry(),
       };
     }
-
-    return {
-      fields: [],
-      originalFields: [],
-      defaultValues: {},
-      registry, // Include registry even for empty forms
-    };
   });
 
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
@@ -110,7 +128,7 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
     const defaults = this.defaultValues();
 
     // Extract the group's nested values from parent form
-    const groupValue = (parentValue as any)?.[groupKey] || {};
+    const groupValue = (parentValue as Record<string, unknown>)?.[groupKey] || {};
     return { ...defaults, ...groupValue };
   });
 
@@ -162,64 +180,61 @@ export default class GroupFieldComponent<T extends any[], TModel = Record<string
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
   readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit'));
 
-  // Convert field setup to observable for field mapping
-  fields$ = toObservable(computed(() => this.formSetup().fields));
+  /**
+   * Source signal for fields to render.
+   */
+  private readonly fieldsSource = computed(() => this.formSetup().fields);
 
-  // Create field fields following the dynamic form pattern
-  fields = toSignal(
-    this.fields$.pipe(
-      switchMap((fields: FieldDef<any>[]) => {
+  /**
+   * Resolved fields for declarative rendering using derivedFromDeferred.
+   * Group components create a scoped FIELD_SIGNAL_CONTEXT with the group's nested form.
+   */
+  protected readonly resolvedFields = derivedFromDeferred(
+    this.fieldsSource,
+    pipe(
+      switchMap((fields) => {
         if (!fields || fields.length === 0) {
-          return of([]);
+          return of([] as (ResolvedField | undefined)[]);
         }
-
-        return forkJoin(this.mapFields(fields));
+        const groupKey = this.field().key;
+        const context = {
+          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+          registry: this.rawFieldRegistry(),
+          injector: this.groupInjector(), // Use group's scoped injector
+          destroyRef: this.destroyRef,
+          onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
+            const fieldKey = fieldDef.key || '<no key>';
+            console.error(
+              `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+                `within group '${groupKey}'. Ensure the field type is registered in your field registry.`,
+              error,
+            );
+          },
+        };
+        return forkJoin(fields.map((f) => resolveField(f, context)));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
+      // Filter out undefined (failed loads) and cast to ResolvedField[]
+      map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
+      // Reconcile to reuse injectors for unchanged fields
+      scan(reconcileFields, [] as ResolvedField[]),
     ),
-    { initialValue: [] },
+    { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
-  private mapFields(fields: FieldDef<any>[]): Promise<ComponentRef<FormUiControl>>[] {
-    return fields
-      .map((fieldDef) => this.mapSingleField(fieldDef))
-      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+  constructor() {
+    // Track initialization when fields are resolved
+    explicitEffect([this.resolvedFields], ([fields]) => {
+      if (fields.length > 0) {
+        this.emitFieldsInitialized();
+      }
+    });
   }
 
-  private async mapSingleField(fieldDef: FieldDef<any>): Promise<ComponentRef<FormUiControl> | undefined> {
-    return this.fieldRegistry
-      .loadTypeComponent(fieldDef.type)
-      .then((componentType) => {
-        // Check if component is destroyed before creating new components
-        if (this.destroyRef.destroyed) {
-          return undefined;
-        }
-
-        // Run mapper in scoped injection context with group's form context
-        const bindings = runInInjectionContext(this.groupInjector(), () => {
-          return mapFieldToBindings(fieldDef, this.fieldRegistry.raw);
-        });
-
-        // Create component with scoped injector so nested fields access group's form context
-        return this.vcr.createComponent(componentType, { bindings, injector: this.groupInjector() }) as ComponentRef<FormUiControl>;
-      })
-      .catch((error) => {
-        // Only log errors if component hasn't been destroyed
-        if (!this.destroyRef.destroyed) {
-          const fieldKey = fieldDef.key || '<no key>';
-          const groupKey = this.field().key;
-          console.error(
-            `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
-              `within group '${groupKey}'. Ensure the field type is registered in your field registry.`,
-            error,
-          );
-        }
-        return undefined;
-      });
-  }
-
-  onFieldsInitialized(): void {
-    this.eventBus.dispatch(ComponentInitializedEvent, 'group', this.field().key);
+  /**
+   * Emits the fieldsInitialized event after the next render cycle.
+   */
+  private emitFieldsInitialized(): void {
+    emitComponentInitialized(this.eventBus, 'group', this.field().key, this.injector);
   }
 }
 

@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ComponentRef,
   computed,
   DestroyRef,
   inject,
@@ -13,40 +12,41 @@ import {
   signal,
   type Type,
   untracked,
-  ViewContainerRef,
 } from '@angular/core';
+import { NgComponentOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs';
+import { catchError, filter, forkJoin, from, map, Observable, of } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ArrayField } from '../../definitions/default/array-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
-import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { FieldTree, form, FormUiControl } from '@angular/forms/signals';
+import { FieldTree, form } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions/base/field-def';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
+import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { AddArrayItemEvent } from '../../events/constants/add-array-item.event';
 import { RemoveArrayItemEvent } from '../../events/constants/remove-array-item.event';
 import { EventBus } from '../../events/event.bus';
-import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 import { ArrayContext, FieldSignalContext } from '../../mappers/types';
-import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
+import { mapFieldToInputs } from '../../utils/field-mapper/field-mapper';
 import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { flattenFields } from '../../utils/flattener/field-flattener';
 import { getChildrenMap } from '../../utils/form-internals/form-internals';
 
 /**
- * Tracked array item with stable identity for differential updates.
+ * Resolved array item ready for declarative rendering with ngComponentOutlet.
  * Each item has a unique ID and a linkedSignal-based index that
  * automatically updates when items are added/removed.
  */
-interface TrackedArrayItem {
+interface ResolvedArrayItem {
   /** Unique identifier for this item (stable across position changes) */
   id: number;
-  /** The Angular component reference */
-  componentRef: ComponentRef<FormUiControl>;
-  /** The injector used for this item */
+  /** The loaded component type */
+  component: Type<unknown>;
+  /** The injector used for this item (with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT) */
   injector: Injector;
+  /** Inputs signal for ngComponentOutlet - evaluated in template for reactivity */
+  inputs: Signal<Record<string, unknown>>;
   /** JSON snapshot of the value this item was created with (for differential comparison) */
   valueSnapshot: string;
 }
@@ -83,10 +83,13 @@ function createValueSnapshot(value: unknown): string {
  */
 @Component({
   selector: 'array-field',
+  imports: [NgComponentOutlet],
   template: `
     <div class="array-container">
-      <div class="array-items" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-        <!-- Array items will be rendered here -->
+      <div class="array-items">
+        @for (item of resolvedItems(); track item.id) {
+          <ng-container *ngComponentOutlet="item.component; injector: item.injector; inputs: item.inputs()" />
+        }
       </div>
     </div>
   `,
@@ -97,13 +100,11 @@ function createValueSnapshot(value: unknown): string {
     '[attr.data-testid]': 'key()',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FieldRendererDirective],
 })
 export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
-  private readonly vcr = inject(ViewContainerRef);
   private readonly parentInjector = inject(Injector);
   private readonly eventBus = inject(EventBus);
 
@@ -169,10 +170,10 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   });
 
   /**
-   * Source of truth: tracked array items with stable identity.
-   * All other signals (fields, itemOrderSignal) derive from this.
+   * Source of truth: resolved array items with stable identity for declarative rendering.
+   * All other signals (resolvedItems, itemOrderSignal) derive from this.
    */
-  private readonly trackedItemsSignal = signal<TrackedArrayItem[]>([]);
+  private readonly resolvedItemsSignal = signal<ResolvedArrayItem[]>([]);
 
   /** Counter for generating unique item IDs */
   private itemIdCounter = 0;
@@ -181,13 +182,13 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
    * Derived signal containing the ordered item IDs.
    * Used by individual item's linkedSignal to compute their current index.
    */
-  private readonly itemOrderSignal = linkedSignal(() => this.trackedItemsSignal().map((item) => item.id));
+  private readonly itemOrderSignal = linkedSignal(() => this.resolvedItemsSignal().map((item) => item.id));
 
   /**
-   * Derived signal containing the current component refs for the template.
-   * Automatically updates when trackedItemsSignal changes.
+   * Resolved items for declarative rendering in template.
+   * Automatically updates when resolvedItemsSignal changes.
    */
-  readonly fields = linkedSignal(() => this.trackedItemsSignal().map((item) => item.componentRef));
+  readonly resolvedItems = linkedSignal(() => this.resolvedItemsSignal());
 
   /** Track in-progress operations to prevent race conditions */
   private pendingUpdateId = 0;
@@ -208,9 +209,9 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
    * Perform differential update of array items.
    * Uses value comparison to detect append/pop vs middle operations.
    */
-  private async performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): Promise<void> {
-    const trackedItems = this.trackedItemsSignal();
-    const currentLength = trackedItems.length;
+  private performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
+    const resolvedItems = this.resolvedItemsSignal();
+    const currentLength = resolvedItems.length;
     const newLength = fieldTrees.length;
 
     // Get current array values for comparison
@@ -219,12 +220,14 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
     // Handle empty arrays
     if (newLength === 0) {
-      return this.clearAllItems();
+      this.clearAllItems();
+      return;
     }
 
     // Handle initial render (no existing items)
     if (currentLength === 0) {
-      return this.createAllItems(fieldTrees, updateId);
+      this.resolveAllItems(fieldTrees, updateId);
+      return;
     }
 
     // Determine operation type by comparing values
@@ -234,14 +237,16 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
       // Items were added - check if it's a pure append
       const isPureAppend = this.checkValuesMatch(currentArrayValue, minLength);
       if (isPureAppend) {
-        return this.appendItems(fieldTrees, currentLength, newLength, updateId);
+        this.appendItems(fieldTrees, currentLength, newLength, updateId);
+        return;
       }
     }
     if (newLength < currentLength) {
       // Items were removed - check if it's a pure pop (remove from end)
       const isPurePop = this.checkValuesMatch(currentArrayValue, newLength);
       if (isPurePop) {
-        return this.removeItemsFromEnd(currentLength, newLength);
+        this.removeItemsFromEnd(newLength);
+        return;
       }
     }
 
@@ -254,21 +259,21 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     }
 
     // Recreate all for any other operation (middle insert/remove, value change)
-    return this.recreateAllItems(fieldTrees, updateId);
+    this.recreateAllItems(fieldTrees, updateId);
   }
 
   /**
-   * Check if the first N values match between tracked items' snapshots and new values.
+   * Check if the first N values match between resolved items' snapshots and new values.
    * Uses pre-computed JSON snapshots for comparison.
    */
   private checkValuesMatch(newValues: unknown[], count: number): boolean {
-    const trackedItems = this.trackedItemsSignal();
-    if (trackedItems.length < count || newValues.length < count) {
+    const resolvedItems = this.resolvedItemsSignal();
+    if (resolvedItems.length < count || newValues.length < count) {
       return false;
     }
 
     for (let i = 0; i < count; i++) {
-      const oldSnapshot = trackedItems[i].valueSnapshot;
+      const oldSnapshot = resolvedItems[i].valueSnapshot;
       const newSnapshot = createValueSnapshot(newValues[i]);
 
       if (oldSnapshot !== newSnapshot) {
@@ -280,162 +285,151 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
   /**
    * Remove items from the end of the array (pure pop operation).
-   * Only destroys removed items. Remaining items' indices automatically update
-   * via their linkedSignal derivation from itemOrderSignal.
+   * Remaining items' indices automatically update via linkedSignal derivation from itemOrderSignal.
+   * With declarative rendering, we just update the signal - Angular handles DOM cleanup.
    */
-  private removeItemsFromEnd(currentLength: number, newLength: number): void {
-    const trackedItems = this.trackedItemsSignal();
-
-    // Remove and destroy items from the end
-    for (let i = currentLength - 1; i >= newLength; i--) {
-      const item = trackedItems[i];
-      const viewIndex = this.vcr.indexOf(item.componentRef.hostView);
-      if (viewIndex >= 0) {
-        this.vcr.remove(viewIndex);
-      }
-      item.componentRef.destroy();
-    }
-
-    // Update signal with truncated array - fields and itemOrderSignal derive automatically
-    this.trackedItemsSignal.set(trackedItems.slice(0, newLength));
+  private removeItemsFromEnd(newLength: number): void {
+    const resolvedItems = this.resolvedItemsSignal();
+    // Update signal with truncated array - resolvedItems and itemOrderSignal derive automatically
+    this.resolvedItemsSignal.set(resolvedItems.slice(0, newLength));
   }
 
   /**
-   * Clear all tracked items and their components.
+   * Clear all resolved items.
+   * With declarative rendering, we just update the signal - Angular handles DOM cleanup.
    */
   private clearAllItems(): void {
-    this.vcr.clear();
-    // Update signal - fields and itemOrderSignal derive automatically
-    this.trackedItemsSignal.set([]);
+    // Update signal - resolvedItems and itemOrderSignal derive automatically
+    this.resolvedItemsSignal.set([]);
   }
 
   /**
-   * Create all items from scratch (initial render).
+   * Resolve all items from scratch (initial render) using RxJS.
    */
-  private async createAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): Promise<void> {
-    const newItems: TrackedArrayItem[] = [];
-
-    for (let i = 0; i < fieldTrees.length; i++) {
-      if (updateId !== this.pendingUpdateId) return;
-
-      const item = await this.createTrackedItem(fieldTrees[i], i);
-      if (item && updateId === this.pendingUpdateId) {
-        newItems.push(item);
-      }
+  private resolveAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
+    if (fieldTrees.length === 0) {
+      this.resolvedItemsSignal.set([]);
+      return;
     }
 
-    if (updateId === this.pendingUpdateId) {
-      // Update signal - fields and itemOrderSignal derive automatically
-      this.trackedItemsSignal.set(newItems);
-    }
+    const itemObservables = fieldTrees.map((fieldTree, i) => this.resolveArrayItem(fieldTree, i));
+
+    forkJoin(itemObservables)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined)),
+      )
+      .subscribe((newItems) => {
+        if (updateId === this.pendingUpdateId) {
+          // Update signal - resolvedItems and itemOrderSignal derive automatically
+          this.resolvedItemsSignal.set(newItems);
+          this.emitFieldsInitialized();
+        }
+      });
   }
 
   /**
    * Recreate all items (used for middle operations).
    */
-  private async recreateAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): Promise<void> {
+  private recreateAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
     // Clear existing items
     this.clearAllItems();
 
-    // Create new items
-    await this.createAllItems(fieldTrees, updateId);
+    // Resolve new items
+    this.resolveAllItems(fieldTrees, updateId);
   }
 
   /**
-   * Append new items to the end of the array.
+   * Append new items to the end of the array using RxJS.
    */
-  private async appendItems(
-    fieldTrees: readonly (FieldTree<unknown> | null)[],
-    startIndex: number,
-    endIndex: number,
-    updateId: number,
-  ): Promise<void> {
-    const newItems: TrackedArrayItem[] = [];
+  private appendItems(fieldTrees: readonly (FieldTree<unknown> | null)[], startIndex: number, endIndex: number, updateId: number): void {
+    const itemsToResolve = fieldTrees.slice(startIndex, endIndex);
 
-    for (let i = startIndex; i < endIndex; i++) {
-      if (updateId !== this.pendingUpdateId) return;
-
-      const item = await this.createTrackedItem(fieldTrees[i], i);
-      if (item && updateId === this.pendingUpdateId) {
-        newItems.push(item);
-      }
+    if (itemsToResolve.length === 0) {
+      return;
     }
 
-    if (updateId === this.pendingUpdateId) {
-      // Update signal with appended items - fields and itemOrderSignal derive automatically
-      this.trackedItemsSignal.update((current) => [...current, ...newItems]);
-    }
+    const itemObservables = itemsToResolve.map((fieldTree, i) => this.resolveArrayItem(fieldTree, startIndex + i));
+
+    forkJoin(itemObservables)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined)),
+      )
+      .subscribe((newItems) => {
+        if (updateId === this.pendingUpdateId) {
+          // Update signal with appended items - resolvedItems and itemOrderSignal derive automatically
+          this.resolvedItemsSignal.update((current) => [...current, ...newItems]);
+        }
+      });
   }
 
   /**
-   * Create a tracked item for a single array element.
+   * Resolve a single array item for declarative rendering using RxJS.
    * Uses linkedSignal for the index, which automatically updates when itemOrderSignal changes.
    */
-  private async createTrackedItem(fieldTree: FieldTree<unknown> | null, index: number): Promise<TrackedArrayItem | undefined> {
+  private resolveArrayItem(fieldTree: FieldTree<unknown> | null, index: number): Observable<ResolvedArrayItem | undefined> {
     const template = this.fieldTemplate();
     if (!template) {
-      return undefined;
+      return of(undefined);
     }
 
-    try {
-      const componentType = await this.fieldRegistry.loadTypeComponent(template.type);
-      if (this.destroyRef.destroyed) {
-        return undefined;
-      }
+    return from(this.fieldRegistry.loadTypeComponent(template.type)).pipe(
+      map((component) => {
+        if (this.destroyRef.destroyed) {
+          return undefined;
+        }
 
-      // Generate unique ID for this item
-      const itemId = this.itemIdCounter++;
+        // Generate unique ID for this item
+        const itemId = this.itemIdCounter++;
 
-      // Create a linkedSignal that derives its index from itemOrderSignal
-      // When itemOrderSignal is updated (e.g., items removed), this automatically updates
-      const indexSignal = linkedSignal(() => {
-        const order = this.itemOrderSignal();
-        const idx = order.indexOf(itemId);
-        return idx >= 0 ? idx : index; // Fallback to initial index if not yet in order
-      });
+        // Create a linkedSignal that derives its index from itemOrderSignal
+        // When itemOrderSignal is updated (e.g., items removed), this automatically updates
+        const indexSignal = linkedSignal(() => {
+          const order = this.itemOrderSignal();
+          const idx = order.indexOf(itemId);
+          return idx >= 0 ? idx : index; // Fallback to initial index if not yet in order
+        });
 
-      // Create the component and get the injector
-      const { componentRef, injector } = this.createComponentWithInjector(
-        componentType as Type<FormUiControl>,
-        fieldTree,
-        template,
-        indexSignal,
-      );
+        // Create the injector and inputs for this array item
+        const { injector, inputs } = this.createItemInjectorAndInputs(fieldTree, template, indexSignal);
 
-      // Get current value for this item to create snapshot
-      const arrayKey = this.field().key;
-      const currentValue = this.parentFieldSignalContext.value() as Partial<TModel>;
-      const arrayValue = this.getArrayValue(currentValue, arrayKey);
-      const itemValue = arrayValue[index];
+        // Get current value for this item to create snapshot
+        const arrayKey = this.field().key;
+        const currentValue = this.parentFieldSignalContext.value() as Partial<TModel>;
+        const arrayValue = this.getArrayValue(currentValue, arrayKey);
+        const itemValue = arrayValue[index];
 
-      return {
-        id: itemId,
-        componentRef,
-        injector,
-        valueSnapshot: createValueSnapshot(itemValue),
-      };
-    } catch (error) {
-      if (!this.destroyRef.destroyed) {
-        console.error(
-          `[Dynamic Forms] Failed to load component for field type '${template.type}' at index ${index} ` +
-            `within array '${this.field().key}'. Ensure the field type is registered in your field registry.`,
-          error,
-        );
-      }
-      return undefined;
-    }
+        return {
+          id: itemId,
+          component,
+          injector,
+          inputs,
+          valueSnapshot: createValueSnapshot(itemValue),
+        };
+      }),
+      catchError((error) => {
+        if (!this.destroyRef.destroyed) {
+          console.error(
+            `[Dynamic Forms] Failed to load component for field type '${template.type}' at index ${index} ` +
+              `within array '${this.field().key}'. Ensure the field type is registered in your field registry.`,
+            error,
+          );
+        }
+        return of(undefined);
+      }),
+    );
   }
 
   /**
-   * Create a component and its injector for an array item.
-   * Returns both the componentRef and the injector for tracking.
+   * Create an injector and inputs for an array item.
+   * Returns both the injector (with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT) and the inputs signal.
    */
-  private createComponentWithInjector(
-    componentType: Type<FormUiControl>,
+  private createItemInjectorAndInputs(
     fieldTree: FieldTree<unknown> | null,
     template: FieldDef<unknown>,
     indexSignal: Signal<number>,
-  ): { componentRef: ComponentRef<FormUiControl>; injector: Injector } {
+  ): { injector: Injector; inputs: Signal<Record<string, unknown>> } {
     const valueHandling = this.rawFieldRegistry().get(template.type)?.valueHandling || 'include';
 
     // Determine the form reference and create injector
@@ -457,14 +451,12 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
     const injector = this.createItemInjector(formRef, indexSignal);
 
-    // Map field to bindings using the scoped injector
-    const bindings = runInInjectionContext(injector, () => {
-      return mapFieldToBindings(template, this.rawFieldRegistry());
+    // Map field to inputs using the scoped injector
+    const inputs = runInInjectionContext(injector, () => {
+      return mapFieldToInputs(template, this.rawFieldRegistry());
     });
 
-    const componentRef = this.vcr.createComponent(componentType, { bindings, injector });
-
-    return { componentRef, injector };
+    return { injector, inputs };
   }
 
   /**
@@ -616,8 +608,11 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     return injector;
   }
 
-  onFieldsInitialized(): void {
-    this.eventBus.dispatch(ComponentInitializedEvent, 'array', this.field().key);
+  /**
+   * Emits the fieldsInitialized event after the next render cycle.
+   */
+  private emitFieldsInitialized(): void {
+    emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
   }
 }
 

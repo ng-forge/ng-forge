@@ -50,7 +50,7 @@ describe('RowFieldComponent', () => {
 
     // The component should render directly as the host element (no nested form)
     expect(component.field()).toEqual(field);
-    expect(component.fields()).toBeDefined();
+    expect(component.resolvedFields()).toBeDefined();
   });
 
   it('should have host classes', () => {

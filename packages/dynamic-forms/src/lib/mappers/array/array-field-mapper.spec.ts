@@ -1,80 +1,90 @@
-import { Injector } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
 import { arrayFieldMapper } from './array-field-mapper';
-import { ArrayField } from '../../definitions';
+import { ArrayField } from '../../definitions/default/array-field';
 
 describe('arrayFieldMapper', () => {
-  let injector: Injector;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({}).compileComponents();
-    injector = TestBed.inject(Injector);
-  });
-
-  it('should create 2 bindings (key + field) for minimal array field', () => {
+  it('should create inputs object with key and field for minimal array field', () => {
     const fieldDef: ArrayField = {
       key: 'items',
       type: 'array',
-      items: { key: 'item', type: 'input' },
+      fields: [{ key: 'item', type: 'input' }],
     };
 
-    const bindings = arrayFieldMapper(fieldDef);
-
-    expect(bindings).toHaveLength(2);
+    const inputsSignal = arrayFieldMapper(fieldDef);
+    const inputs = inputsSignal();
+    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(inputs).toHaveProperty('key', 'items');
+    expect(inputs).toHaveProperty('field');
   });
 
-  it('should create 2 bindings regardless of additional properties', () => {
+  it('should create inputs with key and field regardless of additional properties', () => {
     const fieldDef: ArrayField = {
       key: 'complexArray',
       type: 'array',
-      label: 'Complex Array',
       className: 'array-class',
       tabIndex: 1,
-      items: { key: 'item', type: 'input' },
-      props: { minItems: 1, maxItems: 10 },
+      fields: [{ key: 'item', type: 'input' }],
     };
 
-    const bindings = arrayFieldMapper(fieldDef);
-
-    expect(bindings).toHaveLength(2);
+    const inputsSignal = arrayFieldMapper(fieldDef);
+    const inputs = inputsSignal();
+    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(inputs).toHaveProperty('key');
+    expect(inputs).toHaveProperty('field');
   });
 
-  it('should handle nested array items', () => {
+  it('should handle group fields for object arrays', () => {
     const fieldDef: ArrayField = {
-      key: 'nestedArray',
+      key: 'contacts',
       type: 'array',
-      items: {
-        key: 'subArray',
-        type: 'array',
-        items: { key: 'item', type: 'input' },
-      },
+      fields: [
+        {
+          key: 'contact',
+          type: 'group',
+          fields: [
+            { key: 'name', type: 'input' },
+            { key: 'email', type: 'input' },
+          ],
+        },
+      ],
     };
 
-    const bindings = arrayFieldMapper(fieldDef);
-
-    expect(bindings).toHaveLength(2);
+    const inputsSignal = arrayFieldMapper(fieldDef);
+    const inputs = inputsSignal();
+    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(inputs).toHaveProperty('key');
+    expect(inputs).toHaveProperty('field');
   });
 
   it('should handle edge cases (empty key, null values)', () => {
-    const testCases = [
-      { key: '', type: 'array' as const, items: { key: 'item', type: 'input' as const } },
+    const testCases: ArrayField[] = [
+      { key: '', type: 'array', fields: [{ key: 'item', type: 'input' }] },
       {
         key: 'arr',
-        type: 'array' as const,
-        className: null as any,
-        items: { key: 'item', type: 'input' as const },
-      },
-      {
-        key: 'arr',
-        type: 'array' as const,
-        props: {},
-        items: { key: 'item', type: 'input' as const },
+        type: 'array',
+        className: undefined,
+        fields: [{ key: 'item', type: 'input' }],
       },
     ];
 
     testCases.forEach((fieldDef) => {
-      const bindings = arrayFieldMapper(fieldDef);
-      expect(bindings).toHaveLength(2);
+      const inputsSignal = arrayFieldMapper(fieldDef);
+      const inputs = inputsSignal();
+      expect(Object.keys(inputs)).toHaveLength(2);
+      expect(inputs).toHaveProperty('key');
+      expect(inputs).toHaveProperty('field');
     });
+  });
+
+  it('should pass the complete field definition as field input', () => {
+    const fieldDef: ArrayField = {
+      key: 'tags',
+      type: 'array',
+      className: 'tag-array',
+      fields: [{ key: 'tag', type: 'input' }],
+    };
+
+    const inputsSignal = arrayFieldMapper(fieldDef);
+    const inputs = inputsSignal();
+    expect(inputs['field']).toBe(fieldDef);
   });
 });

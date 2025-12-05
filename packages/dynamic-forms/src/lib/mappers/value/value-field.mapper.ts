@@ -1,55 +1,80 @@
 import { BaseValueField } from '../../definitions/base/base-value-field';
-import { Binding, inject, inputBinding, isSignal } from '@angular/core';
-import { baseFieldMapper } from '../base/base-field-mapper';
+import { computed, inject, isSignal, Signal } from '@angular/core';
+import { buildBaseInputs } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { omit } from '../../utils/object-utils';
-import { getChildrenMap, getFieldProxy } from '../../utils/form-internals';
+import { getChildrenMap, getFieldProxy } from '../../utils/form-internals/form-internals';
 
-export function valueFieldMapper<T = unknown>(fieldDef: BaseValueField<T, string>): Binding[] {
+/**
+ * Maps a value field definition to component inputs.
+ *
+ * Value fields are input fields that contribute to the form's value (text, number, select, etc.).
+ * This mapper injects FIELD_SIGNAL_CONTEXT to access the form structure and retrieve the field proxy.
+ *
+ * @param fieldDef The value field definition
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
+ */
+export function valueFieldMapper<T = unknown>(fieldDef: BaseValueField<T, string>): Signal<Record<string, unknown>> {
   const context = inject(FIELD_SIGNAL_CONTEXT);
   const omittedFields = omit(fieldDef, ['value']);
 
-  const bindings: Binding[] = baseFieldMapper(omittedFields);
+  // Build base inputs (static, from field definition)
+  const baseInputs = buildBaseInputs(omittedFields);
 
-  // Always pass validationMessages (or empty object) - required for error display signals
-  bindings.push(inputBinding('validationMessages', () => fieldDef.validationMessages ?? {}));
-
-  // Pass form-level validation messages for fallback error translations
+  // Get form-level validation messages (static)
   const defaultValidationMessages = context.defaultValidationMessages;
-  if (defaultValidationMessages !== undefined) {
-    bindings.push(inputBinding('defaultValidationMessages', () => defaultValidationMessages));
-  }
 
+  // Get the form root to access field proxy
   const formRoot = context.form();
   const childrenMap = getChildrenMap(formRoot);
+
+  // Resolve field proxy (static - determined once during mapping)
+  let fieldProxy: unknown = undefined;
 
   if (!childrenMap) {
     // No childrenMap - the form might be a FormRecord where fields are direct properties
     // First check if formRoot itself has fieldProxy (for FieldTree items)
     const rootFieldProxy = getFieldProxy(formRoot);
     if (rootFieldProxy) {
-      bindings.push(inputBinding('field', () => rootFieldProxy));
+      fieldProxy = rootFieldProxy;
     } else {
       // Try accessing the field as a direct property on formRoot (FormRecord case)
       // This handles forms created with form(entity, schema) where fields are accessible as formRoot[key]
       const formField = (formRoot as unknown as Record<string, unknown>)[fieldDef.key];
-      const fieldProxy = getFieldProxy(formField);
-      if (fieldProxy) {
-        bindings.push(inputBinding('field', () => fieldProxy));
+      const resolvedProxy = getFieldProxy(formField);
+      if (resolvedProxy) {
+        fieldProxy = resolvedProxy;
       } else if (isSignal(formField) || formField) {
         // The field itself might be the proxy (signal), or might have a different structure
         // Try using the field directly as the proxy
-        bindings.push(inputBinding('field', () => formField));
+        fieldProxy = formField;
       }
     }
   } else {
     // Standard field access for non-array keys via childrenMap lookup
     const formField = childrenMap.get(fieldDef.key);
-    const fieldProxy = getFieldProxy(formField);
-    if (fieldProxy) {
-      bindings.push(inputBinding('field', () => fieldProxy));
+    const resolvedProxy = getFieldProxy(formField);
+    if (resolvedProxy) {
+      fieldProxy = resolvedProxy;
     }
   }
 
-  return bindings;
+  // Return computed signal for reactive updates
+  return computed(() => {
+    const inputs: Record<string, unknown> = {
+      ...baseInputs,
+      // Always pass validationMessages (or empty object) - required for error display signals
+      validationMessages: fieldDef.validationMessages ?? {},
+    };
+
+    if (defaultValidationMessages !== undefined) {
+      inputs['defaultValidationMessages'] = defaultValidationMessages;
+    }
+
+    if (fieldProxy !== undefined) {
+      inputs['field'] = fieldProxy;
+    }
+
+    return inputs;
+  });
 }

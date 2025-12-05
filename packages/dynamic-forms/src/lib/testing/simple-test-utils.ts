@@ -3,13 +3,12 @@ import { DynamicForm } from '../dynamic-form.component';
 import { delay } from './delay';
 import { FieldDef } from '../definitions/base/field-def';
 import { provideDynamicForm } from '../providers/dynamic-form-providers';
-import { Component, Injector, input, runInInjectionContext, signal, Type } from '@angular/core';
+import { Component, computed, Injector, input, runInInjectionContext, signal, Type } from '@angular/core';
 import { FIELD_REGISTRY } from '../models/field-type';
 import { FieldTypeDefinition } from '../models/field-type';
 import { FIELD_SIGNAL_CONTEXT } from '../models/field-signal-context.token';
 import { EventBus } from '../events/event.bus';
 import { form } from '@angular/forms/signals';
-import { createTestFieldContext } from './mapper-test-utils';
 
 /**
  * Simple form configuration interface for testing
@@ -220,7 +219,7 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
   const mockFieldType: FieldTypeDefinition = {
     name: 'test',
     loadComponent: async () => TestFieldComponent,
-    mapper: () => [], // Simple mapper that returns empty bindings for testing
+    mapper: () => computed(() => ({})), // Simple mapper that returns empty inputs signal for testing
   };
 
   TestBed.configureTestingModule({

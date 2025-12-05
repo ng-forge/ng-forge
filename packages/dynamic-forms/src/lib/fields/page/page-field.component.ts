@@ -1,39 +1,25 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ComponentRef,
-  computed,
-  DestroyRef,
-  inject,
-  Injector,
-  input,
-  runInInjectionContext,
-  ViewContainerRef,
-} from '@angular/core';
-import { outputFromObservable, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, switchMap } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input } from '@angular/core';
+import { NgComponentOutlet } from '@angular/common';
+import { outputFromObservable } from '@angular/core/rxjs-interop';
+import { forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
+import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
+import { reconcileFields, ResolvedField, resolveField } from '../../utils/resolve-field/resolve-field';
+import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
-import { FieldRendererDirective } from '../../directives/dynamic-form.directive';
-import { FormUiControl } from '@angular/forms/signals';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
-import { mapFieldToBindings } from '../../utils/field-mapper/field-mapper';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
-import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
+import { FieldDef } from '../../definitions/base/field-def';
 
 @Component({
   selector: 'page-field',
+  imports: [NgComponentOutlet],
   template: `
-    <div
-      class="df-page"
-      [class.df-page-visible]="isVisible()"
-      [class.df-page-hidden]="!isVisible()"
-      [attr.aria-hidden]="!isVisible()"
-      [fieldRenderer]="fields()"
-      (fieldsInitialized)="onFieldsInitialized()"
-    >
-      <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+    <div class="df-page" [class.df-page-visible]="isVisible()" [class.df-page-hidden]="!isVisible()" [attr.aria-hidden]="!isVisible()">
+      @for (field of resolvedFields(); track field.key) {
+        <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+      }
     </div>
   `,
   styleUrl: './page-field.component.scss',
@@ -48,19 +34,16 @@ import { ComponentInitializedEvent } from '../../events/constants/component-init
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
-  imports: [FieldRendererDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PageFieldComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
-  private readonly fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
-  private readonly vcr = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
 
   // Page field definition
-  field = input.required<PageField<any>>();
+  field = input.required<PageField>();
   key = input.required<string>();
 
   /**
@@ -77,9 +60,7 @@ export default class PageFieldComponent {
 
   // EventBus outputs for page navigation
   readonly nextPage = outputFromObservable(this.eventBus.on<NextPageEvent>('next-page'));
-
   readonly previousPage = outputFromObservable(this.eventBus.on<PreviousPageEvent>('previous-page'));
-
   readonly pageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
 
   // Validate that this page doesn't contain nested pages
@@ -98,73 +79,69 @@ export default class PageFieldComponent {
     return valid;
   });
 
-  // Page fields are layout containers - they pass through child fields directly like rows
-  fields$ = toObservable(
-    computed(() => {
-      const pageField = this.field();
+  // Memoized field registry raw access
+  private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
-      // Only return fields if validation passes
-      if (!this.isValid()) {
-        return [];
-      }
+  /**
+   * Source signal for fields to render. Only returns fields if validation passes.
+   */
+  private readonly fieldsSource = computed(() => {
+    // Only return fields if validation passes
+    if (!this.isValid()) {
+      return [];
+    }
+    return this.field().fields || [];
+  });
 
-      return pageField.fields || [];
-    }),
-  );
-
-  fields = toSignal(
-    this.fields$.pipe(
+  /**
+   * Resolved fields for declarative rendering using derivedFromDeferred.
+   * Page components pass through parent FIELD_SIGNAL_CONTEXT unchanged.
+   */
+  protected readonly resolvedFields = derivedFromDeferred(
+    this.fieldsSource,
+    pipe(
       switchMap((fields) => {
         if (!fields || fields.length === 0) {
-          return of([]);
+          return of([] as (ResolvedField | undefined)[]);
         }
-
-        return forkJoin(this.mapFields(fields));
+        const pageKey = this.field().key;
+        const context = {
+          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+          registry: this.rawFieldRegistry(),
+          injector: this.injector, // Pass through parent injector
+          destroyRef: this.destroyRef,
+          onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
+            const fieldKey = fieldDef.key || '<no key>';
+            console.error(
+              `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+                `within page '${pageKey}'. Ensure the field type is registered in your field registry.`,
+              error,
+            );
+          },
+        };
+        return forkJoin(fields.map((f) => resolveField(f as FieldDef<unknown>, context)));
       }),
-      map((components) => components.filter((comp): comp is ComponentRef<FormUiControl> => !!comp)),
+      // Filter out undefined (failed loads) and cast to ResolvedField[]
+      map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
+      // Reconcile to reuse injectors for unchanged fields
+      scan(reconcileFields, [] as ResolvedField[]),
     ),
-    { initialValue: [] },
+    { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
-  private mapFields(fields: any[]): Promise<ComponentRef<FormUiControl>>[] {
-    return fields
-      .map((fieldDef) => this.mapSingleField(fieldDef))
-      .filter((field): field is Promise<ComponentRef<FormUiControl>> => field !== undefined);
+  constructor() {
+    // Track initialization when fields are resolved
+    explicitEffect([this.resolvedFields], ([fields]) => {
+      if (fields.length > 0) {
+        this.emitFieldsInitialized();
+      }
+    });
   }
 
-  private async mapSingleField(fieldDef: any): Promise<ComponentRef<FormUiControl> | undefined> {
-    return this.fieldRegistry
-      .loadTypeComponent(fieldDef.type)
-      .then((componentType) => {
-        // Check if component is destroyed before creating new components
-        if (this.destroyRef.destroyed) {
-          return undefined;
-        }
-
-        // Run mapper in injection context - page passes through parent context unchanged
-        const bindings = runInInjectionContext(this.injector, () => {
-          return mapFieldToBindings(fieldDef, this.fieldRegistry.raw);
-        });
-
-        // Create component with same injector (parent context is passed through)
-        return this.vcr.createComponent(componentType, { bindings, injector: this.injector }) as ComponentRef<FormUiControl>;
-      })
-      .catch((error) => {
-        // Only log errors if component hasn't been destroyed
-        if (!this.destroyRef.destroyed) {
-          const fieldKey = fieldDef.key || '<no key>';
-          const pageKey = this.field().key;
-          console.error(
-            `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
-              `within page '${pageKey}'. Ensure the field type is registered in your field registry.`,
-            error,
-          );
-        }
-        return undefined;
-      });
-  }
-
-  onFieldsInitialized(): void {
-    this.eventBus.dispatch(ComponentInitializedEvent, 'page', this.field().key);
+  /**
+   * Emits the fieldsInitialized event after the next render cycle.
+   */
+  private emitFieldsInitialized(): void {
+    emitComponentInitialized(this.eventBus, 'page', this.field().key, this.injector);
   }
 }

@@ -1,5 +1,5 @@
+import { computed, Signal } from '@angular/core';
 import { FieldDef } from '../../definitions/base/field-def';
-import { Binding, inputBinding } from '@angular/core';
 import { getGridClassString } from '../../utils/grid-classes/grid-classes';
 
 const validationKeys = new Set(['required', 'email', 'min', 'max', 'minLength', 'maxLength', 'pattern', 'validators', 'logic']);
@@ -26,12 +26,21 @@ const excludedKeys = new Set([
   'schemas', // Handled at form level by SchemaRegistryService
 ]);
 
-export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
+/**
+ * Builds base input properties from a field definition.
+ *
+ * This is a helper function that extracts common field properties.
+ * Used by mappers to build the inputs record.
+ *
+ * @param fieldDef The field definition to extract properties from
+ * @returns Record of input names to values
+ */
+export function buildBaseInputs(fieldDef: FieldDef<unknown>): Record<string, unknown> {
   const { label, className, tabIndex, props } = fieldDef;
-  const bindings: Binding[] = [];
+  const inputs: Record<string, unknown> = {};
 
   if (label !== undefined) {
-    bindings.push(inputBinding('label', () => label));
+    inputs['label'] = label;
   }
 
   // Combine user className with generated grid classes
@@ -47,22 +56,37 @@ export function baseFieldMapper(fieldDef: FieldDef<any>): Binding[] {
   }
 
   if (allClasses.length > 0) {
-    bindings.push(inputBinding('className', () => allClasses.join(' ')));
+    inputs['className'] = allClasses.join(' ');
   }
 
   if (tabIndex !== undefined) {
-    bindings.push(inputBinding('tabIndex', () => tabIndex));
+    inputs['tabIndex'] = tabIndex;
   }
 
   if (props !== undefined) {
-    bindings.push(inputBinding('props', () => props));
+    inputs['props'] = props;
   }
 
   for (const [key, value] of Object.entries(fieldDef)) {
     if (!excludedKeys.has(key) && !validationKeys.has(key) && value !== undefined) {
-      bindings.push(inputBinding(key, () => value));
+      inputs[key] = value;
     }
   }
 
-  return bindings;
+  return inputs;
+}
+
+/**
+ * Base field mapper that extracts common field properties into component inputs.
+ *
+ * Returns a Signal containing the Record of input names to values that will be
+ * passed to ngComponentOutlet. The signal enables reactive updates.
+ *
+ * @param fieldDef The field definition to map
+ * @returns Signal containing Record of input names to values
+ */
+export function baseFieldMapper(fieldDef: FieldDef<unknown>): Signal<Record<string, unknown>> {
+  // For base mapper, inputs are static (no reactive dependencies)
+  // Wrap in computed for consistency with the MapperFn type
+  return computed(() => buildBaseInputs(fieldDef));
 }

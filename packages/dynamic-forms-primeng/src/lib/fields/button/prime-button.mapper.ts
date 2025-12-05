@@ -1,31 +1,41 @@
-import { baseFieldMapper, FieldDef } from '@ng-forge/dynamic-forms';
-import { Binding, inputBinding } from '@angular/core';
+import { computed, Signal } from '@angular/core';
+import { buildBaseInputs, FieldDef } from '@ng-forge/dynamic-forms';
 
 /**
  * Generic button mapper for custom events or basic buttons.
  * For specific button types (submit, next, prev, add/remove array items),
  * use the dedicated field types and their specific mappers.
+ *
+ * @param fieldDef The button field definition
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
-export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
-  const bindings: Binding[] = baseFieldMapper(fieldDef);
+export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
+  // Build base inputs (static, from field definition)
+  const baseInputs = buildBaseInputs(fieldDef);
 
-  if (fieldDef.disabled !== undefined) {
-    bindings.push(inputBinding('disabled', () => fieldDef.disabled));
-  }
+  return computed(() => {
+    const inputs: Record<string, unknown> = {
+      ...baseInputs,
+    };
 
-  if (fieldDef.hidden !== undefined) {
-    bindings.push(inputBinding('hidden', () => fieldDef.hidden));
-  }
+    if (fieldDef.disabled !== undefined) {
+      inputs['disabled'] = fieldDef.disabled;
+    }
 
-  // Add event binding for button events
-  if ('event' in fieldDef && fieldDef.event !== undefined) {
-    bindings.push(inputBinding('event', () => fieldDef.event));
-  }
+    if (fieldDef.hidden !== undefined) {
+      inputs['hidden'] = fieldDef.hidden;
+    }
 
-  // Add eventArgs binding if provided
-  if ('eventArgs' in fieldDef && fieldDef.eventArgs !== undefined) {
-    bindings.push(inputBinding('eventArgs', () => fieldDef.eventArgs));
-  }
+    // Add event binding for button events
+    if ('event' in fieldDef && fieldDef.event !== undefined) {
+      inputs['event'] = fieldDef.event;
+    }
 
-  return bindings;
+    // Add eventArgs binding if provided
+    if ('eventArgs' in fieldDef && fieldDef.eventArgs !== undefined) {
+      inputs['eventArgs'] = fieldDef.eventArgs;
+    }
+
+    return inputs;
+  });
 }

@@ -1,5 +1,5 @@
 import { FieldDef } from '../definitions/base/field-def';
-import { Binding, Injector, Signal, WritableSignal } from '@angular/core';
+import { Injector, Signal, WritableSignal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { ValidationMessages } from '../models/validation-types';
 import { FormOptions } from '../models/form-config';
@@ -59,19 +59,27 @@ export interface ArrayContext {
 }
 
 /**
- * Mapper function type that converts a field definition to component bindings.
+ * Mapper function type that converts a field definition to component inputs.
  *
  * Mappers run within an injection context and inject FIELD_SIGNAL_CONTEXT to
  * access the form's state and configuration.
  *
+ * Returns a Signal containing the Record of input names to values that will be
+ * passed to ngComponentOutlet. Using a Signal enables reactive updates when
+ * dependencies change (e.g., form validity affecting button disabled state).
+ *
  * @example
  * ```typescript
- * export function myCustomMapper(fieldDef: MyFieldDef): Binding[] {
+ * export function myCustomMapper(fieldDef: MyFieldDef): Signal<Record<string, unknown>> {
  *   const context = inject(FIELD_SIGNAL_CONTEXT);
  *   const form = context.form();
- *   // ... create bindings
- *   return bindings;
+ *
+ *   return computed(() => ({
+ *     key: fieldDef.key,
+ *     field: fieldProxy,
+ *     disabled: form().invalid(), // Reactive - updates when form validity changes
+ *   }));
  * }
  * ```
  */
-export type MapperFn<T extends FieldDef<unknown>> = (input: T) => Binding[];
+export type MapperFn<T extends FieldDef<unknown>> = (input: T) => Signal<Record<string, unknown>>;

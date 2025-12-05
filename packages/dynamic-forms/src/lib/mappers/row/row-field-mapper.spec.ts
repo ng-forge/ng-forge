@@ -11,18 +11,21 @@ describe('rowFieldMapper', () => {
     injector = TestBed.inject(Injector);
   });
 
-  it('should create 2 bindings (key + field) for minimal row field', () => {
+  it('should create inputs object with key and field for minimal row field', () => {
     const fieldDef: RowField = {
       key: 'testRow',
       type: 'row',
       fields: [],
     };
 
-    const bindings = rowFieldMapper(fieldDef);
-    expect(bindings).toHaveLength(2);
+    const inputsSignal = rowFieldMapper(fieldDef);
+    const inputs = inputsSignal(); // Call the signal to get the actual inputs
+    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(inputs).toHaveProperty('key', 'testRow');
+    expect(inputs).toHaveProperty('field');
   });
 
-  it('should create 2 bindings regardless of additional properties', () => {
+  it('should create inputs with key and field regardless of additional properties', () => {
     const fieldDef: RowField = {
       key: 'complexRow',
       type: 'row',
@@ -33,8 +36,11 @@ describe('rowFieldMapper', () => {
       fields: [],
     };
 
-    const bindings = rowFieldMapper(fieldDef);
-    expect(bindings).toHaveLength(2);
+    const inputsSignal = rowFieldMapper(fieldDef);
+    const inputs = inputsSignal(); // Call the signal to get the actual inputs
+    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(inputs).toHaveProperty('key');
+    expect(inputs).toHaveProperty('field');
   });
 
   it('should handle nested fields of various types', () => {
@@ -52,8 +58,11 @@ describe('rowFieldMapper', () => {
       ],
     };
 
-    const bindings = rowFieldMapper(fieldDef);
-    expect(bindings).toHaveLength(2);
+    const inputsSignal = rowFieldMapper(fieldDef);
+    const inputs = inputsSignal(); // Call the signal to get the actual inputs
+    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(inputs).toHaveProperty('key');
+    expect(inputs).toHaveProperty('field');
   });
 
   it('should handle edge cases (empty fields, complex layouts)', () => {
@@ -76,8 +85,11 @@ describe('rowFieldMapper', () => {
     ];
 
     testCases.forEach((fieldDef) => {
-      const bindings = rowFieldMapper(fieldDef);
-      expect(bindings).toHaveLength(2);
+      const inputsSignal = rowFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call the signal to get the actual inputs
+      expect(Object.keys(inputs)).toHaveLength(2);
+      expect(inputs).toHaveProperty('key');
+      expect(inputs).toHaveProperty('field');
     });
   });
 });

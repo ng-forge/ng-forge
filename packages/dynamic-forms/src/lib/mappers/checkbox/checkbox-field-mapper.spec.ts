@@ -41,16 +41,17 @@ describe('checkboxFieldMapper', () => {
     );
   }
 
-  function testMapper(fieldDef: BaseCheckedField<any>, injector: EnvironmentInjector) {
-    return runInInjectionContext(injector, () => checkboxFieldMapper(fieldDef));
+  function testMapper(fieldDef: BaseCheckedField<any>, injector: EnvironmentInjector): Record<string, unknown> {
+    const inputsSignal = runInInjectionContext(injector, () => checkboxFieldMapper(fieldDef));
+    return inputsSignal(); // Call the signal to get the actual inputs
   }
 
-  it('should create bindings for field properties plus validationMessages', () => {
+  it('should create inputs object with field properties plus validationMessages', () => {
     const testCases = [
       {
         desc: 'minimal field',
         field: { key: 'minimal', type: 'checkbox' as const, label: 'Minimal' },
-        minBindings: 3, // key + label + validationMessages
+        minKeys: 3, // key + label + validationMessages
       },
       {
         desc: 'field with standard properties',
@@ -62,7 +63,7 @@ describe('checkboxFieldMapper', () => {
           tabIndex: 1,
           props: { hint: 'hint' },
         },
-        minBindings: 6, // key + label + className + tabIndex + props + validationMessages
+        minKeys: 6, // key + label + className + tabIndex + props + validationMessages
       },
       {
         desc: 'field with custom validationMessages',
@@ -72,18 +73,18 @@ describe('checkboxFieldMapper', () => {
           label: 'Custom',
           validationMessages: { required: 'Required' },
         },
-        minBindings: 3, // key + label + validationMessages
+        minKeys: 3, // key + label + validationMessages
       },
     ];
 
-    testCases.forEach(({ desc, field, minBindings }) => {
+    testCases.forEach(({ desc, field, minKeys }) => {
       const injector = createTestInjector({ fieldKey: field.key });
-      const bindings = testMapper(field, injector);
-      expect(bindings.length).toBeGreaterThanOrEqual(minBindings);
+      const inputs = testMapper(field, injector);
+      expect(Object.keys(inputs).length).toBeGreaterThanOrEqual(minKeys);
     });
   });
 
-  it('should always include validationMessages binding', () => {
+  it('should always include validationMessages in inputs', () => {
     const fieldWithoutMessages: BaseCheckedField<any> = {
       key: 'noMessages',
       type: 'checkbox',
@@ -100,11 +101,13 @@ describe('checkboxFieldMapper', () => {
     const injector1 = createTestInjector({ fieldKey: 'noMessages' });
     const injector2 = createTestInjector({ fieldKey: 'withMessages' });
 
-    const bindings1 = testMapper(fieldWithoutMessages, injector1);
-    const bindings2 = testMapper(fieldWithMessages, injector2);
+    const inputs1 = testMapper(fieldWithoutMessages, injector1);
+    const inputs2 = testMapper(fieldWithMessages, injector2);
 
-    expect(bindings1.length).toBeGreaterThanOrEqual(3); // includes validationMessages even when undefined
-    expect(bindings2.length).toBeGreaterThanOrEqual(3);
+    expect(Object.keys(inputs1).length).toBeGreaterThanOrEqual(3); // includes validationMessages even when undefined
+    expect(Object.keys(inputs2).length).toBeGreaterThanOrEqual(3);
+    expect(inputs1).toHaveProperty('validationMessages');
+    expect(inputs2).toHaveProperty('validationMessages');
   });
 
   it('should include defaultValidationMessages from context', () => {
@@ -119,8 +122,9 @@ describe('checkboxFieldMapper', () => {
       defaultValidationMessages: { required: 'Default required' },
     });
 
-    const bindings = testMapper(fieldDef, injector);
-    expect(bindings.length).toBeGreaterThanOrEqual(4); // includes defaultValidationMessages
+    const inputs = testMapper(fieldDef, injector);
+    expect(Object.keys(inputs).length).toBeGreaterThanOrEqual(4); // includes defaultValidationMessages
+    expect(inputs).toHaveProperty('defaultValidationMessages');
   });
 
   it('should handle edge cases (empty key, excluded properties)', () => {
@@ -144,8 +148,8 @@ describe('checkboxFieldMapper', () => {
 
     testCases.forEach(({ field, expectedMin }) => {
       const injector = createTestInjector({ fieldKey: field.key || 'test' });
-      const bindings = testMapper(field, injector);
-      expect(bindings.length).toBeGreaterThanOrEqual(expectedMin);
+      const inputs = testMapper(field, injector);
+      expect(Object.keys(inputs).length).toBeGreaterThanOrEqual(expectedMin);
     });
   });
 });
