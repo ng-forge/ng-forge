@@ -310,64 +310,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     return this.createEmptyFormSetup(registry);
   });
 
-  private registerValidatorsFromConfig({ customFnConfig, schemas }: FormConfig<TFields>): void {
-    // Register schemas from config
-    if (schemas) {
-      schemas.forEach((schema) => {
-        this.schemaRegistry.registerSchema(schema);
-      });
-    }
-
-    if (!customFnConfig) {
-      return;
-    }
-
-    // Register custom functions
-    if (customFnConfig.customFunctions) {
-      Object.entries(customFnConfig.customFunctions).forEach(([name, fn]) => {
-        this.functionRegistry.registerCustomFunction(name, fn);
-      });
-    }
-
-    // Set all validators from config - change detection is inside set methods
-    this.functionRegistry.setValidators(customFnConfig.validators);
-    this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
-    this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
-  }
-
-  private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>) {
-    // Use memoized functions for expensive operations with registry
-    const flattenedFields = this.memoizedFlattenFields(fields, registry);
-    const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
-    const fieldsById = this.memoizedKeyBy(flattenedFields);
-    const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
-
-    // For rendering: use flattenedFieldsForRendering which preserves row containers
-    // For paged forms, orchestrator handles rendering separately
-    const fieldsToRender = mode === 'paged' ? [] : flattenedFieldsForRendering;
-
-    return {
-      fields: fieldsToRender,
-      schemaFields: flattenedFields, // Fields for form schema (always flattened for form values)
-      originalFields: fields,
-      defaultValues,
-      schema: undefined,
-      mode,
-      registry, // Include registry for schema creation
-    };
-  }
-
-  private createEmptyFormSetup(registry: Map<string, FieldTypeDefinition>) {
-    return {
-      fields: [],
-      schemaFields: [],
-      defaultValues: {} as TModel,
-      schema: undefined,
-      mode: 'non-paged' as const,
-      registry, // Include registry even for empty forms
-    };
-  }
-
   /**
    * Page field definitions for paged forms.
    * Extracted directly from config for declarative rendering in the orchestrator.
@@ -630,18 +572,22 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    */
   private readonly totalComponentsCount = computed(() => {
     const fields = this.formSetup().fields;
-    if (!fields) return 1; // Just the dynamic-form component
+    if (!fields) {
+      // Just the dynamic-form component
+      return 1;
+    }
 
     const registry = this.rawFieldRegistry();
     const flatFields = flattenFields(fields, registry);
     const componentCount = flatFields.filter(isContainerField).length;
 
-    return componentCount + 1; // +1 for dynamic-form component
+    // +1 for dynamic-form component
+    return componentCount + 1;
   });
 
   /**
    * Observable that emits when all components (pages + rows + groups + dynamic-form) are initialized.
-   * Uses shareReplay(1) to ensure exactly one emission that can be received by late subscribers.
+   * Uses shareReplay to ensure exactly one emission that can be received by late subscribers.
    */
   readonly initialized$ = setupInitializationTracking({
     eventBus: this.eventBus,
@@ -698,58 +644,58 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
-  constructor() {
-    // Clear field loading errors when config changes
-    explicitEffect([this.config], () => {
-      this.fieldLoadingErrors.set([]);
-    });
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Effects - Declarative side effects
+  // ─────────────────────────────────────────────────────────────────────────────
 
-    // For paged forms, emit initialization event when pages are defined
-    explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
-      if (mode === 'paged' && pages.length > 0) {
-        // Emit initialization for dynamic-form component in paged mode
-        // This happens after the page orchestrator is set up
-        this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
-      }
-    });
+  /** Clears field loading errors when config changes */
+  private readonly clearErrorsOnConfigChange = explicitEffect([this.config], () => {
+    this.fieldLoadingErrors.set([]);
+  });
 
-    // Track initialization for non-paged forms when fields are resolved
-    explicitEffect([this.resolvedFields, this.formModeDetection], ([fields, { mode }]) => {
-      if (mode === 'non-paged' && fields.length > 0) {
-        afterNextRender(
-          () => {
-            this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
-          },
-          { injector: this.injector },
-        );
-      }
-    });
+  /** Emits initialization event for paged forms when pages are defined */
+  private readonly emitPagedFormInitialized = explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
+    if (mode === 'paged' && pages.length > 0) {
+      this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+    }
+  });
 
-    // Listen for form reset events
-    this.eventBus
-      .on<FormResetEvent>('form-reset')
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => {
-        this.onFormReset();
-      });
+  /** Emits initialization event for non-paged forms when fields are resolved */
+  private readonly emitNonPagedFormInitialized = explicitEffect([this.resolvedFields, this.formModeDetection], ([fields, { mode }]) => {
+    if (mode === 'non-paged' && fields.length > 0) {
+      afterNextRender(
+        () => {
+          this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+        },
+        { injector: this.injector },
+      );
+    }
+  });
 
-    // Listen for form clear events
-    this.eventBus
-      .on<FormClearEvent>('form-clear')
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => {
-        this.onFormClear();
-      });
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Subscriptions - Event handlers
+  // ─────────────────────────────────────────────────────────────────────────────
 
-    // Handle submission with optional submission action
-    createSubmissionHandler({
-      eventBus: this.eventBus,
-      configSignal: this.config,
-      formSignal: this.form,
-    })
-      .pipe(takeUntilDestroyed())
-      .subscribe();
-  }
+  /** Handles form reset events */
+  private readonly handleFormReset = this.eventBus
+    .on<FormResetEvent>('form-reset')
+    .pipe(takeUntilDestroyed())
+    .subscribe(() => this.onFormReset());
+
+  /** Handles form clear events */
+  private readonly handleFormClear = this.eventBus
+    .on<FormClearEvent>('form-clear')
+    .pipe(takeUntilDestroyed())
+    .subscribe(() => this.onFormClear());
+
+  /** Handles form submission with optional submission action */
+  private readonly handleSubmission = createSubmissionHandler({
+    eventBus: this.eventBus,
+    configSignal: this.config,
+    formSignal: this.form,
+  })
+    .pipe(takeUntilDestroyed())
+    .subscribe();
 
   /**
    * Emitted when all form components are initialized and ready for interaction.
@@ -772,6 +718,64 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   public onPageNavigationStateChange = outputFromObservable(
     this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change'),
   );
+
+  private registerValidatorsFromConfig({ customFnConfig, schemas }: FormConfig<TFields>): void {
+    // Register schemas from config
+    if (schemas) {
+      schemas.forEach((schema) => {
+        this.schemaRegistry.registerSchema(schema);
+      });
+    }
+
+    if (!customFnConfig) {
+      return;
+    }
+
+    // Register custom functions
+    if (customFnConfig.customFunctions) {
+      Object.entries(customFnConfig.customFunctions).forEach(([name, fn]) => {
+        this.functionRegistry.registerCustomFunction(name, fn);
+      });
+    }
+
+    // Set all validators from config - change detection is inside set methods
+    this.functionRegistry.setValidators(customFnConfig.validators);
+    this.functionRegistry.setAsyncValidators(customFnConfig.asyncValidators);
+    this.functionRegistry.setHttpValidators(customFnConfig.httpValidators);
+  }
+
+  private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>) {
+    // Use memoized functions for expensive operations with registry
+    const flattenedFields = this.memoizedFlattenFields(fields, registry);
+    const flattenedFieldsForRendering = this.memoizedFlattenFieldsForRendering(fields, registry);
+    const fieldsById = this.memoizedKeyBy(flattenedFields);
+    const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
+
+    // For rendering: use flattenedFieldsForRendering which preserves row containers
+    // For paged forms, orchestrator handles rendering separately
+    const fieldsToRender = mode === 'paged' ? [] : flattenedFieldsForRendering;
+
+    return {
+      fields: fieldsToRender,
+      schemaFields: flattenedFields, // Fields for form schema (always flattened for form values)
+      originalFields: fields,
+      defaultValues,
+      schema: undefined,
+      mode,
+      registry, // Include registry for schema creation
+    };
+  }
+
+  private createEmptyFormSetup(registry: Map<string, FieldTypeDefinition>) {
+    return {
+      fields: [],
+      schemaFields: [],
+      defaultValues: {} as TModel,
+      schema: undefined,
+      mode: 'non-paged' as const,
+      registry, // Include registry even for empty forms
+    };
+  }
 
   /**
    * Handles form reset. Restores all form field values to their

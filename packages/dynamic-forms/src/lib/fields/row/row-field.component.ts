@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
@@ -35,10 +35,16 @@ export default class RowFieldComponent {
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
 
-  // Row field definition
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Inputs
+  // ─────────────────────────────────────────────────────────────────────────────
+
   field = input.required<RowField>();
   key = input.required<string>();
-  value = model<unknown>(undefined);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Computed Signals
+  // ─────────────────────────────────────────────────────────────────────────────
 
   readonly disabled = computed(() => {
     try {
@@ -48,12 +54,14 @@ export default class RowFieldComponent {
     }
   });
 
-  // Memoized field registry raw access
+  /** Memoized field registry raw access */
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
-  /**
-   * Source signal for fields to render.
-   */
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Field Resolution
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Source signal for fields to render */
   private readonly fieldsSource = computed(() => this.field().fields || []);
 
   /**
@@ -92,21 +100,16 @@ export default class RowFieldComponent {
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
-  constructor() {
-    // Track initialization when fields are resolved
-    explicitEffect([this.resolvedFields], ([fields]) => {
-      if (fields.length > 0) {
-        this.emitFieldsInitialized();
-      }
-    });
-  }
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Effects - Declarative side effects as class fields
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Emits the fieldsInitialized event after the next render cycle.
-   */
-  private emitFieldsInitialized(): void {
-    emitComponentInitialized(this.eventBus, 'row', this.field().key, this.injector);
-  }
+  /** Emits initialization event when fields are resolved */
+  private readonly emitInitializedOnFieldsResolved = explicitEffect([this.resolvedFields], ([fields]) => {
+    if (fields.length > 0) {
+      emitComponentInitialized(this.eventBus, 'row', this.field().key, this.injector);
+    }
+  });
 }
 
 export { RowFieldComponent };

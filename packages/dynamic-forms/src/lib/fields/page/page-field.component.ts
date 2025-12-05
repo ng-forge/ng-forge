@@ -42,28 +42,24 @@ export default class PageFieldComponent {
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
 
-  // Page field definition
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Inputs
+  // ─────────────────────────────────────────────────────────────────────────────
+
   field = input.required<PageField>();
   key = input.required<string>();
-
-  /**
-   * Page index passed from orchestrator
-   */
+  /** Page index passed from orchestrator */
   pageIndex = input.required<number>();
-
-  /**
-   * Page visibility state passed from orchestrator
-   */
+  /** Page visibility state passed from orchestrator */
   isVisible = input.required<boolean>();
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Computed Signals
+  // ─────────────────────────────────────────────────────────────────────────────
 
   readonly disabled = computed(() => this.field().disabled || false);
 
-  // EventBus outputs for page navigation
-  readonly nextPage = outputFromObservable(this.eventBus.on<NextPageEvent>('next-page'));
-  readonly previousPage = outputFromObservable(this.eventBus.on<PreviousPageEvent>('previous-page'));
-  readonly pageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
-
-  // Validate that this page doesn't contain nested pages
+  /** Validates that this page doesn't contain nested pages */
   readonly isValid = computed(() => {
     const pageField = this.field();
     const valid = validatePageNesting(pageField);
@@ -79,12 +75,22 @@ export default class PageFieldComponent {
     return valid;
   });
 
-  // Memoized field registry raw access
+  /** Memoized field registry raw access */
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
-  /**
-   * Source signal for fields to render. Only returns fields if validation passes.
-   */
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Outputs
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  readonly nextPage = outputFromObservable(this.eventBus.on<NextPageEvent>('next-page'));
+  readonly previousPage = outputFromObservable(this.eventBus.on<PreviousPageEvent>('previous-page'));
+  readonly pageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Field Resolution
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Source signal for fields to render. Only returns fields if validation passes. */
   private readonly fieldsSource = computed(() => {
     // Only return fields if validation passes
     if (!this.isValid()) {
@@ -129,19 +135,14 @@ export default class PageFieldComponent {
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
-  constructor() {
-    // Track initialization when fields are resolved
-    explicitEffect([this.resolvedFields], ([fields]) => {
-      if (fields.length > 0) {
-        this.emitFieldsInitialized();
-      }
-    });
-  }
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Effects - Declarative side effects as class fields
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Emits the fieldsInitialized event after the next render cycle.
-   */
-  private emitFieldsInitialized(): void {
-    emitComponentInitialized(this.eventBus, 'page', this.field().key, this.injector);
-  }
+  /** Emits initialization event when fields are resolved */
+  private readonly emitInitializedOnFieldsResolved = explicitEffect([this.resolvedFields], ([fields]) => {
+    if (fields.length > 0) {
+      emitComponentInitialized(this.eventBus, 'page', this.field().key, this.injector);
+    }
+  });
 }
