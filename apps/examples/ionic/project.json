@@ -39,7 +39,7 @@
             }
           ],
           "outputHashing": "all",
-          "baseHref": "/ng-forge/examples/ionic/"
+          "baseHref": "/dynamic-forms/examples/ionic/"
         },
         "development": {
           "optimization": false,

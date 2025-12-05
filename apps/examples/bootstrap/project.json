@@ -39,7 +39,7 @@
             }
           ],
           "outputHashing": "all",
-          "baseHref": "/ng-forge/examples/bootstrap/"
+          "baseHref": "/dynamic-forms/examples/bootstrap/"
         },
         "development": {
           "optimization": false,
