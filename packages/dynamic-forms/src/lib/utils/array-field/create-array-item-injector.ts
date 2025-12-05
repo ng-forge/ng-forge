@@ -9,6 +9,7 @@ import { mapFieldToInputs } from '../field-mapper/field-mapper';
 import { flattenFields } from '../flattener/field-flattener';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { getArrayValue } from './array-field.types';
+import { getChildFieldTree } from '../form-internals/form-internals';
 
 /**
  * Options for creating an array item injector.
@@ -41,19 +42,44 @@ export interface ArrayItemInjectorResult {
 }
 
 /**
+ * Tries to get the nested FieldTree from the parent form for this array item.
+ * This allows child fields to update the parent form directly.
+ */
+function getNestedItemFieldTree<TModel>(
+  parentFieldSignalContext: FieldSignalContext<TModel>,
+  arrayKey: string,
+  index: number,
+): FieldTree<unknown> | null {
+  // First get the array FieldTree from parent
+  const arrayFieldTree = getChildFieldTree(parentFieldSignalContext.form, arrayKey);
+  if (!arrayFieldTree) return null;
+
+  // Then get the item's FieldTree using stringified index
+  return getChildFieldTree(arrayFieldTree, String(index));
+}
+
+/**
  * Creates an injector and inputs for an array item.
  *
  * Handles different item types (flatten, group, regular) by creating appropriate
  * form references and scoped injectors with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT.
+ * Prefers using the parent form's nested FieldTree to ensure changes propagate directly.
  */
 export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayItemInjectorOptions<TModel>): ArrayItemInjectorResult {
   const { fieldTree, template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
 
   const valueHandling = registry.get(template.type)?.valueHandling || 'include';
+  const currentIndex = untracked(() => indexSignal());
+
+  // Try to get the nested FieldTree from parent form first
+  const nestedItemFieldTree = getNestedItemFieldTree(parentFieldSignalContext, arrayField.key, currentIndex);
 
   let formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>;
 
-  if (valueHandling === 'flatten' && 'fields' in template && template.fields) {
+  // Prefer using the nested FieldTree from parent if available
+  if (nestedItemFieldTree) {
+    formRef = nestedItemFieldTree;
+  } else if (valueHandling === 'flatten' && 'fields' in template && template.fields) {
     formRef =
       fieldTree ??
       createObjectItemForm({
