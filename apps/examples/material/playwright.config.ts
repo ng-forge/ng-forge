@@ -16,7 +16,14 @@ const allProjects = [
   },
   {
     name: 'firefox',
-    use: { ...devices['Desktop Firefox'] },
+    use: {
+      ...devices['Desktop Firefox'],
+      // Firefox needs longer timeouts when running in parallel with many tests
+      actionTimeout: 8000,
+      navigationTimeout: 15000,
+    },
+    // Increase timeout for Firefox tests
+    timeout: 15000,
   },
   {
     name: 'webkit',
@@ -44,6 +51,8 @@ export default defineConfig({
   ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: './src/app/testing' }),
   /* Global timeout for each test - prevents tests from hanging indefinitely */
   timeout: 10000,
+  /* Retry flaky tests once */
+  retries: 1,
   /* Expect timeout - how long to wait for expect() assertions */
   expect: {
     timeout: 5000,

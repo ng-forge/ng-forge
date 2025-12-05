@@ -1,5 +1,5 @@
+import { Signal } from '@angular/core';
 import { FieldDef } from '../../definitions/base/field-def';
-import { Binding } from '@angular/core';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
 
@@ -12,9 +12,12 @@ import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
  *
  * @param fieldDef The field definition to map
  * @param fieldRegistry The registry of field type definitions
- * @returns Array of component bindings
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
-export function mapFieldToBindings(fieldDef: FieldDef<any>, fieldRegistry: Map<string, FieldTypeDefinition>): Binding[] {
+export function mapFieldToInputs(
+  fieldDef: FieldDef<unknown>,
+  fieldRegistry: Map<string, FieldTypeDefinition>,
+): Signal<Record<string, unknown>> {
   // Get the field type definition from registry
   const fieldType = fieldRegistry.get(fieldDef.type);
 

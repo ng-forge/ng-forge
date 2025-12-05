@@ -1,6 +1,17 @@
 @use './styles/grid-system.scss';
 
 :host {
+  // Form grid layout
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--df-grid-row-gap);
+  width: 100%;
+
+  // Ensure each field takes full width by default
+  > * {
+    grid-column: 1 / -1;
+  }
+
   // Allow custom spacing for dynamic forms
   &.df-form-spacing-custom {
     --df-grid-row-gap: var(--form-custom-spacing, 1.5rem);
@@ -30,20 +41,5 @@
   &.df-form-paged {
     // Paged forms handle their own spacing through page orchestrator
     --df-grid-row-gap: 0;
-  }
-
-  &.df-form-non-paged {
-    // Non-paged forms use standard grid spacing
-    .df-form {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--df-grid-row-gap);
-      width: 100%;
-
-      // Ensure each field takes full width by default
-      > * {
-        grid-column: 1 / -1;
-      }
-    }
   }
 }

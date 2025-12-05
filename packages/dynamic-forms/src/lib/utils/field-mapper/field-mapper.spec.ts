@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { mapFieldToBindings } from './field-mapper';
+import { computed, Signal } from '@angular/core';
+import { mapFieldToInputs } from './field-mapper';
 import { FieldDef } from '../../definitions/base';
 import { FieldTypeDefinition } from '../../models/field-type';
-import { Binding } from '@angular/core';
 
-describe('mapFieldToBindings', () => {
+describe('mapFieldToInputs', () => {
   let registry: Map<string, FieldTypeDefinition>;
 
   beforeEach(() => {
@@ -13,7 +13,7 @@ describe('mapFieldToBindings', () => {
 
   describe('custom mapper', () => {
     it('should use custom mapper when field type has one', () => {
-      const customMapper = vi.fn().mockReturnValue([{ provide: 'custom', useValue: 'result' }] as Binding[]);
+      const customMapper = vi.fn().mockReturnValue(computed(() => ({ custom: 'result' })));
 
       registry.set('input', {
         component: {} as any,
@@ -21,14 +21,14 @@ describe('mapFieldToBindings', () => {
       });
 
       const field: FieldDef<any> = { type: 'input', key: 'email' };
-      const result = mapFieldToBindings(field, registry);
+      const resultSignal = mapFieldToInputs(field, registry);
 
       expect(customMapper).toHaveBeenCalledWith(field);
-      expect(result).toEqual([{ provide: 'custom', useValue: 'result' }]);
+      expect(resultSignal()).toEqual({ custom: 'result' });
     });
 
     it('should pass field definition to custom mapper', () => {
-      const customMapper = vi.fn().mockReturnValue([] as Binding[]);
+      const customMapper = vi.fn().mockReturnValue(computed(() => ({})));
 
       registry.set('select', {
         component: {} as any,
@@ -41,7 +41,7 @@ describe('mapFieldToBindings', () => {
         label: 'Country',
       };
 
-      mapFieldToBindings(field, registry);
+      mapFieldToInputs(field, registry);
 
       expect(customMapper).toHaveBeenCalledWith(field);
     });
@@ -55,26 +55,31 @@ describe('mapFieldToBindings', () => {
       });
 
       const field: FieldDef<any> = { type: 'input', key: 'name' };
-      const result = mapFieldToBindings(field, registry);
+      const resultSignal = mapFieldToInputs(field, registry);
 
-      // Base mapper should create bindings for common properties
-      expect(result).toBeDefined();
-      expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBeGreaterThan(0);
+      // Base mapper should return a signal
+      expect(resultSignal).toBeDefined();
+      expect(typeof resultSignal).toBe('function'); // Signal is a function
+      // Calling the signal should return an object
+      const result = resultSignal();
+      expect(typeof result).toBe('object');
+      expect(Object.keys(result).length).toBeGreaterThan(0);
     });
 
     it('should handle fields without registry entry using base mapper', () => {
       const field: FieldDef<any> = { type: 'unknown', key: 'test' };
-      const result = mapFieldToBindings(field, registry);
+      const resultSignal = mapFieldToInputs(field, registry);
 
-      expect(result).toBeDefined();
-      expect(Array.isArray(result)).toBe(true);
+      expect(resultSignal).toBeDefined();
+      expect(typeof resultSignal).toBe('function'); // Signal is a function
+      const result = resultSignal();
+      expect(typeof result).toBe('object');
     });
   });
 
   describe('field type resolution', () => {
     it('should lookup field type from registry', () => {
-      const customMapper = vi.fn().mockReturnValue([]);
+      const customMapper = vi.fn().mockReturnValue(computed(() => ({})));
 
       registry.set('email', {
         component: {} as any,
@@ -82,14 +87,14 @@ describe('mapFieldToBindings', () => {
       });
 
       const field: FieldDef<any> = { type: 'email', key: 'userEmail' };
-      mapFieldToBindings(field, registry);
+      mapFieldToInputs(field, registry);
 
       expect(customMapper).toHaveBeenCalled();
     });
 
     it('should handle case-sensitive type names', () => {
-      const mapper1 = vi.fn().mockReturnValue([]);
-      const mapper2 = vi.fn().mockReturnValue([]);
+      const mapper1 = vi.fn().mockReturnValue(computed(() => ({})));
+      const mapper2 = vi.fn().mockReturnValue(computed(() => ({})));
 
       registry.set('Input', { component: {} as any, mapper: mapper1 });
       registry.set('input', { component: {} as any, mapper: mapper2 });
@@ -97,21 +102,21 @@ describe('mapFieldToBindings', () => {
       const field1: FieldDef<any> = { type: 'Input', key: 'field1' };
       const field2: FieldDef<any> = { type: 'input', key: 'field2' };
 
-      mapFieldToBindings(field1, registry);
-      mapFieldToBindings(field2, registry);
+      mapFieldToInputs(field1, registry);
+      mapFieldToInputs(field2, registry);
 
       expect(mapper1).toHaveBeenCalledTimes(1);
       expect(mapper2).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('binding generation', () => {
-    it('should return bindings array', () => {
-      const customMapper = () =>
-        [
-          { provide: 'field', useValue: { key: 'test' } },
-          { provide: 'label', useValue: 'Test Label' },
-        ] as Binding[];
+  describe('inputs generation', () => {
+    it('should return inputs signal', () => {
+      const customMapper = (): Signal<Record<string, unknown>> =>
+        computed(() => ({
+          field: { key: 'test' },
+          label: 'Test Label',
+        }));
 
       registry.set('custom', {
         component: {} as any,
@@ -119,15 +124,16 @@ describe('mapFieldToBindings', () => {
       });
 
       const field: FieldDef<any> = { type: 'custom', key: 'test' };
-      const result = mapFieldToBindings(field, registry);
+      const resultSignal = mapFieldToInputs(field, registry);
+      const result = resultSignal(); // Call signal to get inputs
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toHaveProperty('provide', 'field');
-      expect(result[1]).toHaveProperty('provide', 'label');
+      expect(Object.keys(result)).toHaveLength(2);
+      expect(result).toHaveProperty('field');
+      expect(result).toHaveProperty('label', 'Test Label');
     });
 
-    it('should handle empty bindings array', () => {
-      const customMapper = () => [] as Binding[];
+    it('should handle empty inputs object', () => {
+      const customMapper = (): Signal<Record<string, unknown>> => computed(() => ({}));
 
       registry.set('minimal', {
         component: {} as any,
@@ -135,15 +141,15 @@ describe('mapFieldToBindings', () => {
       });
 
       const field: FieldDef<any> = { type: 'minimal', key: 'test' };
-      const result = mapFieldToBindings(field, registry);
+      const resultSignal = mapFieldToInputs(field, registry);
 
-      expect(result).toEqual([]);
+      expect(resultSignal()).toEqual({});
     });
   });
 
   describe('complex field scenarios', () => {
     it('should handle fields with multiple properties', () => {
-      const customMapper = vi.fn().mockReturnValue([]);
+      const customMapper = vi.fn().mockReturnValue(computed(() => ({})));
 
       registry.set('complex', {
         component: {} as any,
@@ -159,14 +165,14 @@ describe('mapFieldToBindings', () => {
         disabled: false,
       };
 
-      mapFieldToBindings(field, registry);
+      mapFieldToInputs(field, registry);
 
       expect(customMapper).toHaveBeenCalledWith(field);
       expect(customMapper.mock.calls[0][0]).toEqual(field);
     });
 
     it('should handle fields with nested structures', () => {
-      const customMapper = vi.fn().mockReturnValue([]);
+      const customMapper = vi.fn().mockReturnValue(computed(() => ({})));
 
       registry.set('nested', {
         component: {} as any,
@@ -182,7 +188,7 @@ describe('mapFieldToBindings', () => {
         },
       };
 
-      mapFieldToBindings(field, registry);
+      mapFieldToInputs(field, registry);
 
       expect(customMapper).toHaveBeenCalledWith(field);
     });
@@ -190,7 +196,7 @@ describe('mapFieldToBindings', () => {
 
   describe('mapper function interface', () => {
     it('should call mapper with field as single argument', () => {
-      const customMapper = vi.fn().mockReturnValue([]);
+      const customMapper = vi.fn().mockReturnValue(computed(() => ({})));
 
       registry.set('test', {
         component: {} as any,
@@ -198,21 +204,22 @@ describe('mapFieldToBindings', () => {
       });
 
       const field: FieldDef<any> = { type: 'test', key: 'field' };
-      mapFieldToBindings(field, registry);
+      mapFieldToInputs(field, registry);
 
       expect(customMapper).toHaveBeenCalledTimes(1);
       expect(customMapper.mock.calls[0]).toHaveLength(1);
       expect(customMapper.mock.calls[0][0]).toBe(field);
     });
 
-    it('should use mapper return value as-is', () => {
-      const expectedBindings = [
-        { provide: 'a', useValue: 1 },
-        { provide: 'b', useValue: 2 },
-        { provide: 'c', useValue: 3 },
-      ] as Binding[];
+    it('should use mapper return value (signal) directly', () => {
+      const expectedInputs = {
+        a: 1,
+        b: 2,
+        c: 3,
+      };
 
-      const customMapper = () => expectedBindings;
+      const signalInstance = computed(() => expectedInputs);
+      const customMapper = () => signalInstance;
 
       registry.set('test', {
         component: {} as any,
@@ -220,25 +227,28 @@ describe('mapFieldToBindings', () => {
       });
 
       const field: FieldDef<any> = { type: 'test', key: 'field' };
-      const result = mapFieldToBindings(field, registry);
+      const resultSignal = mapFieldToInputs(field, registry);
 
-      expect(result).toBe(expectedBindings);
+      // The result should be the same signal instance
+      expect(resultSignal).toBe(signalInstance);
+      // Calling the signal should return the expected inputs
+      expect(resultSignal()).toEqual(expectedInputs);
     });
   });
 
   describe('registry integration', () => {
     it('should support multiple field types in registry', () => {
-      const mapper1 = vi.fn().mockReturnValue([{ provide: 'type1', useValue: true }]);
-      const mapper2 = vi.fn().mockReturnValue([{ provide: 'type2', useValue: true }]);
-      const mapper3 = vi.fn().mockReturnValue([{ provide: 'type3', useValue: true }]);
+      const mapper1 = vi.fn().mockReturnValue(computed(() => ({ type1: true })));
+      const mapper2 = vi.fn().mockReturnValue(computed(() => ({ type2: true })));
+      const mapper3 = vi.fn().mockReturnValue(computed(() => ({ type3: true })));
 
       registry.set('type1', { component: {} as any, mapper: mapper1 });
       registry.set('type2', { component: {} as any, mapper: mapper2 });
       registry.set('type3', { component: {} as any, mapper: mapper3 });
 
-      mapFieldToBindings({ type: 'type1', key: 'f1' }, registry);
-      mapFieldToBindings({ type: 'type2', key: 'f2' }, registry);
-      mapFieldToBindings({ type: 'type3', key: 'f3' }, registry);
+      mapFieldToInputs({ type: 'type1', key: 'f1' }, registry);
+      mapFieldToInputs({ type: 'type2', key: 'f2' }, registry);
+      mapFieldToInputs({ type: 'type3', key: 'f3' }, registry);
 
       expect(mapper1).toHaveBeenCalledTimes(1);
       expect(mapper2).toHaveBeenCalledTimes(1);
@@ -249,10 +259,12 @@ describe('mapFieldToBindings', () => {
       const emptyRegistry = new Map<string, FieldTypeDefinition>();
       const field: FieldDef<any> = { type: 'unknown', key: 'test' };
 
-      const result = mapFieldToBindings(field, emptyRegistry);
+      const resultSignal = mapFieldToInputs(field, emptyRegistry);
 
-      expect(result).toBeDefined();
-      expect(Array.isArray(result)).toBe(true);
+      expect(resultSignal).toBeDefined();
+      expect(typeof resultSignal).toBe('function'); // Signal is a function
+      const result = resultSignal();
+      expect(typeof result).toBe('object');
     });
   });
 });

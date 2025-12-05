@@ -32,7 +32,7 @@ export const inputScenario: ExampleScenario = {
         minLength: 3,
         validationMessages: {
           required: 'This field is required',
-          minLength: 'Must be at least {requiredLength} characters',
+          minLength: 'Must be at least {{requiredLength}} characters',
         },
         props: {
           placeholder: 'Choose a username',
