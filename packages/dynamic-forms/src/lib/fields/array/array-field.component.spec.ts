@@ -172,7 +172,7 @@ describe('ArrayFieldComponent', () => {
     expect(component.resolvedItems()).toHaveLength(3);
   });
 
-  it('should render array container in template', () => {
+  it('should render with grid layout on host', () => {
     const field: ArrayField<any> = {
       key: 'testArray',
       type: 'array',
@@ -181,8 +181,9 @@ describe('ArrayFieldComponent', () => {
 
     const { fixture } = setupArrayTest(field);
 
-    const container = fixture.nativeElement.querySelector('.array-container');
-    expect(container).toBeTruthy();
+    const host = fixture.nativeElement;
+    // Host should have the df-array class which provides grid styling
+    expect(host.classList.contains('df-array')).toBe(true);
   });
 
   it('should have host classes', () => {

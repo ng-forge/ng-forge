@@ -74,27 +74,21 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
   selector: 'dynamic-form',
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
-    <form
-      class="df-form"
-      [class.disabled]="effectiveFormOptions().disabled"
-      [class.df-form-paged]="formModeDetection().mode === 'paged'"
-      [class.df-form-non-paged]="formModeDetection().mode === 'non-paged'"
-    >
-      @if (formModeDetection().mode === 'paged') {
-        <page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()" />
-      } @else {
-        <div class="df-form">
-          @for (field of resolvedFields(); track field.key) {
-            <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
-          }
-        </div>
+    @if (formModeDetection().mode === 'paged') {
+      <page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()" />
+    } @else {
+      @for (field of resolvedFields(); track field.key) {
+        <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
       }
-    </form>
+    }
   `,
   styleUrl: './dynamic-form.component.scss',
   providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
   host: {
-    '[class.disabled]': 'disabled()',
+    class: 'df-form',
+    '[class.disabled]': 'disabled() || effectiveFormOptions().disabled',
+    '[class.df-form-paged]': 'formModeDetection().mode === "paged"',
+    '[class.df-form-non-paged]': 'formModeDetection().mode === "non-paged"',
     '[attr.data-form-mode]': 'formModeDetection().mode',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,

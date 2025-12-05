@@ -42,15 +42,14 @@ import { flattenFields } from '../../utils/flattener/field-flattener';
   selector: 'group-field',
   imports: [NgComponentOutlet],
   template: `
-    <form [class.disabled]="disabled()">
-      @for (field of resolvedFields(); track field.key) {
-        <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
-      }
-    </form>
+    @for (field of resolvedFields(); track field.key) {
+      <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+    }
   `,
   styleUrl: './group-field.component.scss',
   host: {
     class: 'df-field df-group',
+    '[class.disabled]': 'disabled()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },

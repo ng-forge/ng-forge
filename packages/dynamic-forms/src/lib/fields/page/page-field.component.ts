@@ -23,11 +23,9 @@ import { FieldDef } from '../../definitions/base/field-def';
   selector: 'page-field',
   imports: [NgComponentOutlet],
   template: `
-    <div class="df-page" [class.df-page-visible]="isVisible()" [class.df-page-hidden]="!isVisible()" [attr.aria-hidden]="!isVisible()">
-      @for (field of resolvedFields(); track field.key) {
-        <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
-      }
-    </div>
+    @for (field of resolvedFields(); track field.key) {
+      <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+    }
   `,
   styleUrl: './page-field.component.scss',
   host: {
@@ -35,7 +33,6 @@ import { FieldDef } from '../../definitions/base/field-def';
     '[class.disabled]': 'disabled()',
     '[class.df-page-visible]': 'isVisible()',
     '[class.df-page-hidden]': '!isVisible()',
-    '[style.display]': 'isVisible() ? "block" : "none"',
     '[attr.aria-hidden]': '!isVisible()',
     '[attr.data-page-index]': 'pageIndex()',
     '[id]': '`${key()}`',

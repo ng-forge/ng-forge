@@ -1427,14 +1427,14 @@ describe('DynamicFormComponent', () => {
       const { component, fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
-      const formElement = fixture.nativeElement.querySelector('form');
-      expect(formElement.classList.contains('disabled')).toBe(false);
+      const hostElement = fixture.nativeElement;
+      expect(hostElement.classList.contains('disabled')).toBe(false);
 
       fixture.componentRef.setInput('formOptions', { disabled: true });
       fixture.detectChanges();
       await delay();
 
-      expect(formElement.classList.contains('disabled')).toBe(true);
+      expect(hostElement.classList.contains('disabled')).toBe(true);
     });
 
     it('should prevent user interactions when form is disabled', async () => {
@@ -1502,8 +1502,8 @@ describe('DynamicFormComponent', () => {
 
       expect(component.disabled()).toBe(false);
 
-      const formElement = fixture.nativeElement.querySelector('form');
-      expect(formElement.classList.contains('disabled')).toBe(false);
+      const hostElement = fixture.nativeElement;
+      expect(hostElement.classList.contains('disabled')).toBe(false);
     });
   });
 
