@@ -1,7 +1,7 @@
-import { beforeAll, describe, it, expect } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { BUILT_IN_FIELDS } from './built-in-fields';
 import { FieldTypeDefinition } from '../models/field-type';
-import { arrayFieldMapper, baseFieldMapper, groupFieldMapper, rowFieldMapper } from '../mappers';
+import { arrayFieldMapper, groupFieldMapper, rowFieldMapper, textFieldMapper } from '../mappers';
 import { pageFieldMapper } from '../mappers/page/page-field-mapper';
 
 describe('BUILT_IN_FIELDS', () => {
@@ -76,7 +76,7 @@ describe('BUILT_IN_FIELDS', () => {
       { name: 'group', mapper: groupFieldMapper, valueHandling: 'include', exportName: 'GroupFieldComponent' },
       { name: 'array', mapper: arrayFieldMapper, valueHandling: 'include', exportName: 'ArrayFieldComponent' },
       { name: 'page', mapper: pageFieldMapper, valueHandling: 'flatten', exportName: 'default' },
-      { name: 'text', mapper: baseFieldMapper, valueHandling: 'exclude', exportName: 'default' },
+      { name: 'text', mapper: textFieldMapper, valueHandling: 'exclude', exportName: 'default' },
     ];
 
     fieldConfigs.forEach(({ name, mapper, valueHandling, exportName }) => {
