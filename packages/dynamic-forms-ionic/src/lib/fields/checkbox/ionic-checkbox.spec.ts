@@ -244,8 +244,9 @@ describe('IonicCheckboxFieldComponent', () => {
         initialValue: { agreeToTerms: false },
       });
 
-      const input = fixture.debugElement.query(By.css('ion-checkbox input'));
-      input.nativeElement.dispatchEvent(new Event('blur'));
+      // Ionic components use shadow DOM, so dispatch blur on the ion-checkbox itself
+      const ionCheckbox = fixture.debugElement.query(By.css('ion-checkbox'));
+      ionCheckbox.nativeElement.dispatchEvent(new Event('ionBlur', { bubbles: true }));
       fixture.detectChanges();
 
       //       const errorComponent = fixture.debugElement.query(By.css('df-ionic-errors'));
