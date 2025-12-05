@@ -67,6 +67,58 @@ export function valueFieldMapper<T = unknown>(fieldDef: BaseValueField<T, string
       validationMessages: fieldDef.validationMessages ?? {},
     };
 
+    // Value field specific properties
+    if (fieldDef.placeholder !== undefined) {
+      inputs['placeholder'] = fieldDef.placeholder;
+    }
+
+    // Options property for select, radio, multi-checkbox fields
+    const extendedFieldDef = fieldDef as BaseValueField<T, string> & {
+      options?: unknown;
+      minDate?: unknown;
+      maxDate?: unknown;
+      startAt?: unknown;
+      min?: unknown;
+      max?: unknown;
+      step?: unknown;
+      rows?: unknown;
+      cols?: unknown;
+    };
+
+    if (extendedFieldDef.options !== undefined) {
+      inputs['options'] = extendedFieldDef.options;
+    }
+
+    // Datepicker-specific properties
+    if (extendedFieldDef.minDate !== undefined) {
+      inputs['minDate'] = extendedFieldDef.minDate;
+    }
+    if (extendedFieldDef.maxDate !== undefined) {
+      inputs['maxDate'] = extendedFieldDef.maxDate;
+    }
+    if (extendedFieldDef.startAt !== undefined) {
+      inputs['startAt'] = extendedFieldDef.startAt;
+    }
+
+    // Slider/input-specific properties
+    if (extendedFieldDef.min !== undefined) {
+      inputs['min'] = extendedFieldDef.min;
+    }
+    if (extendedFieldDef.max !== undefined) {
+      inputs['max'] = extendedFieldDef.max;
+    }
+    if (extendedFieldDef.step !== undefined) {
+      inputs['step'] = extendedFieldDef.step;
+    }
+
+    // Textarea-specific properties
+    if (extendedFieldDef.rows !== undefined) {
+      inputs['rows'] = extendedFieldDef.rows;
+    }
+    if (extendedFieldDef.cols !== undefined) {
+      inputs['cols'] = extendedFieldDef.cols;
+    }
+
     if (defaultValidationMessages !== undefined) {
       inputs['defaultValidationMessages'] = defaultValidationMessages;
     }
