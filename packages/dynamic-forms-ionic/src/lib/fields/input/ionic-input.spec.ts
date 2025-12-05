@@ -28,10 +28,14 @@ describe('IonicInputFieldComponent', () => {
       });
 
       const ionInput = fixture.debugElement.query(By.css('df-ionic-input ion-input'));
-      //       const input = fixture.debugElement.query(By.css('ion-input input'));
 
       expect(ionInput).not.toBeNull();
-      expect(ionInput.nativeElement.getAttribute('tabindex')).toBe('1');
+
+      // ion-input passes tabindex to its internal native input, not the custom element
+      // This is correct Ionic behavior - the wrapper has tabIndex=-1 to pass focus through
+      const nativeInput = ionInput.nativeElement.querySelector('input');
+      expect(nativeInput).not.toBeNull();
+      expect(nativeInput.getAttribute('tabindex')).toBe('1');
     });
 
     it('should handle user input and update form value', async () => {

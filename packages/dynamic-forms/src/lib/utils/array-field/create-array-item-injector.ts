@@ -14,19 +14,19 @@ import { getArrayValue } from './array-field.types';
  * Options for creating an array item injector.
  */
 export interface CreateArrayItemInjectorOptions<TModel> {
-  /** The field tree for this item (may be null for object items) */
+  /** The field tree for this item (null for object items without existing FieldTree). */
   fieldTree: FieldTree<unknown> | null;
-  /** The field template for this array item */
+  /** The field template defining the array item structure. */
   template: FieldDef<unknown>;
-  /** Signal containing the current index of this item */
+  /** Signal containing the current index (uses linkedSignal for auto-updates). */
   indexSignal: Signal<number>;
-  /** The parent field signal context */
+  /** Parent context for accessing form state and values. */
   parentFieldSignalContext: FieldSignalContext<TModel>;
-  /** The parent injector */
+  /** Parent injector for creating scoped child injector. */
   parentInjector: Injector;
-  /** The field registry */
+  /** Field registry for looking up field type definitions. */
   registry: Map<string, FieldTypeDefinition>;
-  /** The array field definition */
+  /** The array field definition containing this item. */
   arrayField: ArrayField;
 }
 
@@ -34,29 +34,26 @@ export interface CreateArrayItemInjectorOptions<TModel> {
  * Result of creating an array item injector.
  */
 export interface ArrayItemInjectorResult {
-  /** The injector for this array item */
+  /** Scoped injector providing ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT. */
   injector: Injector;
-  /** Inputs signal for ngComponentOutlet */
+  /** Inputs signal for ngComponentOutlet, mapped from the field template. */
   inputs: Signal<Record<string, unknown>>;
 }
 
 /**
  * Creates an injector and inputs for an array item.
- * Returns both the injector (with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT) and the inputs signal.
  *
- * @param options - Configuration options for creating the injector
- * @returns Object containing the injector and inputs signal
+ * Handles different item types (flatten, group, regular) by creating appropriate
+ * form references and scoped injectors with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT.
  */
 export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayItemInjectorOptions<TModel>): ArrayItemInjectorResult {
   const { fieldTree, template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
 
   const valueHandling = registry.get(template.type)?.valueHandling || 'include';
 
-  // Determine the form reference and create injector
   let formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>;
 
   if (valueHandling === 'flatten' && 'fields' in template && template.fields) {
-    // Flatten types (row/page) or groups
     formRef =
       fieldTree ??
       createObjectItemForm({
@@ -68,7 +65,6 @@ export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayIte
         arrayKey: arrayField.key,
       });
   } else if (template.type === 'group' && valueHandling === 'include') {
-    // Group types inside arrays
     formRef =
       fieldTree ??
       createObjectItemForm({
@@ -80,10 +76,8 @@ export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayIte
         arrayKey: arrayField.key,
       });
   } else if (fieldTree) {
-    // Regular types with FieldTree
     formRef = fieldTree;
   } else {
-    // Object items without FieldTree
     formRef = createObjectItemForm({
       template,
       indexSignal,
@@ -102,7 +96,6 @@ export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayIte
     arrayField,
   });
 
-  // Map field to inputs using the scoped injector
   const inputs = runInInjectionContext(injector, () => {
     return mapFieldToInputs(template, registry);
   });
@@ -110,9 +103,6 @@ export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayIte
   return { injector, inputs };
 }
 
-/**
- * Options for creating an object item form.
- */
 interface CreateObjectItemFormOptions<TModel> {
   template: FieldDef<unknown>;
   indexSignal: Signal<number>;
@@ -124,21 +114,19 @@ interface CreateObjectItemFormOptions<TModel> {
 
 /**
  * Creates a local form for an object array item using a signal-based index.
+ * Uses linkedSignal to derive the item value from the parent array at the current index.
  */
 function createObjectItemForm<TModel>(options: CreateObjectItemFormOptions<TModel>): ReturnType<typeof form<unknown>> {
   const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey } = options;
 
-  // Create entity signal that reads from the array at the signal's current index
   const itemEntity = linkedSignal(() => {
     const parentValue = parentFieldSignalContext.value();
     const arrayValue = getArrayValue(parentValue as Partial<TModel>, arrayKey);
     return arrayValue[indexSignal()] ?? {};
   });
 
-  // Get nested fields for schema creation (if available)
   const nestedFields = 'fields' in template && Array.isArray(template.fields) ? template.fields : [];
 
-  // Create form with schema if we have nested fields
   return runInInjectionContext(parentInjector, () => {
     if (nestedFields.length > 0) {
       const flattenedFields = flattenFields(nestedFields, registry);
@@ -149,9 +137,6 @@ function createObjectItemForm<TModel>(options: CreateObjectItemFormOptions<TMode
   });
 }
 
-/**
- * Options for creating an item injector.
- */
 interface CreateItemInjectorOptions<TModel> {
   formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>;
   indexSignal: Signal<number>;
@@ -161,11 +146,8 @@ interface CreateItemInjectorOptions<TModel> {
 }
 
 /**
- * Core helper to create an injector for an array item.
- * Provides both FIELD_SIGNAL_CONTEXT and ARRAY_CONTEXT to child components.
- *
- * @param options - Configuration options for the injector
- * @returns The created injector
+ * Creates a scoped injector for an array item.
+ * Provides both FIELD_SIGNAL_CONTEXT (for form access) and ARRAY_CONTEXT (for position awareness).
  */
 function createItemInjector<TModel>(options: CreateItemInjectorOptions<TModel>): Injector {
   const { formRef, indexSignal, parentFieldSignalContext, parentInjector, arrayField } = options;
@@ -177,8 +159,6 @@ function createItemInjector<TModel>(options: CreateItemInjectorOptions<TModel>):
     field: arrayField,
   };
 
-  // Create context with placeholder injector (will be set after Injector.create)
-  // Wrap formRef in a function to make it callable (FieldSignalContext.form must be callable)
   const itemFieldSignalContext: FieldSignalContext<unknown> = {
     injector: undefined as unknown as Injector,
     value: parentFieldSignalContext.value,
@@ -195,7 +175,6 @@ function createItemInjector<TModel>(options: CreateItemInjectorOptions<TModel>):
     ],
   });
 
-  // Complete the circular reference
   itemFieldSignalContext.injector = injector;
 
   return injector;

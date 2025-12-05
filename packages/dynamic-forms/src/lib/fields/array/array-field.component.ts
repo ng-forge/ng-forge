@@ -24,25 +24,11 @@ import {
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 
 /**
- * Array field component that manages dynamic arrays of field values.
+ * Container component for rendering dynamic arrays of fields.
  *
- * Key behaviors:
- * - Fields array defines the TEMPLATE (not instances)
- * - Collects values as flat array: [value1, value2, value3]
- * - Supports dynamic add/remove via event bus
- * - Template stored in computed signal for type enforcement
- *
- * Example:
- * ```typescript
- * {
- *   key: 'items',
- *   type: 'array',
- *   fields: [
- *     { key: 'item', type: 'input', value: '' }
- *   ]
- * }
- * // Creates: { items: ['value1', 'value2', 'value3'] }
- * ```
+ * Supports add/remove operations via AddArrayItemEvent and RemoveArrayItemEvent.
+ * Uses differential updates to optimize rendering - only recreates items when necessary.
+ * Each item gets a scoped injector with ARRAY_CONTEXT for position-aware operations.
  */
 @Component({
   selector: 'array-field',
@@ -65,6 +51,10 @@ import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Dependencies
+  // ─────────────────────────────────────────────────────────────────────────────
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
@@ -75,7 +65,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   // Inputs
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Field configuration input */
   field = input.required<ArrayField>();
   key = input.required<string>();
 
@@ -83,22 +72,13 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   // Computed Signals
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Memoized field registry raw access */
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
-  /**
-   * Get the field template from the array field definition.
-   * This template is used when adding new items dynamically.
-   */
   private readonly fieldTemplate = computed<FieldDef<unknown> | null>(() => {
     const arrayField = this.field();
     return arrayField.fields && arrayField.fields.length > 0 ? arrayField.fields[0] : null;
   });
 
-  /**
-   * Get the array of FieldTree objects from the parent form.
-   * Signal Forms automatically creates FieldTree for each array item.
-   */
   private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
     const arrayKey = this.field().key;
     const parentForm = this.parentFieldSignalContext.form();
@@ -128,39 +108,26 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   // State Signals
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Source of truth: resolved array items with stable identity for declarative rendering */
   private readonly resolvedItemsSignal = signal<ResolvedArrayItem[]>([]);
-
-  /**
-   * Update version signal for tracking async operation currency.
-   * When a new update starts, this is incremented. Completed operations
-   * check against current value to determine if results should be applied.
-   */
   private readonly updateVersion = signal(0);
-
-  /** Derived signal containing the ordered item IDs (string UUIDs) */
   private readonly itemOrderSignal = linkedSignal(() => this.resolvedItemsSignal().map((item) => item.id));
 
-  /** Resolved items for declarative rendering in template */
   readonly resolvedItems = linkedSignal(() => this.resolvedItemsSignal());
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Effects - Declarative side effects as class fields
+  // Effects
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Effect that performs differential updates when arrayFieldTrees changes */
   private readonly syncFieldsOnArrayChange = explicitEffect([this.arrayFieldTrees], ([fieldTrees]) => {
-    // Increment version to invalidate any in-flight operations
     this.updateVersion.update((v) => v + 1);
     const currentVersion = this.updateVersion();
     this.performDifferentialUpdate(fieldTrees, currentVersion);
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Subscriptions - Event handlers as class fields
+  // Event Handlers
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Handles add array item events */
   private readonly handleAddItem = this.eventBus
     .on<AddArrayItemEvent>('add-array-item')
     .pipe(
@@ -169,7 +136,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     )
     .subscribe((event) => this.addItem(event.field ?? this.fieldTemplate(), event.index));
 
-  /** Handles remove array item events */
   private readonly handleRemoveItem = this.eventBus
     .on<RemoveArrayItemEvent>('remove-array-item')
     .pipe(
@@ -179,13 +145,9 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     .subscribe((event) => this.removeItem(event.index));
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Differential Update Operations
+  // Private Methods
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Perform differential update of array items.
-   * Uses value comparison to detect append/pop vs middle operations.
-   */
   private performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
     const resolvedItems = this.resolvedItemsSignal();
     const arrayKey = this.field().key;
@@ -213,12 +175,10 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
         this.resolveAllItems(fieldTrees, updateId);
         break;
       case 'none':
-        // No update needed
         break;
     }
   }
 
-  /** Resolve all items from scratch (initial render) */
   private resolveAllItems(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
     if (fieldTrees.length === 0) {
       this.resolvedItemsSignal.set([]);
@@ -240,7 +200,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
       });
   }
 
-  /** Append new items to the end of the array */
   private appendItems(fieldTrees: readonly (FieldTree<unknown> | null)[], startIndex: number, endIndex: number, updateId: number): void {
     const itemsToResolve = fieldTrees.slice(startIndex, endIndex);
     if (itemsToResolve.length === 0) return;
@@ -259,7 +218,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
       });
   }
 
-  /** Creates an observable for resolving a single array item */
   private createResolveItemObservable(fieldTree: FieldTree<unknown> | null, index: number): Observable<ResolvedArrayItem | undefined> {
     const template = this.fieldTemplate();
     if (!template) return of(undefined);
@@ -278,11 +236,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     });
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Array Manipulation Methods
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Add a new item to the array */
   private addItem(fieldTemplate: FieldDef<unknown> | null, index?: number): void {
     if (!fieldTemplate) {
       console.error(
@@ -306,7 +259,6 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     formObject.value.set({ ...currentValue, [arrayKey]: newArray } as any);
   }
 
-  /** Remove an item from the array */
   private removeItem(index?: number): void {
     const arrayKey = this.field().key;
     const formObject = this.parentFieldSignalContext.form();

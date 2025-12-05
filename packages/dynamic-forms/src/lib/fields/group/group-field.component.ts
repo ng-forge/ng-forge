@@ -31,6 +31,13 @@ import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
 import { flattenFields } from '../../utils/flattener/field-flattener';
 
+/**
+ * Container component for rendering nested form groups.
+ *
+ * Creates a scoped form context with its own validation state.
+ * Child fields receive a FIELD_SIGNAL_CONTEXT scoped to this group's form instance.
+ * Group values are nested under the group's key in the parent form.
+ */
 @Component({
   selector: 'group-field',
   imports: [NgComponentOutlet],
@@ -50,6 +57,10 @@ import { flattenFields } from '../../utils/flattener/field-flattener';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class GroupFieldComponent<TModel = Record<string, unknown>> {
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Dependencies
+  // ─────────────────────────────────────────────────────────────────────────────
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
@@ -57,7 +68,7 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   private readonly eventBus = inject(EventBus);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Memoized Functions - Performance optimization for expensive operations
+  // Memoized Functions
   // ─────────────────────────────────────────────────────────────────────────────
 
   private readonly memoizedFlattenFields = memoize(
@@ -81,7 +92,6 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   // Inputs
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Field configuration input */
   field = input.required<GroupField>();
   key = input.required<string>();
 
@@ -89,17 +99,14 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   // Computed Signals
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Memoized field registry raw access */
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   private readonly formSetup = computed(() => {
-    // Safety check: return empty setup if inputs aren't set yet
     try {
       const groupField = this.field();
       const registry = this.rawFieldRegistry();
 
       if (groupField.fields && groupField.fields.length > 0) {
-        // Use memoized functions for expensive operations with registry
         const flattenedFields = this.memoizedFlattenFields(groupField.fields, registry);
         const fieldsById = this.memoizedKeyBy(flattenedFields);
         const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
@@ -108,7 +115,7 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
           fields: flattenedFields,
           originalFields: groupField.fields,
           defaultValues,
-          registry, // Include registry for schema creation
+          registry,
         };
       }
 
@@ -116,7 +123,7 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
         fields: [],
         originalFields: [],
         defaultValues: {},
-        registry, // Include registry even for empty forms
+        registry,
       };
     } catch {
       return {
@@ -130,18 +137,14 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
 
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
 
-  // Create reactive group value signal that extracts group-specific values from parent form
   private readonly entity = linkedSignal(() => {
     const parentValue = this.parentFieldSignalContext.value();
     const groupKey = this.field().key;
     const defaults = this.defaultValues();
-
-    // Extract the group's nested values from parent form
     const groupValue = (parentValue as Record<string, unknown>)?.[groupKey] || {};
     return { ...defaults, ...groupValue };
   });
 
-  // Create nested form for this group
   private readonly form = computed(() => {
     return runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
@@ -156,7 +159,7 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Form State Signals
+  // Public State Signals
   // ─────────────────────────────────────────────────────────────────────────────
 
   readonly formValue = computed(() => this.entity());
@@ -167,18 +170,13 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   readonly errors = computed(() => this.form()().errors());
   readonly disabled = computed(() => this.form()().disabled());
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Injector Creation
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Creates scoped child injector for nested fields with group's form context */
   private readonly groupInjector = computed(() => {
     const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
       injector: this.injector,
-      value: this.parentFieldSignalContext.value, // Pass through parent's value signal
-      defaultValues: this.defaultValues, // Group-specific defaults
-      form: this.form() as ReturnType<typeof form<Record<string, unknown>>>, // Group's nested form
-      defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages, // Pass through validation messages
+      value: this.parentFieldSignalContext.value,
+      defaultValues: this.defaultValues,
+      form: this.form() as ReturnType<typeof form<Record<string, unknown>>>,
+      defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 
     return Injector.create({
@@ -204,13 +202,8 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   // Field Resolution
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Source signal for fields to render */
   private readonly fieldsSource = computed(() => this.formSetup().fields);
 
-  /**
-   * Resolved fields for declarative rendering using derivedFromDeferred.
-   * Group components create a scoped FIELD_SIGNAL_CONTEXT with the group's nested form.
-   */
   protected readonly resolvedFields = derivedFromDeferred(
     this.fieldsSource,
     pipe(
@@ -222,7 +215,7 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
         const context = {
           loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
           registry: this.rawFieldRegistry(),
-          injector: this.groupInjector(), // Use group's scoped injector
+          injector: this.groupInjector(),
           destroyRef: this.destroyRef,
           onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
             const fieldKey = fieldDef.key || '<no key>';
@@ -235,19 +228,16 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
         };
         return forkJoin(fields.map((f) => resolveField(f, context)));
       }),
-      // Filter out undefined (failed loads) and cast to ResolvedField[]
       map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
-      // Reconcile to reuse injectors for unchanged fields
       scan(reconcileFields, [] as ResolvedField[]),
     ),
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Effects - Declarative side effects as class fields
+  // Effects
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Emits initialization event when fields are resolved */
   private readonly emitInitializedOnFieldsResolved = explicitEffect([this.resolvedFields], ([fields]) => {
     if (fields.length > 0) {
       emitComponentInitialized(this.eventBus, 'group', this.field().key, this.injector);

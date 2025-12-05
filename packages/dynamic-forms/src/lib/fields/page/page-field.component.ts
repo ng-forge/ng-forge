@@ -12,6 +12,13 @@ import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { FieldDef } from '../../definitions/base/field-def';
 
+/**
+ * Renders a single page in multi-page (wizard) forms.
+ *
+ * Visibility is controlled by the PageOrchestrator via the isVisible input.
+ * Pages cannot be nested within other pages - validation prevents this.
+ * Field values are flattened into the parent form (no nesting under page key).
+ */
 @Component({
   selector: 'page-field',
   imports: [NgComponentOutlet],
@@ -37,6 +44,10 @@ import { FieldDef } from '../../definitions/base/field-def';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PageFieldComponent {
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Dependencies
+  // ─────────────────────────────────────────────────────────────────────────────
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly injector = inject(Injector);
@@ -48,9 +59,7 @@ export default class PageFieldComponent {
 
   field = input.required<PageField>();
   key = input.required<string>();
-  /** Page index passed from orchestrator */
   pageIndex = input.required<number>();
-  /** Page visibility state passed from orchestrator */
   isVisible = input.required<boolean>();
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -59,7 +68,6 @@ export default class PageFieldComponent {
 
   readonly disabled = computed(() => this.field().disabled || false);
 
-  /** Validates that this page doesn't contain nested pages */
   readonly isValid = computed(() => {
     const pageField = this.field();
     const valid = validatePageNesting(pageField);
@@ -75,7 +83,6 @@ export default class PageFieldComponent {
     return valid;
   });
 
-  /** Memoized field registry raw access */
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -90,19 +97,13 @@ export default class PageFieldComponent {
   // Field Resolution
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Source signal for fields to render. Only returns fields if validation passes. */
   private readonly fieldsSource = computed(() => {
-    // Only return fields if validation passes
     if (!this.isValid()) {
       return [];
     }
     return this.field().fields || [];
   });
 
-  /**
-   * Resolved fields for declarative rendering using derivedFromDeferred.
-   * Page components pass through parent FIELD_SIGNAL_CONTEXT unchanged.
-   */
   protected readonly resolvedFields = derivedFromDeferred(
     this.fieldsSource,
     pipe(
@@ -114,7 +115,7 @@ export default class PageFieldComponent {
         const context = {
           loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
           registry: this.rawFieldRegistry(),
-          injector: this.injector, // Pass through parent injector
+          injector: this.injector,
           destroyRef: this.destroyRef,
           onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
             const fieldKey = fieldDef.key || '<no key>';
@@ -127,19 +128,16 @@ export default class PageFieldComponent {
         };
         return forkJoin(fields.map((f) => resolveField(f as FieldDef<unknown>, context)));
       }),
-      // Filter out undefined (failed loads) and cast to ResolvedField[]
       map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
-      // Reconcile to reuse injectors for unchanged fields
       scan(reconcileFields, [] as ResolvedField[]),
     ),
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Effects - Declarative side effects as class fields
+  // Effects
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Emits initialization event when fields are resolved */
   private readonly emitInitializedOnFieldsResolved = explicitEffect([this.resolvedFields], ([fields]) => {
     if (fields.length > 0) {
       emitComponentInitialized(this.eventBus, 'page', this.field().key, this.injector);

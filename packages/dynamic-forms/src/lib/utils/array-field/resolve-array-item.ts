@@ -12,34 +12,33 @@ import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
  * Options for resolving an array item.
  */
 export interface ResolveArrayItemOptions<TModel> {
-  /** The field tree for this item (may be null for object items) */
+  /** The field tree for this item (null for object items). */
   fieldTree: FieldTree<unknown> | null;
-  /** The index of this item in the array */
+  /** The initial index of this item in the array. */
   index: number;
-  /** The field template for array items */
+  /** The field template defining the array item structure. */
   template: FieldDef<unknown>;
-  /** The array field definition */
+  /** The array field definition containing this item. */
   arrayField: ArrayField;
-  /** Signal containing ordered item IDs for index derivation */
+  /** Signal containing ordered item IDs for reactive index derivation. */
   itemOrderSignal: Signal<string[]>;
-  /** The parent field signal context */
+  /** Parent context for accessing form state and values. */
   parentFieldSignalContext: FieldSignalContext<TModel>;
-  /** The parent injector */
+  /** Parent injector for creating scoped child injector. */
   parentInjector: Injector;
-  /** The field registry */
+  /** Field registry for looking up field type definitions. */
   registry: Map<string, FieldTypeDefinition>;
-  /** DestroyRef to check if component is destroyed */
+  /** DestroyRef to abort resolution if component is destroyed. */
   destroyRef: DestroyRef;
-  /** Function to load component for a field type */
+  /** Function to async load the component for the field type. */
   loadTypeComponent: (type: string) => Promise<unknown>;
 }
 
 /**
  * Resolves a single array item for declarative rendering.
- * Uses linkedSignal for the index, which automatically updates when itemOrderSignal changes.
  *
- * @param options - Configuration options for resolving the item
- * @returns Observable that emits the resolved item or undefined on error
+ * Uses linkedSignal for the index, which automatically updates when itemOrderSignal changes.
+ * This enables position-aware updates without recreating components when items are reordered.
  */
 export function resolveArrayItem<TModel>(options: ResolveArrayItemOptions<TModel>): Observable<ResolvedArrayItem | undefined> {
   const {
@@ -61,18 +60,14 @@ export function resolveArrayItem<TModel>(options: ResolveArrayItemOptions<TModel
         return undefined;
       }
 
-      // Generate unique ID for this item using pure function
       const itemId = generateArrayItemId();
 
-      // Create a linkedSignal that derives its index from itemOrderSignal
-      // When itemOrderSignal is updated (e.g., items removed), this automatically updates
       const indexSignal = linkedSignal(() => {
         const order = itemOrderSignal();
         const idx = order.indexOf(itemId);
-        return idx >= 0 ? idx : index; // Fallback to initial index if not yet in order
+        return idx >= 0 ? idx : index;
       });
 
-      // Create the injector and inputs for this array item
       const { injector, inputs } = createArrayItemInjectorAndInputs({
         fieldTree,
         template,
@@ -83,7 +78,6 @@ export function resolveArrayItem<TModel>(options: ResolveArrayItemOptions<TModel
         arrayField,
       });
 
-      // Get current value for this item to create snapshot
       const currentValue = parentFieldSignalContext.value() as Partial<TModel>;
       const arrayValue = getArrayValue(currentValue, arrayField.key);
       const itemValue = arrayValue[index];

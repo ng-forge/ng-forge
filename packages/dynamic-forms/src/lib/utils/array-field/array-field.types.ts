@@ -2,8 +2,7 @@ import { Injector, Signal, type Type } from '@angular/core';
 
 /**
  * Generates a unique identifier for array items.
- * Uses crypto.randomUUID() for truly unique, collision-free IDs.
- * This is a pure function with no side effects.
+ * Uses crypto.randomUUID() for collision-free IDs that remain stable across position changes.
  */
 export function generateArrayItemId(): string {
   return crypto.randomUUID();
@@ -11,28 +10,25 @@ export function generateArrayItemId(): string {
 
 /**
  * Resolved array item ready for declarative rendering with ngComponentOutlet.
- * Each item has a unique ID and a linkedSignal-based index that
+ * Each item has a stable unique ID and a linkedSignal-based index that
  * automatically updates when items are added/removed.
  */
 export interface ResolvedArrayItem {
-  /** Unique identifier for this item (stable across position changes) */
+  /** Unique identifier for this item (stable across position changes). */
   id: string;
-  /** The loaded component type */
+  /** The loaded component type. */
   component: Type<unknown>;
-  /** The injector used for this item (with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT) */
+  /** Injector providing ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT. */
   injector: Injector;
-  /** Inputs signal for ngComponentOutlet - evaluated in template for reactivity */
+  /** Inputs signal for ngComponentOutlet - evaluated in template for reactivity. */
   inputs: Signal<Record<string, unknown>>;
-  /** JSON snapshot of the value this item was created with (for differential comparison) */
+  /** JSON snapshot of the value this item was created with (for differential comparison). */
   valueSnapshot: string;
 }
 
 /**
- * Creates a JSON snapshot of a value for comparison purposes.
- * Used for differential update detection in array fields.
- *
- * @param value - The value to snapshot
- * @returns JSON string representation of the value, or empty string on error
+ * Creates a JSON snapshot of a value for differential update detection.
+ * Used to compare array item values and determine if recreation is needed.
  */
 export function createValueSnapshot(value: unknown): string {
   try {
@@ -44,10 +40,7 @@ export function createValueSnapshot(value: unknown): string {
 
 /**
  * Safely extracts an array value from a model object.
- *
- * @param value - The parent model object
- * @param key - The key of the array property
- * @returns The array value, or empty array if not found or not an array
+ * Returns empty array if the key doesn't exist or value isn't an array.
  */
 export function getArrayValue<TModel>(value: Partial<TModel> | undefined, key: string): unknown[] {
   const arrayValue = (value as Record<string, unknown>)?.[key];
@@ -55,7 +48,8 @@ export function getArrayValue<TModel>(value: Partial<TModel> | undefined, key: s
 }
 
 /**
- * Determines the type of differential update operation needed.
+ * Discriminated union of possible differential update operations.
+ * Enables optimized array updates without full recreation when possible.
  */
 export type DifferentialUpdateOperation =
   | { type: 'clear' }
@@ -66,13 +60,15 @@ export type DifferentialUpdateOperation =
   | { type: 'none' };
 
 /**
- * Determines the differential update operation needed based on current and new state.
+ * Determines the optimal differential update operation based on current and new state.
  *
- * @param currentItems - Current resolved items
- * @param newLength - Length of the new field trees
- * @param currentArrayValue - Current array values from the form
- * @param checkValuesMatch - Function to check if values match at given count
- * @returns The operation to perform
+ * Compares resolved items against new array values to determine if we can:
+ * - Clear all (empty array)
+ * - Initial render (no existing items)
+ * - Append only (items added at end, existing unchanged)
+ * - Pop only (items removed from end, remaining unchanged)
+ * - Skip update (no changes)
+ * - Recreate all (any other change pattern)
  */
 export function determineDifferentialOperation(
   currentItems: ResolvedArrayItem[],
@@ -82,21 +78,17 @@ export function determineDifferentialOperation(
 ): DifferentialUpdateOperation {
   const currentLength = currentItems.length;
 
-  // Handle empty arrays
   if (newLength === 0) {
     return { type: 'clear' };
   }
 
-  // Handle initial render (no existing items)
   if (currentLength === 0) {
     return { type: 'initial', fieldTreesLength: newLength };
   }
 
-  // Determine operation type by comparing values
   const minLength = Math.min(currentLength, newLength);
 
   if (newLength > currentLength) {
-    // Items were added - check if it's a pure append
     const isPureAppend = checkValuesMatch(currentArrayValue, minLength);
     if (isPureAppend) {
       return { type: 'append', startIndex: currentLength, endIndex: newLength };
@@ -104,14 +96,12 @@ export function determineDifferentialOperation(
   }
 
   if (newLength < currentLength) {
-    // Items were removed - check if it's a pure pop (remove from end)
     const isPurePop = checkValuesMatch(currentArrayValue, newLength);
     if (isPurePop) {
       return { type: 'pop', newLength };
     }
   }
 
-  // If lengths are equal and values match, no update needed
   if (newLength === currentLength) {
     const valuesMatch = checkValuesMatch(currentArrayValue, newLength);
     if (valuesMatch) {
@@ -119,18 +109,12 @@ export function determineDifferentialOperation(
     }
   }
 
-  // Recreate all for any other operation (middle insert/remove, value change)
   return { type: 'recreate' };
 }
 
 /**
  * Checks if the first N values match between resolved items' snapshots and new values.
- * Uses pre-computed JSON snapshots for comparison.
- *
- * @param resolvedItems - Current resolved items with value snapshots
- * @param newValues - New array values to compare
- * @param count - Number of items to compare
- * @returns true if all values match
+ * Uses pre-computed JSON snapshots for efficient comparison without deep equality checks.
  */
 export function checkValuesMatch(resolvedItems: ResolvedArrayItem[], newValues: unknown[], count: number): boolean {
   if (resolvedItems.length < count || newValues.length < count) {

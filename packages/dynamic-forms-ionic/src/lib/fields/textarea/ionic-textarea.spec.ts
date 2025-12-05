@@ -31,7 +31,12 @@ describe('IonicTextareaFieldComponent', () => {
       const ionTextarea = fixture.debugElement.query(By.css('df-ionic-textarea ion-textarea'));
 
       expect(ionTextarea).not.toBeNull();
-      expect(ionTextarea.nativeElement.getAttribute('tabindex')).toBe('1');
+
+      // ion-textarea passes tabindex to its internal native textarea, not the custom element
+      // This is correct Ionic behavior - the wrapper has tabIndex=-1 to pass focus through
+      const nativeTextarea = ionTextarea.nativeElement.querySelector('textarea');
+      expect(nativeTextarea).not.toBeNull();
+      expect(nativeTextarea.getAttribute('tabindex')).toBe('1');
     });
 
     it('should handle user input and update form value', async () => {

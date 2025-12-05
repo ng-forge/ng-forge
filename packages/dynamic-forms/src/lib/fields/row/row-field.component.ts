@@ -10,6 +10,13 @@ import { EventBus } from '../../events/event.bus';
 import { FieldDef } from '../../definitions/base/field-def';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
+/**
+ * Layout container for horizontal field arrangement.
+ *
+ * Does not create a new form context - fields share the parent's context.
+ * Field values are flattened into the parent form (no nesting under row key).
+ * Purely a visual/layout container with no impact on form structure.
+ */
 @Component({
   selector: 'row-field',
   imports: [NgComponentOutlet],
@@ -30,6 +37,10 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class RowFieldComponent {
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Dependencies
+  // ─────────────────────────────────────────────────────────────────────────────
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly injector = inject(Injector);
@@ -54,20 +65,14 @@ export default class RowFieldComponent {
     }
   });
 
-  /** Memoized field registry raw access */
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Field Resolution
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Source signal for fields to render */
   private readonly fieldsSource = computed(() => this.field().fields || []);
 
-  /**
-   * Resolved fields for declarative rendering using derivedFromDeferred.
-   * Row components pass through parent FIELD_SIGNAL_CONTEXT unchanged.
-   */
   protected readonly resolvedFields = derivedFromDeferred(
     this.fieldsSource,
     pipe(
@@ -79,7 +84,7 @@ export default class RowFieldComponent {
         const context = {
           loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
           registry: this.rawFieldRegistry(),
-          injector: this.injector, // Pass through parent injector
+          injector: this.injector,
           destroyRef: this.destroyRef,
           onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
             const fieldKey = fieldDef.key || '<no key>';
@@ -92,19 +97,16 @@ export default class RowFieldComponent {
         };
         return forkJoin(fields.map((f) => resolveField(f as FieldDef<unknown>, context)));
       }),
-      // Filter out undefined (failed loads) and cast to ResolvedField[]
       map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
-      // Reconcile to reuse injectors for unchanged fields
       scan(reconcileFields, [] as ResolvedField[]),
     ),
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Effects - Declarative side effects as class fields
+  // Effects
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Emits initialization event when fields are resolved */
   private readonly emitInitializedOnFieldsResolved = explicitEffect([this.resolvedFields], ([fields]) => {
     if (fields.length > 0) {
       emitComponentInitialized(this.eventBus, 'row', this.field().key, this.injector);
