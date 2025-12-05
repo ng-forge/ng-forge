@@ -34,13 +34,9 @@ import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
   selector: 'array-field',
   imports: [NgComponentOutlet],
   template: `
-    <div class="array-container">
-      <div class="array-items">
-        @for (item of resolvedItems(); track item.id) {
-          <ng-container *ngComponentOutlet="item.component; injector: item.injector; inputs: item.inputs()" />
-        }
-      </div>
-    </div>
+    @for (item of resolvedItems(); track item.id) {
+      <ng-container *ngComponentOutlet="item.component; injector: item.injector; inputs: item.inputs()" />
+    }
   `,
   styleUrl: './array-field.component.scss',
   host: {

@@ -21,11 +21,9 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   selector: 'row-field',
   imports: [NgComponentOutlet],
   template: `
-    <div class="df-row">
-      @for (field of resolvedFields(); track field.key) {
-        <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
-      }
-    </div>
+    @for (field of resolvedFields(); track field.key) {
+      <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
+    }
   `,
   styleUrl: './row-field.component.scss',
   host: {
