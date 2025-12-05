@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
 import { valueFieldMapper } from './value-field.mapper';
 import { BaseValueField } from '../../definitions';
-import { FieldSignalContext } from '../types';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { FieldSignalContext } from '../types';
 
 describe('valueFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
@@ -41,127 +41,463 @@ describe('valueFieldMapper', () => {
     );
   }
 
-  function testMapper(fieldDef: BaseValueField<any, any>, injector: EnvironmentInjector): Record<string, unknown> {
+  function testMapper<T>(fieldDef: BaseValueField<T, string>, injector: EnvironmentInjector): Record<string, unknown> {
     const inputsSignal = runInInjectionContext(injector, () => valueFieldMapper(fieldDef));
-    return inputsSignal(); // Call the signal to get the actual inputs
+    return inputsSignal();
   }
 
-  it('should create inputs object with field properties plus validationMessages', () => {
-    const testCases = [
-      {
-        desc: 'minimal field',
-        field: { key: 'minimal', type: 'input' as const, label: 'Minimal' },
-        minKeys: 3, // key + label + validationMessages
-      },
-      {
-        desc: 'field with standard properties',
-        field: {
-          key: 'standard',
-          type: 'input' as const,
-          label: 'Standard',
-          className: 'class',
-          tabIndex: 1,
-          props: { hint: 'hint' },
-        },
-        minKeys: 6, // key + label + className + tabIndex + props + validationMessages
-      },
-      {
-        desc: 'field with custom validationMessages',
-        field: {
-          key: 'custom',
-          type: 'input' as const,
-          label: 'Custom',
-          validationMessages: { required: 'Required', minLength: 'Too short' },
-        },
-        minKeys: 3,
-      },
-    ];
+  describe('base properties (from buildBaseInputs)', () => {
+    it('should include key from base mapper', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+      };
 
-    testCases.forEach(({ desc, field, minKeys }) => {
-      const injector = createTestInjector({ fieldKey: field.key });
-      const inputs = testMapper(field, injector);
-      expect(Object.keys(inputs).length).toBeGreaterThanOrEqual(minKeys);
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['key']).toBe('testField');
+    });
+
+    it('should include label when defined', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+        label: 'Test Label',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['label']).toBe('Test Label');
+    });
+
+    it('should include className when defined', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+        className: 'custom-class',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['className']).toContain('custom-class');
+    });
+
+    it('should include tabIndex when defined', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+        tabIndex: 5,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['tabIndex']).toBe(5);
+    });
+
+    it('should include props when defined', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+        props: { hint: 'Helper text', autocomplete: 'off' },
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['props']).toEqual({ hint: 'Helper text', autocomplete: 'off' });
     });
   });
 
-  it('should always include validationMessages in inputs', () => {
-    const fieldWithoutMessages: BaseValueField<any, any> = {
-      key: 'noMessages',
-      type: 'input',
-      label: 'No Messages',
-    };
+  describe('value field specific properties', () => {
+    it('should include placeholder when defined', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+        placeholder: 'Enter value...',
+      };
 
-    const fieldWithMessages: BaseValueField<any, any> = {
-      key: 'withMessages',
-      type: 'input',
-      label: 'With Messages',
-      validationMessages: { required: 'Required' },
-    };
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
 
-    const injector1 = createTestInjector({ fieldKey: 'noMessages' });
-    const injector2 = createTestInjector({ fieldKey: 'withMessages' });
-
-    const inputs1 = testMapper(fieldWithoutMessages, injector1);
-    const inputs2 = testMapper(fieldWithMessages, injector2);
-
-    expect(Object.keys(inputs1).length).toBeGreaterThanOrEqual(3);
-    expect(Object.keys(inputs2).length).toBeGreaterThanOrEqual(3);
-    expect(inputs1).toHaveProperty('validationMessages');
-    expect(inputs2).toHaveProperty('validationMessages');
-  });
-
-  it('should include defaultValidationMessages from context', () => {
-    const fieldDef: BaseValueField<any, any> = {
-      key: 'contextMessages',
-      type: 'input',
-      label: 'Context Messages',
-    };
-
-    const injector = createTestInjector({
-      fieldKey: 'contextMessages',
-      defaultValidationMessages: { required: 'Default required' },
+      expect(inputs['placeholder']).toBe('Enter value...');
     });
 
-    const inputs = testMapper(fieldDef, injector);
-    expect(Object.keys(inputs).length).toBeGreaterThanOrEqual(4); // includes defaultValidationMessages
-    expect(inputs).toHaveProperty('defaultValidationMessages');
+    it('should include options for select fields', () => {
+      const selectField = {
+        key: 'selectField',
+        type: 'select' as const,
+        options: [
+          { value: 'a', label: 'Option A' },
+          { value: 'b', label: 'Option B' },
+        ],
+      };
+
+      const injector = createTestInjector({ fieldKey: 'selectField' });
+      const inputs = testMapper(selectField as BaseValueField<unknown, string>, injector);
+
+      expect(inputs['options']).toEqual([
+        { value: 'a', label: 'Option A' },
+        { value: 'b', label: 'Option B' },
+      ]);
+    });
+
+    it('should include minDate and maxDate for datepicker fields', () => {
+      const datepickerField = {
+        key: 'dateField',
+        type: 'datepicker' as const,
+        minDate: '2020-01-01',
+        maxDate: '2025-12-31',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'dateField' });
+      const inputs = testMapper(datepickerField as BaseValueField<unknown, string>, injector);
+
+      expect(inputs['minDate']).toBe('2020-01-01');
+      expect(inputs['maxDate']).toBe('2025-12-31');
+    });
+
+    it('should include startAt for datepicker fields', () => {
+      const datepickerField = {
+        key: 'dateField',
+        type: 'datepicker' as const,
+        startAt: new Date('2023-06-15'),
+      };
+
+      const injector = createTestInjector({ fieldKey: 'dateField' });
+      const inputs = testMapper(datepickerField as BaseValueField<unknown, string>, injector);
+
+      expect(inputs['startAt']).toEqual(new Date('2023-06-15'));
+    });
+
+    it('should include min, max, and step for slider/number fields', () => {
+      const sliderField = {
+        key: 'sliderField',
+        type: 'slider' as const,
+        min: 0,
+        max: 100,
+        step: 5,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'sliderField' });
+      const inputs = testMapper(sliderField as BaseValueField<unknown, string>, injector);
+
+      expect(inputs['min']).toBe(0);
+      expect(inputs['max']).toBe(100);
+      expect(inputs['step']).toBe(5);
+    });
+
+    it('should include rows and cols for textarea fields', () => {
+      const textareaField = {
+        key: 'textareaField',
+        type: 'textarea' as const,
+        rows: 10,
+        cols: 50,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'textareaField' });
+      const inputs = testMapper(textareaField as BaseValueField<unknown, string>, injector);
+
+      expect(inputs['rows']).toBe(10);
+      expect(inputs['cols']).toBe(50);
+    });
   });
 
-  it('should handle edge cases (empty key, excluded properties)', () => {
-    const testCases = [
-      {
-        field: { key: '', type: 'input' as const, label: 'Empty Key' },
-        expectedMin: 3,
-      },
-      {
-        field: {
-          key: 'excluded',
-          type: 'input' as const,
-          label: 'Excluded Props',
-          disabled: true,
-          readonly: false,
-          validation: { required: true },
-        } as any,
-        expectedMin: 3, // excluded props not counted
-      },
-      {
-        field: {
-          key: 'complex',
-          type: 'input' as const,
-          label: 'Complex',
-          className: 'class',
-          tabIndex: 5,
-          props: { placeholder: 'Enter text', hint: 'Hint text' },
-          validationMessages: { required: 'Required', pattern: 'Invalid format' },
-        },
-        expectedMin: 6,
-      },
-    ];
+  describe('validation messages', () => {
+    it('should always include validationMessages (empty object if not provided)', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+      };
 
-    testCases.forEach(({ field, expectedMin }) => {
-      const injector = createTestInjector({ fieldKey: field.key || 'test' });
-      const inputs = testMapper(field, injector);
-      expect(Object.keys(inputs).length).toBeGreaterThanOrEqual(expectedMin);
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['validationMessages']).toEqual({});
+    });
+
+    it('should include custom validationMessages when provided', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+        validationMessages: {
+          required: 'This field is required',
+          minLength: 'Too short',
+        },
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['validationMessages']).toEqual({
+        required: 'This field is required',
+        minLength: 'Too short',
+      });
+    });
+
+    it('should include defaultValidationMessages from context', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+      };
+
+      const injector = createTestInjector({
+        fieldKey: 'testField',
+        defaultValidationMessages: { required: 'Default required message' },
+      });
+
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['defaultValidationMessages']).toEqual({ required: 'Default required message' });
+    });
+  });
+
+  describe('field proxy binding', () => {
+    it('should include field proxy when form field exists', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      // Field proxy should be present (the actual value depends on form structure)
+      expect(inputs).toHaveProperty('field');
+    });
+  });
+
+  describe('excluded properties (NOT passed to component)', () => {
+    it('should NOT include type in inputs', () => {
+      const fieldDef: BaseValueField<unknown, string> = {
+        key: 'testField',
+        type: 'input',
+        label: 'Test',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs).not.toHaveProperty('type');
+    });
+
+    it('should NOT include disabled in inputs (handled by logic)', () => {
+      const fieldDef = {
+        key: 'testField',
+        type: 'input' as const,
+        disabled: true,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef as BaseValueField<unknown, string>, injector);
+
+      expect(inputs).not.toHaveProperty('disabled');
+    });
+
+    it('should NOT include readonly in inputs (handled by logic)', () => {
+      const fieldDef = {
+        key: 'testField',
+        type: 'input' as const,
+        readonly: true,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef as BaseValueField<unknown, string>, injector);
+
+      expect(inputs).not.toHaveProperty('readonly');
+    });
+
+    it('should NOT include hidden in inputs (handled by logic)', () => {
+      const fieldDef = {
+        key: 'testField',
+        type: 'input' as const,
+        hidden: true,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef as BaseValueField<unknown, string>, injector);
+
+      expect(inputs).not.toHaveProperty('hidden');
+    });
+
+    it('should NOT include validation config in inputs', () => {
+      const fieldDef = {
+        key: 'testField',
+        type: 'input' as const,
+        validation: { required: true, minLength: 5 },
+        required: true,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef as BaseValueField<unknown, string>, injector);
+
+      expect(inputs).not.toHaveProperty('validation');
+      expect(inputs).not.toHaveProperty('required');
+    });
+
+    it('should NOT include conditionals in inputs', () => {
+      const fieldDef = {
+        key: 'testField',
+        type: 'input' as const,
+        conditionals: { show: { field: 'other', equals: 'yes' } },
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef as BaseValueField<unknown, string>, injector);
+
+      expect(inputs).not.toHaveProperty('conditionals');
+    });
+
+    it('should NOT include value in inputs (handled by form)', () => {
+      const fieldDef = {
+        key: 'testField',
+        type: 'input' as const,
+        value: 'initial value',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef as BaseValueField<unknown, string>, injector);
+
+      expect(inputs).not.toHaveProperty('value');
+    });
+
+    it('should NOT pass through unknown custom properties', () => {
+      const fieldDef = {
+        key: 'testField',
+        type: 'input' as const,
+        customUnknownProp: 'should not pass',
+        anotherCustomProp: 123,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'testField' });
+      const inputs = testMapper(fieldDef as BaseValueField<unknown, string>, injector);
+
+      expect(inputs).not.toHaveProperty('customUnknownProp');
+      expect(inputs).not.toHaveProperty('anotherCustomProp');
+    });
+  });
+
+  describe('complete field integration', () => {
+    it('should correctly map a complete input field definition', () => {
+      const inputField: BaseValueField<unknown, string> = {
+        key: 'email',
+        type: 'input',
+        label: 'Email Address',
+        placeholder: 'Enter your email',
+        className: 'email-field',
+        tabIndex: 1,
+        props: { autocomplete: 'email' },
+        validationMessages: { required: 'Email is required', email: 'Invalid email format' },
+      };
+
+      const injector = createTestInjector({ fieldKey: 'email' });
+      const inputs = testMapper(inputField, injector);
+
+      // Verify included properties
+      expect(inputs['key']).toBe('email');
+      expect(inputs['label']).toBe('Email Address');
+      expect(inputs['placeholder']).toBe('Enter your email');
+      expect(inputs['className']).toContain('email-field');
+      expect(inputs['tabIndex']).toBe(1);
+      expect(inputs['props']).toEqual({ autocomplete: 'email' });
+      expect(inputs['validationMessages']).toEqual({
+        required: 'Email is required',
+        email: 'Invalid email format',
+      });
+      expect(inputs).toHaveProperty('field');
+
+      // Verify type is excluded
+      expect(inputs).not.toHaveProperty('type');
+    });
+
+    it('should correctly map a complete select field definition', () => {
+      const selectField = {
+        key: 'country',
+        type: 'select' as const,
+        label: 'Country',
+        placeholder: 'Select a country',
+        options: [
+          { value: 'us', label: 'United States' },
+          { value: 'ca', label: 'Canada' },
+          { value: 'uk', label: 'United Kingdom' },
+        ],
+      };
+
+      const injector = createTestInjector({ fieldKey: 'country' });
+      const inputs = testMapper(selectField as BaseValueField<unknown, string>, injector);
+
+      expect(inputs['key']).toBe('country');
+      expect(inputs['label']).toBe('Country');
+      expect(inputs['placeholder']).toBe('Select a country');
+      expect(inputs['options']).toHaveLength(3);
+      expect(inputs['options']).toEqual([
+        { value: 'us', label: 'United States' },
+        { value: 'ca', label: 'Canada' },
+        { value: 'uk', label: 'United Kingdom' },
+      ]);
+    });
+
+    it('should correctly map a complete datepicker field definition', () => {
+      const datepickerField = {
+        key: 'birthDate',
+        type: 'datepicker' as const,
+        label: 'Date of Birth',
+        minDate: '1900-01-01',
+        maxDate: '2010-12-31',
+        startAt: new Date('2000-01-01'),
+      };
+
+      const injector = createTestInjector({ fieldKey: 'birthDate' });
+      const inputs = testMapper(datepickerField as BaseValueField<unknown, string>, injector);
+
+      expect(inputs['key']).toBe('birthDate');
+      expect(inputs['label']).toBe('Date of Birth');
+      expect(inputs['minDate']).toBe('1900-01-01');
+      expect(inputs['maxDate']).toBe('2010-12-31');
+      expect(inputs['startAt']).toEqual(new Date('2000-01-01'));
+    });
+
+    it('should correctly map a complete slider field definition', () => {
+      const sliderField = {
+        key: 'volume',
+        type: 'slider' as const,
+        label: 'Volume',
+        min: 0,
+        max: 100,
+        step: 1,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'volume' });
+      const inputs = testMapper(sliderField as BaseValueField<unknown, string>, injector);
+
+      expect(inputs['key']).toBe('volume');
+      expect(inputs['label']).toBe('Volume');
+      expect(inputs['min']).toBe(0);
+      expect(inputs['max']).toBe(100);
+      expect(inputs['step']).toBe(1);
+    });
+
+    it('should correctly map a complete textarea field definition', () => {
+      const textareaField = {
+        key: 'description',
+        type: 'textarea' as const,
+        label: 'Description',
+        placeholder: 'Enter description...',
+        rows: 5,
+        cols: 40,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'description' });
+      const inputs = testMapper(textareaField as BaseValueField<unknown, string>, injector);
+
+      expect(inputs['key']).toBe('description');
+      expect(inputs['label']).toBe('Description');
+      expect(inputs['placeholder']).toBe('Enter description...');
+      expect(inputs['rows']).toBe(5);
+      expect(inputs['cols']).toBe(40);
     });
   });
 });

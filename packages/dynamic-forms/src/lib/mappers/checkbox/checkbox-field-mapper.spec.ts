@@ -41,115 +41,308 @@ describe('checkboxFieldMapper', () => {
     );
   }
 
-  function testMapper(fieldDef: BaseCheckedField<any>, injector: EnvironmentInjector): Record<string, unknown> {
+  function testMapper(fieldDef: BaseCheckedField<unknown>, injector: EnvironmentInjector): Record<string, unknown> {
     const inputsSignal = runInInjectionContext(injector, () => checkboxFieldMapper(fieldDef));
-    return inputsSignal(); // Call the signal to get the actual inputs
+    return inputsSignal();
   }
 
-  it('should create inputs object with field properties plus validationMessages', () => {
-    const testCases = [
-      {
-        desc: 'minimal field',
-        field: { key: 'minimal', type: 'checkbox' as const, label: 'Minimal' },
-        minKeys: 3, // key + label + validationMessages
-      },
-      {
-        desc: 'field with standard properties',
-        field: {
-          key: 'standard',
-          type: 'checkbox' as const,
-          label: 'Standard',
-          className: 'class',
-          tabIndex: 1,
-          props: { hint: 'hint' },
-        },
-        minKeys: 6, // key + label + className + tabIndex + props + validationMessages
-      },
-      {
-        desc: 'field with custom validationMessages',
-        field: {
-          key: 'custom',
-          type: 'checkbox' as const,
-          label: 'Custom',
-          validationMessages: { required: 'Required' },
-        },
-        minKeys: 3, // key + label + validationMessages
-      },
-    ];
+  describe('base properties (from buildBaseInputs)', () => {
+    it('should include key from base mapper', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+      };
 
-    testCases.forEach(({ desc, field, minKeys }) => {
-      const injector = createTestInjector({ fieldKey: field.key });
-      const inputs = testMapper(field, injector);
-      expect(Object.keys(inputs).length).toBeGreaterThanOrEqual(minKeys);
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['key']).toBe('agreeTerms');
+    });
+
+    it('should include label when defined', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+        label: 'I agree to the terms',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['label']).toBe('I agree to the terms');
+    });
+
+    it('should include className when defined', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+        className: 'terms-checkbox',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['className']).toContain('terms-checkbox');
+    });
+
+    it('should include tabIndex when defined', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+        tabIndex: 3,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['tabIndex']).toBe(3);
+    });
+
+    it('should include props when defined', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+        props: { color: 'primary', indeterminate: false },
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['props']).toEqual({ color: 'primary', indeterminate: false });
     });
   });
 
-  it('should always include validationMessages in inputs', () => {
-    const fieldWithoutMessages: BaseCheckedField<any> = {
-      key: 'noMessages',
-      type: 'checkbox',
-      label: 'No Messages',
-    };
+  describe('checkbox-specific properties', () => {
+    it('should include placeholder when defined', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+        placeholder: 'Check to agree',
+      };
 
-    const fieldWithMessages: BaseCheckedField<any> = {
-      key: 'withMessages',
-      type: 'checkbox',
-      label: 'With Messages',
-      validationMessages: { required: 'Required' },
-    };
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
 
-    const injector1 = createTestInjector({ fieldKey: 'noMessages' });
-    const injector2 = createTestInjector({ fieldKey: 'withMessages' });
-
-    const inputs1 = testMapper(fieldWithoutMessages, injector1);
-    const inputs2 = testMapper(fieldWithMessages, injector2);
-
-    expect(Object.keys(inputs1).length).toBeGreaterThanOrEqual(3); // includes validationMessages even when undefined
-    expect(Object.keys(inputs2).length).toBeGreaterThanOrEqual(3);
-    expect(inputs1).toHaveProperty('validationMessages');
-    expect(inputs2).toHaveProperty('validationMessages');
+      expect(inputs['placeholder']).toBe('Check to agree');
+    });
   });
 
-  it('should include defaultValidationMessages from context', () => {
-    const fieldDef: BaseCheckedField<any> = {
-      key: 'contextMessages',
-      type: 'checkbox',
-      label: 'Context Messages',
-    };
+  describe('validation messages', () => {
+    it('should always include validationMessages (empty object if not provided)', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+      };
 
-    const injector = createTestInjector({
-      fieldKey: 'contextMessages',
-      defaultValidationMessages: { required: 'Default required' },
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['validationMessages']).toEqual({});
     });
 
-    const inputs = testMapper(fieldDef, injector);
-    expect(Object.keys(inputs).length).toBeGreaterThanOrEqual(4); // includes defaultValidationMessages
-    expect(inputs).toHaveProperty('defaultValidationMessages');
+    it('should include custom validationMessages when provided', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+        validationMessages: {
+          required: 'You must agree to the terms',
+        },
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['validationMessages']).toEqual({
+        required: 'You must agree to the terms',
+      });
+    });
+
+    it('should include defaultValidationMessages from context', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+      };
+
+      const injector = createTestInjector({
+        fieldKey: 'agreeTerms',
+        defaultValidationMessages: { required: 'This checkbox is required' },
+      });
+
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs['defaultValidationMessages']).toEqual({ required: 'This checkbox is required' });
+    });
   });
 
-  it('should handle edge cases (empty key, excluded properties)', () => {
-    const testCases = [
-      {
-        field: { key: '', type: 'checkbox' as const, label: 'Empty Key' },
-        expectedMin: 3,
-      },
-      {
-        field: {
-          key: 'excluded',
-          type: 'checkbox' as const,
-          label: 'Excluded Props',
-          disabled: true,
-          readonly: false,
-          validation: { required: true },
-        } as any,
-        expectedMin: 3, // excluded props not counted
-      },
-    ];
+  describe('field proxy binding', () => {
+    it('should include field proxy when form field exists', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+      };
 
-    testCases.forEach(({ field, expectedMin }) => {
-      const injector = createTestInjector({ fieldKey: field.key || 'test' });
-      const inputs = testMapper(field, injector);
-      expect(Object.keys(inputs).length).toBeGreaterThanOrEqual(expectedMin);
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs).toHaveProperty('field');
+    });
+  });
+
+  describe('excluded properties (NOT passed to component)', () => {
+    it('should NOT include type in inputs', () => {
+      const fieldDef: BaseCheckedField<unknown> = {
+        key: 'agreeTerms',
+        type: 'checkbox',
+        label: 'Agree',
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef, injector);
+
+      expect(inputs).not.toHaveProperty('type');
+    });
+
+    it('should NOT include disabled in inputs (handled by logic)', () => {
+      const fieldDef = {
+        key: 'agreeTerms',
+        type: 'checkbox' as const,
+        disabled: true,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef as BaseCheckedField<unknown>, injector);
+
+      expect(inputs).not.toHaveProperty('disabled');
+    });
+
+    it('should NOT include readonly in inputs (handled by logic)', () => {
+      const fieldDef = {
+        key: 'agreeTerms',
+        type: 'checkbox' as const,
+        readonly: true,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef as BaseCheckedField<unknown>, injector);
+
+      expect(inputs).not.toHaveProperty('readonly');
+    });
+
+    it('should NOT include hidden in inputs (handled by logic)', () => {
+      const fieldDef = {
+        key: 'agreeTerms',
+        type: 'checkbox' as const,
+        hidden: true,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef as BaseCheckedField<unknown>, injector);
+
+      expect(inputs).not.toHaveProperty('hidden');
+    });
+
+    it('should NOT include validation config in inputs', () => {
+      const fieldDef = {
+        key: 'agreeTerms',
+        type: 'checkbox' as const,
+        validation: { required: true },
+        required: true,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef as BaseCheckedField<unknown>, injector);
+
+      expect(inputs).not.toHaveProperty('validation');
+      expect(inputs).not.toHaveProperty('required');
+    });
+
+    it('should NOT include conditionals in inputs', () => {
+      const fieldDef = {
+        key: 'agreeTerms',
+        type: 'checkbox' as const,
+        conditionals: { show: { field: 'other', equals: 'yes' } },
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef as BaseCheckedField<unknown>, injector);
+
+      expect(inputs).not.toHaveProperty('conditionals');
+    });
+
+    it('should NOT include value in inputs (handled by form)', () => {
+      const fieldDef = {
+        key: 'agreeTerms',
+        type: 'checkbox' as const,
+        value: true,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef as BaseCheckedField<unknown>, injector);
+
+      expect(inputs).not.toHaveProperty('value');
+    });
+
+    it('should NOT pass through unknown custom properties', () => {
+      const fieldDef = {
+        key: 'agreeTerms',
+        type: 'checkbox' as const,
+        customUnknownProp: 'should not pass',
+        anotherCustomProp: 123,
+      };
+
+      const injector = createTestInjector({ fieldKey: 'agreeTerms' });
+      const inputs = testMapper(fieldDef as BaseCheckedField<unknown>, injector);
+
+      expect(inputs).not.toHaveProperty('customUnknownProp');
+      expect(inputs).not.toHaveProperty('anotherCustomProp');
+    });
+  });
+
+  describe('complete field integration', () => {
+    it('should correctly map a complete checkbox field definition', () => {
+      const checkboxField: BaseCheckedField<unknown> = {
+        key: 'newsletter',
+        type: 'checkbox',
+        label: 'Subscribe to newsletter',
+        placeholder: 'Check to subscribe',
+        className: 'newsletter-checkbox',
+        tabIndex: 2,
+        props: { color: 'accent' },
+        validationMessages: { required: 'Please confirm your choice' },
+      };
+
+      const injector = createTestInjector({ fieldKey: 'newsletter' });
+      const inputs = testMapper(checkboxField, injector);
+
+      // Verify included properties
+      expect(inputs['key']).toBe('newsletter');
+      expect(inputs['label']).toBe('Subscribe to newsletter');
+      expect(inputs['placeholder']).toBe('Check to subscribe');
+      expect(inputs['className']).toContain('newsletter-checkbox');
+      expect(inputs['tabIndex']).toBe(2);
+      expect(inputs['props']).toEqual({ color: 'accent' });
+      expect(inputs['validationMessages']).toEqual({ required: 'Please confirm your choice' });
+      expect(inputs).toHaveProperty('field');
+
+      // Verify type is excluded
+      expect(inputs).not.toHaveProperty('type');
+    });
+
+    it('should correctly map a toggle field definition', () => {
+      const toggleField: BaseCheckedField<unknown> = {
+        key: 'darkMode',
+        type: 'toggle',
+        label: 'Enable Dark Mode',
+        props: { labelPosition: 'before' },
+      };
+
+      const injector = createTestInjector({ fieldKey: 'darkMode' });
+      const inputs = testMapper(toggleField, injector);
+
+      expect(inputs['key']).toBe('darkMode');
+      expect(inputs['label']).toBe('Enable Dark Mode');
+      expect(inputs['props']).toEqual({ labelPosition: 'before' });
+      expect(inputs).not.toHaveProperty('type');
     });
   });
 });
