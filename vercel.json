@@ -1,0 +1,60 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm run deploy:prep",
+  "outputDirectory": "dist/deploy",
+  "git": {
+    "deploymentEnabled": false
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/dynamic-forms/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/dynamic-forms/examples/material/(.*)",
+      "destination": "/dynamic-forms/examples/material/index.html"
+    },
+    {
+      "source": "/dynamic-forms/examples/bootstrap/(.*)",
+      "destination": "/dynamic-forms/examples/bootstrap/index.html"
+    },
+    {
+      "source": "/dynamic-forms/examples/primeng/(.*)",
+      "destination": "/dynamic-forms/examples/primeng/index.html"
+    },
+    {
+      "source": "/dynamic-forms/examples/ionic/(.*)",
+      "destination": "/dynamic-forms/examples/ionic/index.html"
+    },
+    {
+      "source": "/dynamic-forms/(.*)",
+      "destination": "/dynamic-forms/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/dynamic-forms/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/dynamic-forms/(.*).(js|css|woff2|png|jpg|svg|ico)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
+}
