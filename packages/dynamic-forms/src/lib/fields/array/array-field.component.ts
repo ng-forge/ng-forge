@@ -14,7 +14,7 @@ import { RemoveArrayItemEvent } from '../../events/constants/remove-array-item.e
 import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
-import { getChildrenMap } from '../../utils/form-internals/form-internals';
+import { getChildFieldTree } from '../../utils/form-internals/form-internals';
 import {
   checkValuesMatch,
   determineDifferentialOperation,
@@ -82,19 +82,19 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
     if (arrayValue.length === 0) return [];
 
-    const childrenMap = getChildrenMap(parentForm);
-    let innerChildrenMap: Map<string, FieldTree<unknown>> | null = null;
+    // Get the array FieldTree from the parent form
+    const arrayFieldTree = getChildFieldTree(parentForm, arrayKey);
+    if (!arrayFieldTree) return arrayValue.map(() => null);
 
-    if (childrenMap) {
-      const arrayFieldTree = childrenMap.get(arrayKey);
-      if (arrayFieldTree) {
-        innerChildrenMap = getChildrenMap(arrayFieldTree);
-      }
-    }
+    // Access array items via bracket notation - Angular Signal Forms arrays support this
+    // The type is ReadonlyArrayLike<MaybeFieldTree<U, number>>
+    const arrayWithIndex = arrayFieldTree as unknown as readonly (FieldTree<unknown> | undefined)[];
 
     const items: (FieldTree<unknown> | null)[] = [];
     for (let i = 0; i < arrayValue.length; i++) {
-      items.push(innerChildrenMap?.get(String(i)) ?? null);
+      // Access item FieldTree directly via bracket notation
+      const itemFieldTree = arrayWithIndex[i];
+      items.push(itemFieldTree ?? null);
     }
 
     return items;

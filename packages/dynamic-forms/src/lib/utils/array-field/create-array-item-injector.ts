@@ -1,5 +1,6 @@
 import { Injector, runInInjectionContext, Signal, untracked, linkedSignal } from '@angular/core';
 import { FieldTree, form } from '@angular/forms/signals';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ArrayField } from '../../definitions/default/array-field';
 import { FieldDef } from '../../definitions/base/field-def';
 import { ArrayContext, FieldSignalContext } from '../../mappers/types';
@@ -9,7 +10,6 @@ import { mapFieldToInputs } from '../field-mapper/field-mapper';
 import { flattenFields } from '../flattener/field-flattener';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { getArrayValue } from './array-field.types';
-import { getChildFieldTree } from '../form-internals/form-internals';
 
 /**
  * Options for creating an array item injector.
@@ -42,20 +42,40 @@ export interface ArrayItemInjectorResult {
 }
 
 /**
- * Tries to get the nested FieldTree from the parent form for this array item.
- * This allows child fields to update the parent form directly.
+ * Syncs item form value changes back to the parent form's array.
+ * This effect watches the item form value and updates the parent array when changes occur.
  */
-function getNestedItemFieldTree<TModel>(
+function syncItemToParent<TModel>(
+  itemFormInstance: ReturnType<typeof form<unknown>>,
   parentFieldSignalContext: FieldSignalContext<TModel>,
   arrayKey: string,
-  index: number,
-): FieldTree<unknown> | null {
-  // First get the array FieldTree from parent
-  const arrayFieldTree = getChildFieldTree(parentFieldSignalContext.form(), arrayKey);
-  if (!arrayFieldTree) return null;
+  indexSignal: Signal<number>,
+  injector: Injector,
+): void {
+  // Track if we're currently syncing to prevent loops
+  let isSyncing = false;
 
-  // Then get the item's FieldTree using stringified index
-  return getChildFieldTree(arrayFieldTree, String(index));
+  runInInjectionContext(injector, () => {
+    // The form instance is callable - call it to get the form state with .value()
+    explicitEffect([() => itemFormInstance().value()], ([itemValue]) => {
+      if (isSyncing) return;
+
+      const parentForm = parentFieldSignalContext.form();
+      const parentValue = untracked(() => parentForm.value()) as Record<string, unknown>;
+      const currentArray = getArrayValue(parentValue as Partial<TModel>, arrayKey);
+      const idx = untracked(() => indexSignal());
+
+      // Only sync if value actually changed
+      if (idx >= 0 && idx < currentArray.length && currentArray[idx] !== itemValue) {
+        isSyncing = true;
+        const newArray = [...currentArray];
+        newArray[idx] = itemValue;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        parentForm.value.set({ ...parentValue, [arrayKey]: newArray } as any);
+        isSyncing = false;
+      }
+    });
+  });
 }
 
 /**
@@ -63,48 +83,15 @@ function getNestedItemFieldTree<TModel>(
  *
  * Handles different item types (flatten, group, regular) by creating appropriate
  * form references and scoped injectors with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT.
- * Prefers using the parent form's nested FieldTree to ensure changes propagate directly.
+ * Sets up two-way sync to propagate item form changes back to the parent form.
  */
 export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayItemInjectorOptions<TModel>): ArrayItemInjectorResult {
   const { fieldTree, template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
 
-  const valueHandling = registry.get(template.type)?.valueHandling || 'include';
-  const currentIndex = untracked(() => indexSignal());
-
-  // Try to get the nested FieldTree from parent form first
-  const nestedItemFieldTree = getNestedItemFieldTree(parentFieldSignalContext, arrayField.key, currentIndex);
-
-  let formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>;
-
-  // Prefer using the nested FieldTree from parent if available
-  if (nestedItemFieldTree) {
-    formRef = nestedItemFieldTree;
-  } else if (valueHandling === 'flatten' && 'fields' in template && template.fields) {
-    formRef =
-      fieldTree ??
-      createObjectItemForm({
-        template,
-        indexSignal,
-        parentFieldSignalContext,
-        parentInjector,
-        registry,
-        arrayKey: arrayField.key,
-      });
-  } else if (template.type === 'group' && valueHandling === 'include') {
-    formRef =
-      fieldTree ??
-      createObjectItemForm({
-        template,
-        indexSignal,
-        parentFieldSignalContext,
-        parentInjector,
-        registry,
-        arrayKey: arrayField.key,
-      });
-  } else if (fieldTree) {
-    formRef = fieldTree;
-  } else {
-    formRef = createObjectItemForm({
+  // Create item form - uses linkedSignal that derives from parent
+  const formRef =
+    fieldTree ??
+    createObjectItemForm({
       template,
       indexSignal,
       parentFieldSignalContext,
@@ -112,7 +99,6 @@ export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayIte
       registry,
       arrayKey: arrayField.key,
     });
-  }
 
   const injector = createItemInjector({
     formRef,
@@ -121,6 +107,12 @@ export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayIte
     parentInjector,
     arrayField,
   });
+
+  // Set up two-way sync: item form changes -> parent form array
+  // Only sync for locally created forms (not external FieldTrees)
+  if (!fieldTree) {
+    syncItemToParent(formRef as ReturnType<typeof form<unknown>>, parentFieldSignalContext, arrayField.key, indexSignal, injector);
+  }
 
   const inputs = runInInjectionContext(injector, () => {
     return mapFieldToInputs(template, registry);
@@ -139,8 +131,8 @@ interface CreateObjectItemFormOptions<TModel> {
 }
 
 /**
- * Creates a local form for an object array item using a signal-based index.
- * Uses linkedSignal to derive the item value from the parent array at the current index.
+ * Creates a local form for an object array item using linkedSignal.
+ * The linkedSignal derives from the parent array at the current index.
  */
 function createObjectItemForm<TModel>(options: CreateObjectItemFormOptions<TModel>): ReturnType<typeof form<unknown>> {
   const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey } = options;
