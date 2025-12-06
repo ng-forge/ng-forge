@@ -16,7 +16,7 @@
 
   <!-- UI Library Integrations -->
   <url>
-    <loc>https://ng-forge.com/dynamic-forms/ui-libs-integrations/material</loc>
+    <loc>https://ng-forge.com/dynamic-forms/ui-libs-integrations/material-design</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
