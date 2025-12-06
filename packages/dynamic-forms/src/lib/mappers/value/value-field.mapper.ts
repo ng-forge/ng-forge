@@ -78,9 +78,6 @@ export function valueFieldMapper<T = unknown>(fieldDef: BaseValueField<T, string
       minDate?: unknown;
       maxDate?: unknown;
       startAt?: unknown;
-      min?: unknown;
-      max?: unknown;
-      step?: unknown;
       rows?: unknown;
       cols?: unknown;
     };
@@ -98,17 +95,6 @@ export function valueFieldMapper<T = unknown>(fieldDef: BaseValueField<T, string
     }
     if (extendedFieldDef.startAt !== undefined) {
       inputs['startAt'] = extendedFieldDef.startAt;
-    }
-
-    // Slider/input-specific properties
-    if (extendedFieldDef.min !== undefined) {
-      inputs['min'] = extendedFieldDef.min;
-    }
-    if (extendedFieldDef.max !== undefined) {
-      inputs['max'] = extendedFieldDef.max;
-    }
-    if (extendedFieldDef.step !== undefined) {
-      inputs['step'] = extendedFieldDef.step;
     }
 
     // Textarea-specific properties

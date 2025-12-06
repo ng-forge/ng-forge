@@ -173,21 +173,25 @@ describe('valueFieldMapper', () => {
       expect(inputs['startAt']).toEqual(new Date('2023-06-15'));
     });
 
-    it('should include min, max, and step for slider/number fields', () => {
+    it('should NOT pass min, max, step as inputs (handled by Angular Signal Forms field state)', () => {
       const sliderField = {
         key: 'sliderField',
         type: 'slider' as const,
-        min: 0,
-        max: 100,
+        minValue: 0,
+        maxValue: 100,
         step: 5,
       };
 
       const injector = createTestInjector({ fieldKey: 'sliderField' });
       const inputs = testMapper(sliderField as BaseValueField<unknown, string>, injector);
 
-      expect(inputs['min']).toBe(0);
-      expect(inputs['max']).toBe(100);
-      expect(inputs['step']).toBe(5);
+      // min/max/step are accessed from field state (f().min?.(), f().max?.())
+      // not passed as component inputs
+      expect(inputs).not.toHaveProperty('min');
+      expect(inputs).not.toHaveProperty('max');
+      expect(inputs).not.toHaveProperty('step');
+      expect(inputs).not.toHaveProperty('minValue');
+      expect(inputs).not.toHaveProperty('maxValue');
     });
 
     it('should include rows and cols for textarea fields', () => {
@@ -460,14 +464,13 @@ describe('valueFieldMapper', () => {
       expect(inputs['startAt']).toEqual(new Date('2000-01-01'));
     });
 
-    it('should correctly map a complete slider field definition', () => {
+    it('should correctly map a complete slider field definition (min/max via field state)', () => {
       const sliderField = {
         key: 'volume',
         type: 'slider' as const,
         label: 'Volume',
-        min: 0,
-        max: 100,
-        step: 1,
+        minValue: 0,
+        maxValue: 100,
       };
 
       const injector = createTestInjector({ fieldKey: 'volume' });
@@ -475,9 +478,11 @@ describe('valueFieldMapper', () => {
 
       expect(inputs['key']).toBe('volume');
       expect(inputs['label']).toBe('Volume');
-      expect(inputs['min']).toBe(0);
-      expect(inputs['max']).toBe(100);
-      expect(inputs['step']).toBe(1);
+      // min/max are accessed from field state, not component inputs
+      expect(inputs).not.toHaveProperty('min');
+      expect(inputs).not.toHaveProperty('max');
+      expect(inputs).not.toHaveProperty('minValue');
+      expect(inputs).not.toHaveProperty('maxValue');
     });
 
     it('should correctly map a complete textarea field definition', () => {
