@@ -2,30 +2,6 @@ import { computed, Signal } from '@angular/core';
 import { FieldDef } from '../../definitions/base/field-def';
 import { getGridClassString } from '../../utils/grid-classes/grid-classes';
 
-const validationKeys = new Set(['required', 'email', 'min', 'max', 'minLength', 'maxLength', 'pattern', 'validators', 'logic']);
-
-const excludedKeys = new Set([
-  'col',
-  'type',
-  'conditionals',
-  'validation',
-  'label',
-  'className',
-  'tabIndex',
-  'props',
-  'disabled',
-  'readonly',
-  'hidden',
-  'required',
-  'minValue', // Handled by Field directive metadata (MIN)
-  'maxValue', // Handled by Field directive metadata (MAX)
-  'step', // Passed via props instead
-  'validationMessages', // Handled in value/checkbox mappers
-  'defaultValue', // Used for form reset/clear, not passed to components
-  'arrayKey',
-  'schemas', // Handled at form level by SchemaRegistryService
-]);
-
 /**
  * Builds base input properties from a field definition.
  *
@@ -36,8 +12,11 @@ const excludedKeys = new Set([
  * @returns Record of input names to values
  */
 export function buildBaseInputs(fieldDef: FieldDef<unknown>): Record<string, unknown> {
-  const { label, className, tabIndex, props } = fieldDef;
+  const { key, label, className, tabIndex, props } = fieldDef;
   const inputs: Record<string, unknown> = {};
+
+  // Always include key - required by components for accessibility and identification
+  inputs['key'] = key;
 
   if (label !== undefined) {
     inputs['label'] = label;
@@ -65,12 +44,6 @@ export function buildBaseInputs(fieldDef: FieldDef<unknown>): Record<string, unk
 
   if (props !== undefined) {
     inputs['props'] = props;
-  }
-
-  for (const [key, value] of Object.entries(fieldDef)) {
-    if (!excludedKeys.has(key) && !validationKeys.has(key) && value !== undefined) {
-      inputs[key] = value;
-    }
   }
 
   return inputs;
