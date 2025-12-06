@@ -133,6 +133,9 @@ interface CreateObjectItemFormOptions<TModel> {
 /**
  * Creates a local form for an object array item using linkedSignal.
  * The linkedSignal derives from the parent array at the current index.
+ *
+ * For array items, we always create a form with a schema to ensure proper field structure.
+ * This is needed for valueFieldMapper to find fields via childrenMap.
  */
 function createObjectItemForm<TModel>(options: CreateObjectItemFormOptions<TModel>): ReturnType<typeof form<unknown>> {
   const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey } = options;
@@ -146,12 +149,13 @@ function createObjectItemForm<TModel>(options: CreateObjectItemFormOptions<TMode
   const nestedFields = 'fields' in template && Array.isArray(template.fields) ? template.fields : [];
 
   return runInInjectionContext(parentInjector, () => {
-    if (nestedFields.length > 0) {
-      const flattenedFields = flattenFields(nestedFields, registry);
-      const schema = createSchemaFromFields(flattenedFields, registry);
-      return untracked(() => form(itemEntity, schema));
-    }
-    return untracked(() => form(itemEntity));
+    // Determine which fields to include in the schema
+    // - If template has nested fields (e.g., row with children), use those
+    // - Otherwise use the template itself as a single-field schema
+    const schemaFields = nestedFields.length > 0 ? nestedFields : [template];
+    const flattenedFields = flattenFields(schemaFields, registry);
+    const schema = createSchemaFromFields(flattenedFields, registry);
+    return untracked(() => form(itemEntity, schema));
   });
 }
 
@@ -181,7 +185,8 @@ function createItemInjector<TModel>(options: CreateItemInjectorOptions<TModel>):
     injector: undefined as unknown as Injector,
     value: parentFieldSignalContext.value,
     defaultValues: () => ({}),
-    form: (() => formRef) as unknown as ReturnType<typeof form<unknown>>,
+    // formRef is already the form instance (result of form()), no need to wrap in another function
+    form: formRef as unknown as ReturnType<typeof form<unknown>>,
     defaultValidationMessages: parentFieldSignalContext.defaultValidationMessages,
   };
 

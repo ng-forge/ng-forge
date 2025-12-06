@@ -21,8 +21,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       @switch (props()?.type ?? 'text') {
         @case ('email') {
           <input
+            #inputRef
             matInput
-            #inputEl
             type="email"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -31,8 +31,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
         }
         @case ('password') {
           <input
+            #inputRef
             matInput
-            #inputEl
             type="password"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -41,8 +41,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
         }
         @case ('number') {
           <input
+            #inputRef
             matInput
-            #inputEl
             type="number"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -51,8 +51,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
         }
         @case ('tel') {
           <input
+            #inputRef
             matInput
-            #inputEl
             type="tel"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -61,8 +61,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
         }
         @case ('url') {
           <input
+            #inputRef
             matInput
-            #inputEl
             type="url"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -71,8 +71,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
         }
         @default {
           <input
+            #inputRef
             matInput
-            #inputEl
             type="text"
             [field]="f"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -118,6 +118,40 @@ export default class MatInputFieldComponent implements MatInputComponent {
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
+  /**
+   * Reference to the native input element.
+   * Used to imperatively sync the readonly attribute since Angular Signal Forms'
+   * [field] directive doesn't sync FieldState.readonly() to the DOM.
+   */
+  private readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('inputRef');
+
+  /**
+   * Computed signal that extracts the readonly state from the field.
+   * Used by the effect to reactively sync the readonly attribute to the DOM.
+   */
+  private readonly isReadonly = computed(() => this.field()().readonly());
+
+  /**
+   * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
+   * attribute to the DOM, even though FieldState.readonly() returns the correct value.
+   * This effect imperatively sets/removes the readonly attribute on the native input
+   * element whenever the readonly state changes.
+   *
+   * Note: We cannot use [readonly] or [attr.readonly] bindings because Angular throws
+   * NG8022: "Binding to '[readonly]' is not allowed on nodes using the '[field]' directive"
+   *
+   * @see https://github.com/angular/angular/issues/65897
+   */
+  private readonly syncReadonlyToDom = explicitEffect([this.inputRef, this.isReadonly], ([inputRef, isReadonly]) => {
+    if (inputRef?.nativeElement) {
+      if (isReadonly) {
+        inputRef.nativeElement.setAttribute('readonly', '');
+      } else {
+        inputRef.nativeElement.removeAttribute('readonly');
+      }
+    }
+  });
+
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();
   readonly className = input<string>('');
@@ -125,8 +159,6 @@ export default class MatInputFieldComponent implements MatInputComponent {
   readonly props = input<MatInputProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
-
-  readonly inputEl = viewChild<ElementRef<HTMLInputElement>>('inputEl');
 
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 
@@ -136,20 +168,4 @@ export default class MatInputFieldComponent implements MatInputComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  readonly isReadonly = computed(() => this.field()().readonly());
-
-  constructor() {
-    // Use explicitEffect to imperatively set the readonly attribute since Angular Signal Forms
-    // restricts binding [attr.readonly] on elements with [field] directive
-    explicitEffect([this.inputEl, this.isReadonly], ([inputEl, isReadonly]) => {
-      if (inputEl?.nativeElement) {
-        if (isReadonly) {
-          inputEl.nativeElement.setAttribute('readonly', '');
-        } else {
-          inputEl.nativeElement.removeAttribute('readonly');
-        }
-      }
-    });
-  }
 }

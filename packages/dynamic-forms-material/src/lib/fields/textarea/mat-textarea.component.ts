@@ -20,8 +20,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       }
 
       <textarea
+        #textareaRef
         matInput
-        #textareaEl
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
@@ -68,6 +68,40 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
+  /**
+   * Reference to the native textarea element.
+   * Used to imperatively sync the readonly attribute since Angular Signal Forms'
+   * [field] directive doesn't sync FieldState.readonly() to the DOM.
+   */
+  private readonly textareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('textareaRef');
+
+  /**
+   * Computed signal that extracts the readonly state from the field.
+   * Used by the effect to reactively sync the readonly attribute to the DOM.
+   */
+  private readonly isReadonly = computed(() => this.field()().readonly());
+
+  /**
+   * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
+   * attribute to the DOM, even though FieldState.readonly() returns the correct value.
+   * This effect imperatively sets/removes the readonly attribute on the native textarea
+   * element whenever the readonly state changes.
+   *
+   * Note: We cannot use [readonly] or [attr.readonly] bindings because Angular throws
+   * NG8022: "Binding to '[readonly]' is not allowed on nodes using the '[field]' directive"
+   *
+   * @see https://github.com/angular/angular/issues/65897
+   */
+  private readonly syncReadonlyToDom = explicitEffect([this.textareaRef, this.isReadonly], ([textareaRef, isReadonly]) => {
+    if (textareaRef?.nativeElement) {
+      if (isReadonly) {
+        textareaRef.nativeElement.setAttribute('readonly', '');
+      } else {
+        textareaRef.nativeElement.removeAttribute('readonly');
+      }
+    }
+  });
+
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();
   readonly className = input<string>('');
@@ -76,30 +110,11 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
-  readonly textareaEl = viewChild<ElementRef<HTMLTextAreaElement>>('textareaEl');
-
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
-
   readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
-
-  readonly isReadonly = computed(() => this.field()().readonly());
-
-  constructor() {
-    // Use explicitEffect to imperatively set the readonly attribute since Angular Signal Forms
-    // restricts binding [attr.readonly] on elements with [field] directive
-    explicitEffect([this.textareaEl, this.isReadonly], ([textareaEl, isReadonly]) => {
-      if (textareaEl?.nativeElement) {
-        if (isReadonly) {
-          textareaEl.nativeElement.setAttribute('readonly', '');
-        } else {
-          textareaEl.nativeElement.removeAttribute('readonly');
-        }
-      }
-    });
-  }
 }

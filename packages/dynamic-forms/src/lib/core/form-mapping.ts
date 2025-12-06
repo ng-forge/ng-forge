@@ -1,11 +1,13 @@
 import {
   disabled,
   email,
+  hidden,
   max,
   maxLength,
   min,
   minLength,
   pattern,
+  readonly,
   required,
   SchemaPathRules,
   PathKind,
@@ -170,6 +172,16 @@ function mapFieldSpecificConfiguration(fieldDef: FieldDef<any>, fieldPath: Schem
   // Handle disabled state
   if (fieldDef.disabled) {
     disabled(toSupportedPath(fieldPath));
+  }
+
+  // Handle readonly state
+  if (fieldDef.readonly) {
+    readonly(toSupportedPath(fieldPath));
+  }
+
+  // Handle hidden state (hidden() requires a logic function, so we provide a static true)
+  if (fieldDef.hidden) {
+    hidden(toSupportedPath(fieldPath), () => true);
   }
 
   // Handle any additional configuration specific to the field type

@@ -36,6 +36,6 @@ export const arrayMinLengthScenario: TestScenario = {
   description: 'Test minimum length constraint on array fields',
   config,
   initialValue: {
-    items: [''], // Start with one empty item
+    items: [{ item: '' }], // Start with one empty item
   },
 };

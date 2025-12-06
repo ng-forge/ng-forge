@@ -8,6 +8,7 @@ import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-fi
 import { FieldTree } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions/base/field-def';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
+import { getFieldValueHandling } from '../../models/field-type';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { AddArrayItemEvent } from '../../events/constants/add-array-item.event';
 import { RemoveArrayItemEvent } from '../../events/constants/remove-array-item.event';
@@ -237,7 +238,13 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const currentArray = getArrayValue(currentValue as Partial<TModel>, arrayKey);
     const insertIndex = index !== undefined ? Math.min(index, currentArray.length) : currentArray.length;
 
-    const value = getFieldDefaultValue(fieldTemplate, this.rawFieldRegistry());
+    const rawValue = getFieldDefaultValue(fieldTemplate, this.rawFieldRegistry());
+    const valueHandling = getFieldValueHandling(fieldTemplate.type, this.rawFieldRegistry());
+
+    // For fields with 'include' value handling (bare fields like input, checkbox, etc.),
+    // wrap the value in an object using the field's key since arrays contain objects
+    const value = valueHandling === 'include' && fieldTemplate.key ? { [fieldTemplate.key]: rawValue } : rawValue;
+
     const newArray = [...currentArray];
     newArray.splice(insertIndex, 0, value);
 
