@@ -98,10 +98,10 @@ describe('GroupFieldComponent', () => {
 
     const { fixture } = setupGroupTest(field, { field1: 'value1', field2: 'value2' });
 
-    // The form element should be present in the template
-    const formElement = fixture.nativeElement.querySelector('form');
-    expect(formElement).not.toBeNull();
-    expect(formElement).toBeInstanceOf(HTMLFormElement);
+    // Host should have grid layout via df-group class
+    const host = fixture.nativeElement;
+    expect(host.classList.contains('df-group')).toBe(true);
+    expect(host.classList.contains('df-field')).toBe(true);
   });
 
   it('should have host classes', () => {

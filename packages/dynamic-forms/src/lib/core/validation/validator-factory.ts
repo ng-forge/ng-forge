@@ -213,7 +213,7 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
     // Function-based validator
     validatorFn = createFunctionValidator<any>(config);
   } else {
-    console.warn('[DynamicForm] Custom validator must have either "expression" or "functionName"');
+    console.warn('[Dynamic Forms] Custom validator must have either "expression" or "functionName"');
     return;
   }
 
@@ -243,7 +243,7 @@ function createFunctionValidator<TValue>(
 
   if (!validatorFn) {
     console.warn(
-      `[DynamicForm] Custom validator "${config.functionName}" not found in registry. ` +
+      `[Dynamic Forms] Custom validator "${config.functionName}" not found in registry. ` +
         `Ensure it's registered using customFnConfig.validators or check the function name for typos.`,
     );
     return () => null;
@@ -287,7 +287,7 @@ function createExpressionValidator<TValue>(
           try {
             (validationError as unknown as Record<string, unknown>)[key] = ExpressionParser.evaluate(expression, evaluationContext);
           } catch (err) {
-            console.warn(`[DynamicForm] Error evaluating errorParam "${key}":`, expression, err);
+            console.warn(`[Dynamic Forms] Error evaluating errorParam "${key}":`, expression, err);
           }
         });
       }
@@ -296,7 +296,7 @@ function createExpressionValidator<TValue>(
     } catch (error) {
       // Gracefully degrade on errors (e.g., typos in field names, undefined functions)
       // Log to console for debugging while keeping form functional
-      console.error('[DynamicForm] Error evaluating custom validator expression:', config.expression, error);
+      console.error('[Dynamic Forms] Error evaluating custom validator expression:', config.expression, error);
       return { kind: config.kind || 'custom' };
     }
   };
@@ -319,7 +319,7 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
 
   if (!validatorConfig) {
     console.warn(
-      `[DynamicForm] Async validator "${config.functionName}" not found in registry. ` +
+      `[Dynamic Forms] Async validator "${config.functionName}" not found in registry. ` +
         `Ensure it's registered using customFnConfig.asyncValidators or check the function name for typos.`,
     );
     return;
@@ -371,7 +371,7 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
 
   if (!httpValidatorConfig) {
     console.warn(
-      `[DynamicForm] HTTP validator "${config.functionName}" not found in registry. ` +
+      `[Dynamic Forms] HTTP validator "${config.functionName}" not found in registry. ` +
         `Ensure it's registered using customFnConfig.httpValidators or check the function name for typos.`,
     );
     return;

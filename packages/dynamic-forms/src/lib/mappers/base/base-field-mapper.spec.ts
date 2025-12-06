@@ -13,8 +13,8 @@ describe('baseFieldMapper', () => {
     injector = TestBed.inject(Injector);
   });
 
-  describe('property binding creation', () => {
-    it('should create correct number of bindings for provided properties', () => {
+  describe('property input creation', () => {
+    it('should create correct number of inputs for provided properties', () => {
       // Arrange
       const fieldDef: FieldDef<any> = {
         key: 'testField',
@@ -26,15 +26,16 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(5); // key + label + className + tabIndex + props
-      expect(Array.isArray(bindings)).toBe(true);
-      expect(bindings.every((binding) => typeof binding === 'object')).toBe(true);
+      expect(Object.keys(inputs)).toHaveLength(5); // key + label + className + tabIndex + props
+      expect(typeof inputs).toBe('object');
+      expect(inputs).not.toBeNull();
     });
 
-    it('should create fewer bindings when properties are undefined', () => {
+    it('should create fewer inputs when properties are undefined', () => {
       // Arrange
       const fieldDef: FieldDef<any> = {
         key: 'testField',
@@ -44,13 +45,14 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(2); // key + label
+      expect(Object.keys(inputs)).toHaveLength(2); // key + label
     });
 
-    it('should create bindings for custom properties via entries iteration', () => {
+    it('should create inputs for custom properties via entries iteration', () => {
       // Arrange
       const fieldDef: FieldDef<any> = {
         key: 'testField',
@@ -64,11 +66,12 @@ describe('baseFieldMapper', () => {
       } as any;
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      // Should create bindings for: key + label + customProp + anotherProp
-      expect(bindings).toHaveLength(4);
+      // Should create inputs for: key + label + customProp + anotherProp
+      expect(Object.keys(inputs)).toHaveLength(4);
     });
 
     it('should handle destructured properties correctly', () => {
@@ -84,17 +87,18 @@ describe('baseFieldMapper', () => {
       } as any;
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      // Should create bindings for: key + label + customProp
-      // disabled, readonly, hidden are excluded from bindings
-      expect(bindings).toHaveLength(3);
+      // Should create inputs for: key + label + customProp
+      // disabled, readonly, hidden are excluded from inputs
+      expect(Object.keys(inputs)).toHaveLength(3);
     });
   });
 
-  describe('field binding creation with form context', () => {
-    it('should create additional field binding when form has matching field proxy', () => {
+  describe('field input creation with form context', () => {
+    it('should create additional field input when form has matching field proxy', () => {
       // Arrange
       const fieldDef: FieldDef<any> = {
         key: 'testField',
@@ -103,13 +107,14 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(2); // key + label binding
+      expect(Object.keys(inputs)).toHaveLength(2); // key + label input
     });
 
-    it('should not create field binding when form field proxy does not exist', () => {
+    it('should not create field input when form field proxy does not exist', () => {
       // Arrange
       const fieldDef: FieldDef<any> = {
         key: 'nonExistentField',
@@ -118,10 +123,11 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(2); // key + label binding
+      expect(Object.keys(inputs)).toHaveLength(2); // key + label input
     });
 
     it('should handle form context without structure', () => {
@@ -133,10 +139,11 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(2); // key + label binding, no field binding
+      expect(Object.keys(inputs)).toHaveLength(2); // key + label input, no field input
     });
 
     it('should handle form context with null childrenMap', () => {
@@ -148,10 +155,11 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(2); // key + label binding
+      expect(Object.keys(inputs)).toHaveLength(2); // key + label input
     });
 
     it('should work with multiple field proxies in form', () => {
@@ -169,12 +177,14 @@ describe('baseFieldMapper', () => {
       };
 
       // Act - test both fields
-      const bindings1 = baseFieldMapper(fieldDef1);
-      const bindings2 = baseFieldMapper(fieldDef2);
+      const inputsSignal1 = baseFieldMapper(fieldDef1);
+      const inputsSignal2 = baseFieldMapper(fieldDef2);
+      const inputs1 = inputsSignal1(); // Call signal to get inputs
+      const inputs2 = inputsSignal2(); // Call signal to get inputs
 
       // Assert
-      expect(bindings1).toHaveLength(2); // key + label binding for field1
-      expect(bindings2).toHaveLength(2); // key + label binding for field2
+      expect(Object.keys(inputs1)).toHaveLength(2); // key + label input for field1
+      expect(Object.keys(inputs2)).toHaveLength(2); // key + label input for field2
     });
   });
 
@@ -187,10 +197,12 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(1); // key binding
+      expect(Object.keys(inputs)).toHaveLength(1); // key input
+      expect(inputs).toHaveProperty('key', 'testField');
     });
 
     it('should handle field definition with only excluded properties', () => {
@@ -203,15 +215,16 @@ describe('baseFieldMapper', () => {
       } as any;
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(1); // key binding
+      expect(Object.keys(inputs)).toHaveLength(1); // key input
     });
   });
 
   describe('integration scenarios', () => {
-    it('should create correct binding count for complex field definition', () => {
+    it('should create correct input count for complex field definition', () => {
       // Arrange
       const complexFieldDef: FieldDef<any> = {
         key: 'complexField',
@@ -231,12 +244,13 @@ describe('baseFieldMapper', () => {
       } as any;
 
       // Act
-      const bindings = baseFieldMapper(complexFieldDef);
+      const inputsSignal = baseFieldMapper(complexFieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      // Expected bindings: key + label + className + tabIndex + props + customAttribute + anotherCustomProp
+      // Expected inputs: key + label + className + tabIndex + props + customAttribute + anotherCustomProp
       // disabled, readonly, hidden are excluded
-      expect(bindings).toHaveLength(7);
+      expect(Object.keys(inputs)).toHaveLength(7);
     });
 
     it('should verify field proxy access pattern', () => {
@@ -248,14 +262,16 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(2); // key + label binding
-      // Verify that form access works correctly by checking bindings length
+      expect(Object.keys(inputs)).toHaveLength(2); // key + label input
+      expect(inputs).toHaveProperty('key', 'testField');
+      expect(inputs).toHaveProperty('label', 'Test Field');
     });
 
-    it('should handle binding creation when form structure exists but field is missing', () => {
+    it('should handle input creation when form structure exists but field is missing', () => {
       // Arrange
       const fieldDef: FieldDef<any> = {
         key: 'missingField',
@@ -265,15 +281,16 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(3); // key + label + className (no field binding for missing field)
+      expect(Object.keys(inputs)).toHaveLength(3); // key + label + className (no field input for missing field)
     });
   });
 
   describe('real Angular signal forms integration', () => {
-    it('should create field binding when using real form with schema', () => {
+    it('should create field input when using real form with schema', () => {
       // Arrange
       const fieldDef: FieldDef<any> = {
         key: 'username',
@@ -283,13 +300,14 @@ describe('baseFieldMapper', () => {
       };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(3); // key + label + className
+      expect(Object.keys(inputs)).toHaveLength(3); // key + label + className
     });
 
-    it('should create only property bindings when form has no matching field', () => {
+    it('should create only property inputs when form has no matching field', () => {
       // Arrange
       const fieldDef: FieldDef<any> = {
         key: 'email', // This field is not in the schema
@@ -317,10 +335,11 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(2); // key + label binding, no field binding
+      expect(Object.keys(inputs)).toHaveLength(2); // key + label input, no field input
     });
 
     it('should work with form without schema', () => {
@@ -348,10 +367,11 @@ describe('baseFieldMapper', () => {
       const options = { fieldSignalContext: mockFieldSignalContext };
 
       // Act
-      const bindings = baseFieldMapper(fieldDef);
+      const inputsSignal = baseFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
-      expect(bindings).toHaveLength(2); // key + label binding
+      expect(Object.keys(inputs)).toHaveLength(2); // key + label input
     });
 
     it('should handle complex field definitions with real forms', () => {
@@ -374,12 +394,13 @@ describe('baseFieldMapper', () => {
       } as any;
 
       // Act
-      const bindings = baseFieldMapper(complexFieldDef);
+      const inputsSignal = baseFieldMapper(complexFieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
 
       // Assert
       // Expected: key + label + className + tabIndex + props + customAttribute
       // disabled, readonly are excluded
-      expect(bindings).toHaveLength(6);
+      expect(Object.keys(inputs)).toHaveLength(6);
     });
   });
 });

@@ -1,77 +1,51 @@
 import { FieldDef } from '../definitions/base/field-def';
-import { Binding, Injector, Signal, WritableSignal } from '@angular/core';
+import { Injector, Signal, WritableSignal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { ValidationMessages } from '../models/validation-types';
 import { FormOptions } from '../models/form-config';
 
 /**
- * Field signal context contains the "nervous system" of the dynamic form.
+ * Field signal context - the "nervous system" of the dynamic form.
+ * Provided via FIELD_SIGNAL_CONTEXT injection token.
  *
- * This context is provided via the FIELD_SIGNAL_CONTEXT injection token and
- * gives mappers and components access to:
- * - The form instance and structure
- * - Current form values (as signals)
- * - Default values
- * - Validation messages
- * - Form options (for button behavior configuration)
- * - The injector for creating components
- *
+ * Gives mappers and components access to form state, values, and configuration.
  * Container fields (Group, Array) create scoped contexts with nested forms.
  */
 export interface FieldSignalContext<TModel = unknown> {
   injector: Injector;
   value: WritableSignal<Partial<TModel> | undefined>;
   defaultValues: () => TModel;
-  // TODO: enhance this type to support field tree from nested forms (to avoid () => formRef)
   form: ReturnType<typeof form<TModel>>;
   defaultValidationMessages?: ValidationMessages;
-  /**
-   * Form-level options including button behavior configuration.
-   * Used by button mappers to determine disabled state defaults.
-   */
+  /** Form-level options used by button mappers to determine disabled state defaults. */
   formOptions?: FormOptions;
-  /**
-   * Signal indicating current page validity (for paged forms).
-   * Used by next button to determine disabled state.
-   */
+  /** Current page validity signal for paged forms. Used by next button to determine disabled state. */
   currentPageValid?: Signal<boolean>;
 }
 
 /**
- * Array context information for fields rendered within arrays.
- *
- * This metadata is passed as an input binding to components rendered inside array fields,
- * providing context about their position and parent array.
+ * Array context for fields rendered within arrays.
+ * Provides position and parent array information for components inside array fields.
  */
 export interface ArrayContext {
-  /** The key of the parent array field */
+  /** The key of the parent array field. */
   arrayKey: string;
   /**
    * The index of this item within the array.
-   * This is a Signal (via linkedSignal) that automatically updates when items are
-   * added/removed, allowing index-dependent logic to react without component recreation.
+   * Uses linkedSignal to automatically update when items are added/removed,
+   * allowing index-dependent logic to react without component recreation.
    */
   index: Signal<number>;
-  /** The current form value for token resolution */
+  /** The current form value for token resolution. */
   formValue: unknown;
-  /** The array field definition */
+  /** The array field definition. */
   field: FieldDef<unknown>;
 }
 
 /**
- * Mapper function type that converts a field definition to component bindings.
+ * Mapper function that converts a field definition to component inputs.
  *
- * Mappers run within an injection context and inject FIELD_SIGNAL_CONTEXT to
- * access the form's state and configuration.
- *
- * @example
- * ```typescript
- * export function myCustomMapper(fieldDef: MyFieldDef): Binding[] {
- *   const context = inject(FIELD_SIGNAL_CONTEXT);
- *   const form = context.form();
- *   // ... create bindings
- *   return bindings;
- * }
- * ```
+ * Mappers run within an injection context and can inject FIELD_SIGNAL_CONTEXT.
+ * Returns a Signal to enable reactive updates when dependencies change.
  */
-export type MapperFn<T extends FieldDef<unknown>> = (input: T) => Binding[];
+export type MapperFn<T extends FieldDef<unknown>> = (input: T) => Signal<Record<string, unknown>>;

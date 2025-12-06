@@ -15,12 +15,22 @@ export function hasChildFields<T>(
   return 'fields' in field && field.fields != null;
 }
 
+/** Container field type names */
+const CONTAINER_TYPES = new Set(['page', 'row', 'group', 'array']);
+
 /**
  * Type guard to check if a field is a container field (page, row, group, or array)
- * Container fields have a 'fields' property and don't contribute values directly
+ * Container fields have a 'fields' property and don't contribute values directly.
+ * This overload works with RegisteredFieldTypes for full type narrowing.
  */
-export function isContainerField(field: RegisteredFieldTypes): field is ContainerFieldTypes {
-  return isPageField(field) || isRowField(field) || isGroupField(field) || isArrayField(field);
+export function isContainerField(field: RegisteredFieldTypes): field is ContainerFieldTypes;
+/**
+ * Type guard to check if a field is a container field (page, row, group, or array).
+ * This overload works with any FieldDef for looser type checking.
+ */
+export function isContainerField(field: FieldDef<unknown>): boolean;
+export function isContainerField(field: FieldDef<unknown> | RegisteredFieldTypes): boolean {
+  return CONTAINER_TYPES.has(field.type);
 }
 
 /**

@@ -1,8 +1,8 @@
-import { Binding, inject, inputBinding, isSignal } from '@angular/core';
+import { computed, inject, isSignal, Signal } from '@angular/core';
 import {
   AddArrayItemEvent,
   ARRAY_CONTEXT,
-  baseFieldMapper,
+  buildBaseInputs,
   FIELD_SIGNAL_CONTEXT,
   FieldDef,
   FieldWithValidation,
@@ -22,14 +22,16 @@ import { AddArrayItemButtonField, RemoveArrayItemButtonField } from './ionic-but
  * 1. Explicit `disabled: true` on the field definition
  * 2. Field-level `logic` array (if present, overrides form-level defaults)
  * 3. Form-level `options.submitButton` defaults (disableWhenInvalid, disableWhileSubmitting)
+ *
+ * @param fieldDef The submit button field definition
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
-export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
-  const bindings: Binding[] = baseFieldMapper(fieldDef);
-
+export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
   // Inject field signal context to access form state and options
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
 
-  bindings.push(inputBinding('event', () => SubmitEvent));
+  // Build base inputs (static, from field definition)
+  const baseInputs = buildBaseInputs(fieldDef);
 
   // Use button-logic-resolver to compute disabled state
   const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
@@ -40,13 +42,21 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
     explicitlyDisabled: fieldDef.disabled,
   });
 
-  bindings.push(inputBinding('disabled', () => disabledSignal()));
+  // Return computed signal - evaluates disabledSignal inside for reactivity
+  return computed(() => {
+    const inputs: Record<string, unknown> = {
+      ...baseInputs,
+      event: SubmitEvent,
+      // Evaluate the signal inside the computed - component receives plain boolean
+      disabled: disabledSignal(),
+    };
 
-  if (fieldDef.hidden !== undefined) {
-    bindings.push(inputBinding('hidden', () => fieldDef.hidden));
-  }
+    if (fieldDef.hidden !== undefined) {
+      inputs['hidden'] = fieldDef.hidden;
+    }
 
-  return bindings;
+    return inputs;
+  });
 }
 
 /**
@@ -56,14 +66,16 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
  * 1. Explicit `disabled: true` on the field definition
  * 2. Field-level `logic` array (if present, overrides form-level defaults)
  * 3. Form-level `options.nextButton` defaults (disableWhenPageInvalid, disableWhileSubmitting)
+ *
+ * @param fieldDef The next button field definition
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
-export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
-  const bindings: Binding[] = baseFieldMapper(fieldDef);
-
+export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
   // Inject field signal context to access form state and options
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
 
-  bindings.push(inputBinding('event', () => NextPageEvent));
+  // Build base inputs (static, from field definition)
+  const baseInputs = buildBaseInputs(fieldDef);
 
   // Use button-logic-resolver to compute disabled state
   const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
@@ -75,34 +87,51 @@ export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>
     currentPageValid: fieldSignalContext.currentPageValid,
   });
 
-  bindings.push(inputBinding('disabled', () => disabledSignal()));
+  // Return computed signal - evaluates disabledSignal inside for reactivity
+  return computed(() => {
+    const inputs: Record<string, unknown> = {
+      ...baseInputs,
+      event: NextPageEvent,
+      // Evaluate the signal inside the computed - component receives plain boolean
+      disabled: disabledSignal(),
+    };
 
-  if (fieldDef.hidden !== undefined) {
-    bindings.push(inputBinding('hidden', () => fieldDef.hidden));
-  }
+    if (fieldDef.hidden !== undefined) {
+      inputs['hidden'] = fieldDef.hidden;
+    }
 
-  return bindings;
+    return inputs;
+  });
 }
 
 /**
  * Mapper for previous page button - preconfigures PreviousPageEvent
  * Note: Does not auto-disable based on validation. Users can explicitly disable if needed.
+ *
+ * @param fieldDef The previous button field definition
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
-export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Binding[] {
-  const bindings: Binding[] = baseFieldMapper(fieldDef);
+export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
+  // Build base inputs (static, from field definition)
+  const baseInputs = buildBaseInputs(fieldDef);
 
-  bindings.push(inputBinding('event', () => PreviousPageEvent));
+  return computed(() => {
+    const inputs: Record<string, unknown> = {
+      ...baseInputs,
+      event: PreviousPageEvent,
+    };
 
-  // Add disabled binding only if explicitly set by user
-  if (fieldDef.disabled !== undefined) {
-    bindings.push(inputBinding('disabled', () => fieldDef.disabled));
-  }
+    // Add disabled binding only if explicitly set by user
+    if (fieldDef.disabled !== undefined) {
+      inputs['disabled'] = fieldDef.disabled;
+    }
 
-  if (fieldDef.hidden !== undefined) {
-    bindings.push(inputBinding('hidden', () => fieldDef.hidden));
-  }
+    if (fieldDef.hidden !== undefined) {
+      inputs['hidden'] = fieldDef.hidden;
+    }
 
-  return bindings;
+    return inputs;
+  });
 }
 
 /**
@@ -111,10 +140,11 @@ export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unkn
  * Supports two modes:
  * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array
  * 2. Outside array: Uses `arrayKey` property from field definition
+ *
+ * @param fieldDef The add array item button field definition
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
-export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField): Binding[] {
-  const bindings: Binding[] = baseFieldMapper(fieldDef);
-
+export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField): Signal<Record<string, unknown>> {
   // Try to get array context (available when inside an array)
   // Use optional injection so it doesn't fail when outside an array
   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
@@ -130,42 +160,44 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
     );
   }
 
-  bindings.push(inputBinding('event', () => AddArrayItemEvent));
-
-  // Add disabled binding only if explicitly set by user
-  if (fieldDef.disabled !== undefined) {
-    bindings.push(inputBinding('disabled', () => fieldDef.disabled));
-  }
-
-  if (fieldDef.hidden !== undefined) {
-    bindings.push(inputBinding('hidden', () => fieldDef.hidden));
-  }
-
-  // Add array context for token resolution (fallback - component prefers injected ARRAY_CONTEXT)
-  // Read signal value if index is a signal (supports differential updates)
-  const getIndex = () => {
-    if (!arrayContext) return -1;
-    return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
-  };
-
-  bindings.push(
-    inputBinding('eventContext', () => ({
-      key: fieldDef.key,
-      index: getIndex(),
-      arrayKey: targetArrayKey ?? '',
-      formValue: arrayContext?.formValue ?? {},
-    })),
-  );
+  // Build base inputs (static, from field definition)
+  const baseInputs = buildBaseInputs(fieldDef);
 
   // Set default eventArgs for AddArrayItemEvent (arrayKey)
-  // The array component will use its own template automatically
   // User can override by providing eventArgs in field definition
   const defaultEventArgs = ['$arrayKey'];
   const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
 
-  bindings.push(inputBinding('eventArgs', () => eventArgs));
+  return computed(() => {
+    // Read signal value if index is a signal (supports differential updates)
+    const getIndex = () => {
+      if (!arrayContext) return -1;
+      return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
+    };
 
-  return bindings;
+    const inputs: Record<string, unknown> = {
+      ...baseInputs,
+      event: AddArrayItemEvent,
+      eventArgs,
+      eventContext: {
+        key: fieldDef.key,
+        index: getIndex(),
+        arrayKey: targetArrayKey ?? '',
+        formValue: arrayContext?.formValue ?? {},
+      },
+    };
+
+    // Add disabled binding only if explicitly set by user
+    if (fieldDef.disabled !== undefined) {
+      inputs['disabled'] = fieldDef.disabled;
+    }
+
+    if (fieldDef.hidden !== undefined) {
+      inputs['hidden'] = fieldDef.hidden;
+    }
+
+    return inputs;
+  });
 }
 
 /**
@@ -174,10 +206,11 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
  * Supports two modes:
  * 1. Inside array template: Uses ARRAY_CONTEXT to determine target array and removes item at current index
  * 2. Outside array: Uses `arrayKey` property from field definition, removes last item by default
+ *
+ * @param fieldDef The remove array item button field definition
+ * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
-export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButtonField): Binding[] {
-  const bindings: Binding[] = baseFieldMapper(fieldDef);
-
+export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButtonField): Signal<Record<string, unknown>> {
   // Try to get array context (available when inside an array)
   // Use optional injection so it doesn't fail when outside an array
   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
@@ -193,32 +226,8 @@ export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButton
     );
   }
 
-  bindings.push(inputBinding('event', () => RemoveArrayItemEvent));
-
-  // Add disabled binding only if explicitly set by user
-  if (fieldDef.disabled !== undefined) {
-    bindings.push(inputBinding('disabled', () => fieldDef.disabled));
-  }
-
-  if (fieldDef.hidden !== undefined) {
-    bindings.push(inputBinding('hidden', () => fieldDef.hidden));
-  }
-
-  // Add array context for token resolution (fallback - component prefers injected ARRAY_CONTEXT)
-  // Read signal value if index is a signal (supports differential updates)
-  const getIndex = () => {
-    if (!arrayContext) return -1; // -1 means remove last (no specific index)
-    return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
-  };
-
-  bindings.push(
-    inputBinding('eventContext', () => ({
-      key: fieldDef.key,
-      index: getIndex(),
-      arrayKey: targetArrayKey ?? '',
-      formValue: arrayContext?.formValue ?? {},
-    })),
-  );
+  // Build base inputs (static, from field definition)
+  const baseInputs = buildBaseInputs(fieldDef);
 
   // Set default eventArgs for RemoveArrayItemEvent (arrayKey, index if inside array)
   // When outside array, only pass arrayKey (removes last by default)
@@ -226,7 +235,34 @@ export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButton
   const defaultEventArgs = arrayContext ? ['$arrayKey', '$index'] : ['$arrayKey'];
   const eventArgs = 'eventArgs' in fieldDef && fieldDef.eventArgs !== undefined ? fieldDef.eventArgs : defaultEventArgs;
 
-  bindings.push(inputBinding('eventArgs', () => eventArgs));
+  return computed(() => {
+    // Read signal value if index is a signal (supports differential updates)
+    const getIndex = () => {
+      if (!arrayContext) return -1; // -1 means remove last (no specific index)
+      return isSignal(arrayContext.index) ? arrayContext.index() : arrayContext.index;
+    };
 
-  return bindings;
+    const inputs: Record<string, unknown> = {
+      ...baseInputs,
+      event: RemoveArrayItemEvent,
+      eventArgs,
+      eventContext: {
+        key: fieldDef.key,
+        index: getIndex(),
+        arrayKey: targetArrayKey ?? '',
+        formValue: arrayContext?.formValue ?? {},
+      },
+    };
+
+    // Add disabled binding only if explicitly set by user
+    if (fieldDef.disabled !== undefined) {
+      inputs['disabled'] = fieldDef.disabled;
+    }
+
+    if (fieldDef.hidden !== undefined) {
+      inputs['hidden'] = fieldDef.hidden;
+    }
+
+    return inputs;
+  });
 }

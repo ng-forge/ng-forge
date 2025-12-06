@@ -11,18 +11,21 @@ describe('groupFieldMapper', () => {
     injector = TestBed.inject(Injector);
   });
 
-  it('should create 2 bindings (key + field) for minimal group field', () => {
+  it('should create inputs object with key and field for minimal group field', () => {
     const fieldDef: GroupField = {
       key: 'testGroup',
       type: 'group',
       fields: [],
     };
 
-    const bindings = groupFieldMapper(fieldDef);
-    expect(bindings).toHaveLength(2);
+    const inputsSignal = groupFieldMapper(fieldDef);
+    const inputs = inputsSignal(); // Call signal to get inputs
+    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(inputs).toHaveProperty('key', 'testGroup');
+    expect(inputs).toHaveProperty('field');
   });
 
-  it('should create 2 bindings regardless of additional properties', () => {
+  it('should create inputs with key and field regardless of additional properties', () => {
     const fieldDef: GroupField = {
       key: 'complexGroup',
       type: 'group',
@@ -33,8 +36,11 @@ describe('groupFieldMapper', () => {
       fields: [],
     };
 
-    const bindings = groupFieldMapper(fieldDef);
-    expect(bindings).toHaveLength(2);
+    const inputsSignal = groupFieldMapper(fieldDef);
+    const inputs = inputsSignal(); // Call signal to get inputs
+    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(inputs).toHaveProperty('key');
+    expect(inputs).toHaveProperty('field');
   });
 
   it('should handle nested fields of various types', () => {
@@ -52,8 +58,11 @@ describe('groupFieldMapper', () => {
       ],
     };
 
-    const bindings = groupFieldMapper(fieldDef);
-    expect(bindings).toHaveLength(2);
+    const inputsSignal = groupFieldMapper(fieldDef);
+    const inputs = inputsSignal(); // Call signal to get inputs
+    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(inputs).toHaveProperty('key');
+    expect(inputs).toHaveProperty('field');
   });
 
   it('should handle edge cases (empty fields, validation)', () => {
@@ -74,8 +83,11 @@ describe('groupFieldMapper', () => {
     ];
 
     testCases.forEach((fieldDef) => {
-      const bindings = groupFieldMapper(fieldDef);
-      expect(bindings).toHaveLength(2);
+      const inputsSignal = groupFieldMapper(fieldDef);
+      const inputs = inputsSignal(); // Call signal to get inputs
+      expect(Object.keys(inputs)).toHaveLength(2);
+      expect(inputs).toHaveProperty('key');
+      expect(inputs).toHaveProperty('field');
     });
   });
 });

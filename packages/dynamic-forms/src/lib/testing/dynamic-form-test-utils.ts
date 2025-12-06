@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { inputBinding } from '@angular/core';
+import { computed, Signal } from '@angular/core';
 import { ValidationError } from '@angular/forms/signals';
+import { firstValueFrom, race, timer } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { DynamicForm } from '../dynamic-form.component';
 import { FormConfig } from '../models/form-config';
 import { FieldDef } from '../definitions/base/field-def';
@@ -164,36 +166,36 @@ export class DynamicFormTestUtils {
    * Registers common test field types including built-in types like page, row, group
    */
   static registerTestFields(fieldRegistry: ReturnType<typeof injectFieldRegistry>): void {
-    // Input field mapper that extends value field mapper
-    const inputMapper = (fieldDef: FieldDef<any>) => {
-      const bindings = valueFieldMapper(fieldDef);
+    // Input field mapper that extends value field mapper (returns Signal)
+    const inputMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
+      const baseInputsSignal = valueFieldMapper(fieldDef);
 
-      // Add input-specific bindings
-      bindings.push(
-        inputBinding('type', () => (fieldDef.props as Record<string, unknown>)?.['type'] || 'text'),
-        inputBinding('placeholder', () => (fieldDef.props as Record<string, unknown>)?.['placeholder'] || ''),
-      );
-
-      return bindings;
+      // Return computed signal that adds input-specific inputs
+      return computed(() => ({
+        ...baseInputsSignal(),
+        type: (fieldDef.props as Record<string, unknown>)?.['type'] || 'text',
+        placeholder: (fieldDef.props as Record<string, unknown>)?.['placeholder'] || '',
+      }));
     };
 
-    // Select field mapper that extends value field mapper
-    const selectMapper = (fieldDef: FieldDef<any>) => {
-      const bindings = valueFieldMapper(fieldDef);
+    // Select field mapper that extends value field mapper (returns Signal)
+    const selectMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
+      const baseInputsSignal = valueFieldMapper(fieldDef);
 
-      // Add select-specific bindings - options should be at root level
-      bindings.push(inputBinding('options', () => (fieldDef as any).options || []));
-
-      return bindings;
+      // Return computed signal that adds select-specific inputs
+      return computed(() => ({
+        ...baseInputsSignal(),
+        options: (fieldDef as any).options || [],
+      }));
     };
 
-    // Checkbox field mapper - uses checked instead of value
-    const checkboxMapper = (fieldDef: FieldDef<any>) => {
+    // Checkbox field mapper - uses checked instead of value (already returns Signal)
+    const checkboxMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
       return checkboxFieldMapper(fieldDef);
     };
 
-    // Button field mapper that extends value field mapper
-    const buttonMapper = (fieldDef: FieldDef<any>) => {
+    // Button field mapper that extends value field mapper (already returns Signal)
+    const buttonMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
       return valueFieldMapper(fieldDef);
     };
 
@@ -226,40 +228,29 @@ export class DynamicFormTestUtils {
   }
 
   /**
-   * Waits for the dynamic form to initialize
+   * Waits for the dynamic form to initialize.
+   * Uses the initialized$ observable directly which has shareReplay for late subscribers.
+   * @param fixture - The component fixture
+   * @param timeoutMs - Maximum time to wait for initialization (default: 100ms)
    */
-  static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
+  static async waitForInit(fixture: ComponentFixture<DynamicForm>, timeoutMs = 100): Promise<void> {
     const component = fixture.componentInstance;
 
-    // Wait for the initialized event to fire
-    await new Promise<void>((resolve) => {
-      let subscription: ReturnType<typeof component.initialized.subscribe> | null = null;
-
-      subscription = component.initialized.subscribe(() => {
-        if (subscription) {
-          subscription.unsubscribe();
-        }
-        resolve();
-      });
-
-      // Trigger change detection to start initialization process
-      fixture.detectChanges();
-    });
-
-    // Flush all pending effects (critical for zoneless change detection)
-    TestBed.flushEffects();
+    // Trigger initial change detection
     fixture.detectChanges();
-    await fixture.whenStable();
+    TestBed.flushEffects();
 
-    // Additional cycles to ensure all dynamic components and their effects are processed
-    // In zoneless mode, effects may trigger additional effects that need time to settle
+    // Use the initialized$ observable directly (with shareReplay) for proper replay behavior
+    // Race against a timeout to prevent hanging if initialization already happened
+    await firstValueFrom(race(component.initialized$.pipe(map(() => true)), timer(timeoutMs).pipe(map(() => false))));
+
+    // Stabilization cycles for async components
     for (let i = 0; i < 2; i++) {
       TestBed.flushEffects();
       fixture.detectChanges();
       await delay(0);
     }
 
-    // Final stabilization
     await fixture.whenStable();
     TestBed.flushEffects();
     fixture.detectChanges();

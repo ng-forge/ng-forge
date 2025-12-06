@@ -1,13 +1,19 @@
 // Row-specific styling overrides and customizations
-// Using ::ng-deep to ensure grid classes work on child components
 @use '../../styles/grid-system.scss';
 
-// Apply grid system globally using ::ng-deep to bypass view encapsulation
-:host ::ng-deep {
-  // Grid classes are now available on child components
-}
-
 :host {
+  // Row grid container - 12 column grid for horizontal field arrangement
+  display: grid;
+  grid-template-columns: repeat(var(--df-grid-columns, 12), 1fr);
+  gap: var(--df-grid-gap);
+  align-items: start;
+  width: 100%;
+
+  // Fields in row that don't have explicit col classes span full width
+  > *:not([class*='df-col-']) {
+    grid-column: 1 / -1;
+  }
+
   // Allow customization of gap for individual rows
   &.df-gap-custom {
     --df-grid-gap: var(--row-custom-gap, 1rem);
@@ -28,5 +34,33 @@
     @media (min-width: 577px) and (max-width: 768px) {
       --df-grid-columns: 2;
     }
+  }
+}
+
+// Responsive behavior for rows
+@media (max-width: 576px) {
+  :host {
+    // Force single column on mobile for better UX
+    grid-template-columns: 1fr;
+
+    > * {
+      grid-column: 1 / -1 !important;
+    }
+  }
+
+  // Mobile-specific overrides
+  :host.df-row-mobile-keep-cols {
+    grid-template-columns: repeat(var(--df-grid-columns), 1fr);
+
+    > * {
+      grid-column: revert !important;
+    }
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  :host {
+    // Reduce to 6 columns on tablet
+    --df-grid-columns: 6;
   }
 }

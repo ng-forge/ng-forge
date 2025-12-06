@@ -157,6 +157,7 @@ export type { FormEvent } from './events';
 export {
   arrayFieldMapper,
   baseFieldMapper,
+  buildBaseInputs,
   checkboxFieldMapper,
   groupFieldMapper,
   pageFieldMapper,
@@ -180,9 +181,6 @@ export type { ResolvedError } from './utils';
 // Dynamic Text - for translatable labels
 export { dynamicTextToObservable } from './utils';
 export { DynamicTextPipe } from './pipes';
-
-// Directive - for custom field rendering layouts
-export { FieldRendererDirective } from './directives/dynamic-form.directive';
 
 // Container Components - for building custom containers
 export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent } from './fields';

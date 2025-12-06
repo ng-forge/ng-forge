@@ -30,7 +30,7 @@ export const completeFormScenario: ExampleScenario = {
         minLength: 2,
         validationMessages: {
           required: 'This field is required',
-          minLength: 'Must be at least {requiredLength} characters',
+          minLength: 'Must be at least {{requiredLength}} characters',
         },
         props: {
           placeholder: 'Enter your first name',
@@ -45,7 +45,7 @@ export const completeFormScenario: ExampleScenario = {
         minLength: 2,
         validationMessages: {
           required: 'This field is required',
-          minLength: 'Must be at least {requiredLength} characters',
+          minLength: 'Must be at least {{requiredLength}} characters',
         },
         props: {
           placeholder: 'Enter your last name',
@@ -80,8 +80,8 @@ export const completeFormScenario: ExampleScenario = {
         max: 120,
         validationMessages: {
           required: 'This field is required',
-          min: 'Must be at least {min}',
-          max: 'Must not exceed {max}',
+          min: 'Must be at least {{min}}',
+          max: 'Must not exceed {{max}}',
         },
         props: {
           type: 'number',

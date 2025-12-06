@@ -1,49 +1,5 @@
-:host.df-page-orchestrator {
+:host {
   display: block;
   position: relative;
   width: 100%;
-}
-
-.df-page-container {
-  width: 100%;
-  transition: opacity 0.2s ease-in-out;
-
-  &.df-page-visible {
-    display: block;
-    opacity: 1;
-  }
-
-  &.df-page-hidden {
-    display: none;
-    opacity: 0;
-  }
-}
-
-// Accessibility improvements
-.df-page-container[aria-hidden='true'] {
-  pointer-events: none;
-}
-
-// Animation support (optional - can be overridden by consumers)
-@media (prefers-reduced-motion: no-preference) {
-  .df-page-container {
-    transition:
-      opacity 0.3s ease-in-out,
-      transform 0.3s ease-in-out;
-  }
-
-  .df-page-container.df-page-visible {
-    transform: translateX(0);
-  }
-
-  .df-page-container.df-page-hidden {
-    transform: translateX(-10px);
-  }
-}
-
-// Ensure animations are disabled for users who prefer reduced motion
-@media (prefers-reduced-motion: reduce) {
-  .df-page-container {
-    transition: none;
-  }
 }
