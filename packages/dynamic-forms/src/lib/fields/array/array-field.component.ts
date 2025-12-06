@@ -15,12 +15,7 @@ import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { getChildFieldTree } from '../../utils/form-internals/form-internals';
-import {
-  checkValuesMatch,
-  determineDifferentialOperation,
-  getArrayValue,
-  ResolvedArrayItem,
-} from '../../utils/array-field/array-field.types';
+import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 
 /**
@@ -146,12 +141,7 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
   private performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
     const resolvedItems = this.resolvedItemsSignal();
-    const arrayKey = this.field().key;
-    const currentArrayValue = getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
-
-    const operation = determineDifferentialOperation(resolvedItems, fieldTrees.length, currentArrayValue, (newValues, count) =>
-      checkValuesMatch(resolvedItems, newValues, count),
-    );
+    const operation = determineDifferentialOperation(resolvedItems, fieldTrees.length);
 
     switch (operation.type) {
       case 'clear':
