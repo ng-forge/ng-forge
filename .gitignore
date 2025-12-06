@@ -63,3 +63,4 @@ vitest.config.*.timestamp*
 # Playwright test screenshots
 **/screenshots/
 **/__screenshots__/
+.vercel
