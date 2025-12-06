@@ -139,13 +139,11 @@ export const paginatedFormScenario: ExampleScenario = {
                 type: 'previous',
                 key: 'step2Previous',
                 label: 'Back',
-                col: 6,
               },
               {
                 type: 'next',
                 key: 'step2Next',
                 label: 'Continue to Address',
-                col: 6,
                 props: {
                   color: 'primary',
                 },
@@ -246,13 +244,11 @@ export const paginatedFormScenario: ExampleScenario = {
                 type: 'previous',
                 key: 'step3Previous',
                 label: 'Back',
-                col: 6,
               },
               {
                 type: 'next',
                 key: 'step3Next',
                 label: 'Continue to Preferences',
-                col: 6,
                 props: {
                   color: 'primary',
                 },
@@ -320,13 +316,11 @@ export const paginatedFormScenario: ExampleScenario = {
                 type: 'previous',
                 key: 'step4Previous',
                 label: 'Back',
-                col: 6,
               },
               {
                 type: 'submit',
                 key: 'submit',
                 label: 'Complete Registration',
-                col: 6,
                 props: {
                   color: 'primary',
                 },

@@ -10,6 +10,14 @@ const config = {
       col: 12,
     },
     {
+      key: 'staticReadonly',
+      type: 'input',
+      label: 'Static Readonly Field',
+      value: 'cannot_edit',
+      readonly: true,
+      col: 12,
+    },
+    {
       key: 'username',
       type: 'input',
       label: 'Username',

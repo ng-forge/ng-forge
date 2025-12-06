@@ -5,7 +5,7 @@ import { ArrayField } from '../../definitions/default/array-field';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldSignalContext } from '../../mappers/types';
 import { FieldTypeDefinition } from '../../models/field-type';
-import { createValueSnapshot, generateArrayItemId, getArrayValue, ResolvedArrayItem } from './array-field.types';
+import { generateArrayItemId, ResolvedArrayItem } from './array-field.types';
 import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
 
 /**
@@ -78,17 +78,12 @@ export function resolveArrayItem<TModel>(options: ResolveArrayItemOptions<TModel
         arrayField,
       });
 
-      const currentValue = parentFieldSignalContext.value() as Partial<TModel>;
-      const arrayValue = getArrayValue(currentValue, arrayField.key);
-      const itemValue = arrayValue[index];
-
       return {
         id: itemId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         component: component as any,
         injector,
         inputs,
-        valueSnapshot: createValueSnapshot(itemValue),
       };
     }),
     catchError((error) => {

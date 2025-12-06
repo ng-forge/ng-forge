@@ -88,6 +88,18 @@ test.describe('Expression-Based Logic Tests', () => {
   });
 
   test.describe('Readonly Logic', () => {
+    test('should make static readonly field always readonly', async ({ page, helpers }) => {
+      await page.goto('http://localhost:4201/#/test/expression-based-logic/readonly-logic');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('readonly-logic-test');
+      await expect(scenario).toBeVisible();
+
+      // Static readonly field should always have the readonly attribute
+      const staticReadonlyInput = scenario.locator('#staticReadonly input');
+      await expect(staticReadonlyInput).toHaveAttribute('readonly', '');
+    });
+
     test('should make fields readonly using conditional logic', async ({ page, helpers }) => {
       await page.goto('http://localhost:4201/#/test/expression-based-logic/readonly-logic');
       await page.waitForLoadState('networkidle');

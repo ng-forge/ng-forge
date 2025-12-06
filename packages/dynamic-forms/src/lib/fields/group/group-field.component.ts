@@ -30,6 +30,7 @@ import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
 import { flattenFields } from '../../utils/flattener/field-flattener';
+import { getChildFieldTree } from '../../utils/form-internals/form-internals';
 
 /**
  * Container component for rendering nested form groups.
@@ -169,12 +170,29 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   readonly errors = computed(() => this.form()().errors());
   readonly disabled = computed(() => this.form()().disabled());
 
+  /**
+   * Get the nested FieldTree from the parent form for this group.
+   * This allows child fields to update the parent form directly,
+   * avoiding the need for separate form synchronization.
+   */
+  private readonly nestedFieldTree = computed(() => {
+    const parentForm = this.parentFieldSignalContext.form();
+    const groupKey = this.field().key;
+    return getChildFieldTree(parentForm, groupKey);
+  });
+
   private readonly groupInjector = computed(() => {
+    const nestedTree = this.nestedFieldTree();
+
+    // Use the nested FieldTree from parent if available, otherwise fall back to our own form
+    // The nested FieldTree ensures changes propagate directly to the parent form
+    const formToProvide = nestedTree ?? this.form();
+
     const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
       injector: this.injector,
       value: this.parentFieldSignalContext.value,
       defaultValues: this.defaultValues,
-      form: this.form() as ReturnType<typeof form<Record<string, unknown>>>,
+      form: (() => formToProvide) as unknown as ReturnType<typeof form<Record<string, unknown>>>,
       defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 
