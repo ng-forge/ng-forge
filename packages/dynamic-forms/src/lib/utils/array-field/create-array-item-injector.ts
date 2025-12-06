@@ -51,7 +51,7 @@ function getNestedItemFieldTree<TModel>(
   index: number,
 ): FieldTree<unknown> | null {
   // First get the array FieldTree from parent
-  const arrayFieldTree = getChildFieldTree(parentFieldSignalContext.form, arrayKey);
+  const arrayFieldTree = getChildFieldTree(parentFieldSignalContext.form(), arrayKey);
   if (!arrayFieldTree) return null;
 
   // Then get the item's FieldTree using stringified index

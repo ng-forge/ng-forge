@@ -176,7 +176,7 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
    * avoiding the need for separate form synchronization.
    */
   private readonly nestedFieldTree = computed(() => {
-    const parentForm = this.parentFieldSignalContext.form;
+    const parentForm = this.parentFieldSignalContext.form();
     const groupKey = this.field().key;
     return getChildFieldTree(parentForm, groupKey);
   });
@@ -192,7 +192,7 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
       injector: this.injector,
       value: this.parentFieldSignalContext.value,
       defaultValues: this.defaultValues,
-      form: formToProvide as ReturnType<typeof form<Record<string, unknown>>>,
+      form: (() => formToProvide) as unknown as ReturnType<typeof form<Record<string, unknown>>>,
       defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 
