@@ -120,6 +120,7 @@
     "@ng-doc/core": "^20.1.0",
     "@ng-doc/ui-kit": "^20.1.0",
     "@primeuix/themes": "^1.2.5",
+    "@vercel/analytics": "^1.6.1",
     "bootstrap": "^5.3.8",
     "date-fns": "^4.1.0",
     "express": "^5.1.0",
