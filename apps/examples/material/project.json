@@ -39,7 +39,7 @@
             }
           ],
           "outputHashing": "all",
-          "baseHref": "/ng-forge/examples/material/"
+          "baseHref": "/dynamic-forms/examples/material/"
         },
         "development": {
           "optimization": false,
