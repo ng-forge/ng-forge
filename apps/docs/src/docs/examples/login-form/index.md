@@ -23,7 +23,7 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-login-form',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" />`,
+  template: `<form [dynamic-form]="config"></form>`,
 })
 export class LoginFormComponent {
   config = {

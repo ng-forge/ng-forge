@@ -29,9 +29,9 @@ import { TestScenario } from './types';
           <p class="scenario-description">{{ scenario().description }}</p>
         }
         @if (hasSubmissionTracking()) {
-          <dynamic-form [config]="effectiveConfig()" [(value)]="formValue" />
+          <form [dynamic-form]="effectiveConfig()" [(value)]="formValue"></form>
         } @else {
-          <dynamic-form [config]="effectiveConfig()" [(value)]="formValue" (submitted)="onSubmitted($event)" />
+          <form [dynamic-form]="effectiveConfig()" [(value)]="formValue" (submitted)="onSubmitted($event)"></form>
         }
 
         @if (hasSubmissionTracking()) {

@@ -34,7 +34,7 @@ import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dyn
 
 @Component({
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
+  template: `<form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>`,
 })
 export class ContactFormComponent {
   config = {

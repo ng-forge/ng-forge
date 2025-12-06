@@ -42,7 +42,7 @@ import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dyn
 
 @Component({
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" />`,
+  template: `<form [dynamic-form]="config"></form>`,
 })
 export class LoginComponent {
   config = {

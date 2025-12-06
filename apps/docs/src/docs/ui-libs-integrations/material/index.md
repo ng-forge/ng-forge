@@ -73,7 +73,7 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
   selector: 'app-contact-form',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <dynamic-form [config]="config" [(value)]="formValue" />
+    <form [dynamic-form]="config" [(value)]="formValue"></form>
     @let value = formValue();
     <pre>{% raw %}{{ value | json }}{% endraw %}</pre>
   `,

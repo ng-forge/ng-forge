@@ -39,7 +39,7 @@ import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-contact-form',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" [(value)]="formValue" />`,
+  template: `<form [dynamic-form]="config" [(value)]="formValue"></form>`,
 })
 export class ContactFormComponent {
   formValue = signal({});

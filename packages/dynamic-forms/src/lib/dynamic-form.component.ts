@@ -1,5 +1,4 @@
 import {
-  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
@@ -53,18 +52,19 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
 /**
  * Dynamic form component that renders a complete form based on configuration.
  *
- * This is the main entry point component for the dynamic form system. It handles
+ * This component uses a native `<form>` element as its host, enabling browser-native
+ * form features like autofill, password managers, and Enter-to-submit. It handles
  * form state management, validation, field rendering, and event coordination using
  * Angular's signal-based reactive forms.
  *
  * @example
  * ```html
- * <dynamic-form
- *   [config]="formConfig"
+ * <form
+ *   [dynamic-form]="formConfig"
  *   [(value)]="formData"
  *   (submitted)="handleSubmit($event)"
  *   (validityChange)="handleValidityChange($event)">
- * </dynamic-form>
+ * </form>
  * ```
  *
  * @example
@@ -92,31 +92,28 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
  * @public
  */
 @Component({
-  selector: 'dynamic-form',
+  selector: 'form[dynamic-form]',
   imports: [FieldRendererDirective, PageOrchestratorComponent],
   template: `
-    <form
-      class="df-form"
-      [class.disabled]="effectiveFormOptions().disabled"
-      [class.df-form-paged]="formModeDetection().mode === 'paged'"
-      [class.df-form-non-paged]="formModeDetection().mode === 'non-paged'"
-    >
-      @if (formModeDetection().mode === 'paged') {
-        <!-- Paged form: Use page orchestrator with page field definitions -->
-        <page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()" />
-      } @else {
-        <!-- Non-paged form: Render fields directly with grid system -->
-        <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
-          <!-- Fields will be automatically rendered by the fieldRenderer directive -->
-        </div>
-      }
-    </form>
+    @if (formModeDetection().mode === 'paged') {
+      <!-- Paged form: Use page orchestrator with page field definitions -->
+      <page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()" />
+    } @else {
+      <!-- Non-paged form: Render fields directly with grid system -->
+      <div class="df-form" [fieldRenderer]="fields()" (fieldsInitialized)="onFieldsInitialized()">
+        <!-- Fields will be automatically rendered by the fieldRenderer directive -->
+      </div>
+    }
   `,
   styleUrl: './dynamic-form.component.scss',
   providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
   host: {
+    class: 'df-dynamic-form df-form',
     '[class.disabled]': 'disabled()',
+    '[class.df-form-paged]': 'formModeDetection().mode === "paged"',
+    '[class.df-form-non-paged]': 'formModeDetection().mode === "non-paged"',
     '[attr.data-form-mode]': 'formModeDetection().mode',
+    '(submit)': 'onNativeSubmit($event)',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -218,6 +215,9 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * Changes to this input will rebuild the form structure and reset form state.
    * For incremental updates, use the form's update methods instead.
    *
+   * The input is aliased to 'dynamic-form' for cleaner template syntax:
+   * `<form [dynamic-form]="config">` instead of `<form dynamic-form [config]="config">`
+   *
    * @example
    * ```typescript
    * const config: FormConfig = {
@@ -231,7 +231,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * };
    * ```
    */
-  config: InputSignal<FormConfig<TFields>> = input.required<FormConfig<TFields>>();
+  config: InputSignal<FormConfig<TFields>> = input.required<FormConfig<TFields>>({ alias: 'dynamic-form' });
 
   /**
    * Form options input for dynamic runtime configuration.
@@ -245,7 +245,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * formOptionsSignal = signal<FormOptions>({ disabled: true });
    *
    * // In template
-   * <dynamic-form [config]="config" [formOptions]="formOptionsSignal()" />
+   * <form [dynamic-form]="config" [formOptions]="formOptionsSignal()" />
    * ```
    *
    * @value undefined
@@ -264,7 +264,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
    * formData = signal<Partial<UserProfile>>({ email: 'user@example.com' });
    *
    * // In template
-   * <dynamic-form [config]="config" [(value)]="formData" />
+   * <form [dynamic-form]="config" [(value)]="formData" />
    * ```
    *
    * @value undefined
@@ -789,6 +789,22 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   protected onFieldsInitialized(): void {
     this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+  }
+
+  /**
+   * Handles native form submission triggered by:
+   * - Pressing Enter in an input field
+   * - Clicking a button with type="submit"
+   * - Programmatic form.submit() calls
+   *
+   * This method prevents the default form submission behavior (page reload)
+   * and dispatches a SubmitEvent through the EventBus for processing.
+   *
+   * @param event - The native submit event from the form element
+   */
+  protected onNativeSubmit(event: Event): void {
+    event.preventDefault();
+    this.eventBus.dispatch(SubmitEvent);
   }
 
   /**

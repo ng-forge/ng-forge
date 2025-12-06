@@ -22,7 +22,7 @@ const noSpaces: CustomValidator = (ctx) => {
       <h3>Expression-Based Custom Validators</h3>
       <p>Compare expression-based (inline) vs function-based (registered) validators:</p>
 
-      <dynamic-form [config]="config" [(value)]="formValue" (submitted)="onSubmit($event)" />
+      <form [dynamic-form]="config" [(value)]="formValue" (submitted)="onSubmit($event)"></form>
 
       <div class="example-result">
         <h4>Form Data:</h4>

@@ -183,7 +183,7 @@ If you prefer manual control, use the `(submitted)` output instead:
 
 ```typescript
 @Component({
-  template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`,
+  template: `<form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>`,
 })
 export class MyFormComponent {
   onSubmit(value: FormValue) {

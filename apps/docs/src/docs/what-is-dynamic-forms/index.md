@@ -77,7 +77,7 @@ type RegistrationForm = InferFormValue<typeof formFields.fields>;
 @Component({
   selector: 'app-registration',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" />`,
+  template: `<form [dynamic-form]="config"></form>`,
 })
 export class RegistrationComponent {
   private http = inject(HttpClient);
@@ -118,7 +118,7 @@ config = {
 **2. Output-based** - Use the `(submitted)` output for manual control:
 
 ```typescript
-template: `<dynamic-form [config]="config" (submitted)="onSubmit($event)" />`
+template: `<form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>`
 
 onSubmit(value: FormValue) {
   // Handle submission manually

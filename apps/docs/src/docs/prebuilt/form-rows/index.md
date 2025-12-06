@@ -54,7 +54,7 @@ import { DynamicForm } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-address-form',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="formConfig" />`,
+  template: `<form [dynamic-form]="formConfig"></form>`,
 })
 export class AddressFormComponent {
   formConfig = {
