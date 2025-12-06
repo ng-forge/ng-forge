@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "author": "ng-forge",
-  "homepage": "https://ng-forge.com/dynamic-forms/docs/ui-libs-integrations/bootstrap",
+  "homepage": "https://ng-forge.com/dynamic-forms/ui-libs-integrations/bootstrap",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ng-forge/ng-forge.git",

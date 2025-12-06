@@ -63,14 +63,14 @@ export class UserFormComponent {
 
 ## Documentation
 
-- [Installation](https://ng-forge.com/dynamic-forms/docs/installation)
-- [Field Types](https://ng-forge.com/dynamic-forms/docs/core/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/docs/core/validation)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/docs/core/conditional-logic)
-- [Type Safety](https://ng-forge.com/dynamic-forms/docs/core/type-safety)
-- [Events](https://ng-forge.com/dynamic-forms/docs/core/events)
-- [i18n](https://ng-forge.com/dynamic-forms/docs/core/i18n)
-- [Custom Integrations](https://ng-forge.com/dynamic-forms/docs/deep-dive/custom-integrations)
+- [Installation](https://ng-forge.com/dynamic-forms/installation)
+- [Field Types](https://ng-forge.com/dynamic-forms/core/field-types)
+- [Validation](https://ng-forge.com/dynamic-forms/core/validation)
+- [Conditional Logic](https://ng-forge.com/dynamic-forms/core/conditional-logic)
+- [Type Safety](https://ng-forge.com/dynamic-forms/core/type-safety)
+- [Events](https://ng-forge.com/dynamic-forms/core/events)
+- [i18n](https://ng-forge.com/dynamic-forms/core/i18n)
+- [Custom Integrations](https://ng-forge.com/dynamic-forms/deep-dive/custom-integrations)
 
 ## License
 
