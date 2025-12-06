@@ -2,16 +2,26 @@
 @use '../../styles/grid-system.scss';
 
 :host {
-  // Row grid container - 12 column grid for horizontal field arrangement
-  display: grid;
-  grid-template-columns: repeat(var(--df-grid-columns, 12), 1fr);
+  // Row flex container - items stretch evenly by default
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--df-grid-gap);
-  align-items: start;
+  align-items: flex-start;
   width: 100%;
 
-  // Fields in row that don't have explicit col classes span full width
-  > *:not([class*='df-col-']) {
-    grid-column: 1 / -1;
+  // Fields without explicit col classes stretch evenly to fill available space
+  ::ng-deep > *:not([class*='df-col-']) {
+    flex: 1 1 0%;
+    min-width: 0; // Allow shrinking below content size if needed
+  }
+
+  // Column span utilities for 12-column grid system (1-12)
+  // Use ::ng-deep because child components have their own view encapsulation
+  @for $i from 1 through 12 {
+    ::ng-deep > .df-col-#{$i} {
+      flex: 0 0 calc(#{percentage(calc($i / 12))} - var(--df-grid-gap) * #{calc((12 - $i) / 12)});
+      max-width: calc(#{percentage(calc($i / 12))} - var(--df-grid-gap) * #{calc((12 - $i) / 12)});
+    }
   }
 
   // Allow customization of gap for individual rows
@@ -22,17 +32,22 @@
   // Row-specific responsive overrides
   &.df-row-mobile-stack {
     @media (max-width: 576px) {
-      grid-template-columns: 1fr !important;
+      flex-direction: column;
 
-      > * {
-        grid-column: 1 / -1 !important;
+      ::ng-deep > * {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
       }
     }
   }
 
   &.df-row-tablet-2col {
     @media (min-width: 577px) and (max-width: 768px) {
-      --df-grid-columns: 2;
+      // Each item takes ~50% in tablet view
+      ::ng-deep > * {
+        flex: 0 0 calc(50% - var(--df-grid-gap) / 2);
+        max-width: calc(50% - var(--df-grid-gap) / 2);
+      }
     }
   }
 }
@@ -41,26 +56,28 @@
 @media (max-width: 576px) {
   :host {
     // Force single column on mobile for better UX
-    grid-template-columns: 1fr;
+    flex-direction: column;
 
-    > * {
-      grid-column: 1 / -1 !important;
+    ::ng-deep > * {
+      flex: 0 0 100% !important;
+      max-width: 100% !important;
     }
   }
 
-  // Mobile-specific overrides
+  // Mobile-specific overrides to keep side-by-side layout
   :host.df-row-mobile-keep-cols {
-    grid-template-columns: repeat(var(--df-grid-columns), 1fr);
+    flex-direction: row;
 
-    > * {
-      grid-column: revert !important;
+    ::ng-deep > * {
+      flex: 1 1 0% !important;
+      max-width: none !important;
     }
   }
 }
 
 @media (min-width: 577px) and (max-width: 768px) {
   :host {
-    // Reduce to 6 columns on tablet
-    --df-grid-columns: 6;
+    // On tablet, items with col classes get adjusted sizing
+    // Items without col classes continue to stretch evenly
   }
 }
