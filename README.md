@@ -13,8 +13,8 @@
 </p>
 
 <p align="center">
-  <a href="https://ng-forge.github.io/ng-forge/">📚 Documentation</a> •
-  <a href="https://ng-forge.github.io/ng-forge/docs/installation">🚀 Getting Started</a> •
+  <a href="https://ng-forge.com/dynamic-forms/">📚 Documentation</a> •
+  <a href="https://ng-forge.com/dynamic-forms/docs/installation">🚀 Getting Started</a> •
   <a href="https://github.com/ng-forge/ng-forge/issues">🐛 Issues</a>
 </p>
 
@@ -83,13 +83,13 @@ export class LoginComponent {
 
 ## 📖 Documentation
 
-- [Installation](https://ng-forge.github.io/ng-forge/docs/installation)
-- [Field Types](https://ng-forge.github.io/ng-forge/docs/core/field-types)
-- [Validation](https://ng-forge.github.io/ng-forge/docs/core/validation)
-- [Conditional Logic](https://ng-forge.github.io/ng-forge/docs/core/conditional-logic)
-- [Type Safety](https://ng-forge.github.io/ng-forge/docs/core/type-safety)
-- [i18n](https://ng-forge.github.io/ng-forge/docs/core/i18n)
-- [Custom Integrations](https://ng-forge.github.io/ng-forge/docs/deep-dive/custom-integrations)
+- [Installation](https://ng-forge.com/dynamic-forms/docs/installation)
+- [Field Types](https://ng-forge.com/dynamic-forms/docs/core/field-types)
+- [Validation](https://ng-forge.com/dynamic-forms/docs/core/validation)
+- [Conditional Logic](https://ng-forge.com/dynamic-forms/docs/core/conditional-logic)
+- [Type Safety](https://ng-forge.com/dynamic-forms/docs/core/type-safety)
+- [i18n](https://ng-forge.com/dynamic-forms/docs/core/i18n)
+- [Custom Integrations](https://ng-forge.com/dynamic-forms/docs/deep-dive/custom-integrations)
 
 ## 🛠️ Development
 
