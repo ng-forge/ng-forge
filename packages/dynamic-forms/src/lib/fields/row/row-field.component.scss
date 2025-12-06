@@ -2,17 +2,16 @@
 @use '../../styles/grid-system.scss';
 
 :host {
-  // Row flex container - items stretch evenly by default
+  // Row flex container - items use natural size unless col is specified
   display: flex;
   flex-wrap: wrap;
   gap: var(--df-grid-gap);
   align-items: flex-start;
   width: 100%;
 
-  // Fields without explicit col classes stretch evenly to fill available space
+  // Fields without explicit col classes use their natural content size
   ::ng-deep > *:not([class*='df-col-']) {
-    flex: 1 1 0%;
-    min-width: 0; // Allow shrinking below content size if needed
+    flex: 0 0 auto;
   }
 
   // Column span utilities for 12-column grid system (1-12)
@@ -68,8 +67,9 @@
   :host.df-row-mobile-keep-cols {
     flex-direction: row;
 
-    ::ng-deep > * {
-      flex: 1 1 0% !important;
+    // Items without col use natural size, items with col keep their grid sizing
+    ::ng-deep > *:not([class*='df-col-']) {
+      flex: 0 0 auto !important;
       max-width: none !important;
     }
   }
@@ -78,6 +78,6 @@
 @media (min-width: 577px) and (max-width: 768px) {
   :host {
     // On tablet, items with col classes get adjusted sizing
-    // Items without col classes continue to stretch evenly
+    // Items without col classes use natural content size
   }
 }

@@ -125,8 +125,8 @@ export class PaginatedFormComponent {
             type: 'row',
             key: 'step2Buttons',
             fields: [
-              { type: 'previous', key: 'step2Previous', label: 'Back', col: 6 },
-              { type: 'next', key: 'step2Next', label: 'Continue', col: 6 },
+              { type: 'previous', key: 'step2Previous', label: 'Back' },
+              { type: 'next', key: 'step2Next', label: 'Continue' },
             ],
           },
         ],
@@ -175,8 +175,8 @@ export class PaginatedFormComponent {
             type: 'row',
             key: 'step3Buttons',
             fields: [
-              { type: 'previous', key: 'step3Previous', label: 'Back', col: 6 },
-              { type: 'next', key: 'step3Next', label: 'Continue', col: 6 },
+              { type: 'previous', key: 'step3Previous', label: 'Back' },
+              { type: 'next', key: 'step3Next', label: 'Continue' },
             ],
           },
         ],
@@ -224,8 +224,8 @@ export class PaginatedFormComponent {
             type: 'row',
             key: 'step4Buttons',
             fields: [
-              { type: 'previous', key: 'step4Previous', label: 'Back', col: 6 },
-              { type: 'submit', key: 'submit', label: 'Complete Registration', col: 6 },
+              { type: 'previous', key: 'step4Previous', label: 'Back' },
+              { type: 'submit', key: 'submit', label: 'Complete Registration' },
             ],
           },
         ],
