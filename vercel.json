@@ -2,6 +2,16 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "pnpm run deploy:prep",
   "outputDirectory": "dist/deploy",
+  "git": {
+    "deploymentEnabled": false
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/dynamic-forms/",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/dynamic-forms/examples/material/(.*)",
