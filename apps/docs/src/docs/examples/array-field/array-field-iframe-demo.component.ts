@@ -4,7 +4,7 @@ import { ExampleIframeComponent } from '../../../app/components/example-iframe';
 @Component({
   selector: 'array-field-iframe-demo',
   imports: [ExampleIframeComponent],
-  template: `<example-iframe library="material" example="array" height="600px" [code]="code" />`,
+  template: `<example-iframe library="material" example="array" [code]="code" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ArrayFieldIframeDemoComponent {

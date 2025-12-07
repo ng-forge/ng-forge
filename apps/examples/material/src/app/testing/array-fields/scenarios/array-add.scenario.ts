@@ -32,6 +32,6 @@ export const arrayAddScenario: TestScenario = {
   description: 'Add new email addresses to the array field',
   config,
   initialValue: {
-    emails: [''], // Start with one empty item so add button is visible
+    emails: [{ email: '' }], // Start with one empty item so add button is visible
   },
 };

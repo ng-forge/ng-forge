@@ -39,7 +39,7 @@
             }
           ],
           "outputHashing": "all",
-          "baseHref": "/ng-forge/examples/primeng/"
+          "baseHref": "/dynamic-forms/examples/primeng/"
         },
         "development": {
           "optimization": false,

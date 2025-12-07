@@ -73,6 +73,12 @@ export default [
     loadChildren: () => import('./form-reset-clear/form-reset-clear.routes'),
   },
 
+  // Group Fields Tests - Tests for nested group field value propagation
+  {
+    path: 'group-fields',
+    loadChildren: () => import('./group-fields/group-fields.routes'),
+  },
+
   // Material Components Tests - Refactored into folder structure
   {
     path: 'material-components',

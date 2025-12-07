@@ -521,7 +521,7 @@ const config = {
 };
 ```
 
-The validator is only active when the `when` condition evaluates to `true`, allowing dynamic validation based on form state. See [Conditional Logic](/docs/core/conditional-logic) for all expression types and operators.
+The validator is only active when the `when` condition evaluates to `true`, allowing dynamic validation based on form state. See [Conditional Logic](../../conditional-logic/) for all expression types and operators.
 
 ## Common Validation Patterns
 

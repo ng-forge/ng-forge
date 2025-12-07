@@ -30,6 +30,6 @@ export const arrayRemoveScenario: TestScenario = {
   description: 'Remove phone numbers from the array field',
   config,
   initialValue: {
-    phones: ['555-0001', '555-0002'],
+    phones: [{ phone: '555-0001' }, { phone: '555-0002' }],
   },
 };

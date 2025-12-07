@@ -31,6 +31,6 @@ export const arrayMaxLengthScenario: TestScenario = {
   description: 'Test maximum length constraint on array fields',
   config,
   initialValue: {
-    tags: ['tag1', 'tag2'],
+    tags: [{ tag: 'tag1' }, { tag: 'tag2' }],
   },
 };

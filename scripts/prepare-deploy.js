@@ -1,21 +1,22 @@
 #!/usr/bin/env node
 
 /**
- * Deployment Preparation Script for GitHub Pages
+ * Deployment Preparation Script for Vercel
  *
- * This script prepares the deployment directory structure for GitHub Pages by:
- * 1. Copying the main docs app to the root of dist/deploy
- * 2. Copying example apps to dist/deploy/examples subdirectory
+ * This script prepares the deployment directory structure by:
+ * 1. Copying the main docs app to dist/deploy/dynamic-forms
+ * 2. Copying example apps to dist/deploy/dynamic-forms/examples subdirectory
  *
  * Resulting structure:
  * dist/deploy/
- * ├── index.html              (docs app)
- * ├── assets/                 (docs assets)
- * └── examples/               (example apps)
- *     ├── material/           (Material examples)
- *     ├── bootstrap/          (Bootstrap examples)
- *     ├── primeng/            (PrimeNG examples)
- *     └── ionic/              (Ionic examples)
+ * └── dynamic-forms/
+ *     ├── index.html          (docs app)
+ *     ├── assets/             (docs assets)
+ *     └── examples/           (example apps)
+ *         ├── material/       (Material examples)
+ *         ├── bootstrap/      (Bootstrap examples)
+ *         ├── primeng/        (PrimeNG examples)
+ *         └── ionic/          (Ionic examples)
  */
 
 import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from 'fs';
@@ -28,7 +29,8 @@ const rootDir = join(__dirname, '..');
 
 console.log('🚀 Preparing deployment directory...\n');
 
-const deployDir = join(rootDir, 'dist', 'deploy');
+const deployRoot = join(rootDir, 'dist', 'deploy');
+const deployDir = join(deployRoot, 'dynamic-forms');
 const distDir = join(rootDir, 'dist');
 
 // Check if build output exists
@@ -40,7 +42,7 @@ if (!existsSync(join(distDir, 'apps', 'docs', 'browser'))) {
 
 // Clean deploy directory
 console.log('🧹 Cleaning deploy directory...');
-rmSync(deployDir, { recursive: true, force: true });
+rmSync(deployRoot, { recursive: true, force: true });
 
 // Create deploy directory structure
 console.log('📁 Creating deploy directory structure...');
@@ -148,17 +150,18 @@ try {
 console.log('\n✅ Deployment directory prepared successfully!\n');
 console.log('📂 Deployment structure:');
 console.log('   dist/deploy/');
-console.log('   ├── index.html           (docs app)');
-console.log('   ├── assets/              (docs assets)');
-console.log('   └── examples/            (example apps)');
-console.log('       ├── material/        (Material examples)');
-console.log('       ├── bootstrap/       (Bootstrap examples)');
-console.log('       ├── primeng/         (PrimeNG examples)');
-console.log('       └── ionic/           (Ionic examples)\n');
+console.log('   └── dynamic-forms/');
+console.log('       ├── index.html       (docs app)');
+console.log('       ├── assets/          (docs assets)');
+console.log('       └── examples/        (example apps)');
+console.log('           ├── material/    (Material examples)');
+console.log('           ├── bootstrap/   (Bootstrap examples)');
+console.log('           ├── primeng/     (PrimeNG examples)');
+console.log('           └── ionic/       (Ionic examples)\n');
 
-console.log('🌐 GitHub Pages URLs:');
-console.log('   Docs:      https://ng-forge.github.io/ng-forge/');
-console.log('   Material:  https://ng-forge.github.io/ng-forge/examples/material/');
-console.log('   Bootstrap: https://ng-forge.github.io/ng-forge/examples/bootstrap/');
-console.log('   PrimeNG:   https://ng-forge.github.io/ng-forge/examples/primeng/');
-console.log('   Ionic:     https://ng-forge.github.io/ng-forge/examples/ionic/\n');
+console.log('🌐 Production URLs:');
+console.log('   Docs:      https://ng-forge.com/dynamic-forms/');
+console.log('   Material:  https://ng-forge.com/dynamic-forms/examples/material/');
+console.log('   Bootstrap: https://ng-forge.com/dynamic-forms/examples/bootstrap/');
+console.log('   PrimeNG:   https://ng-forge.com/dynamic-forms/examples/primeng/');
+console.log('   Ionic:     https://ng-forge.com/dynamic-forms/examples/ionic/\n');

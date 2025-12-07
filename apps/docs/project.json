@@ -51,12 +51,12 @@
             }
           ],
           "outputHashing": "all",
-          "baseHref": "/ng-forge/",
+          "baseHref": "/dynamic-forms/",
           "define": {
-            "MATERIAL_EXAMPLES_URL": "'/ng-forge/examples/material'",
-            "PRIMENG_EXAMPLES_URL": "'/ng-forge/examples/primeng'",
-            "IONIC_EXAMPLES_URL": "'/ng-forge/examples/ionic'",
-            "BOOTSTRAP_EXAMPLES_URL": "'/ng-forge/examples/bootstrap'"
+            "MATERIAL_EXAMPLES_URL": "'/dynamic-forms/examples/material'",
+            "PRIMENG_EXAMPLES_URL": "'/dynamic-forms/examples/primeng'",
+            "IONIC_EXAMPLES_URL": "'/dynamic-forms/examples/ionic'",
+            "BOOTSTRAP_EXAMPLES_URL": "'/dynamic-forms/examples/bootstrap'"
           },
           "ngDoc": {
             "config": "apps/docs/ng-doc.config.ts"

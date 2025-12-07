@@ -31,6 +31,6 @@ export const arrayValuesScenario: TestScenario = {
   description: 'Verify that existing values are maintained when adding new items',
   config,
   initialValue: {
-    tasks: [''], // Start with one empty item so array field renders
+    tasks: [{ taskName: '' }], // Start with one empty item so array field renders
   },
 };

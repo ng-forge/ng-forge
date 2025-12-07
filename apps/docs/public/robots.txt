@@ -1,5 +1,5 @@
 # ng-forge Documentation
-# https://ng-forge.github.io/ng-forge/
+# https://ng-forge.com/dynamic-forms/
 
 User-agent: *
 Allow: /
@@ -37,4 +37,4 @@ User-agent: Cohere-AI
 Allow: /
 
 # Sitemap location
-Sitemap: https://ng-forge.github.io/ng-forge/sitemap.xml
+Sitemap: https://ng-forge.com/dynamic-forms/sitemap.xml

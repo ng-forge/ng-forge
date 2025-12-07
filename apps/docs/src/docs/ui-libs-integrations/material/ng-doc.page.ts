@@ -17,6 +17,7 @@ import { ButtonIframeDemoComponent } from './examples/button-iframe-demo.compone
  */
 const MaterialPage: NgDocPage = {
   title: 'Material Design',
+  route: 'material',
   mdFile: './index.md',
   category: UiLibsIntegrationCategory,
   order: 1,

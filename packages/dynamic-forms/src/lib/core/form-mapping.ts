@@ -1,4 +1,19 @@
-import { disabled, email, max, maxLength, min, minLength, pattern, required, SchemaPathRules, PathKind } from '@angular/forms/signals';
+import {
+  disabled,
+  email,
+  hidden,
+  max,
+  maxLength,
+  min,
+  minLength,
+  pattern,
+  readonly,
+  required,
+  SchemaPathRules,
+  PathKind,
+  applyEach,
+  schema,
+} from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { FieldDef } from '../definitions/base/field-def';
 import { FieldWithValidation } from '../definitions/base/field-with-validation';
@@ -160,6 +175,16 @@ function mapFieldSpecificConfiguration(fieldDef: FieldDef<any>, fieldPath: Schem
     disabled(toSupportedPath(fieldPath));
   }
 
+  // Handle readonly state
+  if (fieldDef.readonly) {
+    readonly(toSupportedPath(fieldPath));
+  }
+
+  // Handle hidden state (hidden() requires a logic function, so we provide a static true)
+  if (fieldDef.hidden) {
+    hidden(toSupportedPath(fieldPath), () => true);
+  }
+
   // Handle any additional configuration specific to the field type
   // This can be extended as needed for specific field requirements
 
@@ -231,31 +256,60 @@ function mapGroupFieldToForm(groupField: FieldDef<any>, fieldPath: SchemaPath<an
 }
 
 /**
- * Maps array field to the parent form schema
+ * Maps array field to the parent form schema using applyEach.
  *
  * Array fields are fundamentally different from groups:
  * - The fields array is a TEMPLATE (single field definition), not instances
  * - Array items are created/removed dynamically at runtime
- * - Child field instances handle their own validation when created
+ * - applyEach creates proper FieldTree structure for each array item
  *
- * The array field itself is registered in the parent form via normal
- * field processing (valueHandling: 'include'). Array items are managed
- * by the ArrayFieldComponent which creates dynamic field instances
- * with indexed keys (e.g., 'items[0]', 'items[1]').
+ * By using applyEach, Angular Signal Forms will:
+ * 1. Create FieldTree instances for each array item
+ * 2. Apply the item schema (validation, logic) to each item
+ * 3. Allow array items to be accessed via arrayFieldTree[index]
  */
-function mapArrayFieldToForm(arrayField: FieldDef<any>, _fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
-  if (!isArrayField(arrayField) || !arrayField.fields) {
+function mapArrayFieldToForm(arrayField: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
+  if (!isArrayField(arrayField) || !arrayField.fields || arrayField.fields.length === 0) {
     return;
   }
 
-  // Array fields use a template-based approach where validation is defined
-  // in the template and applied to dynamic instances at runtime.
-  //
-  // Unlike groups or pages (which have static children known at schema creation),
-  // array items are dynamic and may not exist yet. The ArrayFieldComponent
-  // manages the lifecycle of array items and ensures validation from the
-  // template is applied to each dynamically created item.
-  //
+  // Get the template field (first field in array.fields)
+  const templateField = arrayField.fields[0];
+
+  // Create an item schema from the template field
+  const itemSchema = schema<any>((itemPath: SchemaPathTree<any>) => {
+    // Handle container fields (row, group) that have nested fields
+    if (isRowField(templateField) || isPageField(templateField)) {
+      // Row/page templates flatten their children - apply child validations directly to item
+      if (templateField.fields && Array.isArray(templateField.fields)) {
+        for (const childField of templateField.fields as FieldDef<any>[]) {
+          if (!childField.key) continue;
+          const childPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
+          if (childPath) {
+            mapFieldToForm(childField, childPath);
+          }
+        }
+      }
+    } else if (isGroupField(templateField)) {
+      // Group template - apply child validations to the item
+      if (templateField.fields && Array.isArray(templateField.fields)) {
+        for (const childField of templateField.fields as FieldDef<any>[]) {
+          if (!childField.key) continue;
+          const childPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
+          if (childPath) {
+            mapFieldToForm(childField, childPath);
+          }
+        }
+      }
+    } else {
+      // Simple field template - apply validation directly
+      mapFieldToForm(templateField, itemPath);
+    }
+  });
+
+  // Apply the item schema to each array element
+  applyEach(fieldPath as SchemaPath<any[]>, itemSchema);
+
   // TODO: Support array-level validation (min/max length, unique items, etc.)
   // This would be applied to the array field itself, not individual items:
   //   if (arrayField.minLength) minLength(fieldPath, arrayField.minLength);

@@ -22,20 +22,6 @@ export interface ResolvedArrayItem {
   injector: Injector;
   /** Inputs signal for ngComponentOutlet - evaluated in template for reactivity. */
   inputs: Signal<Record<string, unknown>>;
-  /** JSON snapshot of the value this item was created with (for differential comparison). */
-  valueSnapshot: string;
-}
-
-/**
- * Creates a JSON snapshot of a value for differential update detection.
- * Used to compare array item values and determine if recreation is needed.
- */
-export function createValueSnapshot(value: unknown): string {
-  try {
-    return JSON.stringify(value) ?? '';
-  } catch {
-    return '';
-  }
 }
 
 /**
@@ -62,20 +48,14 @@ export type DifferentialUpdateOperation =
 /**
  * Determines the optimal differential update operation based on current and new state.
  *
- * Compares resolved items against new array values to determine if we can:
+ * Operations:
  * - Clear all (empty array)
  * - Initial render (no existing items)
- * - Append only (items added at end, existing unchanged)
- * - Pop only (items removed from end, remaining unchanged)
- * - Skip update (no changes)
- * - Recreate all (any other change pattern)
+ * - Append only (items added at end)
+ * - Pop only (items removed from end)
+ * - None (same length - items update via linkedSignal)
  */
-export function determineDifferentialOperation(
-  currentItems: ResolvedArrayItem[],
-  newLength: number,
-  currentArrayValue: unknown[],
-  checkValuesMatch: (newValues: unknown[], count: number) => boolean,
-): DifferentialUpdateOperation {
+export function determineDifferentialOperation(currentItems: ResolvedArrayItem[], newLength: number): DifferentialUpdateOperation {
   const currentLength = currentItems.length;
 
   if (newLength === 0) {
@@ -86,48 +66,20 @@ export function determineDifferentialOperation(
     return { type: 'initial', fieldTreesLength: newLength };
   }
 
-  const minLength = Math.min(currentLength, newLength);
+  // For all length changes, we optimize by assuming existing items stay in place.
+  // Items handle their own value updates via linkedSignal - no need to compare snapshots.
+  // Snapshot comparison was causing false "recreate" when existing items had been edited.
 
   if (newLength > currentLength) {
-    const isPureAppend = checkValuesMatch(currentArrayValue, minLength);
-    if (isPureAppend) {
-      return { type: 'append', startIndex: currentLength, endIndex: newLength };
-    }
+    // Items added - append new ones, existing items stay
+    return { type: 'append', startIndex: currentLength, endIndex: newLength };
   }
 
   if (newLength < currentLength) {
-    const isPurePop = checkValuesMatch(currentArrayValue, newLength);
-    if (isPurePop) {
-      return { type: 'pop', newLength };
-    }
+    // Items removed - pop from end, remaining items stay
+    return { type: 'pop', newLength };
   }
 
-  if (newLength === currentLength) {
-    const valuesMatch = checkValuesMatch(currentArrayValue, newLength);
-    if (valuesMatch) {
-      return { type: 'none' };
-    }
-  }
-
-  return { type: 'recreate' };
-}
-
-/**
- * Checks if the first N values match between resolved items' snapshots and new values.
- * Uses pre-computed JSON snapshots for efficient comparison without deep equality checks.
- */
-export function checkValuesMatch(resolvedItems: ResolvedArrayItem[], newValues: unknown[], count: number): boolean {
-  if (resolvedItems.length < count || newValues.length < count) {
-    return false;
-  }
-
-  for (let i = 0; i < count; i++) {
-    const oldSnapshot = resolvedItems[i].valueSnapshot;
-    const newSnapshot = createValueSnapshot(newValues[i]);
-
-    if (oldSnapshot !== newSnapshot) {
-      return false;
-    }
-  }
-  return true;
+  // Same length - no structural change, items update via linkedSignal
+  return { type: 'none' };
 }
