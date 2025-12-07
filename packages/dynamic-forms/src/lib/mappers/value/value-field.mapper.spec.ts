@@ -126,7 +126,7 @@ describe('valueFieldMapper', () => {
       expect(inputs['placeholder']).toBe('Enter value...');
     });
 
-    it('should include options for select fields', () => {
+    it('should NOT include options (use selectFieldMapper instead)', () => {
       const selectField = {
         key: 'selectField',
         type: 'select' as const,
@@ -139,13 +139,11 @@ describe('valueFieldMapper', () => {
       const injector = createTestInjector({ fieldKey: 'selectField' });
       const inputs = testMapper(selectField as BaseValueField<unknown, string>, injector);
 
-      expect(inputs['options']).toEqual([
-        { value: 'a', label: 'Option A' },
-        { value: 'b', label: 'Option B' },
-      ]);
+      // valueFieldMapper does NOT include options - use selectFieldMapper
+      expect(inputs).not.toHaveProperty('options');
     });
 
-    it('should include minDate and maxDate for datepicker fields', () => {
+    it('should NOT include datepicker properties (use datepickerFieldMapper instead)', () => {
       const datepickerField = {
         key: 'dateField',
         type: 'datepicker' as const,
@@ -156,21 +154,9 @@ describe('valueFieldMapper', () => {
       const injector = createTestInjector({ fieldKey: 'dateField' });
       const inputs = testMapper(datepickerField as BaseValueField<unknown, string>, injector);
 
-      expect(inputs['minDate']).toBe('2020-01-01');
-      expect(inputs['maxDate']).toBe('2025-12-31');
-    });
-
-    it('should include startAt for datepicker fields', () => {
-      const datepickerField = {
-        key: 'dateField',
-        type: 'datepicker' as const,
-        startAt: new Date('2023-06-15'),
-      };
-
-      const injector = createTestInjector({ fieldKey: 'dateField' });
-      const inputs = testMapper(datepickerField as BaseValueField<unknown, string>, injector);
-
-      expect(inputs['startAt']).toEqual(new Date('2023-06-15'));
+      // valueFieldMapper does NOT include datepicker props - use datepickerFieldMapper
+      expect(inputs).not.toHaveProperty('minDate');
+      expect(inputs).not.toHaveProperty('maxDate');
     });
 
     it('should NOT pass min, max, step as inputs (handled by Angular Signal Forms field state)', () => {
@@ -194,19 +180,19 @@ describe('valueFieldMapper', () => {
       expect(inputs).not.toHaveProperty('maxValue');
     });
 
-    it('should include rows and cols for textarea fields', () => {
+    it('should NOT include rows and cols (use textareaFieldMapper instead)', () => {
       const textareaField = {
         key: 'textareaField',
         type: 'textarea' as const,
-        rows: 10,
-        cols: 50,
+        props: { rows: 10, cols: 50 },
       };
 
       const injector = createTestInjector({ fieldKey: 'textareaField' });
       const inputs = testMapper(textareaField as BaseValueField<unknown, string>, injector);
 
-      expect(inputs['rows']).toBe(10);
-      expect(inputs['cols']).toBe(50);
+      // valueFieldMapper does NOT extract rows/cols from props - use textareaFieldMapper
+      expect(inputs).not.toHaveProperty('rows');
+      expect(inputs).not.toHaveProperty('cols');
     });
   });
 
@@ -415,94 +401,6 @@ describe('valueFieldMapper', () => {
 
       // Verify type is excluded
       expect(inputs).not.toHaveProperty('type');
-    });
-
-    it('should correctly map a complete select field definition', () => {
-      const selectField = {
-        key: 'country',
-        type: 'select' as const,
-        label: 'Country',
-        placeholder: 'Select a country',
-        options: [
-          { value: 'us', label: 'United States' },
-          { value: 'ca', label: 'Canada' },
-          { value: 'uk', label: 'United Kingdom' },
-        ],
-      };
-
-      const injector = createTestInjector({ fieldKey: 'country' });
-      const inputs = testMapper(selectField as BaseValueField<unknown, string>, injector);
-
-      expect(inputs['key']).toBe('country');
-      expect(inputs['label']).toBe('Country');
-      expect(inputs['placeholder']).toBe('Select a country');
-      expect(inputs['options']).toHaveLength(3);
-      expect(inputs['options']).toEqual([
-        { value: 'us', label: 'United States' },
-        { value: 'ca', label: 'Canada' },
-        { value: 'uk', label: 'United Kingdom' },
-      ]);
-    });
-
-    it('should correctly map a complete datepicker field definition', () => {
-      const datepickerField = {
-        key: 'birthDate',
-        type: 'datepicker' as const,
-        label: 'Date of Birth',
-        minDate: '1900-01-01',
-        maxDate: '2010-12-31',
-        startAt: new Date('2000-01-01'),
-      };
-
-      const injector = createTestInjector({ fieldKey: 'birthDate' });
-      const inputs = testMapper(datepickerField as BaseValueField<unknown, string>, injector);
-
-      expect(inputs['key']).toBe('birthDate');
-      expect(inputs['label']).toBe('Date of Birth');
-      expect(inputs['minDate']).toBe('1900-01-01');
-      expect(inputs['maxDate']).toBe('2010-12-31');
-      expect(inputs['startAt']).toEqual(new Date('2000-01-01'));
-    });
-
-    it('should correctly map a complete slider field definition (min/max via field state)', () => {
-      const sliderField = {
-        key: 'volume',
-        type: 'slider' as const,
-        label: 'Volume',
-        minValue: 0,
-        maxValue: 100,
-      };
-
-      const injector = createTestInjector({ fieldKey: 'volume' });
-      const inputs = testMapper(sliderField as BaseValueField<unknown, string>, injector);
-
-      expect(inputs['key']).toBe('volume');
-      expect(inputs['label']).toBe('Volume');
-      // min/max are accessed from field state, not component inputs
-      expect(inputs).not.toHaveProperty('min');
-      expect(inputs).not.toHaveProperty('max');
-      expect(inputs).not.toHaveProperty('minValue');
-      expect(inputs).not.toHaveProperty('maxValue');
-    });
-
-    it('should correctly map a complete textarea field definition', () => {
-      const textareaField = {
-        key: 'description',
-        type: 'textarea' as const,
-        label: 'Description',
-        placeholder: 'Enter description...',
-        rows: 5,
-        cols: 40,
-      };
-
-      const injector = createTestInjector({ fieldKey: 'description' });
-      const inputs = testMapper(textareaField as BaseValueField<unknown, string>, injector);
-
-      expect(inputs['key']).toBe('description');
-      expect(inputs['label']).toBe('Description');
-      expect(inputs['placeholder']).toBe('Enter description...');
-      expect(inputs['rows']).toBe(5);
-      expect(inputs['cols']).toBe(40);
     });
   });
 });

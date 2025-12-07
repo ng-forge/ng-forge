@@ -1,4 +1,10 @@
-import { checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms';
+import {
+  checkboxFieldMapper,
+  datepickerFieldMapper,
+  FieldTypeDefinition,
+  optionsFieldMapper,
+  valueFieldMapper,
+} from '@ng-forge/dynamic-forms';
 import { PrimeField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/prime-button.mapper';
 import {
@@ -22,7 +28,7 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: PrimeField.Select,
     loadComponent: () => import('../fields/select/prime-select.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: PrimeField.Checkbox,
@@ -73,17 +79,17 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: PrimeField.Radio,
     loadComponent: () => import('../fields/radio/prime-radio.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: PrimeField.MultiCheckbox,
     loadComponent: () => import('../fields/multi-checkbox/prime-multi-checkbox.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: PrimeField.Datepicker,
     loadComponent: () => import('../fields/datepicker/prime-datepicker.component'),
-    mapper: valueFieldMapper,
+    mapper: datepickerFieldMapper,
   },
   {
     name: PrimeField.Slider,

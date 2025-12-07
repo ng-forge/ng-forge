@@ -1,4 +1,10 @@
-import { checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms';
+import {
+  checkboxFieldMapper,
+  FieldTypeDefinition,
+  valueFieldMapper,
+  optionsFieldMapper,
+  datepickerFieldMapper,
+} from '@ng-forge/dynamic-forms';
 import { BsField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/bs-button.mapper';
 import {
@@ -18,7 +24,7 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: BsField.Select,
     loadComponent: () => import('../fields/select/bs-select.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: BsField.Checkbox,
@@ -69,17 +75,17 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: BsField.Radio,
     loadComponent: () => import('../fields/radio/bs-radio.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: BsField.MultiCheckbox,
     loadComponent: () => import('../fields/multi-checkbox/bs-multi-checkbox.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: BsField.Datepicker,
     loadComponent: () => import('../fields/datepicker/bs-datepicker.component'),
-    mapper: valueFieldMapper,
+    mapper: datepickerFieldMapper,
   },
   {
     name: BsField.Slider,

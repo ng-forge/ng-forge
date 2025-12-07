@@ -1,4 +1,10 @@
-import { checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms';
+import {
+  checkboxFieldMapper,
+  datepickerFieldMapper,
+  FieldTypeDefinition,
+  optionsFieldMapper,
+  valueFieldMapper,
+} from '@ng-forge/dynamic-forms';
 import { IonicField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/ionic-button.mapper';
 import {
@@ -22,7 +28,7 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: IonicField.Select,
     loadComponent: () => import('../fields/select/ionic-select.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: IonicField.Checkbox,
@@ -73,17 +79,17 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: IonicField.Radio,
     loadComponent: () => import('../fields/radio/ionic-radio.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: IonicField.MultiCheckbox,
     loadComponent: () => import('../fields/multi-checkbox/ionic-multi-checkbox.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: IonicField.Datepicker,
     loadComponent: () => import('../fields/datepicker/ionic-datepicker.component'),
-    mapper: valueFieldMapper,
+    mapper: datepickerFieldMapper,
   },
   {
     name: IonicField.Slider,

@@ -159,8 +159,10 @@ export {
   baseFieldMapper,
   buildBaseInputs,
   checkboxFieldMapper,
+  datepickerFieldMapper,
   groupFieldMapper,
   pageFieldMapper,
+  optionsFieldMapper,
   rowFieldMapper,
   valueFieldMapper,
 } from './mappers';

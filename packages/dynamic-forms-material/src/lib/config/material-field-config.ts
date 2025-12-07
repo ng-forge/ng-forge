@@ -1,4 +1,10 @@
-import { checkboxFieldMapper, FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms';
+import {
+  checkboxFieldMapper,
+  datepickerFieldMapper,
+  FieldTypeDefinition,
+  optionsFieldMapper,
+  valueFieldMapper,
+} from '@ng-forge/dynamic-forms';
 import { MatField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/mat-button.mapper';
 import {
@@ -22,7 +28,7 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: MatField.Select,
     loadComponent: () => import('../fields/select/mat-select.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: MatField.Checkbox,
@@ -73,17 +79,17 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: MatField.Radio,
     loadComponent: () => import('../fields/radio/mat-radio.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: MatField.MultiCheckbox,
     loadComponent: () => import('../fields/multi-checkbox/mat-multi-checkbox.component'),
-    mapper: valueFieldMapper,
+    mapper: optionsFieldMapper,
   },
   {
     name: MatField.Datepicker,
     loadComponent: () => import('../fields/datepicker/mat-datepicker.component'),
-    mapper: valueFieldMapper,
+    mapper: datepickerFieldMapper,
   },
   {
     name: MatField.Slider,
