@@ -3,7 +3,7 @@
   "buildCommand": "pnpm run deploy:prep",
   "outputDirectory": "dist/deploy",
   "git": {
-    "deploymentEnabled": false
+    "deploymentEnabled": true
   },
   "redirects": [
     {
