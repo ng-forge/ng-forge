@@ -133,17 +133,18 @@ function applySimpleValidationRules(fieldDef: FieldDef<any> & FieldWithValidatio
   }
 
   // Numeric validators (min/max)
-  const minValue = fieldDef.min ?? (fieldDef.props as any)?.min;
-  const maxValue = fieldDef.max ?? (fieldDef.props as any)?.max;
+  // Support both 'min'/'max' (from FieldWithValidation) and 'minValue'/'maxValue' (from SliderField)
+  const minVal = fieldDef.min ?? (fieldDef as any).minValue ?? (fieldDef.props as any)?.min;
+  const maxVal = fieldDef.max ?? (fieldDef as any).maxValue ?? (fieldDef.props as any)?.max;
 
-  if (minValue !== undefined) {
+  if (minVal !== undefined) {
     // Min validator expects SchemaPath<number>
-    min(path as SchemaPath<number, SchemaPathRules.Supported>, minValue);
+    min(path as SchemaPath<number, SchemaPathRules.Supported>, minVal);
   }
 
-  if (maxValue !== undefined) {
+  if (maxVal !== undefined) {
     // Max validator expects SchemaPath<number>
-    max(path as SchemaPath<number, SchemaPathRules.Supported>, maxValue);
+    max(path as SchemaPath<number, SchemaPathRules.Supported>, maxVal);
   }
 
   // String length validators

@@ -44,6 +44,8 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
+        [min]="minDate()"
+        [max]="maxDate()"
       />
 
       <mat-datepicker-toggle matIconSuffix [for]="$any(picker)" />

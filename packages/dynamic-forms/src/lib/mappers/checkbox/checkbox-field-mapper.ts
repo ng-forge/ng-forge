@@ -48,6 +48,11 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
       validationMessages: fieldDef.validationMessages ?? {},
     };
 
+    // Checked field specific property: placeholder
+    if (fieldDef.placeholder !== undefined) {
+      inputs['placeholder'] = fieldDef.placeholder;
+    }
+
     if (defaultValidationMessages !== undefined) {
       inputs['defaultValidationMessages'] = defaultValidationMessages;
     }
