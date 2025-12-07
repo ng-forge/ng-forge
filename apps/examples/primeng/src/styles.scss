@@ -8,11 +8,18 @@
   box-sizing: border-box;
 }
 
+// Ensure root element is block-level for proper height measurement
+example-root {
+  display: block;
+}
+
 html,
 body {
-  height: 100%;
+  // Use auto height for iframe embedding - content determines height
+  height: auto;
   font-family: var(--font-family);
-  overflow: auto !important;
+  // Hide overflow to prevent scrollbars in iframe - parent controls scrolling
+  overflow: hidden;
   // ng-doc light mode colors
   background-color: #f6f6f6;
   color: rgb(78, 78, 78);

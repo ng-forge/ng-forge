@@ -1,28 +1,9 @@
-import { afterNextRender, Component, inject, Injector, runInInjectionContext } from '@angular/core';
+import { afterNextRender, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { fromEvent, Observable } from 'rxjs';
-import { debounceTime, filter, map, startWith, switchMap } from 'rxjs/operators';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { fromEvent } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-
-/** Creates an observable from a ResizeObserver on the given element */
-const resizeObserver$ = (element: Element): Observable<number> =>
-  new Observable<ResizeObserverEntry[]>((subscriber) => {
-    const observer = new ResizeObserver((entries) => subscriber.next(entries));
-    observer.observe(element);
-    return () => observer.disconnect();
-  }).pipe(map(() => element.scrollHeight));
-
-/** Creates an observable that emits after the next render */
-const afterNextRender$ = (injector = inject(Injector)): Observable<void> =>
-  new Observable((subscriber) => {
-    runInInjectionContext(injector, () => {
-      afterNextRender(() => {
-        subscriber.next();
-        subscriber.complete();
-      });
-    });
-  });
 
 @Component({
   imports: [RouterModule],
@@ -42,15 +23,6 @@ export class App {
     { initialValue: 'auto' },
   );
 
-  // Track body height reactively after first render
-  private readonly bodyHeight = toSignal(
-    afterNextRender$().pipe(
-      switchMap(() => resizeObserver$(document.body).pipe(startWith(document.body.scrollHeight), debounceTime(50))),
-      takeUntilDestroyed(),
-    ),
-    { initialValue: 0 },
-  );
-
   constructor() {
     // Request initial theme state after first render
     afterNextRender(() => {
@@ -65,13 +37,6 @@ export class App {
         document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
       } else {
         document.documentElement.setAttribute('data-theme', theme);
-      }
-    });
-
-    // Report height changes to parent iframe
-    explicitEffect([this.bodyHeight], ([height]) => {
-      if (height > 0) {
-        window.parent.postMessage({ type: 'iframe-height', height }, '*');
       }
     });
   }

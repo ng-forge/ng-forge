@@ -4,7 +4,7 @@ import { ExampleIframeComponent } from '../../../app/components/example-iframe';
 @Component({
   selector: 'group-field-iframe-demo',
   imports: [ExampleIframeComponent],
-  template: `<example-iframe library="material" example="group" height="650px" [code]="code" />`,
+  template: `<example-iframe library="material" example="group" [code]="code" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupFieldIframeDemoComponent {

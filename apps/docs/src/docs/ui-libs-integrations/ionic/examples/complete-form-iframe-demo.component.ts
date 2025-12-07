@@ -4,7 +4,7 @@ import { ExampleIframeComponent } from '../../../../app/components/example-ifram
 @Component({
   selector: 'complete-form-iframe-demo',
   imports: [ExampleIframeComponent],
-  template: `<example-iframe library="ionic" example="complete-form" height="800px" [code]="code" />`,
+  template: `<example-iframe library="ionic" example="complete-form" [code]="code" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompleteFormIframeDemoComponent {
