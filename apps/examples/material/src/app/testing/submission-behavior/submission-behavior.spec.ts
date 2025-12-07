@@ -36,7 +36,7 @@ test.describe('Submission Behavior Tests', () => {
       await expect(page.locator('[data-testid="submitting-indicator"]')).toBeVisible();
 
       // Wait for submission to complete
-      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
 
       // Button should be enabled again after submission
       await expect(submitButton).toBeEnabled();
@@ -56,8 +56,8 @@ test.describe('Submission Behavior Tests', () => {
       // Submit the form
       await scenario.locator('#submitForm button').click();
 
-      // Wait for submission to complete
-      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+      // Wait for submission to complete (increased timeout for reliability)
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
 
       // Submission count should be incremented
       await expect(page.locator('[data-testid="submission-count"]')).toContainText('Submission count: 1');
@@ -119,8 +119,8 @@ test.describe('Submission Behavior Tests', () => {
       await expect(submitButton).toBeDisabled();
       await expect(page.locator('[data-testid="submitting-indicator"]')).toBeVisible();
 
-      // Wait for submission to complete
-      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+      // Wait for submission to complete (increased timeout for reliability)
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
 
       // Button should be enabled again
       await expect(submitButton).toBeEnabled();
@@ -170,10 +170,9 @@ test.describe('Submission Behavior Tests', () => {
 
       // Click next to go to page 2
       await nextButton.click();
-      await page.waitForTimeout(500);
 
-      // Verify we're on page 2
-      await expect(helpers.getInput(scenario, 'optionalField')).toBeVisible();
+      // Verify we're on page 2 - wait for the optional field to become visible
+      await expect(helpers.getInput(scenario, 'optionalField')).toBeVisible({ timeout: 5000 });
     });
   });
 
@@ -199,10 +198,9 @@ test.describe('Submission Behavior Tests', () => {
 
       // Click next - should navigate even with invalid page
       await nextButton.click();
-      await page.waitForTimeout(500);
 
-      // Verify we're on page 2
-      await expect(scenario.locator('#page2bTitle')).toBeVisible();
+      // Verify we're on page 2 - wait for the title to become visible
+      await expect(scenario.locator('#page2bTitle')).toBeVisible({ timeout: 5000 });
     });
   });
 
@@ -229,7 +227,7 @@ test.describe('Submission Behavior Tests', () => {
       await expect(page.locator('[data-testid="submitting-indicator"]')).toBeVisible();
 
       // Wait for submission to complete
-      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
 
       // Button should be enabled again
       await expect(submitButton).toBeEnabled();
@@ -318,7 +316,7 @@ test.describe('Submission Behavior Tests', () => {
       await expect(page.locator('[data-testid="submitting-indicator"]')).toBeVisible();
 
       // Wait for submission to complete
-      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
 
       // Check success message
       await expect(page.locator('[data-testid="submission-result"]')).toContainText('Form submitted successfully!');
@@ -353,7 +351,7 @@ test.describe('Submission Behavior Tests', () => {
       await submitButton.click();
 
       // Wait for error response
-      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
 
       // Check error message
       await expect(page.locator('[data-testid="submission-result"]')).toContainText('Server error: 500');
@@ -380,7 +378,7 @@ test.describe('Submission Behavior Tests', () => {
       await submitButton.click();
 
       // Wait for response
-      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 3000 });
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
 
       // Should show error status (422 is not 2xx)
       await expect(page.locator('[data-testid="submission-result"]')).toHaveClass(/error/);

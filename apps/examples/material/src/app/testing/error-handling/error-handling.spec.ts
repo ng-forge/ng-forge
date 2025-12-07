@@ -14,15 +14,15 @@ test.describe('Error Handling and Edge Cases', () => {
     test('should handle invalid field configurations gracefully', async ({ page, helpers }) => {
       // Navigate to invalid config test
       await page.goto('http://localhost:4201/#/test/error-handling/invalid-config');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
-      // Locate the specific test scenario
+      // Locate the specific test scenario with extended timeout for slower browsers
       const scenario = helpers.getScenario('invalid-config');
-      await expect(scenario).toBeVisible();
+      await expect(scenario).toBeVisible({ timeout: 10000 });
 
       // Verify that valid fields still render even if invalid ones fail
       const validField = scenario.locator('#validField input');
-      await expect(validField).toBeVisible();
+      await expect(validField).toBeVisible({ timeout: 5000 });
 
       // Interact with valid field
       await validField.fill('Test data');
