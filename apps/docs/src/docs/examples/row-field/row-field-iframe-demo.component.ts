@@ -4,7 +4,7 @@ import { ExampleIframeComponent } from '../../../app/components/example-iframe';
 @Component({
   selector: 'row-field-iframe-demo',
   imports: [ExampleIframeComponent],
-  template: `<example-iframe library="material" example="row" height="600px" [code]="code" />`,
+  template: `<example-iframe library="material" example="row" [code]="code" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RowFieldIframeDemoComponent {

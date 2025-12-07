@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, PLATFORM_ID, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ENVIRONMENT } from '../../config/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { fromEvent, NEVER } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter, fromEvent, map } from 'rxjs';
 
 @Component({
   selector: 'example-iframe',
@@ -17,7 +16,6 @@ import { filter, map } from 'rxjs/operators';
         </div>
       }
       <iframe
-        #iframeEl
         [src]="trustedSrc()"
         [style.height.px]="iframeHeight()"
         [style.width]="width()"
@@ -163,43 +161,38 @@ export class ExampleIframeComponent {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  private readonly iframeEl = viewChild<ElementRef<HTMLIFrameElement>>('iframeEl');
-
   loading = signal(true);
-
-  // Listen for height messages from iframe (only in browser)
-  private readonly heightFromIframe = toSignal(
-    this.isBrowser
-      ? fromEvent<MessageEvent>(window, 'message').pipe(
-          filter((event) => event.data?.type === 'iframe-height'),
-          filter((event) => {
-            // Only accept messages from our iframe
-            const iframe = this.iframeEl()?.nativeElement;
-            return iframe?.contentWindow === event.source;
-          }),
-          map((event) => event.data.height as number),
-          filter((height) => height > 0),
-          takeUntilDestroyed(),
-        )
-      : NEVER,
-    { initialValue: 300 },
-  );
-
-  // Computed height from iframe messages - reactive and declarative
-  iframeHeight = computed(() => {
-    const height = this.heightFromIframe();
-    return height > 0 ? height : 300;
-  });
+  iframeHeight = signal(100); // Start small, will adjust via postMessage
 
   iframeSrc = computed(() => {
     const baseUrl = this.env.exampleBaseUrls[this.library()];
-    // Use hash-based routing for examples
     return `${baseUrl}/#/examples/${this.example()}`;
   });
 
   trustedSrc = computed<SafeResourceUrl>(() => {
     return this.sanitizer.bypassSecurityTrustResourceUrl(this.iframeSrc());
   });
+
+  constructor() {
+    // Listen for height messages from iframe
+    if (this.isBrowser) {
+      fromEvent<MessageEvent>(window, 'message')
+        .pipe(
+          filter((event) => event.data?.type === 'example-iframe-height'),
+          // Only accept messages from this iframe's URL (match by example route)
+          filter((event) => {
+            const messageUrl = event.data.url as string | undefined;
+            return messageUrl !== undefined && messageUrl.includes(this.example());
+          }),
+          map((event) => event.data.height as number),
+          filter((height) => height > 0),
+          takeUntilDestroyed(),
+        )
+        .subscribe((height) => {
+          this.iframeHeight.set(height);
+        });
+    }
+  }
 
   onLoad(): void {
     this.loading.set(false);
