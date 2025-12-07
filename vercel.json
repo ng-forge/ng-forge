@@ -14,29 +14,29 @@
   ],
   "rewrites": [
     {
-      "source": "/dynamic-forms/examples/material/(.*)",
+      "source": "/dynamic-forms/examples/material/:path((?!.*\\.).+)",
       "destination": "/dynamic-forms/examples/material/index.html"
     },
     {
-      "source": "/dynamic-forms/examples/bootstrap/(.*)",
+      "source": "/dynamic-forms/examples/bootstrap/:path((?!.*\\.).+)",
       "destination": "/dynamic-forms/examples/bootstrap/index.html"
     },
     {
-      "source": "/dynamic-forms/examples/primeng/(.*)",
+      "source": "/dynamic-forms/examples/primeng/:path((?!.*\\.).+)",
       "destination": "/dynamic-forms/examples/primeng/index.html"
     },
     {
-      "source": "/dynamic-forms/examples/ionic/(.*)",
+      "source": "/dynamic-forms/examples/ionic/:path((?!.*\\.).+)",
       "destination": "/dynamic-forms/examples/ionic/index.html"
     },
     {
-      "source": "/dynamic-forms/(.*)",
+      "source": "/dynamic-forms/:path((?!.*\\.).+)",
       "destination": "/dynamic-forms/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/dynamic-forms/(.*)",
+      "source": "/dynamic-forms/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -45,7 +45,7 @@
       ]
     },
     {
-      "source": "/dynamic-forms/(.*).(js|css|woff2|png|jpg|svg|ico)",
+      "source": "/dynamic-forms/:path*.(js|css|woff2|png|jpg|svg|ico)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -53,8 +53,5 @@
         }
       ]
     }
-  ],
-  "git": {
-    "deploymentEnabled": false
-  }
+  ]
 }
