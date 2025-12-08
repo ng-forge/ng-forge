@@ -355,15 +355,29 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
 
-      - name: Run E2E tests
-        run: pnpm nx run material-examples:e2e
+      - name: Run E2E tests (affected)
+        run: |
+          # Get affected projects with e2e target (compare against previous commit)
+          AFFECTED=$(pnpm nx show projects --affected --base=HEAD~1 --with-target=e2e 2>/dev/null || true)
+
+          if [ -z "$AFFECTED" ]; then
+            echo "No e2e projects affected, skipping"
+            exit 0
+          fi
+
+          echo "Affected e2e projects:"
+          echo "$AFFECTED"
+          echo ""
+
+          # Run e2e tests for all affected projects
+          pnpm nx affected -t e2e --base=HEAD~1
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
-          path: dist/.playwright/apps/examples/material/
+          path: dist/.playwright/
           retention-days: 7
 
   package-integrity:

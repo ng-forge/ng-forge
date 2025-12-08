@@ -413,21 +413,27 @@ jobs:
         env:
           E2E_BROWSERS: chromium
         run: |
+          # Get affected projects with e2e target
           AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || true)
 
-          if echo "$AFFECTED" | grep -q "material-examples"; then
-            echo "Running e2e tests for material-examples..."
-            pnpm nx run material-examples:e2e
-          else
-            echo "E2E tests not affected, skipping"
+          if [ -z "$AFFECTED" ]; then
+            echo "No e2e projects affected, skipping"
+            exit 0
           fi
+
+          echo "Affected e2e projects:"
+          echo "$AFFECTED"
+          echo ""
+
+          # Run e2e tests for all affected projects
+          pnpm nx affected -t e2e --base=origin/main
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report-pr
-          path: dist/.playwright/apps/examples/material/
+          path: dist/.playwright/
           retention-days: 7
 
   package-integrity:
