@@ -1181,7 +1181,7 @@ const certificationConfig = {
 @Component({
   selector: 'app-conditional-logic-showcase',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" />`,
+  template: `<form [dynamic-form]="config"></form>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConditionalLogicShowcaseComponent {
@@ -1378,7 +1378,7 @@ template: `
   <div class="progress">
     Step {{ currentPage() + 1 }} of 4
   </div>
-  <dynamic-form [config]="config" [(value)]="formValue" />
+  <form [dynamic-form]="config" [(value)]="formValue" />
 `;
 ```
 
@@ -1404,11 +1404,11 @@ export class SaveDraftEvent implements FormEvent {
 
 // In your component
 template: `
-  <dynamic-form
-    [config]="config"
+  <form
+    [dynamic-form]="config"
     [(value)]="formValue"
     (events)="onEvent($event)"
-  />
+  ></form>
 `
 
 onEvent(event: FormEvent) {

@@ -43,7 +43,7 @@ import { DynamicForm } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-user-profile-form',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="formConfig" />`,
+  template: `<form [dynamic-form]="formConfig"></form>`,
 })
 export class UserProfileFormComponent {
   formConfig = {

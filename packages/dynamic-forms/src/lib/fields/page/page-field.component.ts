@@ -20,7 +20,7 @@ import { FieldDef } from '../../definitions/base/field-def';
  * Field values are flattened into the parent form (no nesting under page key).
  */
 @Component({
-  selector: 'page-field',
+  selector: 'section[page-field]',
   imports: [NgComponentOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {

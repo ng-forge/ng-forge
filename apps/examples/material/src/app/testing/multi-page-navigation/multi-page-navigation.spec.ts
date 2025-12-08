@@ -29,7 +29,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       await scenario.locator('#confirmPassword input').fill('securepassword123');
 
       // Navigate to page 2 using specific button
-      await scenario.getByTestId('undefined-nextToPersonalPage').click();
+      await scenario.locator('#nextToPersonalPage button').click();
       await page.waitForTimeout(500);
 
       // PAGE 2: Personal Information
@@ -49,7 +49,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       await scenario.locator('#phoneNumber input').fill('+1-555-123-4567');
 
       // Navigate to page 3 using specific button
-      await scenario.getByTestId('undefined-nextToPreferencesPage').click();
+      await scenario.locator('#nextToPreferencesPage button').click();
       await page.waitForTimeout(500);
 
       // PAGE 3: Preferences
@@ -131,7 +131,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       await page.waitForTimeout(200);
 
       // Navigate to page 2
-      const nextButton = scenario.getByTestId('undefined-nextToPage2');
+      const nextButton = scenario.locator('#nextToPage2 button');
       await expect(nextButton).toBeEnabled();
       await nextButton.click();
       await page.waitForTimeout(500);
@@ -185,14 +185,14 @@ test.describe('Multi-Page Navigation Tests', () => {
       await expect(scenario.locator('#field1 input')).toBeVisible();
       await scenario.locator('#field1 input').fill('Data from step 1');
 
-      await scenario.getByTestId('undefined-nextToPage2').click();
+      await scenario.locator('#nextToPage2 button').click();
       await page.waitForTimeout(500);
 
       // PAGE 2: Fill and navigate forward
       await expect(scenario.locator('#field2 input')).toBeVisible();
       await scenario.locator('#field2 input').fill('Data from step 2');
 
-      await scenario.getByTestId('undefined-nextToPage3').click();
+      await scenario.locator('#nextToPage3 button').click();
       await page.waitForTimeout(500);
 
       // PAGE 3: Fill field
@@ -200,7 +200,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       await scenario.locator('#field3 input').fill('Data from step 3');
 
       // Test backward navigation
-      const backButtonFromPage3 = scenario.getByTestId('undefined-previousToPage2');
+      const backButtonFromPage3 = scenario.locator('#previousToPage2 button');
       await expect(backButtonFromPage3).toBeVisible();
       await backButtonFromPage3.click();
       await page.waitForTimeout(500);
@@ -210,7 +210,7 @@ test.describe('Multi-Page Navigation Tests', () => {
       expect(await scenario.locator('#field2 input').inputValue()).toBe('Data from step 2');
 
       // Go back one more time (different button - now on page 2)
-      const backButtonFromPage2 = scenario.getByTestId('undefined-previousToPage1');
+      const backButtonFromPage2 = scenario.locator('#previousToPage1 button');
       await backButtonFromPage2.click();
       await page.waitForTimeout(500);
 
@@ -219,11 +219,11 @@ test.describe('Multi-Page Navigation Tests', () => {
       expect(await scenario.locator('#field1 input').inputValue()).toBe('Data from step 1');
 
       // Navigate forward again to verify data persists
-      await scenario.getByTestId('undefined-nextToPage2').click();
+      await scenario.locator('#nextToPage2 button').click();
       await page.waitForTimeout(500);
       expect(await scenario.locator('#field2 input').inputValue()).toBe('Data from step 2');
 
-      await scenario.getByTestId('undefined-nextToPage3').click();
+      await scenario.locator('#nextToPage3 button').click();
       await page.waitForTimeout(500);
       expect(await scenario.locator('#field3 input').inputValue()).toBe('Data from step 3');
 
@@ -294,12 +294,12 @@ test.describe('Multi-Page Navigation Tests', () => {
         }
       } else {
         // If no page indicators, navigate sequentially
-        await scenario.getByTestId('undefined-nextToDetails').click();
+        await scenario.locator('#nextToDetails button').click();
         await page.waitForTimeout(500);
         await expect(scenario.locator('#detailText input')).toBeVisible();
         await scenario.locator('#detailText input').fill('Detail text');
 
-        await scenario.getByTestId('undefined-nextToSummary').click();
+        await scenario.locator('#nextToSummary button').click();
         await page.waitForTimeout(500);
         await expect(scenario.locator('#summaryText input')).toBeVisible();
       }

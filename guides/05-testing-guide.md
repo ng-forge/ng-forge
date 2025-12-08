@@ -126,8 +126,8 @@ export class PrimeNGFormTestUtils {
     const fixture = TestBed.createComponent(DynamicForm);
     const component = fixture.componentInstance;
 
-    // Set up the component
-    fixture.componentRef.setInput('config', testConfig.config);
+    // Set up the component - use 'dynamic-form' as the input name since config uses alias: 'dynamic-form'
+    fixture.componentRef.setInput('dynamic-form', testConfig.config);
 
     // Set initial value if provided
     if (testConfig.initialValue !== undefined) {

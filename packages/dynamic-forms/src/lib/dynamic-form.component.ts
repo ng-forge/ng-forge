@@ -61,21 +61,21 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
  * @typeParam TModel - The strongly-typed interface for form values
  *
  * @example
- * ```html
- * <dynamic-form
- *   [config]="formConfig"
- *   [(value)]="formData"
- *   (submitted)="handleSubmit($event)"
- *   (validityChange)="handleValidityChange($event)">
- * </dynamic-form>
+ *```html
+ * <form
+ *  [dynamic-form]="formConfig"
+ *  [(value)]="formData"
+ *  (submitted)="handleSubmit($event)"
+ *  (validityChange)="handleValidityChange($event)">
+ * </form>
  * ```
  */
 @Component({
-  selector: 'dynamic-form',
+  selector: 'form[dynamic-form]',
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
     @if (formModeDetection().mode === 'paged') {
-      <page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()" />
+      <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()"></div>
     } @else {
       @for (field of resolvedFields(); track field.key) {
         <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
@@ -85,11 +85,12 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
   styleUrl: './dynamic-form.component.scss',
   providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
   host: {
-    class: 'df-form',
-    '[class.disabled]': 'disabled() || effectiveFormOptions().disabled',
+    class: 'df-dynamic-form df-form',
+    '[class.disabled]': 'disabled()',
     '[class.df-form-paged]': 'formModeDetection().mode === "paged"',
     '[class.df-form-non-paged]': 'formModeDetection().mode === "non-paged"',
     '[attr.data-form-mode]': 'formModeDetection().mode',
+    '(submit)': 'onNativeSubmit($event)',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -113,7 +114,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Form configuration defining the structure, validation, and behavior. */
-  config: InputSignal<FormConfig<TFields>> = input.required<FormConfig<TFields>>();
+  config: InputSignal<FormConfig<TFields>> = input.required<FormConfig<TFields>>({ alias: 'dynamic-form' });
 
   /** Runtime form options that override config options when provided. */
   formOptions = input<FormOptions | undefined>(undefined);
@@ -499,6 +500,22 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   })
     .pipe(takeUntilDestroyed())
     .subscribe();
+
+  /**
+   * Handles native form submission triggered by:
+   * - Pressing Enter in an input field
+   * - Clicking a button with type="submit"
+   * - Programmatic form.submit() calls
+   *
+   * This method prevents the default form submission behavior (page reload)
+   * and dispatches a SubmitEvent through the EventBus for processing.
+   *
+   * @param event - The native submit event from the form element
+   */
+  protected onNativeSubmit(event: Event): void {
+    event.preventDefault();
+    this.eventBus.dispatch(SubmitEvent);
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Private Methods

@@ -23,7 +23,7 @@ import { AsyncPipe } from '@angular/common';
   },
   template: `
     <ion-button
-      [type]="props()?.type || 'button'"
+      [type]="buttonType()"
       [expand]="props()?.expand"
       [fill]="props()?.fill || 'solid'"
       [shape]="props()?.shape"
@@ -33,7 +33,7 @@ import { AsyncPipe } from '@angular/common';
       [class]="className() || ''"
       [disabled]="disabled()"
       [attr.data-testid]="buttonTestId()"
-      (click)="triggerEvent()"
+      (click)="onClick()"
     >
       {{ label() | dynamicText | async }}
     </ion-button>
@@ -52,15 +52,37 @@ export default class IonicButtonFieldComponent<TEvent extends FormEvent> impleme
   readonly tabIndex = input<number>();
   readonly className = input<string>('');
 
-  readonly event = input.required<FormEventConstructor<TEvent>>();
+  /** Event to dispatch on click. Optional for submit buttons (native form submit handles it). */
+  readonly event = input<FormEventConstructor<TEvent>>();
   readonly eventArgs = input<EventArgs>();
   readonly props = input<IonicButtonProps>();
 
   readonly eventContext = input<ArrayItemContext>();
 
-  buttonTestId = computed(() => `${this.props()?.type || 'button'}-${this.key()}`);
+  /** Resolved button type - defaults to 'button' if not specified in props */
+  readonly buttonType = computed(() => this.props()?.type ?? 'button');
 
-  triggerEvent(): void {
+  readonly buttonTestId = computed(() => `${this.buttonType()}-${this.key()}`);
+
+  /**
+   * Handle button click.
+   * - For submit buttons (type="submit"): do nothing, native form submit handles it
+   * - For other buttons: dispatch the configured event via EventBus
+   */
+  onClick(): void {
+    // Native submit buttons let the form handle submission
+    if (this.buttonType() === 'submit') {
+      return;
+    }
+
+    // Other buttons dispatch their event (if configured)
+    const event = this.event();
+    if (event) {
+      this.dispatchEvent(event);
+    }
+  }
+
+  private dispatchEvent(event: FormEventConstructor<TEvent>): void {
     const args = this.eventArgs();
 
     if (args && args.length > 0) {
@@ -79,10 +101,10 @@ export default class IonicButtonFieldComponent<TEvent extends FormEvent> impleme
       const resolvedArgs = resolveTokens(args, context);
 
       // Dispatch event with resolved args
-      this.eventBus.dispatch(this.event(), ...resolvedArgs);
+      this.eventBus.dispatch(event, ...resolvedArgs);
     } else {
       // No args, dispatch event without arguments
-      this.eventBus.dispatch(this.event());
+      this.eventBus.dispatch(event);
     }
   }
 }

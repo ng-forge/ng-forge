@@ -33,32 +33,38 @@ import { FunctionRegistryService } from '../registry/function-registry.service';
  *
  * @example
  * ```html
- * <page-orchestrator
+ * <div page-orchestrator
  *   [pageFields]="pageFields"
  *   [form]="form"
  *   [fieldSignalContext]="fieldSignalContext"
  *   [config]="orchestratorConfig"
  *   (pageChanged)="onPageChanged($event)"
  *   (navigationStateChanged)="onNavigationStateChanged($event)">
- * </page-orchestrator>
+ * </div>
  * ```
  */
 @Component({
-  selector: 'page-orchestrator',
+  selector: 'div[page-orchestrator]',
   imports: [PageFieldComponent],
   template: `
     @for (pageField of pageFields(); track pageField.key; let i = $index) {
       @if (i === state().currentPageIndex || i === state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
         <!-- Current and adjacent pages (±1): render immediately for flicker-free navigation -->
         @defer (on immediate) {
-          <page-field [field]="pageField" [key]="pageField.key" [pageIndex]="i" [isVisible]="i === state().currentPageIndex" />
+          <section
+            page-field
+            [field]="pageField"
+            [key]="pageField.key"
+            [pageIndex]="i"
+            [isVisible]="i === state().currentPageIndex"
+          ></section>
         } @placeholder {
           <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
         }
       } @else {
         <!-- Distant pages: defer until browser is idle for memory savings -->
         @defer (on idle) {
-          <page-field [field]="pageField" [key]="pageField.key" [pageIndex]="i" [isVisible]="false" />
+          <section page-field [field]="pageField" [key]="pageField.key" [pageIndex]="i" [isVisible]="false"></section>
         } @placeholder {
           <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
         }

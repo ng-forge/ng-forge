@@ -102,13 +102,25 @@ export interface TestHelpers {
 /**
  * Extended test fixture with helper methods, console tracking, and mock API support
  */
+/**
+ * Normalizes a URL pattern for Playwright's page.route().
+ * String patterns starting with '/' are converted to glob patterns with '**' prefix
+ * to match against the full URL (e.g., '/api/test' becomes '** /api/test').
+ */
+function normalizeRoutePattern(pattern: string | RegExp): string | RegExp {
+  if (typeof pattern === 'string' && pattern.startsWith('/')) {
+    return `**${pattern}`;
+  }
+  return pattern;
+}
+
 export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleTracker; mockApi: MockApiHelpers }>({
   mockApi: async ({ page }, use) => {
     const interceptedRequests: InterceptedRequest[] = [];
 
     const helpers: MockApiHelpers = {
       mockSuccess: async (urlPattern, response = {}) => {
-        await page.route(urlPattern, async (route) => {
+        await page.route(normalizeRoutePattern(urlPattern), async (route) => {
           // Capture the request
           const request = route.request();
           let body: Record<string, unknown> | null = null;
@@ -142,7 +154,7 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
       },
 
       mockError: async (urlPattern, response = {}) => {
-        await page.route(urlPattern, async (route) => {
+        await page.route(normalizeRoutePattern(urlPattern), async (route) => {
           const request = route.request();
           let body: Record<string, unknown> | null = null;
           try {
@@ -174,7 +186,7 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
       },
 
       mockValidationError: async (urlPattern, errors, response = {}) => {
-        await page.route(urlPattern, async (route) => {
+        await page.route(normalizeRoutePattern(urlPattern), async (route) => {
           const request = route.request();
           let body: Record<string, unknown> | null = null;
           try {

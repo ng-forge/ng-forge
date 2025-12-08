@@ -40,7 +40,7 @@ import { getChildFieldTree } from '../../utils/form-internals/form-internals';
  * Group values are nested under the group's key in the parent form.
  */
 @Component({
-  selector: 'group-field',
+  selector: 'fieldset[group-field]',
   imports: [NgComponentOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {
