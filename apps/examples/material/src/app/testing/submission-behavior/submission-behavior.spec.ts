@@ -359,19 +359,20 @@ test.describe('Submission Behavior Tests', () => {
     });
 
     test('should handle validation error response', async ({ page, helpers, mockApi }) => {
-      // Set up mock endpoint with validation error
+      // Set up mock endpoint with validation error (server-side validation)
       await mockApi.mockValidationError(
         '/api/error-handling-test',
-        { email: 'Invalid email format', username: 'Username already taken' },
+        { email: 'Email already registered', username: 'Username already taken' },
         { delay: 200 },
       );
 
       const scenario = helpers.getScenario('http-error-handling');
       await expect(scenario).toBeVisible();
 
-      // Fill fields
+      // Fill fields with valid format (server will reject with validation errors)
+      // Note: Use valid email format to pass client-side HTML5 validation
       await helpers.fillInput(helpers.getInput(scenario, 'username'), 'testuser');
-      await helpers.fillInput(helpers.getInput(scenario, 'email'), 'invalid-email');
+      await helpers.fillInput(helpers.getInput(scenario, 'email'), 'test@example.com');
 
       // Submit
       const submitButton = scenario.locator('#submitErrorTest button');

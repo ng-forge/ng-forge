@@ -14,6 +14,8 @@
 
 # ng-forge Development Guidelines
 
+- **Spawn subagents if you believe the task is better to be divided**
+
 ## Angular API Usage
 
 - **You MUST investigate real Angular APIs and use those.** Before implementing custom solutions, research whether Angular provides a built-in API. Use official Angular documentation and source code as reference.
