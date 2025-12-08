@@ -19,7 +19,7 @@ import '@ng-forge/dynamic-forms-primeng';
     class: 'example-container',
   },
   template: `
-    <dynamic-form [config]="scenario().config" [(value)]="formValue" />
+    <form [dynamic-form]="scenario().config" [(value)]="formValue"></form>
     <div class="example-result">
       <h4>Form Data:</h4>
       <pre>{{ formValue() | json }}</pre>

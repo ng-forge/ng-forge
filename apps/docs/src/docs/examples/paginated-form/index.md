@@ -27,7 +27,7 @@ import '@ng-forge/dynamic-forms-material';
   selector: 'app-paginated-form',
   imports: [DynamicForm, JsonPipe],
   template: `
-    <dynamic-form [config]="config" [(value)]="formValue" />
+    <form [dynamic-form]="config" [(value)]="formValue"></form>
   `,
 })
 export class PaginatedFormComponent {
@@ -440,7 +440,7 @@ template: `
   <div class="progress-bar">
     Step {{ currentPage() + 1 }} of {{ totalPages }}
   </div>
-  <dynamic-form [config]="config" [(value)]="formValue" />
+  <form [dynamic-form]="config" [(value)]="formValue" />
 `;
 ```
 

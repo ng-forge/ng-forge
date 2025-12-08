@@ -263,7 +263,7 @@ const config = {
 } as const satisfies FormConfig;
 
 // ↓ 2. DynamicForm receives config
-<dynamic-form [config]="config" />
+<form [dynamic-form]="config"></form>
 
 // ↓ 3. DynamicForm computes form setup
 const formSetup = computed(() => {
@@ -345,7 +345,7 @@ onSubmit(event: Event) {
 }
 
 // ↓ Application receives typed value
-<dynamic-form [config]="config" (submitted)="handleSubmit($event)" />
+<form [dynamic-form]="config" (submitted)="handleSubmit($event)"></form>
 
 handleSubmit(value: ExtractFormValue<typeof config>) {
   // TypeScript knows: { email: string }

@@ -147,7 +147,7 @@ import { DynamicForm } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-my-form',
   imports: [DynamicForm],
-  template: ` <dynamic-form [config]="formConfig" /> `,
+  template: ` <form [dynamic-form]="formConfig"></form> `,
 })
 export class MyFormComponent {
   transloco = inject(TranslocoService);

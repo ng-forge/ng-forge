@@ -11,12 +11,15 @@ import {
   RemoveArrayItemEvent,
   resolveNextButtonDisabled,
   resolveSubmitButtonDisabled,
-  SubmitEvent,
 } from '@ng-forge/dynamic-forms';
 import { AddArrayItemButtonField, RemoveArrayItemButtonField } from './mat-button.type';
 
 /**
- * Mapper for submit button - preconfigures SubmitEvent
+ * Mapper for submit button - configures native form submission via type="submit"
+ *
+ * Unlike other buttons, submit buttons don't dispatch events directly.
+ * Instead, they trigger native form submission which the form component
+ * intercepts and dispatches to the EventBus.
  *
  * Disabled state is resolved using the button-logic-resolver which considers:
  * 1. Explicit `disabled: true` on the field definition
@@ -46,7 +49,9 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
   return computed(() => {
     const inputs: Record<string, unknown> = {
       ...baseInputs,
-      event: SubmitEvent,
+      // No event - native form submit handles it via form's onNativeSubmit
+      // Set type="submit" to trigger native form submission
+      props: { ...(fieldDef.props as Record<string, unknown>), type: 'submit' },
       // Evaluate the signal inside the computed - component receives plain boolean
       disabled: disabledSignal(),
     };

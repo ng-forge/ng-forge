@@ -146,8 +146,8 @@ export class DynamicFormTestUtils {
       DynamicFormTestUtils.registerTestFields(fieldRegistry);
     }
 
-    // Set up the component
-    fixture.componentRef.setInput('config', testConfig.config);
+    // Set up the component - use 'dynamic-form' as the input name since config uses alias: 'dynamic-form'
+    fixture.componentRef.setInput('dynamic-form', testConfig.config);
     if (testConfig.initialValue !== undefined) {
       fixture.componentRef.setInput('value', testConfig.initialValue);
     }

@@ -343,7 +343,7 @@ const registrationConfig = {
 @Component({
   selector: 'app-user-registration',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" />`,
+  template: `<form [dynamic-form]="config"></form>`,
 })
 export class UserRegistrationComponent {
   config = registrationConfig;

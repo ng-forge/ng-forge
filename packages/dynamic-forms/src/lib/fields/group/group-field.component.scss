@@ -4,6 +4,12 @@
 // The core grid system is handled by df-group class in grid-system.scss
 
 :host {
+  // Reset native fieldset styling
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0; // Prevent fieldset from expanding beyond container
+
   // Single column flow like parent dynamic-form
   display: grid;
   grid-template-columns: 1fr;

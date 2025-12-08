@@ -649,7 +649,7 @@ describe('DynamicFormComponent', () => {
         ],
       };
 
-      fixture.componentRef.setInput('config', newConfig);
+      fixture.componentRef.setInput('dynamic-form', newConfig);
       await delay();
       fixture.detectChanges();
 
@@ -1625,7 +1625,7 @@ describe('DynamicFormComponent', () => {
         ],
       };
 
-      fixture.componentRef.setInput('config', newConfig);
+      fixture.componentRef.setInput('dynamic-form', newConfig);
       await delay();
       fixture.detectChanges();
 

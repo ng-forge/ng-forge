@@ -18,7 +18,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
  * Purely a visual/layout container with no impact on form structure.
  */
 @Component({
-  selector: 'row-field',
+  selector: 'div[row-field]',
   imports: [NgComponentOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {

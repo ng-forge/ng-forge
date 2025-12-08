@@ -34,6 +34,5 @@
   },
   "dependencies": {
     "date-fns": "^4.0.0"
-  },
-  "sideEffects": false
+  }
 }

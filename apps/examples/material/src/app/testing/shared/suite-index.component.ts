@@ -26,12 +26,12 @@ import { TestScenario, TestSuite } from './types';
             @if (scenario.description) {
               <p class="scenario-description">{{ scenario.description }}</p>
             }
-            <dynamic-form
-              [config]="getEffectiveConfig(scenario)"
+            <form
+              [dynamic-form]="getEffectiveConfig(scenario)"
               [value]="getFormValue(scenario.testId)"
               (valueChange)="updateFormValue(scenario.testId, $event)"
               (submitted)="onSubmitted($event, scenario.testId)"
-            />
+            ></form>
 
             <details class="debug-output">
               <summary>Debug Output</summary>

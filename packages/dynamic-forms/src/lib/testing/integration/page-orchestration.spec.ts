@@ -156,7 +156,7 @@ describe('Page Orchestration Integration', () => {
         initialValue: {},
       });
 
-      const orchestrator = testResult.fixture.nativeElement.querySelector('page-orchestrator');
+      const orchestrator = testResult.fixture.nativeElement.querySelector('[page-orchestrator]');
       expect(orchestrator).toBeTruthy();
     });
 
@@ -168,7 +168,7 @@ describe('Page Orchestration Integration', () => {
         initialValue: {},
       });
 
-      const orchestrator = testResult.fixture.nativeElement.querySelector('page-orchestrator');
+      const orchestrator = testResult.fixture.nativeElement.querySelector('[page-orchestrator]');
       expect(orchestrator).toBeFalsy();
     });
   });

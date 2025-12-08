@@ -1,4 +1,4 @@
-The event bus enables communication between the `<dynamic-form>` component and custom field components within it. Each form instance has its own isolated event bus.
+The event bus enables communication between the `dynamic-form` component and custom field components within it. Each form instance has its own isolated event bus.
 
 ## Overview
 
@@ -10,7 +10,7 @@ The event bus provides:
 - Wizard page navigation coordination
 - Custom field component workflows
 
-**Note**: The event bus is scoped to each `<dynamic-form>` instance - events don't cross form boundaries.
+**Note**: The event bus is scoped to each `dynamic-form` instance - events don't cross form boundaries.
 
 ## Usage in Custom Field Components
 
@@ -344,7 +344,7 @@ import { DynamicForm } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-my-form',
   imports: [DynamicForm],
-  template: `<dynamic-form [config]="config" />`,
+  template: `<form [dynamic-form]="config"></form>`,
 })
 export class MyFormComponent {
   // EventBus is available to all field components rendered by DynamicForm

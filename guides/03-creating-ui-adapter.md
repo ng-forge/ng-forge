@@ -726,9 +726,9 @@ export class SuperUIFormTestUtils {
     const fixture = TestBed.createComponent(DynamicForm);
     const component = fixture.componentInstance;
 
-    // Set config
+    // Set config - use 'dynamic-form' as the input name since config uses alias: 'dynamic-form'
     untracked(() => {
-      fixture.componentRef.setInput('config', options.config);
+      fixture.componentRef.setInput('dynamic-form', options.config);
       fixture.detectChanges();
     });
 

@@ -89,7 +89,8 @@ export class SimpleTestUtils {
     const fixture = TestBed.createComponent(DynamicForm);
     const component = fixture.componentInstance;
 
-    fixture.componentRef.setInput('config', config);
+    // Use 'dynamic-form' as the input name since config uses alias: 'dynamic-form'
+    fixture.componentRef.setInput('dynamic-form', config);
     if (initialValue !== undefined) {
       fixture.componentRef.setInput('value', initialValue);
     }

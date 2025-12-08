@@ -113,7 +113,7 @@ import { DynamicForm, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '
   selector: 'app-tags-form',
   imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" />
+    <form [dynamic-form]="formConfig"></form>
     <button (click)="addTag()">Add Tag</button>
   `,
 })
@@ -163,7 +163,7 @@ import { DynamicForm, EventBus, AddArrayItemEvent, RemoveArrayItemEvent } from '
   selector: 'app-contacts-form',
   imports: [DynamicForm],
   template: `
-    <dynamic-form [config]="formConfig" />
+    <form [dynamic-form]="formConfig"></form>
     <button (click)="addContact()">Add Contact</button>
   `,
 })
