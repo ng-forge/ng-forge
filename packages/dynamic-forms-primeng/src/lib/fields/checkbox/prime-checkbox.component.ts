@@ -10,7 +10,8 @@ import { AsyncPipe } from '@angular/common';
   imports: [Checkbox, DynamicTextPipe, AsyncPipe, Field],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let checkboxId = key() + '-checkbox';
+    @let f = field(); @let checkboxId = key() + '-checkbox'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
+    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="flex items-center">
       <p-checkbox
@@ -19,6 +20,9 @@ import { AsyncPipe } from '@angular/common';
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
+        [attr.aria-invalid]="ariaInvalid"
+        [attr.aria-required]="ariaRequired"
+        [attr.aria-describedby]="ariaDescribedBy"
         [styleClass]="checkboxClasses()"
         [attr.tabindex]="tabIndex()"
       />
@@ -28,10 +32,10 @@ import { AsyncPipe } from '@angular/common';
     </div>
 
     @if (props()?.hint; as hint) {
-      <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+      <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
     }
-    @for (error of errorsToDisplay(); track error.kind) {
-      <small class="p-error">{{ error.message }}</small>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
     }
   `,
   styles: [
@@ -85,5 +89,42 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
     }
 
     return classes.join(' ');
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Unique ID for the hint element, used for aria-describedby */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
+  /** Base ID for error elements, used for aria-describedby */
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** aria-invalid: true when field is invalid AND touched, false otherwise */
+  protected readonly ariaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** aria-required: true if field is required, null otherwise (to remove attribute) */
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
+
+  /** aria-describedby: links to hint and error messages for screen readers */
+  protected readonly ariaDescribedBy = computed(() => {
+    const ids: string[] = [];
+
+    if (this.props()?.hint) {
+      ids.push(this.hintId());
+    }
+
+    const errors = this.errorsToDisplay();
+    errors.forEach((_, i) => {
+      ids.push(`${this.errorId()}-${i}`);
+    });
+
+    return ids.length > 0 ? ids.join(' ') : null;
   });
 }

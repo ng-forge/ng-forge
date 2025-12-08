@@ -45,11 +45,13 @@ import { format } from 'date-fns';
       [readonly]="true"
       [fill]="'outline'"
       [attr.tabindex]="tabIndex()"
+      [attr.aria-invalid]="isAriaInvalid()"
+      [attr.aria-required]="isRequired() || null"
       (click)="!f().disabled() && openModal()"
     >
       <div slot="error">
-        @for (error of errorsToDisplay(); track error.kind) {
-          <ion-note color="danger">{{ error.message }}</ion-note>
+        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
         }
       </div>
     </ion-input>
@@ -126,6 +128,24 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly isModalOpen = signal(false);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Base ID for error elements */
+  readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Whether the field is currently in an invalid state (invalid AND touched) */
+  readonly isAriaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** Whether the field has a required validator */
+  readonly isRequired = computed(() => {
+    return this.field()().required?.() === true;
+  });
 
   openModal() {
     this.isModalOpen.set(true);

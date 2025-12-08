@@ -50,6 +50,7 @@ import { getChildFieldTree } from '../../utils/form-internals/form-internals';
   styleUrl: './group-field.component.scss',
   host: {
     class: 'df-field df-group',
+    role: 'group',
     '[class.disabled]': 'disabled()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',

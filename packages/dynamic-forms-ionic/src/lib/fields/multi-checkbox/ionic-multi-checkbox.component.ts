@@ -25,7 +25,7 @@ import { AsyncPipe } from '@angular/common';
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
-    <div class="checkbox-group">
+    <div class="checkbox-group" role="group" [attr.aria-invalid]="isAriaInvalid()" [attr.aria-required]="isRequired() || null">
       @for (option of options(); track option.value) {
         <ion-item lines="none">
           <ion-checkbox
@@ -42,8 +42,8 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
 
-    @for (error of errorsToDisplay(); track error.kind) {
-      <ion-note color="danger">{{ error.message }}</ion-note>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
     }
   `,
   styles: [
@@ -101,6 +101,24 @@ export default class IonicMultiCheckboxFieldComponent<T extends ValueType> imple
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Base ID for error elements */
+  readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Whether the field is currently in an invalid state (invalid AND touched) */
+  readonly isAriaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** Whether the field has a required validator */
+  readonly isRequired = computed(() => {
+    return this.field()().required?.() === true;
+  });
 
   valueViewModel = linkedSignal<FieldOption<T>[]>(
     () => {

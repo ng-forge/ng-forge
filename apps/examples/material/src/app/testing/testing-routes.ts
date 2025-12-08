@@ -7,6 +7,12 @@ export default [
     loadComponent: () => import('./test-index.component').then((m) => m.TestIndexComponent),
   },
 
+  // Accessibility Tests - WCAG AA compliance tests
+  {
+    path: 'accessibility',
+    loadChildren: () => import('./accessibility/accessibility.routes'),
+  },
+
   // Advanced Validation Tests - Refactored into folder structure
   {
     path: 'advanced-validation',

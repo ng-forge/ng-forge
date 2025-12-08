@@ -10,6 +10,8 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
+    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
+    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div
       class="form-check form-switch"
@@ -26,6 +28,9 @@ import { AsyncPipe } from '@angular/common';
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
         [attr.tabindex]="tabIndex()"
+        [attr.aria-invalid]="ariaInvalid"
+        [attr.aria-required]="ariaRequired"
+        [attr.aria-describedby]="ariaDescribedBy"
         [attr.hidden]="f().hidden() || null"
       />
       <label [for]="key()" class="form-check-label">
@@ -34,12 +39,12 @@ import { AsyncPipe } from '@angular/common';
     </div>
 
     @if (props()?.helpText; as helpText) {
-      <div class="form-text" [attr.hidden]="f().hidden() || null">
+      <div class="form-text" [id]="helpTextId()" [attr.hidden]="f().hidden() || null">
         {{ helpText | dynamicText | async }}
       </div>
     }
-    @for (error of errorsToDisplay(); track error.kind) {
-      <div class="invalid-feedback d-block">{{ error.message }}</div>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
     }
   `,
   styles: [
@@ -90,4 +95,32 @@ export default class BsToggleFieldComponent implements BsToggleComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  protected readonly ariaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
+
+  protected readonly ariaDescribedBy = computed(() => {
+    const ids: string[] = [];
+    if (this.props()?.helpText) {
+      ids.push(this.helpTextId());
+    }
+    const errors = this.errorsToDisplay();
+    errors.forEach((_, i) => {
+      ids.push(`${this.errorId()}-${i}`);
+    });
+    return ids.length > 0 ? ids.join(' ') : null;
+  });
 }

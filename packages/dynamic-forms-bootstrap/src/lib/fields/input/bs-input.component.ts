@@ -12,6 +12,8 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
   template: `
     @let f = field(); @let p = props(); @let effectiveSize = this.effectiveSize();
     @let effectiveFloatingLabel = this.effectiveFloatingLabel();
+    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
+    @let ariaDescribedBy = this.ariaDescribedBy();
     @if (effectiveFloatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -23,6 +25,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -38,6 +43,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -53,6 +61,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -68,6 +79,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -83,6 +97,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -98,6 +115,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -115,8 +135,8 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @for (error of errorsToDisplay(); track error.kind) {
-          <div class="invalid-feedback d-block">{{ error.message }}</div>
+        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+          <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
         }
       </div>
     } @else {
@@ -133,6 +153,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -148,6 +171,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -163,6 +189,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -178,6 +207,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -193,6 +225,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -208,6 +243,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [id]="key()"
               [placeholder]="(placeholder() | dynamicText | async) ?? ''"
               [attr.tabindex]="tabIndex()"
+              [attr.aria-invalid]="ariaInvalid"
+              [attr.aria-required]="ariaRequired"
+              [attr.aria-describedby]="ariaDescribedBy"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -218,7 +256,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           }
         }
         @if (p?.helpText) {
-          <div class="form-text">
+          <div class="form-text" [id]="helpTextId()">
             {{ p?.helpText | dynamicText | async }}
           </div>
         }
@@ -227,8 +265,8 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @for (error of errorsToDisplay(); track error.kind) {
-          <div class="invalid-feedback d-block">{{ error.message }}</div>
+        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+          <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
         }
       </div>
     }
@@ -269,4 +307,41 @@ export default class BsInputFieldComponent implements BsInputComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Unique ID for the help text element, used for aria-describedby */
+  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+
+  /** Base ID for error elements, used for aria-describedby */
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** aria-invalid: true when field is invalid AND touched, false otherwise */
+  protected readonly ariaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** aria-required: true if field is required, null otherwise (to remove attribute) */
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
+
+  /** aria-describedby: links to help text and error messages for screen readers */
+  protected readonly ariaDescribedBy = computed(() => {
+    const ids: string[] = [];
+
+    if (this.props()?.helpText) {
+      ids.push(this.helpTextId());
+    }
+
+    const errors = this.errorsToDisplay();
+    errors.forEach((_, i) => {
+      ids.push(`${this.errorId()}-${i}`);
+    });
+
+    return ids.length > 0 ? ids.join(' ') : null;
+  });
 }

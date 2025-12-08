@@ -17,6 +17,8 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
+    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
+    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="mb-3">
       @if (label(); as label) {
@@ -31,7 +33,9 @@ import { AsyncPipe } from '@angular/common';
         [class.is-invalid]="f().invalid() && f().touched()"
         [multiple]="props()?.multiple || false"
         [size]="props()?.htmlSize"
-        [attr.aria-describedby]="props()?.helpText ? key() + '-help' : null"
+        [attr.aria-invalid]="ariaInvalid"
+        [attr.aria-required]="ariaRequired"
+        [attr.aria-describedby]="ariaDescribedBy"
       >
         @if (placeholder(); as placeholder) {
           <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>
@@ -44,10 +48,10 @@ import { AsyncPipe } from '@angular/common';
       </select>
 
       @if (props()?.helpText; as helpText) {
-        <div class="form-text" [id]="key() + '-help'">{{ helpText | dynamicText | async }}</div>
+        <div class="form-text" [id]="helpTextId()">{{ helpText | dynamicText | async }}</div>
       }
-      @for (error of errorsToDisplay(); track error.kind) {
-        <div class="invalid-feedback d-block">{{ error.message }}</div>
+      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+        <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
       }
     </div>
   `,
@@ -97,4 +101,32 @@ export default class BsSelectFieldComponent<T extends string = string> implement
 
     return fieldValue !== null && compareWith(fieldValue, optionValue);
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  protected readonly ariaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
+
+  protected readonly ariaDescribedBy = computed(() => {
+    const ids: string[] = [];
+    if (this.props()?.helpText) {
+      ids.push(this.helpTextId());
+    }
+    const errors = this.errorsToDisplay();
+    errors.forEach((_, i) => {
+      ids.push(`${this.errorId()}-${i}`);
+    });
+    return ids.length > 0 ? ids.join(' ') : null;
+  });
 }
