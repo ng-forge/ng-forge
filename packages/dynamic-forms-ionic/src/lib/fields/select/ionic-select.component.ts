@@ -33,6 +33,8 @@ import { AsyncPipe } from '@angular/common';
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
       [attr.tabindex]="tabIndex()"
+      [attr.aria-invalid]="isAriaInvalid()"
+      [attr.aria-required]="isRequired() || null"
     >
       @for (option of options(); track option.value) {
         <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
@@ -40,8 +42,8 @@ import { AsyncPipe } from '@angular/common';
         </ion-select-option>
       }
       <div slot="error">
-        @for (error of errorsToDisplay(); track error.kind) {
-          <ion-note color="danger">{{ error.message }}</ion-note>
+        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
         }
       </div>
     </ion-select>
@@ -82,4 +84,22 @@ export default class IonicSelectFieldComponent<T> implements IonicSelectComponen
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Base ID for error elements */
+  readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Whether the field is currently in an invalid state (invalid AND touched) */
+  readonly isAriaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** Whether the field has a required validator */
+  readonly isRequired = computed(() => {
+    return this.field()().required?.() === true;
+  });
 }

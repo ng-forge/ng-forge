@@ -18,17 +18,18 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
+    @let ariaDescribedBy = this.ariaDescribedBy();
     @if (label()) {
       <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
-    <df-prime-radio-group [field]="$any(f)" [options]="options()" [properties]="props()" />
+    <df-prime-radio-group [field]="$any(f)" [options]="options()" [properties]="props()" [attr.aria-describedby]="ariaDescribedBy" />
 
     @if (props()?.hint; as hint) {
-      <small class="p-hint" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+      <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
     }
-    @for (error of errorsToDisplay(); track error.kind) {
-      <small class="p-error">{{ error.message }}</small>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
     }
   `,
   styles: [
@@ -74,4 +75,30 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Unique ID for the hint element, used for aria-describedby */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
+  /** Base ID for error elements, used for aria-describedby */
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** aria-describedby: links to hint and error messages for screen readers */
+  protected readonly ariaDescribedBy = computed(() => {
+    const ids: string[] = [];
+
+    if (this.props()?.hint) {
+      ids.push(this.hintId());
+    }
+
+    const errors = this.errorsToDisplay();
+    errors.forEach((_, i) => {
+      ids.push(`${this.errorId()}-${i}`);
+    });
+
+    return ids.length > 0 ? ids.join(' ') : null;
+  });
 }

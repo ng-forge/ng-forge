@@ -81,6 +81,8 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
         <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
       }
     }
+    <!-- Live region for screen reader announcements -->
+    <div class="df-live-region" role="status" aria-live="polite" aria-atomic="true">{{ errorAnnouncement() }}</div>
   `,
   styleUrl: './dynamic-form.component.scss',
   providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
@@ -339,6 +341,12 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   /** Whether the form is currently submitting. */
   readonly submitting = computed(() => this.form()().submitting());
 
+  /**
+   * Announcement message for screen readers.
+   * Updates when form submission fails due to validation errors.
+   */
+  readonly errorAnnouncement = signal<string>('');
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Initialization
   // ─────────────────────────────────────────────────────────────────────────────
@@ -493,6 +501,28 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     .pipe(takeUntilDestroyed())
     .subscribe(() => this.onFormClear());
 
+  /**
+   * Announces form validation errors to screen readers when submission is attempted
+   * on an invalid form.
+   */
+  private readonly handleErrorAnnouncement = this.eventBus
+    .on<SubmitEvent>('submit')
+    .pipe(takeUntilDestroyed())
+    .subscribe(() => {
+      const formState = this.form()();
+      if (formState.invalid()) {
+        const errorCount = this.countErrors(formState.errors());
+        const message =
+          errorCount === 1
+            ? 'Form submission failed. Please fix 1 validation error before submitting.'
+            : `Form submission failed. Please fix ${errorCount} validation errors before submitting.`;
+        // Clear first to ensure screen readers announce even if message is the same
+        this.errorAnnouncement.set('');
+        // Use setTimeout to ensure the clear is processed before the new message
+        setTimeout(() => this.errorAnnouncement.set(message), 50);
+      }
+    });
+
   private readonly handleSubmission = createSubmissionHandler({
     eventBus: this.eventBus,
     configSignal: this.config,
@@ -584,6 +614,15 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.form()().value.set(emptyValue as any);
     this.value.set(emptyValue);
+  }
+
+  /**
+   * Counts the total number of validation errors across all fields.
+   * Used for screen reader announcements.
+   */
+  private countErrors(errors: unknown[] | null): number {
+    if (!errors) return 0;
+    return errors.length;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

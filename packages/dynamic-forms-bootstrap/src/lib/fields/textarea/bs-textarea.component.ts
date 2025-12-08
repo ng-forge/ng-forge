@@ -9,7 +9,8 @@ import { AsyncPipe } from '@angular/common';
   imports: [Field, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let p = props();
+    @let f = field(); @let p = props(); @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
+    @let ariaDescribedBy = this.ariaDescribedBy();
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -19,6 +20,9 @@ import { AsyncPipe } from '@angular/common';
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [rows]="p?.rows || 4"
           [attr.tabindex]="tabIndex()"
+          [attr.aria-invalid]="ariaInvalid"
+          [attr.aria-required]="ariaRequired"
+          [attr.aria-describedby]="ariaDescribedBy"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -34,8 +38,8 @@ import { AsyncPipe } from '@angular/common';
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @for (error of errorsToDisplay(); track error.kind) {
-          <div class="invalid-feedback d-block">{{ error.message }}</div>
+        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+          <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
         }
       </div>
     } @else {
@@ -51,6 +55,9 @@ import { AsyncPipe } from '@angular/common';
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [rows]="p?.rows || 4"
           [attr.tabindex]="tabIndex()"
+          [attr.aria-invalid]="ariaInvalid"
+          [attr.aria-required]="ariaRequired"
+          [attr.aria-describedby]="ariaDescribedBy"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -59,7 +66,7 @@ import { AsyncPipe } from '@angular/common';
         ></textarea>
 
         @if (p?.helpText) {
-          <div class="form-text">
+          <div class="form-text" [id]="helpTextId()">
             {{ p?.helpText | dynamicText | async }}
           </div>
         }
@@ -68,8 +75,8 @@ import { AsyncPipe } from '@angular/common';
             {{ p?.validFeedback | dynamicText | async }}
           </div>
         }
-        @for (error of errorsToDisplay(); track error.kind) {
-          <div class="invalid-feedback d-block">{{ error.message }}</div>
+        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+          <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
         }
       </div>
     }
@@ -105,4 +112,32 @@ export default class BsTextareaFieldComponent implements BsTextareaComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  protected readonly ariaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
+
+  protected readonly ariaDescribedBy = computed(() => {
+    const ids: string[] = [];
+    if (this.props()?.helpText) {
+      ids.push(this.helpTextId());
+    }
+    const errors = this.errorsToDisplay();
+    errors.forEach((_, i) => {
+      ids.push(`${this.errorId()}-${i}`);
+    });
+    return ids.length > 0 ? ids.join(' ') : null;
+  });
 }

@@ -18,12 +18,14 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color ?? 'primary'"
       [enableOnOffLabels]="props()?.enableOnOffLabels ?? false"
       [attr.tabindex]="tabIndex()"
+      [attr.aria-invalid]="isAriaInvalid()"
+      [attr.aria-required]="isRequired() || null"
     >
       {{ label() | dynamicText | async }}
     </ion-toggle>
 
-    @for (error of errorsToDisplay(); track error.kind) {
-      <ion-note color="danger">{{ error.message }}</ion-note>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
     }
   `,
   styles: [
@@ -62,4 +64,22 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Base ID for error elements */
+  readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Whether the field is currently in an invalid state (invalid AND touched) */
+  readonly isAriaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** Whether the field has a required validator */
+  readonly isRequired = computed(() => {
+    return this.field()().required?.() === true;
+  });
 }

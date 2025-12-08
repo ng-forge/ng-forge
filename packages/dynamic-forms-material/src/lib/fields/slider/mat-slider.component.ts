@@ -11,6 +11,9 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, Field],
   template: `
     @let f = field();
+    @let ariaInvalid = this.ariaInvalid();
+    @let ariaDescribedBy = this.ariaDescribedBy();
+
     @if (label(); as label) {
       <div class="slider-label">{{ label | dynamicText | async }}</div>
     }
@@ -24,14 +27,20 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color || 'primary'"
       class="slider-container"
     >
-      <input matSliderThumb [field]="f" [attr.tabindex]="tabIndex()" />
+      <input
+        matSliderThumb
+        [field]="f"
+        [attr.tabindex]="tabIndex()"
+        [attr.aria-invalid]="ariaInvalid"
+        [attr.aria-describedby]="ariaDescribedBy"
+      />
     </mat-slider>
 
     @if (props()?.hint; as hint) {
-      <div class="mat-hint">{{ hint | dynamicText | async }}</div>
+      <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
     }
-    @for (error of errorsToDisplay(); track error.kind) {
-      <mat-error>{{ error.message }}</mat-error>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
     }
   `,
   styles: [
@@ -76,4 +85,36 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Unique ID for the hint element, used for aria-describedby */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
+  /** Base ID for error elements, used for aria-describedby */
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** aria-invalid: true when field is invalid AND touched, false otherwise */
+  protected readonly ariaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** aria-describedby: links to hint and error messages for screen readers */
+  protected readonly ariaDescribedBy = computed(() => {
+    const ids: string[] = [];
+
+    if (this.props()?.hint) {
+      ids.push(this.hintId());
+    }
+
+    const errors = this.errorsToDisplay();
+    errors.forEach((_, i) => {
+      ids.push(`${this.errorId()}-${i}`);
+    });
+
+    return ids.length > 0 ? ids.join(' ') : null;
+  });
 }

@@ -22,11 +22,12 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
+    @let ariaDescribedBy = this.ariaDescribedBy();
     @if (label(); as label) {
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
-    <div class="checkbox-group" [class]="groupClasses()">
+    <div class="checkbox-group" [class]="groupClasses()" [attr.aria-describedby]="ariaDescribedBy">
       @for (option of options(); track option.value) {
         <div class="checkbox-option">
           <p-checkbox
@@ -41,10 +42,10 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
     @if (props()?.hint; as hint) {
-      <small class="p-hint">{{ hint | dynamicText | async }}</small>
+      <small class="p-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
     }
-    @for (error of errorsToDisplay(); track error.kind) {
-      <small class="p-error">{{ error.message }}</small>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
     }
   `,
   styles: [
@@ -109,6 +110,32 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
   });
 
   valueViewModel = linkedSignal<T[]>(() => this.field()().value(), { equal: isEqual });
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Unique ID for the hint element, used for aria-describedby */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
+  /** Base ID for error elements, used for aria-describedby */
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** aria-describedby: links to hint and error messages for screen readers */
+  protected readonly ariaDescribedBy = computed(() => {
+    const ids: string[] = [];
+
+    if (this.props()?.hint) {
+      ids.push(this.hintId());
+    }
+
+    const errors = this.errorsToDisplay();
+    errors.forEach((_, i) => {
+      ids.push(`${this.errorId()}-${i}`);
+    });
+
+    return ids.length > 0 ? ids.join(' ') : null;
+  });
 
   constructor() {
     explicitEffect([this.valueViewModel], ([selectedValues]) => {

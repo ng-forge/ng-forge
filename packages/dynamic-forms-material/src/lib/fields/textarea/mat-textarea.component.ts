@@ -13,6 +13,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   imports: [MatFormField, MatLabel, MatInput, MatHint, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
+    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label()) {
@@ -27,14 +29,17 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
         [attr.tabindex]="tabIndex()"
+        [attr.aria-invalid]="ariaInvalid"
+        [attr.aria-required]="ariaRequired"
+        [attr.aria-describedby]="ariaDescribedBy"
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
 
       @if (props()?.hint; as hint) {
-        <mat-hint>{{ hint | dynamicText | async }}</mat-hint>
+        <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
       }
-      @for (error of errorsToDisplay(); track error.kind) {
-        <mat-error>{{ error.message }}</mat-error>
+      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+        <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
       }
     </mat-form-field>
   `,
@@ -117,4 +122,41 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Unique ID for the hint element, used for aria-describedby */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
+  /** Base ID for error elements, used for aria-describedby */
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** aria-invalid: true when field is invalid AND touched, false otherwise */
+  protected readonly ariaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** aria-required: true if field is required, null otherwise (to remove attribute) */
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
+
+  /** aria-describedby: links to hint and error messages for screen readers */
+  protected readonly ariaDescribedBy = computed(() => {
+    const ids: string[] = [];
+
+    if (this.props()?.hint) {
+      ids.push(this.hintId());
+    }
+
+    const errors = this.errorsToDisplay();
+    errors.forEach((_, i) => {
+      ids.push(`${this.errorId()}-${i}`);
+    });
+
+    return ids.length > 0 ? ids.join(' ') : null;
+  });
 }

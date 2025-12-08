@@ -25,10 +25,12 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
       [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
+      [attr.aria-invalid]="isAriaInvalid()"
+      [attr.aria-required]="isRequired() || null"
     >
       <div slot="error">
-        @for (error of errorsToDisplay(); track error.kind) {
-          <ion-note color="danger">{{ error.message }}</ion-note>
+        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
         }
       </div>
     </ion-input>
@@ -71,4 +73,22 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Accessibility
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Base ID for error elements */
+  readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Whether the field is currently in an invalid state (invalid AND touched) */
+  readonly isAriaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** Whether the field has a required validator */
+  readonly isRequired = computed(() => {
+    return this.field()().required?.() === true;
+  });
 }
