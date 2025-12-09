@@ -1,0 +1,347 @@
+name: Main Integration
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-all:
+    name: Build All Libraries
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all libraries
+        run: pnpm nx run-many -t build --projects=dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-ionic,dynamic-forms-primeng
+
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
+          key: main-build-${{ github.sha }}
+
+  test-lib:
+    name: Test Library (${{ matrix.lib }})
+    runs-on: ubuntu-latest
+    needs: build-all
+    strategy:
+      fail-fast: false
+      matrix:
+        lib:
+          - dynamic-forms
+          - dynamic-forms-material
+          - dynamic-forms-bootstrap
+          - dynamic-forms-ionic
+          - dynamic-forms-primeng
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
+          key: main-build-${{ github.sha }}
+
+      - name: Test ${{ matrix.lib }}
+        run: pnpm nx test ${{ matrix.lib }} --configuration=ci --coverage
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-${{ matrix.lib }}
+          path: coverage/packages/${{ matrix.lib }}/
+          retention-days: 7
+
+  lint-lib:
+    name: Lint Library (${{ matrix.lib }})
+    runs-on: ubuntu-latest
+    needs: build-all
+    strategy:
+      fail-fast: false
+      matrix:
+        lib:
+          - dynamic-forms
+          - dynamic-forms-material
+          - dynamic-forms-bootstrap
+          - dynamic-forms-ionic
+          - dynamic-forms-primeng
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint ${{ matrix.lib }}
+        run: pnpm nx lint ${{ matrix.lib }}
+
+  e2e-full:
+    name: E2E Full (${{ matrix.app }} - ${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    needs: build-all
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [bootstrap-examples, material-examples, primeng-examples]
+        browser: [chromium, firefox, webkit]
+        # Uncomment when tests are ready:
+        # app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
+          key: main-build-${{ github.sha }}
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | head -1)" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-${{ matrix.browser }}
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install ${{ matrix.browser }} --with-deps
+
+      - name: Run E2E tests
+        env:
+          E2E_BROWSERS: ${{ matrix.browser }}
+        run: |
+          echo "Running full e2e tests for ${{ matrix.app }} on ${{ matrix.browser }}..."
+          pnpm nx run ${{ matrix.app }}:e2e
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.app }}-${{ matrix.browser }}
+          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'primeng-examples' && 'primeng' || 'ionic' }}/
+          retention-days: 7
+
+  build-examples:
+    name: Build Example App (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    needs: build-all
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
+          key: main-build-${{ github.sha }}
+
+      - name: Build ${{ matrix.app }}
+        run: pnpm nx build ${{ matrix.app }} --configuration=production
+
+  build-docs:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    needs: build-all
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/packages/dynamic-forms
+            dist/packages/dynamic-forms-material
+            dist/packages/dynamic-forms-bootstrap
+            dist/packages/dynamic-forms-ionic
+            dist/packages/dynamic-forms-primeng
+          key: main-build-${{ github.sha }}
+
+      - name: Build docs
+        run: pnpm nx build docs --configuration=production
+
+  integration-summary:
+    name: Integration Summary
+    runs-on: ubuntu-latest
+    needs: [test-lib, lint-lib, e2e-full, build-examples, build-docs]
+    if: always()
+
+    steps:
+      - name: Check results
+        run: |
+          echo "## Integration Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.test-lib.result }}" == "success" ]; then
+            echo "- :white_check_mark: Library Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- :x: Library Tests: ${{ needs.test-lib.result }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.lint-lib.result }}" == "success" ]; then
+            echo "- :white_check_mark: Library Lint: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- :x: Library Lint: ${{ needs.lint-lib.result }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.e2e-full.result }}" == "success" ]; then
+            echo "- :white_check_mark: E2E Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- :x: E2E Tests: ${{ needs.e2e-full.result }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.build-examples.result }}" == "success" ]; then
+            echo "- :white_check_mark: Example Apps Build: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- :x: Example Apps Build: ${{ needs.build-examples.result }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.build-docs.result }}" == "success" ]; then
+            echo "- :white_check_mark: Documentation Build: Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- :x: Documentation Build: ${{ needs.build-docs.result }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if any job failed
+        if: |
+          needs.test-lib.result == 'failure' ||
+          needs.lint-lib.result == 'failure' ||
+          needs.e2e-full.result == 'failure' ||
+          needs.build-examples.result == 'failure' ||
+          needs.build-docs.result == 'failure'
+        run: exit 1

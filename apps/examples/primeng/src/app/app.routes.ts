@@ -10,4 +10,8 @@ export const appRoutes: Route[] = [
     path: 'examples',
     loadChildren: () => import('./examples/examples.routes'),
   },
+  {
+    path: 'test',
+    loadChildren: () => import('./testing/testing-routes'),
+  },
 ];

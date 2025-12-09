@@ -358,14 +358,15 @@ jobs:
           pnpm nx show projects --affected --base=origin/main --with-target=build || true
 
   e2e:
-    name: E2E Tests (${{ matrix.app }})
+    name: E2E Tests (${{ matrix.app }} - ${{ matrix.browser }})
     runs-on: ubuntu-latest
     needs: [lint, test, examples, typecheck, package-integrity]
     strategy:
       fail-fast: false
       matrix:
-        app: [bootstrap-examples, material-examples]
-        # Uncomment when tests are ready for these apps:
+        app: [bootstrap-examples, material-examples, primeng-examples]
+        browser: [chromium, firefox, webkit]
+        # Uncomment when tests are ready:
         # app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
 
     steps:
@@ -410,10 +411,10 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-chromium
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-${{ matrix.browser }}
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium --with-deps
+        run: pnpm exec playwright install ${{ matrix.browser }} --with-deps
 
       - name: Check if app is affected
         id: check-affected
@@ -428,9 +429,9 @@ jobs:
       - name: Run E2E tests
         if: steps.check-affected.outputs.affected == 'true'
         env:
-          E2E_BROWSERS: chromium
+          E2E_BROWSERS: ${{ matrix.browser }}
         run: |
-          echo "Running e2e tests for ${{ matrix.app }}..."
+          echo "Running e2e tests for ${{ matrix.app }} on ${{ matrix.browser }}..."
           pnpm nx run ${{ matrix.app }}:e2e
 
       - name: Skip E2E tests (not affected)
@@ -441,7 +442,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-${{ matrix.app }}
+          name: playwright-report-${{ matrix.app }}-${{ matrix.browser }}
           path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'primeng-examples' && 'primeng' || 'ionic' }}/
           retention-days: 7
 
