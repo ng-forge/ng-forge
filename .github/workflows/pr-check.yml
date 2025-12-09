@@ -358,9 +358,15 @@ jobs:
           pnpm nx show projects --affected --base=origin/main --with-target=build || true
 
   e2e:
-    name: E2E Tests (Chromium)
+    name: E2E Tests (${{ matrix.app }})
     runs-on: ubuntu-latest
     needs: [lint, test, examples, typecheck, package-integrity]
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [bootstrap-examples, material-examples]
+        # Uncomment when tests are ready for these apps:
+        # app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
 
     steps:
       - name: Checkout
@@ -409,25 +415,34 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
 
-      - name: Run E2E tests (affected)
+      - name: Check if app is affected
+        id: check-affected
+        run: |
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || true)
+          if echo "$AFFECTED" | grep -q "${{ matrix.app }}"; then
+            echo "affected=true" >> $GITHUB_OUTPUT
+          else
+            echo "affected=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run E2E tests
+        if: steps.check-affected.outputs.affected == 'true'
         env:
           E2E_BROWSERS: chromium
         run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || true)
+          echo "Running e2e tests for ${{ matrix.app }}..."
+          pnpm nx run ${{ matrix.app }}:e2e
 
-          if echo "$AFFECTED" | grep -q "material-examples"; then
-            echo "Running e2e tests for material-examples..."
-            pnpm nx run material-examples:e2e
-          else
-            echo "E2E tests not affected, skipping"
-          fi
+      - name: Skip E2E tests (not affected)
+        if: steps.check-affected.outputs.affected == 'false'
+        run: echo "E2E tests for ${{ matrix.app }} not affected, skipping"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-pr
-          path: dist/.playwright/apps/examples/material/
+          name: playwright-report-${{ matrix.app }}
+          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'primeng-examples' && 'primeng' || 'ionic' }}/
           retention-days: 7
 
   package-integrity:

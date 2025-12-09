@@ -6,6 +6,7 @@
 
 import type { FormEvent } from '@ng-forge/dynamic-forms';
 import type {
+  AddArrayItemButtonField,
   BsButtonField,
   BsCheckboxField,
   BsDatepickerField,
@@ -19,6 +20,7 @@ import type {
   BsSubmitButtonField,
   BsTextareaField,
   BsToggleField,
+  RemoveArrayItemButtonField,
 } from '../fields';
 
 declare module '@ng-forge/dynamic-forms' {
@@ -30,6 +32,8 @@ declare module '@ng-forge/dynamic-forms' {
     submit: BsSubmitButtonField;
     next: BsNextButtonField;
     previous: BsPreviousButtonField;
+    addArrayItem: AddArrayItemButtonField;
+    removeArrayItem: RemoveArrayItemButtonField;
     textarea: BsTextareaField;
     radio: BsRadioField<unknown>;
     'multi-checkbox': BsMultiCheckboxField<unknown>;
