@@ -25,6 +25,7 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
         [maxlength]="props()?.maxlength"
+        [tabIndex]="tabIndex()"
         [autoResize]="props()?.autoResize ?? false"
         [ariaDescribedBy]="ariaDescribedBy"
         [styleClass]="textareaClasses()"

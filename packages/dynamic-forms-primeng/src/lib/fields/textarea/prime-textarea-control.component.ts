@@ -18,6 +18,7 @@ import { FormsModule } from '@angular/forms';
       [rows]="rows()"
       [cols]="cols()"
       [attr.maxlength]="maxlength()"
+      [attr.tabindex]="tabIndex()"
       [autoResize]="autoResize()"
       [disabled]="disabled()"
       [readonly]="readonly()"
@@ -61,6 +62,7 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   readonly rows = input<number>(4);
   readonly cols = input<number | undefined>(undefined);
   readonly maxlength = input<number | undefined>(undefined);
+  readonly tabIndex = input<number | undefined>(undefined);
   readonly autoResize = input<boolean>(false);
   readonly styleClass = input<string>('');
 
