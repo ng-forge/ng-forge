@@ -16,7 +16,7 @@ import { TestScenario } from './types';
  * - `submissionAction`: Uses a custom submission action
  */
 @Component({
-  selector: 'bs-example-test-scenario',
+  selector: 'example-test-scenario',
   imports: [DynamicForm, JsonPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

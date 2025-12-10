@@ -11,7 +11,7 @@ import { TestScenario, TestSuite } from './types';
  * Shows all scenarios in the suite with navigation links.
  */
 @Component({
-  selector: 'bs-example-suite-index',
+  selector: 'example-suite-index',
   imports: [DynamicForm, JsonPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

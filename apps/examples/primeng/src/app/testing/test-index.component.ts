@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { TEST_SUITE_REGISTRY } from './shared/test-suite.registry';
 
 @Component({
-  selector: 'bs-example-test-index',
+  selector: 'example-test-index',
   imports: [RouterLink],
   template: `
     <div class="test-index-container">
