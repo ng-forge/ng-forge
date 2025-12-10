@@ -1,18 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import { Field, FieldTree } from '@angular/forms/signals';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
-import { TextareaModule } from 'primeng/textarea';
-import { FormsModule } from '@angular/forms';
+import { PrimeTextareaControlComponent } from './prime-textarea-control.component';
 
 @Component({
   selector: 'df-prime-textarea',
-  imports: [TextareaModule, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [DynamicTextPipe, AsyncPipe, Field, PrimeTextareaControlComponent],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
@@ -20,23 +18,18 @@ import { FormsModule } from '@angular/forms';
         <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
-      <textarea
-        pInputTextarea
+      <df-prime-textarea-control
         [id]="inputId()"
-        [(ngModel)]="f().value"
+        [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
-        [attr.maxlength]="props()?.maxlength ?? null"
+        [maxlength]="props()?.maxlength"
+        [tabIndex]="tabIndex()"
         [autoResize]="props()?.autoResize ?? false"
-        [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
-        [class]="textareaClasses()"
-        [disabled]="f().disabled()"
-        [readonly]="f().readonly()"
-      ></textarea>
+        [ariaDescribedBy]="ariaDescribedBy"
+        [styleClass]="textareaClasses()"
+      />
 
       @if (props()?.hint; as hint) {
         <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
@@ -105,17 +98,6 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
 
   /** Base ID for error elements, used for aria-describedby */
   protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** aria-invalid: true when field is invalid AND touched, false otherwise */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise (to remove attribute) */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
 
   /** aria-describedby: links to hint and error messages for screen readers */
   protected readonly ariaDescribedBy = computed(() => {

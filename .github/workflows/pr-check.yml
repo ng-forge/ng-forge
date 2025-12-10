@@ -364,9 +364,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [bootstrap-examples, material-examples]
-        # Uncomment when tests are ready for these apps:
-        # app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
+        app: [bootstrap-examples, material-examples, primeng-examples]
 
     steps:
       - name: Checkout
@@ -412,7 +410,7 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-chromium
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browser
         run: pnpm exec playwright install chromium --with-deps
 
       - name: Check if app is affected
@@ -441,8 +439,8 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-${{ matrix.app }}
-          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'primeng-examples' && 'primeng' || 'ionic' }}/
+          name: playwright-report-pr-${{ matrix.app }}
+          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || 'primeng' }}/
           retention-days: 7
 
   package-integrity:
