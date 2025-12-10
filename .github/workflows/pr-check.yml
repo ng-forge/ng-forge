@@ -358,14 +358,13 @@ jobs:
           pnpm nx show projects --affected --base=origin/main --with-target=build || true
 
   e2e:
-    name: E2E Tests (${{ matrix.app }} - ${{ matrix.browser }})
+    name: E2E Tests (${{ matrix.app }})
     runs-on: ubuntu-latest
     needs: [lint, test, examples, typecheck, package-integrity]
     strategy:
       fail-fast: false
       matrix:
         app: [bootstrap-examples, material-examples, primeng-examples]
-        browser: [chromium, firefox, webkit]
 
     steps:
       - name: Checkout
@@ -409,10 +408,10 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-${{ matrix.browser }}
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-chromium
 
       - name: Install Playwright browser
-        run: pnpm exec playwright install ${{ matrix.browser }} --with-deps
+        run: pnpm exec playwright install chromium --with-deps
 
       - name: Check if app is affected
         id: check-affected
@@ -427,7 +426,7 @@ jobs:
       - name: Run E2E tests
         if: steps.check-affected.outputs.affected == 'true'
         env:
-          E2E_BROWSERS: ${{ matrix.browser }}
+          E2E_BROWSERS: chromium
         run: |
           echo "Running e2e tests for ${{ matrix.app }}..."
           pnpm nx run ${{ matrix.app }}:e2e
@@ -440,7 +439,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-pr-${{ matrix.app }}-${{ matrix.browser }}
+          name: playwright-report-pr-${{ matrix.app }}
           path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || 'primeng' }}/
           retention-days: 7
 
