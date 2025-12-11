@@ -253,8 +253,8 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       // Verify successful submission
       expect(submittedData['requiredText']).toBe('Valid text input');
       expect(submittedData['emailValidation']).toBe('valid@example.com');
-      // HTML form inputs always return strings, so we check for string value
-      expect(submittedData['numberRange']).toBe('50');
+      // Signal Forms with type=number returns numeric value
+      expect(submittedData['numberRange']).toBe(50);
       expect(submittedData['patternValidation']).toBe('Valid Name');
     });
   });

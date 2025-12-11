@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
-import type { FormValueControl } from '@angular/forms/signals';
+import type { FormCheckboxControl } from '@angular/forms/signals';
 import { IonToggle } from '@ionic/angular/standalone';
 
 /**
- * A wrapper component for Ionic's ion-toggle that implements FormValueControl.
+ * A wrapper component for Ionic's ion-toggle that implements FormCheckboxControl.
  * This allows it to work with Angular's [field] directive from @angular/forms/signals.
  *
- * We use FormValueControl<boolean> instead of FormCheckboxControl because
- * the Field directive binds to the `value` model for value-based controls.
+ * We use FormCheckboxControl because ion-toggle is a boolean checkbox-like control.
+ * The Field directive binds to the `checked` model for checkbox controls.
  */
 @Component({
   selector: 'df-ionic-toggle-control',
@@ -31,13 +31,13 @@ import { IonToggle } from '@ionic/angular/standalone';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IonicToggleControlComponent implements FormValueControl<boolean> {
+export class IonicToggleControlComponent implements FormCheckboxControl {
   // ─────────────────────────────────────────────────────────────────────────────
-  // FormValueControl implementation
+  // FormCheckboxControl implementation
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** The value - required by FormValueControl */
-  readonly value = model<boolean>(false);
+  /** The checked state - required by FormCheckboxControl */
+  readonly checked = model<boolean>(false);
 
   /** Tracks whether the field has been touched - used by Field directive */
   readonly touched = model<boolean>(false);
@@ -80,16 +80,16 @@ export class IonicToggleControlComponent implements FormValueControl<boolean> {
 
   /** Computed checked state - ensures proper boolean conversion for ion-toggle */
   protected readonly isChecked = computed(() => {
-    return this.value() === true;
+    return this.checked() === true;
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Event Handlers
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Handle toggle change - sync ion-toggle's checked state to our value model */
+  /** Handle toggle change - sync ion-toggle's checked state to our checked model */
   onToggleChange(event: CustomEvent<{ checked: boolean; value: string }>): void {
-    this.value.set(event.detail.checked);
+    this.checked.set(event.detail.checked);
   }
 
   /** Marks the field as touched when toggle loses focus */

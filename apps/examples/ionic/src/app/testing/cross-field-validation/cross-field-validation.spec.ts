@@ -245,12 +245,12 @@ test.describe('Cross-Field Validation Tests', () => {
         return pre ? JSON.parse(pre.textContent || '{}') : null;
       });
 
-      // Note: HTML form input values are always strings, so price comes as string
+      // Signal Forms with type=number returns numeric value
       expect(formValue).toMatchObject({
         category: 'electronics',
         subcategory: 'laptop',
         productName: 'MacBook Pro 16',
-        price: '2499.99',
+        price: 2499.99,
         currency: 'eur',
       });
 
@@ -291,7 +291,7 @@ test.describe('Cross-Field Validation Tests', () => {
         category: 'clothing',
         subcategory: 'shirt',
         productName: 'Cotton T-Shirt',
-        price: '29.99', // HTML input values are always strings
+        price: 29.99, // Signal Forms with type=number returns numeric value
       });
     });
   });

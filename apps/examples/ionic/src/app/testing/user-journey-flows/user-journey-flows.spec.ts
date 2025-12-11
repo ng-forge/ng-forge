@@ -353,9 +353,10 @@ test.describe('User Journey Flow Tests', () => {
       const submittedData = await submittedDataPromise;
 
       // Verify submitted data contains values from all pages
+      // Signal Forms with type=number returns numeric value
       expect(submittedData).toMatchObject({
-        itemQuantity1: '2',
-        itemQuantity2: '2',
+        itemQuantity1: 2,
+        itemQuantity2: 2,
         promoCode: 'SAVE10',
         giftWrap: true,
         shippingFirstName: 'Jane',

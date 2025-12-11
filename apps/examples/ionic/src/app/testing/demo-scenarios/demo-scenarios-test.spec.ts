@@ -213,7 +213,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@example.com',
-        age: '25', // HTML input values are always strings
+        age: 25, // Signal Forms with type=number returns numeric value
         country: 'us',
       });
     });
@@ -476,7 +476,7 @@ test.describe('Demo Scenarios E2E Tests', () => {
       });
 
       expect(formValue).toMatchObject({
-        age: '25', // HTML input values are always strings
+        age: 25, // Signal Forms with type=number returns numeric value
         country: 'us',
       });
     });
@@ -537,9 +537,9 @@ test.describe('Demo Scenarios E2E Tests', () => {
         return pre ? JSON.parse(pre.textContent || '{}') : null;
       });
 
-      // Note: HTML form input values are always strings
+      // Signal Forms with type=number returns numeric value
       expect(formValue).toMatchObject({
-        age: '30',
+        age: 30,
         country: 'ca',
         state: 'ca',
         city: 'San Francisco',
