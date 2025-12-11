@@ -304,14 +304,13 @@ jobs:
           echo "✅ Dependency graph is valid"
 
   e2e:
-    name: E2E Tests (${{ matrix.app }} - ${{ matrix.browser }})
+    name: E2E Tests (${{ matrix.app }})
     runs-on: ubuntu-latest
     needs: [lint, test, build-examples, package-integrity]
     strategy:
       fail-fast: false
       matrix:
         app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
-        browser: [chromium, firefox, webkit]
 
     steps:
       - name: Checkout
@@ -355,21 +354,19 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-${{ matrix.browser }}
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
 
-      - name: Install Playwright browser
-        run: pnpm exec playwright install ${{ matrix.browser }} --with-deps
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
 
       - name: Run E2E tests
-        env:
-          E2E_BROWSERS: ${{ matrix.browser }}
         run: pnpm nx run ${{ matrix.app }}:e2e
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-${{ matrix.app }}-${{ matrix.browser }}
+          name: playwright-report-${{ matrix.app }}
           path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/
           retention-days: 7
 
