@@ -7,21 +7,17 @@ description: Prepare and publish releases for ng-forge dynamic forms libraries. 
 
 This skill guides the preparation of a new release for the ng-forge dynamic forms libraries.
 
-Reference: See `guides/06-release-process.md` for full documentation.
-
 ## Quick Reference
 
-**TL;DR - Release in 5 steps:**
+**TL;DR - Release in 3 steps:**
 
-1. **Create**: `./scripts/create-release-branch.sh patch` (or minor/major)
-2. **Review**: Create PR for the release branch, get approval
-3. **Dry Run**: Comment `/release dry-run` on the PR
-4. **Release**: Comment `/release publish` on the PR
-5. **Verify**: Check npm, GitHub releases, test installation
+1. **Create branch**: `git checkout -b release-{VERSION}` from main
+2. **Update versions**: Edit all `packages/*/package.json` to set new version, commit, push
+3. **Trigger workflow**: Actions → Release → Run workflow on the release branch
 
 ## Packages
 
-The following packages are released together:
+The following packages are released together (fixed versioning):
 
 - `@ng-forge/dynamic-forms` - Core library
 - `@ng-forge/dynamic-forms-material` - Material Design integration
@@ -31,150 +27,88 @@ The following packages are released together:
 
 ## Release Process
 
-### Step 1: Validate State
-
-1. Run `git status` to verify the working tree is clean. **STOP immediately** if there are uncommitted changes.
-2. Ensure you are on the `main` branch: `git checkout main && git pull`
-
-### Step 2: Determine Version Type
-
-Ask the user which type of release they want:
-
-- **patch** - Bug fixes and minor updates (e.g., 0.0.1 → 0.0.2)
-- **minor** - New features, backwards compatible (e.g., 0.1.0 → 0.2.0)
-- **major** - Breaking changes (e.g., 1.0.0 → 2.0.0)
-
-Optionally, ask if they want to release from a specific commit (default is HEAD).
-
-### Step 3: Run Release Script
-
-Use the helper script to create the release branch:
+### Step 1: Create Release Branch
 
 ```bash
-# From latest commit
-./scripts/create-release-branch.sh {VERSION_TYPE}
-
-# From specific commit
-./scripts/create-release-branch.sh {VERSION_TYPE} {COMMIT_HASH}
-
-# With specific version number
-./scripts/create-release-branch.sh 1.2.3 {COMMIT_HASH}
+git checkout main
+git pull origin main
+git checkout -b release-{VERSION}
 ```
 
-The script will:
+Example: `git checkout -b release-0.2.0`
 
-1. Create branch `release-{NEW_VERSION}` from the specified commit
-2. Bump versions in all package.json files using `pnpm nx release version`
-3. Commit the version changes
-4. Push the branch to origin
+### Step 2: Update Package Versions
 
-**Note**: The script requires user confirmation before proceeding.
+Update the version in all 5 package.json files:
 
-### Step 4: Create Pull Request
+1. `packages/dynamic-forms/package.json` - Update `version`
+2. `packages/dynamic-forms-bootstrap/package.json` - Update `version` AND `peerDependencies.@ng-forge/dynamic-forms`
+3. `packages/dynamic-forms-material/package.json` - Update `version` AND `peerDependencies.@ng-forge/dynamic-forms`
+4. `packages/dynamic-forms-primeng/package.json` - Update `version` AND `peerDependencies.@ng-forge/dynamic-forms`
+5. `packages/dynamic-forms-ionic/package.json` - Update `version` AND `peerDependencies.@ng-forge/dynamic-forms`
 
-After the script completes, create a PR for review:
+### Step 3: Commit and Push
 
 ```bash
-gh pr create --title "chore: release v{NEW_VERSION}" --body "$(cat <<'EOF'
-## Release v{NEW_VERSION}
-
-### Changes
-<!-- Summary of changes since last release -->
-
-### Packages
-- `@ng-forge/dynamic-forms@{NEW_VERSION}`
-- `@ng-forge/dynamic-forms-material@{NEW_VERSION}`
-- `@ng-forge/dynamic-forms-bootstrap@{NEW_VERSION}`
-- `@ng-forge/dynamic-forms-primeng@{NEW_VERSION}`
-- `@ng-forge/dynamic-forms-ionic@{NEW_VERSION}`
-
-### Release Commands
-
-After PR is approved, use these commands in the PR comments:
-
-1. `/release dry-run` - Test the release process without publishing
-2. `/release publish` - Publish packages to npm
-
-### Checklist
-- [ ] All CI checks pass
-- [ ] Version numbers are correct
-- [ ] Changelog reviewed
-EOF
-)" --base main
+git add packages/*/package.json
+git commit -m "chore(release): bump version to {VERSION}"
+git push -u origin release-{VERSION}
 ```
 
-### Step 5: Trigger Release
+### Step 4: Trigger Release Workflow
 
-Comment on the PR to trigger the release workflow:
+1. Go to **Actions** → **Release** → **Run workflow**
+2. Select the release branch (e.g., `release-0.2.0`)
+3. Options:
+   - `dry_run: true` (default) - Test without publishing
+   - `publish: true`, `dry_run: false` - Publish to npm
 
-1. **First, do a dry run**:
+The workflow reads the version directly from `packages/dynamic-forms/package.json` on the selected branch. No need to enter a version manually.
 
-   ```
-   /release dry-run
-   ```
+### Step 5: Post-Release Verification
 
-2. **If dry run succeeds, publish**:
-   ```
-   /release publish
-   ```
+```bash
+# Check GitHub Release
+gh release view v{VERSION}
 
-### Step 6: Post-Release Verification
+# Check npm
+npm view @ng-forge/dynamic-forms version
 
-After the release workflow completes:
-
-1. Check GitHub Release: `gh release view`
-2. Check npm: `npm view @ng-forge/dynamic-forms version`
-3. Test installation: `npm install @ng-forge/dynamic-forms@{NEW_VERSION}`
+# Test installation
+npm install @ng-forge/dynamic-forms@{VERSION}
+```
 
 ## Failure Recovery
 
-### If on release branch with uncommitted changes:
+### Delete local and remote branch:
 
 ```bash
 git checkout main
 git branch -D release-{VERSION}
-```
-
-### If branch was pushed but needs to be recreated:
-
-```bash
 git push origin --delete release-{VERSION}
-git checkout main
-git branch -D release-{VERSION}
 ```
 
-### If a tag was created but needs to be removed:
+### Delete tag and GitHub release:
 
 ```bash
 git tag -d v{VERSION}
 git push origin --delete v{VERSION}
+gh release delete v{VERSION} --yes
 ```
 
-### If published to npm (within 24 hours):
+### Unpublish from npm (within 72 hours):
 
 ```bash
 npm unpublish @ng-forge/dynamic-forms@{VERSION}
-# Repeat for all 5 packages
+npm unpublish @ng-forge/dynamic-forms-bootstrap@{VERSION}
+npm unpublish @ng-forge/dynamic-forms-material@{VERSION}
+npm unpublish @ng-forge/dynamic-forms-primeng@{VERSION}
+npm unpublish @ng-forge/dynamic-forms-ionic@{VERSION}
 ```
-
-### If published to npm (after 24 hours):
-
-Publish a new patch version with the fix and deprecate the old version:
-
-```bash
-npm deprecate @ng-forge/dynamic-forms@{VERSION} "Please upgrade to {NEW_VERSION}"
-```
-
-## Commit Standards
-
-- All commits MUST follow conventional commit format
-- Do NOT include co-author attribution or Claude metadata in commits
-- Example: `chore: release v1.2.3`
 
 ## Important Notes
 
-- Never force push to `main` or `release-*` branches
-- The release workflow is triggered by `/release` commands in PR comments
+- The release branch is completely independent - main branch state doesn't matter
+- Version is read from `packages/dynamic-forms/package.json` on the selected branch
 - Always do a dry run before actual publish
 - NPM_TOKEN secret must be configured in GitHub repository settings
-- Fixes in release branches should also be applied to `main`
