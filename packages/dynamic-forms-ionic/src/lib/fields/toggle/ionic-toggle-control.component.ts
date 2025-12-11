@@ -21,10 +21,11 @@ import { IonToggle } from '@ionic/angular/standalone';
       [justify]="justify()"
       [color]="color()"
       [enableOnOffLabels]="enableOnOffLabels()"
-      [disabled]="disabled()"
+      [disabled]="isEffectivelyDisabled()"
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
+      [attr.aria-readonly]="ariaReadonly()"
     >
       <ng-content />
     </ion-toggle>
@@ -78,9 +79,22 @@ export class IonicToggleControlComponent implements FormCheckboxControl {
     return this.required() ? true : null;
   });
 
+  /** aria-readonly: true if field is readonly, null otherwise */
+  protected readonly ariaReadonly = computed(() => {
+    return this.readonly() ? true : null;
+  });
+
   /** Computed checked state - ensures proper boolean conversion for ion-toggle */
   protected readonly isChecked = computed(() => {
     return this.checked() === true;
+  });
+
+  /**
+   * ion-toggle doesn't have a native readonly attribute.
+   * When readonly, we disable the toggle to prevent changes while maintaining the visual state.
+   */
+  protected readonly isEffectivelyDisabled = computed(() => {
+    return this.disabled() || this.readonly();
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
