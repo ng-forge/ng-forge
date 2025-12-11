@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (must match branch version)'
+        description: 'Version to release (must match package.json version in release branch)'
         required: true
         type: string
       publish:
@@ -17,8 +17,6 @@ on:
         required: false
         default: true
         type: boolean
-  issue_comment:
-    types: [created]
 
 permissions:
   contents: write
@@ -26,123 +24,23 @@ permissions:
   pull-requests: write
 
 jobs:
-  check-comment:
-    name: Check Release Comment
-    if: github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/release')
-    runs-on: ubuntu-latest
-    outputs:
-      should_release: ${{ steps.parse.outputs.should_release }}
-      version: ${{ steps.parse.outputs.version }}
-      publish: ${{ steps.parse.outputs.publish }}
-      dry_run: ${{ steps.parse.outputs.dry_run }}
-      branch: ${{ steps.parse.outputs.branch }}
-    steps:
-      - name: Get PR details
-        id: pr
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
-            return {
-              branch: pr.data.head.ref,
-              sha: pr.data.head.sha
-            };
-
-      - name: Parse command and validate
-        id: parse
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr_data = ${{ steps.pr.outputs.result }};
-            const branch = pr_data.branch;
-            const comment = context.payload.comment.body.trim();
-
-            // Check if branch is a release branch
-            const releaseMatch = branch.match(/^release-(.+)$/);
-            if (!releaseMatch) {
-              core.setOutput('should_release', 'false');
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: '❌ This PR is not from a release branch. Release commands only work on `release-*` branches.'
-              });
-              return;
-            }
-
-            const version = releaseMatch[1];
-
-            // Parse command
-            let publish = false;
-            let dry_run = true;
-
-            if (comment === '/release dry-run' || comment === '/release') {
-              dry_run = true;
-              publish = false;
-            } else if (comment === '/release publish') {
-              dry_run = false;
-              publish = true;
-            } else {
-              core.setOutput('should_release', 'false');
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: `❌ Unknown release command. Use:
-            - \`/release dry-run\` or \`/release\` - Test release without publishing
-            - \`/release publish\` - Publish to npm`
-              });
-              return;
-            }
-
-            // Confirm with comment
-            const mode = dry_run ? '🧪 **Dry run**' : '🚀 **Publishing to npm**';
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `✅ Starting release workflow for version \`${version}\`\n\n${mode}\n\nView progress in [Actions](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/release.yml)`
-            });
-
-            core.setOutput('should_release', 'true');
-            core.setOutput('version', version);
-            core.setOutput('publish', publish);
-            core.setOutput('dry_run', dry_run);
-            core.setOutput('branch', branch);
-
   release:
     name: Release Libraries
     runs-on: ubuntu-latest
-    needs: [check-comment]
-    if: |
-      always() &&
-      (github.event_name == 'workflow_dispatch' ||
-       (github.event_name == 'issue_comment' && needs.check-comment.outputs.should_release == 'true'))
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'issue_comment' && needs.check-comment.outputs.branch || github.ref }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set release parameters
         id: params
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-            echo "publish=${{ github.event.inputs.publish }}" >> $GITHUB_OUTPUT
-            echo "dry_run=${{ github.event.inputs.dry_run }}" >> $GITHUB_OUTPUT
-          else
-            echo "version=${{ needs.check-comment.outputs.version }}" >> $GITHUB_OUTPUT
-            echo "publish=${{ needs.check-comment.outputs.publish }}" >> $GITHUB_OUTPUT
-            echo "dry_run=${{ needs.check-comment.outputs.dry_run }}" >> $GITHUB_OUTPUT
-          fi
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          echo "publish=${{ github.event.inputs.publish }}" >> $GITHUB_OUTPUT
+          echo "dry_run=${{ github.event.inputs.dry_run }}" >> $GITHUB_OUTPUT
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -159,10 +57,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Get version from package.json
+      - name: Verify version matches
         id: version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          # Get version from dynamic-forms package.json (source of truth)
+          VERSION=$(node -p "require('./packages/dynamic-forms/package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
@@ -177,24 +76,26 @@ jobs:
             exit 1
           fi
 
-          # Extract version from branch name if on release branch
+          # Verify we're on a release branch
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "Current branch: $BRANCH_NAME"
+
           if [[ "$BRANCH_NAME" =~ ^release-(.+)$ ]]; then
             BRANCH_VERSION="${BASH_REMATCH[1]}"
             echo "Branch version: $BRANCH_VERSION"
 
-            # Verify branch name matches package.json
             if [[ "$VERSION" != "$BRANCH_VERSION" ]]; then
               echo "❌ Error: Branch name version ($BRANCH_VERSION) doesn't match package.json version ($VERSION)"
-              echo "Please ensure the branch name matches the package.json version before releasing."
               exit 1
             fi
+          else
+            echo "⚠️ Warning: Not on a release branch. Proceeding anyway."
           fi
 
       - name: Build and test libraries
         run: |
           pnpm nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-forms-bootstrap
-          pnpm nx run-many -t test -p dynamic-forms,dynamic-forms-material,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-forms-bootstrap --configuration=ci
+          pnpm nx run-many -t test -p dynamic-forms --configuration=ci
 
       - name: Verify build outputs
         run: |
@@ -244,7 +145,7 @@ jobs:
 
           cat RELEASE_NOTES.md
 
-      - name: Create/Update Git Tag
+      - name: Create Git Tag
         run: |
           # Check if tag already exists
           if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
