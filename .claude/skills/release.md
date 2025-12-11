@@ -9,12 +9,11 @@ This skill guides the preparation of a new release for the ng-forge dynamic form
 
 ## Quick Reference
 
-**TL;DR - Release in 4 steps:**
+**TL;DR - Release in 3 steps:**
 
 1. **Create branch**: `git checkout -b release-{VERSION}` from main
-2. **Update versions**: Edit all `packages/*/package.json` to set new version
-3. **Push & PR**: Push branch, create PR for review
-4. **Trigger workflow**: Go to Actions → Release → Run workflow on release branch
+2. **Update versions**: Edit all `packages/*/package.json` to set new version, commit, push
+3. **Trigger workflow**: Actions → Release → Run workflow on the release branch
 
 ## Packages
 
@@ -36,7 +35,7 @@ git pull origin main
 git checkout -b release-{VERSION}
 ```
 
-Example: `git checkout -b release-0.1.0`
+Example: `git checkout -b release-0.2.0`
 
 ### Step 2: Update Package Versions
 
@@ -56,42 +55,17 @@ git commit -m "chore(release): bump version to {VERSION}"
 git push -u origin release-{VERSION}
 ```
 
-### Step 4: Create Pull Request
-
-```bash
-gh pr create --title "chore(release): v{VERSION}" --body "$(cat <<'EOF'
-## Summary
-Release v{VERSION} of @ng-forge packages to npm.
-
-## Packages
-- `@ng-forge/dynamic-forms` v{VERSION}
-- `@ng-forge/dynamic-forms-bootstrap` v{VERSION}
-- `@ng-forge/dynamic-forms-material` v{VERSION}
-- `@ng-forge/dynamic-forms-primeng` v{VERSION}
-- `@ng-forge/dynamic-forms-ionic` v{VERSION}
-
-## Release Instructions
-1. Go to Actions → Release → Run workflow
-2. Select branch: `release-{VERSION}`
-3. Enter version: `{VERSION}`
-4. First run with `dry_run: true` to test
-5. Then run with `publish: true`, `dry_run: false` to publish
-EOF
-)" --base main
-```
-
-### Step 5: Trigger Release Workflow
+### Step 4: Trigger Release Workflow
 
 1. Go to **Actions** → **Release** → **Run workflow**
-2. Select branch: `release-{VERSION}`
-3. Enter version: `{VERSION}` (must match package.json)
-4. Options:
+2. Select the release branch (e.g., `release-0.2.0`)
+3. Options:
    - `dry_run: true` (default) - Test without publishing
    - `publish: true`, `dry_run: false` - Publish to npm
 
-### Step 6: Post-Release Verification
+The workflow reads the version directly from `packages/dynamic-forms/package.json` on the selected branch. No need to enter a version manually.
 
-After the release workflow completes:
+### Step 5: Post-Release Verification
 
 ```bash
 # Check GitHub Release
@@ -132,16 +106,9 @@ npm unpublish @ng-forge/dynamic-forms-primeng@{VERSION}
 npm unpublish @ng-forge/dynamic-forms-ionic@{VERSION}
 ```
 
-### Deprecate old version (if unpublish window passed):
-
-```bash
-npm deprecate @ng-forge/dynamic-forms@{VERSION} "Please upgrade to {NEW_VERSION}"
-```
-
 ## Important Notes
 
-- Branch name must be `release-{VERSION}` (with hyphen, not slash)
-- Version in workflow input must match package.json versions exactly
+- The release branch is completely independent - main branch state doesn't matter
+- Version is read from `packages/dynamic-forms/package.json` on the selected branch
 - Always do a dry run before actual publish
 - NPM_TOKEN secret must be configured in GitHub repository settings
-- The workflow runs on the selected branch, not main
