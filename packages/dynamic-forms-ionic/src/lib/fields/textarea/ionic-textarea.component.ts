@@ -22,11 +22,14 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color"
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
+      [readonly]="f().readonly()"
       [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
       [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="isAriaInvalid()"
       [attr.aria-required]="isRequired() || null"
+      [class.ion-invalid]="f().invalid()"
+      [class.ion-touched]="f().touched()"
     >
       <div slot="error">
         @for (error of errorsToDisplay(); track error.kind; let i = $index) {

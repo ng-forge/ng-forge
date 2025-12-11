@@ -47,6 +47,8 @@ import { format } from 'date-fns';
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="isAriaInvalid()"
       [attr.aria-required]="isRequired() || null"
+      [class.ion-invalid]="f().invalid()"
+      [class.ion-touched]="f().touched()"
       (click)="!f().disabled() && openModal()"
     >
       <div slot="error">
