@@ -35,6 +35,8 @@ import { AsyncPipe } from '@angular/common';
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="isAriaInvalid()"
       [attr.aria-required]="isRequired() || null"
+      [class.ion-invalid]="f().invalid()"
+      [class.ion-touched]="f().touched()"
     >
       @for (option of options(); track option.value) {
         <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
