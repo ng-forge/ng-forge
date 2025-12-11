@@ -364,7 +364,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [bootstrap-examples, material-examples, primeng-examples]
+        app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
 
     steps:
       - name: Checkout
@@ -440,7 +440,7 @@ jobs:
         if: failure()
         with:
           name: playwright-report-pr-${{ matrix.app }}
-          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || 'primeng' }}/
+          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/
           retention-days: 7
 
   package-integrity:

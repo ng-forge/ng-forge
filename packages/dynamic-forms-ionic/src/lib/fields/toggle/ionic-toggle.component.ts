@@ -1,28 +1,27 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { IonNote, IonToggle } from '@ionic/angular/standalone';
+import { IonNote } from '@ionic/angular/standalone';
 import { createResolvedErrorsSignal, DynamicText, DynamicTextPipe, shouldShowErrors, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { IonicToggleComponent, IonicToggleProps } from './ionic-toggle.type';
+import { IonicToggleControlComponent } from './ionic-toggle-control.component';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ionic-toggle',
-  imports: [IonToggle, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonicToggleControlComponent, IonNote, Field, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
-    <ion-toggle
+    <df-ionic-toggle-control
       [field]="f"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"
       [enableOnOffLabels]="props()?.enableOnOffLabels ?? false"
-      [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="isAriaInvalid()"
-      [attr.aria-required]="isRequired() || null"
+      [tabIndex]="tabIndex()"
     >
       {{ label() | dynamicText | async }}
-    </ion-toggle>
+    </df-ionic-toggle-control>
 
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
@@ -71,15 +70,4 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
 
   /** Base ID for error elements */
   readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** Whether the field is currently in an invalid state (invalid AND touched) */
-  readonly isAriaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** Whether the field has a required validator */
-  readonly isRequired = computed(() => {
-    return this.field()().required?.() === true;
-  });
 }
