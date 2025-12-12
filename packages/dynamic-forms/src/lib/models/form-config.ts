@@ -27,7 +27,7 @@ import { SubmissionConfig } from './submission-config';
  * } as const satisfies FormConfig;
  *
  * // Infer form value type from config
- * type FormValue = InferFormValueFromConfig<typeof formConfig>;
+ * type FormValue = InferFormValue<typeof formConfig>;
  * ```
  *
  * @typeParam TFields - Array of registered field types available for this form
