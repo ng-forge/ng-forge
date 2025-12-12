@@ -12,7 +12,7 @@ This skill guides the preparation of a new release for the ng-forge dynamic form
 **TL;DR - Release in 3 steps:**
 
 1. **Create branch**: `git checkout -b release-{VERSION}` from main
-2. **Update versions**: Edit all `packages/*/package.json` to set new version, commit, push
+2. **Update versions**: Edit all `packages/*/package.json` to set new version (including inter-package dependencies), commit, push
 3. **Trigger workflow**: Actions → Release → Run workflow on the release branch
 
 ## Packages
@@ -39,13 +39,30 @@ Example: `git checkout -b release-0.2.0`
 
 ### Step 2: Update Package Versions
 
-Update the version in all 5 package.json files:
+⚠️ **IMPORTANT: Update ALL version references!**
 
-1. `packages/dynamic-forms/package.json` - Update `version`
-2. `packages/dynamic-forms-bootstrap/package.json` - Update `version` AND `peerDependencies.@ng-forge/dynamic-forms`
-3. `packages/dynamic-forms-material/package.json` - Update `version` AND `peerDependencies.@ng-forge/dynamic-forms`
-4. `packages/dynamic-forms-primeng/package.json` - Update `version` AND `peerDependencies.@ng-forge/dynamic-forms`
-5. `packages/dynamic-forms-ionic/package.json` - Update `version` AND `peerDependencies.@ng-forge/dynamic-forms`
+Update the version in all 5 package.json files. Each UI integration package depends on the core package, so you must update both the package version AND the peer dependency:
+
+| Package                                         | Update `version` | Update `peerDependencies.@ng-forge/dynamic-forms` |
+| ----------------------------------------------- | ---------------- | ------------------------------------------------- |
+| `packages/dynamic-forms/package.json`           | ✅               | N/A                                               |
+| `packages/dynamic-forms-bootstrap/package.json` | ✅               | ✅                                                |
+| `packages/dynamic-forms-material/package.json`  | ✅               | ✅                                                |
+| `packages/dynamic-forms-primeng/package.json`   | ✅               | ✅                                                |
+| `packages/dynamic-forms-ionic/package.json`     | ✅               | ✅                                                |
+
+Example for `packages/dynamic-forms-material/package.json`:
+
+```json
+{
+  "name": "@ng-forge/dynamic-forms-material",
+  "version": "0.2.0",  // ← Update this
+  "peerDependencies": {
+    "@ng-forge/dynamic-forms": "0.2.0",  // ← AND this
+    ...
+  }
+}
+```
 
 ### Step 3: Commit and Push
 
@@ -55,17 +72,21 @@ git commit -m "chore(release): bump version to {VERSION}"
 git push -u origin release-{VERSION}
 ```
 
-### Step 4: Trigger Release Workflow
+### Step 4: Create PR (Optional but Recommended)
+
+Create a PR from `release-{VERSION}` to `main`. The Release workflow will appear in the PR checks as **"Awaiting manual trigger"** - this is just a placeholder to show the workflow is ready.
+
+### Step 5: Trigger Release Workflow
 
 1. Go to **Actions** → **Release** → **Run workflow**
 2. Select the release branch (e.g., `release-0.2.0`)
-3. Options:
-   - `dry_run: true` (default) - Test without publishing
-   - `publish: true`, `dry_run: false` - Publish to npm
+3. Choose mode:
+   - `dry-run` (default) - Test without publishing
+   - `publish` - Publish to npm for real
 
-The workflow reads the version directly from `packages/dynamic-forms/package.json` on the selected branch. No need to enter a version manually.
+The workflow reads the version directly from `packages/dynamic-forms/package.json` on the selected branch.
 
-### Step 5: Post-Release Verification
+### Step 6: Post-Release Verification
 
 ```bash
 # Check GitHub Release
@@ -77,6 +98,11 @@ npm view @ng-forge/dynamic-forms version
 # Test installation
 npm install @ng-forge/dynamic-forms@{VERSION}
 ```
+
+## Release Workflow Behavior
+
+- **On push to `release-*` branch**: The Release workflow runs but immediately completes with "Awaiting manual trigger". This makes the workflow visible in PR checks.
+- **On manual trigger**: The actual release process runs - builds, verifies CI passed, creates tag, publishes to npm.
 
 ## Failure Recovery
 
@@ -108,7 +134,9 @@ npm unpublish @ng-forge/dynamic-forms-ionic@{VERSION}
 
 ## Important Notes
 
+- Branch **must** be named `release-{VERSION}` (e.g., `release-0.2.0`) for the workflow to appear in PR checks
 - The release branch is completely independent - main branch state doesn't matter
 - Version is read from `packages/dynamic-forms/package.json` on the selected branch
+- **Always update inter-package peer dependencies** when bumping versions
 - Always do a dry run before actual publish
 - NPM_TOKEN secret must be configured in GitHub repository settings
