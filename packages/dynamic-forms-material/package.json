@@ -24,10 +24,10 @@
     "ng-forge"
   ],
   "peerDependencies": {
-    "@angular/common": ">=19.0.0",
-    "@angular/core": ">=19.0.0",
-    "@angular/forms": ">=19.0.0",
-    "@angular/material": ">=19.0.0",
+    "@angular/common": "~21.0.5",
+    "@angular/core": "~21.0.5",
+    "@angular/forms": "~21.0.5",
+    "@angular/material": "~21.0.0",
     "@ng-forge/dynamic-forms": "0.1.0",
     "rxjs": ">=7.0.0"
   }

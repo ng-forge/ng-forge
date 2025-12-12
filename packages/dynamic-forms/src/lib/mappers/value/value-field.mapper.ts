@@ -57,9 +57,8 @@ export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
   } else {
     // Standard field access for non-array keys via childrenMap lookup
     const formField = childrenMap.get(fieldKey);
-    const resolvedProxy = getFieldProxy(formField);
-    if (resolvedProxy) {
-      fieldProxy = resolvedProxy;
+    if (formField) {
+      fieldProxy = formField;
     }
   }
 
