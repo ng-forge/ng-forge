@@ -16,6 +16,7 @@ This document defines the coding standards and conventions for the ng-forge dyna
 - [Naming Conventions](#naming-conventions)
 - [Documentation Standards](#documentation-standards)
 - [Performance Guidelines](#performance-guidelines)
+- [Commit Messages](#commitlint)
 
 ## General Principles
 
@@ -738,6 +739,37 @@ Pre-commit hooks enforce:
 - Formatting
 - Type checking
 - Unit tests
+
+### Commitlint
+
+Commit messages must follow Angular conventional commit format:
+
+```bash
+# Format
+<type>(<scope>): <subject>
+
+# Examples
+feat(dynamic-forms): add async validator support
+fix(primeng): correct select option binding
+docs: update contributing guidelines
+```
+
+**Allowed types:** `feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `ci`, `chore`, `style`, `revert`
+
+**Allowed scopes:** `core`, `forms`, `dynamic-forms`, `material`, `bootstrap`, `primeng`, `ionic`, `docs`, `examples`, `release`, `deps`, `config`
+
+**Rules:**
+
+- Subject must be lowercase
+- No period at end
+- Max 100 characters
+- Imperative mood ("add" not "added")
+
+Test your commit message:
+
+```bash
+echo "feat(dynamic-forms): add new feature" | pnpm commitlint
+```
 
 ## Summary
 

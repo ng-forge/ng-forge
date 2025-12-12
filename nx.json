@@ -45,6 +45,76 @@
       "workspaceChangelog": {
         "createRelease": "github"
       }
+    },
+    "conventionalCommits": {
+      "types": {
+        "feat": {
+          "semverBump": "minor",
+          "changelog": {
+            "title": "🚀 Features"
+          }
+        },
+        "fix": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "🐛 Bug Fixes"
+          }
+        },
+        "perf": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "⚡ Performance Improvements"
+          }
+        },
+        "refactor": {
+          "semverBump": "none",
+          "changelog": {
+            "title": "♻️ Code Refactoring"
+          }
+        },
+        "docs": {
+          "semverBump": "none",
+          "changelog": {
+            "title": "📚 Documentation"
+          }
+        },
+        "test": {
+          "semverBump": "none",
+          "changelog": {
+            "title": "✅ Tests"
+          }
+        },
+        "build": {
+          "semverBump": "none",
+          "changelog": {
+            "title": "📦 Build System"
+          }
+        },
+        "ci": {
+          "semverBump": "none",
+          "changelog": {
+            "hidden": true
+          }
+        },
+        "chore": {
+          "semverBump": "none",
+          "changelog": {
+            "hidden": true
+          }
+        },
+        "style": {
+          "semverBump": "none",
+          "changelog": {
+            "hidden": true
+          }
+        },
+        "revert": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "⏪ Reverts"
+          }
+        }
+      }
     }
   },
   "generators": {
