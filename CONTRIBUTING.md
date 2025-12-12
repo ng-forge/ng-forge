@@ -205,7 +205,7 @@ describe('MyComponent', () => {
 
 ## Commit Guidelines
 
-We use [Conventional Commits](https://www.conventionalcommits.org/) with the Angular preset, enforced by [commitlint](https://commitlint.js.org/).
+We use [Conventional Commits](https://www.conventionalcommits.org/) with the Angular preset. **PRs are squash-merged**, so only the **PR title** matters for the changelog. PR titles are validated by commitlint in CI.
 
 ### Format
 
@@ -409,27 +409,31 @@ Update documentation when you:
 
 ## Release Process
 
-Releases are managed by maintainers. The process:
+Releases are managed by maintainers using the Release workflow.
 
-1. **Version bump**: Using Nx release
-2. **Changelog**: Auto-generated from commits
-3. **Build**: All libraries built for production
-4. **Tests**: Full test suite passes
-5. **Publish**: Published to npm
-6. **Tag**: Git tag created
-7. **GitHub Release**: Release notes published
+### Overview
+
+1. **Create release branch**: `release-{VERSION}` (e.g., `release-0.2.0`)
+2. **Update versions**: All `packages/*/package.json` files, including inter-package peer dependencies
+3. **Create PR**: The Release workflow appears as "Awaiting manual trigger"
+4. **Trigger workflow**: Actions → Release → Run workflow → Select branch → Choose mode
+5. **Verify**: Check GitHub Release and npm
+
+### Version Updates
+
+When releasing, ALL version references must be updated:
+
+| Package                   | `version` | `peerDependencies.@ng-forge/dynamic-forms` |
+| ------------------------- | --------- | ------------------------------------------ |
+| `dynamic-forms`           | ✅        | N/A                                        |
+| `dynamic-forms-bootstrap` | ✅        | ✅                                         |
+| `dynamic-forms-material`  | ✅        | ✅                                         |
+| `dynamic-forms-primeng`   | ✅        | ✅                                         |
+| `dynamic-forms-ionic`     | ✅        | ✅                                         |
 
 ### For Contributors
 
-You don't need to worry about releases. Just:
-
-1. Add changeset if your PR affects published packages:
-
-   ```bash
-   nx release version --dry-run
-   ```
-
-2. Maintainers will handle the release
+You don't need to worry about releases - maintainers handle them. Your commits will be included in the next release and appear in the auto-generated changelog based on your commit type (feat, fix, etc.).
 
 ## Working on Specific Areas
 
