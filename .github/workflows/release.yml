@@ -1,6 +1,8 @@
 name: Release
 
 on:
+  push:
+    branches: ['release-*']
   workflow_dispatch:
     inputs:
       mode:
@@ -18,8 +20,21 @@ permissions:
   actions: read
 
 jobs:
+  # This job runs on push and skips immediately - just to show the workflow in PR
+  await-dispatch:
+    name: Awaiting manual trigger
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip
+        run: |
+          echo "ℹ️ Release workflow is ready."
+          echo "To release, go to Actions → Release → Run workflow on this branch."
+          echo "Select 'publish' mode to publish to npm."
+
   check-ci:
     name: Verify CI Passed
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Check CI workflow status
