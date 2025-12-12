@@ -9,8 +9,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  commitlint:
-    name: Validate Commit Messages
+  checks:
+    name: Checks
     runs-on: ubuntu-latest
 
     steps:
@@ -38,8 +38,38 @@ jobs:
           echo "Validating commit messages against Angular convention..."
           pnpm commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
+      - name: Check formatting on affected files
+        run: |
+          echo "Checking code formatting on affected files..."
+          AFFECTED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/main...HEAD | grep -E '\.(ts|js|json|md|yml|yaml|html|css|scss)$' || true)
+          if [ -z "$AFFECTED_FILES" ]; then
+            echo "No affected files to check"
+            exit 0
+          fi
+          echo "Affected files to check:"
+          echo "$AFFECTED_FILES"
+          echo ""
+          echo "$AFFECTED_FILES" | xargs pnpm exec prettier --check || {
+            echo ""
+            echo "❌ Formatting issues found in affected files!"
+            echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
+            exit 1
+          }
+
+      - name: Validate dependency graph
+        run: |
+          echo "Checking for circular dependencies..."
+          pnpm nx graph --file=graph.json || {
+            echo "❌ Failed to generate dependency graph"
+            exit 1
+          }
+          echo "✅ Dependency graph is valid"
+          echo ""
+          echo "Affected projects and their dependents:"
+          pnpm nx show projects --affected --base=origin/main --with-target=build || true
+
   build:
-    name: Build Affected
+    name: Build & Verify
     runs-on: ubuntu-latest
 
     steps:
@@ -65,6 +95,27 @@ jobs:
       - name: Build affected libraries
         run: pnpm nx affected -t build --base=origin/main
 
+      - name: Verify package integrity
+        run: |
+          echo "Verifying package integrity..."
+          for PKG in dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng; do
+            if [ -d "dist/packages/$PKG" ]; then
+              echo "Checking dist/packages/$PKG..."
+              if [ ! -f "dist/packages/$PKG/package.json" ]; then
+                echo "❌ Missing package.json in dist/packages/$PKG"
+                exit 1
+              fi
+              if [ ! -f "dist/packages/$PKG/index.d.ts" ] && [ ! -f "dist/packages/$PKG/fesm2022/index.d.ts" ]; then
+                echo "⚠️  Warning: No index.d.ts found in dist/packages/$PKG"
+              else
+                echo "✅ $PKG package structure looks valid"
+              fi
+            else
+              echo "⏭️  Skipping $PKG (not built or not affected)"
+            fi
+          done
+          echo "✅ Package integrity check complete"
+
       - name: Cache build artifacts
         uses: actions/cache@v4
         with:
@@ -75,11 +126,9 @@ jobs:
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-          restore-keys: |
-            build-${{ github.sha }}-
 
-  lint:
-    name: Lint Affected
+  quality:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
     needs: build
 
@@ -113,14 +162,23 @@ jobs:
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-          restore-keys: |
-            build-${{ github.sha }}-
 
       - name: Lint affected projects
         run: pnpm nx affected -t lint --base=origin/main
 
+      - name: Type check affected libraries
+        run: |
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --type=lib)
+          if [ -n "$AFFECTED" ]; then
+            echo "Type checking affected libraries:"
+            echo "$AFFECTED"
+            pnpm nx affected -t build --base=origin/main --exclude='*-examples,docs' --verbose
+          else
+            echo "No libraries affected, skipping type check"
+          fi
+
   test:
-    name: Test Affected
+    name: Unit Tests
     runs-on: ubuntu-latest
     needs: build
 
@@ -154,14 +212,12 @@ jobs:
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-          restore-keys: |
-            build-${{ github.sha }}-
 
       - name: Test affected projects
         run: pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
 
-  docs:
-    name: Build Docs if Affected
+  build-apps:
+    name: Build Apps
     runs-on: ubuntu-latest
     needs: build
 
@@ -195,64 +251,23 @@ jobs:
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-          restore-keys: |
-            build-${{ github.sha }}-
 
       - name: Build docs if affected
         run: |
           if pnpm nx show projects --affected --base=origin/main | grep -q docs; then
+            echo "Building documentation..."
             pnpm nx build docs --configuration=production
           else
             echo "Documentation not affected, skipping build"
           fi
 
-  examples:
-    name: Build Example Apps if Affected
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Restore build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-          restore-keys: |
-            build-${{ github.sha }}-
-
       - name: Build affected example apps
         run: |
           AFFECTED=$(pnpm nx show projects --affected --base=origin/main)
           EXAMPLES=$(echo "$AFFECTED" | grep -E "(material-examples|bootstrap-examples|primeng-examples|ionic-examples)" || true)
-
           if [ -n "$EXAMPLES" ]; then
             echo "Building affected example apps:"
             echo "$EXAMPLES"
-            # Build each affected example app
             for APP in $EXAMPLES; do
               echo "Building $APP..."
               pnpm nx build $APP --configuration=production
@@ -261,135 +276,10 @@ jobs:
             echo "No example apps affected, skipping build"
           fi
 
-  typecheck:
-    name: Type Check Affected
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Type check affected libraries
-        run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --type=lib)
-
-          if [ -n "$AFFECTED" ]; then
-            echo "Type checking affected libraries:"
-            echo "$AFFECTED"
-            # Use build task as it performs type checking
-            pnpm nx affected -t build --base=origin/main --exclude='*-examples,docs' --verbose
-          else
-            echo "No libraries affected, skipping type check"
-          fi
-
-  format:
-    name: Format Check (Affected)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Check formatting on affected files
-        run: |
-          echo "Checking code formatting on affected files..."
-
-          # Get list of affected files
-          AFFECTED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/main...HEAD | grep -E '\.(ts|js|json|md|yml|yaml|html|css|scss)$' || true)
-
-          if [ -z "$AFFECTED_FILES" ]; then
-            echo "No affected files to check"
-            exit 0
-          fi
-
-          echo "Affected files to check:"
-          echo "$AFFECTED_FILES"
-          echo ""
-
-          # Check formatting on affected files only
-          echo "$AFFECTED_FILES" | xargs pnpm exec prettier --check || {
-            echo ""
-            echo "❌ Formatting issues found in affected files!"
-            echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
-            exit 1
-          }
-
-  dependency-graph:
-    name: Dependency Graph Validation
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Validate dependency graph
-        run: |
-          echo "Checking for circular dependencies..."
-          pnpm nx graph --file=graph.json || {
-            echo "❌ Failed to generate dependency graph"
-            exit 1
-          }
-
-          echo "✅ Dependency graph is valid"
-
-          # Check for any affected dependencies
-          echo ""
-          echo "Affected projects and their dependents:"
-          pnpm nx show projects --affected --base=origin/main --with-target=build || true
-
   e2e:
     name: E2E Tests (${{ matrix.app }})
     runs-on: ubuntu-latest
-    needs: [lint, test, examples, typecheck, package-integrity]
+    needs: [quality, test, build-apps]
     strategy:
       fail-fast: false
       matrix:
@@ -425,22 +315,6 @@ jobs:
             dist/packages/dynamic-forms-ionic
             dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-          restore-keys: |
-            build-${{ github.sha }}-
-
-      - name: Get Playwright version
-        id: playwright-version
-        run: echo "version=$(pnpm exec playwright --version | head -1)" >> $GITHUB_OUTPUT
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-chromium
-
-      - name: Install Playwright browser
-        run: pnpm exec playwright install chromium --with-deps
 
       - name: Check if app is affected
         id: check-affected
@@ -451,6 +325,23 @@ jobs:
           else
             echo "affected=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Get Playwright version
+        if: steps.check-affected.outputs.affected == 'true'
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | head -1)" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        if: steps.check-affected.outputs.affected == 'true'
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-chromium
+
+      - name: Install Playwright browser
+        if: steps.check-affected.outputs.affected == 'true'
+        run: pnpm exec playwright install chromium --with-deps
 
       - name: Run E2E tests
         if: steps.check-affected.outputs.affected == 'true'
@@ -471,70 +362,3 @@ jobs:
           name: playwright-report-pr-${{ matrix.app }}
           path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/
           retention-days: 7
-
-  package-integrity:
-    name: Package Integrity Check
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Restore build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-          restore-keys: |
-            build-${{ github.sha }}-
-
-      - name: Verify package exports
-        run: |
-          echo "Verifying package integrity..."
-
-          # Check that main library packages have valid exports
-          for PKG in dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng; do
-            if [ -d "dist/packages/$PKG" ]; then
-              echo "Checking dist/packages/$PKG..."
-
-              # Verify package.json exists
-              if [ ! -f "dist/packages/$PKG/package.json" ]; then
-                echo "❌ Missing package.json in dist/packages/$PKG"
-                exit 1
-              fi
-
-              # Verify main entry point exists (check for common patterns)
-              if [ ! -f "dist/packages/$PKG/index.d.ts" ] && [ ! -f "dist/packages/$PKG/fesm2022/index.d.ts" ]; then
-                echo "⚠️  Warning: No index.d.ts found in dist/packages/$PKG"
-              else
-                echo "✅ $PKG package structure looks valid"
-              fi
-            else
-              echo "⏭️  Skipping $PKG (not built or not affected)"
-            fi
-          done
-
-          echo ""
-          echo "✅ Package integrity check complete"
