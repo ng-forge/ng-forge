@@ -12,15 +12,18 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
 type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 /**
- * Extract the value type from a single field, handling required/optional
+ * Widens literal types to their primitive equivalents.
+ * This prevents `as const` from over-narrowing types like `''` to literal `''` instead of `string`.
+ *
+ * @example
+ * ```typescript
+ * type A = Widen<''>; // string
+ * type B = Widen<false>; // boolean
+ * type C = Widen<42>; // number
+ * type D = Widen<string[]>; // string[]
+ * ```
  */
-type ExtractFieldValue<T> = T extends { value: infer V; required: true }
-  ? V
-  : T extends { value: infer V; required?: false | undefined }
-    ? V | undefined
-    : T extends { value: infer V }
-      ? V | undefined
-      : unknown;
+type Widen<T> = T extends string ? string : T extends number ? number : T extends boolean ? boolean : T;
 
 /**
  * Process a single field and determine its contribution to the form value type
@@ -56,12 +59,12 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
           : // Value fields with required flag set to true
             T extends { key: infer K; value: infer V; required: true }
             ? K extends string
-              ? { [P in K]: V }
+              ? { [P in K]: Widen<V> }
               : never
             : // Value fields with required flag set to false or undefined, or no required flag
               T extends { key: infer K; value: infer V }
               ? K extends string
-                ? { [P in K]: V | undefined }
+                ? { [P in K]: Widen<V> | undefined }
                 : never
               : // Fallback: fields without a key are excluded
                 never;
