@@ -1,6 +1,6 @@
 import { Schema } from '@angular/forms/signals';
 import { InferFormValue } from './types/form-value-inference';
-import { RegisteredFieldTypes } from './registry/field-registry';
+import { NarrowFields, RegisteredFieldTypes } from './registry/field-registry';
 import { SchemaDefinition } from './schemas/schema-definition';
 import { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from '../core/validation/validator-types';
 import { CustomFunction } from '../core/expressions/custom-function-types';
@@ -16,19 +16,18 @@ import { SubmissionConfig } from './submission-config';
  *
  * @example
  * ```typescript
- * const formConfig: FormConfig = {
+ * const formConfig = {
  *   fields: [
- *     { type: 'input', key: 'email', value: '', label: 'Email', required: true, email: true },
+ *     { type: 'input', key: 'email', value: '', label: 'Email', required: true },
  *     { type: 'group', key: 'address', label: 'Address', fields: [
  *       { type: 'input', key: 'street', value: '', label: 'Street' },
  *       { type: 'input', key: 'city', value: '', label: 'City' }
  *     ]},
- *     { type: 'button', key: 'submit', label: 'Submit', buttonType: 'submit' }
  *   ],
- *   schemas: [
- *     { name: 'emailSchema', schema: { email: validators.email } }
- *   ]
- * };
+ * } as const satisfies FormConfig;
+ *
+ * // Infer form value type from config
+ * type FormValue = InferFormValueFromConfig<typeof formConfig>;
  * ```
  *
  * @typeParam TFields - Array of registered field types available for this form
@@ -36,7 +35,10 @@ import { SubmissionConfig } from './submission-config';
  *
  * @public
  */
-export interface FormConfig<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TValue = InferFormValue<TFields>> {
+export interface FormConfig<
+  TFields extends NarrowFields = NarrowFields,
+  TValue = InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>,
+> {
   /**
    * Array of field definitions that define the form structure.
    *

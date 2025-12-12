@@ -75,22 +75,43 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
 type InferFormValueWithDepth<T extends RegisteredFieldTypes[], D extends number = 5> = UnionToIntersection<ProcessField<T[number], D>>;
 
 /**
- * Infer form value type from an array of field definitions
- * Recursively processes nested structures and merges the results
- * Limited to 5 levels of nesting to prevent infinite type instantiation
+ * Helper to extract fields from either fields array or FormConfig
+ */
+type ExtractFields<T> = T extends { fields: infer TFields }
+  ? TFields extends readonly RegisteredFieldTypes[]
+    ? TFields
+    : never
+  : T extends readonly RegisteredFieldTypes[]
+    ? T
+    : never;
+
+/**
+ * Infer form value type from fields array or FormConfig.
+ * Recursively processes nested structures and merges the results.
+ * Limited to 5 levels of nesting to prevent infinite type instantiation.
  *
  * @example
  * ```typescript
+ * // From fields array
  * const fields = [
  *   { type: 'input', key: 'email', value: '', required: true },
- *   { type: 'group', key: 'address', fields: [
- *     { type: 'input', key: 'street', value: '' },
- *     { type: 'input', key: 'city', value: '' }
- *   ]}
+ *   { type: 'input', key: 'name', value: '' }
  * ] as const;
+ * type FieldsValue = InferFormValue<typeof fields>;
  *
- * type FormValue = InferFormValue<typeof fields>;
- * // Result: { email: string; address: { street?: string; city?: string } }
+ * // From FormConfig
+ * const config = {
+ *   fields: [
+ *     { type: 'input', key: 'email', value: '', required: true },
+ *     { type: 'input', key: 'name', value: '' }
+ *   ]
+ * } as const satisfies FormConfig;
+ * type ConfigValue = InferFormValue<typeof config>;
+ *
+ * // Result: { email: string; name?: string }
  * ```
  */
-export type InferFormValue<T extends RegisteredFieldTypes[]> = InferFormValueWithDepth<T, 5>;
+export type InferFormValue<T> =
+  ExtractFields<T> extends readonly RegisteredFieldTypes[]
+    ? InferFormValueWithDepth<ExtractFields<T> extends RegisteredFieldTypes[] ? ExtractFields<T> : [...ExtractFields<T>], 5>
+    : never;

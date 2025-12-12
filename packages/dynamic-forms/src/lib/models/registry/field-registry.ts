@@ -117,8 +117,18 @@ export type ExtractField<T extends AvailableFieldTypes> = T extends keyof FieldT
  * }
  * ```
  */
-export type NarrowField<T extends RegisteredFieldTypes> = T extends { type: infer TType }
-  ? TType extends AvailableFieldTypes
-    ? ExtractField<TType>
-    : T
-  : T;
+export type NarrowField<T> = T extends { type: infer TType } ? (TType extends AvailableFieldTypes ? ExtractField<TType> : T) : T;
+
+/**
+ * Narrow each field in an array based on its `type` property.
+ * Use with `satisfies` to get proper type inference for field arrays.
+ *
+ * @example
+ * ```typescript
+ * const fields = [
+ *   { type: 'input', key: 'name', value: '', props: { type: 'text' } },
+ *   { type: 'select', key: 'country', value: 'us', options: [...] },
+ * ] as const satisfies NarrowFields;
+ * ```
+ */
+export type NarrowFields = readonly NarrowField<RegisteredFieldTypes>[];

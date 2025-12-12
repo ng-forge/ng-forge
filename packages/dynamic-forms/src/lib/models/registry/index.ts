@@ -7,5 +7,6 @@ export type {
   FieldRegistryLeaves,
   LeafFieldTypes,
   NarrowField,
+  NarrowFields,
   RegisteredFieldTypes,
 } from './field-registry';
