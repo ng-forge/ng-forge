@@ -13,4 +13,4 @@ pre-commit:
 commit-msg:
   commands:
     commitlint:
-      run: echo "Commit message format validated"
+      run: pnpm commitlint --edit

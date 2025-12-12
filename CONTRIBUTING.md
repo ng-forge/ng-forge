@@ -205,7 +205,9 @@ describe('MyComponent', () => {
 
 ## Commit Guidelines
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
+We use [Conventional Commits](https://www.conventionalcommits.org/) with the Angular preset, enforced by [commitlint](https://commitlint.js.org/).
+
+### Format
 
 ```
 <type>(<scope>): <subject>
@@ -217,47 +219,104 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Types
 
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc.)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
-- `perf`: Performance improvements
+| Type       | Description                                       | Version Bump | In Changelog |
+| ---------- | ------------------------------------------------- | ------------ | ------------ |
+| `feat`     | A new feature                                     | minor        | ✅           |
+| `fix`      | A bug fix                                         | patch        | ✅           |
+| `perf`     | Performance improvement                           | patch        | ✅           |
+| `refactor` | Code change (no feature or fix)                   | none         | ✅           |
+| `docs`     | Documentation only changes                        | none         | ✅           |
+| `test`     | Adding or correcting tests                        | none         | ✅           |
+| `build`    | Changes to build system or dependencies           | none         | ✅           |
+| `revert`   | Reverts a previous commit                         | patch        | ✅           |
+| `ci`       | CI configuration changes                          | none         | ❌           |
+| `chore`    | Other changes (don't modify src or test)          | none         | ❌           |
+| `style`    | Code style changes (formatting, semicolons, etc.) | none         | ❌           |
+
+### Scopes
+
+Use one of the following scopes to indicate the affected area:
+
+| Scope           | Description                               |
+| --------------- | ----------------------------------------- |
+| `core`          | Core utilities or shared code             |
+| `forms`         | Angular forms integration                 |
+| `dynamic-forms` | Main dynamic-forms library                |
+| `material`      | Material Design adapter                   |
+| `bootstrap`     | Bootstrap adapter                         |
+| `primeng`       | PrimeNG adapter                           |
+| `ionic`         | Ionic adapter                             |
+| `docs`          | Documentation site                        |
+| `examples`      | Example applications                      |
+| `release`       | Release-related changes                   |
+| `deps`          | Dependency updates                        |
+| `config`        | Configuration changes                     |
+| _(empty)_       | General changes not specific to one scope |
+
+### Rules
+
+- **Subject**: lowercase, no period at end, max 100 characters
+- **Body**: optional, must have blank line before it
+- **Footer**: optional, must have blank line before it
+- Use present tense ("add feature" not "added feature")
+- Use imperative mood ("move cursor to..." not "moves cursor to...")
 
 ### Examples
 
 ```bash
+# Feature with scope
 feat(dynamic-forms): add support for async validators
 
 Add AsyncValidatorConfig interface and implement async validation
 support in form structure builder.
 
 Closes #123
+```
 
----
-
+```bash
+# Bug fix with scope
 fix(primeng): correct select field option binding
 
 The option binding was not properly updating when options changed
 dynamically. This fixes the reactivity issue.
 
 Fixes #456
-
----
-
-docs(guides): add mapper creation custom-integrations
-
-Add comprehensive custom-integrations for creating custom mappers with examples.
 ```
 
-### Commit Message Rules
+```bash
+# Documentation without scope
+docs: add mapper creation guide
 
-- Use present tense ("add feature" not "added feature")
-- Use imperative mood ("move cursor to..." not "moves cursor to...")
-- First line should be ≤72 characters
-- Reference issues and PRs in footer
+Add comprehensive guide for creating custom mappers with examples.
+```
+
+```bash
+# Breaking change (note the !)
+feat(dynamic-forms)!: change form builder API
+
+BREAKING CHANGE: The `build()` method now returns a FormGroup instead of FormArray.
+```
+
+### Validation
+
+Commit messages are validated:
+
+- **Locally**: Via lefthook git hooks (runs commitlint on commit-msg)
+- **CI**: PR check validates all commits in the PR
+
+If your commit message doesn't follow the convention, you'll see an error like:
+
+```
+⧗   input: my commit message
+✖   subject may not be empty [subject-empty]
+✖   type may not be empty [type-empty]
+```
+
+Fix by amending your commit:
+
+```bash
+git commit --amend -m "feat(dynamic-forms): proper commit message"
+```
 
 ## Pull Request Process
 
