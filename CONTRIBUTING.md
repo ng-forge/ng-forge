@@ -205,7 +205,7 @@ describe('MyComponent', () => {
 
 ## Commit Guidelines
 
-We use [Conventional Commits](https://www.conventionalcommits.org/) with the Angular preset, enforced by [commitlint](https://commitlint.js.org/).
+We use [Conventional Commits](https://www.conventionalcommits.org/) with the Angular preset. **PRs are squash-merged**, so only the **PR title** matters for the changelog. PR titles are validated by commitlint in CI.
 
 ### Format
 

@@ -34,10 +34,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate commit messages
+      - name: Validate PR title
         run: |
-          echo "Validating commit messages against Angular convention..."
-          pnpm commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+          echo "Validating PR title against Angular convention..."
+          echo "${{ github.event.pull_request.title }}" | pnpm commitlint --verbose
 
       - name: Check formatting on affected files
         run: |
