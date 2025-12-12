@@ -4,7 +4,7 @@ import { computed, inject, Signal } from '@angular/core';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { omit } from '../../utils/object-utils';
-import { getChildrenMap, getFieldProxy } from '../../utils/form-internals/form-internals';
+import { getChildrenMap } from '../../utils/form-internals/form-internals';
 
 /**
  * Maps a checkbox/toggle field definition to component inputs.
@@ -34,9 +34,8 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
 
   if (childrenMap) {
     const formField = childrenMap.get(fieldDef.key);
-    const resolvedProxy = getFieldProxy(formField);
-    if (resolvedProxy) {
-      fieldProxy = resolvedProxy;
+    if (formField) {
+      fieldProxy = formField;
     }
   }
 

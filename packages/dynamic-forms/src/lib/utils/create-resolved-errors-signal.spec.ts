@@ -29,7 +29,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const emailFieldProxy = testForm().structure.childrenMap().get('email').fieldProxy;
+        const emailFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('email').reader;
         // Wrap fieldProxy in a signal to match the expected type Signal<FieldTree<T>>
         const emailField = signal(emailFieldProxy);
 
@@ -61,7 +61,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const emailFieldProxy = testForm().structure.childrenMap().get('email').fieldProxy;
+        const emailFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('email').reader;
         const emailField = signal(emailFieldProxy);
 
         const fieldMessages = signal<ValidationMessages>({});
@@ -89,7 +89,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const emailFieldProxy = testForm().structure.childrenMap().get('email').fieldProxy;
+        const emailFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('email').reader;
         const emailField = signal(emailFieldProxy);
 
         const fieldMessages = signal<ValidationMessages>({});
@@ -126,7 +126,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const passwordFieldProxy = testForm().structure.childrenMap().get('password').fieldProxy;
+        const passwordFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('password').reader;
         const passwordField = signal(passwordFieldProxy);
 
         // Field-level only has 'minLength'
@@ -165,7 +165,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const ageFieldProxy = testForm().structure.childrenMap().get('age').fieldProxy;
+        const ageFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('age').reader;
         const ageField = signal(ageFieldProxy);
 
         const fieldMessages = signal<ValidationMessages>({});
