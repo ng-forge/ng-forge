@@ -18,7 +18,6 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="mb-3">
