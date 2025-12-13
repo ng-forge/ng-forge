@@ -24,8 +24,15 @@
     "form-generator",
     "type-safe",
     "typescript",
-    "angular-forms"
+    "angular-forms",
+    "schema-forms",
+    "json-forms",
+    "config-driven"
   ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
   "peerDependencies": {
     "@angular/common": "~21.0.5",
     "@angular/core": "~21.0.5",

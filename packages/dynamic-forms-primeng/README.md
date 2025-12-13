@@ -4,34 +4,53 @@
 
 # @ng-forge/dynamic-forms-primeng
 
-PrimeNG field components for ng-forge dynamic forms.
+PrimeNG field components for [@ng-forge/dynamic-forms](https://www.npmjs.com/package/@ng-forge/dynamic-forms).
 
 [![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-forms-primeng.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-primeng)
+[![npm downloads](https://img.shields.io/npm/dm/@ng-forge/dynamic-forms-primeng.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-primeng)
+[![Angular](https://img.shields.io/badge/Angular-21+-DD0031.svg)](https://angular.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> **Experimental API Notice:** This library uses Angular's experimental Signal Forms API.
+> Angular may introduce breaking changes in patch releases. Check the [compatibility matrix](#compatibility) below.
+
+## Compatibility
+
+| @ng-forge/dynamic-forms-primeng | @ng-forge/dynamic-forms | Angular       |
+| ------------------------------- | ----------------------- | ------------- |
+| 0.1.1+                          | 0.1.1+                  | >=21.0.2      |
+| 0.1.0                           | 0.1.0                   | 21.0.0-21.0.1 |
 
 ## Installation
 
 ```bash
-npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng primeicons
+npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng @primeng/themes primeicons
 ```
 
 ## Setup
 
-```scss
-// styles.scss
-@import 'primeng/resources/themes/lara-light-blue/theme.css';
-@import 'primeng/resources/primeng.css';
-@import 'primeicons/primeicons.css';
-```
-
 ```typescript
 // app.config.ts
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeng/themes/aura';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideDynamicForm(...withPrimeNGFields())],
+  providers: [
+    providePrimeNG({
+      theme: {
+        preset: Aura,
+      },
+    }),
+    provideDynamicForm(...withPrimeNGFields()),
+  ],
 };
+```
+
+```scss
+// styles.scss
+@import 'primeicons/primeicons.css';
 ```
 
 ## Usage
@@ -79,6 +98,14 @@ Input, Textarea, Select, Checkbox, Toggle, Radio, Multi-Checkbox, Datepicker, Sl
 - [Field Types](https://ng-forge.com/dynamic-forms/core/field-types)
 - [Validation](https://ng-forge.com/dynamic-forms/core/validation)
 - [Conditional Logic](https://ng-forge.com/dynamic-forms/core/conditional-logic)
+
+## Changelog
+
+See [GitHub Releases](https://github.com/ng-forge/ng-forge/releases).
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](https://github.com/ng-forge/ng-forge/blob/main/CONTRIBUTING.md).
 
 ## License
 

@@ -24,6 +24,10 @@
     "form-builder",
     "ng-forge"
   ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
   "peerDependencies": {
     "@angular/common": "~21.0.5",
     "@angular/core": "~21.0.5",

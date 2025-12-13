@@ -7,7 +7,19 @@
 Core library for building type-safe, dynamic Angular forms with signal forms integration.
 
 [![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-forms.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms)
+[![npm downloads](https://img.shields.io/npm/dm/@ng-forge/dynamic-forms.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms)
+[![Angular](https://img.shields.io/badge/Angular-21+-DD0031.svg)](https://angular.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> **Experimental API Notice:** This library uses Angular's experimental Signal Forms API.
+> Angular may introduce breaking changes in patch releases. Check the [compatibility matrix](#compatibility) below.
+
+## Compatibility
+
+| @ng-forge/dynamic-forms | Angular       | Notes                              |
+| ----------------------- | ------------- | ---------------------------------- |
+| 0.1.1+                  | >=21.0.2      | Signal forms API signature changed |
+| 0.1.0                   | 21.0.0-21.0.1 | Initial release                    |
 
 ## Installation
 
@@ -61,6 +73,19 @@ export class UserFormComponent {
 - **i18n Ready** - Observable/Signal support for labels and messages
 - **Event System** - Custom events for buttons and form actions
 
+## UI Integrations
+
+This core library requires a UI integration. Choose one:
+
+| Package                                                                                              | UI Library       |
+| ---------------------------------------------------------------------------------------------------- | ---------------- |
+| [@ng-forge/dynamic-forms-material](https://www.npmjs.com/package/@ng-forge/dynamic-forms-material)   | Angular Material |
+| [@ng-forge/dynamic-forms-bootstrap](https://www.npmjs.com/package/@ng-forge/dynamic-forms-bootstrap) | Bootstrap 5      |
+| [@ng-forge/dynamic-forms-primeng](https://www.npmjs.com/package/@ng-forge/dynamic-forms-primeng)     | PrimeNG          |
+| [@ng-forge/dynamic-forms-ionic](https://www.npmjs.com/package/@ng-forge/dynamic-forms-ionic)         | Ionic            |
+
+Or [create your own](https://ng-forge.com/dynamic-forms/deep-dive/custom-integrations).
+
 ## Documentation
 
 - [Installation](https://ng-forge.com/dynamic-forms/installation)
@@ -71,6 +96,14 @@ export class UserFormComponent {
 - [Events](https://ng-forge.com/dynamic-forms/core/events)
 - [i18n](https://ng-forge.com/dynamic-forms/core/i18n)
 - [Custom Integrations](https://ng-forge.com/dynamic-forms/deep-dive/custom-integrations)
+
+## Changelog
+
+See [GitHub Releases](https://github.com/ng-forge/ng-forge/releases).
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](https://github.com/ng-forge/ng-forge/blob/main/CONTRIBUTING.md).
 
 ## License
 

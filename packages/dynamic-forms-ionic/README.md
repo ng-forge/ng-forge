@@ -4,16 +4,30 @@
 
 # @ng-forge/dynamic-forms-ionic
 
-Ionic field components for ng-forge dynamic forms.
+Ionic field components for [@ng-forge/dynamic-forms](https://www.npmjs.com/package/@ng-forge/dynamic-forms).
 
 [![npm version](https://img.shields.io/npm/v/@ng-forge/dynamic-forms-ionic.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-ionic)
+[![npm downloads](https://img.shields.io/npm/dm/@ng-forge/dynamic-forms-ionic.svg)](https://www.npmjs.com/package/@ng-forge/dynamic-forms-ionic)
+[![Angular](https://img.shields.io/badge/Angular-21+-DD0031.svg)](https://angular.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> **Experimental API Notice:** This library uses Angular's experimental Signal Forms API.
+> Angular may introduce breaking changes in patch releases. Check the [compatibility matrix](#compatibility) below.
+
+## Compatibility
+
+| @ng-forge/dynamic-forms-ionic | @ng-forge/dynamic-forms | Angular       |
+| ----------------------------- | ----------------------- | ------------- |
+| 0.1.1+                        | 0.1.1+                  | >=21.0.2      |
+| 0.1.0                         | 0.1.0                   | 21.0.0-21.0.1 |
 
 ## Installation
 
 ```bash
 npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-ionic @ionic/angular
 ```
+
+> **Note:** This package includes [date-fns](https://date-fns.org/) as a dependency for datepicker formatting.
 
 ## Setup
 
@@ -90,6 +104,14 @@ Input, Textarea, Select, Checkbox, Radio, Toggle, Datepicker, Slider, Multi-Chec
 - [Field Types](https://ng-forge.com/dynamic-forms/core/field-types)
 - [Validation](https://ng-forge.com/dynamic-forms/core/validation)
 - [Conditional Logic](https://ng-forge.com/dynamic-forms/core/conditional-logic)
+
+## Changelog
+
+See [GitHub Releases](https://github.com/ng-forge/ng-forge/releases).
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](https://github.com/ng-forge/ng-forge/blob/main/CONTRIBUTING.md).
 
 ## License
 
