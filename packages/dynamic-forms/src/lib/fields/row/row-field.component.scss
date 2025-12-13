@@ -1,4 +1,5 @@
 // Row-specific styling overrides and customizations
+@use 'sass:math';
 @use '../../styles/grid-system.scss';
 
 :host {
@@ -18,8 +19,8 @@
   // Use ::ng-deep because child components have their own view encapsulation
   @for $i from 1 through 12 {
     ::ng-deep > .df-col-#{$i} {
-      flex: 0 0 calc(#{percentage(calc($i / 12))} - var(--df-grid-gap) * #{calc((12 - $i) / 12)});
-      max-width: calc(#{percentage(calc($i / 12))} - var(--df-grid-gap) * #{calc((12 - $i) / 12)});
+      flex: 0 0 calc(#{math.percentage(math.div($i, 12))} - var(--df-grid-gap) * #{math.div((12 - $i), 12)});
+      max-width: calc(#{math.percentage(math.div($i, 12))} - var(--df-grid-gap) * #{math.div((12 - $i), 12)});
     }
   }
 

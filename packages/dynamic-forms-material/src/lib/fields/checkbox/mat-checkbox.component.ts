@@ -13,7 +13,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   imports: [MatCheckbox, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-checkbox
@@ -22,7 +21,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       [indeterminate]="props()?.indeterminate || false"
       [color]="props()?.color || 'primary'"
       [disableRipple]="effectiveDisableRipple()"
-      [required]="!!f().required?.()"
+      [required]="!!f().required()"
       [aria-describedby]="ariaDescribedBy"
       [attr.tabindex]="tabIndex()"
       [attr.hidden]="f().hidden() || null"
