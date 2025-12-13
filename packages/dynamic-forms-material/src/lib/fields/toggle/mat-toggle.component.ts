@@ -13,7 +13,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   imports: [MatSlideToggle, Field, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-slide-toggle
@@ -22,7 +21,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [labelPosition]="props()?.labelPosition || 'after'"
       [hideIcon]="props()?.hideIcon || false"
       [disableRipple]="effectiveDisableRipple()"
-      [required]="!!f().required?.()"
+      [required]="!!f().required()"
       [aria-describedby]="ariaDescribedBy"
       [attr.tabindex]="tabIndex()"
       class="toggle-container"
