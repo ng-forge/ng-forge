@@ -456,80 +456,13 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Effects
+  // Constructor
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly syncEntityToValue = explicitEffect([this.entity], ([currentEntity]) => {
-    const currentValue = this.value();
-    if (!isEqual(currentEntity, currentValue)) {
-      this.value.set(currentEntity);
-    }
-  });
-
-  private readonly clearErrorsOnConfigChange = explicitEffect([this.config], () => {
-    this.fieldLoadingErrors.set([]);
-  });
-
-  private readonly emitPagedFormInitialized = explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
-    if (mode === 'paged' && pages.length > 0) {
-      this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
-    }
-  });
-
-  private readonly emitNonPagedFormInitialized = explicitEffect([this.resolvedFields, this.formModeDetection], ([fields, { mode }]) => {
-    if (mode === 'non-paged' && fields.length > 0) {
-      afterNextRender(
-        () => {
-          this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
-        },
-        { injector: this.injector },
-      );
-    }
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Event Handlers
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  private readonly handleFormReset = this.eventBus
-    .on<FormResetEvent>('form-reset')
-    .pipe(takeUntilDestroyed())
-    .subscribe(() => this.onFormReset());
-
-  private readonly handleFormClear = this.eventBus
-    .on<FormClearEvent>('form-clear')
-    .pipe(takeUntilDestroyed())
-    .subscribe(() => this.onFormClear());
-
-  /**
-   * Announces form validation errors to screen readers when submission is attempted
-   * on an invalid form.
-   */
-  private readonly handleErrorAnnouncement = this.eventBus
-    .on<SubmitEvent>('submit')
-    .pipe(takeUntilDestroyed())
-    .subscribe(() => {
-      const formState = this.form()();
-      if (formState.invalid()) {
-        const errorCount = this.countErrors(formState.errors());
-        const message =
-          errorCount === 1
-            ? 'Form submission failed. Please fix 1 validation error before submitting.'
-            : `Form submission failed. Please fix ${errorCount} validation errors before submitting.`;
-        // Clear first to ensure screen readers announce even if message is the same
-        this.errorAnnouncement.set('');
-        // Use setTimeout to ensure the clear is processed before the new message
-        setTimeout(() => this.errorAnnouncement.set(message), 50);
-      }
-    });
-
-  private readonly handleSubmission = createSubmissionHandler({
-    eventBus: this.eventBus,
-    configSignal: this.config,
-    formSignal: this.form,
-  })
-    .pipe(takeUntilDestroyed())
-    .subscribe();
+  constructor() {
+    this.setupEffects();
+    this.setupEventHandlers();
+  }
 
   /**
    * Handles native form submission triggered by:
@@ -550,6 +483,82 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   // ─────────────────────────────────────────────────────────────────────────────
   // Private Methods
   // ─────────────────────────────────────────────────────────────────────────────
+
+  private setupEffects(): void {
+    // Sync entity changes to the value signal
+    explicitEffect([this.entity], ([currentEntity]) => {
+      const currentValue = this.value();
+      if (!isEqual(currentEntity, currentValue)) {
+        this.value.set(currentEntity);
+      }
+    });
+
+    // Clear loading errors when config changes
+    explicitEffect([this.config], () => {
+      this.fieldLoadingErrors.set([]);
+    });
+
+    // Emit initialization event for paged forms
+    explicitEffect([this.formModeDetection, this.pageFieldDefinitions], ([{ mode }, pages]) => {
+      if (mode === 'paged' && pages.length > 0) {
+        this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+      }
+    });
+
+    // Emit initialization event for non-paged forms
+    explicitEffect([this.resolvedFields, this.formModeDetection], ([fields, { mode }]) => {
+      if (mode === 'non-paged' && fields.length > 0) {
+        afterNextRender(
+          () => {
+            this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
+          },
+          { injector: this.injector },
+        );
+      }
+    });
+  }
+
+  private setupEventHandlers(): void {
+    // Handle form reset events
+    this.eventBus
+      .on<FormResetEvent>('form-reset')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.onFormReset());
+
+    // Handle form clear events
+    this.eventBus
+      .on<FormClearEvent>('form-clear')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.onFormClear());
+
+    // Announce form validation errors to screen readers when submission is attempted on an invalid form
+    this.eventBus
+      .on<SubmitEvent>('submit')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        const formState = this.form()();
+        if (formState.invalid()) {
+          const errorCount = this.countErrors(formState.errors());
+          const message =
+            errorCount === 1
+              ? 'Form submission failed. Please fix 1 validation error before submitting.'
+              : `Form submission failed. Please fix ${errorCount} validation errors before submitting.`;
+          // Clear first to ensure screen readers announce even if message is the same
+          this.errorAnnouncement.set('');
+          // Use setTimeout to ensure the clear is processed before the new message
+          setTimeout(() => this.errorAnnouncement.set(message), 50);
+        }
+      });
+
+    // Handle form submission
+    createSubmissionHandler({
+      eventBus: this.eventBus,
+      configSignal: this.config,
+      formSignal: this.form,
+    })
+      .pipe(takeUntilDestroyed())
+      .subscribe();
+  }
 
   private registerValidatorsFromConfig({ customFnConfig, schemas }: FormConfig<TFields>): void {
     if (schemas) {
