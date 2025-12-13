@@ -102,14 +102,25 @@ export default class RowFieldComponent {
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Effects
+  // Constructor
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly emitInitializedOnFieldsResolved = explicitEffect([this.resolvedFields], ([fields]) => {
-    if (fields.length > 0) {
-      emitComponentInitialized(this.eventBus, 'row', this.field().key, this.injector);
-    }
-  });
+  constructor() {
+    this.setupEffects();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Private Methods
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  private setupEffects(): void {
+    // Emit initialization event when fields are resolved
+    explicitEffect([this.resolvedFields], ([fields]) => {
+      if (fields.length > 0) {
+        emitComponentInitialized(this.eventBus, 'row', this.field().key, this.injector);
+      }
+    });
+  }
 }
 
 export { RowFieldComponent };
