@@ -61,16 +61,3 @@ import './types/registry-augmentation';
 
 // Providers
 export { withPrimeNGFields } from './providers/primeng-providers';
-
-// Testing utilities
-export {
-  delay,
-  waitForDFInit,
-  PrimeNGFormTestUtils,
-  PrimeNGFormConfigBuilder,
-  FakeTranslationService,
-  DEFAULT_TEST_TRANSLATIONS,
-  SPANISH_TEST_TRANSLATIONS,
-  createTestTranslationService,
-} from './testing';
-export type { PrimeNGFormTestConfig, PrimeNGFormTestResult } from './testing';
