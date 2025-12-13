@@ -107,38 +107,46 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
   readonly resolvedItems = linkedSignal(() => this.resolvedItemsSignal());
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Effects
+  // Constructor
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly syncFieldsOnArrayChange = explicitEffect([this.arrayFieldTrees], ([fieldTrees]) => {
-    this.updateVersion.update((v) => v + 1);
-    const currentVersion = this.updateVersion();
-    this.performDifferentialUpdate(fieldTrees, currentVersion);
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Event Handlers
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  private readonly handleAddItem = this.eventBus
-    .on<AddArrayItemEvent>('add-array-item')
-    .pipe(
-      takeUntilDestroyed(),
-      filter((event) => event.arrayKey === this.key()),
-    )
-    .subscribe((event) => this.addItem(event.field ?? this.fieldTemplate(), event.index));
-
-  private readonly handleRemoveItem = this.eventBus
-    .on<RemoveArrayItemEvent>('remove-array-item')
-    .pipe(
-      takeUntilDestroyed(),
-      filter((event) => event.arrayKey === this.key()),
-    )
-    .subscribe((event) => this.removeItem(event.index));
+  constructor() {
+    this.setupEffects();
+    this.setupEventHandlers();
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Private Methods
   // ─────────────────────────────────────────────────────────────────────────────
+
+  private setupEffects(): void {
+    // Sync field components when array data changes
+    explicitEffect([this.arrayFieldTrees], ([fieldTrees]) => {
+      this.updateVersion.update((v) => v + 1);
+      const currentVersion = this.updateVersion();
+      this.performDifferentialUpdate(fieldTrees, currentVersion);
+    });
+  }
+
+  private setupEventHandlers(): void {
+    // Handle add item events
+    this.eventBus
+      .on<AddArrayItemEvent>('add-array-item')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((event) => event.arrayKey === this.key()),
+      )
+      .subscribe((event) => this.addItem(event.field ?? this.fieldTemplate(), event.index));
+
+    // Handle remove item events
+    this.eventBus
+      .on<RemoveArrayItemEvent>('remove-array-item')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((event) => event.arrayKey === this.key()),
+      )
+      .subscribe((event) => this.removeItem(event.index));
+  }
 
   private performDifferentialUpdate(fieldTrees: readonly (FieldTree<unknown> | null)[], updateId: number): void {
     const resolvedItems = this.resolvedItemsSignal();
