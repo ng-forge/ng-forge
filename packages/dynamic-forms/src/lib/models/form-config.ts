@@ -36,7 +36,7 @@ import { SubmissionConfig } from './submission-config';
  * @public
  */
 export interface FormConfig<
-  TFields extends NarrowFields = NarrowFields,
+  TFields extends NarrowFields | RegisteredFieldTypes[] = RegisteredFieldTypes[],
   TValue = InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>,
 > {
   /**
