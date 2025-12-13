@@ -79,3 +79,56 @@ export type RegisteredFieldTypes = ContainerFieldTypes | LeafFieldTypes;
  * Extract field types that are available in the registry
  */
 export type AvailableFieldTypes = keyof DynamicFormFieldRegistry['containers'] | keyof DynamicFormFieldRegistry['leaves'];
+
+/**
+ * Combined registry mapping type names to field definitions.
+ * This flattens containers and leaves into a single mapping.
+ */
+type FieldTypeMap = DynamicFormFieldRegistry['containers'] & DynamicFormFieldRegistry['leaves'];
+
+/**
+ * Extract a specific field type from RegisteredFieldTypes based on the `type` discriminant.
+ * This enables proper type narrowing when defining fields.
+ *
+ * @example
+ * ```typescript
+ * // Extract a specific field type
+ * type MyInputField = ExtractField<'input'>;
+ *
+ * // Use in field definitions for proper props inference
+ * const field: ExtractField<'input'> = {
+ *   type: 'input',
+ *   key: 'email',
+ *   value: '',
+ *   props: { type: 'email' } // Only input props allowed here
+ * };
+ * ```
+ */
+export type ExtractField<T extends AvailableFieldTypes> = T extends keyof FieldTypeMap ? FieldTypeMap[T] : never;
+
+/**
+ * Narrow a field definition based on its `type` property.
+ * Use this to get proper type inference when working with field unions.
+ *
+ * @example
+ * ```typescript
+ * function processField<T extends RegisteredFieldTypes>(field: T): NarrowField<T> {
+ *   return field as NarrowField<T>;
+ * }
+ * ```
+ */
+export type NarrowField<T> = T extends { type: infer TType } ? (TType extends AvailableFieldTypes ? ExtractField<TType> : T) : T;
+
+/**
+ * Narrow each field in an array based on its `type` property.
+ * Use with `satisfies` to get proper type inference for field arrays.
+ *
+ * @example
+ * ```typescript
+ * const fields = [
+ *   { type: 'input', key: 'name', value: '', props: { type: 'text' } },
+ *   { type: 'select', key: 'country', value: 'us', options: [...] },
+ * ] as const satisfies NarrowFields;
+ * ```
+ */
+export type NarrowFields = readonly NarrowField<RegisteredFieldTypes>[];
