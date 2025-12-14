@@ -26,48 +26,46 @@ type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 type Widen<T> = T extends string ? string : T extends number ? number : T extends boolean ? boolean : T;
 
 /**
+ * Infer value type based on field type and props.
+ * - Slider fields: always number
+ * - Input fields with props.type: 'number': number
+ * - Other fields: widen the literal value type
+ */
+type InferValueType<T, V> = T extends { type: 'slider' }
+  ? number
+  : T extends { type: 'input'; props: { type: 'number' } }
+    ? number
+    : Widen<V>;
+
+/** Make type optional if field is not required */
+type MaybeOptional<T, V> = T extends { required: true } ? V : V | undefined;
+
+/**
  * Process a single field and determine its contribution to the form value type
- * Handles:
- * - Page fields: flatten children (valueHandling: 'flatten')
- * - Row fields: flatten children (valueHandling: 'flatten')
- * - Group fields: nest children under group key (valueHandling: 'include')
- * - Text fields: exclude from values (valueHandling: 'exclude')
- * - Value fields: include with their key and value type
  */
 type ProcessField<T, D extends number = 5> = [D] extends [never]
-  ? Record<string, unknown> // Max depth reached, return generic
-  : // Page fields: flatten children (don't create a key for the page itself)
-    T extends { type: 'page'; fields: infer TFields }
-    ? TFields extends RegisteredFieldTypes[]
-      ? InferFormValueWithDepth<TFields, Depth[D]>
+  ? Record<string, unknown>
+  : // Container: page/row - flatten children
+    T extends { type: 'page' | 'row'; fields: infer F }
+    ? F extends RegisteredFieldTypes[]
+      ? InferFormValueWithDepth<F, Depth[D]>
       : never
-    : // Row fields: flatten children (don't create a key for the row itself)
-      T extends { type: 'row'; fields: infer TFields }
-      ? TFields extends RegisteredFieldTypes[]
-        ? InferFormValueWithDepth<TFields, Depth[D]>
+    : // Container: group - nest under key
+      T extends { type: 'group'; key: infer K; fields: infer F }
+      ? K extends string
+        ? F extends RegisteredFieldTypes[]
+          ? { [P in K]: InferFormValueWithDepth<F, Depth[D]> }
+          : { [P in K]: Record<string, unknown> }
         : never
-      : // Group fields: nest children under the group's key
-        T extends { type: 'group'; key: infer K; fields: infer TFields }
-        ? K extends string
-          ? TFields extends RegisteredFieldTypes[]
-            ? { [P in K]: InferFormValueWithDepth<TFields, Depth[D]> }
-            : { [P in K]: Record<string, unknown> }
-          : never
-        : // Text fields: exclude from form values (display-only)
-          T extends { type: 'text' }
-          ? never
-          : // Value fields with required flag set to true
-            T extends { key: infer K; value: infer V; required: true }
-            ? K extends string
-              ? { [P in K]: Widen<V> }
-              : never
-            : // Value fields with required flag set to false or undefined, or no required flag
-              T extends { key: infer K; value: infer V }
-              ? K extends string
-                ? { [P in K]: Widen<V> | undefined }
-                : never
-              : // Fallback: fields without a key are excluded
-                never;
+      : // Display-only: text - exclude
+        T extends { type: 'text' }
+        ? never
+        : // Value fields: infer type and optionality
+          T extends { key: infer K; value: infer V }
+          ? K extends string
+            ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
+            : never
+          : never;
 
 /**
  * Internal helper with depth tracking

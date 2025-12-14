@@ -34,8 +34,7 @@ const config = {
           },
           min: 0,
           max: 10,
-          // TODO: fix number inference for inputs
-          value: '1',
+          value: 1,
           required: true,
           col: 6,
         },
@@ -48,7 +47,7 @@ const config = {
           },
           min: 0,
           max: 10,
-          value: '2',
+          value: 2,
           col: 6,
         },
         {
