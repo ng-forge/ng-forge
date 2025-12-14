@@ -253,14 +253,25 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Effects
+  // Constructor
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private readonly emitInitializedOnFieldsResolved = explicitEffect([this.resolvedFields], ([fields]) => {
-    if (fields.length > 0) {
-      emitComponentInitialized(this.eventBus, 'group', this.field().key, this.injector);
-    }
-  });
+  constructor() {
+    this.setupEffects();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Private Methods
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  private setupEffects(): void {
+    // Emit initialization event when fields are resolved
+    explicitEffect([this.resolvedFields], ([fields]) => {
+      if (fields.length > 0) {
+        emitComponentInitialized(this.eventBus, 'group', this.field().key, this.injector);
+      }
+    });
+  }
 }
 
 export { GroupFieldComponent };
