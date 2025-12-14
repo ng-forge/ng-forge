@@ -26,53 +26,45 @@ export interface InputProps<T extends InputType = InputType> {
 }
 
 // ============================================================================
+// String input types (excludes 'number')
+// ============================================================================
+
+/**
+ * Input types that produce string values
+ */
+export type StringInputType = Exclude<InputType, 'number'>;
+
+// ============================================================================
 // Discriminated union variants
 // ============================================================================
 
 /**
  * Number input field with strict number value type.
  * When props.type is 'number', value must be number.
+ * Props is REQUIRED and must include type: 'number'.
  */
-interface NumberInputField<TProps extends { type?: string } = { type: 'number'; placeholder?: DynamicText }>
-  extends BaseValueField<TProps, number> {
+interface NumberInputField<TProps extends { type?: string } = InputProps> extends BaseValueField<TProps & { type: 'number' }, number> {
   type: 'input';
-  props?: TProps; // Optional to match component expectations
+  props: TProps & { type: 'number' }; // Required with type: 'number'
 }
 
 /**
  * String input field with strict string value type.
- * When props.type is text/email/etc, value must be string.
+ * When props.type is text/email/etc (or undefined), value must be string.
+ * Props type cannot be 'number'.
  */
-interface StringInputField<
-  TProps extends { type?: string } = { type: 'text' | 'email' | 'password' | 'tel' | 'url'; placeholder?: DynamicText },
-> extends BaseValueField<TProps, string> {
+interface StringInputField<TProps extends { type?: string } = InputProps>
+  extends BaseValueField<TProps & { type?: StringInputType }, string> {
   type: 'input';
-  props?: TProps; // Optional to match component expectations
+  props?: TProps & { type?: StringInputType }; // Optional, but type cannot be 'number'
 }
 
 /**
- * Helper type to extract the input type from props
+ * Builds discriminated union where props.type determines value type.
+ * - If props.type is 'number', only NumberInputField matches (value: number)
+ * - If props.type is undefined/text/email/etc, only StringInputField matches (value: string)
  */
-type ExtractInputType<TProps> = TProps extends { type?: infer T } ? T : InputType;
-
-/**
- * Fallback variant when props is undefined - allows both string and number values
- */
-interface UndefinedPropsInputField extends BaseValueField<undefined, string | number> {
-  type: 'input';
-  props?: never;
-}
-
-/**
- * Builds discriminated union based on what input types are possible in TProps
- */
-type BuildInputFieldUnion<TProps extends { type?: string }> =
-  | (ExtractInputType<TProps> extends infer T
-      ? T extends string
-        ? ('number' extends T ? NumberInputField<TProps> : never) | (Exclude<T, 'number'> extends never ? never : StringInputField<TProps>)
-        : StringInputField<TProps>
-      : never)
-  | UndefinedPropsInputField; // Allow undefined props as fallback
+type BuildInputFieldUnion<TProps extends { type?: string }> = NumberInputField<TProps> | StringInputField<TProps>;
 
 /**
  * Input field with automatic type-safe value inference.

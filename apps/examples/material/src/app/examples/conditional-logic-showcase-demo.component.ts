@@ -281,7 +281,7 @@ export default class ConditionalLogicShowcaseDemoComponent {
           {
             key: 'graduationYear',
             type: 'input',
-            value: '',
+            value: undefined,
             label: 'Graduation Year',
             required: true,
             pattern: '^(19|20)\\d{2}$',
@@ -296,7 +296,7 @@ export default class ConditionalLogicShowcaseDemoComponent {
           {
             key: 'yearsExperience',
             type: 'input',
-            value: '',
+            value: undefined,
             label: 'Years of Professional Experience',
             required: true,
             validationMessages: {
