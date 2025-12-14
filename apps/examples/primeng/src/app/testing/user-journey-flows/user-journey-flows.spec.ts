@@ -352,8 +352,8 @@ test.describe('User Journey Flow Tests', () => {
 
       // Verify submitted data contains values from all pages
       expect(submittedData).toMatchObject({
-        itemQuantity1: '2',
-        itemQuantity2: '2',
+        itemQuantity1: 2,
+        itemQuantity2: 2,
         promoCode: 'SAVE10',
         giftWrap: true,
         shippingFirstName: 'Jane',
