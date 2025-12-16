@@ -184,9 +184,6 @@ function mapFieldSpecificConfiguration(fieldDef: FieldDef<any>, fieldPath: Schem
   if (fieldDef.hidden) {
     hidden(toSupportedPath(fieldPath), () => true);
   }
-
-  // Handle any additional configuration specific to the field type
-  // This can be extended as needed for specific field requirements
 }
 
 /**

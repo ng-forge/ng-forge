@@ -1,4 +1,5 @@
 export { delay } from './delay';
+export { createMockLogger, createSilentLogger, type MockLogger } from './mock-logger';
 export { DynamicFormTestUtils, FormConfigBuilder, type DynamicFormTestConfig, type DynamicFormTestResult } from './dynamic-form-test-utils';
 export { createTestFormInjector, testMapper, createTestFieldContext, type TestFieldContextConfig } from './mapper-test-utils';
 export {

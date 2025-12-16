@@ -52,7 +52,7 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
 
     case 'applyWhenValue':
       if (config.typePredicate) {
-        const predicate = createTypePredicateFunction(config.typePredicate);
+        const predicate = createTypePredicateFunction(config.typePredicate, logger);
         applyWhenValue(path, predicate, schemaFn);
       }
       break;

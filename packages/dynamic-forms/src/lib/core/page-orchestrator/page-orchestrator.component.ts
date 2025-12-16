@@ -15,6 +15,7 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { evaluateCondition } from '../expressions/condition-evaluator';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { FunctionRegistryService } from '../registry/function-registry.service';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -90,6 +91,7 @@ export class PageOrchestratorComponent {
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
+  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
 
   /**
    * Array of page field definitions to render
@@ -114,8 +116,9 @@ export class PageOrchestratorComponent {
   readonly pageHiddenStates = computed(() => {
     const pages = this.pageFields();
     const formValue = this.rootFormRegistry.getFormValue();
+    const customFunctions = this.functionRegistry.getCustomFunctions();
 
-    return pages.map((page) => this.evaluatePageHidden(page, formValue));
+    return pages.map((page) => this.evaluatePageHidden(page, formValue, customFunctions));
   });
 
   /**
@@ -373,7 +376,11 @@ export class PageOrchestratorComponent {
    * @param formValue The current form value to evaluate against
    * @returns true if the page should be hidden, false otherwise
    */
-  private evaluatePageHidden(page: PageField, formValue: unknown): boolean {
+  private evaluatePageHidden(
+    page: PageField,
+    formValue: unknown,
+    customFunctions: Record<string, (context: EvaluationContext) => unknown>,
+  ): boolean {
     // If no logic defined, page is visible
     if (!page.logic || page.logic.length === 0) {
       return false;
@@ -387,6 +394,15 @@ export class PageOrchestratorComponent {
       return false;
     }
 
+    // Create evaluation context once for all conditions on this page
+    const context: EvaluationContext = {
+      fieldValue: null, // Pages don't have field values
+      formValue: (formValue ?? {}) as Record<string, unknown>,
+      fieldPath: page.key || '',
+      customFunctions,
+      logger: this.logger,
+    };
+
     // Check each hidden logic - if ANY condition is true, the page is hidden
     for (const logic of hiddenLogic) {
       // Handle static boolean conditions
@@ -399,12 +415,6 @@ export class PageOrchestratorComponent {
 
       // Evaluate conditional expression
       const condition = logic.condition as ConditionalExpression;
-      const context: EvaluationContext = {
-        fieldValue: null, // Pages don't have field values
-        formValue: (formValue ?? {}) as Record<string, unknown>,
-        fieldPath: page.key || '',
-        customFunctions: this.functionRegistry.getCustomFunctions(),
-      };
 
       if (evaluateCondition(condition, context)) {
         return true;

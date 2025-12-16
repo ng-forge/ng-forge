@@ -63,6 +63,7 @@ export class FieldContextRegistryService {
       formValue,
       fieldPath,
       customFunctions: customFunctions || {},
+      logger: this.logger,
     };
   }
 
@@ -143,6 +144,7 @@ export class FieldContextRegistryService {
       formValue,
       fieldPath,
       customFunctions: customFunctions || {},
+      logger: this.logger,
     };
   }
 }
