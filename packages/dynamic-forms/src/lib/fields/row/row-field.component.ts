@@ -9,6 +9,7 @@ import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-fi
 import { EventBus } from '../../events/event.bus';
 import { FieldDef } from '../../definitions/base/field-def';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 
 /**
  * Layout container for horizontal field arrangement.
@@ -43,6 +44,7 @@ export default class RowFieldComponent {
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
+  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -86,8 +88,8 @@ export default class RowFieldComponent {
           destroyRef: this.destroyRef,
           onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
             const fieldKey = fieldDef.key || '<no key>';
-            console.error(
-              `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            this.logger.error(
+              `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
                 `within row '${rowKey}'. Ensure the field type is registered in your field registry.`,
               error,
             );

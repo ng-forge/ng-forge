@@ -5,6 +5,7 @@ import { ArrayField } from '../../definitions/default/array-field';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldSignalContext } from '../../mappers/types';
 import { FieldTypeDefinition } from '../../models/field-type';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 import { generateArrayItemId, ResolvedArrayItem } from './array-field.types';
 import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
 
@@ -88,8 +89,9 @@ export function resolveArrayItem<TModel>(options: ResolveArrayItemOptions<TModel
     }),
     catchError((error) => {
       if (!destroyRef.destroyed) {
-        console.error(
-          `[Dynamic Forms] Failed to load component for field type '${template.type}' at index ${index} ` +
+        const logger = parentInjector.get(DYNAMIC_FORM_LOGGER);
+        logger.error(
+          `Failed to load component for field type '${template.type}' at index ${index} ` +
             `within array '${arrayField.key}'. Ensure the field type is registered in your field registry.`,
           error,
         );

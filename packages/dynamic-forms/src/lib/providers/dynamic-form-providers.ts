@@ -1,7 +1,9 @@
-import { EnvironmentProviders, makeEnvironmentProviders, Provider } from '@angular/core';
+import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider } from '@angular/core';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
 import { FieldDef } from '../definitions/base/field-def';
+import { DynamicFormFeature, isDynamicFormFeature } from './features/dynamic-form-feature';
+import { DYNAMIC_FORM_LOGGER } from './features/logger/logger.token';
 
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
@@ -40,12 +42,28 @@ type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProv
 };
 
 /**
+ * Union type for items that can be passed to provideDynamicForm
+ */
+type FieldTypeOrFeature = FieldTypeDefinition | DynamicFormFeature;
+
+/**
+ * Extract only FieldTypeDefinition items from a tuple type
+ */
+type ExtractFieldTypes<T extends FieldTypeOrFeature[]> = {
+  [K in keyof T]: T[K] extends FieldTypeDefinition ? T[K] : never;
+}[number] extends infer U
+  ? U extends FieldTypeDefinition
+    ? U[]
+    : never
+  : never;
+
+/**
  * Provider function to configure the dynamic form system with field types and options.
  *
  * This function creates environment providers that can be used at application or route level
  * to register field types. It provides type-safe field registration with automatic type inference.
  *
- * @param fieldTypes - Custom field type definitions to register alongside built-in types
+ * @param items - Field type definitions and/or features (like withLogger)
  * @returns Environment providers for dependency injection with type inference
  *
  * @example
@@ -54,6 +72,19 @@ type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProv
  * bootstrapApplication(AppComponent, {
  *   providers: [
  *     provideDynamicForm(...withMaterialFields())
+ *   ]
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With logging configuration
+ * bootstrapApplication(AppComponent, {
+ *   providers: [
+ *     provideDynamicForm(
+ *       ...withMaterialFields(),
+ *       withLogger({ level: LogLevel.Debug })
+ *     )
  *   ]
  * });
  * ```
@@ -86,7 +117,13 @@ type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProv
  *
  * @public
  */
-export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fieldTypes: T): ProvideDynamicFormResult<T> {
+export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
+  ...items: T
+): ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]> {
+  // Separate field types from features
+  const fieldTypes = items.filter((item): item is FieldTypeDefinition => !isDynamicFormFeature(item));
+  const features = items.filter(isDynamicFormFeature);
+
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
 
   // Extract config providers from field type arrays
@@ -98,15 +135,22 @@ export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fie
     }
   });
 
+  // Extract providers from features
+  const featureProviders: Provider[] = [];
+  features.forEach((feature) => {
+    featureProviders.push(...feature.ɵproviders);
+  });
+
   return makeEnvironmentProviders([
     {
       provide: FIELD_REGISTRY,
       useFactory: () => {
+        const logger = inject(DYNAMIC_FORM_LOGGER);
         const registry = new Map();
         // Add custom field types
         fields.forEach((fieldType) => {
           if (registry.has(fieldType.name)) {
-            console.warn(`[Dynamic Forms] Field type "${fieldType.name}" is already registered. Overwriting.`);
+            logger.warn(`Field type "${fieldType.name}" is already registered. Overwriting.`);
           }
           registry.set(fieldType.name, fieldType);
         });
@@ -114,7 +158,8 @@ export function provideDynamicForm<const T extends FieldTypeDefinition[]>(...fie
       },
     },
     ...configProviders,
-  ]) as ProvideDynamicFormResult<T>;
+    ...featureProviders,
+  ]) as ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]>;
 }
 
 /**

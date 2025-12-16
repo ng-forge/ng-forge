@@ -2,6 +2,7 @@ import { inject, Injectable, isSignal, untracked } from '@angular/core';
 import { ChildFieldContext, FieldContext } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { RootFormRegistryService } from './root-form-registry.service';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 
 function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is ChildFieldContext<TValue> {
   return 'key' in context && isSignal(context.key);
@@ -17,6 +18,7 @@ function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is 
 @Injectable()
 export class FieldContextRegistryService {
   private rootFormRegistry = inject(RootFormRegistryService);
+  private logger = inject(DYNAMIC_FORM_LOGGER);
 
   /**
    * Creates an evaluation context for a field by combining:
@@ -93,7 +95,7 @@ export class FieldContextRegistryService {
         const fieldPaths = (formContext.fieldPaths as Record<string, string>) || {};
         return fieldPaths[String(key)] || String(key);
       } catch (error) {
-        console.warn('[Dynamic Forms] Unable to extract field key:', error);
+        this.logger.warn('Unable to extract field key:', error);
       }
     }
 

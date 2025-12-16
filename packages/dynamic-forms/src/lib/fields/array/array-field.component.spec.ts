@@ -322,7 +322,7 @@ describe('ArrayFieldComponent', () => {
       fixture.detectChanges();
 
       expect(component.resolvedItems()).toHaveLength(0);
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cannot add item to array'));
+      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Cannot add item to array'));
     });
   });
 

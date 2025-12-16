@@ -18,6 +18,7 @@ import { reconcileFields, ResolvedField, resolveField } from '../../utils/resolv
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { keyBy, mapValues, memoize } from '../../utils/object-utils';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTypeDefinition } from '../../models/field-type';
@@ -67,6 +68,7 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
+  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Memoized Functions
@@ -237,8 +239,8 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
           destroyRef: this.destroyRef,
           onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
             const fieldKey = fieldDef.key || '<no key>';
-            console.error(
-              `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            this.logger.error(
+              `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
                 `within group '${groupKey}'. Ensure the field type is registered in your field registry.`,
               error,
             );
