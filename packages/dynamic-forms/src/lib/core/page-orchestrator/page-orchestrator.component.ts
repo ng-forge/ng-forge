@@ -16,6 +16,7 @@ import { evaluateCondition } from '../expressions/condition-evaluator';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { CustomFunction } from '../expressions/custom-function-types';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -91,6 +92,7 @@ export class PageOrchestratorComponent {
   private readonly eventBus = inject(EventBus);
   private readonly rootFormRegistry = inject(RootFormRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
+  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
 
   /**
    * Cache for filtered hidden logic per page key.
@@ -419,6 +421,7 @@ export class PageOrchestratorComponent {
       formValue: (formValue ?? {}) as Record<string, unknown>,
       fieldPath: page.key || '',
       customFunctions,
+      logger: this.logger,
     };
 
     // Check each hidden logic - if ANY condition is true, the page is hidden

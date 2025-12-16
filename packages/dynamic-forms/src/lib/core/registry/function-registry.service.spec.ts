@@ -2,12 +2,17 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { FunctionRegistryService } from './function-registry.service';
+import { createSilentLogger } from '../../testing/mock-logger';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.interface';
 
 describe('FunctionRegistryService', () => {
   let service: FunctionRegistryService;
   let mockContext: EvaluationContext;
+  let mockLogger: DynamicFormLogger;
 
   beforeEach(() => {
+    mockLogger = createSilentLogger();
+
     TestBed.configureTestingModule({
       providers: [FunctionRegistryService],
     });
@@ -17,6 +22,7 @@ describe('FunctionRegistryService', () => {
       fieldValue: 'test',
       formValue: { testField: 'test', age: 25 },
       fieldPath: 'testField',
+      logger: mockLogger,
     };
   });
 
@@ -263,6 +269,7 @@ describe('FunctionRegistryService', () => {
         fieldValue: 'test@example.com',
         formValue: {},
         fieldPath: 'email',
+        logger: mockLogger,
       };
       expect(functions.isEmailValid(emailContext)).toBe(true);
 
@@ -271,6 +278,7 @@ describe('FunctionRegistryService', () => {
         fieldValue: 'Password123',
         formValue: {},
         fieldPath: 'password',
+        logger: mockLogger,
       };
       expect(functions.isPasswordStrong(passwordContext)).toBe(true);
 
@@ -279,6 +287,7 @@ describe('FunctionRegistryService', () => {
         fieldValue: '',
         formValue: { email: 'test@example.com', password: 'Password123', name: 'John' },
         fieldPath: '',
+        logger: mockLogger,
       };
       expect(functions.isFormComplete(formContext)).toBe(true);
     });
@@ -303,6 +312,7 @@ describe('FunctionRegistryService', () => {
         fieldValue: 'test',
         formValue: {},
         fieldPath: 'field',
+        logger: mockLogger,
       };
 
       expect(functions.isNotEmpty(testContext)).toBe(true);

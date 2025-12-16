@@ -4,6 +4,7 @@ import { FormOptions, NextButtonOptions, SubmitButtonOptions } from '../../model
 import { LogicConfig, FormStateCondition, isFormStateCondition } from '../../models/logic';
 import { ConditionalExpression } from '../../models/expressions';
 import { evaluateCondition } from '../expressions';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.interface';
 
 /**
  * Context for resolving button disabled state.
@@ -28,6 +29,9 @@ export interface ButtonLogicContext {
 
   /** Current form value for evaluating conditional expressions */
   formValue?: unknown;
+
+  /** Logger for diagnostic output */
+  logger: DynamicFormLogger;
 }
 
 /**
@@ -95,6 +99,7 @@ function evaluateLogicCondition(condition: LogicConfig['condition'], ctx: Button
     fieldValue: undefined,
     formValue,
     fieldPath: '',
+    logger: ctx.logger,
   };
 
   return evaluateCondition(condition as ConditionalExpression, evaluationContext);

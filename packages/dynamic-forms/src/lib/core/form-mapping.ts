@@ -185,15 +185,6 @@ function mapFieldSpecificConfiguration(fieldDef: FieldDef<any>, fieldPath: Schem
   if (fieldDef.hidden) {
     hidden(toSupportedPath(fieldPath), () => true);
   }
-
-  // Handle any additional configuration specific to the field type
-  // This can be extended as needed for specific field requirements
-
-  // Example: if field has custom form integration requirements
-  if ('customFormConfig' in fieldDef && fieldDef.customFormConfig) {
-    console.log('Custom form configuration detected for field:', fieldDef.key);
-    // Handle custom configuration here
-  }
 }
 
 /**

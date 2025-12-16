@@ -203,6 +203,7 @@ function evaluateCustomCrossFieldValidator<TModel>(
       formValue,
       fieldPath: sourceFieldKey,
       customFunctions: (evaluationContext.customFunctions as Record<string, (ctx: unknown) => unknown>) || {},
+      logger: evaluationContext.logger as DynamicFormLogger,
     });
 
     if (!conditionMet) {
@@ -265,6 +266,7 @@ function evaluateBuiltInCrossFieldValidator<TModel>(
       formValue,
       fieldPath: sourceFieldKey,
       customFunctions: (evaluationContext.customFunctions as Record<string, (ctx: unknown) => unknown>) || {},
+      logger: evaluationContext.logger as DynamicFormLogger,
     });
 
     if (!conditionMet) {

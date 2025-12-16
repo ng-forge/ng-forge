@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import { vi } from 'vitest';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { evaluateCondition } from '../../core/expressions/condition-evaluator';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
@@ -11,6 +10,7 @@ import { ValidatorConfig } from '../../models/validation/validator-config';
 import { FormConfig } from '../../models/form-config';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
+import { createMockLogger, MockLogger } from '../mock-logger';
 
 // Mock component to test integration
 @Component({
@@ -66,8 +66,11 @@ class TestFormComponent {
 
 describe('Signal Forms Integration Tests', () => {
   let fixture: ComponentFixture<TestFormComponent>;
+  let mockLogger: MockLogger;
 
   beforeEach(() => {
+    mockLogger = createMockLogger();
+
     TestBed.configureTestingModule({
       imports: [TestFormComponent],
       providers: [SchemaRegistryService, FunctionRegistryService],
@@ -174,6 +177,7 @@ describe('Signal Forms Integration Tests', () => {
         fieldValue: 'test',
         formValue: { age: 25, hasLicense: true },
         fieldPath: 'driverStatus',
+        logger: mockLogger,
       };
 
       const result = evaluateCondition(complexCondition, context);
@@ -198,6 +202,7 @@ describe('Signal Forms Integration Tests', () => {
           },
         },
         fieldPath: 'adminPanel',
+        logger: mockLogger,
       };
 
       const result = evaluateCondition(nestedCondition, context);
@@ -246,6 +251,7 @@ describe('Signal Forms Integration Tests', () => {
         fieldValue: '',
         formValue: { contactMethod: 'email' },
         fieldPath: 'email',
+        logger: mockLogger,
       };
 
       const logicConfig = fieldConfig.logic?.[0];
@@ -259,6 +265,7 @@ describe('Signal Forms Integration Tests', () => {
         fieldValue: '',
         formValue: { contactMethod: 'phone' },
         fieldPath: 'email',
+        logger: mockLogger,
       };
 
       shouldHide = evaluateCondition(logicConfig.condition as ConditionalExpression, context);
@@ -305,6 +312,7 @@ describe('Signal Forms Integration Tests', () => {
         fieldValue: 25,
         formValue: { requiresAge: true, category: 'adult' },
         fieldPath: 'age',
+        logger: mockLogger,
       };
 
       let isRequired = evaluateCondition(requiredCondition, context);
@@ -375,6 +383,7 @@ describe('Signal Forms Integration Tests', () => {
         formValue: {},
         fieldPath: 'appointmentDate',
         customFunctions: functionRegistry.getCustomFunctions(),
+        logger: mockLogger,
       };
 
       let isBusinessDay = evaluateCondition(businessDayCondition, context);
@@ -399,13 +408,13 @@ describe('Signal Forms Integration Tests', () => {
         fieldValue: 'test',
         formValue: {},
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
       const result = evaluateCondition(invalidExpression, context);
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle missing custom functions', () => {
@@ -418,13 +427,13 @@ describe('Signal Forms Integration Tests', () => {
         fieldValue: 'test',
         formValue: {},
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
       const result = evaluateCondition(missingFunctionExpression, context);
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Custom function not found:', 'nonExistentFunction');
+      expect(mockLogger.error).toHaveBeenCalledWith('Custom function not found:', 'nonExistentFunction');
     });
 
     it('should handle missing field paths gracefully', () => {
@@ -439,6 +448,7 @@ describe('Signal Forms Integration Tests', () => {
         fieldValue: 'test',
         formValue: { existing: 'value' },
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
       const result = evaluateCondition(missingFieldExpression, context);
@@ -507,6 +517,7 @@ describe('Signal Forms Integration Tests', () => {
         fieldValue: 'test',
         formValue: deeplyNestedForm,
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
       const result = evaluateCondition(deepExpression, context);
@@ -521,6 +532,7 @@ describe('Signal Forms Integration Tests', () => {
         fieldValue: 'test',
         formValue: circularRef,
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
       const expression: ConditionalExpression = {

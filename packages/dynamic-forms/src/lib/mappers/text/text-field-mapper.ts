@@ -6,6 +6,7 @@ import { FunctionRegistryService } from '../../core/registry/function-registry.s
 import { evaluateCondition } from '../../core/expressions/condition-evaluator';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 
 /**
  * Maps a text field definition to component inputs.
@@ -20,6 +21,7 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
+  const logger = inject(DYNAMIC_FORM_LOGGER);
 
   // Build base inputs (static, from field definition)
   const baseInputs = buildBaseInputs(fieldDef);
@@ -43,6 +45,7 @@ export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unkn
         formValue,
         fieldPath: fieldDef.key,
         customFunctions,
+        logger,
       };
 
       // Evaluate all hidden logic conditions - if ANY is true, the field is hidden

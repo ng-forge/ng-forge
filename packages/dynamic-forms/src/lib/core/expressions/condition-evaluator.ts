@@ -52,7 +52,7 @@ function evaluateJavaScriptExpression(expression: ConditionalExpression, context
     const result = ExpressionParser.evaluate(expression.expression, context);
     return !!result;
   } catch (error) {
-    console.error('[Dynamic Forms] Error evaluating JavaScript expression:', expression.expression, error);
+    context.logger.error('Error evaluating JavaScript expression:', expression.expression, error);
     return false;
   }
 }
@@ -62,14 +62,14 @@ function evaluateCustomFunction(expression: ConditionalExpression, context: Eval
 
   const customFn = context.customFunctions?.[expression.expression];
   if (!customFn) {
-    console.error('[Dynamic Forms] Custom function not found:', expression.expression);
+    context.logger.error('Custom function not found:', expression.expression);
     return false;
   }
 
   try {
     return !!customFn(context);
   } catch (error) {
-    console.error('[Dynamic Forms] Error executing custom function:', expression.expression, error);
+    context.logger.error('Error executing custom function:', expression.expression, error);
     return false;
   }
 }
