@@ -6,6 +6,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { ValidationMessages } from '../models/validation-types';
 import { dynamicTextToObservable } from './dynamic-text-to-observable';
 import { interpolateParams } from './interpolate-params';
+import { DYNAMIC_FORM_LOGGER, DynamicFormLogger } from '../providers/features/logger';
 
 /**
  * Resolved validation error with interpolated message
@@ -40,6 +41,9 @@ export function createResolvedErrorsSignal<T>(
   defaultValidationMessages: Signal<ValidationMessages | undefined> = signal(undefined),
   injector = inject(Injector),
 ): Signal<ResolvedError[]> {
+  // Get logger from injector
+  const logger = injector.get(DYNAMIC_FORM_LOGGER);
+
   // Ensure validationMessages is never undefined (mappers pass {} if not defined)
   const messages = computed(() => validationMessages() ?? {});
   const defaultMessages = computed(() => defaultValidationMessages() ?? {});
@@ -65,7 +69,7 @@ export function createResolvedErrorsSignal<T>(
       }
 
       // Create observable for each error's resolved message
-      const errorResolvers = currentErrors.map((error: ValidationError) => resolveErrorMessage(error, msgs, defaultMsgs, injector));
+      const errorResolvers = currentErrors.map((error: ValidationError) => resolveErrorMessage(error, msgs, defaultMsgs, injector, logger));
 
       // Combine all error message observables into single array emission, filtering out nulls
       return errorResolvers.length > 0
@@ -89,6 +93,7 @@ function resolveErrorMessage(
   fieldMessages: ValidationMessages,
   defaultMessages: ValidationMessages,
   injector: Injector,
+  logger: DynamicFormLogger,
 ): Observable<ResolvedError | null> {
   // Check for field-level custom message first
   const fieldMessage = fieldMessages[error.kind];
@@ -101,8 +106,8 @@ function resolveErrorMessage(
 
   // If no message found, log warning and return null (will be filtered out)
   if (!messageToUse) {
-    console.warn(
-      `[Dynamic Forms] No validation message found for error kind "${error.kind}". ` +
+    logger.warn(
+      `No validation message found for error kind "${error.kind}". ` +
         `Please provide a message via field-level validationMessages or form-level defaultValidationMessages.`,
     );
     return of(null);

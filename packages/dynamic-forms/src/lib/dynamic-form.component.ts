@@ -50,6 +50,7 @@ import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
+import { DYNAMIC_FORM_LOGGER } from './providers/features/logger/logger.token';
 
 /**
  * Dynamic form component that renders a complete form based on configuration.
@@ -108,6 +109,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   private readonly rootFormRegistry = inject(RootFormRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
+  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -180,11 +182,11 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     const validation = FormModeValidator.validateFormConfiguration(fields);
 
     if (!validation.isValid) {
-      console.error('[Dynamic Forms] Invalid form configuration:', validation.errors);
+      this.logger.error('Invalid form configuration:', validation.errors);
     }
 
     if (validation.warnings.length > 0) {
-      console.warn('[Dynamic Forms] Form configuration warnings:', validation.warnings);
+      this.logger.warn('Form configuration warnings:', validation.warnings);
     }
 
     return detection;
@@ -370,8 +372,8 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         const submissionConfig = this.config().submission;
 
         if (submissionConfig?.action) {
-          console.warn(
-            '[Dynamic Forms] Both `submission.action` and `(submitted)` output are configured. ' +
+          this.logger.warn(
+            'Both `submission.action` and `(submitted)` output are configured. ' +
               'When using `submission.action`, the `(submitted)` output will not emit. ' +
               'Use either `submission.action` OR `(submitted)`, not both.',
           );
@@ -432,8 +434,8 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
                 error: error instanceof Error ? error : new Error(String(error)),
               },
             ]);
-            console.error(
-              `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
+            this.logger.error(
+              `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}). ` +
                 `Ensure the field type is registered in your field registry.`,
               error,
             );

@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 
 /**
  * Cache for memoized dynamic value functions, keyed by service instance.
@@ -26,6 +27,7 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
   // Inject services during factory creation, not during execution
   // This captures the service instance in the closure
   const fieldContextRegistry = inject(FieldContextRegistryService);
+  const logger = inject(DYNAMIC_FORM_LOGGER);
 
   // Get or create cache for this injection context
   let contextCache = dynamicValueFunctionCache.get(fieldContextRegistry);
@@ -48,7 +50,7 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
       // Use secure AST-based expression parser (already has LRU cache)
       return ExpressionParser.evaluate(expression, evaluationContext) as TReturn;
     } catch (error) {
-      console.error('[Dynamic Forms] Error evaluating dynamic expression:', expression, error);
+      logger.error('Error evaluating dynamic expression:', expression, error);
       return undefined as TReturn;
     }
   };

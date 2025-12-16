@@ -27,6 +27,13 @@ export { DynamicForm } from './dynamic-form.component';
 export { provideDynamicForm } from './providers';
 export type { ExtractFieldDefs, ExtractFormValue } from './providers';
 
+// Logger Feature
+export { withLogger } from './providers/features/logger/with-logger';
+export { LogLevel } from './providers/features/logger/log-level';
+export type { DynamicFormLogger } from './providers/features/logger/logger.interface';
+export type { LoggerFeatureOptions } from './providers/features/logger/with-logger';
+export { DYNAMIC_FORM_LOGGER } from './providers/features/logger/logger.token';
+
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
 

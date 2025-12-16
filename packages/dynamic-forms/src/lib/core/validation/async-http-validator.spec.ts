@@ -128,7 +128,10 @@ describe('Async and HTTP Validator Integration', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Async validator "nonexistent" not found in registry'));
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          '[Dynamic Forms]',
+          expect.stringContaining('Async validator "nonexistent" not found in registry'),
+        );
 
         consoleWarnSpy.mockRestore();
       });
@@ -333,7 +336,10 @@ describe('Async and HTTP Validator Integration', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('HTTP validator "nonexistent" not found in registry'));
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          '[Dynamic Forms]',
+          expect.stringContaining('HTTP validator "nonexistent" not found in registry'),
+        );
 
         consoleWarnSpy.mockRestore();
       });

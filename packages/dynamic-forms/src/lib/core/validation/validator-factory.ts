@@ -17,6 +17,7 @@ import {
   ValidationError,
 } from '@angular/forms/signals';
 import { inject } from '@angular/core';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 import {
   AsyncValidatorConfig,
   CustomValidatorConfig,
@@ -210,7 +211,8 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
     // Function-based validator
     validatorFn = createFunctionValidator<unknown>(config);
   } else {
-    console.warn('[Dynamic Forms] Custom validator must have either "expression" or "functionName"');
+    const logger = inject(DYNAMIC_FORM_LOGGER);
+    logger.warn('Custom validator must have either "expression" or "functionName"');
     return;
   }
 
@@ -235,9 +237,10 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
 function createFunctionValidator<TValue>(
   config: CustomValidatorConfig,
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
+  const logger = inject(DYNAMIC_FORM_LOGGER);
   const functionName = config.functionName;
   if (!functionName) {
-    console.warn('[Dynamic Forms] Custom validator missing functionName');
+    logger.warn('Custom validator missing functionName');
     return () => null;
   }
 
@@ -245,8 +248,8 @@ function createFunctionValidator<TValue>(
   const validatorFn = registry.getValidator(functionName);
 
   if (!validatorFn) {
-    console.warn(
-      `[Dynamic Forms] Custom validator "${functionName}" not found in registry. ` +
+    logger.warn(
+      `Custom validator "${functionName}" not found in registry. ` +
         `Ensure it's registered using customFnConfig.validators or check the function name for typos.`,
     );
     return () => null;
@@ -263,9 +266,10 @@ function createFunctionValidator<TValue>(
 function createExpressionValidator<TValue>(
   config: CustomValidatorConfig,
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
+  const logger = inject(DYNAMIC_FORM_LOGGER);
   const expression = config.expression;
   if (!expression) {
-    console.warn('[Dynamic Forms] Custom validator missing expression');
+    logger.warn('Custom validator missing expression');
     return () => null;
   }
 
@@ -296,7 +300,7 @@ function createExpressionValidator<TValue>(
           try {
             (validationError as unknown as Record<string, unknown>)[key] = ExpressionParser.evaluate(expression, evaluationContext);
           } catch (err) {
-            console.warn(`[Dynamic Forms] Error evaluating errorParam "${key}":`, expression, err);
+            logger.warn(`Error evaluating errorParam "${key}":`, expression, err);
           }
         });
       }
@@ -304,8 +308,8 @@ function createExpressionValidator<TValue>(
       return validationError;
     } catch (error) {
       // Gracefully degrade on errors (e.g., typos in field names, undefined functions)
-      // Log to console for debugging while keeping form functional
-      console.error('[Dynamic Forms] Error evaluating custom validator expression:', expression, error);
+      // Log for debugging while keeping form functional
+      logger.error('Error evaluating custom validator expression:', expression, error);
       return { kind: config.kind || 'custom' };
     }
   };
@@ -321,14 +325,15 @@ function createExpressionValidator<TValue>(
  * - onError: Optional handler for resource errors
  */
 function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<unknown, SchemaPathRules.Supported>): void {
+  const logger = inject(DYNAMIC_FORM_LOGGER);
   const registry = inject(FunctionRegistryService);
 
   // Get async validator config from registry
   const validatorConfig = registry.getAsyncValidator(config.functionName);
 
   if (!validatorConfig) {
-    console.warn(
-      `[Dynamic Forms] Async validator "${config.functionName}" not found in registry. ` +
+    logger.warn(
+      `Async validator "${config.functionName}" not found in registry. ` +
         `Ensure it's registered using customFnConfig.asyncValidators or check the function name for typos.`,
     );
     return;
@@ -373,14 +378,15 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
  * - onError: Optional handler for HTTP errors
  */
 function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
+  const logger = inject(DYNAMIC_FORM_LOGGER);
   const registry = inject(FunctionRegistryService);
 
   // Get HTTP validator config from registry
   const httpValidatorConfig = registry.getHttpValidator(config.functionName);
 
   if (!httpValidatorConfig) {
-    console.warn(
-      `[Dynamic Forms] HTTP validator "${config.functionName}" not found in registry. ` +
+    logger.warn(
+      `HTTP validator "${config.functionName}" not found in registry. ` +
         `Ensure it's registered using customFnConfig.httpValidators or check the function name for typos.`,
     );
     return;

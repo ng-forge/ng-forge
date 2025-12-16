@@ -11,6 +11,7 @@ import { ExpressionParser } from './expressions/parser/expression-parser';
 import { evaluateCondition } from './expressions/condition-evaluator';
 import { CustomValidatorConfig, ValidatorConfig } from '../models/validation/validator-config';
 import { hasChildFields } from '../models/types/type-guards';
+import { DYNAMIC_FORM_LOGGER, DynamicFormLogger } from '../providers/features/logger';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -36,6 +37,7 @@ export function createSchemaFromFields<TModel = unknown>(
   // Inject services for cross-field validation
   // These will be available because createSchemaFromFields is called within runInInjectionContext
   const functionRegistry = inject(FunctionRegistryService);
+  const logger = inject(DYNAMIC_FORM_LOGGER);
 
   return schema<TModel>((path) => {
     for (const fieldDef of fields) {
@@ -76,7 +78,7 @@ export function createSchemaFromFields<TModel = unknown>(
 
     // Apply cross-field validators using validateTree
     if (crossFieldValidators && crossFieldValidators.length > 0) {
-      applyCrossFieldTreeValidator(path as SchemaPathTree<TModel>, crossFieldValidators, functionRegistry);
+      applyCrossFieldTreeValidator(path as SchemaPathTree<TModel>, crossFieldValidators, functionRegistry, logger);
     }
   });
 }
@@ -98,11 +100,13 @@ export function createSchemaFromFields<TModel = unknown>(
  * @param rootPath The root schema path tree
  * @param validators Array of collected cross-field validators
  * @param functionRegistry Registry containing custom functions for expression evaluation
+ * @param logger Logger for error reporting
  */
 function applyCrossFieldTreeValidator<TModel>(
   rootPath: SchemaPathTree<TModel>,
   validators: CrossFieldValidatorEntry[],
   functionRegistry: FunctionRegistryService,
+  logger: DynamicFormLogger,
 ): void {
   // Get custom functions for expression evaluation
   const customFunctions = functionRegistry.getCustomFunctions();
@@ -126,7 +130,7 @@ function applyCrossFieldTreeValidator<TModel>(
           errors.push(error);
         }
       } catch (err) {
-        console.error(`[Dynamic Forms] Error evaluating cross-field validator for ${sourceFieldKey}:`, err);
+        logger.error(`Error evaluating cross-field validator for ${sourceFieldKey}:`, err);
 
         // On error, add a validation error to indicate the failure
         // Use ctx.field[key] to access the field tree for dynamic field names

@@ -185,7 +185,7 @@ export class DynamicFormTestUtils {
       // Return computed signal that adds select-specific inputs
       return computed(() => ({
         ...baseInputsSignal(),
-        options: (fieldDef as Record<string, unknown>).options || [], // Safe cast: SelectField extends FieldDef with options property
+        options: (fieldDef as unknown as Record<string, unknown>).options || [], // Safe cast: SelectField extends FieldDef with options property
       }));
     };
 

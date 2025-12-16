@@ -1,11 +1,23 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 import { provideDynamicForm } from './dynamic-form-providers';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
+import { withLogger } from './features/logger/with-logger';
+import { LogLevel } from './features/logger/log-level';
+import { DYNAMIC_FORM_LOGGER } from './features/logger/logger.token';
+import { ConsoleLogger } from './features/logger/console-logger';
+import { NoopLogger } from './features/logger/noop-logger';
 
 // Helper to extract providers from EnvironmentProviders
 function getProviders(envProviders: any) {
   return envProviders.ɵproviders || [];
+}
+
+// Helper to create registry with proper injection context
+function createRegistryWithInjection(envProviders: any): Map<string, FieldTypeDefinition> {
+  TestBed.configureTestingModule({ providers: [envProviders] });
+  return TestBed.inject(FIELD_REGISTRY);
 }
 
 describe('provideDynamicForm', () => {
@@ -17,6 +29,7 @@ describe('provideDynamicForm', () => {
 
   afterEach(() => {
     consoleWarnSpy.mockRestore();
+    TestBed.resetTestingModule();
   });
 
   describe('Provider structure', () => {
@@ -74,13 +87,7 @@ describe('provideDynamicForm', () => {
   describe('Built-in fields registration', () => {
     it('should register all built-in fields', () => {
       const envProviders = provideDynamicForm();
-      const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
+      const registry = createRegistryWithInjection(envProviders);
 
       expect(registry.size).toBe(BUILT_IN_FIELDS.length);
       BUILT_IN_FIELDS.forEach((field) => {
@@ -100,13 +107,7 @@ describe('provideDynamicForm', () => {
       };
 
       const envProviders = provideDynamicForm(customField);
-      const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
+      const registry = createRegistryWithInjection(envProviders);
 
       expect(registry.has('custom')).toBe(true);
       expect(registry.get('custom')).toBe(customField);
@@ -128,13 +129,7 @@ describe('provideDynamicForm', () => {
       };
 
       const envProviders = provideDynamicForm(customField1, customField2);
-      const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
+      const registry = createRegistryWithInjection(envProviders);
 
       expect(registry.has('custom1')).toBe(true);
       expect(registry.has('custom2')).toBe(true);
@@ -151,13 +146,7 @@ describe('provideDynamicForm', () => {
       };
 
       const envProviders = provideDynamicForm(customField);
-      const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
+      const registry = createRegistryWithInjection(envProviders);
 
       expect(registry.size).toBe(BUILT_IN_FIELDS.length + 1);
       expect(registry.has('row')).toBe(true);
@@ -175,15 +164,9 @@ describe('provideDynamicForm', () => {
       };
 
       const envProviders = provideDynamicForm(customRow);
-      const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
+      createRegistryWithInjection(envProviders);
 
-      registryProvider.useFactory();
-
-      expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms] Field type "row" is already registered. Overwriting.');
+      expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms]', 'Field type "row" is already registered. Overwriting.');
     });
 
     it('should overwrite built-in field with custom field', () => {
@@ -195,13 +178,7 @@ describe('provideDynamicForm', () => {
       };
 
       const envProviders = provideDynamicForm(customRow);
-      const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
+      const registry = createRegistryWithInjection(envProviders);
 
       expect(registry.get('row')).toBe(customRow);
       expect(registry.get('row')?.valueHandling).toBe('exclude');
@@ -223,15 +200,9 @@ describe('provideDynamicForm', () => {
       };
 
       const envProviders = provideDynamicForm(customField1, customField2);
-      const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
+      createRegistryWithInjection(envProviders);
 
-      registryProvider.useFactory();
-
-      expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms] Field type "myfield" is already registered. Overwriting.');
+      expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms]', 'Field type "myfield" is already registered. Overwriting.');
     });
   });
 
@@ -245,18 +216,102 @@ describe('provideDynamicForm', () => {
       }));
 
       const envProviders = provideDynamicForm(...customFields);
-      const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
-
-      const registry = registryProvider.useFactory();
+      const registry = createRegistryWithInjection(envProviders);
 
       expect(registry.size).toBe(BUILT_IN_FIELDS.length + 10);
       customFields.forEach((field) => {
         expect(registry.has(field.name)).toBe(true);
       });
+    });
+  });
+
+  describe('Feature integration', () => {
+    it('should accept withLogger feature alongside field types', () => {
+      const customField: FieldTypeDefinition = {
+        name: 'custom',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        mapper: vi.fn(),
+        valueHandling: 'exclude',
+      };
+
+      const envProviders = provideDynamicForm(customField, withLogger({ level: LogLevel.Debug }));
+      const providers = getProviders(envProviders);
+
+      // Should have 2 providers: FIELD_REGISTRY and DYNAMIC_FORM_LOGGER
+      expect(providers.length).toBe(2);
+    });
+
+    it('should include logger provider when withLogger is used', () => {
+      const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Debug }));
+      const providers = getProviders(envProviders);
+      const loggerProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER);
+
+      expect(loggerProvider).toBeDefined();
+    });
+
+    it('should use ConsoleLogger when level is specified', () => {
+      const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Debug }));
+      const providers = getProviders(envProviders);
+      const loggerProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER) as {
+        provide: unknown;
+        useValue: unknown;
+      };
+
+      expect(loggerProvider?.useValue).toBeInstanceOf(ConsoleLogger);
+    });
+
+    it('should use NoopLogger when level is Off', () => {
+      const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Off }));
+      const providers = getProviders(envProviders);
+      const loggerProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER) as {
+        provide: unknown;
+        useValue: unknown;
+      };
+
+      expect(loggerProvider?.useValue).toBeInstanceOf(NoopLogger);
+    });
+
+    it('should separate field types from features correctly', () => {
+      const customField1: FieldTypeDefinition = {
+        name: 'custom1',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        mapper: vi.fn(),
+        valueHandling: 'exclude',
+      };
+
+      const customField2: FieldTypeDefinition = {
+        name: 'custom2',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        mapper: vi.fn(),
+        valueHandling: 'include',
+      };
+
+      // Mix field types and features in different positions
+      const envProviders = provideDynamicForm(customField1, withLogger({ level: LogLevel.Warn }), customField2);
+      const registry = createRegistryWithInjection(envProviders);
+
+      // Both custom fields should be registered
+      expect(registry.has('custom1')).toBe(true);
+      expect(registry.has('custom2')).toBe(true);
+
+      // Logger provider should exist (verified by successful registry creation)
+      const logger = TestBed.inject(DYNAMIC_FORM_LOGGER);
+      expect(logger).toBeDefined();
+    });
+
+    it('should allow features before field types', () => {
+      const customField: FieldTypeDefinition = {
+        name: 'custom',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        mapper: vi.fn(),
+        valueHandling: 'exclude',
+      };
+
+      // Feature first, then field type
+      const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Error }), customField);
+      const registry = createRegistryWithInjection(envProviders);
+
+      expect(registry.has('custom')).toBe(true);
     });
   });
 });
