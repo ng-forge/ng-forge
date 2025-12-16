@@ -7,13 +7,28 @@ import { evaluateCondition } from '../expressions';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.interface';
 
 /**
+ * No-op logger for when no logger is provided.
+ * Used as fallback in button logic evaluation to avoid breaking downstream packages.
+ */
+const noOpLogger: DynamicFormLogger = {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  debug: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  info: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  warn: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  error: () => {},
+};
+
+/**
  * Context for resolving button disabled state.
  *
  * @public
  */
 export interface ButtonLogicContext {
-  /** The form's FieldTree instance */
-  form: FieldTree<unknown>;
+  /** The form's FieldTree instance (supports both string and number keys for array indices) */
+  form: FieldTree<unknown, string | number>;
 
   /** Form-level options */
   formOptions?: FormOptions;
@@ -30,8 +45,8 @@ export interface ButtonLogicContext {
   /** Current form value for evaluating conditional expressions */
   formValue?: unknown;
 
-  /** Logger for diagnostic output */
-  logger: DynamicFormLogger;
+  /** Optional logger for diagnostic output. Falls back to no-op logger if not provided. */
+  logger?: DynamicFormLogger;
 }
 
 /**
@@ -99,7 +114,7 @@ function evaluateLogicCondition(condition: LogicConfig['condition'], ctx: Button
     fieldValue: undefined,
     formValue,
     fieldPath: '',
-    logger: ctx.logger,
+    logger: ctx.logger ?? noOpLogger,
   };
 
   return evaluateCondition(condition as ConditionalExpression, evaluationContext);
