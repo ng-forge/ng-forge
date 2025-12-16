@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- This file handles dynamic field types at runtime where `any` is appropriate */
 import {
   disabled,
   email,
