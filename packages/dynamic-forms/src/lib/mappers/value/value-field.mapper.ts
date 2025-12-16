@@ -1,26 +1,29 @@
 import { BaseValueField } from '../../definitions/base/base-value-field';
-import { computed, inject, isSignal, Signal } from '@angular/core';
+import { computed, inject, Signal } from '@angular/core';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { omit } from '../../utils/object-utils';
-import { getChildrenMap, getFieldProxy } from '../../utils/form-internals/form-internals';
 import { ValidationMessages } from '../../models/validation-types';
+import { FieldTree } from '@angular/forms/signals';
 
 /**
- * Context for value field mapping, containing resolved field proxy and default validation messages.
+ * Context for value field mapping, containing resolved field tree and default validation messages.
  * Used by specialized mappers to avoid duplicate context resolution.
  */
 export interface ValueFieldContext {
-  fieldProxy: unknown;
+  fieldTree: FieldTree<unknown> | undefined;
   defaultValidationMessages: ValidationMessages | undefined;
 }
 
 /**
- * Resolves the field proxy and default validation messages from the form context.
+ * Resolves the field tree and default validation messages from the form context.
  * Must be called within an injection context.
  *
+ * Uses direct bracket notation to access child FieldTrees from the parent form.
+ * This is the official way to access nested fields in Angular Signal Forms.
+ *
  * @param fieldKey The key of the field to resolve
- * @returns The resolved context with field proxy and validation messages
+ * @returns The resolved context with field tree and validation messages
  */
 export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
   const context = inject(FIELD_SIGNAL_CONTEXT);
@@ -28,41 +31,12 @@ export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
   // Get form-level validation messages
   const defaultValidationMessages = context.defaultValidationMessages;
 
-  // Get the form root to access field proxy
+  // Get the form root and access child field directly via bracket notation
+  // Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
   const formRoot = context.form();
-  const childrenMap = getChildrenMap(formRoot);
+  const fieldTree = (formRoot as unknown as Record<string, FieldTree<unknown>>)[fieldKey];
 
-  // Resolve field proxy
-  let fieldProxy: unknown = undefined;
-
-  if (!childrenMap) {
-    // No childrenMap - the form might be a FormRecord where fields are direct properties
-    // First check if formRoot itself has fieldProxy (for FieldTree items)
-    const rootFieldProxy = getFieldProxy(formRoot);
-    if (rootFieldProxy) {
-      fieldProxy = rootFieldProxy;
-    } else {
-      // Try accessing the field as a direct property on formRoot (FormRecord case)
-      // This handles forms created with form(entity, schema) where fields are accessible as formRoot[key]
-      const formField = (formRoot as unknown as Record<string, unknown>)[fieldKey];
-      const resolvedProxy = getFieldProxy(formField);
-      if (resolvedProxy) {
-        fieldProxy = resolvedProxy;
-      } else if (isSignal(formField) || formField) {
-        // The field itself might be the proxy (signal), or might have a different structure
-        // Try using the field directly as the proxy
-        fieldProxy = formField;
-      }
-    }
-  } else {
-    // Standard field access for non-array keys via childrenMap lookup
-    const formField = childrenMap.get(fieldKey);
-    if (formField) {
-      fieldProxy = formField;
-    }
-  }
-
-  return { fieldProxy, defaultValidationMessages };
+  return { fieldTree, defaultValidationMessages };
 }
 
 /**
@@ -95,8 +69,8 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
     inputs['defaultValidationMessages'] = ctx.defaultValidationMessages;
   }
 
-  if (ctx.fieldProxy !== undefined) {
-    inputs['field'] = ctx.fieldProxy;
+  if (ctx.fieldTree !== undefined) {
+    inputs['field'] = ctx.fieldTree;
   }
 
   return inputs;

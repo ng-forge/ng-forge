@@ -15,7 +15,6 @@ import { RemoveArrayItemEvent } from '../../events/constants/remove-array-item.e
 import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
-import { getChildFieldTree } from '../../utils/form-internals/form-internals';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 
@@ -78,8 +77,9 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
     if (arrayValue.length === 0) return [];
 
-    // Get the array FieldTree from the parent form
-    const arrayFieldTree = getChildFieldTree(parentForm, arrayKey);
+    // Get the array FieldTree from the parent form via bracket notation
+    // Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
+    const arrayFieldTree = (parentForm as unknown as Record<string, FieldTree<unknown>>)[arrayKey];
     if (!arrayFieldTree) return arrayValue.map(() => null);
 
     // Access array items via bracket notation - Angular Signal Forms arrays support this

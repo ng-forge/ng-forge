@@ -4,13 +4,13 @@ import { computed, inject, Signal } from '@angular/core';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { omit } from '../../utils/object-utils';
-import { getChildrenMap } from '../../utils/form-internals/form-internals';
+import { FieldTree } from '@angular/forms/signals';
 
 /**
  * Maps a checkbox/toggle field definition to component inputs.
  *
  * Checkbox fields are checked fields that contribute to the form's value as boolean.
- * This mapper injects FIELD_SIGNAL_CONTEXT to access the form structure and retrieve the field proxy.
+ * This mapper injects FIELD_SIGNAL_CONTEXT to access the form structure and retrieve the field tree.
  *
  * @param fieldDef The checkbox field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
@@ -25,19 +25,10 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
   // Get form-level validation messages (static)
   const defaultValidationMessages = context.defaultValidationMessages;
 
-  // Get the form root to access field proxy
+  // Get the form root and access child field directly via bracket notation
+  // Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
   const formRoot = context.form();
-  const childrenMap = getChildrenMap(formRoot);
-
-  // Resolve field proxy (static - determined once during mapping)
-  let fieldProxy: unknown = undefined;
-
-  if (childrenMap) {
-    const formField = childrenMap.get(fieldDef.key);
-    if (formField) {
-      fieldProxy = formField;
-    }
-  }
+  const fieldTree = (formRoot as unknown as Record<string, FieldTree<unknown>>)[fieldDef.key];
 
   // Return computed signal for reactive updates
   return computed(() => {
@@ -56,8 +47,8 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
       inputs['defaultValidationMessages'] = defaultValidationMessages;
     }
 
-    if (fieldProxy !== undefined) {
-      inputs['field'] = fieldProxy;
+    if (fieldTree !== undefined) {
+      inputs['field'] = fieldTree;
     }
 
     return inputs;
