@@ -1,4 +1,4 @@
-import { EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
+import { EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { textFieldMapper } from './text-field-mapper';
 import { TextField } from '../../definitions/default/text-field';

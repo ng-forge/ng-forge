@@ -13,7 +13,6 @@ import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
-import { FieldDef } from '../../definitions/base/field-def';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 
 describe('ArrayFieldComponent', () => {
@@ -52,8 +51,9 @@ describe('ArrayFieldComponent', () => {
 
               // Force Signal Forms to initialize the structure by reading the form
               // This ensures the FieldTree structure is set up before the component accesses it
-              const formValue = testForm();
-              const structure = (testForm as any).structure?.();
+              testForm();
+
+              (testForm as any).structure?.();
 
               const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                 injector,
@@ -499,8 +499,9 @@ describe('ArrayFieldComponent', () => {
                 const testForm = form(valueSignal, schema);
 
                 // Force Signal Forms initialization
-                const formValue = testForm();
-                const structure = (testForm as any).structure?.();
+                testForm();
+
+                (testForm as any).structure?.();
 
                 const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                   injector,

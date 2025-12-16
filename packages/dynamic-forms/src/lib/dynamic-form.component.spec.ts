@@ -1424,7 +1424,7 @@ describe('DynamicFormComponent', () => {
         ],
       };
 
-      const { component, fixture } = createComponent(config);
+      const { fixture } = createComponent(config);
       await waitForDynamicComponents(fixture);
 
       const hostElement = fixture.nativeElement;
@@ -1463,7 +1463,6 @@ describe('DynamicFormComponent', () => {
       expect(testInputs.length).toBeGreaterThan(0);
       const inputElement = testInputs[0].nativeElement.querySelector('input');
 
-      const originalValue = component.formValue().firstName;
       inputElement.value = 'Jane';
       inputElement.dispatchEvent(new Event('input'));
       fixture.detectChanges();

@@ -1,10 +1,18 @@
 import { FieldDef } from '../../definitions/base/field-def';
 
 /**
+ * Cache for computed grid class strings.
+ * Uses WeakMap keyed by field definition object for automatic cleanup.
+ */
+const gridClassCache = new WeakMap<FieldDef<unknown>, string>();
+
+/**
  * Generates CSS class string for responsive grid layout based on field column configuration.
  *
  * Creates Bootstrap-style column classes for implementing responsive form layouts.
  * Validates column values to ensure they fall within the standard 12-column grid system.
+ *
+ * Results are memoized using WeakMap to avoid recomputation for the same field definition.
  *
  * @param fieldDef - Field definition containing column configuration
  * @returns CSS class string for grid layout, empty if no valid column configuration
@@ -42,12 +50,23 @@ import { FieldDef } from '../../definitions/base/field-def';
  *
  * @public
  */
-export function getGridClassString(fieldDef: FieldDef<any>): string {
+export function getGridClassString(fieldDef: FieldDef<unknown>): string {
+  // Check cache first
+  const cached = gridClassCache.get(fieldDef);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  // Compute grid class string
   const classes: string[] = [];
 
   if (typeof fieldDef.col === 'number' && fieldDef.col > 0 && fieldDef.col <= 12) {
     classes.push(`df-col-${fieldDef.col}`);
   }
 
-  return classes.join(' ');
+  const result = classes.join(' ');
+
+  // Cache and return
+  gridClassCache.set(fieldDef, result);
+  return result;
 }

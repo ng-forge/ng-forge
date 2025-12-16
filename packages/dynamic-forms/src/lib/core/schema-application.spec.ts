@@ -155,7 +155,7 @@ describe('schema-application', () => {
         });
 
         // Verify the form was created and schema applied (no error thrown)
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
 
@@ -183,7 +183,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
     });
@@ -215,7 +215,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
 
@@ -246,7 +246,7 @@ describe('schema-application', () => {
         });
 
         // Should not throw and no error logged
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
     });
@@ -278,7 +278,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
 
@@ -308,7 +308,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
     });
@@ -339,7 +339,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
     });
@@ -426,7 +426,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should apply multiple validators in correct order', () => {
@@ -450,7 +450,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle schema without validators', () => {
@@ -501,7 +501,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle schema without logic', () => {
@@ -555,7 +555,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle nested inline sub-schemas', () => {
@@ -587,7 +587,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle schema without sub-schemas', () => {
@@ -642,7 +642,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle empty schema definition', () => {
@@ -693,7 +693,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
     });
 

@@ -55,7 +55,7 @@ export interface ArrayField<TFields extends readonly ArrayAllowedChildren[] = re
 /**
  * Type guard for ArrayField with proper type narrowing
  */
-export function isArrayField(field: FieldDef<any>): field is ArrayField {
+export function isArrayField<T>(field: FieldDef<T>): field is FieldDef<T> & ArrayField {
   return field.type === 'array' && 'fields' in field;
 }
 

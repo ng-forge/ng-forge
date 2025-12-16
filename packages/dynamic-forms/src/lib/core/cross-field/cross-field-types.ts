@@ -1,6 +1,6 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { LogicConfig } from '../../models/logic/logic-config';
-import { CustomValidatorConfig, ValidatorConfig } from '../../models/validation/validator-config';
+import { ValidatorConfig } from '../../models/validation/validator-config';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 
 /**

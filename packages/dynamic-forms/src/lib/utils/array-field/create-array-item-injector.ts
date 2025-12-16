@@ -70,8 +70,10 @@ function syncItemToParent<TModel>(
         isSyncing = true;
         const newArray = [...currentArray];
         newArray[idx] = itemValue;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        parentForm.value.set({ ...parentValue, [arrayKey]: newArray } as any);
+        // Type assertion is necessary: Angular Signal Forms expects the exact form value type,
+        // but we're constructing it dynamically. The spread preserves all properties and the
+        // array key is updated with the new value.
+        (parentForm.value.set as (value: unknown) => void)({ ...parentValue, [arrayKey]: newArray });
         isSyncing = false;
       }
     });

@@ -24,10 +24,11 @@ describe('dynamic-value-factory', () => {
     function createMockFieldContext<T>(
       value: T,
       mockField?: Partial<FieldTree<T>>,
-      mockValueOf?: (path: any) => any,
+
+      mockValueOf?: (_path: any) => any,
       fieldKey?: string,
     ): FieldContext<T> {
-      const defaultValueOf = (path: any) => ({ username: 'test', email: 'test@example.com' });
+      const defaultValueOf = () => ({ username: 'test', email: 'test@example.com' });
 
       const context = {
         value: signal(value),
@@ -69,6 +70,7 @@ describe('dynamic-value-factory', () => {
       expression: string,
       fieldValue: TValue,
       mockField?: Partial<FieldTree<TValue>>,
+
       mockValueOf?: (path: any) => any,
       setupRoot = true,
       fieldKey?: string,
@@ -222,7 +224,14 @@ describe('dynamic-value-factory', () => {
     it('should handle missing root field gracefully', () => {
       const expression = 'formValue.username || "default"';
 
-      const result = runDynamicValueFunctionTest<string, string>(expression, 'test', null as any, undefined, false);
+      const result = runDynamicValueFunctionTest<string, string>(
+        expression,
+        'test',
+
+        null as any,
+        undefined,
+        false,
+      );
 
       expect(result).toBe('default'); // Should fall back to empty object for formValue
     });

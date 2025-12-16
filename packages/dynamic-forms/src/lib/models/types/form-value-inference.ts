@@ -1,10 +1,10 @@
 import { RegisteredFieldTypes } from '../registry/field-registry';
 
 /**
- * Helper type to convert union to intersection
- * Note: `any` is necessary for distributive conditional types
+ * Helper type to convert union to intersection.
+ * Uses `U extends U` to trigger distributive conditional type behavior.
  */
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 
 /**
  * Depth counter for recursion limiting (prevents infinite type instantiation)

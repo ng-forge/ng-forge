@@ -19,7 +19,6 @@ import {
 import { inject } from '@angular/core';
 import {
   AsyncValidatorConfig,
-  BuiltInValidatorConfig,
   CustomValidatorConfig,
   HttpValidatorConfig,
   ValidatorConfig,
@@ -53,7 +52,7 @@ function createConditionalLogic<TValue>(when: ConditionalExpression | undefined)
  * conditional type, but at runtime the value is always the correct type for our use case.
  */
 function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
-  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>,
+  path: SchemaPath<TValue, SchemaPathRules, TPathKind> | SchemaPathTree<TValue, TPathKind>,
 ): SchemaPath<TValue, SchemaPathRules.Supported, TPathKind> {
   // The cast is safe because SchemaPathTree extends SchemaPath, and we constrain TValue
   // to exclude AbstractControl in our public APIs (we never pass reactive form controls)
@@ -77,9 +76,8 @@ function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
  *
  * @param config The validator configuration
  * @param fieldPath The field path to apply the validator to
- * @param fieldKey Optional field key (used for logging)
  */
-export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>, fieldKey?: string): void {
+export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
   const path = toSupportedPath(fieldPath);
 
   // Check if this is a built-in validator with a cross-field expression
@@ -172,7 +170,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       break;
 
     case 'custom':
-      applyCustomValidator(config, path, fieldKey);
+      applyCustomValidator(config, path);
       break;
 
     case 'customAsync':
@@ -194,9 +192,8 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
  *
  * @param config The custom validator configuration
  * @param fieldPath The field path to apply validation to
- * @param fieldKey Optional field key (used for logging)
  */
-function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<any>, fieldKey?: string): void {
+function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<unknown>): void {
   // Check if this is a cross-field validator - skip at field level
   if (isCrossFieldValidator(config)) {
     // Cross-field validators are handled at form level via validateTree
@@ -204,23 +201,23 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
   }
 
   // Non-cross-field validators: apply at field level as before
-  let validatorFn: (ctx: FieldContext<any>) => ValidationError | ValidationError[] | null;
+  let validatorFn: (ctx: FieldContext<unknown>) => ValidationError | ValidationError[] | null;
 
   if (config.expression) {
     // Expression-based validator
-    validatorFn = createExpressionValidator<any>(config);
+    validatorFn = createExpressionValidator<unknown>(config);
   } else if (config.functionName) {
     // Function-based validator
-    validatorFn = createFunctionValidator<any>(config);
+    validatorFn = createFunctionValidator<unknown>(config);
   } else {
     console.warn('[Dynamic Forms] Custom validator must have either "expression" or "functionName"');
     return;
   }
 
   // Apply with conditional logic if specified
-  const whenLogic = createConditionalLogic<any>(config.when);
+  const whenLogic = createConditionalLogic<unknown>(config.when);
   if (whenLogic) {
-    const conditionalValidator = (ctx: FieldContext<any>) => {
+    const conditionalValidator = (ctx: FieldContext<unknown>) => {
       if (!whenLogic(ctx)) {
         return null; // Condition not met, skip validation
       }
@@ -238,12 +235,18 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
 function createFunctionValidator<TValue>(
   config: CustomValidatorConfig,
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
+  const functionName = config.functionName;
+  if (!functionName) {
+    console.warn('[Dynamic Forms] Custom validator missing functionName');
+    return () => null;
+  }
+
   const registry = inject(FunctionRegistryService);
-  const validatorFn = registry.getValidator(config.functionName!);
+  const validatorFn = registry.getValidator(functionName);
 
   if (!validatorFn) {
     console.warn(
-      `[Dynamic Forms] Custom validator "${config.functionName}" not found in registry. ` +
+      `[Dynamic Forms] Custom validator "${functionName}" not found in registry. ` +
         `Ensure it's registered using customFnConfig.validators or check the function name for typos.`,
     );
     return () => null;
@@ -260,6 +263,12 @@ function createFunctionValidator<TValue>(
 function createExpressionValidator<TValue>(
   config: CustomValidatorConfig,
 ): (ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null {
+  const expression = config.expression;
+  if (!expression) {
+    console.warn('[Dynamic Forms] Custom validator missing expression');
+    return () => null;
+  }
+
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
 
@@ -269,7 +278,7 @@ function createExpressionValidator<TValue>(
       const evaluationContext = fieldContextRegistry.createEvaluationContext(ctx, functionRegistry.getCustomFunctions());
 
       // Evaluate expression securely using AST parser
-      const result = ExpressionParser.evaluate(config.expression!, evaluationContext);
+      const result = ExpressionParser.evaluate(expression, evaluationContext);
 
       // If expression returns truthy, validation passes (no error)
       // If expression returns falsy, validation fails
@@ -296,7 +305,7 @@ function createExpressionValidator<TValue>(
     } catch (error) {
       // Gracefully degrade on errors (e.g., typos in field names, undefined functions)
       // Log to console for debugging while keeping form functional
-      console.error('[Dynamic Forms] Error evaluating custom validator expression:', config.expression, error);
+      console.error('[Dynamic Forms] Error evaluating custom validator expression:', expression, error);
       return { kind: config.kind || 'custom' };
     }
   };
@@ -311,7 +320,7 @@ function createExpressionValidator<TValue>(
  * - onSuccess: Maps resource result to validation errors
  * - onError: Optional handler for resource errors
  */
-function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<any, SchemaPathRules.Supported>): void {
+function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<unknown, SchemaPathRules.Supported>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get async validator config from registry
@@ -327,7 +336,7 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
 
   // Build Angular's AsyncValidatorOptions
   const asyncOptions = {
-    params: (ctx: FieldContext<any>) => {
+    params: (ctx: FieldContext<unknown>) => {
       return validatorConfig.params(ctx, config.params);
     },
     factory: validatorConfig.factory,
@@ -336,12 +345,12 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
   };
 
   // Apply with conditional logic if specified
-  const whenLogic = createConditionalLogic<any>(config.when);
+  const whenLogic = createConditionalLogic<unknown>(config.when);
   if (whenLogic) {
     // For conditional async validators, we wrap the params function
     const conditionalOptions = {
       ...asyncOptions,
-      params: (ctx: FieldContext<any>) => {
+      params: (ctx: FieldContext<unknown>) => {
         if (!whenLogic(ctx)) {
           return undefined; // Skip validation when condition not met
         }
@@ -363,7 +372,7 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
  * - onSuccess: Maps HTTP response to validation errors (inverted logic!)
  * - onError: Optional handler for HTTP errors
  */
-function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<any>): void {
+function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get HTTP validator config from registry
@@ -379,7 +388,7 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
 
   // Build Angular's HttpValidatorOptions
   const httpOptions = {
-    request: (ctx: FieldContext<any>) => {
+    request: (ctx: FieldContext<unknown>) => {
       return httpValidatorConfig.request(ctx, config.params);
     },
     onSuccess: httpValidatorConfig.onSuccess,
@@ -387,12 +396,12 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
   };
 
   // Apply with conditional logic if specified
-  const whenLogic = createConditionalLogic<any>(config.when);
+  const whenLogic = createConditionalLogic<unknown>(config.when);
   if (whenLogic) {
     // For conditional HTTP validators, we wrap the request function
     const conditionalOptions = {
       ...httpOptions,
-      request: (ctx: FieldContext<any>) => {
+      request: (ctx: FieldContext<unknown>) => {
         if (!whenLogic(ctx)) {
           return undefined; // Skip validation when condition not met
         }
@@ -411,8 +420,7 @@ function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<a
  *
  * @param configs Array of validator configurations
  * @param fieldPath The field path to apply validators to
- * @param fieldKey Optional field key (used for logging)
  */
-export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>, fieldKey?: string): void {
-  configs.forEach((config) => applyValidator(config, fieldPath, fieldKey));
+export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
+  configs.forEach((config) => applyValidator(config, fieldPath));
 }

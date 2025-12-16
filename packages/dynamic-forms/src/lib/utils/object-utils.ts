@@ -17,7 +17,7 @@
  * omit(obj, ['b']); // { a: 1, c: 3 }
  * ```
  */
-export function omit<T extends Record<string, any>, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result = { ...obj };
   keys.forEach((key) => delete result[key]);
   return result as Omit<T, K>;
@@ -37,10 +37,10 @@ export function omit<T extends Record<string, any>, K extends keyof T>(obj: T, k
  * keyBy(users, 'id'); // { a: { id: 'a', name: 'Alice' }, b: { id: 'b', name: 'Bob' } }
  * ```
  */
-export function keyBy<T extends Record<string, any>>(array: T[], key: keyof T): Record<string, T> {
+export function keyBy<T>(array: T[], key: keyof T): Record<string, T> {
   return array.reduce(
     (acc, item) => {
-      acc[item[key]] = item;
+      acc[String(item[key])] = item;
       return acc;
     },
     {} as Record<string, T>,
@@ -87,20 +87,24 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
  * memoized(1, 2); // Cached
  * ```
  */
-export function memoize<TFunc extends (...args: any[]) => any>(fn: TFunc, resolver?: (...args: Parameters<TFunc>) => string): TFunc {
-  const cache = new Map<string, ReturnType<TFunc>>();
+export function memoize<TArgs extends unknown[], TReturn>(
+  fn: (...args: TArgs) => TReturn,
+  resolver?: (...args: TArgs) => string,
+): (...args: TArgs) => TReturn {
+  const cache = new Map<string, TReturn>();
 
-  return ((...args: Parameters<TFunc>): ReturnType<TFunc> => {
+  return (...args: TArgs): TReturn => {
     const key = resolver ? resolver(...args) : JSON.stringify(args);
 
-    if (cache.has(key)) {
-      return cache.get(key)!;
+    const cached = cache.get(key);
+    if (cached !== undefined) {
+      return cached;
     }
 
     const result = fn(...args);
     cache.set(key, result);
     return result;
-  }) as TFunc;
+  };
 }
 
 /**
@@ -118,7 +122,7 @@ export function memoize<TFunc extends (...args: any[]) => any>(fn: TFunc, resolv
  * isEqual({ a: 1 }, { a: 2 }); // false
  * ```
  */
-export function isEqual(a: any, b: any): boolean {
+export function isEqual(a: unknown, b: unknown): boolean {
   // Same reference or both null/undefined
   if (a === b) return true;
 
@@ -146,7 +150,11 @@ export function isEqual(a: any, b: any): boolean {
 
     if (keysA.length !== keysB.length) return false;
 
-    return keysA.every((key) => keysB.includes(key) && isEqual(a[key], b[key]));
+    // Type assertion is safe: we've confirmed both values are objects
+    const objA = a as Record<string, unknown>;
+    const objB = b as Record<string, unknown>;
+
+    return keysA.every((key) => keysB.includes(key) && isEqual(objA[key], objB[key]));
   }
 
   // Primitives - use Object.is to handle NaN correctly (NaN === NaN is false, but Object.is(NaN, NaN) is true)

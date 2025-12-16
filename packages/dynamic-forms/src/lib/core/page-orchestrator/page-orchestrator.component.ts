@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
@@ -15,6 +15,7 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { evaluateCondition } from '../expressions/condition-evaluator';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { FunctionRegistryService } from '../registry/function-registry.service';
+import { CustomFunction } from '../expressions/custom-function-types';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -92,14 +93,26 @@ export class PageOrchestratorComponent {
   private readonly functionRegistry = inject(FunctionRegistryService);
 
   /**
+   * Cache for filtered hidden logic per page key.
+   * This avoids re-filtering the logic array on every form value change.
+   */
+  private readonly hiddenLogicCache = new Map<string, PageLogicConfig[]>();
+
+  /**
+   * Cached custom functions to avoid repeated registry lookups.
+   * Cleared when page fields change to ensure fresh functions are used.
+   */
+  private cachedCustomFunctions: Record<string, CustomFunction> | null = null;
+
+  /**
    * Array of page field definitions to render
    */
   pageFields = input.required<PageField[]>();
 
   /**
-   * Root form instance from parent DynamicForm
+   * Root form instance from parent DynamicForm (uses unknown for dynamic form model types)
    */
-  form = input.required<FieldTree<any>>();
+  form = input.required<FieldTree<unknown>>();
 
   /**
    * Field signal context for child fields
@@ -110,12 +123,24 @@ export class PageOrchestratorComponent {
    * Computed signal that tracks which pages are hidden.
    * Returns an array of booleans where true means the page is hidden.
    * This signal is reactive and will re-evaluate when form values change.
+   *
+   * Optimizations:
+   * - Caches filtered hidden logic per page to avoid repeated filtering
+   * - Caches custom functions to avoid repeated registry lookups
+   * - Clears caches when page fields change
    */
   readonly pageHiddenStates = computed(() => {
     const pages = this.pageFields();
     const formValue = this.rootFormRegistry.getFormValue();
 
-    return pages.map((page) => this.evaluatePageHidden(page, formValue));
+    // Clear caches when page structure changes (detected by page count or keys changing)
+    // Use untracked to avoid creating unwanted dependencies
+    untracked(() => this.invalidateCachesIfNeeded(pages));
+
+    // Get custom functions once for all page evaluations
+    const customFunctions = this.getCustomFunctions();
+
+    return pages.map((page) => this.evaluatePageHidden(page, formValue, customFunctions));
   });
 
   /**
@@ -369,27 +394,36 @@ export class PageOrchestratorComponent {
    * Evaluates whether a page should be hidden based on its logic configuration.
    * A page is hidden if ANY of its hidden logic conditions evaluate to true.
    *
+   * Optimizations:
+   * - Uses cached hidden logic per page (avoids filtering on every call)
+   * - Reuses pre-fetched custom functions (avoids registry lookup per page)
+   * - Creates context object once per page evaluation
+   *
    * @param page The page field to evaluate
    * @param formValue The current form value to evaluate against
+   * @param customFunctions Pre-fetched custom functions for all evaluations
    * @returns true if the page should be hidden, false otherwise
    */
-  private evaluatePageHidden(page: PageField, formValue: unknown): boolean {
-    // If no logic defined, page is visible
-    if (!page.logic || page.logic.length === 0) {
-      return false;
-    }
-
-    // Filter to only hidden logic (pages only support hidden type)
-    const hiddenLogic = page.logic.filter((l): l is PageLogicConfig => l.type === 'hidden');
+  private evaluatePageHidden(page: PageField, formValue: unknown, customFunctions: Record<string, CustomFunction>): boolean {
+    // Get cached hidden logic or compute and cache it
+    const hiddenLogic = this.getHiddenLogicForPage(page);
 
     // If no hidden logic, page is visible
     if (hiddenLogic.length === 0) {
       return false;
     }
 
+    // Create evaluation context once for all conditions on this page
+    const context: EvaluationContext = {
+      fieldValue: null, // Pages don't have field values
+      formValue: (formValue ?? {}) as Record<string, unknown>,
+      fieldPath: page.key || '',
+      customFunctions,
+    };
+
     // Check each hidden logic - if ANY condition is true, the page is hidden
     for (const logic of hiddenLogic) {
-      // Handle static boolean conditions
+      // Handle static boolean conditions (fast path)
       if (typeof logic.condition === 'boolean') {
         if (logic.condition) {
           return true;
@@ -398,19 +432,63 @@ export class PageOrchestratorComponent {
       }
 
       // Evaluate conditional expression
-      const condition = logic.condition as ConditionalExpression;
-      const context: EvaluationContext = {
-        fieldValue: null, // Pages don't have field values
-        formValue: (formValue ?? {}) as Record<string, unknown>,
-        fieldPath: page.key || '',
-        customFunctions: this.functionRegistry.getCustomFunctions(),
-      };
-
-      if (evaluateCondition(condition, context)) {
+      if (evaluateCondition(logic.condition as ConditionalExpression, context)) {
         return true;
       }
     }
 
     return false;
+  }
+
+  /**
+   * Gets the filtered hidden logic for a page, using cache when available.
+   * This avoids repeated filtering of the logic array on every form value change.
+   */
+  private getHiddenLogicForPage(page: PageField): PageLogicConfig[] {
+    const pageKey = page.key || '';
+
+    // Check cache first
+    const cached = this.hiddenLogicCache.get(pageKey);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    // If no logic defined, cache empty array
+    if (!page.logic || page.logic.length === 0) {
+      this.hiddenLogicCache.set(pageKey, []);
+      return [];
+    }
+
+    // Filter to only hidden logic and cache
+    const hiddenLogic = page.logic.filter((l): l is PageLogicConfig => l.type === 'hidden');
+    this.hiddenLogicCache.set(pageKey, hiddenLogic);
+    return hiddenLogic;
+  }
+
+  /**
+   * Gets custom functions, using cache when available.
+   * This avoids repeated registry lookups.
+   */
+  private getCustomFunctions(): Record<string, CustomFunction> {
+    if (this.cachedCustomFunctions === null) {
+      this.cachedCustomFunctions = this.functionRegistry.getCustomFunctions();
+    }
+    return this.cachedCustomFunctions;
+  }
+
+  /**
+   * Invalidates caches when page fields change.
+   * Tracks the last seen page keys to detect changes.
+   */
+  private lastPageKeys: string | null = null;
+
+  private invalidateCachesIfNeeded(pages: PageField[]): void {
+    const currentKeys = pages.map((p) => p.key || '').join(',');
+
+    if (this.lastPageKeys !== currentKeys) {
+      this.hiddenLogicCache.clear();
+      this.cachedCustomFunctions = null;
+      this.lastPageKeys = currentKeys;
+    }
   }
 }

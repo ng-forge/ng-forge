@@ -9,12 +9,13 @@ import { FieldTypeDefinition } from '../models/field-type';
 import { FIELD_SIGNAL_CONTEXT } from '../models/field-signal-context.token';
 import { EventBus } from '../events/event.bus';
 import { form } from '@angular/forms/signals';
+import { RegisteredFieldTypes } from '../models/registry/field-registry';
 
 /**
  * Simple form configuration interface for testing
  */
 export interface TestFormConfig {
-  fields: FieldDef<any>[];
+  fields: FieldDef<unknown>[];
 }
 
 /**
@@ -26,20 +27,21 @@ export interface SimpleTestConfig<T = Record<string, unknown>> {
 }
 
 /**
- * Result of creating a dynamic form test
+ * Result of creating a dynamic form test.
+ * Uses the base DynamicForm type without generic constraints for flexibility in tests.
  */
 export interface SimpleTestResult {
-  component: any;
-  fixture: any;
+  component: DynamicForm<RegisteredFieldTypes[]>;
+  fixture: ComponentFixture<DynamicForm<RegisteredFieldTypes[]>>;
 }
 
 /**
  * Fluent API for building form configurations using existing field structure
  */
 export class TestFormConfigBuilder<T = Record<string, unknown>> {
-  private fields: FieldDef<any>[] = [];
+  private fields: FieldDef<unknown>[] = [];
 
-  field(field: FieldDef<any>): TestFormConfigBuilder<T> {
+  field(field: FieldDef<unknown>): TestFormConfigBuilder<T> {
     this.fields.push(field);
     return this;
   }
@@ -97,13 +99,14 @@ export class SimpleTestUtils {
 
     fixture.detectChanges();
     TestBed.flushEffects();
-    return { component, fixture };
+    // Cast to SimpleTestResult - type variance in DynamicForm generics doesn't affect runtime behavior
+    return { component, fixture } as SimpleTestResult;
   }
 
   /**
    * Waits for the dynamic form to initialize
    */
-  static async waitForInit(fixture: any): Promise<void> {
+  static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await delay(0);
     fixture.detectChanges();
     TestBed.flushEffects();
@@ -113,7 +116,7 @@ export class SimpleTestUtils {
   /**
    * Simulates user input on a field element
    */
-  static async simulateInput(fixture: any, selector: string, value: string): Promise<void> {
+  static async simulateInput(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
     const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!input) {
       throw new Error(`[Dynamic Forms] Input element not found with selector: ${selector}`);
@@ -128,7 +131,7 @@ export class SimpleTestUtils {
   /**
    * Simulates checkbox toggle
    */
-  static async simulateCheckbox(fixture: any, selector: string, checked: boolean): Promise<void> {
+  static async simulateCheckbox(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     const checkbox = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!checkbox) {
       throw new Error(`[Dynamic Forms] Checkbox element not found with selector: ${selector}`);
@@ -143,21 +146,21 @@ export class SimpleTestUtils {
   /**
    * Gets the current form value from the component
    */
-  static getFormValue(component: any): Record<string, unknown> | undefined {
+  static getFormValue(component: DynamicForm): Record<string, unknown> | undefined {
     return component.formValue();
   }
 
   /**
    * Checks if the form is valid
    */
-  static isFormValid(component: any): boolean {
+  static isFormValid(component: DynamicForm): boolean {
     return component.valid();
   }
 
   /**
    * Asserts that the form has a specific value
    */
-  static assertFormValue(component: any, expectedValue: Record<string, unknown>): void {
+  static assertFormValue(component: DynamicForm, expectedValue: Record<string, unknown>): void {
     const actualValue = component.formValue();
     if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {
       throw new Error(`[Dynamic Forms] Expected form value to be ${JSON.stringify(expectedValue)}, but got ${JSON.stringify(actualValue)}`);
@@ -172,43 +175,45 @@ export class SimpleTestUtils {
   template: '<div>Test Field: {{ value() }}</div>',
 })
 export class TestFieldComponent {
-  // Accept the inputs that array field components bind to child fields
-  field = input<any>();
-  key = input<string>();
-  arrayContext = input<any>();
-  label = input<string>();
-  placeholder = input<string>();
+  // Field tree input
+  field = input<unknown>();
 
-  value = signal('test');
   // Required inputs from baseFieldMapper
   key = input<string>('');
   label = input<string>('');
   className = input<string>('');
   tabIndex = input<number | undefined>(undefined);
   props = input<Record<string, unknown> | undefined>(undefined);
+
   // Array-related inputs
+  arrayContext = input<unknown>();
   fields = input<unknown[]>([]);
+
+  // Field-specific inputs
+  placeholder = input<string>();
+
   // Validation inputs from valueFieldMapper
   validationMessages = input<Record<string, string> | undefined>(undefined);
   defaultValidationMessages = input<Record<string, string> | undefined>(undefined);
-  field = input<unknown>(undefined);
+
+  value = signal('test');
 }
 
 /**
  * Configuration for setting up a simple component test
  */
-export interface SimpleComponentTestConfig<T = any> {
-  field: FieldDef<any>;
+export interface SimpleComponentTestConfig<T = unknown> {
+  field: FieldDef<unknown>;
   value?: T;
   pageIndex?: number;
   isVisible?: boolean;
-  [key: string]: any; // Allow any additional inputs
+  [key: string]: unknown; // Allow additional inputs for flexible component testing
 }
 
 /**
  * Result of setting up a simple component test
  */
-export interface SimpleComponentTestResult<T = any> {
+export interface SimpleComponentTestResult<T = unknown> {
   component: T;
   fixture: ComponentFixture<T>;
 }
@@ -237,12 +242,13 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
         useFactory: (injector: Injector) => {
           // Create test context using factory
           return runInInjectionContext(injector, () => {
-            const valueSignal = signal(config.value || {});
+            const defaultValue = (config.value || {}) as T & Record<string, unknown>;
+            const valueSignal = signal(defaultValue);
             const formInstance = form(valueSignal);
             return {
               injector,
               value: valueSignal,
-              defaultValues: () => (config.value || {}) as any,
+              defaultValues: () => defaultValue,
               form: formInstance,
               defaultValidationMessages: undefined,
             };
@@ -283,7 +289,7 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
 /**
  * Creates a simple test field definition
  */
-export function createSimpleTestField(key: string, label: string): FieldDef<any> {
+export function createSimpleTestField(key: string, label: string): FieldDef<unknown> {
   return {
     key,
     type: 'test',

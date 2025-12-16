@@ -44,7 +44,7 @@ describe('Button Logic Integration', () => {
         const formValue = signal({ email: '' });
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<typeof formValue>(() => {
             // Add required validation
             // For this test, we'll check validity based on empty value
           }),

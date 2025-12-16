@@ -26,9 +26,11 @@ type FieldDefUnion<T extends FieldTypeDefinition[]> = ExtractFieldDef<T[number]>
 
 /**
  * Infer form value type from field definitions
+ * Note: Full value type inference requires complex recursive type mapping.
+ * Using unknown as placeholder until full inference is implemented.
  */
-type InferFormValue<TFieldDefs extends FieldDef<any>[]> = {
-  [K in TFieldDefs[number]['key']]: any; // TODO: extract actual value type from field
+type InferFormValue<TFieldDefs extends FieldDef<unknown>[]> = {
+  [K in TFieldDefs[number]['key']]: unknown;
 };
 
 /**

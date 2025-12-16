@@ -41,4 +41,8 @@ export interface FormEvent {
  * eventBus.dispatch(ErrorEventCtor);
  * ```
  */
+// TypeScript limitation: Constructor types with varying parameter signatures require `any[]`
+// because `unknown[]` cannot be assigned from more specific parameter types (contravariance).
+// Using a generic TArgs parameter here would require changes throughout the event system.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FormEventConstructor<T extends FormEvent = FormEvent> = new (...args: any[]) => T;

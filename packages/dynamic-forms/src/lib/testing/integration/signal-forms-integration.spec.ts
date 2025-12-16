@@ -248,7 +248,10 @@ describe('Signal Forms Integration Tests', () => {
         fieldPath: 'email',
       };
 
-      let shouldHide = evaluateCondition(fieldConfig.logic![0].condition as ConditionalExpression, context);
+      const logicConfig = fieldConfig.logic?.[0];
+      if (!logicConfig) throw new Error('Expected logic config to be defined');
+
+      let shouldHide = evaluateCondition(logicConfig.condition as ConditionalExpression, context);
       expect(shouldHide).toBe(false); // Should not hide when contactMethod is email
 
       // Test when email should be hidden
@@ -258,7 +261,7 @@ describe('Signal Forms Integration Tests', () => {
         fieldPath: 'email',
       };
 
-      shouldHide = evaluateCondition(fieldConfig.logic![0].condition as ConditionalExpression, context);
+      shouldHide = evaluateCondition(logicConfig.condition as ConditionalExpression, context);
       expect(shouldHide).toBe(true); // Should hide when contactMethod is not email
     });
 
@@ -291,7 +294,13 @@ describe('Signal Forms Integration Tests', () => {
       };
 
       // Test required validation condition
-      const requiredCondition = ageFieldConfig.validators![0].when!;
+      const validators = ageFieldConfig.validators;
+      if (!validators?.[0]?.when || !validators?.[1]?.when) {
+        throw new Error('Expected validators with when conditions to be defined');
+      }
+      const requiredCondition = validators[0].when;
+      const minCondition = validators[1].when;
+
       const context = {
         fieldValue: 25,
         formValue: { requiresAge: true, category: 'adult' },
@@ -302,7 +311,6 @@ describe('Signal Forms Integration Tests', () => {
       expect(isRequired).toBe(true);
 
       // Test min validation condition
-      const minCondition = ageFieldConfig.validators![1].when!;
       let isAdult = evaluateCondition(minCondition, context);
       expect(isAdult).toBe(true);
 

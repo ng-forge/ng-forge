@@ -36,9 +36,9 @@ export interface DynamicFormTestResult {
  * Fluent API for building form configurations
  */
 export class FormConfigBuilder {
-  private fields: FieldDef<any>[] = [];
+  private fields: FieldDef<unknown>[] = [];
 
-  field(field: FieldDef<any>): FormConfigBuilder {
+  field(field: FieldDef<unknown>): FormConfigBuilder {
     this.fields.push(field);
     return this;
   }
@@ -83,20 +83,20 @@ export class FormConfigBuilder {
     });
   }
 
-  rowField(key: string, fields: FieldDef<any>[]): FormConfigBuilder {
+  rowField(key: string, fields: FieldDef<unknown>[]): FormConfigBuilder {
     return this.field({
       key,
       type: 'row',
       fields,
-    } as FieldDef<any>);
+    } as FieldDef<unknown>);
   }
 
-  groupField(key: string, fields: FieldDef<any>[]): FormConfigBuilder {
+  groupField(key: string, fields: FieldDef<unknown>[]): FormConfigBuilder {
     return this.field({
       key,
       type: 'group',
       fields,
-    } as FieldDef<any>);
+    } as FieldDef<unknown>);
   }
 
   buttonField(key: string, props?: Record<string, unknown>): FormConfigBuilder {
@@ -108,13 +108,13 @@ export class FormConfigBuilder {
     });
   }
 
-  pageField(key: string, fields: FieldDef<any>[], title?: string): FormConfigBuilder {
+  pageField(key: string, fields: FieldDef<unknown>[], title?: string): FormConfigBuilder {
     const pageFields = title ? [{ key: `${key}-title`, type: 'text', label: title }, ...fields] : fields;
     return this.field({
       key,
       type: 'page',
       fields: pageFields,
-    } as FieldDef<any>);
+    } as FieldDef<unknown>);
   }
 
   build(): FormConfig {
@@ -167,7 +167,7 @@ export class DynamicFormTestUtils {
    */
   static registerTestFields(fieldRegistry: ReturnType<typeof injectFieldRegistry>): void {
     // Input field mapper that extends value field mapper (returns Signal)
-    const inputMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
+    const inputMapper = (fieldDef: FieldDef<unknown>): Signal<Record<string, unknown>> => {
       const baseInputsSignal = valueFieldMapper(fieldDef);
 
       // Return computed signal that adds input-specific inputs
@@ -179,23 +179,23 @@ export class DynamicFormTestUtils {
     };
 
     // Select field mapper that extends value field mapper (returns Signal)
-    const selectMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
+    const selectMapper = (fieldDef: FieldDef<unknown>): Signal<Record<string, unknown>> => {
       const baseInputsSignal = valueFieldMapper(fieldDef);
 
       // Return computed signal that adds select-specific inputs
       return computed(() => ({
         ...baseInputsSignal(),
-        options: (fieldDef as any).options || [],
+        options: (fieldDef as Record<string, unknown>).options || [], // Safe cast: SelectField extends FieldDef with options property
       }));
     };
 
     // Checkbox field mapper - uses checked instead of value (already returns Signal)
-    const checkboxMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
+    const checkboxMapper = (fieldDef: FieldDef<unknown>): Signal<Record<string, unknown>> => {
       return checkboxFieldMapper(fieldDef);
     };
 
     // Button field mapper that extends value field mapper (already returns Signal)
-    const buttonMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
+    const buttonMapper = (fieldDef: FieldDef<unknown>): Signal<Record<string, unknown>> => {
       return valueFieldMapper(fieldDef);
     };
 

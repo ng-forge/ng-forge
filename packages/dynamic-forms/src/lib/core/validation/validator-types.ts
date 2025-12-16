@@ -175,7 +175,8 @@ export interface AsyncCustomValidator<TValue = unknown, TParams = unknown, TResu
 export interface HttpResourceRequest {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  body?: any;
+  /** HTTP body - accepts JSON-serializable values */
+  body?: unknown;
   headers?: Record<string, string | string[]>;
 }
 

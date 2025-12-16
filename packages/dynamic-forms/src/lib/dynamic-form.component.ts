@@ -586,15 +586,15 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   private onFormReset(): void {
     const defaults = this.defaultValues();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.form()().value.set(defaults as any);
+    // Type assertion is necessary: Angular Signal Forms expects exact form value type
+    (this.form()().value.set as (value: unknown) => void)(defaults);
     this.value.set(defaults as Partial<TModel>);
   }
 
   private onFormClear(): void {
     const emptyValue = {} as Partial<TModel>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.form()().value.set(emptyValue as any);
+    // Type assertion is necessary: Angular Signal Forms expects exact form value type
+    (this.form()().value.set as (value: unknown) => void)(emptyValue);
     this.value.set(emptyValue);
   }
 

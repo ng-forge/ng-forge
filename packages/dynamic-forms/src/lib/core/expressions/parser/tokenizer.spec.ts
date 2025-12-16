@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Tokenizer } from './tokenizer';
-import { TokenType, ExpressionParserError } from './types';
+import { TokenType } from './types';
 
 describe('Tokenizer', () => {
   describe('basic literals', () => {

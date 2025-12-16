@@ -330,7 +330,7 @@ describe('Logic Transformation Pipeline Integration', () => {
         const functionRegistry = TestBed.inject(FunctionRegistryService);
 
         // Register custom function
-        functionRegistry.registerCustomFunction('isWeekday', (context: any) => {
+        functionRegistry.registerCustomFunction('isWeekday', () => {
           const date = new Date();
           const day = date.getDay();
           return day >= 1 && day <= 5; // Monday to Friday

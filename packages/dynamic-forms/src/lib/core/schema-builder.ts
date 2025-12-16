@@ -1,4 +1,4 @@
-import { inject, untracked } from '@angular/core';
+import { inject } from '@angular/core';
 import { Schema, schema, validateTree, FieldContext, ValidationError, FieldTree } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { FieldDef } from '../definitions/base/field-def';
@@ -29,7 +29,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * @param crossFieldValidators Optional array of collected cross-field validators
  */
 export function createSchemaFromFields<TModel = unknown>(
-  fields: FieldDef<any>[],
+  fields: FieldDef<unknown>[],
   registry: Map<string, FieldTypeDefinition>,
   crossFieldValidators?: CrossFieldValidatorEntry[],
 ): Schema<TModel> {
@@ -372,7 +372,7 @@ function applyBuiltInValidationLogic(config: ValidatorConfig, fieldValue: unknow
 /**
  * Utility to convert field definitions to default values object
  */
-export function fieldsToDefaultValues<TModel = unknown>(fields: FieldDef<any>[], registry: Map<string, FieldTypeDefinition>): TModel {
+export function fieldsToDefaultValues<TModel = unknown>(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>): TModel {
   const defaultValues: Record<string, unknown> = {};
 
   for (const field of fields) {

@@ -256,8 +256,8 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const newArray = [...currentArray];
     newArray.splice(insertIndex, 0, value);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    formObject.value.set({ ...currentValue, [arrayKey]: newArray } as any);
+    // Type assertion is necessary: we're constructing the form value dynamically
+    (formObject.value.set as (value: unknown) => void)({ ...currentValue, [arrayKey]: newArray });
   }
 
   private removeItem(index?: number): void {
@@ -272,8 +272,8 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const newArray = [...currentArray];
     newArray.splice(removeIndex, 1);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    formObject.value.set({ ...currentValue, [arrayKey]: newArray } as any);
+    // Type assertion is necessary: we're constructing the form value dynamically
+    (formObject.value.set as (value: unknown) => void)({ ...currentValue, [arrayKey]: newArray });
   }
 }
 

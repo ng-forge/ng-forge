@@ -7,8 +7,7 @@ import { ValidationMessages } from '../models/validation-types';
 /**
  * Configuration for creating a test form injector with field signal context
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface TestFieldContextConfig<TModel = any> {
+export interface TestFieldContextConfig<TModel = Record<string, unknown>> {
   /**
    * Parent injector to use. If not provided, uses an empty injector.
    */
@@ -61,8 +60,7 @@ export interface TestFieldContextConfig<TModel = any> {
  * });
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createTestFormInjector<TModel = any>(config: TestFieldContextConfig<TModel> = {}): Injector {
+export function createTestFormInjector<TModel = Record<string, unknown>>(config: TestFieldContextConfig<TModel> = {}): Injector {
   const {
     parentInjector,
     initialValue = {} as Partial<TModel>,
@@ -129,8 +127,7 @@ export function createTestFormInjector<TModel = any>(config: TestFieldContextCon
  * );
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function testMapper<T>(mapperFn: () => T, context?: TestFieldContextConfig<any>): T {
+export function testMapper<T>(mapperFn: () => T, context?: TestFieldContextConfig<Record<string, unknown>>): T {
   const testInjector = createTestFormInjector(context);
   return runInInjectionContext(testInjector, mapperFn);
 }
@@ -154,8 +151,9 @@ export function testMapper<T>(mapperFn: () => T, context?: TestFieldContextConfi
  * });
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createTestFieldContext<TModel = any>(config: TestFieldContextConfig<TModel> = {}): FieldSignalContext<TModel> {
+export function createTestFieldContext<TModel = Record<string, unknown>>(
+  config: TestFieldContextConfig<TModel> = {},
+): FieldSignalContext<TModel> {
   const {
     parentInjector,
     initialValue = {} as Partial<TModel>,

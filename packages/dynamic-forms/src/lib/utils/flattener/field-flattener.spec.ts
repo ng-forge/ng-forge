@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { flattenFields, FlattenedField } from './field-flattener';
+import { flattenFields } from './field-flattener';
 import { FieldDef } from '../../definitions';
 import { FieldTypeDefinition } from '../../models/field-type';
 
