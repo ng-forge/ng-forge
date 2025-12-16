@@ -22,7 +22,7 @@ export interface GroupField<TFields extends readonly GroupAllowedChildren[] = re
 /**
  * Type guard for GroupField with proper type narrowing
  */
-export function isGroupField<T>(field: FieldDef<T>): field is FieldDef<T> & GroupField {
+export function isGroupField(field: FieldDef<any>): field is GroupField {
   return field.type === 'group' && 'fields' in field;
 }
 

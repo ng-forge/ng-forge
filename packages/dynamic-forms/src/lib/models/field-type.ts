@@ -32,7 +32,8 @@ export type ValueHandlingMode = 'include' | 'exclude' | 'flatten';
  * provideDynamicForm(CustomInputType)
  * ```
  */
-export interface FieldTypeDefinition<T extends FieldDef<unknown> = FieldDef<unknown>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Intentionally using `any` for maximum flexibility in field type registration
+export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   /** Unique identifier for the field type */
   name: string;
   /** Field definition type marker (internal use) */
@@ -41,7 +42,8 @@ export interface FieldTypeDefinition<T extends FieldDef<unknown> = FieldDef<unkn
    * Function to load the component (supports lazy loading)
    * Returns a Promise that resolves to the component class or module with default export
    */
-  loadComponent?: () => Promise<unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Component loading returns dynamic module structure
+  loadComponent?: () => Promise<any>;
   /** Mapper function that converts field definition to component bindings */
   mapper: MapperFn<T>;
   /** How this field type handles form values and data collection (defaults to 'include') */

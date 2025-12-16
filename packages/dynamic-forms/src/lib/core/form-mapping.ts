@@ -30,7 +30,7 @@ import { isRowField } from '../definitions/default/row-field';
  * See validator-factory.ts for detailed explanation of why this is safe.
  */
 function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
-  path: SchemaPath<TValue, SchemaPathRules, TPathKind> | SchemaPathTree<TValue, TPathKind>,
+  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>,
 ): SchemaPath<TValue, SchemaPathRules.Supported, TPathKind> {
   return path as SchemaPath<TValue, SchemaPathRules.Supported, TPathKind>;
 }
@@ -48,9 +48,9 @@ function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
  * @param fieldDef The field definition to map
  * @param fieldPath The Angular Signal Forms schema path
  */
-export function mapFieldToForm(fieldDef: FieldDef<unknown>, fieldPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
+export function mapFieldToForm(fieldDef: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   // Cast to FieldWithValidation to access validation properties
-  const validationField = fieldDef as FieldDef<unknown> & FieldWithValidation;
+  const validationField = fieldDef as FieldDef<any> & FieldWithValidation;
 
   // Special handling for page fields - flatten child fields to root level
   if (isPageField(fieldDef)) {
@@ -84,7 +84,7 @@ export function mapFieldToForm(fieldDef: FieldDef<unknown>, fieldPath: SchemaPat
   // and applied at form level via validateTree
   if (validationField.validators) {
     validationField.validators.forEach((validatorConfig) => {
-      applyValidator(validatorConfig, fieldPath);
+      applyValidator(validatorConfig, fieldPath as SchemaPath<unknown> | SchemaPathTree<unknown>);
     });
   }
 
@@ -99,7 +99,7 @@ export function mapFieldToForm(fieldDef: FieldDef<unknown>, fieldPath: SchemaPat
   // Apply schemas if they exist
   if (validationField.schemas) {
     validationField.schemas.forEach((schemaConfig) => {
-      applySchema(schemaConfig, fieldPath);
+      applySchema(schemaConfig, fieldPath as SchemaPath<unknown> | SchemaPathTree<unknown>);
     });
   }
 
@@ -118,10 +118,7 @@ export function mapFieldToForm(fieldDef: FieldDef<unknown>, fieldPath: SchemaPat
  * 2. The FieldDef properties indicate which validator to apply
  * 3. The SchemaPath type parameter is primarily for IDE autocomplete/type inference
  */
-function applySimpleValidationRules(
-  fieldDef: FieldDef<unknown> & FieldWithValidation,
-  fieldPath: SchemaPath<unknown> | SchemaPathTree<unknown>,
-): void {
+function applySimpleValidationRules(fieldDef: FieldDef<any> & FieldWithValidation, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   const path = toSupportedPath(fieldPath);
 
   // Required validator
@@ -137,11 +134,8 @@ function applySimpleValidationRules(
 
   // Numeric validators (min/max)
   // Support both 'min'/'max' (from FieldWithValidation) and 'minValue'/'maxValue' (from SliderField)
-  // Use type-safe property access with hasOwnProperty checks
-  const fieldRecord = fieldDef as unknown as Record<string, unknown>;
-  const propsRecord = (fieldDef.props ?? {}) as Record<string, unknown>;
-  const minVal = fieldDef.min ?? (fieldRecord['minValue'] as number | undefined) ?? (propsRecord['min'] as number | undefined);
-  const maxVal = fieldDef.max ?? (fieldRecord['maxValue'] as number | undefined) ?? (propsRecord['max'] as number | undefined);
+  const minVal = fieldDef.min ?? (fieldDef as any).minValue ?? (fieldDef.props as any)?.min;
+  const maxVal = fieldDef.max ?? (fieldDef as any).maxValue ?? (fieldDef.props as any)?.max;
 
   if (minVal !== undefined) {
     // Min validator expects SchemaPath<number>
@@ -175,7 +169,7 @@ function applySimpleValidationRules(
 /**
  * Handle field-specific configuration that doesn't fit into validators/logic/schemas
  */
-function mapFieldSpecificConfiguration(fieldDef: FieldDef<unknown>, fieldPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
+function mapFieldSpecificConfiguration(fieldDef: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   // Handle disabled state
   if (fieldDef.disabled) {
     disabled(toSupportedPath(fieldPath));
@@ -193,6 +187,12 @@ function mapFieldSpecificConfiguration(fieldDef: FieldDef<unknown>, fieldPath: S
 
   // Handle any additional configuration specific to the field type
   // This can be extended as needed for specific field requirements
+
+  // Example: if field has custom form integration requirements
+  if ('customFormConfig' in fieldDef && fieldDef.customFormConfig) {
+    console.log('Custom form configuration detected for field:', fieldDef.key);
+    // Handle custom configuration here
+  }
 }
 
 /**
@@ -200,15 +200,14 @@ function mapFieldSpecificConfiguration(fieldDef: FieldDef<unknown>, fieldPath: S
  * @param fields - Array of child field definitions
  * @param parentPath - The parent field path
  */
-function mapChildFieldsToForm<TValue>(fields: FieldDef<unknown>[], parentPath: SchemaPath<TValue> | SchemaPathTree<TValue>): void {
+function mapChildFieldsToForm<TValue>(fields: FieldDef<any>[], parentPath: SchemaPath<TValue> | SchemaPathTree<TValue>): void {
   for (const childField of fields) {
     if (!childField.key) {
       continue;
     }
 
-    // Use Record type for dynamic property access by field key
-    const pathRecord = parentPath as unknown as Record<string, SchemaPath<unknown> | SchemaPathTree<unknown> | undefined>;
-    const childPath = pathRecord[childField.key];
+    // Type assertion needed due to dynamic field keys
+    const childPath = (parentPath as any)[childField.key] as SchemaPath<any> | SchemaPathTree<any> | undefined;
     if (childPath) {
       mapFieldToForm(childField, childPath);
     }
@@ -220,12 +219,12 @@ function mapChildFieldsToForm<TValue>(fields: FieldDef<unknown>[], parentPath: S
  * Page fields are layout containers that don't create their own form controls
  * Their children are flattened to the root level of the form
  */
-function mapPageFieldToForm(pageField: FieldDef<unknown>, rootPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
+function mapPageFieldToForm(pageField: FieldDef<any>, rootPath: SchemaPath<any> | SchemaPathTree<any>): void {
   if (!isPageField(pageField) || !pageField.fields) {
     return;
   }
 
-  const fields = pageField.fields as FieldDef<unknown>[];
+  const fields = pageField.fields as FieldDef<any>[];
   mapChildFieldsToForm(fields, rootPath);
 }
 
@@ -234,12 +233,12 @@ function mapPageFieldToForm(pageField: FieldDef<unknown>, rootPath: SchemaPath<u
  * Row fields are layout containers (horizontal) that don't create their own form controls
  * Their children are flattened to the root level of the form, similar to page fields
  */
-function mapRowFieldToForm(rowField: FieldDef<unknown>, rootPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
+function mapRowFieldToForm(rowField: FieldDef<any>, rootPath: SchemaPath<any> | SchemaPathTree<any>): void {
   if (!isRowField(rowField) || !rowField.fields) {
     return;
   }
 
-  const fields = rowField.fields as FieldDef<unknown>[];
+  const fields = rowField.fields as FieldDef<any>[];
   mapChildFieldsToForm(fields, rootPath);
 }
 
@@ -247,12 +246,12 @@ function mapRowFieldToForm(rowField: FieldDef<unknown>, rootPath: SchemaPath<unk
  * Maps group field children to the parent form schema
  * This ensures that validation from child fields is applied to the parent form
  */
-function mapGroupFieldToForm(groupField: FieldDef<unknown>, fieldPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
+function mapGroupFieldToForm(groupField: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   if (!isGroupField(groupField) || !groupField.fields) {
     return;
   }
 
-  const fields = groupField.fields as FieldDef<unknown>[];
+  const fields = groupField.fields as FieldDef<any>[];
   mapChildFieldsToForm(fields, fieldPath);
 }
 
@@ -269,7 +268,7 @@ function mapGroupFieldToForm(groupField: FieldDef<unknown>, fieldPath: SchemaPat
  * 2. Apply the item schema (validation, logic) to each item
  * 3. Allow array items to be accessed via arrayFieldTree[index]
  */
-function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
+function mapArrayFieldToForm(arrayField: FieldDef<any>, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   if (!isArrayField(arrayField) || !arrayField.fields || arrayField.fields.length === 0) {
     return;
   }
@@ -278,15 +277,14 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: SchemaPat
   const templateField = arrayField.fields[0];
 
   // Create an item schema from the template field
-  const itemSchema = schema<unknown>((itemPath: SchemaPathTree<unknown>) => {
+  const itemSchema = schema<any>((itemPath: SchemaPathTree<any>) => {
     // Handle container fields (row, group) that have nested fields
     if (isRowField(templateField) || isPageField(templateField)) {
       // Row/page templates flatten their children - apply child validations directly to item
       if (templateField.fields && Array.isArray(templateField.fields)) {
-        for (const childField of templateField.fields as FieldDef<unknown>[]) {
+        for (const childField of templateField.fields as FieldDef<any>[]) {
           if (!childField.key) continue;
-          const pathRecord = itemPath as unknown as Record<string, SchemaPathTree<unknown>>;
-          const childPath = pathRecord[childField.key];
+          const childPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
           if (childPath) {
             mapFieldToForm(childField, childPath);
           }
@@ -295,10 +293,9 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: SchemaPat
     } else if (isGroupField(templateField)) {
       // Group template - apply child validations to the item
       if (templateField.fields && Array.isArray(templateField.fields)) {
-        for (const childField of templateField.fields as FieldDef<unknown>[]) {
+        for (const childField of templateField.fields as FieldDef<any>[]) {
           if (!childField.key) continue;
-          const pathRecord = itemPath as unknown as Record<string, SchemaPathTree<unknown>>;
-          const childPath = pathRecord[childField.key];
+          const childPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
           if (childPath) {
             mapFieldToForm(childField, childPath);
           }
@@ -311,7 +308,7 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: SchemaPat
   });
 
   // Apply the item schema to each array element
-  applyEach(fieldPath as SchemaPath<unknown[]>, itemSchema);
+  applyEach(fieldPath as SchemaPath<any[]>, itemSchema);
 
   // TODO: Support array-level validation (min/max length, unique items, etc.)
   // This would be applied to the array field itself, not individual items:

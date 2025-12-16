@@ -24,7 +24,7 @@ export interface RowField<TFields extends readonly RowAllowedChildren[] = readon
 /**
  * Type guard for RowField with proper type narrowing
  */
-export function isRowField<T>(field: FieldDef<T>): field is FieldDef<T> & RowField {
+export function isRowField(field: FieldDef<any>): field is RowField {
   return field.type === 'row' && 'fields' in field && Array.isArray((field as RowField).fields);
 }
 
