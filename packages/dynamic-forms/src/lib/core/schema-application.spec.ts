@@ -352,10 +352,11 @@ describe('schema-application', () => {
         };
 
         const formValue = signal({ name: '' });
+        // Intentionally using invalid type to test error handling
         const config = {
-          type: 'invalid' as any,
+          type: 'invalid',
           schema: testSchema,
-        };
+        } as unknown as SchemaApplicationConfig;
 
         expect(() => {
           runInInjectionContext(injector, () => {
@@ -372,9 +373,10 @@ describe('schema-application', () => {
 
       it('should not crash on malformed config', () => {
         const formValue = signal({ name: '' });
+        // Intentionally malformed config (missing schema) to test error handling
         const config = {
           type: 'apply',
-        } as any;
+        } as unknown as SchemaApplicationConfig;
 
         expect(() => {
           runInInjectionContext(injector, () => {

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { EnvironmentProviders, Provider } from '@angular/core';
 import { provideDynamicForm } from './dynamic-form-providers';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
@@ -9,13 +10,18 @@ import { DYNAMIC_FORM_LOGGER } from './features/logger/logger.token';
 import { ConsoleLogger } from './features/logger/console-logger';
 import { NoopLogger } from './features/logger/noop-logger';
 
+// Internal Angular structure for EnvironmentProviders
+interface InternalEnvironmentProviders {
+  ɵproviders: Provider[];
+}
+
 // Helper to extract providers from EnvironmentProviders
-function getProviders(envProviders: any) {
-  return envProviders.ɵproviders || [];
+function getProviders(envProviders: EnvironmentProviders): Provider[] {
+  return (envProviders as unknown as InternalEnvironmentProviders).ɵproviders || [];
 }
 
 // Helper to create registry with proper injection context
-function createRegistryWithInjection(envProviders: any): Map<string, FieldTypeDefinition> {
+function createRegistryWithInjection(envProviders: EnvironmentProviders): Map<string, FieldTypeDefinition> {
   TestBed.configureTestingModule({ providers: [envProviders] });
   return TestBed.inject(FIELD_REGISTRY);
 }
@@ -66,7 +72,9 @@ describe('provideDynamicForm', () => {
     it('should include FIELD_REGISTRY provider', () => {
       const envProviders = provideDynamicForm();
       const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY);
+      const registryProvider = providers.find(
+        (p): p is { provide: unknown } => typeof p === 'object' && p !== null && 'provide' in p && p.provide === FIELD_REGISTRY,
+      );
 
       expect(registryProvider).toBeDefined();
     });
@@ -74,10 +82,10 @@ describe('provideDynamicForm', () => {
     it('should have useFactory for FIELD_REGISTRY', () => {
       const envProviders = provideDynamicForm();
       const providers = getProviders(envProviders);
-      const registryProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === FIELD_REGISTRY) as {
-        provide: unknown;
-        useFactory: () => Map<string, FieldTypeDefinition>;
-      };
+      const registryProvider = providers.find(
+        (p): p is { provide: unknown; useFactory: () => Map<string, FieldTypeDefinition> } =>
+          typeof p === 'object' && p !== null && 'provide' in p && p.provide === FIELD_REGISTRY,
+      );
 
       expect(registryProvider?.useFactory).toBeDefined();
       expect(typeof registryProvider?.useFactory).toBe('function');
@@ -244,7 +252,9 @@ describe('provideDynamicForm', () => {
     it('should include logger provider when withLogger is used', () => {
       const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Debug }));
       const providers = getProviders(envProviders);
-      const loggerProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER);
+      const loggerProvider = providers.find(
+        (p): p is { provide: unknown } => typeof p === 'object' && p !== null && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER,
+      );
 
       expect(loggerProvider).toBeDefined();
     });
@@ -252,10 +262,10 @@ describe('provideDynamicForm', () => {
     it('should use ConsoleLogger when level is specified', () => {
       const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Debug }));
       const providers = getProviders(envProviders);
-      const loggerProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER) as {
-        provide: unknown;
-        useValue: unknown;
-      };
+      const loggerProvider = providers.find(
+        (p): p is { provide: unknown; useValue: unknown } =>
+          typeof p === 'object' && p !== null && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER,
+      );
 
       expect(loggerProvider?.useValue).toBeInstanceOf(ConsoleLogger);
     });
@@ -263,10 +273,10 @@ describe('provideDynamicForm', () => {
     it('should use NoopLogger when level is Off', () => {
       const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Off }));
       const providers = getProviders(envProviders);
-      const loggerProvider = providers.find((p: any) => typeof p === 'object' && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER) as {
-        provide: unknown;
-        useValue: unknown;
-      };
+      const loggerProvider = providers.find(
+        (p): p is { provide: unknown; useValue: unknown } =>
+          typeof p === 'object' && p !== null && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER,
+      );
 
       expect(loggerProvider?.useValue).toBeInstanceOf(NoopLogger);
     });
