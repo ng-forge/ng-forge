@@ -212,7 +212,3 @@ export { BUILT_IN_FIELDS } from './providers';
 
 // Event Args Type
 export type { EventArgs } from './definitions';
-
-// Form Internals - for advanced container field implementations
-export { getChildFieldTree, getChildrenMap, getFieldProxy, hasFormStructure } from './utils/form-internals';
-export type { FormInternals } from './utils/form-internals';

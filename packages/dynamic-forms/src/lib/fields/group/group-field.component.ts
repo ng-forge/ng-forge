@@ -22,7 +22,7 @@ import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.toke
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTypeDefinition } from '../../models/field-type';
-import { form } from '@angular/forms/signals';
+import { FieldTree, form } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldSignalContext } from '../../mappers/types';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
@@ -31,7 +31,6 @@ import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
 import { flattenFields } from '../../utils/flattener/field-flattener';
-import { getChildFieldTree } from '../../utils/form-internals/form-internals';
 
 /**
  * Container component for rendering nested form groups.
@@ -177,11 +176,14 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
    * Get the nested FieldTree from the parent form for this group.
    * This allows child fields to update the parent form directly,
    * avoiding the need for separate form synchronization.
+   *
+   * Uses direct bracket notation to access child FieldTrees from the parent form.
+   * Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
    */
   private readonly nestedFieldTree = computed(() => {
     const parentForm = this.parentFieldSignalContext.form();
     const groupKey = this.field().key;
-    return getChildFieldTree(parentForm, groupKey);
+    return (parentForm as unknown as Record<string, FieldTree<unknown>>)[groupKey] ?? null;
   });
 
   private readonly groupInjector = computed(() => {
