@@ -31,9 +31,10 @@ export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
   // Get form-level validation messages
   const defaultValidationMessages = context.defaultValidationMessages;
 
-  // Get the form root and access child field directly via bracket notation
-  // Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
-  const formRoot = context.form();
+  // Access child field directly via bracket notation on the FieldTree
+  // IMPORTANT: context.form IS the FieldTree, not a signal. Don't call it with ()!
+  // FieldTree() returns FieldState (status signals), but FieldTree['key'] returns child FieldTree
+  const formRoot = context.form;
   const fieldTree = (formRoot as unknown as Record<string, FieldTree<unknown>>)[fieldKey];
 
   return { fieldTree, defaultValidationMessages };

@@ -72,13 +72,14 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
   private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
     const arrayKey = this.field().key;
-    const parentForm = this.parentFieldSignalContext.form();
+    // IMPORTANT: parentFieldSignalContext.form IS the FieldTree, not a signal. Don't call it with ()!
+    // FieldTree() returns FieldState (status signals), but FieldTree['key'] returns child FieldTree
+    const parentForm = this.parentFieldSignalContext.form;
     const arrayValue = getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
 
     if (arrayValue.length === 0) return [];
 
     // Get the array FieldTree from the parent form via bracket notation
-    // Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
     const arrayFieldTree = (parentForm as unknown as Record<string, FieldTree<unknown>>)[arrayKey];
     if (!arrayFieldTree) return arrayValue.map(() => null);
 

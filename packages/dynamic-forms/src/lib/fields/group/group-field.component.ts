@@ -179,7 +179,9 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
    * Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
    */
   private readonly nestedFieldTree = computed(() => {
-    const parentForm = this.parentFieldSignalContext.form();
+    // IMPORTANT: parentFieldSignalContext.form IS the FieldTree, not a signal. Don't call it with ()!
+    // FieldTree() returns FieldState, but FieldTree['key'] returns child FieldTree
+    const parentForm = this.parentFieldSignalContext.form;
     const groupKey = this.field().key;
     return (parentForm as unknown as Record<string, FieldTree<unknown>>)[groupKey] ?? null;
   });
@@ -195,7 +197,9 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
       injector: this.injector,
       value: this.parentFieldSignalContext.value,
       defaultValues: this.defaultValues,
-      form: (() => formToProvide) as unknown as ReturnType<typeof form<Record<string, unknown>>>,
+      // Pass the FieldTree directly - don't wrap it in a function!
+      // FieldTree is already callable (returns FieldState) AND supports bracket notation for children
+      form: formToProvide as unknown as ReturnType<typeof form<Record<string, unknown>>>,
       defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 
