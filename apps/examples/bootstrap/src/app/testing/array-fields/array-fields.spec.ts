@@ -120,9 +120,9 @@ test.describe('Array Fields E2E Tests', () => {
       await expect(nameInput).toBeVisible();
       await expect(emailInput).toBeVisible();
 
-      // Fields should be marked as required via aria-required
-      expect(await nameInput.getAttribute('aria-required')).toBe('true');
-      expect(await emailInput.getAttribute('aria-required')).toBe('true');
+      // Fields should be marked as required
+      expect(await nameInput.getAttribute('required')).not.toBeNull();
+      expect(await emailInput.getAttribute('required')).not.toBeNull();
 
       // Validation should show error when required field is blurred empty
       await nameInput.focus();

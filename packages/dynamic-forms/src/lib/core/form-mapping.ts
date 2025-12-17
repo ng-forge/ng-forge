@@ -14,8 +14,16 @@ import {
   applyEach,
   schema,
 } from '@angular/forms/signals';
-import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
+import type { SchemaPath, SchemaPathTree, MaybeSchemaPathTree } from '@angular/forms/signals';
 import { FieldDef } from '../definitions/base/field-def';
+
+/**
+ * Type representing a SchemaPathTree for an object with string keys.
+ * This allows proper typing when accessing child paths by string key.
+ */
+type ObjectSchemaPathTree = SchemaPathTree<Record<string, unknown>> & {
+  [key: string]: MaybeSchemaPathTree<unknown, PathKind.Child>;
+};
 import { FieldWithValidation } from '../definitions/base/field-with-validation';
 import { applyValidator } from './validation/validator-factory';
 import { applyLogic } from './logic/logic-applicator';
@@ -277,14 +285,17 @@ function mapArrayFieldToForm(arrayField: FieldDef<any>, fieldPath: SchemaPath<an
   const templateField = arrayField.fields[0];
 
   // Create an item schema from the template field
-  const itemSchema = schema<any>((itemPath: SchemaPathTree<any>) => {
+  // Cast itemPath to ObjectSchemaPathTree for proper child access typing
+  const itemSchema = schema<Record<string, unknown>>((itemPath) => {
+    const typedItemPath = itemPath as ObjectSchemaPathTree;
+
     // Handle container fields (row, group) that have nested fields
     if (isRowField(templateField) || isPageField(templateField)) {
       // Row/page templates flatten their children - apply child validations directly to item
       if (templateField.fields && Array.isArray(templateField.fields)) {
-        for (const childField of templateField.fields as FieldDef<any>[]) {
+        for (const childField of templateField.fields as FieldDef<unknown>[]) {
           if (!childField.key) continue;
-          const childPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
+          const childPath = typedItemPath[childField.key];
           if (childPath) {
             mapFieldToForm(childField, childPath);
           }
@@ -296,11 +307,11 @@ function mapArrayFieldToForm(arrayField: FieldDef<any>, fieldPath: SchemaPath<an
       // So we need: itemPath[groupKey][childFieldKey], not itemPath[childFieldKey]
       const groupKey = templateField.key;
       if (groupKey) {
-        const groupPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[groupKey];
+        const groupPath = typedItemPath[groupKey] as ObjectSchemaPathTree | undefined;
         if (groupPath && templateField.fields && Array.isArray(templateField.fields)) {
-          for (const childField of templateField.fields as FieldDef<any>[]) {
+          for (const childField of templateField.fields as FieldDef<unknown>[]) {
             if (!childField.key) continue;
-            const childPath = (groupPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
+            const childPath = groupPath[childField.key];
             if (childPath) {
               mapFieldToForm(childField, childPath);
             }
@@ -309,9 +320,9 @@ function mapArrayFieldToForm(arrayField: FieldDef<any>, fieldPath: SchemaPath<an
       } else {
         // No group key - apply children directly to item (shouldn't happen normally)
         if (templateField.fields && Array.isArray(templateField.fields)) {
-          for (const childField of templateField.fields as FieldDef<any>[]) {
+          for (const childField of templateField.fields as FieldDef<unknown>[]) {
             if (!childField.key) continue;
-            const childPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
+            const childPath = typedItemPath[childField.key];
             if (childPath) {
               mapFieldToForm(childField, childPath);
             }
