@@ -47,29 +47,24 @@ describe('createTypePredicateFunction', () => {
     });
   });
 
-  describe('complex predicates', () => {
-    it('should create predicate for array check', () => {
-      const isArray = createTypePredicateFunction('Array.isArray(value)');
+  describe('realistic form config predicates', () => {
+    it('should create predicate for discriminated union by type property', () => {
+      const isCreditCard = createTypePredicateFunction('value && value.paymentType === "credit"');
 
-      expect(isArray([])).toBe(true);
-      expect(isArray([1, 2, 3])).toBe(true);
-      expect(isArray('array')).toBe(false);
-      expect(isArray({})).toBe(false);
+      expect(isCreditCard({ paymentType: 'credit', cardNumber: '1234' })).toBe(true);
+      expect(isCreditCard({ paymentType: 'bank', accountNumber: '5678' })).toBe(false);
+      expect(isCreditCard(null)).toBe(false);
     });
 
-    it('should create predicate for object check', () => {
-      const isObject = createTypePredicateFunction('typeof value === "object" && value !== null && !Array.isArray(value)');
+    it('should create predicate for status check', () => {
+      const isActive = createTypePredicateFunction('value && value.status === "active"');
 
-      expect(isObject({})).toBe(true);
-      expect(isObject({ key: 'value' })).toBe(true);
-      expect(isObject([])).toBe(false);
-      expect(isObject(null)).toBe(false);
-      expect(isObject('object')).toBe(false);
+      expect(isActive({ status: 'active' })).toBe(true);
+      expect(isActive({ status: 'inactive' })).toBe(false);
+      expect(isActive({})).toBe(false);
     });
 
     it('should create predicate for string with length check', () => {
-      // Note: isNaN and Number() global calls are not supported by the secure parser
-      // Use simpler predicates that work with the whitelist-based evaluation
       const isLongString = createTypePredicateFunction('typeof value === "string" && value.length > 5');
 
       expect(isLongString('hello world')).toBe(true);
@@ -284,25 +279,8 @@ describe('createTypePredicateFunction', () => {
     });
   });
 
-  describe('advanced JavaScript features', () => {
-    it('should support instanceof checks', () => {
-      const isDate = createTypePredicateFunction('value instanceof Date');
-
-      expect(isDate(new Date())).toBe(true);
-      expect(isDate('2024-01-01')).toBe(false);
-      expect(isDate({})).toBe(false);
-    });
-
-    it('should support instanceof with Array', () => {
-      const isArray = createTypePredicateFunction('value instanceof Array');
-
-      expect(isArray([])).toBe(true);
-      expect(isArray([1, 2, 3])).toBe(true);
-      expect(isArray('array')).toBe(false);
-      expect(isArray({})).toBe(false);
-    });
-
-    it('should support method calls', () => {
+  describe('string method predicates', () => {
+    it('should support startsWith method', () => {
       const startsWithHello = createTypePredicateFunction('typeof value === "string" && value.startsWith("hello")');
 
       expect(startsWithHello('hello world')).toBe(true);
@@ -310,7 +288,7 @@ describe('createTypePredicateFunction', () => {
       expect(startsWithHello(123)).toBe(false);
     });
 
-    it('should support string includes check', () => {
+    it('should support includes method', () => {
       const containsAt = createTypePredicateFunction('typeof value === "string" && value.includes("@")');
 
       expect(containsAt('test@example.com')).toBe(true);

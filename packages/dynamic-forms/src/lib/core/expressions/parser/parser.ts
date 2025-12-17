@@ -72,7 +72,7 @@ export class Parser {
   private parseComparison(): ASTNode {
     let node = this.parseAddition();
 
-    while (this.match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL, TokenType.INSTANCEOF)) {
+    while (this.match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
       const operator = this.previous().value;
       const right = this.parseAddition();
       node = { type: 'BinaryOp', operator, left: node, right };
