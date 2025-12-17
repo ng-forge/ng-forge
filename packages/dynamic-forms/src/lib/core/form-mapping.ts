@@ -291,13 +291,30 @@ function mapArrayFieldToForm(arrayField: FieldDef<any>, fieldPath: SchemaPath<an
         }
       }
     } else if (isGroupField(templateField)) {
-      // Group template - apply child validations to the item
-      if (templateField.fields && Array.isArray(templateField.fields)) {
-        for (const childField of templateField.fields as FieldDef<any>[]) {
-          if (!childField.key) continue;
-          const childPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
-          if (childPath) {
-            mapFieldToForm(childField, childPath);
+      // Group template - first access the group's path, then apply child validations
+      // Data structure: { groupKey: { childField1, childField2 } }
+      // So we need: itemPath[groupKey][childFieldKey], not itemPath[childFieldKey]
+      const groupKey = templateField.key;
+      if (groupKey) {
+        const groupPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[groupKey];
+        if (groupPath && templateField.fields && Array.isArray(templateField.fields)) {
+          for (const childField of templateField.fields as FieldDef<any>[]) {
+            if (!childField.key) continue;
+            const childPath = (groupPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
+            if (childPath) {
+              mapFieldToForm(childField, childPath);
+            }
+          }
+        }
+      } else {
+        // No group key - apply children directly to item (shouldn't happen normally)
+        if (templateField.fields && Array.isArray(templateField.fields)) {
+          for (const childField of templateField.fields as FieldDef<any>[]) {
+            if (!childField.key) continue;
+            const childPath = (itemPath as unknown as Record<string, SchemaPathTree<any>>)[childField.key];
+            if (childPath) {
+              mapFieldToForm(childField, childPath);
+            }
           }
         }
       }

@@ -183,7 +183,8 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
     // FieldTree() returns FieldState, but FieldTree['key'] returns child FieldTree
     const parentForm = this.parentFieldSignalContext.form;
     const groupKey = this.field().key;
-    return (parentForm as unknown as Record<string, FieldTree<unknown>>)[groupKey] ?? null;
+    const nestedTree = (parentForm as unknown as Record<string, FieldTree<unknown>>)[groupKey];
+    return nestedTree ?? null;
   });
 
   private readonly groupInjector = computed(() => {
