@@ -56,7 +56,7 @@ import { flattenFields } from '../../utils/flattener/field-flattener';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class GroupFieldComponent<TModel = Record<string, unknown>> {
+export default class GroupFieldComponent<TModel extends Record<string, unknown> = Record<string, unknown>> {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies
   // ─────────────────────────────────────────────────────────────────────────────
@@ -174,33 +174,23 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
    * Get the nested FieldTree from the parent form for this group.
    * This allows child fields to update the parent form directly,
    * avoiding the need for separate form synchronization.
-   *
-   * Uses direct bracket notation to access child FieldTrees from the parent form.
-   * Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
    */
-  private readonly nestedFieldTree = computed(() => {
-    // IMPORTANT: parentFieldSignalContext.form IS the FieldTree, not a signal. Don't call it with ()!
-    // FieldTree() returns FieldState, but FieldTree['key'] returns child FieldTree
+  private readonly nestedFieldTree = computed((): FieldTree<Record<string, unknown>> | undefined => {
     const parentForm = this.parentFieldSignalContext.form;
     const groupKey = this.field().key;
-    const nestedTree = (parentForm as unknown as Record<string, FieldTree<unknown>>)[groupKey];
-    return nestedTree ?? null;
+    const child = (parentForm as Record<string, unknown>)[groupKey];
+    return child as FieldTree<Record<string, unknown>> | undefined;
   });
 
   private readonly groupInjector = computed(() => {
-    const nestedTree = this.nestedFieldTree();
-
     // Use the nested FieldTree from parent if available, otherwise fall back to our own form
-    // The nested FieldTree ensures changes propagate directly to the parent form
-    const formToProvide = nestedTree ?? this.form();
+    const formToProvide = this.nestedFieldTree() ?? (this.form() as FieldTree<Record<string, unknown>>);
 
     const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
       injector: this.injector,
       value: this.parentFieldSignalContext.value,
       defaultValues: this.defaultValues,
-      // Pass the FieldTree directly - don't wrap it in a function!
-      // FieldTree is already callable (returns FieldState) AND supports bracket notation for children
-      form: formToProvide as unknown as ReturnType<typeof form<Record<string, unknown>>>,
+      form: formToProvide,
       defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 

@@ -1,10 +1,11 @@
 import { BaseCheckedField } from '../../definitions/base/base-checked-field';
 import { FieldDef } from '../../definitions/base/field-def';
 import { computed, inject, Signal } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { omit } from '../../utils/object-utils';
-import { FieldTree } from '@angular/forms/signals';
+import { getChildField } from '../../core/field-tree-utils';
 
 /**
  * Maps a checkbox/toggle field definition to component inputs.
@@ -25,11 +26,11 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
   // Get form-level validation messages (static)
   const defaultValidationMessages = context.defaultValidationMessages;
 
-  // Access child field directly via bracket notation on the FieldTree
+  // Access child field using type-safe utility
   // IMPORTANT: context.form IS the FieldTree, not a signal. Don't call it with ()!
   // FieldTree() returns FieldState (status signals), but FieldTree['key'] returns child FieldTree
-  const formRoot = context.form;
-  const fieldTree = (formRoot as unknown as Record<string, FieldTree<unknown>>)[fieldDef.key];
+  const formRoot = context.form as FieldTree<Record<string, unknown>>;
+  const fieldTree = getChildField(formRoot, fieldDef.key);
 
   // Return computed signal for reactive updates
   return computed(() => {

@@ -1,10 +1,11 @@
 import { BaseValueField } from '../../definitions/base/base-value-field';
 import { computed, inject, Signal } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { omit } from '../../utils/object-utils';
 import { ValidationMessages } from '../../models/validation-types';
-import { FieldTree } from '@angular/forms/signals';
+import { getChildField } from '../../core/field-tree-utils';
 
 /**
  * Context for value field mapping, containing resolved field tree and default validation messages.
@@ -19,8 +20,7 @@ export interface ValueFieldContext {
  * Resolves the field tree and default validation messages from the form context.
  * Must be called within an injection context.
  *
- * Uses direct bracket notation to access child FieldTrees from the parent form.
- * This is the official way to access nested fields in Angular Signal Forms.
+ * Uses type-safe field tree utilities to access child FieldTrees from the parent form.
  *
  * @param fieldKey The key of the field to resolve
  * @returns The resolved context with field tree and validation messages
@@ -31,11 +31,11 @@ export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
   // Get form-level validation messages
   const defaultValidationMessages = context.defaultValidationMessages;
 
-  // Access child field directly via bracket notation on the FieldTree
+  // Access child field using type-safe utility
   // IMPORTANT: context.form IS the FieldTree, not a signal. Don't call it with ()!
   // FieldTree() returns FieldState (status signals), but FieldTree['key'] returns child FieldTree
-  const formRoot = context.form;
-  const fieldTree = (formRoot as unknown as Record<string, FieldTree<unknown>>)[fieldKey];
+  const formRoot = context.form as FieldTree<Record<string, unknown>>;
+  const fieldTree = getChildField(formRoot, fieldKey);
 
   return { fieldTree, defaultValidationMessages };
 }

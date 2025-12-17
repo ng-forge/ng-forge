@@ -97,14 +97,15 @@ export class PageOrchestratorComponent {
   pageFields = input.required<PageField[]>();
 
   /**
-   * Root form instance from parent DynamicForm
+   * Root form instance from parent DynamicForm.
+   * Uses FieldTree<unknown> to accept any form type.
    */
-  form = input.required<FieldTree<any>>();
+  form = input.required<FieldTree<unknown>>();
 
   /**
    * Field signal context for child fields
    */
-  fieldSignalContext = input.required<FieldSignalContext>();
+  fieldSignalContext = input.required<FieldSignalContext<any>>();
 
   /**
    * Computed signal that tracks which pages are hidden.

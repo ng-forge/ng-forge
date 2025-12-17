@@ -194,6 +194,10 @@ export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent } from './f
 export { applyValidator, applyValidators } from './core/validation';
 export type { HttpResourceRequest } from './core/validation';
 
+// FieldTree Utilities
+export { getChildField, getArrayLength } from './core/field-tree-utils';
+export type { ArrayFieldTree } from './core/field-tree-utils';
+
 // Event Utilities - for custom event handling
 export { EventBus } from './events';
 export { resolveTokens } from './events';

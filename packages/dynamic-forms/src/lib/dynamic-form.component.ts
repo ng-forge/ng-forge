@@ -75,7 +75,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
     @if (formModeDetection().mode === 'paged') {
-      <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()"></div>
+      <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
     } @else {
       @for (field of resolvedFields(); track field.key) {
         <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
@@ -94,8 +94,10 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = InferFormValue<TFields>>
-  implements OnDestroy
+export class DynamicForm<
+  TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
+  TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
+> implements OnDestroy
 {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies
