@@ -1,4 +1,4 @@
-import { disabled, hidden, readonly, required, SchemaPathRules, PathKind, LogicFn } from '@angular/forms/signals';
+import { disabled, hidden, readonly, required, LogicFn, SchemaPathRules } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { LogicConfig } from '../../models/logic/logic-config';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
@@ -9,16 +9,6 @@ import { createLogicFunction } from '../expressions/logic-function-factory';
  * Accepts either a simple () => boolean or a LogicFn that takes FieldContext.
  */
 type AnyLogicFn<TValue> = LogicFn<TValue, boolean> | (() => boolean);
-
-/**
- * Safely cast a SchemaPathTree to SchemaPath with Supported rules.
- * See validator-factory.ts for detailed explanation of why this is safe.
- */
-function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
-  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>,
-): SchemaPath<TValue, SchemaPathRules.Supported, TPathKind> {
-  return path as SchemaPath<TValue, SchemaPathRules.Supported, TPathKind>;
-}
 
 /**
  * Apply logic configuration to field path.
@@ -32,7 +22,8 @@ function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
  * @param fieldPath The Angular Signal Forms path
  */
 export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TValue> | SchemaPathTree<TValue>): void {
-  const path = toSupportedPath(fieldPath);
+  // Cast to SchemaPath with Supported rules - safe because SchemaPathTree extends SchemaPath
+  const path = fieldPath as SchemaPath<TValue, SchemaPathRules.Supported>;
 
   // Handle static boolean conditions
   if (typeof config.condition === 'boolean') {

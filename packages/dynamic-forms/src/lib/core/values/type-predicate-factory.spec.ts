@@ -67,13 +67,14 @@ describe('createTypePredicateFunction', () => {
       expect(isObject('object')).toBe(false);
     });
 
-    it('should create predicate for numeric string', () => {
-      const isNumericString = createTypePredicateFunction('typeof value === "string" && !isNaN(Number(value))');
+    it('should create predicate for string with length check', () => {
+      // Note: isNaN and Number() global calls are not supported by the secure parser
+      // Use simpler predicates that work with the whitelist-based evaluation
+      const isLongString = createTypePredicateFunction('typeof value === "string" && value.length > 5');
 
-      expect(isNumericString('42')).toBe(true);
-      expect(isNumericString('3.14')).toBe(true);
-      expect(isNumericString('hello')).toBe(false);
-      expect(isNumericString(42)).toBe(false);
+      expect(isLongString('hello world')).toBe(true);
+      expect(isLongString('hi')).toBe(false);
+      expect(isLongString(42)).toBe(false);
     });
 
     it('should create predicate for non-empty string', () => {
@@ -108,7 +109,9 @@ describe('createTypePredicateFunction', () => {
 
   describe('property access predicates', () => {
     it('should create predicate checking object property', () => {
-      const hasName = createTypePredicateFunction('!!(value && typeof value === "object" && "name" in value)');
+      // Note: 'in' operator is not supported by the secure parser
+      // Use property access check instead
+      const hasName = createTypePredicateFunction('!!(value && typeof value === "object" && value.name !== undefined)');
 
       expect(hasName({ name: 'John' })).toBe(true);
       expect(hasName({ age: 30 })).toBe(false);
@@ -136,7 +139,8 @@ describe('createTypePredicateFunction', () => {
   describe('error handling', () => {
     it('should return false for invalid predicate', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-      const invalidPredicate = createTypePredicateFunction('invalid javascript syntax !!!');
+      // Use syntax that will cause a parse error (unbalanced parentheses)
+      const invalidPredicate = createTypePredicateFunction('value === (');
 
       const result = invalidPredicate('test');
 
@@ -186,8 +190,9 @@ describe('createTypePredicateFunction', () => {
 
       const result = emptyPredicate('test');
 
-      // Empty predicate returns undefined
-      expect(result).toBe(undefined);
+      // Empty predicate throws parse error, returns false
+      expect(result).toBe(false);
+      expect(consoleErrorSpy).toHaveBeenCalled();
 
       consoleErrorSpy.mockRestore();
     });
@@ -199,18 +204,18 @@ describe('createTypePredicateFunction', () => {
       expect(withWhitespace(42)).toBe(false);
     });
 
-    it('should handle predicate returning non-boolean', () => {
+    it('should handle predicate returning non-boolean (converts to boolean)', () => {
       const returnsNumber = createTypePredicateFunction('42');
 
-      // Returns the actual number, not converted to boolean
-      expect(returnsNumber('anything')).toBe(42);
+      // Type predicates always return boolean (truthy value -> true)
+      expect(returnsNumber('anything')).toBe(true);
     });
 
-    it('should handle predicate returning falsy values', () => {
+    it('should handle predicate returning falsy values (converts to boolean)', () => {
       const returnsFalsy = createTypePredicateFunction('0');
 
-      // Returns the actual 0, not converted to false
-      expect(returnsFalsy('anything')).toBe(0);
+      // Type predicates always return boolean (falsy value -> false)
+      expect(returnsFalsy('anything')).toBe(false);
     });
   });
 
@@ -288,12 +293,13 @@ describe('createTypePredicateFunction', () => {
       expect(isDate({})).toBe(false);
     });
 
-    it('should support regex test', () => {
-      const isEmail = createTypePredicateFunction('/^[^@]+@[^@]+\\.[^@]+$/.test(value)');
+    it('should support instanceof with Array', () => {
+      const isArray = createTypePredicateFunction('value instanceof Array');
 
-      expect(isEmail('test@example.com')).toBe(true);
-      expect(isEmail('invalid-email')).toBe(false);
-      expect(isEmail('test@')).toBe(false);
+      expect(isArray([])).toBe(true);
+      expect(isArray([1, 2, 3])).toBe(true);
+      expect(isArray('array')).toBe(false);
+      expect(isArray({})).toBe(false);
     });
 
     it('should support method calls', () => {
@@ -302,6 +308,13 @@ describe('createTypePredicateFunction', () => {
       expect(startsWithHello('hello world')).toBe(true);
       expect(startsWithHello('goodbye world')).toBe(false);
       expect(startsWithHello(123)).toBe(false);
+    });
+
+    it('should support string includes check', () => {
+      const containsAt = createTypePredicateFunction('typeof value === "string" && value.includes("@")');
+
+      expect(containsAt('test@example.com')).toBe(true);
+      expect(containsAt('invalid-email')).toBe(false);
     });
   });
 });

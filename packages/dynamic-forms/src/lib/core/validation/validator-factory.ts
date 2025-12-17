@@ -7,7 +7,6 @@ import {
   maxLength,
   min,
   minLength,
-  PathKind,
   pattern,
   required,
   SchemaPathRules,
@@ -119,25 +118,6 @@ function createConditionalLogic<TValue>(when: ConditionalExpression | undefined)
 }
 
 /**
- * Safely cast a SchemaPathTree to SchemaPath with Supported rules.
- *
- * This is safe when TValue is not an AbstractControl, because:
- * - SchemaPathTree<T> for non-AbstractControl is: SchemaPath<T, Supported> & {...nested}
- * - The intersection type is structurally compatible with SchemaPath<T, Supported>
- * - We only work with signal forms, never reactive forms (AbstractControl)
- *
- * TypeScript can't automatically narrow this because SchemaPathTree is defined as a
- * conditional type, but at runtime the value is always the correct type for our use case.
- */
-function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
-  path: SchemaPath<TValue, any, TPathKind> | SchemaPathTree<TValue, TPathKind>,
-): SchemaPath<TValue, SchemaPathRules.Supported, TPathKind> {
-  // The cast is safe because SchemaPathTree extends SchemaPath, and we constrain TValue
-  // to exclude AbstractControl in our public APIs (we never pass reactive form controls)
-  return path as SchemaPath<TValue, SchemaPathRules.Supported, TPathKind>;
-}
-
-/**
  * Apply validator configuration to field path, following the logic pattern.
  *
  * Accepts both SchemaPath and SchemaPathTree to support being called from both
@@ -162,7 +142,8 @@ function toSupportedPath<TValue, TPathKind extends PathKind = PathKind.Root>(
 // Angular's type system uses internal markers that don't align well with `unknown`.
 // The internal typed helper functions provide type safety where it matters.
 export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>, fieldKey?: string): void {
-  const path = toSupportedPath(fieldPath);
+  // Cast to SchemaPath with Supported rules - safe because SchemaPathTree extends SchemaPath
+  const path = fieldPath as SchemaPath<any, SchemaPathRules.Supported>;
 
   // Check if this is a built-in validator with a cross-field expression
   // These are collected at form level - skip here

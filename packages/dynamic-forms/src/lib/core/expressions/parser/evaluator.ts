@@ -119,6 +119,23 @@ const SAFE_METHODS: Record<string, ReadonlySet<string>> = {
 };
 
 /**
+ * Whitelist of safe static methods that can be called on global objects.
+ * These are type-checking and data inspection methods with no side effects.
+ */
+const SAFE_STATIC_METHODS: Record<string, ReadonlySet<string>> = {
+  Array: new Set(['isArray']),
+  Object: new Set(['keys', 'values', 'entries', 'hasOwn']),
+  Number: new Set(['isFinite', 'isInteger', 'isNaN', 'isSafeInteger']),
+  String: new Set(['fromCharCode']),
+};
+
+/**
+ * Whitelist of constructor functions allowed for instanceof checks.
+ * Only safe, built-in types are allowed.
+ */
+const SAFE_INSTANCEOF_TYPES: ReadonlySet<string> = new Set(['Array', 'Date', 'RegExp', 'Map', 'Set', 'Error', 'TypeError', 'RangeError']);
+
+/**
  * Blacklist of property names that should not be accessible
  * These properties can leak information about object structure or enable attacks
  */
@@ -176,10 +193,31 @@ export class Evaluator {
   }
 
   private evaluateIdentifier(name: string): unknown {
-    if (!(name in this.scope)) {
-      return undefined;
+    // Check scope first
+    if (name in this.scope) {
+      return this.scope[name];
     }
-    return this.scope[name];
+
+    // Check for whitelisted global constructors (for instanceof and static methods)
+    const globalConstructors: Record<string, unknown> = {
+      Array: Array,
+      Date: Date,
+      RegExp: RegExp,
+      Map: Map,
+      Set: Set,
+      Error: Error,
+      TypeError: TypeError,
+      RangeError: RangeError,
+      Object: Object,
+      Number: Number,
+      String: String,
+    };
+
+    if (name in globalConstructors) {
+      return globalConstructors[name];
+    }
+
+    return undefined;
   }
 
   private evaluateMemberAccess(node: { object: ASTNode; property: string }): unknown {
@@ -207,6 +245,17 @@ export class Evaluator {
   }
 
   private evaluateBinaryOp(node: { operator: string; left: ASTNode; right: ASTNode }): unknown {
+    // Handle short-circuit evaluation for logical operators
+    if (node.operator === '&&') {
+      const left = this.evaluate(node.left);
+      return left ? this.evaluate(node.right) : left;
+    }
+    if (node.operator === '||') {
+      const left = this.evaluate(node.left);
+      return left ? left : this.evaluate(node.right);
+    }
+
+    // For all other operators, evaluate both sides
     const left = this.evaluate(node.left);
     const right = this.evaluate(node.right);
 
@@ -241,15 +290,36 @@ export class Evaluator {
       case '<=':
         return (left as number) <= (right as number);
 
-      // Logical
-      case '&&':
-        return left && right;
-      case '||':
-        return left || right;
+      // instanceof
+      case 'instanceof':
+        return this.evaluateInstanceof(left, right);
 
       default:
         throw new ExpressionParserError(`[Dynamic Forms] Unknown binary operator: ${node.operator}`, 0, this.expression);
     }
+  }
+
+  /**
+   * Evaluate instanceof operator with whitelist check.
+   * Only allows checking against safe built-in types.
+   */
+  private evaluateInstanceof(left: unknown, right: unknown): boolean {
+    // The right side should be a constructor function reference
+    if (right === undefined || right === null) {
+      return false;
+    }
+
+    // Whitelist of allowed constructors for instanceof checks
+    // Using a Set of actual constructor references for O(1) lookup
+    const allowedConstructors = new Set<unknown>([Array, Date, RegExp, Map, Set, Error, TypeError, RangeError]);
+
+    // If right is a constructor function from our whitelist
+    if (typeof right === 'function' && allowedConstructors.has(right)) {
+      // Safe to use instanceof since we've verified it's a whitelisted constructor
+      return left instanceof (right as new (...args: unknown[]) => object);
+    }
+
+    return false;
   }
 
   private evaluateUnaryOp(node: { operator: string; operand: ASTNode }): unknown {
@@ -287,7 +357,17 @@ export class Evaluator {
       );
     }
 
-    // Check if the method is in the whitelist
+    // Check if this is a static method call (e.g., Array.isArray, Object.keys)
+    if (this.isStaticMethodSafe(obj, methodName)) {
+      const args = node.arguments.map((arg) => this.evaluate(arg));
+      const method = (obj as Record<string, unknown>)[methodName];
+      if (typeof method === 'function') {
+        return (method as (...args: unknown[]) => unknown).apply(obj, args);
+      }
+      return undefined;
+    }
+
+    // Check if the method is in the instance method whitelist
     if (!this.isMethodSafe(obj, methodName)) {
       throw new ExpressionParserError(`[Dynamic Forms] Method "${methodName}" is not allowed for security reasons`, 0, this.expression);
     }
@@ -303,6 +383,29 @@ export class Evaluator {
     }
 
     return undefined;
+  }
+
+  /**
+   * Check if a static method call is safe (e.g., Array.isArray, Object.keys)
+   */
+  private isStaticMethodSafe(obj: unknown, methodName: string): boolean {
+    if (typeof obj !== 'function') {
+      return false;
+    }
+
+    // Check each constructor explicitly to get the name for whitelist lookup
+    let constructorName: string | undefined;
+    if (obj === Array) constructorName = 'Array';
+    else if (obj === Object) constructorName = 'Object';
+    else if (obj === Number) constructorName = 'Number';
+    else if (obj === String) constructorName = 'String';
+
+    if (!constructorName) {
+      return false;
+    }
+
+    const safeMethods = SAFE_STATIC_METHODS[constructorName];
+    return safeMethods ? safeMethods.has(methodName) : false;
   }
 
   private evaluateArrayLiteral(node: { elements: ASTNode[] }): unknown {
