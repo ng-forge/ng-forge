@@ -230,8 +230,10 @@ export class Evaluator {
       case '*':
         return (left as number) * (right as number);
       case '/':
+        if (right === 0) return null;
         return (left as number) / (right as number);
       case '%':
+        if (right === 0) return null;
         return (left as number) % (right as number);
 
       // Comparison - using == and != intentionally for loose equality

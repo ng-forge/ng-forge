@@ -5,6 +5,7 @@ import { ValidatorConfig, CustomValidatorConfig, BuiltInValidatorConfig } from '
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 import { hasChildFields } from '../../models/types/type-guards';
+import { normalizeFieldsArray } from '../../utils/object-utils';
 import {
   isCrossFieldExpression,
   isCrossFieldValidator,
@@ -46,8 +47,7 @@ function traverseFields(fields: FieldDef<unknown>[], collection: CrossFieldColle
 
     // Recursively process container fields (page, row, group, array)
     if (hasChildFields(field)) {
-      const childFields = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-      traverseFields(childFields as FieldDef<unknown>[], collection);
+      traverseFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], collection);
     }
   }
 }

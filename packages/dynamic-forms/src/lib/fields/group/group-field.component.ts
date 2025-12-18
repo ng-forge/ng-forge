@@ -102,37 +102,28 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   private readonly formSetup = computed(() => {
-    try {
-      const groupField = this.field();
-      const registry = this.rawFieldRegistry();
+    const groupField = this.field();
+    const registry = this.rawFieldRegistry();
 
-      if (groupField.fields && groupField.fields.length > 0) {
-        const flattenedFields = this.memoizedFlattenFields(groupField.fields, registry);
-        const fieldsById = this.memoizedKeyBy(flattenedFields);
-        const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
-
-        return {
-          fields: flattenedFields,
-          originalFields: groupField.fields,
-          defaultValues,
-          registry,
-        };
-      }
+    if (groupField.fields && groupField.fields.length > 0) {
+      const flattenedFields = this.memoizedFlattenFields(groupField.fields, registry);
+      const fieldsById = this.memoizedKeyBy(flattenedFields);
+      const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
 
       return {
-        fields: [],
-        originalFields: [],
-        defaultValues: {},
+        fields: flattenedFields,
+        originalFields: groupField.fields,
+        defaultValues,
         registry,
       };
-    } catch {
-      return {
-        fields: [],
-        originalFields: [],
-        defaultValues: {},
-        registry: this.rawFieldRegistry(),
-      };
     }
+
+    return {
+      fields: [],
+      originalFields: [],
+      defaultValues: {},
+      registry,
+    };
   });
 
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);

@@ -152,3 +152,14 @@ export function isEqual(a: any, b: any): boolean {
   // Primitives - use Object.is to handle NaN correctly (NaN === NaN is false, but Object.is(NaN, NaN) is true)
   return Object.is(a, b);
 }
+
+/**
+ * Normalizes a fields collection to an array.
+ * Handles both array format and object format (keyed by field key).
+ *
+ * @param fields - Fields as array or object
+ * @returns Fields as array
+ */
+export function normalizeFieldsArray<T>(fields: readonly T[] | Record<string, T>): T[] {
+  return Array.isArray(fields) ? [...fields] : Object.values(fields);
+}

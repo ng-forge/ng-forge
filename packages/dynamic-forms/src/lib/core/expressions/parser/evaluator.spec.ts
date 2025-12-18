@@ -307,6 +307,36 @@ describe('Evaluator', () => {
       expect(result).toBe(5);
     });
 
+    it('should return null for division by zero', () => {
+      const scope: EvaluationScope = {};
+      const evaluator = new Evaluator(scope, '10 / 0');
+      const ast: ASTNode = {
+        type: 'BinaryOp',
+        operator: '/',
+        left: { type: 'Literal', value: 10 },
+        right: { type: 'Literal', value: 0 },
+      };
+
+      const result = evaluator.evaluate(ast);
+
+      expect(result).toBe(null);
+    });
+
+    it('should return null for modulo by zero', () => {
+      const scope: EvaluationScope = {};
+      const evaluator = new Evaluator(scope, '10 % 0');
+      const ast: ASTNode = {
+        type: 'BinaryOp',
+        operator: '%',
+        left: { type: 'Literal', value: 10 },
+        right: { type: 'Literal', value: 0 },
+      };
+
+      const result = evaluator.evaluate(ast);
+
+      expect(result).toBe(null);
+    });
+
     it('should evaluate modulo', () => {
       const scope: EvaluationScope = {};
       const evaluator = new Evaluator(scope, '17 % 5');
