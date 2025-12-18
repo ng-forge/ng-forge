@@ -522,19 +522,16 @@ export class DynamicForm<
   }
 
   private setupEventHandlers(): void {
-    // Handle form reset events
     this.eventBus
       .on<FormResetEvent>('form-reset')
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.onFormReset());
 
-    // Handle form clear events
     this.eventBus
       .on<FormClearEvent>('form-clear')
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.onFormClear());
 
-    // Handle form submission
     createSubmissionHandler({
       eventBus: this.eventBus,
       configSignal: this.config,

@@ -19,25 +19,17 @@ import { getChildField } from '../../core/field-tree-utils';
 export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal<Record<string, unknown>> {
   const context = inject(FIELD_SIGNAL_CONTEXT);
   const omittedFields = omit(fieldDef, ['value']) as FieldDef<unknown>;
-
-  // Build base inputs (static, from field definition)
   const baseInputs = buildBaseInputs(omittedFields);
-
-  // Get form-level validation messages (static)
   const defaultValidationMessages = context.defaultValidationMessages;
-
   const formRoot = context.form as FieldTree<Record<string, unknown>>;
   const fieldTree = getChildField(formRoot, fieldDef.key);
 
-  // Return computed signal for reactive updates
   return computed(() => {
     const inputs: Record<string, unknown> = {
       ...baseInputs,
-      // Always pass validationMessages (or empty object) - required for error display signals
       validationMessages: fieldDef.validationMessages ?? {},
     };
 
-    // Checked field specific property: placeholder
     if (fieldDef.placeholder !== undefined) {
       inputs['placeholder'] = fieldDef.placeholder;
     }

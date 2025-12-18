@@ -51,8 +51,6 @@ export class FieldContextRegistryService {
     // - Validators still run when their own field value changes (via fieldValue)
     // - Cross-field validation still works, just without cascading re-evaluation
     const formValue = untracked(() => this.rootFormRegistry.getFormValue(formId));
-
-    // Get field path from field context
     const fieldPath = this.extractFieldPath(fieldContext);
 
     return {
@@ -103,14 +101,8 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
     formId = 'default',
   ): EvaluationContext {
-    // Read field value reactively (creates a dependency)
     const fieldValue = fieldContext.value();
-
-    // Get form value using the new unified method that prefers the direct signal
-    // This creates reactive dependencies on the form value signal
     const formValue = this.rootFormRegistry.getFormValue(formId);
-
-    // Get field path from field context
     const fieldPath = this.extractFieldPath(fieldContext);
 
     return {
@@ -140,8 +132,6 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
     formId = 'default',
   ): EvaluationContext {
-    // Use reactive form value for display-only components
-    // These components need to re-evaluate when form values change
     const formValue = this.rootFormRegistry.getFormValue(formId);
 
     return {

@@ -27,13 +27,9 @@ export interface ValueFieldContext {
  */
 export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
   const context = inject(FIELD_SIGNAL_CONTEXT);
-
-  // Get form-level validation messages
   const defaultValidationMessages = context.defaultValidationMessages;
-
   const formRoot = context.form as FieldTree<Record<string, unknown>>;
   const fieldTree = getChildField(formRoot, fieldKey);
-
   return { fieldTree, defaultValidationMessages };
 }
 
@@ -54,11 +50,9 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
 
   const inputs: Record<string, unknown> = {
     ...baseInputs,
-    // Always pass validationMessages (or empty object) - required for error display signals
     validationMessages: fieldDef.validationMessages ?? {},
   };
 
-  // Value field specific properties
   if (fieldDef.placeholder !== undefined) {
     inputs['placeholder'] = fieldDef.placeholder;
   }
