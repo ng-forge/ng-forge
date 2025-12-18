@@ -261,21 +261,29 @@ describe('object-utils', () => {
       expect(fn).toHaveBeenCalledTimes(3);
     });
 
-    it('should work without maxSize (unbounded cache)', () => {
+    it('should use default maxSize of 100', () => {
       const fn = vi.fn((x: number) => x * 2);
       const memoized = memoize(fn);
 
-      // Add many entries
+      // Fill cache to default limit
       for (let i = 0; i < 100; i++) {
         memoized(i);
       }
       expect(fn).toHaveBeenCalledTimes(100);
 
-      // All should still be cached
+      // All 100 should be cached
       for (let i = 0; i < 100; i++) {
         memoized(i);
       }
       expect(fn).toHaveBeenCalledTimes(100);
+
+      // Adding one more should evict the oldest
+      memoized(100);
+      expect(fn).toHaveBeenCalledTimes(101);
+
+      // Entry 0 should have been evicted (LRU)
+      memoized(0);
+      expect(fn).toHaveBeenCalledTimes(102);
     });
 
     it('should handle resolver with maxSize', () => {

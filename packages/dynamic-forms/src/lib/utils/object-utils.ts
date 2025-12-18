@@ -74,16 +74,18 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
 /**
  * Options for memoize function
  */
+/** Default maximum cache size for memoized functions */
+const DEFAULT_MEMOIZE_MAX_SIZE = 100;
+
 export interface MemoizeOptions<TFunc extends (...args: never[]) => unknown> {
   /** Optional function to generate cache key from arguments */
   resolver?: (...args: Parameters<TFunc>) => string;
-  /** Maximum number of entries to keep in cache. Uses LRU eviction when exceeded. */
+  /** Maximum number of entries to keep in cache. Uses LRU eviction when exceeded. Defaults to 100. */
   maxSize?: number;
 }
 
 /**
- * Memoizes a function with optional custom cache key resolver and LRU cache eviction
- * Native replacement for lodash memoize()
+ * Memoizes a function with LRU cache eviction and optional custom cache key resolver.
  *
  * @param fn - Function to memoize
  * @param resolverOrOptions - Optional key resolver function or options object
@@ -92,12 +94,13 @@ export interface MemoizeOptions<TFunc extends (...args: never[]) => unknown> {
  * @example
  * ```typescript
  * const expensive = (a: number, b: number) => a + b;
- * const memoized = memoize(expensive, (a, b) => `${a}-${b}`);
- * memoized(1, 2); // Computed
- * memoized(1, 2); // Cached
+ * const memoized = memoize(expensive); // Uses default maxSize of 100
  *
- * // With maxSize
- * const bounded = memoize(expensive, { resolver: (a, b) => `${a}-${b}`, maxSize: 100 });
+ * // With custom resolver
+ * const withResolver = memoize(expensive, (a, b) => `${a}-${b}`);
+ *
+ * // With custom maxSize
+ * const small = memoize(expensive, { maxSize: 10 });
  * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -108,7 +111,7 @@ export function memoize<TFunc extends (...args: any[]) => any>(
   const options: MemoizeOptions<TFunc> =
     typeof resolverOrOptions === 'function' ? { resolver: resolverOrOptions } : (resolverOrOptions ?? {});
 
-  const { resolver, maxSize } = options;
+  const { resolver, maxSize = DEFAULT_MEMOIZE_MAX_SIZE } = options;
   const cache = new Map<string, ReturnType<TFunc>>();
 
   return ((...args: Parameters<TFunc>): ReturnType<TFunc> => {
@@ -116,18 +119,14 @@ export function memoize<TFunc extends (...args: any[]) => any>(
 
     if (cache.has(key)) {
       const value = cache.get(key)!;
-      // Move to end for LRU (only needed if maxSize is set)
-      if (maxSize !== undefined) {
-        cache.delete(key);
-        cache.set(key, value);
-      }
+      cache.delete(key);
+      cache.set(key, value);
       return value;
     }
 
     const result = fn(...args);
 
-    // Evict oldest entry if cache is full
-    if (maxSize !== undefined && cache.size >= maxSize) {
+    if (cache.size >= maxSize) {
       const oldestKey = cache.keys().next().value;
       if (oldestKey !== undefined) {
         cache.delete(oldestKey);
