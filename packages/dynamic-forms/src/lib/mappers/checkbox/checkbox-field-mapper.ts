@@ -26,9 +26,6 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
   // Get form-level validation messages (static)
   const defaultValidationMessages = context.defaultValidationMessages;
 
-  // Access child field using type-safe utility
-  // IMPORTANT: context.form IS the FieldTree, not a signal. Don't call it with ()!
-  // FieldTree() returns FieldState (status signals), but FieldTree['key'] returns child FieldTree
   const formRoot = context.form as FieldTree<Record<string, unknown>>;
   const fieldTree = getChildField(formRoot, fieldDef.key);
 

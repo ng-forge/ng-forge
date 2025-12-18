@@ -73,8 +73,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
     const arrayKey = this.field().key;
-    // IMPORTANT: parentFieldSignalContext.form IS the FieldTree, not a signal. Don't call it with ()!
-    // FieldTree() returns FieldState (status signals), but FieldTree['key'] returns child FieldTree
     const parentForm = this.parentFieldSignalContext.form;
     const arrayValue = getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
 
