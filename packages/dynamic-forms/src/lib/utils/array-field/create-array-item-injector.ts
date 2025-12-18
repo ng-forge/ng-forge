@@ -139,7 +139,7 @@ interface CreateObjectItemFormOptions<TModel extends Record<string, unknown>> {
  * The linkedSignal derives from the parent array at the current index.
  *
  * For array items, we always create a form with a schema to ensure proper field structure.
- * This is needed for valueFieldMapper to find fields via childrenMap.
+ * This is needed for valueFieldMapper to find fields via bracket notation.
  */
 function createObjectItemForm<TModel extends Record<string, unknown>>(
   options: CreateObjectItemFormOptions<TModel>,
