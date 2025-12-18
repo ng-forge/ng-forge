@@ -168,10 +168,9 @@ function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath): vo
   // Apply simple validation rules from field properties
   applySimpleValidationRules(validationField, path);
 
-  // Apply advanced validators
   if (validationField.validators) {
     for (const config of validationField.validators) {
-      applyValidator(config, fieldPath, fieldDef.key);
+      applyValidator(config, fieldPath);
     }
   }
 

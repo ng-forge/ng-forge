@@ -170,38 +170,32 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   readonly errors = computed(() => this.form()().errors());
   readonly disabled = computed(() => this.form()().disabled());
 
-  /**
-   * Get the nested FieldTree from the parent form for this group.
-   * This allows child fields to update the parent form directly,
-   * avoiding the need for separate form synchronization.
-   */
-  private readonly nestedFieldTree = computed((): FieldTree<Record<string, unknown>> | undefined => {
+  private readonly nestedFieldTree = computed((): FieldTree<Record<string, unknown>> => {
     const parentForm = this.parentFieldSignalContext.form;
     const groupKey = this.field().key;
     const child = (parentForm as Record<string, unknown>)[groupKey];
-    return child as FieldTree<Record<string, unknown>> | undefined;
+
+    if (!child) {
+      throw new Error(
+        `[Dynamic Forms] Group field "${groupKey}" not found in parent form. ` + `Ensure the parent form schema includes this group field.`,
+      );
+    }
+
+    return child as FieldTree<Record<string, unknown>>;
   });
 
   private readonly groupInjector = computed(() => {
-    // Use the nested FieldTree from parent if available, otherwise fall back to our own form
-    const formToProvide = this.nestedFieldTree() ?? (this.form() as FieldTree<Record<string, unknown>>);
-
     const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
       injector: this.injector,
       value: this.parentFieldSignalContext.value,
       defaultValues: this.defaultValues,
-      form: formToProvide,
+      form: this.nestedFieldTree(),
       defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 
     return Injector.create({
       parent: this.injector,
-      providers: [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: groupFieldSignalContext,
-        },
-      ],
+      providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: groupFieldSignalContext }],
     });
   });
 
