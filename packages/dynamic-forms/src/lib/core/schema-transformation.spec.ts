@@ -175,7 +175,7 @@ describe('schema-transformation', () => {
           const config: SchemaApplicationConfig = {
             type: 'applyWhenValue',
             schema: 'testSchema',
-            typePredicate: 'typeof value === "string"',
+            typePredicate: 'value && value.type === "text"',
           };
 
           const formInstance = form(

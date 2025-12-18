@@ -143,7 +143,7 @@ describe('logic-function-factory', () => {
       it('should handle complex JavaScript expressions', () => {
         const expression: ConditionalExpression = {
           type: 'javascript',
-          expression: 'typeof fieldValue === "string" && fieldValue.length > 2',
+          expression: 'fieldValue && fieldValue.length > 2',
         };
 
         const result = runLogicFunctionTest(expression, 'test');
@@ -271,25 +271,33 @@ describe('logic-function-factory', () => {
       });
 
       it('should handle different field value types', () => {
-        const testCases = [
-          { value: 'string', type: 'string' },
-          { value: 123, type: 'number' },
-          { value: true, type: 'boolean' },
-          { value: null, type: 'object' },
-          { value: undefined, type: 'undefined' },
-          { value: [], type: 'object' },
-          { value: {}, type: 'object' },
-        ];
+        // Test null check
+        const nullExpression: ConditionalExpression = {
+          type: 'javascript',
+          expression: 'fieldValue === null',
+        };
+        expect(runLogicFunctionTest(nullExpression, null)).toBe(true);
+        expect(runLogicFunctionTest(nullExpression, 'string')).toBe(false);
 
-        testCases.forEach(({ value, type }) => {
-          const expression: ConditionalExpression = {
-            type: 'javascript',
-            expression: `typeof fieldValue === "${type}"`,
-          };
+        // Test undefined check
+        const undefinedExpression: ConditionalExpression = {
+          type: 'javascript',
+          expression: 'fieldValue === undefined',
+        };
+        expect(runLogicFunctionTest(undefinedExpression, undefined)).toBe(true);
+        expect(runLogicFunctionTest(undefinedExpression, null)).toBe(false);
 
-          const result = runLogicFunctionTest(expression, value);
-          expect(result).toBe(true);
-        });
+        // Test truthy check (works for strings, numbers, objects)
+        const truthyExpression: ConditionalExpression = {
+          type: 'javascript',
+          expression: '!!fieldValue',
+        };
+        expect(runLogicFunctionTest(truthyExpression, 'string')).toBe(true);
+        expect(runLogicFunctionTest(truthyExpression, 123)).toBe(true);
+        expect(runLogicFunctionTest(truthyExpression, {})).toBe(true);
+        expect(runLogicFunctionTest(truthyExpression, [])).toBe(true);
+        expect(runLogicFunctionTest(truthyExpression, null)).toBe(false);
+        expect(runLogicFunctionTest(truthyExpression, undefined)).toBe(false);
       });
     });
 

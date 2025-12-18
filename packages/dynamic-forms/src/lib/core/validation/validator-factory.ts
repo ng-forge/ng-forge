@@ -9,7 +9,6 @@ import {
   minLength,
   pattern,
   required,
-  SchemaPathRules,
   validate,
   validateAsync,
   validateHttp,
@@ -39,7 +38,7 @@ import { isCrossFieldValidator, isCrossFieldBuiltInValidator, hasCrossFieldWhenC
  * Applies the email validator to a string schema path.
  * This function is properly typed - no casts needed internally.
  */
-function applyEmailValidator(path: SchemaPath<string, SchemaPathRules.Supported>): void {
+function applyEmailValidator(path: SchemaPath<string>): void {
   email(path);
 }
 
@@ -47,7 +46,7 @@ function applyEmailValidator(path: SchemaPath<string, SchemaPathRules.Supported>
  * Applies the min validator to a number schema path.
  * Supports both static values and dynamic expressions.
  */
-function applyMinValidator(path: SchemaPath<number, SchemaPathRules.Supported>, value: number, expression?: string): void {
+function applyMinValidator(path: SchemaPath<number>, value: number, expression?: string): void {
   if (expression) {
     const dynamicMin = createDynamicValueFunction<string | number | null, number | undefined>(expression);
     min(path, dynamicMin);
@@ -60,7 +59,7 @@ function applyMinValidator(path: SchemaPath<number, SchemaPathRules.Supported>, 
  * Applies the max validator to a number schema path.
  * Supports both static values and dynamic expressions.
  */
-function applyMaxValidator(path: SchemaPath<number, SchemaPathRules.Supported>, value: number, expression?: string): void {
+function applyMaxValidator(path: SchemaPath<number>, value: number, expression?: string): void {
   if (expression) {
     const dynamicMax = createDynamicValueFunction<string | number | null, number | undefined>(expression);
     max(path, dynamicMax);
@@ -73,7 +72,7 @@ function applyMaxValidator(path: SchemaPath<number, SchemaPathRules.Supported>, 
  * Applies the minLength validator to a string schema path.
  * Supports both static values and dynamic expressions.
  */
-function applyMinLengthValidator(path: SchemaPath<string, SchemaPathRules.Supported>, value: number, expression?: string): void {
+function applyMinLengthValidator(path: SchemaPath<string>, value: number, expression?: string): void {
   if (expression) {
     const dynamicMinLength = createDynamicValueFunction<string, number>(expression);
     minLength(path, dynamicMinLength);
@@ -86,7 +85,7 @@ function applyMinLengthValidator(path: SchemaPath<string, SchemaPathRules.Suppor
  * Applies the maxLength validator to a string schema path.
  * Supports both static values and dynamic expressions.
  */
-function applyMaxLengthValidator(path: SchemaPath<string, SchemaPathRules.Supported>, value: number, expression?: string): void {
+function applyMaxLengthValidator(path: SchemaPath<string>, value: number, expression?: string): void {
   if (expression) {
     const dynamicMaxLength = createDynamicValueFunction<string, number>(expression);
     maxLength(path, dynamicMaxLength);
@@ -99,7 +98,7 @@ function applyMaxLengthValidator(path: SchemaPath<string, SchemaPathRules.Suppor
  * Applies the pattern validator to a string schema path.
  * Supports both static values and dynamic expressions.
  */
-function applyPatternValidator(path: SchemaPath<string, SchemaPathRules.Supported>, value: RegExp, expression?: string): void {
+function applyPatternValidator(path: SchemaPath<string>, value: RegExp, expression?: string): void {
   if (expression) {
     const dynamicPattern = createDynamicValueFunction<string | undefined, RegExp | undefined>(expression);
     pattern(path, dynamicPattern as LogicFn<string | undefined, RegExp | undefined>);
@@ -142,8 +141,8 @@ function createConditionalLogic<TValue>(when: ConditionalExpression | undefined)
 // Angular's type system uses internal markers that don't align well with `unknown`.
 // The internal typed helper functions provide type safety where it matters.
 export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>, fieldKey?: string): void {
-  // Cast to SchemaPath with Supported rules - safe because SchemaPathTree extends SchemaPath
-  const path = fieldPath as SchemaPath<any, SchemaPathRules.Supported>;
+  // Cast to SchemaPath - safe because SchemaPathTree extends SchemaPath
+  const path = fieldPath as SchemaPath<any>;
 
   // Check if this is a built-in validator with a cross-field expression
   // These are collected at form level - skip here
@@ -172,34 +171,34 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
 
     case 'email':
       // Cast at boundary - applyEmailValidator is type-safe internally
-      applyEmailValidator(fieldPath as SchemaPath<string, SchemaPathRules.Supported>);
+      applyEmailValidator(fieldPath as SchemaPath<string>);
       break;
 
     case 'min':
       // Cast at boundary - applyMinValidator is type-safe internally
       if (typeof config.value === 'number') {
-        applyMinValidator(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, config.value, config.expression);
+        applyMinValidator(fieldPath as SchemaPath<number>, config.value, config.expression);
       }
       break;
 
     case 'max':
       // Cast at boundary - applyMaxValidator is type-safe internally
       if (typeof config.value === 'number') {
-        applyMaxValidator(fieldPath as SchemaPath<number, SchemaPathRules.Supported>, config.value, config.expression);
+        applyMaxValidator(fieldPath as SchemaPath<number>, config.value, config.expression);
       }
       break;
 
     case 'minLength':
       // Cast at boundary - applyMinLengthValidator is type-safe internally
       if (typeof config.value === 'number') {
-        applyMinLengthValidator(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, config.value, config.expression);
+        applyMinLengthValidator(fieldPath as SchemaPath<string>, config.value, config.expression);
       }
       break;
 
     case 'maxLength':
       // Cast at boundary - applyMaxLengthValidator is type-safe internally
       if (typeof config.value === 'number') {
-        applyMaxLengthValidator(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, config.value, config.expression);
+        applyMaxLengthValidator(fieldPath as SchemaPath<string>, config.value, config.expression);
       }
       break;
 
@@ -207,7 +206,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       // Cast at boundary - applyPatternValidator is type-safe internally
       if (config.value instanceof RegExp || typeof config.value === 'string') {
         const regexPattern = typeof config.value === 'string' ? new RegExp(config.value) : config.value;
-        applyPatternValidator(fieldPath as SchemaPath<string, SchemaPathRules.Supported>, regexPattern, config.expression);
+        applyPatternValidator(fieldPath as SchemaPath<string>, regexPattern, config.expression);
       }
       break;
 
@@ -354,7 +353,7 @@ function createExpressionValidator<TValue>(
  * - onSuccess: Maps resource result to validation errors
  * - onError: Optional handler for resource errors
  */
-function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<any, SchemaPathRules.Supported>): void {
+function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<any>): void {
   const registry = inject(FunctionRegistryService);
 
   // Get async validator config from registry

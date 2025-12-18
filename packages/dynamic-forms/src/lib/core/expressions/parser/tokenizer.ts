@@ -142,8 +142,6 @@ export class Tokenizer {
         return TokenType.NULL;
       case 'undefined':
         return TokenType.UNDEFINED;
-      case 'typeof':
-        return TokenType.TYPEOF;
       default:
         return TokenType.IDENTIFIER;
     }

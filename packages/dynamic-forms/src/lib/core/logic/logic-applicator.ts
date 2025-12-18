@@ -1,4 +1,4 @@
-import { disabled, hidden, readonly, required, LogicFn, SchemaPathRules } from '@angular/forms/signals';
+import { disabled, hidden, readonly, required, LogicFn } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { LogicConfig } from '../../models/logic/logic-config';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
@@ -22,8 +22,8 @@ type AnyLogicFn<TValue> = LogicFn<TValue, boolean> | (() => boolean);
  * @param fieldPath The Angular Signal Forms path
  */
 export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TValue> | SchemaPathTree<TValue>): void {
-  // Cast to SchemaPath with Supported rules - safe because SchemaPathTree extends SchemaPath
-  const path = fieldPath as SchemaPath<TValue, SchemaPathRules.Supported>;
+  // Cast to SchemaPath - safe because SchemaPathTree extends SchemaPath
+  const path = fieldPath as SchemaPath<TValue>;
 
   // Handle static boolean conditions
   if (typeof config.condition === 'boolean') {

@@ -290,17 +290,6 @@ describe('Parser', () => {
       });
     });
 
-    it('should parse typeof operator', () => {
-      const parser = new Parser('typeof x');
-      const ast = parser.parse();
-
-      expect(ast).toEqual({
-        type: 'UnaryOp',
-        operator: 'typeof',
-        operand: { type: 'Identifier', name: 'x' },
-      });
-    });
-
     it('should parse double negation', () => {
       const parser = new Parser('!!x');
       const ast = parser.parse();

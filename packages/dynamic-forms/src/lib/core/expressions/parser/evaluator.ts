@@ -267,8 +267,6 @@ export class Evaluator {
         return -(operand as number);
       case '+':
         return +(operand as number);
-      case 'typeof':
-        return typeof operand;
       default:
         throw new ExpressionParserError(`[Dynamic Forms] Unknown unary operator: ${node.operator}`, 0, this.expression);
     }
