@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { omit, keyBy, mapValues } from './object-utils';
+import { vi } from 'vitest';
+import { omit, keyBy, mapValues, memoize } from './object-utils';
 
 describe('object-utils', () => {
   describe('omit', () => {
@@ -156,6 +156,154 @@ describe('object-utils', () => {
         y: { key: 'y', value: 2, doubled: 4 },
         z: { key: 'z', value: 3, doubled: 6 },
       });
+    });
+  });
+
+  describe('memoize', () => {
+    it('should cache function results', () => {
+      const fn = vi.fn((a: number, b: number) => a + b);
+      const memoized = memoize(fn);
+
+      expect(memoized(1, 2)).toBe(3);
+      expect(memoized(1, 2)).toBe(3);
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should compute for different arguments', () => {
+      const fn = vi.fn((a: number, b: number) => a + b);
+      const memoized = memoize(fn);
+
+      expect(memoized(1, 2)).toBe(3);
+      expect(memoized(2, 3)).toBe(5);
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it('should use custom resolver for cache key', () => {
+      const fn = vi.fn((obj: { id: number; value: string }) => obj.value.toUpperCase());
+      const memoized = memoize(fn, (obj) => String(obj.id));
+
+      expect(memoized({ id: 1, value: 'hello' })).toBe('HELLO');
+      // Same id, different value - should return cached
+      expect(memoized({ id: 1, value: 'world' })).toBe('HELLO');
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // Different id - should compute
+      expect(memoized({ id: 2, value: 'world' })).toBe('WORLD');
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it('should accept resolver via options object', () => {
+      const fn = vi.fn((a: number, b: number) => a + b);
+      const memoized = memoize(fn, { resolver: (a, b) => `${a}-${b}` });
+
+      expect(memoized(1, 2)).toBe(3);
+      expect(memoized(1, 2)).toBe(3);
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should evict oldest entry when maxSize is exceeded', () => {
+      const fn = vi.fn((x: number) => x * 2);
+      const memoized = memoize(fn, { maxSize: 2 });
+
+      // Fill cache
+      expect(memoized(1)).toBe(2);
+      expect(memoized(2)).toBe(4);
+      expect(fn).toHaveBeenCalledTimes(2);
+
+      // Add third entry - should evict first
+      expect(memoized(3)).toBe(6);
+      expect(fn).toHaveBeenCalledTimes(3);
+
+      // First entry should have been evicted
+      expect(memoized(1)).toBe(2);
+      expect(fn).toHaveBeenCalledTimes(4); // Had to recompute
+    });
+
+    it('should use LRU eviction policy', () => {
+      const fn = vi.fn((x: number) => x * 2);
+      const memoized = memoize(fn, { maxSize: 2 });
+
+      // Fill cache with 1, 2
+      memoized(1);
+      memoized(2);
+      expect(fn).toHaveBeenCalledTimes(2);
+
+      // Access 1 again - moves it to end
+      memoized(1);
+      expect(fn).toHaveBeenCalledTimes(2); // Still cached
+
+      // Add 3 - should evict 2 (oldest), not 1
+      memoized(3);
+      expect(fn).toHaveBeenCalledTimes(3);
+
+      // 1 should still be cached
+      memoized(1);
+      expect(fn).toHaveBeenCalledTimes(3);
+
+      // 2 should have been evicted
+      memoized(2);
+      expect(fn).toHaveBeenCalledTimes(4);
+    });
+
+    it('should work with maxSize of 1', () => {
+      const fn = vi.fn((x: number) => x * 2);
+      const memoized = memoize(fn, { maxSize: 1 });
+
+      expect(memoized(1)).toBe(2);
+      expect(memoized(1)).toBe(2);
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      expect(memoized(2)).toBe(4);
+      expect(fn).toHaveBeenCalledTimes(2);
+
+      // Previous entry evicted
+      expect(memoized(1)).toBe(2);
+      expect(fn).toHaveBeenCalledTimes(3);
+    });
+
+    it('should work without maxSize (unbounded cache)', () => {
+      const fn = vi.fn((x: number) => x * 2);
+      const memoized = memoize(fn);
+
+      // Add many entries
+      for (let i = 0; i < 100; i++) {
+        memoized(i);
+      }
+      expect(fn).toHaveBeenCalledTimes(100);
+
+      // All should still be cached
+      for (let i = 0; i < 100; i++) {
+        memoized(i);
+      }
+      expect(fn).toHaveBeenCalledTimes(100);
+    });
+
+    it('should handle resolver with maxSize', () => {
+      const fn = vi.fn((obj: { key: string; data: number }) => obj.data * 2);
+      const memoized = memoize(fn, {
+        resolver: (obj) => obj.key,
+        maxSize: 3,
+      });
+
+      // Fill cache with 3 entries
+      memoized({ key: 'a', data: 1 });
+      memoized({ key: 'b', data: 2 });
+      memoized({ key: 'c', data: 3 });
+      expect(fn).toHaveBeenCalledTimes(3);
+
+      // All three should be cached
+      memoized({ key: 'a', data: 1 });
+      memoized({ key: 'b', data: 2 });
+      memoized({ key: 'c', data: 3 });
+      expect(fn).toHaveBeenCalledTimes(3);
+
+      // Adding 'd' evicts 'a'
+      memoized({ key: 'd', data: 4 });
+      expect(fn).toHaveBeenCalledTimes(4);
+
+      // 'a' was evicted, needs recompute
+      memoized({ key: 'a', data: 1 });
+      expect(fn).toHaveBeenCalledTimes(5);
     });
   });
 });

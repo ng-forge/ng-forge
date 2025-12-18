@@ -52,9 +52,8 @@ export class FieldContextRegistryService {
     // - Cross-field validation still works, just without cascading re-evaluation
     const formValue = untracked(() => this.rootFormRegistry.getFormValue(formId));
 
-    // Get field path from form context
-    const formContext = this.rootFormRegistry.getFormContext(formId);
-    const fieldPath = this.extractFieldPath(fieldContext, formContext);
+    // Get field path from field context
+    const fieldPath = this.extractFieldPath(fieldContext);
 
     return {
       fieldValue,
@@ -65,33 +64,12 @@ export class FieldContextRegistryService {
   }
 
   /**
-   * Registers a field path mapping for a specific form.
-   * This can be called when fields are created to maintain path information.
+   * Extracts the field path (key) for a given field context.
    */
-  registerFieldPath(fieldKey: string | number, parentPath: string, formId = 'default'): void {
-    const context = this.rootFormRegistry.getFormContext(formId);
-    const fullPath = parentPath ? `${parentPath}.${fieldKey}` : String(fieldKey);
-
-    context.fieldPaths = context.fieldPaths || {};
-    (context.fieldPaths as Record<string, string>)[String(fieldKey)] = fullPath;
-
-    this.rootFormRegistry.registerFormContext(context, formId);
-  }
-
-  /**
-   * Extracts the field path for a given field context.
-   * This is a simplified implementation that could be enhanced
-   * based on the specific needs of the form library.
-   */
-  private extractFieldPath(fieldContext: FieldContext<unknown>, formContext: Record<string, unknown>): string {
-    // Check if the field context has a key property (for child fields)
-    const extendedContext = fieldContext;
-
-    if (isChildFieldContext(extendedContext)) {
+  private extractFieldPath(fieldContext: FieldContext<unknown>): string {
+    if (isChildFieldContext(fieldContext)) {
       try {
-        const key = extendedContext.key();
-        const fieldPaths = (formContext.fieldPaths as Record<string, string>) || {};
-        return fieldPaths[String(key)] || String(key);
+        return String(fieldContext.key());
       } catch (error) {
         console.warn('[Dynamic Forms] Unable to extract field key:', error);
       }
@@ -132,12 +110,42 @@ export class FieldContextRegistryService {
     // This creates reactive dependencies on the form value signal
     const formValue = this.rootFormRegistry.getFormValue(formId);
 
-    // Get field path from form context
-    const formContext = this.rootFormRegistry.getFormContext(formId);
-    const fieldPath = this.extractFieldPath(fieldContext, formContext);
+    // Get field path from field context
+    const fieldPath = this.extractFieldPath(fieldContext);
 
     return {
       fieldValue,
+      formValue,
+      fieldPath,
+      customFunctions: customFunctions || {},
+    };
+  }
+
+  /**
+   * Creates an evaluation context for display-only components (text fields, pages)
+   * that don't have their own FieldContext.
+   *
+   * This is useful for:
+   * - Text fields (display-only, not part of form schema)
+   * - Pages (containers that need to evaluate visibility logic)
+   *
+   * Uses reactive form value access to allow logic re-evaluation when form values change.
+   *
+   * @param fieldPath - The key/path of the display-only component
+   * @param customFunctions - Optional custom functions for expression evaluation
+   * @param formId - Optional form identifier (defaults to 'default')
+   */
+  createDisplayOnlyContext(
+    fieldPath: string,
+    customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
+    formId = 'default',
+  ): EvaluationContext {
+    // Use reactive form value for display-only components
+    // These components need to re-evaluate when form values change
+    const formValue = this.rootFormRegistry.getFormValue(formId);
+
+    return {
+      fieldValue: undefined,
       formValue,
       fieldPath,
       customFunctions: customFunctions || {},

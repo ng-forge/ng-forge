@@ -130,26 +130,32 @@ export class DynamicForm<
 
   private readonly memoizedFlattenFields = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
-    (fields, registry) => {
-      const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
-      const registryKeys = Array.from(registry.keys()).sort().join('|');
-      return `${fieldKeys}__${registryKeys}`;
+    {
+      resolver: (fields, registry) => {
+        const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
+        const registryKeys = Array.from(registry.keys()).sort().join('|');
+        return `${fieldKeys}__${registryKeys}`;
+      },
+      maxSize: 10,
     },
   );
 
   private readonly memoizedFlattenFieldsForRendering = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
-    (fields, registry) => {
-      const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
-      const registryKeys = Array.from(registry.keys()).sort().join('|');
-      return `render_${fieldKeys}__${registryKeys}`;
+    {
+      resolver: (fields, registry) => {
+        const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
+        const registryKeys = Array.from(registry.keys()).sort().join('|');
+        return `render_${fieldKeys}__${registryKeys}`;
+      },
+      maxSize: 10,
     },
   );
 
-  private readonly memoizedKeyBy = memoize(
-    <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
-    (fields) => fields.map((f) => f.key).join('|'),
-  );
+  private readonly memoizedKeyBy = memoize(<T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'), {
+    resolver: (fields) => fields.map((f) => f.key).join('|'),
+    maxSize: 10,
+  });
 
   private readonly memoizedDefaultValues = memoize(
     <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
@@ -162,10 +168,13 @@ export class DynamicForm<
       }
       return result as TModel;
     },
-    (fieldsById, registry) => {
-      const fieldKeys = Object.keys(fieldsById).sort().join('|');
-      const registryKeys = Array.from(registry.keys()).sort().join('|');
-      return `defaults_${fieldKeys}__${registryKeys}`;
+    {
+      resolver: (fieldsById, registry) => {
+        const fieldKeys = Object.keys(fieldsById).sort().join('|');
+        const registryKeys = Array.from(registry.keys()).sort().join('|');
+        return `defaults_${fieldKeys}__${registryKeys}`;
+      },
+      maxSize: 10,
     },
   );
 

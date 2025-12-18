@@ -12,9 +12,8 @@ import {
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
-import { reconcileFields, ResolvedField, resolveField } from '../../utils/resolve-field/resolve-field';
+import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { keyBy, mapValues, memoize } from '../../utils/object-utils';
@@ -73,19 +72,25 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
   private readonly memoizedFlattenFields = memoize(
     (fields: readonly FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields([...fields], registry),
-    (fields, registry) =>
-      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(','),
+    {
+      resolver: (fields, registry) =>
+        JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(','),
+      maxSize: 10,
+    },
   );
 
-  private readonly memoizedKeyBy = memoize(
-    <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
-    (fields) => fields.map((f) => f.key).join(','),
-  );
+  private readonly memoizedKeyBy = memoize(<T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'), {
+    resolver: (fields) => fields.map((f) => f.key).join(','),
+    maxSize: 10,
+  });
 
   private readonly memoizedDefaultValues = memoize(
     <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) =>
       mapValues(fieldsById, (field) => getFieldDefaultValue(field, registry)),
-    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(','),
+    {
+      resolver: (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(','),
+      maxSize: 10,
+    },
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -206,31 +211,20 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
   protected readonly resolvedFields = derivedFromDeferred(
     this.fieldsSource,
-    pipe(
-      switchMap((fields) => {
-        if (!fields || fields.length === 0) {
-          return of([] as (ResolvedField | undefined)[]);
-        }
-        const groupKey = this.field().key;
-        const context = {
-          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
-          registry: this.rawFieldRegistry(),
-          injector: this.groupInjector(),
-          destroyRef: this.destroyRef,
-          onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
-            const fieldKey = fieldDef.key || '<no key>';
-            console.error(
-              `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
-                `within group '${groupKey}'. Ensure the field type is registered in your field registry.`,
-              error,
-            );
-          },
-        };
-        return forkJoin(fields.map((f) => resolveField(f, context)));
-      }),
-      map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
-      scan(reconcileFields, [] as ResolvedField[]),
-    ),
+    createFieldResolutionPipe(() => ({
+      loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+      registry: this.rawFieldRegistry(),
+      injector: this.groupInjector(),
+      destroyRef: this.destroyRef,
+      onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
+        const fieldKey = fieldDef.key || '<no key>';
+        console.error(
+          `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            `within group '${this.field().key}'. Ensure the field type is registered in your field registry.`,
+          error,
+        );
+      },
+    })),
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 

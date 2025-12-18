@@ -185,19 +185,7 @@ describe('FieldContextRegistryService', () => {
   });
 
   describe('createEvaluationContext with field path', () => {
-    it('should extract field path from context', () => {
-      const fieldContext: any = createMockFieldContext('test');
-      // Use a real signal for key since isChildFieldContext checks isSignal()
-      fieldContext.key = signal('email');
-
-      mockRootFormRegistry.registerFormContext({ fieldPaths: { email: 'user.email' } });
-
-      const result = service.createEvaluationContext(fieldContext);
-
-      expect(result.fieldPath).toBe('user.email');
-    });
-
-    it('should use key as path when no field paths registered', () => {
+    it('should extract field path from signal key', () => {
       const fieldContext: any = createMockFieldContext('test');
       // Use a real signal for key since isChildFieldContext checks isSignal()
       fieldContext.key = signal('email');
@@ -225,92 +213,13 @@ describe('FieldContextRegistryService', () => {
       expect(result.fieldPath).toBe('');
     });
 
-    it('should use custom form id for field paths', () => {
+    it('should extract numeric keys', () => {
       const fieldContext: any = createMockFieldContext('test');
-      // Use a real signal for key since isChildFieldContext checks isSignal()
-      fieldContext.key = signal('name');
+      fieldContext.key = signal(0);
 
-      mockRootFormRegistry.registerFormContext({ fieldPaths: { name: 'user.profile.name' } }, 'customForm');
+      const result = service.createEvaluationContext(fieldContext);
 
-      const result = service.createEvaluationContext(fieldContext, undefined, 'customForm');
-
-      expect(result.fieldPath).toBe('user.profile.name');
-    });
-  });
-
-  describe('registerFieldPath', () => {
-    it('should register field path with default form id', () => {
-      service.registerFieldPath('email', 'user');
-
-      const context = mockRootFormRegistry.getFormContext();
-
-      expect(context.fieldPaths).toEqual({ email: 'user.email' });
-    });
-
-    it('should register field path with parent path', () => {
-      service.registerFieldPath('street', 'user.address');
-
-      const context = mockRootFormRegistry.getFormContext();
-
-      expect(context.fieldPaths).toEqual({ street: 'user.address.street' });
-    });
-
-    it('should register field path without parent path', () => {
-      service.registerFieldPath('name', '');
-
-      const context = mockRootFormRegistry.getFormContext();
-
-      expect(context.fieldPaths).toEqual({ name: 'name' });
-    });
-
-    it('should register numeric field key', () => {
-      service.registerFieldPath(0, 'items');
-
-      const context = mockRootFormRegistry.getFormContext();
-
-      expect(context.fieldPaths).toEqual({ '0': 'items.0' });
-    });
-
-    it('should register multiple field paths', () => {
-      service.registerFieldPath('email', 'user');
-      service.registerFieldPath('name', 'user');
-      service.registerFieldPath('age', 'user');
-
-      const context = mockRootFormRegistry.getFormContext();
-
-      expect(context.fieldPaths).toEqual({
-        email: 'user.email',
-        name: 'user.name',
-        age: 'user.age',
-      });
-    });
-
-    it('should update existing field path', () => {
-      service.registerFieldPath('email', 'user');
-      service.registerFieldPath('email', 'admin');
-
-      const context = mockRootFormRegistry.getFormContext();
-
-      expect(context.fieldPaths).toEqual({ email: 'admin.email' });
-    });
-
-    it('should use custom form id', () => {
-      service.registerFieldPath('name', 'user', 'customForm');
-
-      const context = mockRootFormRegistry.getFormContext('customForm');
-
-      expect(context.fieldPaths).toEqual({ name: 'user.name' });
-    });
-
-    it('should preserve existing context data', () => {
-      mockRootFormRegistry.registerFormContext({ metadata: 'test' });
-
-      service.registerFieldPath('email', 'user');
-
-      const context = mockRootFormRegistry.getFormContext();
-
-      expect(context.metadata).toBe('test');
-      expect(context.fieldPaths).toEqual({ email: 'user.email' });
+      expect(result.fieldPath).toBe('0');
     });
   });
 
@@ -320,21 +229,20 @@ describe('FieldContextRegistryService', () => {
       const formValueSignal = signal(formValue);
 
       mockRootFormRegistry.registerFormValueSignal(formValueSignal);
-      mockRootFormRegistry.registerFormContext({ fieldPaths: { email: 'user.email' } });
 
       const fieldContext: any = createMockFieldContext('alice@example.com');
       // Use a real signal for key since isChildFieldContext checks isSignal()
       fieldContext.key = signal('email');
 
       const customFunctions = {
-        validateEmail: (ctx: any) => ctx.fieldValue.includes('@'),
+        validateEmail: (ctx: unknown) => (ctx as { fieldValue: string }).fieldValue.includes('@'),
       };
 
       const result = service.createEvaluationContext(fieldContext, customFunctions);
 
       expect(result.fieldValue).toBe('alice@example.com');
       expect(result.formValue).toEqual(formValue);
-      expect(result.fieldPath).toBe('user.email');
+      expect(result.fieldPath).toBe('email');
       expect(result.customFunctions).toEqual(customFunctions);
     });
 
@@ -356,17 +264,59 @@ describe('FieldContextRegistryService', () => {
       expect(result1.formValue).toEqual(form1Value);
       expect(result2.formValue).toEqual(form2Value);
     });
+  });
 
-    it('should handle nested field paths correctly', () => {
-      service.registerFieldPath('city', 'user.address');
-      service.registerFieldPath('street', 'user.address');
+  describe('createDisplayOnlyContext', () => {
+    it('should create context with undefined fieldValue', () => {
+      const result = service.createDisplayOnlyContext('infoText');
 
-      const context = mockRootFormRegistry.getFormContext();
+      expect(result.fieldValue).toBeUndefined();
+    });
 
-      expect(context.fieldPaths).toEqual({
-        city: 'user.address.city',
-        street: 'user.address.street',
-      });
+    it('should include fieldPath', () => {
+      const result = service.createDisplayOnlyContext('myTextField');
+
+      expect(result.fieldPath).toBe('myTextField');
+    });
+
+    it('should include form value from registry', () => {
+      const formValue = { name: 'Alice', email: 'alice@example.com' };
+      mockRootFormRegistry.registerFormValueSignal(signal(formValue));
+
+      const result = service.createDisplayOnlyContext('infoText');
+
+      expect(result.formValue).toEqual(formValue);
+    });
+
+    it('should include custom functions when provided', () => {
+      const customFunctions = {
+        isValid: () => true,
+      };
+
+      const result = service.createDisplayOnlyContext('infoText', customFunctions);
+
+      expect(result.customFunctions).toEqual(customFunctions);
+    });
+
+    it('should use empty object for custom functions when not provided', () => {
+      const result = service.createDisplayOnlyContext('infoText');
+
+      expect(result.customFunctions).toEqual({});
+    });
+
+    it('should support custom form ID', () => {
+      const formValue = { status: 'active' };
+      mockRootFormRegistry.registerFormValueSignal(signal(formValue), 'customForm');
+
+      const result = service.createDisplayOnlyContext('infoText', undefined, 'customForm');
+
+      expect(result.formValue).toEqual(formValue);
+    });
+
+    it('should return empty form value when no form is registered', () => {
+      const result = service.createDisplayOnlyContext('infoText');
+
+      expect(result.formValue).toEqual({});
     });
   });
 });

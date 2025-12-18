@@ -17,7 +17,7 @@
  * omit(obj, ['b']); // { a: 1, c: 3 }
  * ```
  */
-export function omit<T extends Record<string, any>, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result = { ...obj };
   keys.forEach((key) => delete result[key]);
   return result as Omit<T, K>;
@@ -37,10 +37,10 @@ export function omit<T extends Record<string, any>, K extends keyof T>(obj: T, k
  * keyBy(users, 'id'); // { a: { id: 'a', name: 'Alice' }, b: { id: 'b', name: 'Bob' } }
  * ```
  */
-export function keyBy<T extends Record<string, any>>(array: T[], key: keyof T): Record<string, T> {
+export function keyBy<T extends object>(array: T[], key: keyof T): Record<string, T> {
   return array.reduce(
     (acc, item) => {
-      acc[item[key]] = item;
+      acc[String(item[key])] = item;
       return acc;
     },
     {} as Record<string, T>,
@@ -72,11 +72,21 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
 }
 
 /**
- * Memoizes a function with optional custom cache key resolver
+ * Options for memoize function
+ */
+export interface MemoizeOptions<TFunc extends (...args: never[]) => unknown> {
+  /** Optional function to generate cache key from arguments */
+  resolver?: (...args: Parameters<TFunc>) => string;
+  /** Maximum number of entries to keep in cache. Uses LRU eviction when exceeded. */
+  maxSize?: number;
+}
+
+/**
+ * Memoizes a function with optional custom cache key resolver and LRU cache eviction
  * Native replacement for lodash memoize()
  *
  * @param fn - Function to memoize
- * @param resolver - Optional function to generate cache key from arguments
+ * @param resolverOrOptions - Optional key resolver function or options object
  * @returns Memoized function
  *
  * @example
@@ -85,19 +95,45 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
  * const memoized = memoize(expensive, (a, b) => `${a}-${b}`);
  * memoized(1, 2); // Computed
  * memoized(1, 2); // Cached
+ *
+ * // With maxSize
+ * const bounded = memoize(expensive, { resolver: (a, b) => `${a}-${b}`, maxSize: 100 });
  * ```
  */
-export function memoize<TFunc extends (...args: any[]) => any>(fn: TFunc, resolver?: (...args: Parameters<TFunc>) => string): TFunc {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function memoize<TFunc extends (...args: any[]) => any>(
+  fn: TFunc,
+  resolverOrOptions?: ((...args: Parameters<TFunc>) => string) | MemoizeOptions<TFunc>,
+): TFunc {
+  const options: MemoizeOptions<TFunc> =
+    typeof resolverOrOptions === 'function' ? { resolver: resolverOrOptions } : (resolverOrOptions ?? {});
+
+  const { resolver, maxSize } = options;
   const cache = new Map<string, ReturnType<TFunc>>();
 
   return ((...args: Parameters<TFunc>): ReturnType<TFunc> => {
     const key = resolver ? resolver(...args) : JSON.stringify(args);
 
     if (cache.has(key)) {
-      return cache.get(key)!;
+      const value = cache.get(key)!;
+      // Move to end for LRU (only needed if maxSize is set)
+      if (maxSize !== undefined) {
+        cache.delete(key);
+        cache.set(key, value);
+      }
+      return value;
     }
 
     const result = fn(...args);
+
+    // Evict oldest entry if cache is full
+    if (maxSize !== undefined && cache.size >= maxSize) {
+      const oldestKey = cache.keys().next().value;
+      if (oldestKey !== undefined) {
+        cache.delete(oldestKey);
+      }
+    }
+
     cache.set(key, result);
     return result;
   }) as TFunc;
@@ -118,7 +154,7 @@ export function memoize<TFunc extends (...args: any[]) => any>(fn: TFunc, resolv
  * isEqual({ a: 1 }, { a: 2 }); // false
  * ```
  */
-export function isEqual(a: any, b: any): boolean {
+export function isEqual(a: unknown, b: unknown): boolean {
   // Same reference or both null/undefined
   if (a === b) return true;
 
@@ -141,12 +177,14 @@ export function isEqual(a: any, b: any): boolean {
 
   // Handle objects
   if (typeof a === 'object' && typeof b === 'object') {
-    const keysA = Object.keys(a);
-    const keysB = Object.keys(b);
+    const objA = a as Record<string, unknown>;
+    const objB = b as Record<string, unknown>;
+    const keysA = Object.keys(objA);
+    const keysB = Object.keys(objB);
 
     if (keysA.length !== keysB.length) return false;
 
-    return keysA.every((key) => keysB.includes(key) && isEqual(a[key], b[key]));
+    return keysA.every((key) => keysB.includes(key) && isEqual(objA[key], objB[key]));
   }
 
   // Primitives - use Object.is to handle NaN correctly (NaN === NaN is false, but Object.is(NaN, NaN) is true)
