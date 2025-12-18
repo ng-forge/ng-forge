@@ -61,7 +61,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[Dynamic Forms] Schema not found: 'nonexistent-schema'"));
+        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining("Schema not found: 'nonexistent-schema'"));
       });
 
       it('should list available schemas in error message', () => {
@@ -84,7 +84,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Available schemas: schema1, schema2'));
+        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Available schemas: schema1, schema2'));
       });
 
       it('should handle empty schema registry gracefully', () => {
@@ -104,7 +104,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Available schemas: <none>'));
+        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Available schemas: <none>'));
       });
 
       it('should not throw when schema is missing', () => {

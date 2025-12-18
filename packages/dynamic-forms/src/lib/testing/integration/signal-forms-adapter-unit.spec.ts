@@ -6,12 +6,16 @@ import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 import { SchemaDefinition } from '../../models/schemas/schema-definition';
 import { SchemaRegistryService } from '../../core/registry/schema-registry.service';
+import { createMockLogger, MockLogger } from '../mock-logger';
 
 describe('SignalFormsAdapterService Unit Tests', () => {
   let schemaRegistry: SchemaRegistryService;
   let functionRegistry: FunctionRegistryService;
+  let mockLogger: MockLogger;
 
   beforeEach(() => {
+    mockLogger = createMockLogger();
+
     TestBed.configureTestingModule({
       providers: [SchemaRegistryService, FunctionRegistryService],
     });
@@ -55,6 +59,7 @@ describe('SignalFormsAdapterService Unit Tests', () => {
         formValue: {},
         fieldPath: 'test',
         customFunctions: functionRegistry.getCustomFunctions(),
+        logger: mockLogger,
       };
 
       const result = evaluateCondition(expression, context);
@@ -72,6 +77,7 @@ describe('SignalFormsAdapterService Unit Tests', () => {
         fieldValue: 'John',
         formValue: { name: 'John', age: 25, email: 'john@test.com' },
         fieldPath: 'name',
+        logger: mockLogger,
       };
     });
 
@@ -149,6 +155,7 @@ describe('SignalFormsAdapterService Unit Tests', () => {
             },
           },
           fieldPath: 'test',
+          logger: mockLogger,
         };
 
         const expression: ConditionalExpression = {
@@ -193,12 +200,10 @@ describe('SignalFormsAdapterService Unit Tests', () => {
           expression: 'invalid @@ syntax',
         };
 
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
         const result = evaluateCondition(expression, context);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalled();
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalled();
       });
     });
 
@@ -244,6 +249,7 @@ describe('SignalFormsAdapterService Unit Tests', () => {
           fieldValue: value1,
           formValue: { testField: value1 },
           fieldPath: 'testField',
+          logger: mockLogger,
         };
 
         const result = evaluateCondition(expression, context);
@@ -263,14 +269,13 @@ describe('SignalFormsAdapterService Unit Tests', () => {
         fieldValue: 'test',
         formValue: {},
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
       const result = evaluateCondition(missingFunctionExpression, context);
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Custom function not found:', 'nonExistentFunction');
-      consoleSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalledWith('Custom function not found:', 'nonExistentFunction');
     });
 
     it('should handle custom function execution errors', () => {
@@ -289,14 +294,13 @@ describe('SignalFormsAdapterService Unit Tests', () => {
         fieldValue: 'test',
         formValue: {},
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
       const result = evaluateCondition(expression, context);
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle missing expression properties', () => {
@@ -311,6 +315,7 @@ describe('SignalFormsAdapterService Unit Tests', () => {
         fieldValue: 'test',
         formValue: {},
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
       invalidExpressions.forEach((expr) => {
@@ -347,6 +352,7 @@ describe('SignalFormsAdapterService Unit Tests', () => {
         fieldValue: 'test',
         formValue: deeplyNestedForm,
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
       const result = evaluateCondition(deepExpression, context);
@@ -354,13 +360,14 @@ describe('SignalFormsAdapterService Unit Tests', () => {
     });
 
     it('should handle circular references safely', () => {
-      const circularRef: any = { name: 'test' };
-      circularRef.self = circularRef;
+      const circularRef: Record<string, unknown> = { name: 'test' };
+      circularRef['self'] = circularRef;
 
       const context: EvaluationContext = {
         fieldValue: 'test',
         formValue: circularRef,
         fieldPath: 'test',
+        logger: mockLogger,
       };
 
       const expression: ConditionalExpression = {
@@ -399,6 +406,7 @@ describe('SignalFormsAdapterService Unit Tests', () => {
           fieldValue: value,
           formValue: { testField: value },
           fieldPath: 'testField',
+          logger: mockLogger,
         };
 
         const actualResult = evaluateCondition(expression, context);

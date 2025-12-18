@@ -2,11 +2,14 @@ import { vi } from 'vitest';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { evaluateCondition } from './condition-evaluator';
+import { createMockLogger, MockLogger } from '../../testing/mock-logger';
 
 describe('condition-evaluator', () => {
   let mockContext: EvaluationContext;
+  let mockLogger: MockLogger;
 
   beforeEach(() => {
+    mockLogger = createMockLogger();
     mockContext = {
       fieldValue: 'test',
       formValue: {
@@ -24,6 +27,7 @@ describe('condition-evaluator', () => {
       },
       fieldPath: 'name',
       customFunctions: {},
+      logger: mockLogger,
     };
   });
 
@@ -232,8 +236,6 @@ describe('condition-evaluator', () => {
       });
 
       it('should handle JavaScript errors gracefully', () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
-
         // Test with an expression that causes a parsing error
         const expression: ConditionalExpression = {
           type: 'javascript',
@@ -243,18 +245,10 @@ describe('condition-evaluator', () => {
         const result = evaluateCondition(expression, mockContext);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[Dynamic Forms] Error evaluating JavaScript expression:',
-          'invalid @@ syntax',
-          expect.any(Error),
-        );
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalledWith('Error evaluating JavaScript expression:', 'invalid @@ syntax', expect.any(Error));
       });
 
       it('should handle syntax errors gracefully', () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
-
         const expression: ConditionalExpression = {
           type: 'javascript',
           expression: 'invalid syntax }{',
@@ -263,9 +257,7 @@ describe('condition-evaluator', () => {
         const result = evaluateCondition(expression, mockContext);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalled();
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalled();
       });
 
       it('should handle expressions that access nested properties', () => {
@@ -355,8 +347,6 @@ describe('condition-evaluator', () => {
       });
 
       it('should handle missing custom functions', () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
-
         const expression: ConditionalExpression = {
           type: 'custom',
           expression: 'nonExistentFunction',
@@ -365,13 +355,10 @@ describe('condition-evaluator', () => {
         const result = evaluateCondition(expression, mockContext);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Custom function not found:', 'nonExistentFunction');
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalledWith('Custom function not found:', 'nonExistentFunction');
       });
 
       it('should handle custom function execution errors', () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
         const throwingFunction = vi.fn(() => {
           throw new Error('Custom function error');
         });
@@ -391,9 +378,7 @@ describe('condition-evaluator', () => {
         const result = evaluateCondition(expression, contextWithThrowingFn);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Error executing custom function:', 'throwingFunction', expect.any(Error));
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalledWith('Error executing custom function:', 'throwingFunction', expect.any(Error));
       });
 
       it('should handle context without custom functions', () => {
@@ -401,8 +386,6 @@ describe('condition-evaluator', () => {
           ...mockContext,
           customFunctions: undefined,
         };
-
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
 
         const expression: ConditionalExpression = {
           type: 'custom',
@@ -412,9 +395,7 @@ describe('condition-evaluator', () => {
         const result = evaluateCondition(expression, contextWithoutCustomFn);
 
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Custom function not found:', 'testFunction');
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalledWith('Custom function not found:', 'testFunction');
       });
 
       it('should pass correct context to custom functions', () => {
@@ -461,6 +442,7 @@ describe('condition-evaluator', () => {
           fieldValue: null,
           formValue: { field: null },
           fieldPath: 'field',
+          logger: mockLogger,
         };
 
         const expression: ConditionalExpression = {
@@ -479,6 +461,7 @@ describe('condition-evaluator', () => {
           fieldValue: undefined,
           formValue: { field: undefined },
           fieldPath: 'field',
+          logger: mockLogger,
         };
 
         const expression: ConditionalExpression = {
@@ -493,13 +476,14 @@ describe('condition-evaluator', () => {
       });
 
       it('should handle circular references in form values', () => {
-        const circularForm: any = { name: 'test' };
-        circularForm.self = circularForm;
+        const circularForm: Record<string, unknown> = { name: 'test' };
+        circularForm['self'] = circularForm;
 
         const circularContext: EvaluationContext = {
           fieldValue: 'test',
           formValue: circularForm,
           fieldPath: 'name',
+          logger: mockLogger,
         };
 
         const expression: ConditionalExpression = {
@@ -519,6 +503,7 @@ describe('condition-evaluator', () => {
           fieldValue: '',
           formValue: {},
           fieldPath: 'nonexistent',
+          logger: mockLogger,
         };
 
         const expression: ConditionalExpression = {
@@ -533,7 +518,7 @@ describe('condition-evaluator', () => {
       });
 
       it('should handle very deeply nested paths', () => {
-        let deepForm: any = { value: 'found' };
+        let deepForm: Record<string, unknown> = { value: 'found' };
         for (let i = 0; i < 20; i++) {
           deepForm = { level: deepForm };
         }
@@ -542,6 +527,7 @@ describe('condition-evaluator', () => {
           fieldValue: 'test',
           formValue: deepForm,
           fieldPath: 'test',
+          logger: mockLogger,
         };
 
         const deepPath = Array(20).fill('level').join('.') + '.value';
@@ -559,7 +545,7 @@ describe('condition-evaluator', () => {
 
     describe('performance considerations', () => {
       it('should handle large form objects efficiently', () => {
-        const largeForm: any = {};
+        const largeForm: Record<string, string> = {};
         for (let i = 0; i < 1000; i++) {
           largeForm[`field${i}`] = `value${i}`;
         }
@@ -568,6 +554,7 @@ describe('condition-evaluator', () => {
           fieldValue: 'value500',
           formValue: largeForm,
           fieldPath: 'field500',
+          logger: mockLogger,
         };
 
         const expression: ConditionalExpression = {

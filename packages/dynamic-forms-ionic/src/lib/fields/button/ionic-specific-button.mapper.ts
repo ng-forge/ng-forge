@@ -3,6 +3,7 @@ import {
   AddArrayItemEvent,
   ARRAY_CONTEXT,
   buildBaseInputs,
+  DYNAMIC_FORM_LOGGER,
   FIELD_SIGNAL_CONTEXT,
   FieldDef,
   FieldWithValidation,
@@ -153,14 +154,15 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
   // Try to get array context (available when inside an array)
   // Use optional injection so it doesn't fail when outside an array
   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+  const logger = inject(DYNAMIC_FORM_LOGGER);
 
   // Determine the target array key
   // Priority: explicit arrayKey from fieldDef > arrayKey from context
   const targetArrayKey = fieldDef.arrayKey ?? arrayContext?.arrayKey;
 
   if (!targetArrayKey) {
-    console.warn(
-      `[Dynamic Forms] addArrayItem button "${fieldDef.key}" has no array context. ` +
+    logger.warn(
+      `addArrayItem button "${fieldDef.key}" has no array context. ` +
         'Either place it inside an array field, or provide an explicit arrayKey property.',
     );
   }
@@ -219,14 +221,15 @@ export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButton
   // Try to get array context (available when inside an array)
   // Use optional injection so it doesn't fail when outside an array
   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+  const logger = inject(DYNAMIC_FORM_LOGGER);
 
   // Determine the target array key
   // Priority: explicit arrayKey from fieldDef > arrayKey from context
   const targetArrayKey = fieldDef.arrayKey ?? arrayContext?.arrayKey;
 
   if (!targetArrayKey) {
-    console.warn(
-      `[Dynamic Forms] removeArrayItem button "${fieldDef.key}" has no array context. ` +
+    logger.warn(
+      `removeArrayItem button "${fieldDef.key}" has no array context. ` +
         'Either place it inside an array field, or provide an explicit arrayKey property.',
     );
   }

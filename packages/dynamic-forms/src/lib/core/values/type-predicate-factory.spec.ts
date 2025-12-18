@@ -1,10 +1,17 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createTypePredicateFunction } from './type-predicate-factory';
+import { createMockLogger, MockLogger } from '../../testing/mock-logger';
 
 describe('createTypePredicateFunction', () => {
+  let mockLogger: MockLogger;
+
+  beforeEach(() => {
+    mockLogger = createMockLogger();
+  });
+
   describe('discriminated union predicates', () => {
     it('should create predicate for type property check', () => {
-      const isCreditCard = createTypePredicateFunction('value && value.paymentType === "credit"');
+      const isCreditCard = createTypePredicateFunction('value && value.paymentType === "credit"', mockLogger);
 
       expect(isCreditCard({ paymentType: 'credit', cardNumber: '1234' })).toBe(true);
       expect(isCreditCard({ paymentType: 'bank', accountNumber: '5678' })).toBe(false);
@@ -12,7 +19,7 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should create predicate for status check', () => {
-      const isActive = createTypePredicateFunction('value && value.status === "active"');
+      const isActive = createTypePredicateFunction('value && value.status === "active"', mockLogger);
 
       expect(isActive({ status: 'active' })).toBe(true);
       expect(isActive({ status: 'inactive' })).toBe(false);
@@ -20,7 +27,7 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should create predicate for kind property', () => {
-      const isError = createTypePredicateFunction('value && value.kind === "error"');
+      const isError = createTypePredicateFunction('value && value.kind === "error"', mockLogger);
 
       expect(isError({ kind: 'error', message: 'failed' })).toBe(true);
       expect(isError({ kind: 'success', data: 'ok' })).toBe(false);
@@ -29,7 +36,7 @@ describe('createTypePredicateFunction', () => {
 
   describe('null and undefined checks', () => {
     it('should create predicate for null check', () => {
-      const isNull = createTypePredicateFunction('value === null');
+      const isNull = createTypePredicateFunction('value === null', mockLogger);
 
       expect(isNull(null)).toBe(true);
       expect(isNull(undefined)).toBe(false);
@@ -38,7 +45,7 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should create predicate for undefined check', () => {
-      const isUndefined = createTypePredicateFunction('value === undefined');
+      const isUndefined = createTypePredicateFunction('value === undefined', mockLogger);
 
       expect(isUndefined(undefined)).toBe(true);
       expect(isUndefined(null)).toBe(false);
@@ -46,7 +53,7 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should create predicate for truthy value', () => {
-      const isTruthy = createTypePredicateFunction('!!value');
+      const isTruthy = createTypePredicateFunction('!!value', mockLogger);
 
       expect(isTruthy('hello')).toBe(true);
       expect(isTruthy(1)).toBe(true);
@@ -59,7 +66,7 @@ describe('createTypePredicateFunction', () => {
 
   describe('property access predicates', () => {
     it('should create predicate checking property existence', () => {
-      const hasName = createTypePredicateFunction('!!(value && value.name !== undefined)');
+      const hasName = createTypePredicateFunction('!!(value && value.name !== undefined)', mockLogger);
 
       expect(hasName({ name: 'John' })).toBe(true);
       expect(hasName({ age: 30 })).toBe(false);
@@ -67,7 +74,7 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should create predicate checking boolean property', () => {
-      const isActiveUser = createTypePredicateFunction('!!(value && value.isActive === true)');
+      const isActiveUser = createTypePredicateFunction('!!(value && value.isActive === true)', mockLogger);
 
       expect(isActiveUser({ isActive: true })).toBe(true);
       expect(isActiveUser({ isActive: false })).toBe(false);
@@ -76,7 +83,7 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should create predicate with nested property access', () => {
-      const hasEmail = createTypePredicateFunction('!!(value && value.user && value.user.email)');
+      const hasEmail = createTypePredicateFunction('!!(value && value.user && value.user.email)', mockLogger);
 
       expect(hasEmail({ user: { email: 'test@example.com' } })).toBe(true);
       expect(hasEmail({ user: {} })).toBe(false);
@@ -86,7 +93,7 @@ describe('createTypePredicateFunction', () => {
 
   describe('comparison predicates', () => {
     it('should create predicate for numeric comparison', () => {
-      const isPositive = createTypePredicateFunction('value > 0');
+      const isPositive = createTypePredicateFunction('value > 0', mockLogger);
 
       expect(isPositive(1)).toBe(true);
       expect(isPositive(42)).toBe(true);
@@ -95,7 +102,7 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should create predicate for range check', () => {
-      const isInRange = createTypePredicateFunction('value >= 0 && value <= 100');
+      const isInRange = createTypePredicateFunction('value >= 0 && value <= 100', mockLogger);
 
       expect(isInRange(50)).toBe(true);
       expect(isInRange(0)).toBe(true);
@@ -105,7 +112,7 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should create predicate with OR condition', () => {
-      const isSpecialStatus = createTypePredicateFunction('value && (value.status === "pending" || value.status === "review")');
+      const isSpecialStatus = createTypePredicateFunction('value && (value.status === "pending" || value.status === "review")', mockLogger);
 
       expect(isSpecialStatus({ status: 'pending' })).toBe(true);
       expect(isSpecialStatus({ status: 'review' })).toBe(true);
@@ -115,58 +122,49 @@ describe('createTypePredicateFunction', () => {
 
   describe('error handling', () => {
     it('should return false for invalid predicate', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-      const invalidPredicate = createTypePredicateFunction('value === (');
+      const invalidPredicate = createTypePredicateFunction('value === (', mockLogger);
 
       const result = invalidPredicate('test');
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should return false when predicate throws at runtime', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-      const throwingPredicate = createTypePredicateFunction('value.nonExistent.method()');
+      const throwingPredicate = createTypePredicateFunction('value.nonExistent.method()', mockLogger);
 
       const result = throwingPredicate({});
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle empty predicate', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-      const emptyPredicate = createTypePredicateFunction('');
+      const emptyPredicate = createTypePredicateFunction('', mockLogger);
 
       const result = emptyPredicate('test');
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
   describe('edge cases', () => {
     it('should handle predicate with whitespace', () => {
-      const withWhitespace = createTypePredicateFunction('  value && value.type === "test"  ');
+      const withWhitespace = createTypePredicateFunction('  value && value.type === "test"  ', mockLogger);
 
       expect(withWhitespace({ type: 'test' })).toBe(true);
       expect(withWhitespace({ type: 'other' })).toBe(false);
     });
 
     it('should handle predicate returning truthy non-boolean', () => {
-      const returnsNumber = createTypePredicateFunction('42');
+      const returnsNumber = createTypePredicateFunction('42', mockLogger);
 
       expect(returnsNumber('anything')).toBe(true);
     });
 
     it('should handle predicate returning falsy value', () => {
-      const returnsFalsy = createTypePredicateFunction('0');
+      const returnsFalsy = createTypePredicateFunction('0', mockLogger);
 
       expect(returnsFalsy('anything')).toBe(false);
     });
@@ -174,7 +172,7 @@ describe('createTypePredicateFunction', () => {
 
   describe('function reusability', () => {
     it('should create reusable predicate function', () => {
-      const isSuccess = createTypePredicateFunction('value && value.status === "success"');
+      const isSuccess = createTypePredicateFunction('value && value.status === "success"', mockLogger);
 
       const results = [
         { status: 'success', data: 'a' },
@@ -190,8 +188,8 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should create independent predicate instances', () => {
-      const pred1 = createTypePredicateFunction('value > 0');
-      const pred2 = createTypePredicateFunction('value < 0');
+      const pred1 = createTypePredicateFunction('value > 0', mockLogger);
+      const pred2 = createTypePredicateFunction('value < 0', mockLogger);
 
       expect(pred1(5)).toBe(true);
       expect(pred1(-5)).toBe(false);
@@ -211,7 +209,7 @@ describe('createTypePredicateFunction', () => {
         message: string;
       }
 
-      const isSuccess = createTypePredicateFunction<Success>('value && value.status === "success"');
+      const isSuccess = createTypePredicateFunction<Success>('value && value.status === "success"', mockLogger);
 
       const result1: Success | Error = { status: 'success', data: 'test' };
       const result2: Success | Error = { status: 'error', message: 'failed' };

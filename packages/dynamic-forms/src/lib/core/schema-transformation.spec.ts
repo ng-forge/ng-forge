@@ -45,7 +45,8 @@ describe('schema-transformation', () => {
           rootFormRegistry.registerRootForm(formInstance);
 
           expect(consoleErrorSpy).toHaveBeenCalledWith(
-            "[Dynamic Forms] Schema not found: 'nonexistentSchema'. Available schemas: <none>. Ensure the schema is registered in your schema registry.",
+            '[Dynamic Forms]',
+            "Schema not found: 'nonexistentSchema'. Available schemas: <none>. Ensure the schema is registered in your schema registry.",
           );
           consoleErrorSpy.mockRestore();
         });

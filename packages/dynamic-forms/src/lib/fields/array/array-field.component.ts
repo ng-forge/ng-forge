@@ -17,6 +17,7 @@ import { FieldSignalContext } from '../../mappers/types';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 import { ArrayFieldTree } from '../../core/field-tree-utils';
 
 /**
@@ -52,6 +53,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
   private readonly parentInjector = inject(Injector);
   private readonly eventBus = inject(EventBus);
+  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -229,8 +231,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private addItem(fieldTemplate: FieldDef<unknown> | null, index?: number): void {
     if (!fieldTemplate) {
-      console.error(
-        `[Dynamic Forms] Cannot add item to array '${this.field().key}': no field template provided. ` +
+      this.logger.error(
+        `Cannot add item to array '${this.field().key}': no field template provided. ` +
           'Ensure the array field has a fields property with at least one field definition.',
       );
       return;

@@ -6,6 +6,7 @@ import { ConditionalExpression, EvaluationContext } from '../../models/expressio
 import { FormConfig } from '../../models/form-config';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
+import { createSilentLogger } from '../mock-logger';
 
 // Type aliases for the unified field definition
 type EnhancedFieldDef = FieldDef<any> & FieldWithValidation;
@@ -531,6 +532,7 @@ describe('Signal Forms Integration Types', () => {
         customFunctions: {
           isBusinessEmail: (ctx) => !String(ctx.fieldValue).includes('gmail.com'),
         },
+        logger: createSilentLogger(),
       };
 
       expect(context.fieldValue).toBe('test@example.com');

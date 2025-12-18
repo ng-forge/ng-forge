@@ -5,14 +5,24 @@ import { vi } from 'vitest';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { createLogicFunction } from './logic-function-factory';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
+import { createMockLogger, MockLogger } from '../../testing/mock-logger';
 
 describe('logic-function-factory', () => {
   let functionRegistry: FunctionRegistryService;
   let injector: Injector;
+  let mockLogger: MockLogger;
 
   beforeEach(() => {
+    mockLogger = createMockLogger();
+
     TestBed.configureTestingModule({
-      providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService],
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        RootFormRegistryService,
+        { provide: DYNAMIC_FORM_LOGGER, useValue: mockLogger },
+      ],
     });
 
     functionRegistry = TestBed.inject(FunctionRegistryService);
@@ -151,8 +161,6 @@ describe('logic-function-factory', () => {
       });
 
       it('should handle JavaScript expression errors gracefully', () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
-
         // Test with an expression that causes a parsing error
         const expression: ConditionalExpression = {
           type: 'javascript',
@@ -161,9 +169,7 @@ describe('logic-function-factory', () => {
 
         const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalled();
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalled();
       });
     });
 
@@ -192,8 +198,6 @@ describe('logic-function-factory', () => {
       });
 
       it('should handle missing custom functions', () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
-
         const expression: ConditionalExpression = {
           type: 'custom',
           expression: 'nonExistentFunction',
@@ -201,13 +205,10 @@ describe('logic-function-factory', () => {
 
         const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Custom function not found:', 'nonExistentFunction');
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalledWith('Custom function not found:', 'nonExistentFunction');
       });
 
       it('should handle custom function execution errors', () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
         const throwingFn = vi.fn(() => {
           throw new Error('Custom function error');
         });
@@ -220,9 +221,7 @@ describe('logic-function-factory', () => {
 
         const result = runLogicFunctionTest(expression, 'test');
         expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalledWith('[Dynamic Forms] Error executing custom function:', 'throwingFn', expect.any(Error));
-
-        consoleSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalledWith('Error executing custom function:', 'throwingFn', expect.any(Error));
       });
     });
 

@@ -10,6 +10,7 @@ import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-fi
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { FieldDef } from '../../definitions/base/field-def';
+import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 
 /**
  * Renders a single page in multi-page (wizard) forms.
@@ -48,6 +49,7 @@ export default class PageFieldComponent {
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
+  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -69,8 +71,8 @@ export default class PageFieldComponent {
     const valid = validatePageNesting(pageField);
 
     if (!valid) {
-      console.error(
-        `[Dynamic Forms] Invalid configuration: Page '${pageField.key}' contains nested page fields. ` +
+      this.logger.error(
+        `Invalid configuration: Page '${pageField.key}' contains nested page fields. ` +
           `Pages cannot contain other pages. Consider using groups or rows for nested structure.`,
         pageField,
       );
@@ -109,8 +111,8 @@ export default class PageFieldComponent {
       destroyRef: this.destroyRef,
       onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
         const fieldKey = fieldDef.key || '<no key>';
-        console.error(
-          `[Dynamic Forms] Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+        this.logger.error(
+          `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
             `within page '${this.field().key}'. Ensure the field type is registered in your field registry.`,
           error,
         );

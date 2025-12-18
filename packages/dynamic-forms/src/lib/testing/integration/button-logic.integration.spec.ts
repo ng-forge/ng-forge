@@ -5,12 +5,17 @@ import { form, schema } from '@angular/forms/signals';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 import { resolveSubmitButtonDisabled, resolveNextButtonDisabled, ButtonLogicContext } from '../../core/logic/button-logic-resolver';
 import { FormOptions, FormStateCondition, LogicConfig, isFormStateCondition } from '../../models';
+import { createSilentLogger, MockLogger, createMockLogger } from '../mock-logger';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.interface';
 
 describe('Button Logic Integration', () => {
   let injector: Injector;
   let rootFormRegistry: RootFormRegistryService;
+  let mockLogger: DynamicFormLogger;
 
   beforeEach(() => {
+    mockLogger = createSilentLogger();
+
     TestBed.configureTestingModule({
       providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService],
     });
@@ -63,6 +68,7 @@ describe('Button Logic Integration', () => {
               disableWhileSubmitting: true,
             },
           },
+          logger: mockLogger,
         };
 
         const disabledSignal = resolveSubmitButtonDisabled(ctx);
@@ -81,6 +87,7 @@ describe('Button Logic Integration', () => {
         const ctx: ButtonLogicContext = {
           form: formInstance,
           explicitlyDisabled: true,
+          logger: mockLogger,
         };
 
         const disabledSignal = resolveSubmitButtonDisabled(ctx);
@@ -104,6 +111,7 @@ describe('Button Logic Integration', () => {
               disableWhileSubmitting: true,
             },
           },
+          logger: mockLogger,
         };
 
         const disabledSignal = resolveSubmitButtonDisabled(ctx);
@@ -128,6 +136,7 @@ describe('Button Logic Integration', () => {
               disableWhileSubmitting: false,
             },
           },
+          logger: mockLogger,
         };
 
         const disabledSignal = resolveSubmitButtonDisabled(ctx);
@@ -146,6 +155,7 @@ describe('Button Logic Integration', () => {
         const ctx: ButtonLogicContext = {
           form: formInstance,
           fieldLogic: [{ type: 'disabled', condition: 'formSubmitting' }] as LogicConfig[],
+          logger: mockLogger,
         };
 
         const disabledSignal = resolveSubmitButtonDisabled(ctx);
@@ -174,6 +184,7 @@ describe('Button Logic Integration', () => {
               disableWhileSubmitting: true,
             },
           },
+          logger: mockLogger,
         };
 
         const disabledSignal = resolveNextButtonDisabled(ctx);
@@ -204,6 +215,7 @@ describe('Button Logic Integration', () => {
               disableWhileSubmitting: false,
             },
           },
+          logger: mockLogger,
         };
 
         const disabledSignal = resolveNextButtonDisabled(ctx);
@@ -231,6 +243,7 @@ describe('Button Logic Integration', () => {
               disableWhileSubmitting: false,
             },
           },
+          logger: mockLogger,
         };
 
         const disabledSignal = resolveNextButtonDisabled(ctx);
@@ -274,6 +287,7 @@ describe('Button Logic Integration', () => {
         const ctx: ButtonLogicContext = {
           form: formInstance,
           // No formOptions provided - should use defaults
+          logger: mockLogger,
         };
 
         const disabledSignal = resolveSubmitButtonDisabled(ctx);

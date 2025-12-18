@@ -7,6 +7,7 @@ import { createLogicFunction } from './expressions/logic-function-factory';
 import { createTypePredicateFunction } from './values/type-predicate-factory';
 import { applyValidator } from './validation/validator-factory';
 import { applyLogic } from './logic/logic-applicator';
+import { DYNAMIC_FORM_LOGGER } from '../providers/features/logger/logger.token';
 
 /**
  * Apply schema configuration.
@@ -18,13 +19,14 @@ import { applyLogic } from './logic/logic-applicator';
  * 3. The actual schema application happens at runtime via the schema function
  */
 export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
+  const logger = inject(DYNAMIC_FORM_LOGGER);
   const schemaRegistry = inject(SchemaRegistryService);
   const schema = schemaRegistry.resolveSchema(config.schema);
 
   if (!schema) {
     const availableSchemas = Array.from(schemaRegistry.getAllSchemas().keys()).join(', ') || '<none>';
-    console.error(
-      `[Dynamic Forms] Schema not found: '${config.schema}'. ` +
+    logger.error(
+      `Schema not found: '${config.schema}'. ` +
         `Available schemas: ${availableSchemas}. ` +
         `Ensure the schema is registered in your schema registry.`,
     );
@@ -50,7 +52,7 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
 
     case 'applyWhenValue':
       if (config.typePredicate) {
-        const predicate = createTypePredicateFunction(config.typePredicate);
+        const predicate = createTypePredicateFunction(config.typePredicate, logger);
         applyWhenValue(path, predicate, schemaFn);
       }
       break;

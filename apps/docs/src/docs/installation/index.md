@@ -219,6 +219,10 @@ See [Custom Integration Guide](../deep-dive/custom-integrations) for building cu
 
 Now that you have ng-forge dynamic forms installed, explore the core features:
 
+### Configure Behavior
+
+- **[Configuration](../configuration)** - Configure logging, debugging, and other provider-level options
+
 ### Learn Core Concepts
 
 - **[Field Types](../core/field-types)** - Understand all available field types (input, select, checkbox, group, etc.)

@@ -103,7 +103,8 @@ describe('createResolvedErrorsSignal', () => {
 
         // Should log a warning
         expect(warnSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[Dynamic Forms] No validation message found for error kind "required"'),
+          '[Dynamic Forms]',
+          expect.stringContaining('No validation message found for error kind "required"'),
         );
 
         warnSpy.mockRestore();
