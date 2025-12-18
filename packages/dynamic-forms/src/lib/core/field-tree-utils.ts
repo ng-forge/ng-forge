@@ -9,20 +9,6 @@ export type ArrayFieldTree<T> = FieldTree<T[]> & {
 };
 
 /**
- * Access a child FieldTree by key.
- *
- * @param parent The parent FieldTree
- * @param key The key of the child field
- * @returns The child FieldTree or undefined if not found
- */
-export function getChildField<T extends Record<string, unknown>, K extends keyof T & string>(
-  parent: FieldTree<T>,
-  key: K,
-): FieldTree<T[K]> | undefined {
-  return (parent as Record<string, unknown>)[key] as FieldTree<T[K]> | undefined;
-}
-
-/**
  * Get the length of an array FieldTree.
  */
 export function getArrayLength<T>(arrayFieldTree: ArrayFieldTree<T>): number {

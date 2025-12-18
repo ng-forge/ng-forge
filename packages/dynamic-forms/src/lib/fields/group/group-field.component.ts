@@ -167,9 +167,9 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   readonly disabled = computed(() => this.form()().disabled());
 
   private readonly nestedFieldTree = computed((): FieldTree<Record<string, unknown>> => {
-    const parentForm = this.parentFieldSignalContext.form;
+    const parentForm = this.parentFieldSignalContext.form as Record<string, FieldTree<Record<string, unknown>>>;
     const groupKey = this.field().key;
-    const child = (parentForm as Record<string, unknown>)[groupKey];
+    const child = parentForm[groupKey];
 
     if (!child) {
       throw new Error(
@@ -177,7 +177,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
       );
     }
 
-    return child as FieldTree<Record<string, unknown>>;
+    return child;
   });
 
   private readonly groupInjector = computed(() => {

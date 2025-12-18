@@ -195,7 +195,7 @@ export { applyValidator, applyValidators } from './core/validation';
 export type { HttpResourceRequest } from './core/validation';
 
 // FieldTree Utilities
-export { getChildField, getArrayLength } from './core/field-tree-utils';
+export { getArrayLength } from './core/field-tree-utils';
 export type { ArrayFieldTree } from './core/field-tree-utils';
 
 // Event Utilities - for custom event handling

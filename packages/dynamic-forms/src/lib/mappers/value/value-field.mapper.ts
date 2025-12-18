@@ -5,7 +5,6 @@ import { buildBaseInputs } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { omit } from '../../utils/object-utils';
 import { ValidationMessages } from '../../models/validation-types';
-import { getChildField } from '../../core/field-tree-utils';
 
 /**
  * Context for value field mapping, containing resolved field tree and default validation messages.
@@ -28,8 +27,8 @@ export interface ValueFieldContext {
 export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
   const context = inject(FIELD_SIGNAL_CONTEXT);
   const defaultValidationMessages = context.defaultValidationMessages;
-  const formRoot = context.form as FieldTree<Record<string, unknown>>;
-  const fieldTree = getChildField(formRoot, fieldKey);
+  const formRoot = context.form as Record<string, FieldTree<unknown> | undefined>;
+  const fieldTree = formRoot[fieldKey];
   return { fieldTree, defaultValidationMessages };
 }
 

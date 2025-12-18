@@ -5,7 +5,6 @@ import { FieldTree } from '@angular/forms/signals';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { omit } from '../../utils/object-utils';
-import { getChildField } from '../../core/field-tree-utils';
 
 /**
  * Maps a checkbox/toggle field definition to component inputs.
@@ -21,8 +20,8 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
   const omittedFields = omit(fieldDef, ['value']) as FieldDef<unknown>;
   const baseInputs = buildBaseInputs(omittedFields);
   const defaultValidationMessages = context.defaultValidationMessages;
-  const formRoot = context.form as FieldTree<Record<string, unknown>>;
-  const fieldTree = getChildField(formRoot, fieldDef.key);
+  const formRoot = context.form as Record<string, FieldTree<unknown> | undefined>;
+  const fieldTree = formRoot[fieldDef.key];
 
   return computed(() => {
     const inputs: Record<string, unknown> = {
