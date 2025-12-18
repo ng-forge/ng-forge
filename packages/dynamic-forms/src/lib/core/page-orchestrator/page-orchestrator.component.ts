@@ -10,12 +10,11 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
 import { FieldTree } from '@angular/forms/signals';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
-import { RootFormRegistryService } from '../registry/root-form-registry.service';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { evaluateCondition } from '../expressions/condition-evaluator';
-import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
+import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -89,7 +88,7 @@ import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.toke
 })
 export class PageOrchestratorComponent {
   private readonly eventBus = inject(EventBus);
-  private readonly rootFormRegistry = inject(RootFormRegistryService);
+  private readonly fieldContextRegistry = inject(FieldContextRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly logger = inject(DYNAMIC_FORM_LOGGER);
 
@@ -99,14 +98,15 @@ export class PageOrchestratorComponent {
   pageFields = input.required<PageField[]>();
 
   /**
-   * Root form instance from parent DynamicForm
+   * Root form instance from parent DynamicForm.
+   * Uses FieldTree<unknown> to accept any form type.
    */
-  form = input.required<FieldTree<any>>();
+  form = input.required<FieldTree<unknown>>();
 
   /**
    * Field signal context for child fields
    */
-  fieldSignalContext = input.required<FieldSignalContext>();
+  fieldSignalContext = input.required<FieldSignalContext<any>>();
 
   /**
    * Computed signal that tracks which pages are hidden.
@@ -115,10 +115,8 @@ export class PageOrchestratorComponent {
    */
   readonly pageHiddenStates = computed(() => {
     const pages = this.pageFields();
-    const formValue = this.rootFormRegistry.getFormValue();
-    const customFunctions = this.functionRegistry.getCustomFunctions();
 
-    return pages.map((page) => this.evaluatePageHidden(page, formValue, customFunctions));
+    return pages.map((page) => this.evaluatePageHidden(page));
   });
 
   /**
@@ -373,14 +371,9 @@ export class PageOrchestratorComponent {
    * A page is hidden if ANY of its hidden logic conditions evaluate to true.
    *
    * @param page The page field to evaluate
-   * @param formValue The current form value to evaluate against
    * @returns true if the page should be hidden, false otherwise
    */
-  private evaluatePageHidden(
-    page: PageField,
-    formValue: unknown,
-    customFunctions: Record<string, (context: EvaluationContext) => unknown>,
-  ): boolean {
+  private evaluatePageHidden(page: PageField): boolean {
     // If no logic defined, page is visible
     if (!page.logic || page.logic.length === 0) {
       return false;
@@ -394,15 +387,6 @@ export class PageOrchestratorComponent {
       return false;
     }
 
-    // Create evaluation context once for all conditions on this page
-    const context: EvaluationContext = {
-      fieldValue: null, // Pages don't have field values
-      formValue: (formValue ?? {}) as Record<string, unknown>,
-      fieldPath: page.key || '',
-      customFunctions,
-      logger: this.logger,
-    };
-
     // Check each hidden logic - if ANY condition is true, the page is hidden
     for (const logic of hiddenLogic) {
       // Handle static boolean conditions
@@ -413,8 +397,9 @@ export class PageOrchestratorComponent {
         continue;
       }
 
-      // Evaluate conditional expression
+      // Evaluate conditional expression using centralized context creation
       const condition = logic.condition as ConditionalExpression;
+      const context = this.fieldContextRegistry.createDisplayOnlyContext(page.key || '', this.functionRegistry.getCustomFunctions());
 
       if (evaluateCondition(condition, context)) {
         return true;

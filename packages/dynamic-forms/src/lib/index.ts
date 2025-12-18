@@ -201,6 +201,10 @@ export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent } from './f
 export { applyValidator, applyValidators } from './core/validation';
 export type { HttpResourceRequest } from './core/validation';
 
+// FieldTree Utilities
+export { getArrayLength } from './core/field-tree-utils';
+export type { ArrayFieldTree } from './core/field-tree-utils';
+
 // Event Utilities - for custom event handling
 export { EventBus } from './events';
 export { resolveTokens } from './events';
@@ -212,7 +216,3 @@ export { BUILT_IN_FIELDS } from './providers';
 
 // Event Args Type
 export type { EventArgs } from './definitions';
-
-// Form Internals - for advanced container field implementations
-export { getChildFieldTree, getChildrenMap, getFieldProxy, hasFormStructure } from './utils/form-internals';
-export type { FormInternals } from './utils/form-internals';

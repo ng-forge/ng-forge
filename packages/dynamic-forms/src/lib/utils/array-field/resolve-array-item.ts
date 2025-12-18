@@ -12,7 +12,7 @@ import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
 /**
  * Options for resolving an array item.
  */
-export interface ResolveArrayItemOptions<TModel> {
+export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>> {
   /** The field tree for this item (null for object items). */
   fieldTree: FieldTree<unknown> | null;
   /** The initial index of this item in the array. */
@@ -41,7 +41,9 @@ export interface ResolveArrayItemOptions<TModel> {
  * Uses linkedSignal for the index, which automatically updates when itemOrderSignal changes.
  * This enables position-aware updates without recreating components when items are reordered.
  */
-export function resolveArrayItem<TModel>(options: ResolveArrayItemOptions<TModel>): Observable<ResolvedArrayItem | undefined> {
+export function resolveArrayItem<TModel extends Record<string, unknown>>(
+  options: ResolveArrayItemOptions<TModel>,
+): Observable<ResolvedArrayItem | undefined> {
   const {
     fieldTree,
     index,

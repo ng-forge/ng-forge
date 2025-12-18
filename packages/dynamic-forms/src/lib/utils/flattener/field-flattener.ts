@@ -3,6 +3,7 @@ import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { isArrayField } from '../../definitions/default/array-field';
 import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
+import { normalizeFieldsArray } from '../object-utils';
 
 /**
  * Represents a field definition that has been processed through the flattening algorithm.
@@ -98,11 +99,8 @@ export function flattenFields(
     // Row fields need to render their container element for grid layouts to work
     if (options.preserveRows && isRowField(field)) {
       if (field.fields) {
-        // Normalize field children to array format (handles both array and object syntax)
-        const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-
         // Recursively flatten children while preserving row structure
-        const flattenedChildren = flattenFields(fieldsArray as FieldDef<unknown>[], registry, options);
+        const flattenedChildren = flattenFields(normalizeFieldsArray(field.fields) as FieldDef<unknown>[], registry, options);
 
         // Keep the row field in the result with its flattened children
         // This allows the row component to render its container while children are flattened
@@ -116,8 +114,8 @@ export function flattenFields(
       // Step 3: Handle fields with 'flatten' value handling (typically page/row fields)
       // These fields are pure containers - merge their children directly into the parent level
       if (field.fields) {
-        const fieldsArray = Array.isArray(field.fields) ? field.fields : Object.values(field.fields);
-        const flattenedChildren = flattenFields(fieldsArray as FieldDef<unknown>[], registry, options);
+        const fields = field.fields as FieldDef<unknown>[] | Record<string, FieldDef<unknown>>;
+        const flattenedChildren = flattenFields(normalizeFieldsArray(fields), registry, options);
 
         // Spread children directly into result - the container field itself is discarded
         // This is used for page fields (form structure) and row fields (form values)

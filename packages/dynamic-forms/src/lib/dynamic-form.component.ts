@@ -76,7 +76,7 @@ import { DYNAMIC_FORM_LOGGER } from './providers/features/logger/logger.token';
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
     @if (formModeDetection().mode === 'paged') {
-      <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="$any(form())" [fieldSignalContext]="fieldSignalContext()"></div>
+      <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
     } @else {
       @for (field of resolvedFields(); track field.key) {
         <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
@@ -95,8 +95,10 @@ import { DYNAMIC_FORM_LOGGER } from './providers/features/logger/logger.token';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel = InferFormValue<TFields>>
-  implements OnDestroy
+export class DynamicForm<
+  TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
+  TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
+> implements OnDestroy
 {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies
@@ -130,26 +132,32 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
 
   private readonly memoizedFlattenFields = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry),
-    (fields, registry) => {
-      const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
-      const registryKeys = Array.from(registry.keys()).sort().join('|');
-      return `${fieldKeys}__${registryKeys}`;
+    {
+      resolver: (fields, registry) => {
+        const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
+        const registryKeys = Array.from(registry.keys()).sort().join('|');
+        return `${fieldKeys}__${registryKeys}`;
+      },
+      maxSize: 10,
     },
   );
 
   private readonly memoizedFlattenFieldsForRendering = memoize(
     (fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields(fields, registry, { preserveRows: true }),
-    (fields, registry) => {
-      const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
-      const registryKeys = Array.from(registry.keys()).sort().join('|');
-      return `render_${fieldKeys}__${registryKeys}`;
+    {
+      resolver: (fields, registry) => {
+        const fieldKeys = fields.map((f) => `${f.key || ''}:${f.type}`).join('|');
+        const registryKeys = Array.from(registry.keys()).sort().join('|');
+        return `render_${fieldKeys}__${registryKeys}`;
+      },
+      maxSize: 10,
     },
   );
 
-  private readonly memoizedKeyBy = memoize(
-    <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
-    (fields) => fields.map((f) => f.key).join('|'),
-  );
+  private readonly memoizedKeyBy = memoize(<T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'), {
+    resolver: (fields) => fields.map((f) => f.key).join('|'),
+    maxSize: 10,
+  });
 
   private readonly memoizedDefaultValues = memoize(
     <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) => {
@@ -162,10 +170,13 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
       }
       return result as TModel;
     },
-    (fieldsById, registry) => {
-      const fieldKeys = Object.keys(fieldsById).sort().join('|');
-      const registryKeys = Array.from(registry.keys()).sort().join('|');
-      return `defaults_${fieldKeys}__${registryKeys}`;
+    {
+      resolver: (fieldsById, registry) => {
+        const fieldKeys = Object.keys(fieldsById).sort().join('|');
+        const registryKeys = Array.from(registry.keys()).sort().join('|');
+        return `defaults_${fieldKeys}__${registryKeys}`;
+      },
+      maxSize: 10,
     },
   );
 
@@ -513,19 +524,16 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
   }
 
   private setupEventHandlers(): void {
-    // Handle form reset events
     this.eventBus
       .on<FormResetEvent>('form-reset')
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.onFormReset());
 
-    // Handle form clear events
     this.eventBus
       .on<FormClearEvent>('form-clear')
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.onFormClear());
 
-    // Handle form submission
     createSubmissionHandler({
       eventBus: this.eventBus,
       configSignal: this.config,

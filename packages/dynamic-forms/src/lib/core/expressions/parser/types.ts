@@ -43,7 +43,6 @@ export enum TokenType {
 
   // Special
   EOF = 'EOF',
-  TYPEOF = 'TYPEOF',
 }
 
 /**

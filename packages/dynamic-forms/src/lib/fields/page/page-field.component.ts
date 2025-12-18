@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, Injector, input } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
-import { reconcileFields, ResolvedField, resolveField } from '../../utils/resolve-field/resolve-field';
+import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
@@ -105,31 +104,20 @@ export default class PageFieldComponent {
 
   protected readonly resolvedFields = derivedFromDeferred(
     this.fieldsSource,
-    pipe(
-      switchMap((fields) => {
-        if (!fields || fields.length === 0) {
-          return of([] as (ResolvedField | undefined)[]);
-        }
-        const pageKey = this.field().key;
-        const context = {
-          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
-          registry: this.rawFieldRegistry(),
-          injector: this.injector,
-          destroyRef: this.destroyRef,
-          onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
-            const fieldKey = fieldDef.key || '<no key>';
-            this.logger.error(
-              `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
-                `within page '${pageKey}'. Ensure the field type is registered in your field registry.`,
-              error,
-            );
-          },
-        };
-        return forkJoin(fields.map((f) => resolveField(f as FieldDef<unknown>, context)));
-      }),
-      map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
-      scan(reconcileFields, [] as ResolvedField[]),
-    ),
+    createFieldResolutionPipe(() => ({
+      loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+      registry: this.rawFieldRegistry(),
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
+        const fieldKey = fieldDef.key || '<no key>';
+        this.logger.error(
+          `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            `within page '${this.field().key}'. Ensure the field type is registered in your field registry.`,
+          error,
+        );
+      },
+    })),
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 

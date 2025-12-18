@@ -1,6 +1,6 @@
 import { FieldDef } from '../definitions/base/field-def';
 import { Injector, Signal, WritableSignal } from '@angular/core';
-import { form } from '@angular/forms/signals';
+import { FieldTree } from '@angular/forms/signals';
 import { ValidationMessages } from '../models/validation-types';
 import { FormOptions } from '../models/form-config';
 
@@ -10,12 +10,15 @@ import { FormOptions } from '../models/form-config';
  *
  * Gives mappers and components access to form state, values, and configuration.
  * Container fields (Group, Array) create scoped contexts with nested forms.
+ *
+ * The `form` property uses Angular's FieldTree which includes Subfields<TModel>
+ * for type-safe child field access via bracket notation when TModel is a Record.
  */
-export interface FieldSignalContext<TModel = unknown> {
+export interface FieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>> {
   injector: Injector;
   value: WritableSignal<Partial<TModel> | undefined>;
   defaultValues: () => TModel;
-  form: ReturnType<typeof form<TModel>>;
+  form: FieldTree<TModel>;
   defaultValidationMessages?: ValidationMessages;
   /** Form-level options used by button mappers to determine disabled state defaults. */
   formOptions?: FormOptions;

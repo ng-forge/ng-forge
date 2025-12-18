@@ -35,19 +35,16 @@ import { FieldDef } from '../../definitions/base/field-def';
  *   `
  * })
  * export class FieldComponent {
- *   field: FieldDef<any>;
+ *   field: FieldDef<unknown>;
  *   getGridClassString = getGridClassString;
  * }
  * ```
  *
  * @public
  */
-export function getGridClassString(fieldDef: FieldDef<any>): string {
-  const classes: string[] = [];
-
-  if (typeof fieldDef.col === 'number' && fieldDef.col > 0 && fieldDef.col <= 12) {
-    classes.push(`df-col-${fieldDef.col}`);
+export function getGridClassString(fieldDef: FieldDef<unknown>): string {
+  if (typeof fieldDef.col === 'number' && Number.isInteger(fieldDef.col) && fieldDef.col > 0 && fieldDef.col <= 12) {
+    return `df-col-${fieldDef.col}`;
   }
-
-  return classes.join(' ');
+  return '';
 }

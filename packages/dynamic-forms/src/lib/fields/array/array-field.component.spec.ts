@@ -739,10 +739,8 @@ describe('ArrayFieldComponent', () => {
      * CRITICAL REGRESSION TESTS: These tests verify that the valueFieldMapper
      * produces the correct 'field' binding for array items.
      *
-     * The fix ensures that for schemaless forms (like array item forms),
-     * the mapper can find the field either through:
-     * 1. childrenMap (standard path for schema-based forms)
-     * 2. Direct property access (formRoot[key]) for schemaless forms
+     * The mapper finds the field through bracket notation (formRoot[key])
+     * which works for both schema-based and schemaless forms.
      *
      * If these tests fail, the array field rendering will break with NG0950 errors.
      */

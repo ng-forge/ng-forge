@@ -29,9 +29,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const emailFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('email').reader;
-        // Wrap fieldProxy in a signal to match the expected type Signal<FieldTree<T>>
-        const emailField = signal(emailFieldProxy);
+        const emailField = signal((testForm as Record<string, FieldTree<string>>)['email']);
 
         const fieldMessages = signal<ValidationMessages>({
           required: 'Field-level: Email is required',
@@ -61,8 +59,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const emailFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('email').reader;
-        const emailField = signal(emailFieldProxy);
+        const emailField = signal((testForm as Record<string, FieldTree<string>>)['email']);
 
         const fieldMessages = signal<ValidationMessages>({});
 
@@ -89,8 +86,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const emailFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('email').reader;
-        const emailField = signal(emailFieldProxy);
+        const emailField = signal((testForm as Record<string, FieldTree<string>>)['email']);
 
         const fieldMessages = signal<ValidationMessages>({});
         const defaultMessages = signal<ValidationMessages>({});
@@ -127,8 +123,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const passwordFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('password').reader;
-        const passwordField = signal(passwordFieldProxy);
+        const passwordField = signal((testForm as Record<string, FieldTree<string>>)['password']);
 
         // Field-level only has 'minLength'
         const fieldMessages = signal<ValidationMessages>({
@@ -166,8 +161,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const ageFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('age').reader;
-        const ageField = signal(ageFieldProxy);
+        const ageField = signal((testForm as Record<string, FieldTree<number>>)['age']);
 
         const fieldMessages = signal<ValidationMessages>({});
 
