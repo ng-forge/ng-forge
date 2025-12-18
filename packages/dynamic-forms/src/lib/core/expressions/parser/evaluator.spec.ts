@@ -307,6 +307,36 @@ describe('Evaluator', () => {
       expect(result).toBe(5);
     });
 
+    it('should return null for division by zero', () => {
+      const scope: EvaluationScope = {};
+      const evaluator = new Evaluator(scope, '10 / 0');
+      const ast: ASTNode = {
+        type: 'BinaryOp',
+        operator: '/',
+        left: { type: 'Literal', value: 10 },
+        right: { type: 'Literal', value: 0 },
+      };
+
+      const result = evaluator.evaluate(ast);
+
+      expect(result).toBe(null);
+    });
+
+    it('should return null for modulo by zero', () => {
+      const scope: EvaluationScope = {};
+      const evaluator = new Evaluator(scope, '10 % 0');
+      const ast: ASTNode = {
+        type: 'BinaryOp',
+        operator: '%',
+        left: { type: 'Literal', value: 10 },
+        right: { type: 'Literal', value: 0 },
+      };
+
+      const result = evaluator.evaluate(ast);
+
+      expect(result).toBe(null);
+    });
+
     it('should evaluate modulo', () => {
       const scope: EvaluationScope = {};
       const evaluator = new Evaluator(scope, '17 % 5');
@@ -653,62 +683,6 @@ describe('Evaluator', () => {
       const result = evaluator.evaluate(ast);
 
       expect(result).toBe(5);
-    });
-
-    it('should evaluate typeof on number', () => {
-      const scope: EvaluationScope = {};
-      const evaluator = new Evaluator(scope, 'typeof 42');
-      const ast: ASTNode = {
-        type: 'UnaryOp',
-        operator: 'typeof',
-        operand: { type: 'Literal', value: 42 },
-      };
-
-      const result = evaluator.evaluate(ast);
-
-      expect(result).toBe('number');
-    });
-
-    it('should evaluate typeof on string', () => {
-      const scope: EvaluationScope = {};
-      const evaluator = new Evaluator(scope, 'typeof "hello"');
-      const ast: ASTNode = {
-        type: 'UnaryOp',
-        operator: 'typeof',
-        operand: { type: 'Literal', value: 'hello' },
-      };
-
-      const result = evaluator.evaluate(ast);
-
-      expect(result).toBe('string');
-    });
-
-    it('should evaluate typeof on boolean', () => {
-      const scope: EvaluationScope = {};
-      const evaluator = new Evaluator(scope, 'typeof true');
-      const ast: ASTNode = {
-        type: 'UnaryOp',
-        operator: 'typeof',
-        operand: { type: 'Literal', value: true },
-      };
-
-      const result = evaluator.evaluate(ast);
-
-      expect(result).toBe('boolean');
-    });
-
-    it('should evaluate typeof on undefined', () => {
-      const scope: EvaluationScope = {};
-      const evaluator = new Evaluator(scope, 'typeof undefined');
-      const ast: ASTNode = {
-        type: 'UnaryOp',
-        operator: 'typeof',
-        operand: { type: 'Literal', value: undefined },
-      };
-
-      const result = evaluator.evaluate(ast);
-
-      expect(result).toBe('undefined');
     });
   });
 

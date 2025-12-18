@@ -1,5 +1,5 @@
 import { DestroyRef, Injector, runInInjectionContext, Signal, Type } from '@angular/core';
-import { catchError, from, map, Observable, of } from 'rxjs';
+import { catchError, forkJoin, from, map, Observable, of, OperatorFunction, pipe, scan, switchMap } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { mapFieldToInputs } from '../field-mapper/field-mapper';
@@ -91,4 +91,22 @@ export function reconcileFields(prev: ResolvedField[], curr: ResolvedField[]): R
     // New field or type changed - use new injector
     return field;
   });
+}
+
+/**
+ * Creates an RxJS pipe for resolving field definitions to rendered components.
+ * Used by container components (page, group) to resolve their child fields.
+ */
+export function createFieldResolutionPipe(getContext: () => ResolveFieldContext): OperatorFunction<FieldDef<unknown>[], ResolvedField[]> {
+  return pipe(
+    switchMap((fields) => {
+      if (!fields || fields.length === 0) {
+        return of([] as (ResolvedField | undefined)[]);
+      }
+      const context = getContext();
+      return forkJoin(fields.map((f) => resolveField(f, context)));
+    }),
+    map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
+    scan(reconcileFields, [] as ResolvedField[]),
+  );
 }

@@ -300,11 +300,11 @@ describe('Signal Forms Integration Types', () => {
       const config: SchemaApplicationConfig = {
         type: 'applyWhenValue',
         schema: 'stringValidation',
-        typePredicate: 'typeof value === "string"',
+        typePredicate: 'value && value.type === "text"',
       };
 
       expect(config.type).toBe('applyWhenValue');
-      expect(config.typePredicate).toBe('typeof value === "string"');
+      expect(config.typePredicate).toBe('value && value.type === "text"');
     });
 
     it('should create array item apply configuration', () => {

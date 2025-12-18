@@ -229,53 +229,6 @@ describe('getFieldDefaultValue', () => {
     });
   });
 
-  describe('defaultValue property', () => {
-    it('should use defaultValue when provided', () => {
-      const field: FieldDef<any> = {
-        type: 'input',
-        key: 'country',
-        defaultValue: 'USA',
-      };
-      const result = getFieldDefaultValue(field, registry);
-
-      expect(result).toBe('USA');
-    });
-
-    it('should prioritize defaultValue over value', () => {
-      const field: FieldDef<any> = {
-        type: 'input',
-        key: 'name',
-        value: 'John',
-        defaultValue: 'Default Name',
-      };
-      const result = getFieldDefaultValue(field, registry);
-
-      expect(result).toBe('Default Name');
-    });
-
-    it('should use defaultValue for checkbox', () => {
-      const field: FieldDef<any> = {
-        type: 'checkbox',
-        key: 'premium',
-        defaultValue: true,
-      };
-      const result = getFieldDefaultValue(field, registry);
-
-      expect(result).toBe(true);
-    });
-
-    it('should use defaultValue for arrays', () => {
-      const field: FieldDef<any> = {
-        type: 'array',
-        key: 'tags',
-        defaultValue: ['default', 'tags'],
-      };
-      const result = getFieldDefaultValue(field, registry);
-
-      expect(result).toEqual(['default', 'tags']);
-    });
-  });
-
   describe('value property', () => {
     it('should use value when provided', () => {
       const field: FieldDef<any> = {
@@ -394,7 +347,7 @@ describe('getFieldDefaultValue', () => {
             key: 'row1',
             fields: [
               { type: 'input', key: 'email' },
-              { type: 'checkbox', key: 'verified', defaultValue: true },
+              { type: 'checkbox', key: 'verified', value: true },
             ],
           },
           {

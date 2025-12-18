@@ -86,13 +86,12 @@ describe('getGridClassString', () => {
     }
   });
 
-  it('should handle decimal numbers by creating class with decimal value', () => {
-    const field: FieldDef<any> = { key: 'test', type: 'input', col: 6.5 };
+  it('should return empty string for decimal numbers', () => {
+    const field: FieldDef<unknown> = { key: 'test', type: 'input', col: 6.5 };
     const result = getGridClassString(field);
 
-    // 6.5 passes the validation (> 0 && <= 12) so it creates df-col-6.5
-    // Note: This may not be valid CSS, but that's the current implementation behavior
-    expect(result).toBe('df-col-6.5');
+    // Decimal values are rejected to ensure valid CSS class names
+    expect(result).toBe('');
   });
 
   it('should return empty string for NaN', () => {

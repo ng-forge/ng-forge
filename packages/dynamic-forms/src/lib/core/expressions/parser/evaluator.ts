@@ -176,10 +176,10 @@ export class Evaluator {
   }
 
   private evaluateIdentifier(name: string): unknown {
-    if (!(name in this.scope)) {
-      return undefined;
+    if (name in this.scope) {
+      return this.scope[name];
     }
-    return this.scope[name];
+    return undefined;
   }
 
   private evaluateMemberAccess(node: { object: ASTNode; property: string }): unknown {
@@ -207,6 +207,17 @@ export class Evaluator {
   }
 
   private evaluateBinaryOp(node: { operator: string; left: ASTNode; right: ASTNode }): unknown {
+    // Handle short-circuit evaluation for logical operators
+    if (node.operator === '&&') {
+      const left = this.evaluate(node.left);
+      return left ? this.evaluate(node.right) : left;
+    }
+    if (node.operator === '||') {
+      const left = this.evaluate(node.left);
+      return left ? left : this.evaluate(node.right);
+    }
+
+    // For all other operators, evaluate both sides
     const left = this.evaluate(node.left);
     const right = this.evaluate(node.right);
 
@@ -219,8 +230,10 @@ export class Evaluator {
       case '*':
         return (left as number) * (right as number);
       case '/':
+        if (right === 0) return null;
         return (left as number) / (right as number);
       case '%':
+        if (right === 0) return null;
         return (left as number) % (right as number);
 
       // Comparison - using == and != intentionally for loose equality
@@ -241,12 +254,6 @@ export class Evaluator {
       case '<=':
         return (left as number) <= (right as number);
 
-      // Logical
-      case '&&':
-        return left && right;
-      case '||':
-        return left || right;
-
       default:
         throw new ExpressionParserError(`[Dynamic Forms] Unknown binary operator: ${node.operator}`, 0, this.expression);
     }
@@ -262,8 +269,6 @@ export class Evaluator {
         return -(operand as number);
       case '+':
         return +(operand as number);
-      case 'typeof':
-        return typeof operand;
       default:
         throw new ExpressionParserError(`[Dynamic Forms] Unknown unary operator: ${node.operator}`, 0, this.expression);
     }
@@ -287,7 +292,7 @@ export class Evaluator {
       );
     }
 
-    // Check if the method is in the whitelist
+    // Check if the method is in the instance method whitelist
     if (!this.isMethodSafe(obj, methodName)) {
       throw new ExpressionParserError(`[Dynamic Forms] Method "${methodName}" is not allowed for security reasons`, 0, this.expression);
     }

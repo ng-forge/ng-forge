@@ -106,7 +106,7 @@ export class Parser {
   }
 
   private parseUnary(): ASTNode {
-    if (this.match(TokenType.NOT, TokenType.MINUS, TokenType.PLUS, TokenType.TYPEOF)) {
+    if (this.match(TokenType.NOT, TokenType.MINUS, TokenType.PLUS)) {
       const operator = this.previous().value;
       const operand = this.parseUnary();
       return { type: 'UnaryOp', operator, operand };

@@ -552,7 +552,7 @@ describe('schema-builder', () => {
       });
 
       it('should use explicit defaultValue when provided', () => {
-        const fields: FieldDef<any>[] = [{ type: 'input', key: 'name', defaultValue: 'Default' } as any];
+        const fields: FieldDef<any>[] = [{ type: 'input', key: 'name', value: 'Default' } as any];
         const result = fieldsToDefaultValues(fields, registry);
         expect(result).toEqual({ name: 'Default' });
       });

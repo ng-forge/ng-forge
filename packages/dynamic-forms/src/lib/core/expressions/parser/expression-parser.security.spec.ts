@@ -327,23 +327,6 @@ describe('ExpressionParser - Security Tests', () => {
       const result = ExpressionParser.evaluate('!!val', scope);
       expect(result).toBe(false);
     });
-
-    it('should handle typeof operator safely', () => {
-      const scope = {
-        obj: {},
-        arr: [],
-        func: () => {
-          /* empty */
-        },
-        str: 'test',
-        num: 42,
-      };
-      expect(ExpressionParser.evaluate('typeof obj', scope)).toBe('object');
-      expect(ExpressionParser.evaluate('typeof arr', scope)).toBe('object');
-      expect(ExpressionParser.evaluate('typeof func', scope)).toBe('function');
-      expect(ExpressionParser.evaluate('typeof str', scope)).toBe('string');
-      expect(ExpressionParser.evaluate('typeof num', scope)).toBe('number');
-    });
   });
 
   describe('Edge Cases and Boundary Conditions', () => {
