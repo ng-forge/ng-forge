@@ -1,4 +1,5 @@
-import { DynamicText, SliderField, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { SliderField } from '@ng-forge/dynamic-forms/integration';
 
 export interface BsSliderProps {
   showValue?: boolean;

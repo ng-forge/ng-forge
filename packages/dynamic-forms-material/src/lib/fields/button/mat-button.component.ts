@@ -5,12 +5,12 @@ import {
   ArrayItemContext,
   DynamicText,
   DynamicTextPipe,
-  EventArgs,
   EventBus,
   FormEvent,
   FormEventConstructor,
   resolveTokens,
 } from '@ng-forge/dynamic-forms';
+import { EventArgs } from '@ng-forge/dynamic-forms/integration';
 import { MatButtonComponent, MatButtonProps } from './mat-button.type';
 import { AsyncPipe } from '@angular/common';
 

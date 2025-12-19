@@ -1,4 +1,5 @@
-import { RadioField, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { RadioField } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicRadioProps<T> {
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';

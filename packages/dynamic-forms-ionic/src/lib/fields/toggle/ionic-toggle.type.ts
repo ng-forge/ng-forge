@@ -1,4 +1,5 @@
-import { CheckedFieldComponent, ToggleField } from '@ng-forge/dynamic-forms';
+import { CheckedFieldComponent } from '@ng-forge/dynamic-forms';
+import { ToggleField } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicToggleProps {
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';

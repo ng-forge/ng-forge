@@ -2,6 +2,33 @@
 
 Create custom UI integrations for ng-forge dynamic forms using any component library or design system.
 
+## Package Structure
+
+The `@ng-forge/dynamic-forms` package is organized into multiple entrypoints to keep the core abstract and provide specialized utilities for integration authors:
+
+| Entrypoint                            | Purpose                                                    |
+| ------------------------------------- | ---------------------------------------------------------- |
+| `@ng-forge/dynamic-forms`             | Core types, components, and configuration (for all users)  |
+| `@ng-forge/dynamic-forms/integration` | Field types, mappers, and utilities for UI library authors |
+| `@ng-forge/dynamic-forms/testing`     | Testing utilities for unit testing custom integrations     |
+
+When building a custom integration, you'll primarily import from the `/integration` entrypoint:
+
+```typescript
+// Core types (used by everyone)
+import { DynamicForm, provideDynamicForm, FormConfig, DynamicText } from '@ng-forge/dynamic-forms';
+
+// Integration utilities (for UI library authors)
+import {
+  InputField,
+  SelectField,
+  CheckboxField,
+  valueFieldMapper,
+  checkboxFieldMapper,
+  createResolvedErrorsSignal,
+} from '@ng-forge/dynamic-forms/integration';
+```
+
 ## Integration Overview
 
 UI integrations map field types to your components using `FieldTypeDefinition` objects. Each definition specifies the field type name, component loader, and mapper function.
@@ -13,7 +40,8 @@ UI integrations map field types to your components using `FieldTypeDefinition` o
 Create a type interface extending the base field type:
 
 ```typescript
-import { InputField, ValueFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
+import { InputField } from '@ng-forge/dynamic-forms/integration';
 
 // Define your custom props
 export interface CustomInputProps extends Record<string, unknown> {
@@ -93,7 +121,8 @@ export default class CustomInputFieldComponent implements CustomInputComponent {
 Define the field type registration:
 
 ```typescript
-import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 
 export const CustomInputType: FieldTypeDefinition = {
   name: 'input',
@@ -145,7 +174,8 @@ ng-forge provides component interface types for different field categories:
 For fields that collect user input (input, select, textarea, datepicker, radio, slider):
 
 ```typescript
-import { ValueFieldComponent, InputField } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { InputField } from '@ng-forge/dynamic-forms/integration';
 
 export type CustomInputComponent = ValueFieldComponent<CustomInputField>;
 ```
@@ -160,14 +190,15 @@ The component must implement these inputs:
 - `tabIndex?: number` - Tab order
 - `props?: TProps` - Custom field-specific props
 
-### CheckboxFieldComponent
+### CheckedFieldComponent
 
 For checkbox and toggle fields:
 
 ```typescript
-import { CheckboxFieldComponent, CheckboxField } from '@ng-forge/dynamic-forms';
+import { CheckedFieldComponent } from '@ng-forge/dynamic-forms';
+import { CheckboxField } from '@ng-forge/dynamic-forms/integration';
 
-export type CustomCheckboxComponent = CheckboxFieldComponent<CustomCheckboxField>;
+export type CustomCheckboxComponent = CheckedFieldComponent<CustomCheckboxField>;
 ```
 
 Similar to ValueFieldComponent but specifically for boolean checkbox fields.
@@ -204,7 +235,8 @@ Mappers convert field definitions to component input bindings. ng-forge provides
 For standard value-bearing fields:
 
 ```typescript
-import { FieldTypeDefinition, valueFieldMapper } from '@ng-forge/dynamic-forms';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 
 export const CustomInputType: FieldTypeDefinition = {
   name: 'input',
@@ -218,7 +250,8 @@ export const CustomInputType: FieldTypeDefinition = {
 For checkbox/toggle fields:
 
 ```typescript
-import { FieldTypeDefinition, checkboxFieldMapper } from '@ng-forge/dynamic-forms';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { checkboxFieldMapper } from '@ng-forge/dynamic-forms/integration';
 
 export const CustomCheckboxType: FieldTypeDefinition = {
   name: 'checkbox',
@@ -233,9 +266,10 @@ For specialized fields (like buttons), create custom mappers:
 
 ```typescript
 import { Binding, inputBinding } from '@angular/core';
-import { ButtonField } from '@ng-forge/dynamic-forms';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { ButtonField } from '@ng-forge/dynamic-forms/integration';
 
-export function buttonFieldMapper(fieldDef: ButtonField): Binding[] {
+export function buttonFieldMapper(fieldDef: ButtonField<unknown, unknown>): Binding[] {
   return [
     inputBinding('key', () => fieldDef.key),
     inputBinding('label', () => fieldDef.label),
@@ -296,7 +330,7 @@ This enables:
 **Use proper component interfaces:**
 
 - Implement `ValueFieldComponent<T>` for value fields
-- Implement `CheckboxFieldComponent<T>` for checkboxes
+- Implement `CheckedFieldComponent<T>` for checkboxes/toggles
 - Define clear prop interfaces
 
 **Leverage [field] binding:**

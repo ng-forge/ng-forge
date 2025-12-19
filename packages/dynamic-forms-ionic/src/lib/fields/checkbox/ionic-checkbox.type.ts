@@ -1,4 +1,5 @@
-import { CheckboxField, CheckedFieldComponent } from '@ng-forge/dynamic-forms';
+import { CheckedFieldComponent } from '@ng-forge/dynamic-forms';
+import { CheckboxField } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicCheckboxProps {
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';

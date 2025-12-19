@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { signal, computed } from '@angular/core';
-import { shouldShowErrors } from './should-show-errors';
+import { shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 
 // Mock FieldTree structure for testing
 function createMockFieldTree(invalid: boolean, touched: boolean, errorsCount: number) {
@@ -72,7 +72,7 @@ describe('shouldShowErrors', () => {
     // Create mutable signals for testing reactivity
     const invalidSignal = signal(false);
     const touchedSignal = signal(false);
-    const errorsSignal = signal<any[]>([]);
+    const errorsSignal = signal<unknown[]>([]);
 
     const field = signal(() => ({
       invalid: computed(() => invalidSignal()),
