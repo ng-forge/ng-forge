@@ -1,4 +1,10 @@
-export { delay } from './delay';
+export {
+  delay,
+  FakeTranslationService,
+  DEFAULT_TEST_TRANSLATIONS,
+  SPANISH_TEST_TRANSLATIONS,
+  createTestTranslationService,
+} from '@ng-forge/dynamic-forms/testing';
 export { waitForDFInit } from './wait-for-df';
 export {
   PrimeNGFormTestUtils,
@@ -6,9 +12,3 @@ export {
   type PrimeNGFormTestConfig,
   type PrimeNGFormTestResult,
 } from './primeng-test-utils';
-export {
-  FakeTranslationService,
-  DEFAULT_TEST_TRANSLATIONS,
-  SPANISH_TEST_TRANSLATIONS,
-  createTestTranslationService,
-} from './fake-translation.service';
