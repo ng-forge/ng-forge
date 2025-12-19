@@ -56,6 +56,40 @@ body[data-theme='light'] .logo-dark {
 }
 
 // ============================================
+// RESPONSIVE NAVBAR
+// ============================================
+// On very narrow screens, hide search and reduce spacing to make room for hamburger menu
+@media (max-width: 400px) {
+  ng-doc-navbar {
+    // Hide the search component on very narrow screens
+    ng-doc-search {
+      display: none !important;
+    }
+
+    // Reduce navbar padding
+    .navbar-container {
+      padding-inline: calc(var(--ng-doc-base-gutter) * 1) !important;
+    }
+  }
+}
+
+// ============================================
+// MOBILE SIDEBAR SCROLL FIX
+// ============================================
+// Fix sidebar scroll on iOS Safari where content gets cut off
+// due to safe area insets and browser chrome
+@media (max-width: 1024px) {
+  ng-doc-sidebar {
+    // Ensure sidebar wrapper can scroll fully on mobile
+    .ng-doc-side-bar-wrapper {
+      // Add padding at bottom to account for iOS safe area and ensure
+      // all content is accessible when scrolling
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px) !important;
+    }
+  }
+}
+
+// ============================================
 // IFRAME EXAMPLES
 // ============================================
 // PrimeNG and Ionic examples are loaded via iframes
