@@ -1,7 +1,5 @@
 import { ComponentFixture } from '@angular/core/testing';
-import { FormConfig } from '@ng-forge/dynamic-forms';
-import { FieldDef } from '@ng-forge/dynamic-forms';
-import { injectFieldRegistry } from '@ng-forge/dynamic-forms';
+import { FormConfig, FieldDef } from '@ng-forge/dynamic-forms';
 
 /**
  * Simple form configuration interface for testing
@@ -27,7 +25,6 @@ export interface TestConfig<T = Record<string, unknown>> {
 export interface TestResult<T = unknown> {
   component: T;
   fixture: ComponentFixture<T>;
-  fieldRegistry?: ReturnType<typeof injectFieldRegistry>;
 }
 
 /**

@@ -65,14 +65,13 @@ describe('DynamicFormTestUtils', () => {
     it('should create dynamic form test with test fields registered', async () => {
       const config = DynamicFormTestUtils.builder().inputField('username').build();
 
-      const { component, fixture, fieldRegistry } = await DynamicFormTestUtils.createTest({
+      const { component, fixture } = await DynamicFormTestUtils.createTest({
         config,
         initialValue: { username: 'test-user' },
       });
 
       expect(component).toBeDefined();
       expect(fixture).toBeDefined();
-      expect(fieldRegistry).toBeDefined();
       expect(component.formValue()).toEqual({ username: 'test-user' });
     });
 

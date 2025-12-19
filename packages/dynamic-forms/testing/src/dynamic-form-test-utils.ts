@@ -3,16 +3,16 @@ import { computed, Signal } from '@angular/core';
 import { ValidationError } from '@angular/forms/signals';
 import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DynamicForm } from '@ng-forge/dynamic-forms';
-import { FormConfig } from '@ng-forge/dynamic-forms';
-import { FieldDef } from '@ng-forge/dynamic-forms';
-import { InputField } from '@ng-forge/dynamic-forms/integration';
-import { SelectField } from '@ng-forge/dynamic-forms/integration';
-import { injectFieldRegistry } from '@ng-forge/dynamic-forms';
+import { DynamicForm, FormConfig, FieldDef, FieldTypeDefinition, BUILT_IN_FIELDS } from '@ng-forge/dynamic-forms';
+import { InputField, SelectField, checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { delay } from './delay';
-import { checkboxFieldMapper } from '@ng-forge/dynamic-forms/integration';
-import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
-import { BUILT_IN_FIELDS } from '@ng-forge/dynamic-forms';
+
+/**
+ * Internal interface for field registry operations needed by test utilities
+ */
+interface FieldRegistryWriter {
+  registerTypes(types: FieldTypeDefinition[]): void;
+}
 
 /**
  * Configuration for creating a dynamic form test
@@ -29,7 +29,6 @@ export interface DynamicFormTestConfig {
 export interface DynamicFormTestResult {
   component: DynamicForm;
   fixture: ComponentFixture<DynamicForm>;
-  fieldRegistry: ReturnType<typeof injectFieldRegistry>;
 }
 
 /**
@@ -139,7 +138,8 @@ export class DynamicFormTestUtils {
   static async createTest(testConfig: DynamicFormTestConfig): Promise<DynamicFormTestResult> {
     const fixture = TestBed.createComponent(DynamicForm);
     const component = fixture.componentInstance;
-    const fieldRegistry = component['fieldRegistry'] || TestBed.inject(injectFieldRegistry);
+    // Access fieldRegistry from the component instance (injected by Angular DI)
+    const fieldRegistry = component['fieldRegistry'] as FieldRegistryWriter;
 
     // Register test fields if requested
     if (testConfig.registerTestFields !== false) {
@@ -158,14 +158,14 @@ export class DynamicFormTestUtils {
     return {
       component: component as DynamicForm,
       fixture: fixture as ComponentFixture<DynamicForm>,
-      fieldRegistry,
     };
   }
 
   /**
    * Registers common test field types including built-in types like page, row, group
+   * @internal
    */
-  static registerTestFields(fieldRegistry: ReturnType<typeof injectFieldRegistry>): void {
+  private static registerTestFields(fieldRegistry: FieldRegistryWriter): void {
     // Input field mapper that extends value field mapper (returns Signal)
     const inputMapper = (fieldDef: FieldDef<any>): Signal<Record<string, unknown>> => {
       const baseInputsSignal = valueFieldMapper(fieldDef);

@@ -148,7 +148,7 @@ export type { ArrayContext, FieldSignalContext, MapperFn } from './mappers';
 
 // Field Type Definition - for registering custom field types
 export type { FieldTypeDefinition, ValueHandlingMode } from './models';
-export { FIELD_REGISTRY, getFieldValueHandling } from './models';
+export { FIELD_REGISTRY } from './models';
 
 // Signal Context - injection tokens for field components
 export { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from './models';
@@ -172,7 +172,6 @@ export type { ArrayFieldTree } from './core/field-tree-utils';
 export { EventBus, resolveTokens } from './events';
 
 // Registry Utilities
-export { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 export { BUILT_IN_FIELDS } from './providers';
 
 // Object utilities (used by integration mappers)
