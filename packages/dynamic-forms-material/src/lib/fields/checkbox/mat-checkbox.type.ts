@@ -1,4 +1,5 @@
-import { CheckboxField, CheckedFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
+import { CheckedFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
+import { CheckboxField } from '@ng-forge/dynamic-forms/integration';
 import { ThemePalette } from '@angular/material/core';
 
 export interface MatCheckboxProps {

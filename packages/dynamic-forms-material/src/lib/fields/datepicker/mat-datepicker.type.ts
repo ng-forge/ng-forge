@@ -1,4 +1,5 @@
-import { DatepickerField, DatepickerProps, DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DatepickerField, DatepickerProps } from '@ng-forge/dynamic-forms/integration';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
 export interface MatDatepickerProps extends DatepickerProps {

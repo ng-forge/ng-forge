@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { FunctionRegistryService } from './function-registry.service';
-import { createSilentLogger } from '../../testing/mock-logger';
+import { createSilentLogger } from '@ng-forge/dynamic-forms/testing';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.interface';
 
 describe('FunctionRegistryService', () => {

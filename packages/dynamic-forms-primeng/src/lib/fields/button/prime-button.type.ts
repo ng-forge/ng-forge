@@ -1,4 +1,5 @@
-import { ButtonField, FieldComponent, FieldDef, FormEvent, LogicConfig } from '@ng-forge/dynamic-forms';
+import { FieldComponent, FieldDef, FormEvent, LogicConfig } from '@ng-forge/dynamic-forms';
+import { ButtonField } from '@ng-forge/dynamic-forms/integration';
 
 export interface PrimeButtonProps {
   severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';

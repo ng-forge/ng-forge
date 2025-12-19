@@ -1,10 +1,5 @@
-import {
-  checkboxFieldMapper,
-  datepickerFieldMapper,
-  FieldTypeDefinition,
-  optionsFieldMapper,
-  valueFieldMapper,
-} from '@ng-forge/dynamic-forms';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { checkboxFieldMapper, datepickerFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { PrimeField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/prime-button.mapper';
 import {

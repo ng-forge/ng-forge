@@ -1,10 +1,5 @@
-import {
-  checkboxFieldMapper,
-  datepickerFieldMapper,
-  FieldTypeDefinition,
-  optionsFieldMapper,
-  valueFieldMapper,
-} from '@ng-forge/dynamic-forms';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { checkboxFieldMapper, datepickerFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { MatField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/mat-button.mapper';
 import {

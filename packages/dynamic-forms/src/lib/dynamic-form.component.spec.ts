@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { DynamicForm } from './dynamic-form.component';
-import { delay, SimpleTestUtils, TestCheckboxHarnessComponent, TestInputHarnessComponent } from './testing';
+import { delay, SimpleTestUtils, TestCheckboxHarnessComponent, TestInputHarnessComponent } from '@ng-forge/dynamic-forms/testing';
 import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
-import { checkboxFieldMapper, valueFieldMapper } from './mappers';
+import { checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS } from './providers/built-in-fields';
 import { BaseCheckedField, BaseValueField } from './definitions';
 import { DebugElement } from '@angular/core';
@@ -24,12 +24,12 @@ type TestFormConfig = {
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: 'input',
-    loadComponent: () => import('./testing/harnesses/test-input.harness'),
+    loadComponent: () => import('@ng-forge/dynamic-forms/testing').then((m) => m.TestInputHarnessComponent),
     mapper: valueFieldMapper,
   },
   {
     name: 'checkbox',
-    loadComponent: () => import('./testing/harnesses/test-checkbox.harness'),
+    loadComponent: () => import('@ng-forge/dynamic-forms/testing').then((m) => m.TestCheckboxHarnessComponent),
     mapper: checkboxFieldMapper,
   },
 ];

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { DynamicForm, FormConfig, FormEvent, provideDynamicForm, RegisteredFieldTypes, TextareaField } from '@ng-forge/dynamic-forms';
+import { DynamicForm, FormConfig, FormEvent, provideDynamicForm, RegisteredFieldTypes } from '@ng-forge/dynamic-forms';
+import { TextareaField } from '@ng-forge/dynamic-forms/integration';
 import { delay } from './delay';
 import { waitForDFInit } from './wait-for-df';
 import { withBootstrapFields } from '../providers/bootstrap-providers';

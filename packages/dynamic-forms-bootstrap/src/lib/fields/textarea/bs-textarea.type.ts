@@ -1,4 +1,5 @@
-import { DynamicText, TextareaField, TextareaProps, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { TextareaField, TextareaProps } from '@ng-forge/dynamic-forms/integration';
 
 export interface BsTextareaProps extends TextareaProps {
   rows?: number;

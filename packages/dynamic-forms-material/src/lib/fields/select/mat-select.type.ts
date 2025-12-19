@@ -1,5 +1,6 @@
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
-import { DynamicText, SelectField, SelectProps, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
 export interface MatSelectProps<T> extends SelectProps {
   appearance?: MatFormFieldAppearance;

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { map, pipe, scan } from 'rxjs';
 import { derivedFromDeferred } from './derived-from-deferred';
-import { delay } from '../../testing/delay';
+import { delay } from '@ng-forge/dynamic-forms/testing';
 
 describe('derivedFromDeferred', () => {
   let injector: Injector;

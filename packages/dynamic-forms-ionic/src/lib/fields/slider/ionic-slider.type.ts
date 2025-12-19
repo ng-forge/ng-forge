@@ -1,4 +1,5 @@
-import { SliderField, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { SliderField } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicSliderProps {
   min?: number;
