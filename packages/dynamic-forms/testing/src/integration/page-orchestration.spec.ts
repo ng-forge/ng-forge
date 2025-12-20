@@ -199,9 +199,10 @@ describe('Page Orchestration Integration', () => {
       await DynamicFormTestUtils.waitForInit(testResult.fixture);
 
       expect(pageChangeEvent).toBeTruthy();
-      expect(pageChangeEvent!.currentPageIndex).toBe(1);
-      expect(pageChangeEvent!.totalPages).toBe(2);
-      expect(pageChangeEvent!.previousPageIndex).toBe(0);
+      if (!pageChangeEvent) throw new Error('Expected pageChangeEvent to be defined');
+      expect(pageChangeEvent.currentPageIndex).toBe(1);
+      expect(pageChangeEvent.totalPages).toBe(2);
+      expect(pageChangeEvent.previousPageIndex).toBe(0);
     });
 
     it('should handle navigation boundary constraints', async () => {

@@ -50,4 +50,6 @@ type ExcludedKeys =
   | 'logic'
   | 'schemas';
 
-export type ValueFieldComponent<T extends BaseValueField<any, unknown>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;
+export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown> | unknown, unknown>> = Prettify<
+  WithInputSignals<Omit<T, ExcludedKeys>>
+>;

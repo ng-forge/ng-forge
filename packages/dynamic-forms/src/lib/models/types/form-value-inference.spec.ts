@@ -39,6 +39,7 @@ const smallForm = {
 type SmallFormValue = InferFormValue<typeof smallForm>;
 
 // Verify small form inference
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
 type _SmallFormTests = [
   Expect<Equal<SmallFormValue['firstName'], string>>,
   Expect<Equal<SmallFormValue['lastName'], string>>,
@@ -99,6 +100,7 @@ const mediumForm = {
 type MediumFormValue = InferFormValue<typeof mediumForm>;
 
 // Verify key fields
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
 type _MediumFormTests = [
   Expect<Equal<MediumFormValue['firstName'], string>>,
   Expect<Equal<MediumFormValue['age'], number>>,
@@ -204,6 +206,7 @@ const largeForm = {
 type LargeFormValue = InferFormValue<typeof largeForm>;
 
 // Verify large form inference including nested groups
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
 type _LargeFormTests = [
   // Top level (flattened from pages)
   Expect<Equal<LargeFormValue['firstName'], string>>,
@@ -335,6 +338,7 @@ const stressForm = {
 type StressFormValue = InferFormValue<typeof stressForm>;
 
 // Verify stress form inference
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
 type _StressFormTests = [
   Expect<Equal<StressFormValue['f01'], string | undefined>>,
   Expect<Equal<StressFormValue['f50'], string | undefined>>,
@@ -615,6 +619,7 @@ const hugeNestedForm = {
 type HugeNestedFormValue = InferFormValue<typeof hugeNestedForm>;
 
 // Verify huge nested form inference
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
 type _HugeNestedFormTests = [
   // Top level (flattened from pages and rows)
   Expect<Equal<HugeNestedFormValue['firstName'], string>>,
@@ -656,6 +661,7 @@ type _HugeNestedFormTests = [
 
 describe('InferFormValue type inference', () => {
   it('should correctly infer small form value types', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
     type Result = SmallFormValue;
     // Type-level assertions are checked at compile time
     // Runtime check just ensures the config is valid
@@ -663,26 +669,31 @@ describe('InferFormValue type inference', () => {
   });
 
   it('should correctly infer medium form value types', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
     type Result = MediumFormValue;
     expect(mediumForm.fields.length).toBeGreaterThan(0);
   });
 
   it('should correctly infer large form value types with nesting', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
     type Result = LargeFormValue;
     expect(largeForm.fields.length).toBeGreaterThan(0);
   });
 
   it('should handle stress test with 100 fields', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
     type Result = StressFormValue;
     expect(stressForm.fields.length).toBe(100);
   });
 
   it('should handle huge nested form with 5 pages and deep nesting', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
     type Result = HugeNestedFormValue;
     // 5 pages
     expect(hugeNestedForm.fields.length).toBe(5);
     // Verify deep nesting works (group inside group)
     type NestedAddress = HugeNestedFormValue['currentEmployment']['employerAddress'];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
     type _NestedTest = Expect<Equal<NestedAddress['street1'], string | undefined>>;
   });
 
@@ -692,6 +703,7 @@ describe('InferFormValue type inference', () => {
     } as const satisfies FormConfig;
 
     type Value = InferFormValue<typeof config>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
     type _Test = Expect<Equal<Value['age'], number>>;
 
     expect(config.fields[0].props.type).toBe('number');
@@ -703,6 +715,7 @@ describe('InferFormValue type inference', () => {
     } as const satisfies FormConfig;
 
     type Value = InferFormValue<typeof config>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
     type _Test = Expect<Equal<Value['rating'], number>>;
 
     expect(config.fields[0].type).toBe('slider');
@@ -717,6 +730,7 @@ describe('InferFormValue type inference', () => {
     } as const satisfies FormConfig;
 
     type Value = InferFormValue<typeof config>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test for compile-time verification
     type _Tests = [Expect<Equal<Value['required'], string>>, Expect<Equal<Value['optional'], string | undefined>>];
 
     expect(config.fields[0].required).toBe(true);

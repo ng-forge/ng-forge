@@ -408,9 +408,9 @@ describe('FunctionRegistryService', () => {
   describe('registerAsyncValidator', () => {
     it('should register an async validator', () => {
       const asyncValidator = {
-        params: vi.fn((ctx: any) => ({ value: ctx.value() })),
-        factory: vi.fn(),
-        onSuccess: vi.fn((result: any) => null),
+        params: vi.fn((ctx: unknown) => ({ value: (ctx as { value: () => unknown }).value() })),
+        factory: vi.fn() as any,
+        onSuccess: vi.fn(() => null),
       };
 
       service.registerAsyncValidator('asyncTest', asyncValidator);
@@ -488,8 +488,8 @@ describe('FunctionRegistryService', () => {
   describe('registerHttpValidator', () => {
     it('should register an HTTP validator', () => {
       const httpValidator = {
-        request: vi.fn((ctx: any) => `/api/check?value=${ctx.value()}`),
-        onSuccess: vi.fn((result: any) => null),
+        request: vi.fn((ctx: unknown) => `/api/check?value=${(ctx as { value: () => unknown }).value()}`),
+        onSuccess: vi.fn(() => null),
       };
 
       service.registerHttpValidator('httpTest', httpValidator);
@@ -518,10 +518,10 @@ describe('FunctionRegistryService', () => {
 
     it('should handle HTTP validators with POST method', () => {
       const postValidator = {
-        request: vi.fn((ctx: any) => ({
+        request: vi.fn((ctx: unknown) => ({
           url: '/api/validate',
           method: 'POST' as const,
-          body: { value: ctx.value() },
+          body: { value: (ctx as { value: () => unknown }).value() },
         })),
         onSuccess: vi.fn(),
       };

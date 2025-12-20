@@ -7,7 +7,6 @@ import { SchemaApplicationConfig } from '../../models/schemas/schema-definition'
 import { hasChildFields } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
 import {
-  isCrossFieldExpression,
   isCrossFieldValidator,
   isCrossFieldBuiltInValidator,
   hasCrossFieldWhenCondition,
@@ -166,7 +165,10 @@ function tryCreateSchemaEntry(fieldKey: string, config: SchemaApplicationConfig)
 
 /** Converts a built-in validator with cross-field expression to a custom validator. */
 function convertBuiltInToCustomValidator(config: BuiltInValidatorConfig): CustomValidatorConfig {
-  const expression = config.expression!;
+  const expression = config.expression;
+  if (!expression) {
+    throw new Error(`Built-in validator ${config.type} missing required expression for cross-field conversion`);
+  }
   let validationExpression: string;
 
   switch (config.type) {

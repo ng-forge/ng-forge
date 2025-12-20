@@ -106,6 +106,7 @@ export class PageOrchestratorComponent {
   /**
    * Field signal context for child fields
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- FieldSignalContext is contravariant in TModel, using any allows accepting any form type
   fieldSignalContext = input.required<FieldSignalContext<any>>();
 
   /**
@@ -198,7 +199,7 @@ export class PageOrchestratorComponent {
       const fieldKey = fieldDef.key;
       if (!fieldKey) continue;
 
-      // Access the field from the form using dynamic key access
+      // Access the field from the form using bracket notation
       const field = (form as Record<string, unknown>)[fieldKey];
       if (field && typeof field === 'function') {
         const fieldState = (field as () => { valid: () => boolean })();
@@ -389,7 +390,7 @@ export class PageOrchestratorComponent {
 
     // Check each hidden logic - if ANY condition is true, the page is hidden
     for (const logic of hiddenLogic) {
-      // Handle static boolean conditions
+      // Handle static boolean conditions (fast path)
       if (typeof logic.condition === 'boolean') {
         if (logic.condition) {
           return true;

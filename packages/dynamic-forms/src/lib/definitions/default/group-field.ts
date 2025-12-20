@@ -22,6 +22,7 @@ export interface GroupField<TFields extends readonly GroupAllowedChildren[] = re
 /**
  * Type guard for GroupField with proper type narrowing
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Type guard must accept any field type
 export function isGroupField(field: FieldDef<any>): field is GroupField {
   return field.type === 'group' && 'fields' in field;
 }

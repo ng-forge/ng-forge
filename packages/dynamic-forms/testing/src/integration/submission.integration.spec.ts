@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { form, schema, submit, FieldTree, TreeValidationResult } from '@angular/forms/signals';
+import { form, submit, FieldTree, TreeValidationResult } from '@angular/forms/signals';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 import { FormConfig, SubmissionConfig } from '../../models';
-import { delay, firstValueFrom, isObservable, of, timer } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { firstValueFrom, isObservable, of, timer } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 describe('Form Submission Integration', () => {
   let injector: Injector;
@@ -23,8 +23,7 @@ describe('Form Submission Integration', () => {
   describe('SubmissionConfig Interface', () => {
     it('should define a valid submission config with Promise action', () => {
       const submissionConfig: SubmissionConfig<{ email: string }> = {
-        action: async (form) => {
-          const value = form().value();
+        action: async () => {
           // Simulate API call
           await new Promise((resolve) => setTimeout(resolve, 10));
           return undefined; // No errors
@@ -37,8 +36,7 @@ describe('Form Submission Integration', () => {
 
     it('should define a valid submission config with Observable action', () => {
       const submissionConfig: SubmissionConfig<{ email: string }> = {
-        action: (form) => {
-          const value = form().value();
+        action: () => {
           // Simulate HTTP call returning Observable
           return timer(10).pipe(map(() => undefined));
         },
@@ -67,7 +65,6 @@ describe('Form Submission Integration', () => {
     it('should allow Promise submission config to return server errors', () => {
       const submissionConfig: SubmissionConfig<{ username: string }> = {
         action: async (form) => {
-          const value = form().value();
           // Simulate server validation error
           return [
             {
@@ -290,7 +287,7 @@ describe('Form Submission Integration', () => {
           { type: 'submit', key: 'submit', label: 'Submit' },
         ],
         submission: {
-          action: async (form) => {
+          action: async () => {
             return undefined;
           },
         },
@@ -307,7 +304,7 @@ describe('Form Submission Integration', () => {
           { type: 'submit', key: 'submit', label: 'Submit' },
         ],
         submission: {
-          action: (form) => of(undefined),
+          action: () => of(undefined),
         },
       };
 

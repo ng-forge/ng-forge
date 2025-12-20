@@ -232,4 +232,4 @@ type IncludedKeys = 'label' | 'className' | 'hidden' | 'tabIndex';
  *
  * @public
  */
-export type FieldComponent<T extends FieldDef<any>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;
+export type FieldComponent<T extends FieldDef<Record<string, unknown> | unknown>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;

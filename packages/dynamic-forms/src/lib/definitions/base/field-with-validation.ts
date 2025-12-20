@@ -1,7 +1,6 @@
 import { ValidatorConfig } from '../../models/validation';
 import { LogicConfig } from '../../models/logic';
 import { SchemaApplicationConfig } from '../../models/schemas';
-import { ConditionalExpression } from '../../models/expressions';
 import { ValidationMessages } from '../../models/validation-types';
 
 export interface FieldWithValidation {

@@ -6,13 +6,20 @@ import { RegisteredFieldTypes } from '../registry/field-registry';
 export { isPageField };
 
 /**
+ * Interface for fields that contain child fields
+ */
+interface ContainerField<T> extends FieldDef<T> {
+  fields: FieldDef<unknown>[];
+}
+
+/**
  * Type guard to check if a field is a container with fields
  */
-function isContainerWithFields(field: FieldDef<any>): field is FieldDef<any> & { fields: FieldDef<any>[] } {
+function isContainerWithFields<T>(field: FieldDef<T>): field is FieldDef<T> & ContainerField<T> {
   return (
     (field.type === 'row' || field.type === 'group' || field.type === 'page') &&
     'fields' in field &&
-    Array.isArray((field as FieldDef<any> & { fields: FieldDef<any>[] }).fields)
+    Array.isArray((field as ContainerField<T>).fields)
   );
 }
 
@@ -116,7 +123,7 @@ export function detectFormMode<TFields extends RegisteredFieldTypes[]>(fields: T
  * @param fields Array of field definitions to check
  * @returns true if any page field is found at any level
  */
-function hasAnyPageFields(fields: FieldDef<any>[]): boolean {
+function hasAnyPageFields(fields: FieldDef<unknown>[]): boolean {
   for (const field of fields) {
     if (isPageField(field)) {
       return true;
@@ -138,7 +145,7 @@ function hasAnyPageFields(fields: FieldDef<any>[]): boolean {
  * @param fields Array of field definitions to check
  * @returns true if nested page fields found
  */
-function hasNestedPageFields(fields: FieldDef<any>[]): boolean {
+function hasNestedPageFields(fields: FieldDef<unknown>[]): boolean {
   for (const field of fields) {
     // If this is a page field, check if its children contain pages
     if (isPageField(field) && isContainerWithFields(field)) {

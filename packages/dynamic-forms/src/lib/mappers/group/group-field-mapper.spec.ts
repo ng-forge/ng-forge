@@ -1,14 +1,10 @@
-import { Injector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { groupFieldMapper } from './group-field-mapper';
 import { GroupField } from '../../definitions';
 
 describe('groupFieldMapper', () => {
-  let injector: Injector;
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({}).compileComponents();
-    injector = TestBed.inject(Injector);
   });
 
   it('should create inputs object with key and field for minimal group field', () => {

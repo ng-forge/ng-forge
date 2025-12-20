@@ -6,6 +6,76 @@ import { FunctionRegistryService } from '../registry/function-registry.service';
 import { evaluateCondition } from './condition-evaluator';
 
 /**
+ * Cache key combining both services to represent the injection context.
+ */
+interface InjectionContextKey {
+  functionRegistry: FunctionRegistryService;
+  fieldContextRegistry: FieldContextRegistryService;
+}
+
+/**
+ * Cache for memoized logic functions, keyed by injection context.
+ * Uses WeakMap with FunctionRegistryService as outer key to automatically clean up.
+ * Inner structure: Map<FieldContextRegistryService, Map<expressionKey, LogicFn>>
+ */
+const logicFunctionCache = new WeakMap<
+  FunctionRegistryService,
+  WeakMap<FieldContextRegistryService, Map<string, LogicFn<unknown, boolean>>>
+>();
+
+/**
+ * Serializes a value to a deterministic string for cache key generation.
+ * Unlike JSON.stringify, this sorts object keys to ensure consistent output
+ * regardless of property insertion order.
+ */
+function stableStringify(value: unknown): string {
+  if (value === null || value === undefined) {
+    return String(value);
+  }
+
+  if (typeof value !== 'object') {
+    return JSON.stringify(value);
+  }
+
+  if (Array.isArray(value)) {
+    return '[' + value.map(stableStringify).join(',') + ']';
+  }
+
+  const obj = value as Record<string, unknown>;
+  const sortedKeys = Object.keys(obj).sort();
+  const pairs = sortedKeys.map((key) => JSON.stringify(key) + ':' + stableStringify(obj[key]));
+  return '{' + pairs.join(',') + '}';
+}
+
+/**
+ * Serializes a conditional expression to a deterministic string key for caching.
+ * Uses stable stringification to ensure equivalent objects produce the same key
+ * regardless of property order.
+ */
+function serializeExpression(expression: ConditionalExpression): string {
+  return stableStringify(expression);
+}
+
+/**
+ * Gets or creates the cache map for a specific injection context.
+ */
+function getContextCache(ctx: InjectionContextKey): Map<string, LogicFn<unknown, boolean>> {
+  let outerCache = logicFunctionCache.get(ctx.functionRegistry);
+  if (!outerCache) {
+    outerCache = new WeakMap();
+    logicFunctionCache.set(ctx.functionRegistry, outerCache);
+  }
+
+  let innerCache = outerCache.get(ctx.fieldContextRegistry);
+  if (!innerCache) {
+    innerCache = new Map();
+    outerCache.set(ctx.fieldContextRegistry, innerCache);
+  }
+
+  return innerCache;
+}
+
+/**
  * Create a logic function from a conditional expression.
  *
  * This function is used for creating logic functions for hidden, readonly, disabled, and required.
@@ -16,17 +86,36 @@ import { evaluateCondition } from './condition-evaluator';
  * NOTE: For validators, use createEvaluationContext directly (with untracked) to prevent
  * infinite reactive loops. Validators with cross-field dependencies should be hoisted
  * to form-level using validateTree.
+ *
+ * @param expression The conditional expression to evaluate
+ * @returns A LogicFn that evaluates the condition in the context of a field
  */
 export function createLogicFunction<TValue>(expression: ConditionalExpression): LogicFn<TValue, boolean> {
   // Inject services during factory creation, not during execution
   const functionRegistry = inject(FunctionRegistryService);
   const fieldContextRegistry = inject(FieldContextRegistryService);
 
-  return (ctx: FieldContext<TValue>) => {
+  // Get cache for this injection context
+  const contextCache = getContextCache({ functionRegistry, fieldContextRegistry });
+
+  // Generate cache key from serialized expression
+  const cacheKey = serializeExpression(expression);
+
+  // Check cache first
+  const cached = contextCache.get(cacheKey);
+  if (cached) {
+    return cached as LogicFn<TValue, boolean>;
+  }
+
+  const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
     // Create REACTIVE evaluation context for logic functions
     // This allows logic to re-evaluate when dependent fields change
     const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
 
     return evaluateCondition(expression, evaluationContext);
   };
+
+  // Cache the function
+  contextCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  return fn;
 }

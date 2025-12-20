@@ -24,6 +24,7 @@ export interface RowField<TFields extends readonly RowAllowedChildren[] = readon
 /**
  * Type guard for RowField with proper type narrowing
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Type guard must accept any field type
 export function isRowField(field: FieldDef<any>): field is RowField {
   return field.type === 'row' && 'fields' in field && Array.isArray((field as RowField).fields);
 }

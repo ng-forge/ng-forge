@@ -24,27 +24,12 @@ import { FieldDef } from '../../definitions/base/field-def';
  * // Returns: ''
  * ```
  *
- * @example
- * ```typescript
- * // Usage in component template
- * @Component({
- *   template: `
- *     <div [class]="getGridClassString(field)" class="form-field">
- *       <!-- Field content -->
- *     </div>
- *   `
- * })
- * export class FieldComponent {
- *   field: FieldDef<unknown>;
- *   getGridClassString = getGridClassString;
- * }
- * ```
- *
  * @public
  */
 export function getGridClassString(fieldDef: FieldDef<unknown>): string {
-  if (typeof fieldDef.col === 'number' && Number.isInteger(fieldDef.col) && fieldDef.col > 0 && fieldDef.col <= 12) {
-    return `df-col-${fieldDef.col}`;
+  const col = fieldDef.col;
+  if (typeof col === 'number' && Number.isInteger(col) && col > 0 && col <= 12) {
+    return `df-col-${col}`;
   }
   return '';
 }

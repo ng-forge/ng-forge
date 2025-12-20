@@ -55,6 +55,7 @@ export interface ArrayField<TFields extends readonly ArrayAllowedChildren[] = re
 /**
  * Type guard for ArrayField with proper type narrowing
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Type guard must accept any field type
 export function isArrayField(field: FieldDef<any>): field is ArrayField {
   return field.type === 'array' && 'fields' in field;
 }

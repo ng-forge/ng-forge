@@ -117,11 +117,11 @@ export function memoize<TFunc extends (...args: any[]) => any>(
   return ((...args: Parameters<TFunc>): ReturnType<TFunc> => {
     const key = resolver ? resolver(...args) : JSON.stringify(args);
 
-    if (cache.has(key)) {
-      const value = cache.get(key)!;
+    const cachedValue = cache.get(key);
+    if (cachedValue !== undefined) {
       cache.delete(key);
-      cache.set(key, value);
-      return value;
+      cache.set(key, cachedValue);
+      return cachedValue;
     }
 
     const result = fn(...args);

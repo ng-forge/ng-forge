@@ -35,7 +35,7 @@ function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): Fiel
  * @param crossFieldValidators Optional array of collected cross-field validators
  */
 export function createSchemaFromFields<TModel = unknown>(
-  fields: FieldDef<any>[],
+  fields: FieldDef<unknown>[],
   registry: Map<string, FieldTypeDefinition>,
   crossFieldValidators?: CrossFieldValidatorEntry[],
 ): Schema<TModel> {
@@ -58,7 +58,7 @@ export function createSchemaFromFields<TModel = unknown>(
         for (const childField of normalizeFieldsArray(fieldDef.fields)) {
           if (!childField.key) continue;
 
-          const childPath = path[childField.key as keyof typeof path] as SchemaPath<unknown>;
+          const childPath = (path as Record<string, SchemaPath<unknown>>)[childField.key];
           if (childPath) {
             mapFieldToForm(childField, childPath);
           }
@@ -67,7 +67,7 @@ export function createSchemaFromFields<TModel = unknown>(
       }
 
       // Regular field processing for 'include' fields
-      const fieldPath = path[fieldDef.key as keyof typeof path] as SchemaPath<unknown>;
+      const fieldPath = (path as Record<string, SchemaPath<unknown>>)[fieldDef.key];
 
       if (!fieldPath) {
         continue;
@@ -377,7 +377,7 @@ function applyBuiltInValidationLogic(config: ValidatorConfig, fieldValue: unknow
 /**
  * Utility to convert field definitions to default values object
  */
-export function fieldsToDefaultValues<TModel = unknown>(fields: FieldDef<any>[], registry: Map<string, FieldTypeDefinition>): TModel {
+export function fieldsToDefaultValues<TModel = unknown>(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>): TModel {
   const defaultValues: Record<string, unknown> = {};
 
   for (const field of fields) {

@@ -1,4 +1,4 @@
-> Prerequisites: [Installation](../installation)
+> Prerequisites: [Installation](../../installation)
 
 Configure ng-forge dynamic forms behavior at the application level using provider features.
 
