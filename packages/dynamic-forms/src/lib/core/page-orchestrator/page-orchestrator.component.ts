@@ -113,11 +113,6 @@ export class PageOrchestratorComponent {
    * Computed signal that tracks which pages are hidden.
    * Returns an array of booleans where true means the page is hidden.
    * This signal is reactive and will re-evaluate when form values change.
-   *
-   * Optimizations:
-   * - Caches filtered hidden logic per page to avoid repeated filtering
-   * - Caches custom functions to avoid repeated registry lookups
-   * - Clears caches when page fields change
    */
   readonly pageHiddenStates = computed(() => {
     const pages = this.pageFields();
@@ -375,11 +370,6 @@ export class PageOrchestratorComponent {
   /**
    * Evaluates whether a page should be hidden based on its logic configuration.
    * A page is hidden if ANY of its hidden logic conditions evaluate to true.
-   *
-   * Optimizations:
-   * - Uses cached hidden logic per page (avoids filtering on every call)
-   * - Reuses pre-fetched custom functions (avoids registry lookup per page)
-   * - Creates context object once per page evaluation
    *
    * @param page The page field to evaluate
    * @returns true if the page should be hidden, false otherwise

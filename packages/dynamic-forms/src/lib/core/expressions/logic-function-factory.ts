@@ -83,11 +83,6 @@ function getContextCache(ctx: InjectionContextKey): Map<string, LogicFn<unknown,
  * reactive dependencies on form values. When dependent fields change, the logic function
  * will be automatically re-evaluated.
  *
- * Optimizations:
- * - Caches created functions by serialized expression per injection context
- * - Services are injected at creation time, not execution time
- * - Uses WeakMap for automatic cleanup when services are garbage collected
- *
  * NOTE: For validators, use createEvaluationContext directly (with untracked) to prevent
  * infinite reactive loops. Validators with cross-field dependencies should be hoisted
  * to form-level using validateTree.
