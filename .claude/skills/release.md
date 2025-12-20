@@ -1,142 +1,142 @@
 ---
 name: release
-description: Prepare and publish releases for ng-forge dynamic forms libraries. Use when doing a release, preparing a patch, minor, or major version, bumping versions, or creating release pull requests.
+description: Prepare a release PR for ng-forge dynamic forms libraries. Use when the user asks to prepare, create, or start a release.
 ---
 
 # Release Skill
 
-This skill guides the preparation of a new release for the ng-forge dynamic forms libraries.
+Prepares a release PR for the ng-forge dynamic forms libraries, including version bumps and changelog.
 
-## Quick Reference
+## Required User Input
 
-**TL;DR - Release in 3 steps:**
+The user **must** provide the target version number (e.g., `0.1.3`, `0.2.0`, `1.0.0`).
 
-1. **Create branch**: `git checkout -b release-{VERSION}` from main
-2. **Update versions**: Edit all `packages/*/package.json` to set new version (including inter-package dependencies), commit, push
-3. **Trigger workflow**: Actions → Release → Run workflow on the release branch
+If the user doesn't specify a version, ask them:
 
-## Packages
+> What version should this release be? (current: {current_version})
 
-The following packages are released together (fixed versioning):
+To find the current version, check `packages/dynamic-forms/package.json`.
 
-- `@ng-forge/dynamic-forms` - Core library
-- `@ng-forge/dynamic-forms-material` - Material Design integration
-- `@ng-forge/dynamic-forms-bootstrap` - Bootstrap integration
-- `@ng-forge/dynamic-forms-primeng` - PrimeNG integration
-- `@ng-forge/dynamic-forms-ionic` - Ionic integration
+## Packages (Fixed Versioning)
 
-## Release Process
+All packages are released together with the same version:
 
-### Step 1: Create Release Branch
+- `@ng-forge/dynamic-forms` (core)
+- `@ng-forge/dynamic-forms-bootstrap`
+- `@ng-forge/dynamic-forms-ionic`
+- `@ng-forge/dynamic-forms-material`
+- `@ng-forge/dynamic-forms-primeng`
+
+## Commit Message Format
+
+All commits and PR titles **must** follow Angular-style conventional commits as defined in `CLAUDE.md`:
+
+- Version bump: `chore(release): bump version to {VERSION}`
+- PR title: `chore(release): bump version to {VERSION}`
+
+## Release Preparation Steps
+
+Execute these steps in order:
+
+### 1. Ensure clean main branch
 
 ```bash
 git checkout main
 git pull origin main
+```
+
+### 2. Create release branch
+
+```bash
 git checkout -b release-{VERSION}
 ```
 
-Example: `git checkout -b release-0.2.0`
+Use the format `release-{VERSION}` (e.g., `release-0.2.0`).
 
-### Step 2: Update Package Versions
+### 3. Bump versions using nx release
 
-⚠️ **IMPORTANT: Update ALL version references!**
-
-Update the version in all 5 package.json files. Each UI integration package depends on the core package, so you must update both the package version AND the peer dependency:
-
-| Package                                         | Update `version` | Update `peerDependencies.@ng-forge/dynamic-forms` |
-| ----------------------------------------------- | ---------------- | ------------------------------------------------- |
-| `packages/dynamic-forms/package.json`           | ✅               | N/A                                               |
-| `packages/dynamic-forms-bootstrap/package.json` | ✅               | ✅                                                |
-| `packages/dynamic-forms-material/package.json`  | ✅               | ✅                                                |
-| `packages/dynamic-forms-primeng/package.json`   | ✅               | ✅                                                |
-| `packages/dynamic-forms-ionic/package.json`     | ✅               | ✅                                                |
-
-Example for `packages/dynamic-forms-material/package.json`:
-
-```json
-{
-  "name": "@ng-forge/dynamic-forms-material",
-  "version": "0.2.0",  // ← Update this
-  "peerDependencies": {
-    "@ng-forge/dynamic-forms": "0.2.0",  // ← AND this
-    ...
-  }
-}
+```bash
+pnpm nx release version {VERSION}
 ```
 
-### Step 3: Commit and Push
+This command automatically:
+
+- Updates `version` in all package.json files
+- Updates `peerDependencies` referencing `@ng-forge/dynamic-forms`
+
+### 4. Commit version bump
 
 ```bash
 git add packages/*/package.json
 git commit -m "chore(release): bump version to {VERSION}"
+```
+
+### 5. Generate changelog
+
+Find the previous version tag first:
+
+```bash
+git tag -l "v*" | sort -V | tail -1
+```
+
+Then generate the changelog:
+
+```bash
+pnpm nx release changelog {VERSION} --from={PREVIOUS_TAG}
+```
+
+This command automatically:
+
+- Updates CHANGELOG.md with entries since the previous release
+- Commits the changelog
+- Creates the git tag `v{VERSION}`
+- Pushes the tag to origin
+- Creates a GitHub Release
+
+### 6. Push the branch
+
+```bash
 git push -u origin release-{VERSION}
 ```
 
-### Step 4: Create PR (Optional but Recommended)
-
-Create a PR from `release-{VERSION}` to `main`. The Release workflow will appear in the PR checks as **"Awaiting manual trigger"** - this is just a placeholder to show the workflow is ready.
-
-### Step 5: Trigger Release Workflow
-
-1. Go to **Actions** → **Release** → **Run workflow**
-2. Select the release branch (e.g., `release-0.2.0`)
-3. Choose mode:
-   - `dry-run` (default) - Test without publishing
-   - `publish` - Publish to npm for real
-
-The workflow reads the version directly from `packages/dynamic-forms/package.json` on the selected branch.
-
-### Step 6: Post-Release Verification
+### 7. Create the PR
 
 ```bash
-# Check GitHub Release
-gh release view v{VERSION}
+gh pr create --title "chore(release): bump version to {VERSION}" --body "## Summary
+- Bump all package versions to {VERSION}
+- Update inter-package peerDependencies
+- Generate changelog from {PREVIOUS_TAG}
 
-# Check npm
-npm view @ng-forge/dynamic-forms version
+## Packages Updated
+- @ng-forge/dynamic-forms: {OLD_VERSION} -> {VERSION}
+- @ng-forge/dynamic-forms-bootstrap: {OLD_VERSION} -> {VERSION}
+- @ng-forge/dynamic-forms-ionic: {OLD_VERSION} -> {VERSION}
+- @ng-forge/dynamic-forms-material: {OLD_VERSION} -> {VERSION}
+- @ng-forge/dynamic-forms-primeng: {OLD_VERSION} -> {VERSION}
 
-# Test installation
-npm install @ng-forge/dynamic-forms@{VERSION}
+## Release Notes
+See the generated [GitHub Release](https://github.com/ng-forge/ng-forge/releases/tag/v{VERSION}) for full changelog.
+
+## Next Steps
+After merging, trigger the Release workflow manually from GitHub Actions to publish to npm."
 ```
 
-## Release Workflow Behavior
+## What This Skill Does NOT Do
 
-- **On push to `release-*` branch**: The Release workflow runs but immediately completes with "Awaiting manual trigger". This makes the workflow visible in PR checks.
-- **On manual trigger**: The actual release process runs - builds, verifies CI passed, creates tag, publishes to npm.
+- **Publishing to npm**: Handled by the Release GitHub Action after PR merge
 
 ## Failure Recovery
 
-### Delete local and remote branch:
+If something goes wrong, clean up with:
 
 ```bash
+# Delete local and remote branch
 git checkout main
 git branch -D release-{VERSION}
 git push origin --delete release-{VERSION}
-```
 
-### Delete tag and GitHub release:
-
-```bash
+# Delete tag and GitHub release (if created)
 git tag -d v{VERSION}
 git push origin --delete v{VERSION}
 gh release delete v{VERSION} --yes
 ```
-
-### Unpublish from npm (within 72 hours):
-
-```bash
-npm unpublish @ng-forge/dynamic-forms@{VERSION}
-npm unpublish @ng-forge/dynamic-forms-bootstrap@{VERSION}
-npm unpublish @ng-forge/dynamic-forms-material@{VERSION}
-npm unpublish @ng-forge/dynamic-forms-primeng@{VERSION}
-npm unpublish @ng-forge/dynamic-forms-ionic@{VERSION}
-```
-
-## Important Notes
-
-- Branch **must** be named `release-{VERSION}` (e.g., `release-0.2.0`) for the workflow to appear in PR checks
-- The release branch is completely independent - main branch state doesn't matter
-- Version is read from `packages/dynamic-forms/package.json` on the selected branch
-- **Always update inter-package peer dependencies** when bumping versions
-- Always do a dry run before actual publish
-- NPM_TOKEN secret must be configured in GitHub repository settings
