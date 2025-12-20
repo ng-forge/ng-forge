@@ -1,18 +1,10 @@
 import { FieldDef } from '../../definitions/base/field-def';
 
 /**
- * Cache for computed grid class strings.
- * Uses WeakMap keyed by field definition object for automatic cleanup.
- */
-const gridClassCache = new WeakMap<FieldDef<unknown>, string>();
-
-/**
  * Generates CSS class string for responsive grid layout based on field column configuration.
  *
  * Creates Bootstrap-style column classes for implementing responsive form layouts.
  * Validates column values to ensure they fall within the standard 12-column grid system.
- *
- * Results are memoized using WeakMap to avoid recomputation for the same field definition.
  *
  * @param fieldDef - Field definition containing column configuration
  * @returns CSS class string for grid layout, empty if no valid column configuration
@@ -32,39 +24,12 @@ const gridClassCache = new WeakMap<FieldDef<unknown>, string>();
  * // Returns: ''
  * ```
  *
- * @example
- * ```typescript
- * // Usage in component template
- * @Component({
- *   template: `
- *     <div [class]="getGridClassString(field)" class="form-field">
- *       <!-- Field content -->
- *     </div>
- *   `
- * })
- * export class FieldComponent {
- *   field: FieldDef<unknown>;
- *   getGridClassString = getGridClassString;
- * }
- * ```
- *
  * @public
  */
 export function getGridClassString(fieldDef: FieldDef<unknown>): string {
-  // Check cache first
-  const cached = gridClassCache.get(fieldDef);
-  if (cached !== undefined) {
-    return cached;
+  const col = fieldDef.col;
+  if (typeof col === 'number' && Number.isInteger(col) && col > 0 && col <= 12) {
+    return `df-col-${col}`;
   }
-
-  // Compute grid class string
-  let result = '';
-
-  if (typeof fieldDef.col === 'number' && Number.isInteger(fieldDef.col) && fieldDef.col > 0 && fieldDef.col <= 12) {
-    result = `df-col-${fieldDef.col}`;
-  }
-
-  // Cache and return
-  gridClassCache.set(fieldDef, result);
-  return result;
+  return '';
 }

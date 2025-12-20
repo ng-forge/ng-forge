@@ -42,10 +42,13 @@ import { TextField } from '../definitions/default/text-field';
  * ```
  */
 /**
- * Internal type for all built-in field definitions with specific field types.
- * Each definition uses its specific field type for proper mapper type safety.
+ * Built-in field types provided by the dynamic form library.
+ *
+ * Each field type is validated at compile time using satisfies, ensuring
+ * type safety of the mapper function while allowing the array to be typed
+ * as FieldTypeDefinition[] for consumer flexibility.
  */
-const builtInFieldDefinitions = [
+export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
   {
     name: 'row',
     loadComponent: () => import('../fields/row/row-field.component'),
@@ -76,11 +79,4 @@ const builtInFieldDefinitions = [
     mapper: textFieldMapper,
     valueHandling: 'exclude',
   } satisfies FieldTypeDefinition<TextField>,
-] as const;
-
-/**
- * Built-in field types exported as FieldTypeDefinition[].
- * Type erasure to FieldTypeDefinition[] is safe because consumers only access
- * fields by name lookup at runtime, not by static type.
- */
-export const BUILT_IN_FIELDS: FieldTypeDefinition[] = builtInFieldDefinitions as unknown as FieldTypeDefinition[];
+];

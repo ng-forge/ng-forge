@@ -319,5 +319,99 @@ describe('logic-function-factory', () => {
         expect(result).toBe(false);
       });
     });
+
+    describe('caching behavior', () => {
+      it('should return the same function instance for identical expressions', () => {
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'username',
+          operator: 'equals',
+          value: 'test',
+        };
+
+        let fn1: unknown;
+        let fn2: unknown;
+
+        runInInjectionContext(injector, () => {
+          fn1 = createLogicFunction(expression);
+          fn2 = createLogicFunction(expression);
+        });
+
+        expect(fn1).toBe(fn2);
+      });
+
+      it('should return the same function for equivalent expressions with different key order', () => {
+        // Create two expressions with same content but different key order
+        const expression1: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'username',
+          operator: 'equals',
+          value: 'test',
+        };
+
+        // Manually create object with different insertion order
+        const expression2 = {} as ConditionalExpression;
+        (expression2 as Record<string, unknown>)['value'] = 'test';
+        (expression2 as Record<string, unknown>)['operator'] = 'equals';
+        (expression2 as Record<string, unknown>)['fieldPath'] = 'username';
+        (expression2 as Record<string, unknown>)['type'] = 'fieldValue';
+
+        let fn1: unknown;
+        let fn2: unknown;
+
+        runInInjectionContext(injector, () => {
+          fn1 = createLogicFunction(expression1);
+          fn2 = createLogicFunction(expression2);
+        });
+
+        expect(fn1).toBe(fn2);
+      });
+
+      it('should return different functions for different expressions', () => {
+        const expression1: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'username',
+          operator: 'equals',
+          value: 'test1',
+        };
+
+        const expression2: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'username',
+          operator: 'equals',
+          value: 'test2',
+        };
+
+        let fn1: unknown;
+        let fn2: unknown;
+
+        runInInjectionContext(injector, () => {
+          fn1 = createLogicFunction(expression1);
+          fn2 = createLogicFunction(expression2);
+        });
+
+        expect(fn1).not.toBe(fn2);
+      });
+
+      it('should handle nested expressions in cache key', () => {
+        const expression: ConditionalExpression = {
+          type: 'and',
+          conditions: [
+            { type: 'fieldValue', fieldPath: 'a', operator: 'equals', value: 1 },
+            { type: 'fieldValue', fieldPath: 'b', operator: 'equals', value: 2 },
+          ],
+        };
+
+        let fn1: unknown;
+        let fn2: unknown;
+
+        runInInjectionContext(injector, () => {
+          fn1 = createLogicFunction(expression);
+          fn2 = createLogicFunction(expression);
+        });
+
+        expect(fn1).toBe(fn2);
+      });
+    });
   });
 });
