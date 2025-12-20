@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/dynamic-forms-material",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Angular Material integration for @ng-forge/dynamic-forms. Pre-built Material Design form components.",
   "type": "module",
   "license": "MIT",
@@ -32,7 +32,7 @@
     "@angular/core": "~21.0.5",
     "@angular/forms": "~21.0.5",
     "@angular/material": "~21.0.0",
-    "@ng-forge/dynamic-forms": "~0.1.1",
+    "@ng-forge/dynamic-forms": "~0.1.3",
     "rxjs": ">=7.0.0"
   }
 }
