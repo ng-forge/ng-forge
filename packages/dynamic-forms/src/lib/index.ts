@@ -136,6 +136,9 @@ export {
 
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 
+// Errors
+export { DynamicFormError } from './errors/dynamic-form-error';
+
 // ============================================================
 // INTERNAL EXPORTS - Used by integration entrypoint
 // These are stable APIs for UI library authors
