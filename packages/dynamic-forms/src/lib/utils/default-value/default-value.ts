@@ -91,14 +91,6 @@ export function getFieldDefaultValue(field: FieldDef<unknown>, registry: Map<str
     return groupDefaults;
   }
 
-  // Check for defaultValue first (used for reset/clear operations)
-  if ('defaultValue' in field) {
-    const fieldWithDefault = field as FieldDef<unknown> & { defaultValue?: unknown };
-    if (fieldWithDefault.defaultValue !== undefined && fieldWithDefault.defaultValue !== null) {
-      return fieldWithDefault.defaultValue;
-    }
-  }
-
   // Use explicit value if provided, with type-specific handling for null
   if ('value' in field) {
     // If value is explicitly set (even to null/undefined), respect it

@@ -1,14 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import {
-  createResolvedErrorsSignal,
-  DynamicText,
-  DynamicTextPipe,
-  FieldOption,
-  shouldShowErrors,
-  ValidationMessages,
-  ValueType,
-} from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { isEqual } from '../../utils/is-equal';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { BsMultiCheckboxComponent, BsMultiCheckboxProps } from './bs-multi-checkbox.type';

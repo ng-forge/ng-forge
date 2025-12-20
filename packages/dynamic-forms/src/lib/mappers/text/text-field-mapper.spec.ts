@@ -2,21 +2,26 @@ import { EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { textFieldMapper } from './text-field-mapper';
 import { TextField } from '../../definitions/default/text-field';
-import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
 import { vi } from 'vitest';
 
 describe('textFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
-  let mockGetFormValue: ReturnType<typeof vi.fn>;
   let mockGetCustomFunctions: ReturnType<typeof vi.fn>;
+  let mockCreateDisplayOnlyContext: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
-    mockGetFormValue = vi.fn().mockReturnValue({});
     mockGetCustomFunctions = vi.fn().mockReturnValue({});
+    mockCreateDisplayOnlyContext = vi.fn().mockImplementation((fieldPath, customFunctions) => ({
+      fieldValue: undefined,
+      formValue: {},
+      fieldPath,
+      customFunctions: customFunctions || {},
+    }));
 
-    const mockRootFormRegistry = {
-      getFormValue: mockGetFormValue,
+    const mockFieldContextRegistry = {
+      createDisplayOnlyContext: mockCreateDisplayOnlyContext,
     };
 
     const mockFunctionRegistry = {
@@ -25,7 +30,7 @@ describe('textFieldMapper', () => {
 
     await TestBed.configureTestingModule({
       providers: [
-        { provide: RootFormRegistryService, useValue: mockRootFormRegistry },
+        { provide: FieldContextRegistryService, useValue: mockFieldContextRegistry },
         { provide: FunctionRegistryService, useValue: mockFunctionRegistry },
       ],
     }).compileComponents();
@@ -239,7 +244,12 @@ describe('textFieldMapper', () => {
     });
 
     it('should correctly map a text field with hidden logic', () => {
-      mockGetFormValue.mockReturnValue({ agreedToTerms: true });
+      mockCreateDisplayOnlyContext.mockImplementation((fieldPath, customFunctions) => ({
+        fieldValue: undefined,
+        formValue: { agreedToTerms: true },
+        fieldPath,
+        customFunctions: customFunctions || {},
+      }));
 
       const textField: TextField = {
         key: 'termsAccepted',

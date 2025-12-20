@@ -214,13 +214,6 @@ describe('Tokenizer', () => {
       expect(tokens[1].type).toBe(TokenType.OR);
       expect(tokens[2].type).toBe(TokenType.NOT);
     });
-
-    it('should tokenize typeof operator', () => {
-      const tokenizer = new Tokenizer('typeof');
-      const tokens = tokenizer.tokenize();
-
-      expect(tokens[0].type).toBe(TokenType.TYPEOF);
-    });
   });
 
   describe('punctuation', () => {

@@ -43,7 +43,7 @@ const gridClassCache = new WeakMap<FieldDef<unknown>, string>();
  *   `
  * })
  * export class FieldComponent {
- *   field: FieldDef<any>;
+ *   field: FieldDef<unknown>;
  *   getGridClassString = getGridClassString;
  * }
  * ```
@@ -58,13 +58,11 @@ export function getGridClassString(fieldDef: FieldDef<unknown>): string {
   }
 
   // Compute grid class string
-  const classes: string[] = [];
+  let result = '';
 
-  if (typeof fieldDef.col === 'number' && fieldDef.col > 0 && fieldDef.col <= 12) {
-    classes.push(`df-col-${fieldDef.col}`);
+  if (typeof fieldDef.col === 'number' && Number.isInteger(fieldDef.col) && fieldDef.col > 0 && fieldDef.col <= 12) {
+    result = `df-col-${fieldDef.col}`;
   }
-
-  const result = classes.join(' ');
 
   // Cache and return
   gridClassCache.set(fieldDef, result);

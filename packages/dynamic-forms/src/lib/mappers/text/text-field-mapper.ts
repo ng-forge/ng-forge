@@ -1,12 +1,10 @@
 import { computed, inject, Signal } from '@angular/core';
 import { TextField } from '../../definitions/default/text-field';
 import { buildBaseInputs } from '../base/base-field-mapper';
-import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
 import { evaluateCondition } from '../../core/expressions/condition-evaluator';
-import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 
 /**
  * Maps a text field definition to component inputs.
@@ -19,9 +17,8 @@ import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.toke
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unknown>> {
-  const rootFormRegistry = inject(RootFormRegistryService);
+  const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
-  const logger = inject(DYNAMIC_FORM_LOGGER);
 
   // Build base inputs (static, from field definition)
   const baseInputs = buildBaseInputs(fieldDef);
@@ -35,18 +32,8 @@ export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unkn
 
     // Evaluate hidden logic if present
     if (hiddenLogic.length > 0) {
-      const formValue = rootFormRegistry.getFormValue();
-      const customFunctions = functionRegistry.getCustomFunctions();
-
-      // Create evaluation context without a specific field value
-      // (text fields don't have their own value in the form)
-      const evaluationContext: EvaluationContext = {
-        fieldValue: undefined,
-        formValue,
-        fieldPath: fieldDef.key,
-        customFunctions,
-        logger,
-      };
+      // Use centralized context creation for display-only components
+      const evaluationContext = fieldContextRegistry.createDisplayOnlyContext(fieldDef.key, functionRegistry.getCustomFunctions());
 
       // Evaluate all hidden logic conditions - if ANY is true, the field is hidden
       inputs['hidden'] = hiddenLogic.some((logic) => {

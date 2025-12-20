@@ -9,11 +9,16 @@
  * - FormConfig and field definition types
  * - Event classes (SubmitEvent, PageChangeEvent, etc.)
  *
- * ## Integration API (for UI library authors building Material, Bootstrap, etc.)
- * - Mappers (baseFieldMapper, valueFieldMapper, etc.)
- * - FieldTypeDefinition for registering field types
- * - DynamicTextPipe, shouldShowErrors, createResolvedErrorsSignal
- * - EventBus for custom event handling
+ * ## Integration API (for UI library authors)
+ * Import from '@ng-forge/dynamic-forms/integration' for:
+ * - Specific field types (InputField, SelectField, etc.)
+ * - Field mappers (valueFieldMapper, checkboxFieldMapper, etc.)
+ * - Error utilities (createResolvedErrorsSignal, shouldShowErrors)
+ *
+ * ## Testing API
+ * Import from '@ng-forge/dynamic-forms/testing' for:
+ * - Test utilities and harnesses
+ * - Form config builders for testing
  */
 
 // ============================================================
@@ -33,10 +38,10 @@ export { LogLevel } from './providers/features/logger/log-level';
 export type { DynamicFormLogger } from './providers/features/logger/logger.interface';
 export type { LoggerFeatureOptions } from './providers/features/logger/with-logger';
 export { DYNAMIC_FORM_LOGGER } from './providers/features/logger/logger.token';
+export { NoopLogger } from './providers/features/logger/noop-logger';
 
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';
-
 export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
 
 // Submission Config
@@ -46,44 +51,26 @@ export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, Nex
 export type { FormStateCondition } from './models';
 export { isFormStateCondition } from './models';
 
-// Button Logic Resolver (for UI library authors)
+// Button Logic Resolver
 export { resolveSubmitButtonDisabled, resolveNextButtonDisabled } from './core/logic';
 export type { ButtonLogicContext } from './core/logic';
 
-// Field Definition Types
+// Abstract Base Field Types (for extension by UI libraries)
 export type {
-  ArrayField,
   BaseCheckedField,
   BaseValueField,
-  ButtonField,
-  CheckboxField,
   CheckedFieldComponent,
-  DatepickerField,
-  DatepickerProps,
   FieldComponent,
   FieldDef,
   FieldWithValidation,
-  GroupField,
-  InputField,
-  InputProps,
-  MultiCheckboxField,
-  PageField,
-  RadioField,
-  RowField,
-  SelectField,
-  SelectProps,
-  SliderField,
-  TextareaField,
-  TextareaProps,
-  TextElementType,
-  TextField,
-  TextProps,
-  ToggleField,
   ValueFieldComponent,
   ValueType,
 } from './definitions';
-
 export { isCheckedField, isValueField } from './definitions';
+
+// Built-in Container Field Types
+export type { ArrayField, GroupField, PageField, RowField, TextField, TextElementType, TextProps } from './definitions/default';
+export { isRowField } from './definitions/default';
 
 // Validation Config Types
 export type {
@@ -133,16 +120,7 @@ export type {
 } from './models';
 
 // Type Guards
-export {
-  isArrayField,
-  isContainerField,
-  isDisplayOnlyField,
-  isGroupField,
-  isLeafField,
-  isPageField,
-  isRowField,
-  isValueBearingField,
-} from './models';
+export { isArrayField, isContainerField, isDisplayOnlyField, isGroupField, isLeafField, isPageField, isValueBearingField } from './models';
 
 // Events
 export {
@@ -156,59 +134,48 @@ export {
   SubmitEvent,
 } from './events';
 
-export type { FormEvent } from './events';
+export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 
 // ============================================================
-// INTEGRATION API - For UI library authors
-// (Material, Bootstrap, PrimeNG, Ionic, etc.)
+// INTERNAL EXPORTS - Used by integration entrypoint
+// These are stable APIs for UI library authors
 // ============================================================
 
-// Mappers - for creating FieldTypeDefinition
-export {
-  arrayFieldMapper,
-  baseFieldMapper,
-  buildBaseInputs,
-  checkboxFieldMapper,
-  datepickerFieldMapper,
-  groupFieldMapper,
-  pageFieldMapper,
-  optionsFieldMapper,
-  rowFieldMapper,
-  valueFieldMapper,
-} from './mappers';
-
+// Base mapper utilities
+export { baseFieldMapper, buildBaseInputs } from './mappers';
+export { arrayFieldMapper, groupFieldMapper, pageFieldMapper, rowFieldMapper, textFieldMapper } from './mappers';
 export type { ArrayContext, FieldSignalContext, MapperFn } from './mappers';
 
 // Field Type Definition - for registering custom field types
 export type { FieldTypeDefinition, ValueHandlingMode } from './models';
-export { FIELD_REGISTRY, getFieldValueHandling } from './models';
+export { FIELD_REGISTRY } from './models';
 
 // Signal Context - injection tokens for field components
 export { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from './models';
 
-// Error Display Utilities - for field components
-export { createResolvedErrorsSignal, shouldShowErrors } from './utils';
-export type { ResolvedError } from './utils';
-
-// Dynamic Text - for translatable labels
+// Dynamic Text utilities
 export { dynamicTextToObservable } from './utils';
 export { DynamicTextPipe } from './pipes';
 
 // Container Components - for building custom containers
 export { ArrayFieldComponent, GroupFieldComponent, RowFieldComponent } from './fields';
 
-// Validation - for applying validators in custom fields
+// Validation utilities
 export { applyValidator, applyValidators } from './core/validation';
 export type { HttpResourceRequest } from './core/validation';
 
-// Event Utilities - for custom event handling
-export { EventBus } from './events';
-export { resolveTokens } from './events';
-export type { ArrayItemContext, FormEventConstructor, TokenContext } from './events';
+// FieldTree Utilities
+export { getArrayLength } from './core/field-tree-utils';
+export type { ArrayFieldTree } from './core/field-tree-utils';
+
+// Event utilities
+export { EventBus, resolveTokens } from './events';
 
 // Registry Utilities
-export { injectFieldRegistry } from './utils/inject-field-registry/inject-field-registry';
 export { BUILT_IN_FIELDS } from './providers';
 
-// Event Args Type
-export type { EventArgs } from './definitions';
+// Object utilities (used by integration mappers)
+export { omit } from './utils/object-utils';
+
+// Interpolation utility (used by integration error utilities)
+export { interpolateParams } from './utils/interpolate-params';

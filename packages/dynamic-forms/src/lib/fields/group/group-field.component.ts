@@ -12,9 +12,8 @@ import {
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
-import { forkJoin, map, of, pipe, scan, switchMap } from 'rxjs';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
-import { reconcileFields, ResolvedField, resolveField } from '../../utils/resolve-field/resolve-field';
+import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { keyBy, mapValues, memoize } from '../../utils/object-utils';
@@ -57,7 +56,7 @@ import { flattenFields } from '../../utils/flattener/field-flattener';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class GroupFieldComponent<TModel = Record<string, unknown>> {
+export default class GroupFieldComponent<TModel extends Record<string, unknown> = Record<string, unknown>> {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies
   // ─────────────────────────────────────────────────────────────────────────────
@@ -75,19 +74,25 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
 
   private readonly memoizedFlattenFields = memoize(
     (fields: readonly FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>) => flattenFields([...fields], registry),
-    (fields, registry) =>
-      JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(','),
+    {
+      resolver: (fields, registry) =>
+        JSON.stringify(fields.map((f) => ({ key: f.key, type: f.type }))) + '_' + Array.from(registry.keys()).sort().join(','),
+      maxSize: 10,
+    },
   );
 
-  private readonly memoizedKeyBy = memoize(
-    <T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'),
-    (fields) => fields.map((f) => f.key).join(','),
-  );
+  private readonly memoizedKeyBy = memoize(<T extends { key: string }>(fields: T[]) => keyBy(fields, 'key'), {
+    resolver: (fields) => fields.map((f) => f.key).join(','),
+    maxSize: 10,
+  });
 
   private readonly memoizedDefaultValues = memoize(
     <T extends FieldDef<unknown>>(fieldsById: Record<string, T>, registry: Map<string, FieldTypeDefinition>) =>
       mapValues(fieldsById, (field) => getFieldDefaultValue(field, registry)),
-    (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(','),
+    {
+      resolver: (fieldsById, registry) => Object.keys(fieldsById).sort().join(',') + '_' + Array.from(registry.keys()).sort().join(','),
+      maxSize: 10,
+    },
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -104,37 +109,28 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
   private readonly formSetup = computed(() => {
-    try {
-      const groupField = this.field();
-      const registry = this.rawFieldRegistry();
+    const groupField = this.field();
+    const registry = this.rawFieldRegistry();
 
-      if (groupField.fields && groupField.fields.length > 0) {
-        const flattenedFields = this.memoizedFlattenFields(groupField.fields, registry);
-        const fieldsById = this.memoizedKeyBy(flattenedFields);
-        const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
-
-        return {
-          fields: flattenedFields,
-          originalFields: groupField.fields,
-          defaultValues,
-          registry,
-        };
-      }
+    if (groupField.fields && groupField.fields.length > 0) {
+      const flattenedFields = this.memoizedFlattenFields(groupField.fields, registry);
+      const fieldsById = this.memoizedKeyBy(flattenedFields);
+      const defaultValues = this.memoizedDefaultValues(fieldsById, registry);
 
       return {
-        fields: [],
-        originalFields: [],
-        defaultValues: {},
+        fields: flattenedFields,
+        originalFields: groupField.fields,
+        defaultValues,
         registry,
       };
-    } catch {
-      return {
-        fields: [],
-        originalFields: [],
-        defaultValues: {},
-        registry: this.rawFieldRegistry(),
-      };
     }
+
+    return {
+      fields: [],
+      originalFields: [],
+      defaultValues: {},
+      registry,
+    };
   });
 
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues);
@@ -172,43 +168,32 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
   readonly errors = computed(() => this.form()().errors());
   readonly disabled = computed(() => this.form()().disabled());
 
-  /**
-   * Get the nested FieldTree from the parent form for this group.
-   * This allows child fields to update the parent form directly,
-   * avoiding the need for separate form synchronization.
-   *
-   * Uses direct bracket notation to access child FieldTrees from the parent form.
-   * Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
-   */
-  private readonly nestedFieldTree = computed(() => {
-    const parentForm = this.parentFieldSignalContext.form();
+  private readonly nestedFieldTree = computed((): FieldTree<Record<string, unknown>> => {
+    const parentForm = this.parentFieldSignalContext.form as Record<string, FieldTree<Record<string, unknown>>>;
     const groupKey = this.field().key;
-    return (parentForm as unknown as Record<string, FieldTree<unknown>>)[groupKey] ?? null;
+    const child = parentForm[groupKey];
+
+    if (!child) {
+      throw new Error(
+        `[Dynamic Forms] Group field "${groupKey}" not found in parent form. ` + `Ensure the parent form schema includes this group field.`,
+      );
+    }
+
+    return child;
   });
 
   private readonly groupInjector = computed(() => {
-    const nestedTree = this.nestedFieldTree();
-
-    // Use the nested FieldTree from parent if available, otherwise fall back to our own form
-    // The nested FieldTree ensures changes propagate directly to the parent form
-    const formToProvide = nestedTree ?? this.form();
-
     const groupFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
       injector: this.injector,
       value: this.parentFieldSignalContext.value,
       defaultValues: this.defaultValues,
-      form: (() => formToProvide) as unknown as ReturnType<typeof form<Record<string, unknown>>>,
+      form: this.nestedFieldTree(),
       defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
     };
 
     return Injector.create({
       parent: this.injector,
-      providers: [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: groupFieldSignalContext,
-        },
-      ],
+      providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: groupFieldSignalContext }],
     });
   });
 
@@ -228,31 +213,20 @@ export default class GroupFieldComponent<TModel = Record<string, unknown>> {
 
   protected readonly resolvedFields = derivedFromDeferred(
     this.fieldsSource,
-    pipe(
-      switchMap((fields) => {
-        if (!fields || fields.length === 0) {
-          return of([] as (ResolvedField | undefined)[]);
-        }
-        const groupKey = this.field().key;
-        const context = {
-          loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
-          registry: this.rawFieldRegistry(),
-          injector: this.groupInjector(),
-          destroyRef: this.destroyRef,
-          onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
-            const fieldKey = fieldDef.key || '<no key>';
-            this.logger.error(
-              `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
-                `within group '${groupKey}'. Ensure the field type is registered in your field registry.`,
-              error,
-            );
-          },
-        };
-        return forkJoin(fields.map((f) => resolveField(f, context)));
-      }),
-      map((fields) => fields.filter((f): f is ResolvedField => f !== undefined)),
-      scan(reconcileFields, [] as ResolvedField[]),
-    ),
+    createFieldResolutionPipe(() => ({
+      loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
+      registry: this.rawFieldRegistry(),
+      injector: this.groupInjector(),
+      destroyRef: this.destroyRef,
+      onError: (fieldDef: FieldDef<unknown>, error: unknown) => {
+        const fieldKey = fieldDef.key || '<no key>';
+        this.logger.error(
+          `Failed to load component for field type '${fieldDef.type}' (key: ${fieldKey}) ` +
+            `within group '${this.field().key}'. Ensure the field type is registered in your field registry.`,
+          error,
+        );
+      },
+    })),
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 

@@ -12,8 +12,13 @@ import { evaluateCondition } from './expressions/condition-evaluator';
 import { CustomValidatorConfig, ValidatorConfig } from '../models/validation/validator-config';
 import { hasChildFields } from '../models/types/type-guards';
 import { DYNAMIC_FORM_LOGGER, DynamicFormLogger } from '../providers/features/logger';
+import { normalizeFieldsArray } from '../utils/object-utils';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): FieldTree<unknown> | undefined {
+  return (ctx.field as Record<string, FieldTree<unknown>>)[key];
+}
 
 /**
  * Creates an Angular signal forms schema from field definitions
@@ -50,12 +55,10 @@ export function createSchemaFromFields<TModel = unknown>(
       }
 
       if (valueHandling === 'flatten' && hasChildFields(fieldDef)) {
-        // Handle both array (page/row fields) and object (group fields)
-        const fieldsArray = Array.isArray(fieldDef.fields) ? fieldDef.fields : Object.values(fieldDef.fields);
-        for (const childField of fieldsArray) {
+        for (const childField of normalizeFieldsArray(fieldDef.fields)) {
           if (!childField.key) continue;
 
-          const childPath = path[childField.key as keyof typeof path] as SchemaPath<unknown>;
+          const childPath = (path as Record<string, SchemaPath<unknown>>)[childField.key];
           if (childPath) {
             mapFieldToForm(childField, childPath);
           }
@@ -64,7 +67,7 @@ export function createSchemaFromFields<TModel = unknown>(
       }
 
       // Regular field processing for 'include' fields
-      const fieldPath = path[fieldDef.key as keyof typeof path] as SchemaPath<unknown>;
+      const fieldPath = (path as Record<string, SchemaPath<unknown>>)[fieldDef.key];
 
       if (!fieldPath) {
         continue;
@@ -133,8 +136,7 @@ function applyCrossFieldTreeValidator<TModel>(
         logger.error(`Error evaluating cross-field validator for ${sourceFieldKey}:`, err);
 
         // On error, add a validation error to indicate the failure
-        // Use ctx.field[key] to access the field tree for dynamic field names
-        const targetField = (ctx.field as Record<string, FieldTree<unknown>>)[sourceFieldKey];
+        const targetField = getFieldTreeByKey(ctx, sourceFieldKey);
 
         if (targetField) {
           const customConfig = config as CustomValidatorConfig;
@@ -220,9 +222,7 @@ function evaluateCustomCrossFieldValidator<TModel>(
   }
 
   // Validation failed - create error targeting the source field
-  // Use ctx.field[key] to access the field tree for dynamic field names
-  const targetField = (ctx.field as Record<string, FieldTree<unknown>>)[sourceFieldKey];
-
+  const targetField = getFieldTreeByKey(ctx, sourceFieldKey);
   if (!targetField) {
     return null;
   }
@@ -282,8 +282,7 @@ function evaluateBuiltInCrossFieldValidator<TModel>(
   }
 
   // Validation failed - create error targeting the source field
-  // Use ctx.field[key] to access the field tree for dynamic field names
-  const targetField = (ctx.field as Record<string, FieldTree<unknown>>)[sourceFieldKey];
+  const targetField = getFieldTreeByKey(ctx, sourceFieldKey);
   if (!targetField) {
     return null;
   }

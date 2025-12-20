@@ -1,6 +1,6 @@
 import { GroupFieldComponent } from './group-field.component';
 import { GroupField } from '../../definitions/default/group-field';
-import { createSimpleTestField } from '../../testing';
+import { createSimpleTestField, TestFieldComponent } from '@ng-forge/dynamic-forms/testing';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
@@ -13,10 +13,10 @@ import { EventBus } from '../../events';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 
 describe('GroupFieldComponent', () => {
-  function setupGroupTest(field: GroupField<any>, value?: Record<string, unknown>) {
+  function setupGroupTest(field: GroupField<any>, groupValue?: Record<string, unknown>) {
     const mockFieldType: FieldTypeDefinition = {
       name: 'test',
-      loadComponent: () => import('../../testing/simple-test-utils'),
+      loadComponent: async () => TestFieldComponent,
       mapper: baseFieldMapper,
     };
 
@@ -34,7 +34,9 @@ describe('GroupFieldComponent', () => {
           provide: FIELD_SIGNAL_CONTEXT,
           useFactory: (injector: Injector) => {
             return runInInjectionContext(injector, () => {
-              const valueSignal = signal(value || {});
+              // Parent form value must contain the group key with its nested values
+              const parentValue = { [field.key]: groupValue || {} };
+              const valueSignal = signal(parentValue);
               const testForm = form(valueSignal);
               const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                 injector,
@@ -96,6 +98,7 @@ describe('GroupFieldComponent', () => {
       fields: [createSimpleTestField('field1', 'Field 1'), createSimpleTestField('field2', 'Field 2')],
     };
 
+    // Group value is the nested content of the group
     const { fixture } = setupGroupTest(field, { field1: 'value1', field2: 'value2' });
 
     // Host should have grid layout via df-group class

@@ -1,3 +1,24 @@
+## 0.1.3 (2025-12-20)
+
+### 🚀 Features
+
+- **dynamic-forms:** add configurable logger service ([#105](https://github.com/ng-forge/ng-forge/pull/105))
+- **dynamic-forms:** add secondary entrypoints for integration and testing ([#108](https://github.com/ng-forge/ng-forge/pull/108))
+
+### 🐛 Bug Fixes
+
+- **docs:** improve mobile responsiveness for navbar and sidebar ([#109](https://github.com/ng-forge/ng-forge/pull/109))
+- **dynamic-forms:** infer number type for input fields with props.type: 'number' ([#104](https://github.com/ng-forge/ng-forge/pull/104))
+
+### ♻️ Code Refactoring
+
+- **dynamic-forms:** simplify field tree access using bracket notation ([#107](https://github.com/ng-forge/ng-forge/pull/107))
+
+### ❤️ Thank You
+
+- Antim Prisacaru @antimprisacaru
+- Claude Opus 4.5
+
 ## 0.1.0 (2025-12-11)
 
 ### 🚀 Features

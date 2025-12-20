@@ -1,11 +1,12 @@
 import { ArrayFieldComponent } from './array-field.component';
 import { ArrayField } from '../../definitions/default/array-field';
 import { RowField } from '../../definitions/default/row-field';
-import { createSimpleTestField, delay } from '../../testing';
+import { createSimpleTestField, delay, TestFieldComponent } from '@ng-forge/dynamic-forms/testing';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import { baseFieldMapper, FieldSignalContext, rowFieldMapper, valueFieldMapper } from '../../mappers';
+import { baseFieldMapper, FieldSignalContext, rowFieldMapper } from '../../mappers';
+import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { provideDynamicForm } from '../../providers';
 import { FIELD_REGISTRY } from '../../models/field-type';
 import { FieldTypeDefinition } from '../../models/field-type';
@@ -19,10 +20,7 @@ describe('ArrayFieldComponent', () => {
   function setupArrayTest(field: ArrayField<unknown>, value?: Record<string, unknown>) {
     const mockFieldType: FieldTypeDefinition = {
       name: 'test',
-      loadComponent: async () => {
-        const module = await import('../../testing/simple-test-utils');
-        return module.TestFieldComponent;
-      },
+      loadComponent: async () => TestFieldComponent,
       mapper: baseFieldMapper,
     };
 
@@ -455,20 +453,14 @@ describe('ArrayFieldComponent', () => {
 
       const inputFieldType: FieldTypeDefinition = {
         name: 'input',
-        loadComponent: async () => {
-          const module = await import('../../testing/simple-test-utils');
-          return module.TestFieldComponent;
-        },
+        loadComponent: async () => TestFieldComponent,
         mapper: valueFieldMapper,
         valueHandling: 'include',
       };
 
       const testFieldType: FieldTypeDefinition = {
         name: 'test',
-        loadComponent: async () => {
-          const module = await import('../../testing/simple-test-utils');
-          return module.TestFieldComponent;
-        },
+        loadComponent: async () => TestFieldComponent,
         mapper: baseFieldMapper,
       };
 
@@ -742,10 +734,8 @@ describe('ArrayFieldComponent', () => {
      * CRITICAL REGRESSION TESTS: These tests verify that the valueFieldMapper
      * produces the correct 'field' binding for array items.
      *
-     * The fix ensures that for schemaless forms (like array item forms),
-     * the mapper can find the field either through:
-     * 1. childrenMap (standard path for schema-based forms)
-     * 2. Direct property access (formRoot[key]) for schemaless forms
+     * The mapper finds the field through bracket notation (formRoot[key])
+     * which works for both schema-based and schemaless forms.
      *
      * If these tests fail, the array field rendering will break with NG0950 errors.
      */

@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import type { SchemaPath } from '@angular/forms/signals';
+import type { FieldTree, SchemaPath } from '@angular/forms/signals';
 import { form, schema } from '@angular/forms/signals';
-import { createResolvedErrorsSignal } from './create-resolved-errors-signal';
+import { createResolvedErrorsSignal } from '@ng-forge/dynamic-forms/integration';
 import { ValidationMessages } from '../models/validation-types';
 import { applyValidator } from '../core/validation/validator-factory';
-import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService } from '../core/registry';
+import { FieldContextRegistryService } from '../core/registry/field-context-registry.service';
+import { FunctionRegistryService } from '../core/registry/function-registry.service';
+import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 
 describe('createResolvedErrorsSignal', () => {
   let injector: Injector;
@@ -29,9 +31,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const emailFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('email').reader;
-        // Wrap fieldProxy in a signal to match the expected type Signal<FieldTree<T>>
-        const emailField = signal(emailFieldProxy);
+        const emailField = signal((testForm as unknown as Record<string, FieldTree<string>>)['email']);
 
         const fieldMessages = signal<ValidationMessages>({
           required: 'Field-level: Email is required',
@@ -61,8 +61,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const emailFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('email').reader;
-        const emailField = signal(emailFieldProxy);
+        const emailField = signal((testForm as unknown as Record<string, FieldTree<string>>)['email']);
 
         const fieldMessages = signal<ValidationMessages>({});
 
@@ -89,8 +88,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const emailFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('email').reader;
-        const emailField = signal(emailFieldProxy);
+        const emailField = signal((testForm as unknown as Record<string, FieldTree<string>>)['email']);
 
         const fieldMessages = signal<ValidationMessages>({});
         const defaultMessages = signal<ValidationMessages>({});
@@ -127,8 +125,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const passwordFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('password').reader;
-        const passwordField = signal(passwordFieldProxy);
+        const passwordField = signal((testForm as unknown as Record<string, FieldTree<string>>)['password']);
 
         // Field-level only has 'minLength'
         const fieldMessages = signal<ValidationMessages>({
@@ -166,8 +163,7 @@ describe('createResolvedErrorsSignal', () => {
           }),
         );
 
-        const ageFieldProxy = testForm().structure.childrenMap().byPropertyKey.get('age').reader;
-        const ageField = signal(ageFieldProxy);
+        const ageField = signal((testForm as unknown as Record<string, FieldTree<number>>)['age']);
 
         const fieldMessages = signal<ValidationMessages>({});
 

@@ -263,7 +263,7 @@ describe('schema-application', () => {
         const config: SchemaApplicationConfig = {
           type: 'applyWhenValue',
           schema: 'string-schema',
-          typePredicate: "typeof value === 'string'",
+          typePredicate: 'value && value.type === "text"',
         };
 
         let formInstance: ReturnType<typeof form>;

@@ -8,7 +8,6 @@ import { RootFormRegistryService, FieldContextRegistryService } from '../registr
 describe('dynamic-value-factory', () => {
   let injector: Injector;
   let rootFormRegistry: RootFormRegistryService;
-  let fieldContextRegistry: FieldContextRegistryService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -17,15 +16,13 @@ describe('dynamic-value-factory', () => {
 
     injector = TestBed.inject(Injector);
     rootFormRegistry = TestBed.inject(RootFormRegistryService);
-    fieldContextRegistry = TestBed.inject(FieldContextRegistryService);
   });
 
   describe('createDynamicValueFunction', () => {
     function createMockFieldContext<T>(
       value: T,
       mockField?: Partial<FieldTree<T>>,
-
-      mockValueOf?: (_path: any) => any,
+      mockValueOf?: (_path: unknown) => unknown,
       fieldKey?: string,
     ): FieldContext<T> {
       const defaultValueOf = () => ({ username: 'test', email: 'test@example.com' });
@@ -70,26 +67,19 @@ describe('dynamic-value-factory', () => {
       expression: string,
       fieldValue: TValue,
       mockField?: Partial<FieldTree<TValue>>,
-
-      mockValueOf?: (path: any) => any,
+      mockValueOf?: (path: unknown) => unknown,
       setupRoot = true,
       fieldKey?: string,
-      expectedPath?: string,
     ): TReturn {
       return runInInjectionContext(injector, () => {
         // Set up the root form registry with mock data if needed
         if (setupRoot) {
           // Create mock form value signal and register BEFORE creating dynamic function
           const mockFormValue = signal({ username: 'test', email: 'test@example.com' });
-          rootFormRegistry.registerFormValueSignal(mockFormValue as any);
+          rootFormRegistry.registerFormValueSignal(mockFormValue);
 
           const mockRootField = createMockFieldTree();
           rootFormRegistry.registerRootForm(mockRootField);
-
-          // Register field path if provided
-          if (fieldKey && expectedPath) {
-            fieldContextRegistry.registerFieldPath(fieldKey, expectedPath.replace(`.${fieldKey}`, ''));
-          }
         }
 
         const dynamicFn = createDynamicValueFunction<TValue, TReturn>(expression);
@@ -132,26 +122,28 @@ describe('dynamic-value-factory', () => {
       expect(result).toBe(true);
     });
 
-    it('should provide field path in context', () => {
-      const expression = 'fieldPath === "user.email"';
+    it('should provide field key as path in context', () => {
+      // fieldPath is the field's key (not full path), used to identify the field
+      const expression = 'fieldPath === "email"';
 
       const rootField = createMockFieldTree();
       const userField = createMockFieldTree(rootField, 'user');
       const emailField = createMockFieldTree(userField, 'email');
 
-      const result = runDynamicValueFunctionTest(expression, 'test@example.com', emailField, undefined, true, 'email', 'user.email');
+      const result = runDynamicValueFunctionTest(expression, 'test@example.com', emailField, undefined, true, 'email');
       expect(result).toBe(true);
     });
 
-    it('should handle nested field paths correctly', () => {
-      const expression = 'fieldPath === "form.section.field"';
+    it('should use field key as path for nested fields', () => {
+      // fieldPath is the field's key, even for deeply nested fields
+      const expression = 'fieldPath === "field"';
 
       const rootField = createMockFieldTree();
       const formField = createMockFieldTree(rootField, 'form');
       const sectionField = createMockFieldTree(formField, 'section');
       const targetField = createMockFieldTree(sectionField, 'field');
 
-      const result = runDynamicValueFunctionTest(expression, 'value', targetField, undefined, true, 'field', 'form.section.field');
+      const result = runDynamicValueFunctionTest(expression, 'value', targetField, undefined, true, 'field');
       expect(result).toBe(true);
     });
 
@@ -224,14 +216,7 @@ describe('dynamic-value-factory', () => {
     it('should handle missing root field gracefully', () => {
       const expression = 'formValue.username || "default"';
 
-      const result = runDynamicValueFunctionTest<string, string>(
-        expression,
-        'test',
-
-        null as any,
-        undefined,
-        false,
-      );
+      const result = runDynamicValueFunctionTest<string, string>(expression, 'test', null as any, undefined, false);
 
       expect(result).toBe('default'); // Should fall back to empty object for formValue
     });

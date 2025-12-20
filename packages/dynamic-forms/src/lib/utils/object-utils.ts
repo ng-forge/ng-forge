@@ -17,7 +17,7 @@
  * omit(obj, ['b']); // { a: 1, c: 3 }
  * ```
  */
-export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result = { ...obj };
   keys.forEach((key) => delete result[key]);
   return result as Omit<T, K>;
@@ -37,7 +37,7 @@ export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
  * keyBy(users, 'id'); // { a: { id: 'a', name: 'Alice' }, b: { id: 'b', name: 'Bob' } }
  * ```
  */
-export function keyBy<T>(array: T[], key: keyof T): Record<string, T> {
+export function keyBy<T extends object>(array: T[], key: keyof T): Record<string, T> {
   return array.reduce(
     (acc, item) => {
       acc[String(item[key])] = item;
@@ -72,39 +72,70 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
 }
 
 /**
- * Memoizes a function with optional custom cache key resolver
- * Native replacement for lodash memoize()
+ * Options for memoize function
+ */
+/** Default maximum cache size for memoized functions */
+const DEFAULT_MEMOIZE_MAX_SIZE = 100;
+
+export interface MemoizeOptions<TFunc extends (...args: never[]) => unknown> {
+  /** Optional function to generate cache key from arguments */
+  resolver?: (...args: Parameters<TFunc>) => string;
+  /** Maximum number of entries to keep in cache. Uses LRU eviction when exceeded. Defaults to 100. */
+  maxSize?: number;
+}
+
+/**
+ * Memoizes a function with LRU cache eviction and optional custom cache key resolver.
  *
  * @param fn - Function to memoize
- * @param resolver - Optional function to generate cache key from arguments
+ * @param resolverOrOptions - Optional key resolver function or options object
  * @returns Memoized function
  *
  * @example
  * ```typescript
  * const expensive = (a: number, b: number) => a + b;
- * const memoized = memoize(expensive, (a, b) => `${a}-${b}`);
- * memoized(1, 2); // Computed
- * memoized(1, 2); // Cached
+ * const memoized = memoize(expensive); // Uses default maxSize of 100
+ *
+ * // With custom resolver
+ * const withResolver = memoize(expensive, (a, b) => `${a}-${b}`);
+ *
+ * // With custom maxSize
+ * const small = memoize(expensive, { maxSize: 10 });
  * ```
  */
-export function memoize<TArgs extends unknown[], TReturn>(
-  fn: (...args: TArgs) => TReturn,
-  resolver?: (...args: TArgs) => string,
-): (...args: TArgs) => TReturn {
-  const cache = new Map<string, TReturn>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function memoize<TFunc extends (...args: any[]) => any>(
+  fn: TFunc,
+  resolverOrOptions?: ((...args: Parameters<TFunc>) => string) | MemoizeOptions<TFunc>,
+): TFunc {
+  const options: MemoizeOptions<TFunc> =
+    typeof resolverOrOptions === 'function' ? { resolver: resolverOrOptions } : (resolverOrOptions ?? {});
 
-  return (...args: TArgs): TReturn => {
+  const { resolver, maxSize = DEFAULT_MEMOIZE_MAX_SIZE } = options;
+  const cache = new Map<string, ReturnType<TFunc>>();
+
+  return ((...args: Parameters<TFunc>): ReturnType<TFunc> => {
     const key = resolver ? resolver(...args) : JSON.stringify(args);
 
-    const cached = cache.get(key);
-    if (cached !== undefined) {
-      return cached;
+    const cachedValue = cache.get(key);
+    if (cachedValue !== undefined) {
+      cache.delete(key);
+      cache.set(key, cachedValue);
+      return cachedValue;
     }
 
     const result = fn(...args);
+
+    if (cache.size >= maxSize) {
+      const oldestKey = cache.keys().next().value;
+      if (oldestKey !== undefined) {
+        cache.delete(oldestKey);
+      }
+    }
+
     cache.set(key, result);
     return result;
-  };
+  }) as TFunc;
 }
 
 /**
@@ -145,18 +176,27 @@ export function isEqual(a: unknown, b: unknown): boolean {
 
   // Handle objects
   if (typeof a === 'object' && typeof b === 'object') {
-    const keysA = Object.keys(a);
-    const keysB = Object.keys(b);
-
-    if (keysA.length !== keysB.length) return false;
-
-    // Type assertion is safe: we've confirmed both values are objects
     const objA = a as Record<string, unknown>;
     const objB = b as Record<string, unknown>;
+    const keysA = Object.keys(objA);
+    const keysB = Object.keys(objB);
+
+    if (keysA.length !== keysB.length) return false;
 
     return keysA.every((key) => keysB.includes(key) && isEqual(objA[key], objB[key]));
   }
 
   // Primitives - use Object.is to handle NaN correctly (NaN === NaN is false, but Object.is(NaN, NaN) is true)
   return Object.is(a, b);
+}
+
+/**
+ * Normalizes a fields collection to an array.
+ * Handles both array format and object format (keyed by field key).
+ *
+ * @param fields - Fields as array or object
+ * @returns Fields as array
+ */
+export function normalizeFieldsArray<T>(fields: readonly T[] | Record<string, T>): T[] {
+  return Array.isArray(fields) ? [...fields] : Object.values(fields);
 }

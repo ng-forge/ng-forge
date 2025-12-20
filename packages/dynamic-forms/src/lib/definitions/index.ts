@@ -11,29 +11,6 @@ export type {
 } from './base';
 export { isCheckedField, isValueField } from './base';
 
-// Default field definitions
-export type {
-  ArrayField,
-  ButtonField,
-  CheckboxField,
-  DatepickerField,
-  DatepickerProps,
-  EventArgs,
-  GroupField,
-  InputField,
-  InputProps,
-  MultiCheckboxField,
-  PageField,
-  RadioField,
-  RowField,
-  SelectField,
-  SelectProps,
-  SliderField,
-  TextareaField,
-  TextareaProps,
-  TextElementType,
-  TextField,
-  TextProps,
-  ToggleField,
-} from './default';
+// Default field definitions (core/built-in fields)
+export type { ArrayField, GroupField, PageField, RowField, TextElementType, TextField, TextProps } from './default';
 export { isRowField } from './default';

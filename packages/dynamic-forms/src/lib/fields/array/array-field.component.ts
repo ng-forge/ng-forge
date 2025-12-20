@@ -18,6 +18,7 @@ import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
+import { ArrayFieldTree } from '../../core/field-tree-utils';
 
 /**
  * Container component for rendering dynamic arrays of fields.
@@ -42,7 +43,7 @@ import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.toke
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
+export default class ArrayFieldComponent<TModel extends Record<string, unknown> = Record<string, unknown>> {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies
   // ─────────────────────────────────────────────────────────────────────────────
@@ -74,24 +75,19 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
 
   private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
     const arrayKey = this.field().key;
-    const parentForm = this.parentFieldSignalContext.form();
+    const parentForm = this.parentFieldSignalContext.form;
     const arrayValue = getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
 
     if (arrayValue.length === 0) return [];
 
-    // Get the array FieldTree from the parent form via bracket notation
-    // Angular Signal Forms FieldTree supports indexing: form['fieldKey'] returns FieldTree<T>
-    const arrayFieldTree = (parentForm as unknown as Record<string, FieldTree<unknown>>)[arrayKey];
+    const arrayFieldTree = (parentForm as Record<string, ArrayFieldTree<unknown>>)[arrayKey];
     if (!arrayFieldTree) return arrayValue.map(() => null);
 
     // Access array items via bracket notation - Angular Signal Forms arrays support this
-    // The type is ReadonlyArrayLike<MaybeFieldTree<U, number>>
-    const arrayWithIndex = arrayFieldTree as unknown as readonly (FieldTree<unknown> | undefined)[];
-
     const items: (FieldTree<unknown> | null)[] = [];
     for (let i = 0; i < arrayValue.length; i++) {
-      // Access item FieldTree directly via bracket notation
-      const itemFieldTree = arrayWithIndex[i];
+      // Access item FieldTree directly via numeric indexing (ArrayFieldTree supports this)
+      const itemFieldTree = arrayFieldTree[i];
       items.push(itemFieldTree ?? null);
     }
 
@@ -243,8 +239,8 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     }
 
     const arrayKey = this.field().key;
-    const formObject = this.parentFieldSignalContext.form();
-    const currentValue = formObject.value() as TModel;
+    const parentForm = this.parentFieldSignalContext.form;
+    const currentValue = parentForm().value() as TModel;
     const currentArray = getArrayValue(currentValue as Partial<TModel>, arrayKey);
     const insertIndex = index !== undefined ? Math.min(index, currentArray.length) : currentArray.length;
 
@@ -258,14 +254,16 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const newArray = [...currentArray];
     newArray.splice(insertIndex, 0, value);
 
-    // Type assertion is necessary: we're constructing the form value dynamically
-    (formObject.value.set as (value: unknown) => void)({ ...currentValue, [arrayKey]: newArray });
+    // Update the parent form with the new array value
+    // The `as any` is required due to Angular Signal Forms' complex conditional types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parentForm().value.set({ ...currentValue, [arrayKey]: newArray } as any);
   }
 
   private removeItem(index?: number): void {
     const arrayKey = this.field().key;
-    const formObject = this.parentFieldSignalContext.form();
-    const currentValue = formObject.value() as TModel;
+    const parentForm = this.parentFieldSignalContext.form;
+    const currentValue = parentForm().value() as TModel;
     const currentArray = getArrayValue(currentValue as Partial<TModel>, arrayKey);
 
     if (currentArray.length === 0) return;
@@ -274,8 +272,10 @@ export default class ArrayFieldComponent<TModel = Record<string, unknown>> {
     const newArray = [...currentArray];
     newArray.splice(removeIndex, 1);
 
-    // Type assertion is necessary: we're constructing the form value dynamically
-    (formObject.value.set as (value: unknown) => void)({ ...currentValue, [arrayKey]: newArray });
+    // Update the parent form with the new array value
+    // The `as any` is required due to Angular Signal Forms' complex conditional types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parentForm().value.set({ ...currentValue, [arrayKey]: newArray } as any);
   }
 }
 

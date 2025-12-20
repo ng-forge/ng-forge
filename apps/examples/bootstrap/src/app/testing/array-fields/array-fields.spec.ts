@@ -123,6 +123,14 @@ test.describe('Array Fields E2E Tests', () => {
       // Fields should be marked as required
       expect(await nameInput.getAttribute('required')).not.toBeNull();
       expect(await emailInput.getAttribute('required')).not.toBeNull();
+
+      // Validation should show error when required field is blurred empty
+      await nameInput.focus();
+      await nameInput.blur();
+      await page.waitForTimeout(500);
+
+      const errorMessage = scenario.locator('.invalid-feedback');
+      await expect(errorMessage.first()).toBeVisible({ timeout: 5000 });
     });
 
     test('should enforce minimum array length', async ({ page, helpers }) => {

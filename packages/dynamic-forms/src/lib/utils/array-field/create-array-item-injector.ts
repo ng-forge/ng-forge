@@ -14,7 +14,7 @@ import { getArrayValue } from './array-field.types';
 /**
  * Options for creating an array item injector.
  */
-export interface CreateArrayItemInjectorOptions<TModel> {
+export interface CreateArrayItemInjectorOptions<TModel extends Record<string, unknown>> {
   /** The field tree for this item (null for object items without existing FieldTree). */
   fieldTree: FieldTree<unknown> | null;
   /** The field template defining the array item structure. */
@@ -45,7 +45,7 @@ export interface ArrayItemInjectorResult {
  * Syncs item form value changes back to the parent form's array.
  * This effect watches the item form value and updates the parent array when changes occur.
  */
-function syncItemToParent<TModel>(
+function syncItemToParent<TModel extends Record<string, unknown>>(
   itemFormInstance: ReturnType<typeof form<unknown>>,
   parentFieldSignalContext: FieldSignalContext<TModel>,
   arrayKey: string,
@@ -60,8 +60,8 @@ function syncItemToParent<TModel>(
     explicitEffect([() => itemFormInstance().value()], ([itemValue]) => {
       if (isSyncing) return;
 
-      const parentForm = parentFieldSignalContext.form();
-      const parentValue = untracked(() => parentForm.value()) as Record<string, unknown>;
+      const parentForm = parentFieldSignalContext.form;
+      const parentValue = untracked(() => parentForm().value()) as TModel;
       const currentArray = getArrayValue(parentValue as Partial<TModel>, arrayKey);
       const idx = untracked(() => indexSignal());
 
@@ -70,10 +70,10 @@ function syncItemToParent<TModel>(
         isSyncing = true;
         const newArray = [...currentArray];
         newArray[idx] = itemValue;
-        // Type assertion is necessary: Angular Signal Forms expects the exact form value type,
-        // but we're constructing it dynamically. The spread preserves all properties and the
-        // array key is updated with the new value.
-        (parentForm.value.set as (value: unknown) => void)({ ...parentValue, [arrayKey]: newArray });
+        // Update the parent form with the new array value
+        // The `as any` is required due to Angular Signal Forms' complex conditional types
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        parentForm().value.set({ ...parentValue, [arrayKey]: newArray } as any);
         isSyncing = false;
       }
     });
@@ -87,7 +87,9 @@ function syncItemToParent<TModel>(
  * form references and scoped injectors with ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT.
  * Sets up two-way sync to propagate item form changes back to the parent form.
  */
-export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayItemInjectorOptions<TModel>): ArrayItemInjectorResult {
+export function createArrayItemInjectorAndInputs<TModel extends Record<string, unknown>>(
+  options: CreateArrayItemInjectorOptions<TModel>,
+): ArrayItemInjectorResult {
   const { fieldTree, template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField } = options;
 
   // Create item form - uses linkedSignal that derives from parent
@@ -123,7 +125,7 @@ export function createArrayItemInjectorAndInputs<TModel>(options: CreateArrayIte
   return { injector, inputs };
 }
 
-interface CreateObjectItemFormOptions<TModel> {
+interface CreateObjectItemFormOptions<TModel extends Record<string, unknown>> {
   template: FieldDef<unknown>;
   indexSignal: Signal<number>;
   parentFieldSignalContext: FieldSignalContext<TModel>;
@@ -137,9 +139,11 @@ interface CreateObjectItemFormOptions<TModel> {
  * The linkedSignal derives from the parent array at the current index.
  *
  * For array items, we always create a form with a schema to ensure proper field structure.
- * This is needed for valueFieldMapper to find fields via childrenMap.
+ * This is needed for valueFieldMapper to find fields via bracket notation.
  */
-function createObjectItemForm<TModel>(options: CreateObjectItemFormOptions<TModel>): ReturnType<typeof form<unknown>> {
+function createObjectItemForm<TModel extends Record<string, unknown>>(
+  options: CreateObjectItemFormOptions<TModel>,
+): ReturnType<typeof form<unknown>> {
   const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayKey } = options;
 
   const itemEntity = linkedSignal(() => {
@@ -161,7 +165,7 @@ function createObjectItemForm<TModel>(options: CreateObjectItemFormOptions<TMode
   });
 }
 
-interface CreateItemInjectorOptions<TModel> {
+interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
   formRef: FieldTree<unknown> | ReturnType<typeof form<unknown>>;
   indexSignal: Signal<number>;
   parentFieldSignalContext: FieldSignalContext<TModel>;
@@ -173,7 +177,7 @@ interface CreateItemInjectorOptions<TModel> {
  * Creates a scoped injector for an array item.
  * Provides both FIELD_SIGNAL_CONTEXT (for form access) and ARRAY_CONTEXT (for position awareness).
  */
-function createItemInjector<TModel>(options: CreateItemInjectorOptions<TModel>): Injector {
+function createItemInjector<TModel extends Record<string, unknown>>(options: CreateItemInjectorOptions<TModel>): Injector {
   const { formRef, indexSignal, parentFieldSignalContext, parentInjector, arrayField } = options;
 
   const arrayContext: ArrayContext = {
@@ -183,12 +187,11 @@ function createItemInjector<TModel>(options: CreateItemInjectorOptions<TModel>):
     field: arrayField,
   };
 
-  const itemFieldSignalContext: FieldSignalContext<unknown> = {
+  const itemFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
     injector: undefined as unknown as Injector,
     value: parentFieldSignalContext.value,
     defaultValues: () => ({}),
-    // formRef is already the form instance (result of form()), no need to wrap in another function
-    form: formRef as unknown as ReturnType<typeof form<unknown>>,
+    form: formRef as FieldTree<Record<string, unknown>>,
     defaultValidationMessages: parentFieldSignalContext.defaultValidationMessages,
   };
 
