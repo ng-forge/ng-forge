@@ -13,10 +13,11 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
+import { IonicWrappedMetaDirective } from '../../directives/ionic-wrapped-meta.directive';
 
 @Component({
   selector: 'df-ionic-datepicker',
@@ -33,11 +34,13 @@ import { format } from 'date-fns';
     IonButton,
     DynamicTextPipe,
     AsyncPipe,
+    IonicWrappedMetaDirective,
   ],
   template: `
     @let f = field(); @let dateValue = f().value();
 
     <ion-input
+      [meta]="meta()"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -122,6 +125,7 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<IonicDatepickerProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

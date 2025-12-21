@@ -244,6 +244,87 @@ test.describe('Comprehensive Material Field Tests', () => {
     });
   });
 
+  test.describe('Meta Attributes Test', () => {
+    test('should propagate meta attributes to native input elements in wrapped components', async ({ page, helpers }) => {
+      // Navigate to the meta attributes test component
+      await page.goto('http://localhost:4201/#/test/comprehensive-field-tests/meta-attributes');
+      await page.waitForLoadState('networkidle');
+
+      // Locate the specific test scenario
+      const scenario = helpers.getScenario('meta-attributes-test');
+      await expect(scenario).toBeVisible();
+
+      // Test checkbox meta attributes - verify they reach the native input
+      const checkboxInput = scenario.locator('#termsCheckbox mat-checkbox input[type="checkbox"]');
+      await expect(checkboxInput).toHaveAttribute('data-testid', 'terms-checkbox-input');
+      await expect(checkboxInput).toHaveAttribute('data-analytics', 'terms-acceptance');
+
+      // Test toggle meta attributes - verify they reach the native input
+      const toggleInput = scenario.locator('#notificationsToggle mat-slide-toggle input[type="checkbox"]');
+      await expect(toggleInput).toHaveAttribute('data-testid', 'notifications-toggle-input');
+      await expect(toggleInput).toHaveAttribute('data-analytics', 'notification-setting');
+
+      // Test radio meta attributes - verify they reach all radio inputs in the group
+      const radioInputs = scenario.locator('#preferenceRadio mat-radio-group input[type="radio"]');
+      const radioCount = await radioInputs.count();
+      expect(radioCount).toBe(3); // Three options
+
+      for (let i = 0; i < radioCount; i++) {
+        await expect(radioInputs.nth(i)).toHaveAttribute('data-testid', 'preference-radio-input');
+        await expect(radioInputs.nth(i)).toHaveAttribute('data-analytics', 'contact-preference');
+      }
+
+      // Test multi-checkbox meta attributes - verify they reach all checkbox inputs
+      const multiCheckboxInputs = scenario.locator('#interestsMultiCheckbox mat-checkbox input[type="checkbox"]');
+      const multiCheckboxCount = await multiCheckboxInputs.count();
+      expect(multiCheckboxCount).toBe(3); // Three options
+
+      for (let i = 0; i < multiCheckboxCount; i++) {
+        await expect(multiCheckboxInputs.nth(i)).toHaveAttribute('data-testid', 'interests-multi-checkbox-input');
+        await expect(multiCheckboxInputs.nth(i)).toHaveAttribute('data-analytics', 'user-interests');
+      }
+
+      // Test native input meta attributes (for comparison)
+      const emailInput = scenario.locator('#emailInput input');
+      await expect(emailInput).toHaveAttribute('data-testid', 'email-input');
+      await expect(emailInput).toHaveAttribute('autocomplete', 'email');
+
+      // Interact with the form to ensure functionality isn't broken
+      await scenario.locator('#termsCheckbox mat-checkbox').click();
+      await scenario.locator('#notificationsToggle mat-slide-toggle').click();
+      await scenario.locator('#preferenceRadio mat-radio-button:has-text("Email")').click();
+      await scenario.locator('#interestsMultiCheckbox mat-checkbox:has-text("Sports")').click();
+      await scenario.locator('#emailInput input').fill('test@example.com');
+
+      // Set up event listener BEFORE clicking submit
+      const submittedDataPromise = page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            window.addEventListener(
+              'formSubmitted',
+              (event: any) => {
+                resolve(event.detail.data);
+              },
+              { once: true },
+            );
+          }),
+      );
+
+      // Submit form
+      await scenario.locator('#submitMeta button').click();
+
+      // Wait for formSubmitted event
+      const submittedData = (await submittedDataPromise) as Record<string, unknown>;
+
+      // Verify submission
+      expect(submittedData['termsCheckbox']).toBe(true);
+      expect(submittedData['notificationsToggle']).toBe(true);
+      expect(submittedData['preferenceRadio']).toBe('email');
+      expect(submittedData['interestsMultiCheckbox']).toEqual(['sports']);
+      expect(submittedData['emailInput']).toBe('test@example.com');
+    });
+  });
+
   test.describe('State Management Test', () => {
     test('should test form state management', async ({ page, helpers }) => {
       // Navigate to the state management test component

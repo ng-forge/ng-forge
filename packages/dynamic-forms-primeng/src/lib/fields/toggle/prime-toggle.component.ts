@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeToggleComponent, PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';
 import { ToggleSwitch } from 'primeng/toggleswitch';
+import { PrimeWrappedMetaDirective } from '../../directives/prime-wrapped-meta.directive';
 
 @Component({
   selector: 'df-prime-toggle',
-  imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, Field],
+  imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, Field, PrimeWrappedMetaDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -23,6 +24,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
       <p-toggleSwitch
         [id]="key()"
         [field]="f"
+        [meta]="meta()"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"
         [attr.aria-required]="ariaRequired"
@@ -64,6 +66,7 @@ export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeToggleProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

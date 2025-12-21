@@ -1,6 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
+import {
+  DynamicText,
+  DynamicTextPipe,
+  FieldMeta,
+  FieldMetaDirective,
+  FieldOption,
+  ValidationMessages,
+  ValueType,
+} from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { isEqual } from '../../utils/is-equal';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -9,7 +17,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-multi-checkbox',
-  imports: [DynamicTextPipe, AsyncPipe],
+  imports: [DynamicTextPipe, AsyncPipe, FieldMetaDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -33,6 +41,7 @@ import { AsyncPipe } from '@angular/common';
             [checked]="isChecked(option)"
             [disabled]="f().disabled() || option.disabled"
             (change)="onCheckboxChange(option, $any($event.target).checked)"
+            [meta]="meta()"
             class="form-check-input"
             [class.is-invalid]="f().invalid() && f().touched()"
             [attr.tabindex]="tabIndex()"
@@ -93,6 +102,7 @@ export default class BsMultiCheckboxFieldComponent<T extends ValueType> implemen
   readonly props = input<BsMultiCheckboxProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<FieldMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

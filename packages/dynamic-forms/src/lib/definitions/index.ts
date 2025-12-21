@@ -5,6 +5,7 @@ export type {
   CheckedFieldComponent,
   FieldComponent,
   FieldDef,
+  FieldMeta,
   FieldWithValidation,
   ValueFieldComponent,
   ValueType,

@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMetaDirective, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, InputMeta, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatSliderComponent, MatSliderProps } from './mat-slider.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-slider',
-  imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, Field],
+  imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, Field, FieldMetaDirective],
   template: `
     @let f = field();
     @let ariaInvalid = this.ariaInvalid();
@@ -31,6 +31,7 @@ import { AsyncPipe } from '@angular/common';
       <input
         matSliderThumb
         [field]="f"
+        [meta]="meta()"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"
         [attr.aria-describedby]="ariaDescribedBy"
@@ -79,6 +80,7 @@ export default class MatSliderFieldComponent implements MatSliderComponent {
   readonly tabIndex = input<number>();
 
   readonly props = input<MatSliderProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

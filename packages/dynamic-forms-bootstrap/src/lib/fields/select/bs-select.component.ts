@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldMetaDirective, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsSelectComponent, BsSelectProps } from './bs-select.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-select',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe, FieldMetaDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -21,6 +21,7 @@ import { AsyncPipe } from '@angular/common';
       <select
         [field]="f"
         [id]="key()"
+        [meta]="meta()"
         class="form-select"
         [class.form-select-sm]="props()?.size === 'sm'"
         [class.form-select-lg]="props()?.size === 'lg'"
@@ -78,6 +79,7 @@ export default class BsSelectFieldComponent<T extends string = string> implement
   readonly props = input<BsSelectProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<FieldMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

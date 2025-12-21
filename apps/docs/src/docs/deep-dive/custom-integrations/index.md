@@ -189,6 +189,7 @@ The component must implement these inputs:
 - `className?: string` - CSS classes
 - `tabIndex?: number` - Tab order
 - `props?: TProps` - Custom field-specific props
+- `meta?: FieldMeta` - Native HTML attributes (data-_, aria-_, autocomplete, etc.)
 
 ### CheckedFieldComponent
 
@@ -325,6 +326,105 @@ This enables:
 - Type checking in form configurations
 - Compile-time validation of field definitions
 
+## Handling Meta Attributes
+
+`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior).
+
+### Props vs Meta
+
+| Attribute Type     | Example                 | Use `props` | Use `meta` |
+| ------------------ | ----------------------- | ----------- | ---------- |
+| UI appearance      | `appearance: 'outline'` | ✅          | ❌         |
+| Component behavior | `multiple: true`        | ✅          | ❌         |
+| Browser autofill   | `autocomplete: 'email'` | ❌          | ✅         |
+| Testing IDs        | `data-testid: 'email'`  | ❌          | ✅         |
+| Accessibility      | `aria-describedby`      | ❌          | ✅         |
+
+### For Native Elements
+
+For components using native HTML elements directly, use the `FieldMetaDirective`:
+
+```typescript
+import { FieldMetaDirective } from '@ng-forge/dynamic-forms';
+
+@Component({
+  imports: [FieldMetaDirective, ...],
+  template: `
+    <input [field]="f" [meta]="meta()" />
+  `,
+})
+export default class CustomInputComponent {
+  readonly meta = input<FieldMeta>();
+}
+```
+
+### For Wrapped Components
+
+UI libraries like Material, PrimeNG, and Ionic wrap native inputs inside custom components. To propagate meta attributes to the native element, create a **wrapped-meta directive**:
+
+```typescript
+import { Directive, ElementRef, inject, input } from '@angular/core';
+import { FieldMeta, applyMetaToElement } from '@ng-forge/dynamic-forms';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+
+@Directive({
+  selector: 'custom-checkbox[meta], custom-toggle[meta], custom-radio[meta]',
+})
+export class CustomWrappedMetaDirective {
+  private readonly el = inject(ElementRef<HTMLElement>);
+  readonly meta = input<FieldMeta>();
+  private appliedAttributes = new Set<string>();
+
+  constructor() {
+    explicitEffect([this.meta], ([meta]) => {
+      // Find native input inside the wrapper
+      const input = this.el.nativeElement.querySelector('input');
+      if (input) {
+        this.appliedAttributes = applyMetaToElement(input, meta, this.appliedAttributes);
+      }
+    });
+  }
+}
+```
+
+Then use it in your wrapped components:
+
+```typescript
+@Component({
+  imports: [CustomCheckbox, CustomWrappedMetaDirective, ...],
+  template: `
+    <custom-checkbox [field]="f" [meta]="meta()">
+      {% raw %}{{ label() | dynamicText | async }}{% endraw %}
+    </custom-checkbox>
+  `,
+})
+export default class CustomCheckboxComponent {
+  readonly meta = input<FieldMeta>();
+}
+```
+
+### Shadow DOM Considerations
+
+For components using Shadow DOM (like Ionic), you cannot access the internal input. Apply meta to the host element instead:
+
+```typescript
+@Directive({
+  selector: 'ion-checkbox[meta], ion-toggle[meta]',
+})
+export class IonicWrappedMetaDirective {
+  private readonly el = inject(ElementRef<HTMLElement>);
+  readonly meta = input<FieldMeta>();
+  private appliedAttributes = new Set<string>();
+
+  constructor() {
+    explicitEffect([this.meta], ([meta]) => {
+      // Shadow DOM: apply to host element only
+      this.appliedAttributes = applyMetaToElement(this.el.nativeElement, meta, this.appliedAttributes);
+    });
+  }
+}
+```
+
 ## Best Practices
 
 **Use proper component interfaces:**
@@ -332,6 +432,13 @@ This enables:
 - Implement `ValueFieldComponent<T>` for value fields
 - Implement `CheckedFieldComponent<T>` for checkboxes/toggles
 - Define clear prop interfaces
+
+**Handle meta attributes:**
+
+- All components must accept a `meta` input
+- Use `FieldMetaDirective` for native elements
+- Create wrapped-meta directives for UI library components
+- Apply to host element when Shadow DOM blocks access
 
 **Leverage [field] binding:**
 

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { ValueInArrayPipe } from '../../directives/value-in-array.pipe';
 import { isEqual } from '../../utils/is-equal';
@@ -9,10 +9,11 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxComponent, MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { MatWrappedMetaDirective } from '../../directives/mat-wrapped-meta.directive';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
-  imports: [MatCheckbox, ValueInArrayPipe, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatCheckbox, ValueInArrayPipe, MatError, DynamicTextPipe, AsyncPipe, MatWrappedMetaDirective],
   template: `
     @let f = field();
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -33,6 +34,7 @@ import { AsyncPipe } from '@angular/common';
         <mat-checkbox
           [checked]="option | inArray: valueViewModel()"
           [disabled]="f().disabled() || option.disabled"
+          [meta]="meta()"
           [color]="props()?.color || 'primary'"
           [labelPosition]="props()?.labelPosition || 'after'"
           (change)="onCheckboxChange(option, $event.checked)"
@@ -81,6 +83,7 @@ export default class MatMultiCheckboxFieldComponent<T extends ValueType> impleme
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatMultiCheckboxProps>();
+  readonly meta = input<FieldMeta>();
 
   valueViewModel = linkedSignal<FieldOption<T>[]>(
     () => {

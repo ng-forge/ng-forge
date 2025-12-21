@@ -27,6 +27,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getComprehensiveFieldTestsScenario('state-management-test') },
   },
+  {
+    path: 'meta-attributes',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getComprehensiveFieldTestsScenario('meta-attributes-test') },
+  },
 ];
 
 export default routes;

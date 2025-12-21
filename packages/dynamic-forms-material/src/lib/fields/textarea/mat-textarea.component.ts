@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMetaDirective, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
@@ -11,7 +11,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'df-mat-textarea',
-  imports: [MatFormField, MatLabel, MatInput, MatHint, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatFormField, MatLabel, MatInput, MatHint, Field, MatError, DynamicTextPipe, AsyncPipe, FieldMetaDirective],
   template: `
     @let f = field();
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -26,6 +26,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
         #textareaRef
         matInput
         [field]="f"
+        [meta]="meta()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
@@ -113,6 +114,7 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<MatTextareaProps>();
+  readonly meta = input<TextareaMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

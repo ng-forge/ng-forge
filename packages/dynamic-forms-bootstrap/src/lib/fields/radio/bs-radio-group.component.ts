@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldMetaDirective, FieldOption } from '@ng-forge/dynamic-forms';
 import { AsyncPipe } from '@angular/common';
 
 export interface BsRadioGroupProps {
@@ -28,7 +28,7 @@ export interface BsRadioGroupProps {
 
 @Component({
   selector: 'df-bs-radio-group',
-  imports: [DynamicTextPipe, AsyncPipe],
+  imports: [DynamicTextPipe, AsyncPipe, FieldMetaDirective],
   template: `
     @let props = properties();
     @let ariaDescribedBy = this.ariaDescribedBy();
@@ -43,6 +43,7 @@ export interface BsRadioGroupProps {
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
             [attr.aria-describedby]="ariaDescribedBy"
+            [meta]="meta()"
             class="btn-check"
             [id]="name() + '_' + i"
             autocomplete="off"
@@ -68,6 +69,7 @@ export interface BsRadioGroupProps {
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
             [attr.aria-describedby]="ariaDescribedBy"
+            [meta]="meta()"
             class="form-check-input"
             [id]="name() + '_' + i"
           />
@@ -100,6 +102,7 @@ export class BsRadioGroupComponent<T = unknown> implements FormValueControl<T> {
   readonly label = input<DynamicText>();
   readonly options = input.required<FieldOption<T>[]>();
   readonly properties = input<BsRadioGroupProps>();
+  readonly meta = input<FieldMeta>();
 
   // Accessibility - this will be provided by parent component through input
   readonly ariaDescribedBy = input<string | null>(null);

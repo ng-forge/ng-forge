@@ -3,15 +3,16 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatHint } from '@angular/material/input';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatSelectComponent, MatSelectProps } from './mat-select.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { MatWrappedMetaDirective } from '../../directives/mat-wrapped-meta.directive';
 
 @Component({
   selector: 'df-mat-select',
-  imports: [MatFormField, MatLabel, MatSelect, MatOption, MatHint, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatFormField, MatLabel, MatSelect, MatOption, MatHint, Field, MatError, DynamicTextPipe, AsyncPipe, MatWrappedMetaDirective],
   template: `
     @let f = field();
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -24,6 +25,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
       <mat-select
         [field]="f"
+        [meta]="meta()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
         [compareWith]="props()?.compareWith || defaultCompare"
@@ -84,6 +86,7 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatSelectProps<T>>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

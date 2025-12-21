@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMetaDirective, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, InputMeta, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
@@ -9,7 +9,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 @Component({
   selector: 'df-prime-input',
-  imports: [InputText, DynamicTextPipe, AsyncPipe, Field],
+  imports: [InputText, DynamicTextPipe, AsyncPipe, Field, FieldMetaDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -26,6 +26,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
             pInputText
             [id]="inputId()"
             [field]="f"
+            [meta]="meta()"
             type="email"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
@@ -40,6 +41,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
             pInputText
             [id]="inputId()"
             [field]="f"
+            [meta]="meta()"
             type="password"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
@@ -54,6 +56,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
             pInputText
             [id]="inputId()"
             [field]="f"
+            [meta]="meta()"
             type="number"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
@@ -68,6 +71,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
             pInputText
             [id]="inputId()"
             [field]="f"
+            [meta]="meta()"
             type="tel"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
@@ -82,6 +86,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
             pInputText
             [id]="inputId()"
             [field]="f"
+            [meta]="meta()"
             type="url"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
@@ -96,6 +101,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
             pInputText
             [id]="inputId()"
             [field]="f"
+            [meta]="meta()"
             type="text"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
@@ -140,6 +146,7 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeInputProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

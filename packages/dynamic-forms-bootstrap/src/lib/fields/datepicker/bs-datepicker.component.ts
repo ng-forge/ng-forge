@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMetaDirective, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, InputMeta, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsDatepickerComponent, BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
 @Component({
   selector: 'df-bs-datepicker',
-  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
+  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective, FieldMetaDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -28,6 +28,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
           [attr.aria-invalid]="ariaInvalid"
           [attr.aria-required]="ariaRequired"
           [attr.aria-describedby]="ariaDescribedBy"
+          [meta]="meta()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -65,6 +66,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
           [attr.aria-invalid]="ariaInvalid"
           [attr.aria-required]="ariaRequired"
           [attr.aria-describedby]="ariaDescribedBy"
+          [meta]="meta()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -118,6 +120,7 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
   readonly props = input<BsDatepickerProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<InputMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

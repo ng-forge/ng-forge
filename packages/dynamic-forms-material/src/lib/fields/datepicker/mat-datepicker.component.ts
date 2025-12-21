@@ -3,8 +3,8 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMetaDirective, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, InputMeta, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatDatepickerComponent, MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
@@ -25,6 +25,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     MatError,
     DynamicTextPipe,
     AsyncPipe,
+    FieldMetaDirective,
   ],
   host: {
     '[id]': '`${key()}`',
@@ -45,6 +46,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         matInput
         [matDatepicker]="picker"
         [field]="f"
+        [meta]="meta()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
         [min]="minDate()"
@@ -100,6 +102,7 @@ export default class MatDatepickerFieldComponent implements MatDatepickerCompone
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<MatDatepickerProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

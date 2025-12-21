@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
-import { DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
 import { AsyncPipe } from '@angular/common';
 import { RadioButton } from 'primeng/radiobutton';
+import { PrimeWrappedMetaDirective } from '../../directives/prime-wrapped-meta.directive';
 
 export interface PrimeRadioGroupProps {
   /**
@@ -14,7 +15,7 @@ export interface PrimeRadioGroupProps {
 
 @Component({
   selector: 'df-prime-radio-group',
-  imports: [RadioButton, FormsModule, DynamicTextPipe, AsyncPipe],
+  imports: [RadioButton, FormsModule, DynamicTextPipe, AsyncPipe, PrimeWrappedMetaDirective],
   template: `
     <div class="radio-group">
       @for (option of options(); track option.value; let i = $index) {
@@ -26,6 +27,7 @@ export interface PrimeRadioGroupProps {
             (ngModelChange)="onRadioChange($event)"
             [disabled]="disabled() || option.disabled || false"
             [inputId]="name() + '_' + i"
+            [meta]="meta()"
             [styleClass]="properties()?.styleClass"
           />
           <label [for]="name() + '_' + i" class="radio-option-label">{{ option.label | dynamicText | async }}</label>
@@ -72,6 +74,7 @@ export class PrimeRadioGroupComponent<T = unknown> implements FormValueControl<T
   // Component-specific inputs
   readonly options = input.required<FieldOption<T>[]>();
   readonly properties = input<PrimeRadioGroupProps>();
+  readonly meta = input<FieldMeta>();
 
   /**
    * Handle radio button change event

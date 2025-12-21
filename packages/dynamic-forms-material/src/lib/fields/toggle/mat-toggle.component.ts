@@ -1,23 +1,25 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 
 import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { MatWrappedMetaDirective } from '../../directives/mat-wrapped-meta.directive';
 
 @Component({
   selector: 'df-mat-toggle',
-  imports: [MatSlideToggle, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatSlideToggle, Field, MatError, DynamicTextPipe, AsyncPipe, MatWrappedMetaDirective],
   template: `
     @let f = field();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-slide-toggle
       [field]="f"
+      [meta]="meta()"
       [color]="props()?.color || 'primary'"
       [labelPosition]="props()?.labelPosition || 'after'"
       [hideIcon]="props()?.hideIcon || false"
@@ -69,6 +71,7 @@ export default class MatToggleFieldComponent implements MatToggleComponent {
   readonly tabIndex = input<number>();
 
   readonly props = input<MatToggleProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

@@ -62,11 +62,15 @@ export type {
   CheckedFieldComponent,
   FieldComponent,
   FieldDef,
+  FieldMeta,
   FieldWithValidation,
   ValueFieldComponent,
   ValueType,
 } from './definitions';
 export { isCheckedField, isValueField } from './definitions';
+
+// Directives
+export { FieldMetaDirective } from './directives';
 
 // Built-in Container Field Types
 export type { ArrayField, GroupField, PageField, RowField, TextField, TextElementType, TextProps } from './definitions/default';
@@ -179,3 +183,6 @@ export { omit } from './utils/object-utils';
 
 // Interpolation utility (used by integration error utilities)
 export { interpolateParams } from './utils/interpolate-params';
+
+// Meta utilities (used by UI library wrapped-meta directives)
+export { applyMetaToElement } from './utils/apply-meta';

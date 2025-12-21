@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonItem, IonNote, IonRadio, IonRadioGroup } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicRadioComponent, IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
+import { IonicWrappedMetaDirective } from '../../directives/ionic-wrapped-meta.directive';
 
 @Component({
   selector: 'df-ionic-radio',
-  imports: [IonRadioGroup, IonRadio, IonItem, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonRadioGroup, IonRadio, IonItem, IonNote, Field, DynamicTextPipe, AsyncPipe, IonicWrappedMetaDirective],
   template: `
     @let f = field();
     @if (label(); as label) {
@@ -26,6 +27,7 @@ import { AsyncPipe } from '@angular/common';
           <ion-radio
             [value]="option.value"
             [disabled]="option.disabled || false"
+            [meta]="meta()"
             [labelPlacement]="props()?.labelPlacement ?? 'end'"
             [justify]="props()?.justify"
             [color]="props()?.color ?? 'primary'"
@@ -77,6 +79,7 @@ export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<
   readonly tabIndex = input<number>();
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<IonicRadioProps<T>>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

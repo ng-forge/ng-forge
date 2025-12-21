@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMetaDirective, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, InputMeta, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsSliderComponent, BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
 
 @Component({
   selector: 'df-bs-slider',
-  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
+  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective, FieldMetaDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -37,6 +37,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
         [attr.aria-invalid]="ariaInvalid"
         [attr.aria-required]="ariaRequired"
         [attr.aria-describedby]="ariaDescribedBy"
+        [meta]="meta()"
         class="form-range"
       />
 
@@ -86,6 +87,7 @@ export default class BsSliderFieldComponent implements BsSliderComponent {
   readonly props = input<BsSliderProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<InputMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

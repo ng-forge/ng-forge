@@ -2,14 +2,15 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
+import { IonicWrappedMetaDirective } from '../../directives/ionic-wrapped-meta.directive';
 
 @Component({
   selector: 'df-ionic-input',
-  imports: [IonInput, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonInput, IonNote, Field, DynamicTextPipe, AsyncPipe, IonicWrappedMetaDirective],
   template: `
     @let f = field();
     @let ariaInvalid = isAriaInvalid();
@@ -20,6 +21,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
         <ion-input
           type="email"
           [field]="f"
+          [meta]="meta()"
           [label]="(label() | dynamicText | async) ?? undefined"
           [labelPlacement]="effectiveLabelPlacement()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -48,6 +50,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
         <ion-input
           type="password"
           [field]="f"
+          [meta]="meta()"
           [label]="(label() | dynamicText | async) ?? undefined"
           [labelPlacement]="effectiveLabelPlacement()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -76,6 +79,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
         <ion-input
           type="number"
           [field]="f"
+          [meta]="meta()"
           [label]="(label() | dynamicText | async) ?? undefined"
           [labelPlacement]="effectiveLabelPlacement()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -104,6 +108,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
         <ion-input
           type="tel"
           [field]="f"
+          [meta]="meta()"
           [label]="(label() | dynamicText | async) ?? undefined"
           [labelPlacement]="effectiveLabelPlacement()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -132,6 +137,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
         <ion-input
           type="url"
           [field]="f"
+          [meta]="meta()"
           [label]="(label() | dynamicText | async) ?? undefined"
           [labelPlacement]="effectiveLabelPlacement()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -160,6 +166,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
         <ion-input
           type="text"
           [field]="f"
+          [meta]="meta()"
           [label]="(label() | dynamicText | async) ?? undefined"
           [labelPlacement]="effectiveLabelPlacement()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -212,6 +219,7 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<IonicInputProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

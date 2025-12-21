@@ -1,19 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicCheckboxComponent, IonicCheckboxProps } from './ionic-checkbox.type';
 import { AsyncPipe } from '@angular/common';
+import { IonicWrappedMetaDirective } from '../../directives/ionic-wrapped-meta.directive';
 
 @Component({
   selector: 'df-ionic-checkbox',
-  imports: [IonCheckbox, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonCheckbox, IonNote, Field, DynamicTextPipe, AsyncPipe, IonicWrappedMetaDirective],
   template: `
     @let f = field();
 
     <ion-checkbox
       [field]="f"
+      [meta]="meta()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"
       [color]="props()?.color ?? 'primary'"
@@ -58,6 +60,7 @@ export default class IonicCheckboxFieldComponent implements IonicCheckboxCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<IonicCheckboxProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

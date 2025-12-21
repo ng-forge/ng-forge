@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
+import { FieldMetaDirective } from '@ng-forge/dynamic-forms';
+import { TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { TextareaModule } from 'primeng/textarea';
 import { FormsModule } from '@angular/forms';
 
@@ -9,11 +11,12 @@ import { FormsModule } from '@angular/forms';
  */
 @Component({
   selector: 'df-prime-textarea-control',
-  imports: [TextareaModule, FormsModule],
+  imports: [TextareaModule, FormsModule, FieldMetaDirective],
   template: `
     <textarea
       pInputTextarea
       [(ngModel)]="value"
+      [meta]="meta()"
       [placeholder]="placeholder()"
       [rows]="rows()"
       [cols]="cols()"
@@ -65,6 +68,7 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   readonly tabIndex = input<number | undefined>(undefined);
   readonly autoResize = input<boolean>(false);
   readonly styleClass = input<string>('');
+  readonly meta = input<TextareaMeta>();
 
   /** aria-describedby IDs passed from parent */
   readonly ariaDescribedBy = input<string | null>(null);

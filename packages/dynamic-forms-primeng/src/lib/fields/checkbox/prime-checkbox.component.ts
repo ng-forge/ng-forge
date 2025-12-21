@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeCheckboxComponent, PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';
+import { PrimeWrappedMetaDirective } from '../../directives/prime-wrapped-meta.directive';
 
 @Component({
   selector: 'df-prime-checkbox',
-  imports: [Checkbox, DynamicTextPipe, AsyncPipe, Field],
+  imports: [Checkbox, DynamicTextPipe, AsyncPipe, Field, PrimeWrappedMetaDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let checkboxId = key() + '-checkbox'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -17,6 +18,7 @@ import { AsyncPipe } from '@angular/common';
     <div class="flex items-center">
       <p-checkbox
         [field]="f"
+        [meta]="meta()"
         [inputId]="checkboxId"
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
@@ -68,6 +70,7 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeCheckboxProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

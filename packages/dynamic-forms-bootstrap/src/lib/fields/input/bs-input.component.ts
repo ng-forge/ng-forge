@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMetaDirective, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, InputMeta, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsInputComponent, BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 
 @Component({
   selector: 'df-bs-input',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [Field, DynamicTextPipe, AsyncPipe, FieldMetaDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @let effectiveSize = this.effectiveSize();
@@ -29,6 +29,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -47,6 +48,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -65,6 +67,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -83,6 +86,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -101,6 +105,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -119,6 +124,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -157,6 +163,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -175,6 +182,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -193,6 +201,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -211,6 +220,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -229,6 +239,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -247,6 +258,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
               [attr.aria-invalid]="ariaInvalid"
               [attr.aria-required]="ariaRequired"
               [attr.aria-describedby]="ariaDescribedBy"
+              [meta]="meta()"
               class="form-control"
               [class.form-control-sm]="effectiveSize === 'sm'"
               [class.form-control-lg]="effectiveSize === 'lg'"
@@ -300,6 +312,7 @@ export default class BsInputFieldComponent implements BsInputComponent {
   readonly props = input<BsInputProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<InputMeta>();
 
   readonly effectiveSize = computed(() => this.props()?.size ?? this.bootstrapConfig?.size);
   readonly effectiveFloatingLabel = computed(() => this.props()?.floatingLabel ?? this.bootstrapConfig?.floatingLabel ?? false);

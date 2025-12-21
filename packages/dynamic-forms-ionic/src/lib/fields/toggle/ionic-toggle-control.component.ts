@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
 import type { FormCheckboxControl } from '@angular/forms/signals';
 import { IonToggle } from '@ionic/angular/standalone';
+import { FieldMeta } from '@ng-forge/dynamic-forms';
+import { IonicWrappedMetaDirective } from '../../directives/ionic-wrapped-meta.directive';
 
 /**
  * A wrapper component for Ionic's ion-toggle that implements FormCheckboxControl.
@@ -11,12 +13,13 @@ import { IonToggle } from '@ionic/angular/standalone';
  */
 @Component({
   selector: 'df-ionic-toggle-control',
-  imports: [IonToggle],
+  imports: [IonToggle, IonicWrappedMetaDirective],
   template: `
     <ion-toggle
       [checked]="isChecked()"
       (ionChange)="onToggleChange($event)"
       (ionBlur)="onBlur()"
+      [meta]="meta()"
       [labelPlacement]="labelPlacement()"
       [justify]="justify()"
       [color]="color()"
@@ -64,6 +67,7 @@ export class IonicToggleControlComponent implements FormCheckboxControl {
   readonly color = input<string>('primary');
   readonly enableOnOffLabels = input<boolean>(false);
   readonly tabIndex = input<number | undefined>(undefined);
+  readonly meta = input<FieldMeta>();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed ARIA attributes

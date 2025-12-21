@@ -2,18 +2,20 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { IonicTextareaComponent, IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
+import { IonicWrappedMetaDirective } from '../../directives/ionic-wrapped-meta.directive';
 
 @Component({
   selector: 'df-ionic-textarea',
-  imports: [IonTextarea, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonTextarea, IonNote, Field, DynamicTextPipe, AsyncPipe, IonicWrappedMetaDirective],
   template: `
     @let f = field();
 
     <ion-textarea
       [field]="f"
+      [meta]="meta()"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -63,6 +65,7 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<IonicTextareaProps>();
+  readonly meta = input<TextareaMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

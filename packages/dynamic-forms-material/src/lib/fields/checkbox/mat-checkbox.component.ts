@@ -1,23 +1,25 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { MatWrappedMetaDirective } from '../../directives/mat-wrapped-meta.directive';
 
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatCheckbox, Field, MatError, DynamicTextPipe, AsyncPipe, MatWrappedMetaDirective],
   template: `
     @let f = field();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-checkbox
       [field]="f"
+      [meta]="meta()"
       [labelPosition]="props()?.labelPosition || 'after'"
       [indeterminate]="props()?.indeterminate || false"
       [color]="props()?.color || 'primary'"
@@ -74,6 +76,7 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<MatCheckboxProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 

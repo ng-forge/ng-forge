@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMetaDirective, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, InputMeta, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatInputComponent, MatInputProps } from './mat-input.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
@@ -11,7 +11,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'df-mat-input',
-  imports: [MatFormField, MatLabel, MatInput, MatHint, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatFormField, MatLabel, MatInput, MatHint, Field, MatError, DynamicTextPipe, AsyncPipe, FieldMetaDirective],
   template: `
     @let f = field();
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -28,6 +28,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
             matInput
             type="email"
             [field]="f"
+            [meta]="meta()"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
             [attr.aria-invalid]="ariaInvalid"
@@ -41,6 +42,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
             matInput
             type="password"
             [field]="f"
+            [meta]="meta()"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
             [attr.aria-invalid]="ariaInvalid"
@@ -54,6 +56,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
             matInput
             type="number"
             [field]="f"
+            [meta]="meta()"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
             [attr.aria-invalid]="ariaInvalid"
@@ -67,6 +70,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
             matInput
             type="tel"
             [field]="f"
+            [meta]="meta()"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
             [attr.aria-invalid]="ariaInvalid"
@@ -80,6 +84,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
             matInput
             type="url"
             [field]="f"
+            [meta]="meta()"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
             [attr.aria-invalid]="ariaInvalid"
@@ -93,6 +98,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
             matInput
             type="text"
             [field]="f"
+            [meta]="meta()"
             [placeholder]="(placeholder() | dynamicText | async) ?? ''"
             [attr.tabindex]="tabIndex()"
             [attr.aria-invalid]="ariaInvalid"
@@ -178,6 +184,7 @@ export default class MatInputFieldComponent implements MatInputComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<MatInputProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
