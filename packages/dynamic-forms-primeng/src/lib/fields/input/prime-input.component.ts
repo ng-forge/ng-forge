@@ -20,92 +20,18 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
       @if (label()) {
         <label [for]="inputId()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
-      @switch (props()?.type ?? 'text') {
-        @case ('email') {
-          <input
-            pInputText
-            [id]="inputId()"
-            [field]="f"
-            type="email"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-            [class]="inputClasses()"
-          />
-        }
-        @case ('password') {
-          <input
-            pInputText
-            [id]="inputId()"
-            [field]="f"
-            type="password"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-            [class]="inputClasses()"
-          />
-        }
-        @case ('number') {
-          <input
-            pInputText
-            [id]="inputId()"
-            [field]="f"
-            type="number"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-            [class]="inputClasses()"
-          />
-        }
-        @case ('tel') {
-          <input
-            pInputText
-            [id]="inputId()"
-            [field]="f"
-            type="tel"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-            [class]="inputClasses()"
-          />
-        }
-        @case ('url') {
-          <input
-            pInputText
-            [id]="inputId()"
-            [field]="f"
-            type="url"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-            [class]="inputClasses()"
-          />
-        }
-        @default {
-          <input
-            pInputText
-            [id]="inputId()"
-            [field]="f"
-            type="text"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-            [class]="inputClasses()"
-          />
-        }
-      }
+      <input
+        pInputText
+        [id]="inputId()"
+        [field]="f"
+        [type]="props()?.type ?? 'text'"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        [attr.aria-invalid]="ariaInvalid"
+        [attr.aria-required]="ariaRequired"
+        [attr.aria-describedby]="ariaDescribedBy"
+        [class]="inputClasses()"
+      />
       @if (props()?.hint; as hint) {
         <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
       }

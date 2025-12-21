@@ -21,86 +21,17 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       @if (label()) {
         <mat-label>{{ label() | dynamicText | async }}</mat-label>
       }
-      @switch (props()?.type ?? 'text') {
-        @case ('email') {
-          <input
-            #inputRef
-            matInput
-            type="email"
-            [field]="f"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-          />
-        }
-        @case ('password') {
-          <input
-            #inputRef
-            matInput
-            type="password"
-            [field]="f"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-          />
-        }
-        @case ('number') {
-          <input
-            #inputRef
-            matInput
-            type="number"
-            [field]="f"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-          />
-        }
-        @case ('tel') {
-          <input
-            #inputRef
-            matInput
-            type="tel"
-            [field]="f"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-          />
-        }
-        @case ('url') {
-          <input
-            #inputRef
-            matInput
-            type="url"
-            [field]="f"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-          />
-        }
-        @default {
-          <input
-            #inputRef
-            matInput
-            type="text"
-            [field]="f"
-            [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-            [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
-          />
-        }
-      }
+      <input
+        #inputRef
+        matInput
+        [type]="props()?.type ?? 'text'"
+        [field]="f"
+        [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+        [attr.tabindex]="tabIndex()"
+        [attr.aria-invalid]="ariaInvalid"
+        [attr.aria-required]="ariaRequired"
+        [attr.aria-describedby]="ariaDescribedBy"
+      />
       @if (props()?.hint; as hint) {
         <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
       }

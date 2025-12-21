@@ -15,176 +15,32 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
     @let ariaInvalid = isAriaInvalid();
     @let ariaRequired = isRequired() || null;
 
-    @switch (props()?.type ?? 'text') {
-      @case ('email') {
-        <ion-input
-          type="email"
-          [field]="f"
-          [label]="(label() | dynamicText | async) ?? undefined"
-          [labelPlacement]="effectiveLabelPlacement()"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [clearInput]="props()?.clearInput ?? false"
-          [counter]="props()?.counter ?? false"
-          [color]="effectiveColor()"
-          [fill]="effectiveFill()"
-          [shape]="effectiveShape()"
-          [readonly]="f().readonly()"
-          [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-          [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [class.ion-invalid]="f().invalid()"
-          [class.ion-touched]="f().touched()"
-        >
-          <div slot="error">
-            @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-              <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-            }
-          </div>
-        </ion-input>
-      }
-      @case ('password') {
-        <ion-input
-          type="password"
-          [field]="f"
-          [label]="(label() | dynamicText | async) ?? undefined"
-          [labelPlacement]="effectiveLabelPlacement()"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [clearInput]="props()?.clearInput ?? false"
-          [counter]="props()?.counter ?? false"
-          [color]="effectiveColor()"
-          [fill]="effectiveFill()"
-          [shape]="effectiveShape()"
-          [readonly]="f().readonly()"
-          [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-          [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [class.ion-invalid]="f().invalid()"
-          [class.ion-touched]="f().touched()"
-        >
-          <div slot="error">
-            @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-              <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-            }
-          </div>
-        </ion-input>
-      }
-      @case ('number') {
-        <ion-input
-          type="number"
-          [field]="f"
-          [label]="(label() | dynamicText | async) ?? undefined"
-          [labelPlacement]="effectiveLabelPlacement()"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [clearInput]="props()?.clearInput ?? false"
-          [counter]="props()?.counter ?? false"
-          [color]="effectiveColor()"
-          [fill]="effectiveFill()"
-          [shape]="effectiveShape()"
-          [readonly]="f().readonly()"
-          [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-          [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [class.ion-invalid]="f().invalid()"
-          [class.ion-touched]="f().touched()"
-        >
-          <div slot="error">
-            @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-              <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-            }
-          </div>
-        </ion-input>
-      }
-      @case ('tel') {
-        <ion-input
-          type="tel"
-          [field]="f"
-          [label]="(label() | dynamicText | async) ?? undefined"
-          [labelPlacement]="effectiveLabelPlacement()"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [clearInput]="props()?.clearInput ?? false"
-          [counter]="props()?.counter ?? false"
-          [color]="effectiveColor()"
-          [fill]="effectiveFill()"
-          [shape]="effectiveShape()"
-          [readonly]="f().readonly()"
-          [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-          [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [class.ion-invalid]="f().invalid()"
-          [class.ion-touched]="f().touched()"
-        >
-          <div slot="error">
-            @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-              <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-            }
-          </div>
-        </ion-input>
-      }
-      @case ('url') {
-        <ion-input
-          type="url"
-          [field]="f"
-          [label]="(label() | dynamicText | async) ?? undefined"
-          [labelPlacement]="effectiveLabelPlacement()"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [clearInput]="props()?.clearInput ?? false"
-          [counter]="props()?.counter ?? false"
-          [color]="effectiveColor()"
-          [fill]="effectiveFill()"
-          [shape]="effectiveShape()"
-          [readonly]="f().readonly()"
-          [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-          [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [class.ion-invalid]="f().invalid()"
-          [class.ion-touched]="f().touched()"
-        >
-          <div slot="error">
-            @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-              <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-            }
-          </div>
-        </ion-input>
-      }
-      @default {
-        <ion-input
-          type="text"
-          [field]="f"
-          [label]="(label() | dynamicText | async) ?? undefined"
-          [labelPlacement]="effectiveLabelPlacement()"
-          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [clearInput]="props()?.clearInput ?? false"
-          [counter]="props()?.counter ?? false"
-          [color]="effectiveColor()"
-          [fill]="effectiveFill()"
-          [shape]="effectiveShape()"
-          [readonly]="f().readonly()"
-          [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-          [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
-          [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [class.ion-invalid]="f().invalid()"
-          [class.ion-touched]="f().touched()"
-        >
-          <div slot="error">
-            @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-              <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-            }
-          </div>
-        </ion-input>
-      }
-    }
+    <ion-input
+      [type]="props()?.type ?? 'text'"
+      [field]="f"
+      [label]="(label() | dynamicText | async) ?? undefined"
+      [labelPlacement]="effectiveLabelPlacement()"
+      [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+      [clearInput]="props()?.clearInput ?? false"
+      [counter]="props()?.counter ?? false"
+      [color]="effectiveColor()"
+      [fill]="effectiveFill()"
+      [shape]="effectiveShape()"
+      [readonly]="f().readonly()"
+      [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
+      [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
+      [attr.tabindex]="tabIndex()"
+      [attr.aria-invalid]="ariaInvalid"
+      [attr.aria-required]="ariaRequired"
+      [class.ion-invalid]="f().invalid()"
+      [class.ion-touched]="f().touched()"
+    >
+      <div slot="error">
+        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+        }
+      </div>
+    </ion-input>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

@@ -2,3 +2,6 @@
 export { createResolvedErrorsSignal } from './create-resolved-errors-signal';
 export type { ResolvedError } from './create-resolved-errors-signal';
 export { shouldShowErrors } from './should-show-errors';
+
+// Value comparison utilities
+export { isEqual } from './is-equal';

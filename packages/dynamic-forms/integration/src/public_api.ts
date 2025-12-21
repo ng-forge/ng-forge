@@ -56,3 +56,15 @@ export type { ValueFieldContext, FieldWithOptions } from './mappers';
 
 export { createResolvedErrorsSignal, shouldShowErrors } from './utils';
 export type { ResolvedError } from './utils';
+
+// =============================================================================
+// Value Comparison Utilities
+// =============================================================================
+
+export { isEqual } from './utils';
+
+// =============================================================================
+// Pipes
+// =============================================================================
+
+export { ValueInArrayPipe } from './pipes';
