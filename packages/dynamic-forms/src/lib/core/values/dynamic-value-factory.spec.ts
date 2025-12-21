@@ -22,10 +22,10 @@ describe('dynamic-value-factory', () => {
     function createMockFieldContext<T>(
       value: T,
       mockField?: Partial<FieldTree<T>>,
-      mockValueOf?: (path: any) => any,
+      mockValueOf?: (_path: unknown) => unknown,
       fieldKey?: string,
     ): FieldContext<T> {
-      const defaultValueOf = (path: any) => ({ username: 'test', email: 'test@example.com' });
+      const defaultValueOf = () => ({ username: 'test', email: 'test@example.com' });
 
       const context = {
         value: signal(value),

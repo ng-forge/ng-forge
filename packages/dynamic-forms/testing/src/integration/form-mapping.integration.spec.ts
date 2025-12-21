@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
-import type { SchemaPath } from '@angular/forms/signals';
 import { mapFieldToForm } from '../../core/form-mapping';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
@@ -88,6 +87,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ show: false, field: 'test' });
         // Register the form value signal BEFORE form creation for cross-field logic
+
         rootFormRegistry.registerFormValueSignal(formValue as any);
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
@@ -164,6 +164,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
 
         const formValue = signal({ requirePassword: true, password: '' });
         // Register the form value signal BEFORE form creation for cross-field logic
+
         rootFormRegistry.registerFormValueSignal(formValue as any);
 
         const fieldDef: FieldDef<any> & FieldWithValidation = {
@@ -266,6 +267,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
                 type: 'input',
                 required: true,
               } as FieldDef<any> & FieldWithValidation,
+
               {
                 key: 'lastName',
                 type: 'input',
@@ -275,6 +277,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
           };
 
           // Map page field (should flatten children)
+
           mapFieldToForm(pageField, path as any);
         });
 
@@ -308,6 +311,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
                 type: 'input',
                 required: true,
               } as FieldDef<any> & FieldWithValidation,
+
               {
                 key: 'city',
                 type: 'input',
@@ -350,6 +354,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
                 type: 'input',
                 email: true,
               } as FieldDef<any> & FieldWithValidation,
+
               {
                 key: 'phone',
                 type: 'input',
@@ -432,6 +437,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
                     type: 'input',
                     required: true,
                   } as FieldDef<any> & FieldWithValidation,
+
                   {
                     key: 'email',
                     type: 'input',
@@ -465,6 +471,7 @@ describe('Form Mapping Pipeline Integration (End-to-End)', () => {
         const formValue = signal({ email: '' });
 
         // Using deprecated properties
+
         const fieldDef: FieldDef<any> & FieldWithValidation = {
           key: 'email',
           type: 'input',

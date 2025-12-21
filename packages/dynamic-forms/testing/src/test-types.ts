@@ -5,7 +5,7 @@ import { FormConfig, FieldDef } from '@ng-forge/dynamic-forms';
  * Simple form configuration interface for testing
  */
 export interface TestFormConfig {
-  fields: FieldDef<any>[];
+  fields: FieldDef<unknown>[];
 }
 
 /**
@@ -31,7 +31,7 @@ export interface TestResult<T = unknown> {
  * Configuration for setting up individual field component tests
  */
 export interface ComponentTestConfig<T = unknown> {
-  field: FieldDef<any>;
+  field: FieldDef<unknown>;
   value?: T;
 }
 

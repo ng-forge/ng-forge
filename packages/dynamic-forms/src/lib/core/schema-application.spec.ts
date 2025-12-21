@@ -155,7 +155,7 @@ describe('schema-application', () => {
         });
 
         // Verify the form was created and schema applied (no error thrown)
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
 
@@ -183,7 +183,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
     });
@@ -215,7 +215,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
 
@@ -246,7 +246,7 @@ describe('schema-application', () => {
         });
 
         // Should not throw and no error logged
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
     });
@@ -278,7 +278,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
 
@@ -308,7 +308,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
     });
@@ -339,7 +339,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
         expect(consoleSpy).not.toHaveBeenCalled();
       });
     });
@@ -352,10 +352,11 @@ describe('schema-application', () => {
         };
 
         const formValue = signal({ name: '' });
+        // Intentionally using invalid type to test error handling
         const config = {
-          type: 'invalid' as any,
+          type: 'invalid',
           schema: testSchema,
-        };
+        } as unknown as SchemaApplicationConfig;
 
         expect(() => {
           runInInjectionContext(injector, () => {
@@ -372,9 +373,10 @@ describe('schema-application', () => {
 
       it('should not crash on malformed config', () => {
         const formValue = signal({ name: '' });
+        // Intentionally malformed config (missing schema) to test error handling
         const config = {
           type: 'apply',
-        } as any;
+        } as unknown as SchemaApplicationConfig;
 
         expect(() => {
           runInInjectionContext(injector, () => {
@@ -426,7 +428,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should apply multiple validators in correct order', () => {
@@ -450,7 +452,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle schema without validators', () => {
@@ -501,7 +503,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle schema without logic', () => {
@@ -555,7 +557,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle nested inline sub-schemas', () => {
@@ -587,7 +589,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle schema without sub-schemas', () => {
@@ -642,7 +644,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
 
       it('should handle empty schema definition', () => {
@@ -693,7 +695,7 @@ describe('schema-application', () => {
           rootFormRegistry.registerRootForm(formInstance);
         });
 
-        expect(formInstance!).toBeDefined();
+        expect(formInstance).toBeDefined();
       });
     });
 

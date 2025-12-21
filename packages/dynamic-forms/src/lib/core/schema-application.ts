@@ -18,7 +18,7 @@ import { DYNAMIC_FORM_LOGGER } from '../providers/features/logger/logger.token';
  * 2. The Angular apply functions accept SchemaPath with any value type
  * 3. The actual schema application happens at runtime via the schema function
  */
-export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
+export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
   const logger = inject(DYNAMIC_FORM_LOGGER);
   const schemaRegistry = inject(SchemaRegistryService);
   const schema = schemaRegistry.resolveSchema(config.schema);
@@ -36,7 +36,7 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
   const schemaFn = createSchemaFunction(schema);
 
   // Cast to suppress union type errors - safe because we only use signal forms (see function docs)
-  const path = fieldPath as SchemaPath<any>;
+  const path = fieldPath as SchemaPath<unknown>;
 
   switch (config.type) {
     case 'apply':
@@ -58,7 +58,7 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
       break;
 
     case 'applyEach':
-      applyEach(path as SchemaPath<any[]>, schemaFn);
+      applyEach(path as SchemaPath<unknown[]>, schemaFn);
       break;
   }
 }
@@ -70,8 +70,8 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
  * and nested child access properties. The validator/logic/schema application functions
  * accept SchemaPath | SchemaPathTree, so we can pass the path directly.
  */
-export function createSchemaFunction<T = unknown>(schema: SchemaDefinition): SchemaOrSchemaFn<T> {
-  return (path: SchemaPathTree<T>) => {
+export function createSchemaFunction(schema: SchemaDefinition): SchemaOrSchemaFn<unknown> {
+  return (path: SchemaPathTree<unknown>) => {
     // Apply validators - path is SchemaPathTree which is accepted by applyValidator
     schema.validators?.forEach((validatorConfig) => {
       applyValidator(validatorConfig, path);

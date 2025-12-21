@@ -120,7 +120,7 @@
   "generators": {
     "@nx/angular:library": {
       "linter": "eslint",
-      "unitTestRunner": "vitest"
+      "unitTestRunner": "vitest-analog"
     },
     "@nx/angular:component": {
       "style": "css"
@@ -129,7 +129,7 @@
       "e2eTestRunner": "playwright",
       "linter": "eslint",
       "style": "scss",
-      "unitTestRunner": "vitest"
+      "unitTestRunner": "vitest-analog"
     },
     "@nx/web:application": {
       "style": "scss",
@@ -157,9 +157,14 @@
       "options": {
         "buildTargetName": "build",
         "previewTargetName": "preview",
-        "testTargetName": "test",
         "serveTargetName": "serve",
         "serveStaticTargetName": "serve-static"
+      }
+    },
+    {
+      "plugin": "@nx/vitest",
+      "options": {
+        "testTargetName": "test"
       }
     }
   ]

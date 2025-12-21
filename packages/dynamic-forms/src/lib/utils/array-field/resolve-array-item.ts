@@ -1,4 +1,4 @@
-import { DestroyRef, Injector, linkedSignal, Signal } from '@angular/core';
+import { DestroyRef, Injector, linkedSignal, Signal, Type } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { catchError, from, map, Observable, of } from 'rxjs';
 import { ArrayField } from '../../definitions/default/array-field';
@@ -83,8 +83,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
 
       return {
         id: itemId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        component: component as any,
+        component: component as Type<unknown>,
         injector,
         inputs,
       };

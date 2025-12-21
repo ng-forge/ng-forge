@@ -14,8 +14,8 @@ export interface SubmissionHandlerOptions<TFields extends RegisteredFieldTypes[]
   eventBus: EventBus;
   /** Signal containing the form configuration */
   configSignal: Signal<FormConfig<TFields>>;
-  /** Signal containing the form instance */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  /** Signal containing the form instance. Type is parameterized to support different form value shapes. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- FieldTree type requires dynamic form model type
   formSignal: Signal<any>;
 }
 
@@ -26,7 +26,7 @@ export interface SubmissionHandlerOptions<TFields extends RegisteredFieldTypes[]
  * @param action - The submission action function
  * @returns A wrapped function that always returns a Promise
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Form tree type is dynamic, action signatures vary
 function wrapSubmissionAction(action: (formTree: any) => any): (formTree: any) => Promise<any> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (formTree: any): Promise<any> => {

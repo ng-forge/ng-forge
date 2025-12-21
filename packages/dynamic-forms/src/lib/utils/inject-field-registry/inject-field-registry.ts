@@ -113,7 +113,8 @@ export function injectFieldRegistry() {
         try {
           const result = await fieldType.loadComponent();
           // Handle ES module imports - extract default export if needed
-          return (result as any)?.default || result;
+          const moduleResult = result as { default?: Type<unknown> } | Type<unknown>;
+          return (typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default) || (result as Type<unknown>);
         } catch (error) {
           throw new DynamicFormError(`Failed to load component for field type "${name}": ${error}`);
         }

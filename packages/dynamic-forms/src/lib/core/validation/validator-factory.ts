@@ -202,7 +202,7 @@ function createExpressionValidator(
   return (ctx: FieldContext<unknown>) => {
     try {
       const evaluationContext = fieldContextRegistry.createEvaluationContext(ctx, functionRegistry.getCustomFunctions());
-      const result = ExpressionParser.evaluate(config.expression!, evaluationContext);
+      const result = ExpressionParser.evaluate(expression, evaluationContext);
 
       if (result) {
         return null;

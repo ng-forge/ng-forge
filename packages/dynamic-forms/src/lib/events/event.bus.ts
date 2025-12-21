@@ -57,7 +57,8 @@ export class EventBus {
    * eventBus.dispatch(CustomFormEvent);
    * ```
    */
-  dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: any[]): void {
+  // TypeScript limitation: Must use ConstructorParameters which relies on `any` in FormEventConstructor
+  dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: ConstructorParameters<T>): void {
     this.pipeline$.next(new eventConstructor(...args));
   }
 

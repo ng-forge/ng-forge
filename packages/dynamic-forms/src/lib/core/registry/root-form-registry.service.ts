@@ -2,11 +2,6 @@ import { Injectable, signal, Signal, isSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 
 /**
- * Type for form value signals - either a Signal returning an object or a FieldTree
- */
-type FormValueSource = Signal<Record<string, unknown>> | FieldTree<unknown>;
-
-/**
  * Registry service that maintains references to root form fields.
  * This provides a type-safe way to access root form values from child fields
  * without relying on internal Angular Forms API navigation.

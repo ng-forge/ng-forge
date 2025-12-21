@@ -5,7 +5,6 @@ import { FunctionRegistryService } from '../../core/registry/function-registry.s
 import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
 import { evaluateCondition } from '../../core/expressions/condition-evaluator';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
 
 /**
  * Maps a text field definition to component inputs.
@@ -20,7 +19,6 @@ import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.toke
 export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unknown>> {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
-  const logger = inject(DYNAMIC_FORM_LOGGER);
 
   // Build base inputs (static, from field definition)
   const baseInputs = buildBaseInputs(fieldDef);

@@ -15,11 +15,6 @@ const dynamicValueFunctionCache = new WeakMap<FieldContextRegistryService, Map<s
  * Create a dynamic value function from an expression string.
  * Uses secure AST-based parsing instead of eval() or new Function().
  *
- * Optimizations:
- * - Injects FieldContextRegistryService at creation time, not execution time
- * - Caches created functions by expression string per injection context
- * - Expression parsing is already cached by ExpressionParser's LRU cache
- *
  * @param expression The expression string to evaluate
  * @returns A LogicFn that evaluates the expression in the context of a field
  */

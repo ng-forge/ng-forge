@@ -5,7 +5,7 @@ import { form, schema } from '@angular/forms/signals';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 import { resolveSubmitButtonDisabled, resolveNextButtonDisabled, ButtonLogicContext } from '../../core/logic/button-logic-resolver';
 import { FormOptions, FormStateCondition, LogicConfig, isFormStateCondition } from '../../models';
-import { createSilentLogger, MockLogger, createMockLogger } from '../mock-logger';
+import { createSilentLogger } from '../mock-logger';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
 
 describe('Button Logic Integration', () => {
@@ -49,7 +49,7 @@ describe('Button Logic Integration', () => {
         const formValue = signal({ email: '' });
         const formInstance = form(
           formValue,
-          schema<typeof formValue>((path) => {
+          schema<typeof formValue>(() => {
             // Add required validation
             // For this test, we'll check validity based on empty value
           }),

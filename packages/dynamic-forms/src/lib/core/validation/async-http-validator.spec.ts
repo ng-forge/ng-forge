@@ -1,11 +1,20 @@
 import { TestBed } from '@angular/core/testing';
-import { Injector, runInInjectionContext, signal, ResourceRef } from '@angular/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { Injector, runInInjectionContext, signal, ResourceStatus } from '@angular/core';
+import { beforeEach, describe, expect, it, vi, Mock } from 'vitest';
 import { form, schema, FieldContext } from '@angular/forms/signals';
 import { AsyncValidatorConfig, HttpValidatorConfig } from '../../models/validation/validator-config';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { applyValidator } from './validator-factory';
 import { AsyncCustomValidator, HttpCustomValidator } from './validator-types';
+
+// Helper type for mock ResourceRef
+type MockResourceRef<T> = {
+  value: () => T | null;
+  status: () => ResourceStatus;
+  error: () => unknown;
+  isLoading: () => boolean;
+  reload: Mock;
+};
 
 describe('Async and HTTP Validator Integration', () => {
   let injector: Injector;
@@ -27,8 +36,8 @@ describe('Async and HTTP Validator Integration', () => {
       it('should register and retrieve async validator', () => {
         const asyncValidator: AsyncCustomValidator = {
           params: (ctx) => ({ value: ctx.value() }),
-          factory: vi.fn() as any,
-          onSuccess: (result) => null,
+          factory: vi.fn() as AsyncCustomValidator['factory'],
+          onSuccess: () => null,
         };
 
         functionRegistry.registerAsyncValidator('testAsync', asyncValidator);
@@ -40,9 +49,9 @@ describe('Async and HTTP Validator Integration', () => {
       it('should handle async validator with onError', () => {
         const asyncValidator: AsyncCustomValidator = {
           params: (ctx) => ({ value: ctx.value() }),
-          factory: vi.fn() as any,
-          onSuccess: (result) => null,
-          onError: (error) => ({ kind: 'asyncError' }),
+          factory: vi.fn() as AsyncCustomValidator['factory'],
+          onSuccess: () => null,
+          onError: () => ({ kind: 'asyncError' }),
         };
 
         functionRegistry.registerAsyncValidator('withError', asyncValidator);
@@ -57,8 +66,8 @@ describe('Async and HTTP Validator Integration', () => {
             value: ctx.value(),
             minLength: config?.minLength,
           }),
-          factory: vi.fn() as any,
-          onSuccess: (result) => null,
+          factory: vi.fn() as AsyncCustomValidator['factory'],
+          onSuccess: () => null,
         };
 
         functionRegistry.registerAsyncValidator('withParams', asyncValidator);
@@ -71,18 +80,18 @@ describe('Async and HTTP Validator Integration', () => {
     describe('validator application', () => {
       it('should apply async validator without throwing', () => {
         runInInjectionContext(injector, () => {
-          const mockResource = {
+          const mockResource: MockResourceRef<{ available: boolean }> = {
             value: () => ({ available: true }),
-            status: () => 'success' as const,
+            status: () => 'idle' as ResourceStatus,
             error: () => null,
             isLoading: () => false,
             reload: vi.fn(),
-          } as unknown as ResourceRef<any>;
+          };
 
           const asyncValidator: AsyncCustomValidator = {
             params: (ctx) => ({ username: ctx.value() }),
             factory: () => mockResource,
-            onSuccess: (result, ctx) => {
+            onSuccess: (result) => {
               return result?.available ? null : { kind: 'usernameTaken' };
             },
           };
@@ -136,13 +145,13 @@ describe('Async and HTTP Validator Integration', () => {
 
       it('should apply async validator with conditional logic', () => {
         runInInjectionContext(injector, () => {
-          const mockResource = {
+          const mockResource: MockResourceRef<null> = {
             value: () => null,
-            status: () => 'idle' as const,
+            status: () => 'idle' as ResourceStatus,
             error: () => null,
             isLoading: () => false,
             reload: vi.fn(),
-          } as unknown as ResourceRef<any>;
+          };
 
           const asyncValidator: AsyncCustomValidator = {
             params: (ctx, config) => {
@@ -180,18 +189,19 @@ describe('Async and HTTP Validator Integration', () => {
     describe('cross-field async validation', () => {
       it('should support cross-field validation with valueOf', () => {
         runInInjectionContext(injector, () => {
-          const mockResource = {
+          const mockResource: MockResourceRef<{ valid: boolean }> = {
             value: () => ({ valid: true }),
-            status: () => 'success' as const,
+            status: () => 'idle' as ResourceStatus,
             error: () => null,
             isLoading: () => false,
             reload: vi.fn(),
-          } as unknown as ResourceRef<any>;
+          };
 
           const asyncValidator: AsyncCustomValidator = {
             params: (ctx: FieldContext<string>) => ({
               password: ctx.value(),
-              email: ctx.valueOf('email' as any),
+              // Using type assertion for cross-field access in test
+              email: ctx.valueOf('email' as keyof typeof ctx),
             }),
             factory: () => mockResource,
             onSuccess: (result) => (result?.valid ? null : { kind: 'invalidPasswordForEmail' }),
@@ -224,7 +234,7 @@ describe('Async and HTTP Validator Integration', () => {
       it('should register and retrieve HTTP validator', () => {
         const httpValidator: HttpCustomValidator = {
           request: (ctx) => `/api/check?value=${ctx.value()}`,
-          onSuccess: (result) => null,
+          onSuccess: () => null,
         };
 
         functionRegistry.registerHttpValidator('testHttp', httpValidator);
@@ -235,8 +245,8 @@ describe('Async and HTTP Validator Integration', () => {
 
       it('should handle HTTP validator with onError', () => {
         const httpValidator: HttpCustomValidator = {
-          request: (ctx) => `/api/check`,
-          onSuccess: (result) => null,
+          request: () => `/api/check`,
+          onSuccess: () => null,
           onError: (error) => {
             console.error(error);
             return null;
@@ -256,7 +266,7 @@ describe('Async and HTTP Validator Integration', () => {
             method: 'POST',
             body: { value: ctx.value() },
           }),
-          onSuccess: (result: any) => (result?.valid ? null : { kind: 'invalid' }),
+          onSuccess: (result: unknown) => ((result as { valid?: boolean })?.valid ? null : { kind: 'invalid' }),
         };
 
         functionRegistry.registerHttpValidator('postValidator', httpValidator);
@@ -413,13 +423,14 @@ describe('Async and HTTP Validator Integration', () => {
               url: '/api/validate-address',
               method: 'POST',
               body: {
-                street: ctx.valueOf('street' as any),
-                city: ctx.valueOf('city' as any),
+                // Using type assertion for cross-field access in test
+                street: ctx.valueOf('street' as keyof typeof ctx),
+                city: ctx.valueOf('city' as keyof typeof ctx),
                 zipCode: ctx.value(),
               },
             }),
-            onSuccess: (result: any) => {
-              return result?.valid ? null : { kind: 'invalidAddress' };
+            onSuccess: (result: unknown) => {
+              return (result as { valid?: boolean })?.valid ? null : { kind: 'invalidAddress' };
             },
           };
 
@@ -487,7 +498,7 @@ describe('Async and HTTP Validator Integration', () => {
       it('should handle onSuccess returning error for invalid response', () => {
         const httpValidator: HttpCustomValidator<string, { available: boolean }> = {
           request: (ctx) => `/api/check?username=${ctx.value()}`,
-          onSuccess: (result, ctx) => {
+          onSuccess: (result) => {
             // Inverted logic: success response may indicate validation failure
             return result.available ? null : { kind: 'usernameTaken' };
           },
@@ -498,17 +509,19 @@ describe('Async and HTTP Validator Integration', () => {
         const retrieved = functionRegistry.getHttpValidator('invertedLogic');
         expect(retrieved?.onSuccess).toBeDefined();
 
-        // Simulate onSuccess call
-        const mockCtx = { value: () => 'testuser' } as any;
-        const errorResult = retrieved!.onSuccess({ available: false }, mockCtx);
-        const successResult = retrieved!.onSuccess({ available: true }, mockCtx);
+        // Simulate onSuccess call with minimal mock context
+        const mockCtx = { value: () => 'testuser' } as FieldContext<string>;
+        if (retrieved) {
+          const errorResult = retrieved.onSuccess({ available: false }, mockCtx);
+          const successResult = retrieved.onSuccess({ available: true }, mockCtx);
 
-        expect(errorResult).toEqual({ kind: 'usernameTaken' });
-        expect(successResult).toBeNull();
+          expect(errorResult).toEqual({ kind: 'usernameTaken' });
+          expect(successResult).toBeNull();
+        }
       });
 
       it('should handle onSuccess returning multiple errors', () => {
-        const httpValidator: HttpCustomValidator<any, { errors: string[] }> = {
+        const httpValidator: HttpCustomValidator<unknown, { errors: string[] }> = {
           request: () => '/api/validate',
           onSuccess: (result) => {
             if (!result.errors || result.errors.length === 0) return null;
@@ -519,13 +532,17 @@ describe('Async and HTTP Validator Integration', () => {
         functionRegistry.registerHttpValidator('multiError', httpValidator);
 
         const retrieved = functionRegistry.getHttpValidator('multiError');
-        const mockCtx = {} as any;
 
-        const noErrors = retrieved!.onSuccess({ errors: [] }, mockCtx);
-        const withErrors = retrieved!.onSuccess({ errors: ['error1', 'error2'] }, mockCtx);
+        // Minimal mock context for testing onSuccess callback
+        const mockCtx = {} as FieldContext<unknown>;
 
-        expect(noErrors).toBeNull();
-        expect(withErrors).toEqual([{ kind: 'error1' }, { kind: 'error2' }]);
+        if (retrieved) {
+          const noErrors = retrieved.onSuccess({ errors: [] }, mockCtx);
+          const withErrors = retrieved.onSuccess({ errors: ['error1', 'error2'] }, mockCtx);
+
+          expect(noErrors).toBeNull();
+          expect(withErrors).toEqual([{ kind: 'error1' }, { kind: 'error2' }]);
+        }
       });
     });
   });
@@ -541,13 +558,13 @@ describe('Async and HTTP Validator Integration', () => {
         functionRegistry.registerValidator('minLength', syncValidator);
 
         // Register async validator
-        const mockResource = {
+        const mockResource: MockResourceRef<{ available: boolean }> = {
           value: () => ({ available: true }),
-          status: () => 'success' as const,
+          status: () => 'idle' as ResourceStatus,
           error: () => null,
           isLoading: () => false,
           reload: vi.fn(),
-        } as unknown as ResourceRef<any>;
+        };
 
         const asyncValidator: AsyncCustomValidator = {
           params: (ctx) => ({ username: ctx.value() }),
@@ -573,9 +590,14 @@ describe('Async and HTTP Validator Integration', () => {
     });
 
     it('should support all validator types registered simultaneously', () => {
-      const syncValidator = vi.fn((ctx) => null);
-      const asyncValidator = { params: vi.fn(), factory: vi.fn() as any, onSuccess: vi.fn() };
-      const httpValidator = { request: vi.fn(), onSuccess: vi.fn() };
+      const syncValidator = vi.fn(() => null);
+
+      const asyncValidator: AsyncCustomValidator = {
+        params: vi.fn(),
+        factory: vi.fn() as AsyncCustomValidator['factory'],
+        onSuccess: vi.fn(),
+      };
+      const httpValidator: HttpCustomValidator = { request: vi.fn(), onSuccess: vi.fn() };
 
       functionRegistry.registerValidator('sync', syncValidator);
       functionRegistry.registerAsyncValidator('async', asyncValidator);

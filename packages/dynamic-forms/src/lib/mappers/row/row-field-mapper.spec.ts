@@ -1,14 +1,10 @@
-import { Injector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { rowFieldMapper } from './row-field-mapper';
 import { RowField } from '../../definitions';
 
 describe('rowFieldMapper', () => {
-  let injector: Injector;
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({}).compileComponents();
-    injector = TestBed.inject(Injector);
   });
 
   it('should create inputs object with key and field for minimal row field', () => {
