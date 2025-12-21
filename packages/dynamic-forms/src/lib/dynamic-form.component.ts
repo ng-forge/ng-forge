@@ -50,7 +50,7 @@ import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
-import { DYNAMIC_FORM_LOGGER } from './providers/features/logger/logger.token';
+import { DynamicFormLogger } from './providers/features/logger/logger.token';
 
 /**
  * Dynamic form component that renders a complete form based on configuration.
@@ -110,7 +110,7 @@ export class DynamicForm<
   private readonly rootFormRegistry = inject(RootFormRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
-  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
+  private readonly logger = inject(DynamicFormLogger);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs

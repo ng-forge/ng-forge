@@ -33,11 +33,10 @@ export { provideDynamicForm } from './providers';
 export type { ExtractFieldDefs, ExtractFormValue } from './providers';
 
 // Logger Feature
-export { withLogger } from './providers/features/logger/with-logger';
-export { LogLevel } from './providers/features/logger/log-level';
-export type { DynamicFormLogger } from './providers/features/logger/logger.interface';
-export type { LoggerFeatureOptions } from './providers/features/logger/with-logger';
-export { DYNAMIC_FORM_LOGGER } from './providers/features/logger/logger.token';
+export { withLoggerConfig } from './providers/features/logger/with-logger-config';
+export { DynamicFormLogger } from './providers/features/logger/logger.token';
+export type { Logger } from './providers/features/logger';
+export { ConsoleLogger } from './providers/features/logger/console-logger';
 export { NoopLogger } from './providers/features/logger/noop-logger';
 
 // Configuration Types

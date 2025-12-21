@@ -11,7 +11,9 @@ import { ExpressionParser } from './expressions/parser/expression-parser';
 import { evaluateCondition } from './expressions/condition-evaluator';
 import { CustomValidatorConfig, ValidatorConfig } from '../models/validation/validator-config';
 import { hasChildFields } from '../models/types/type-guards';
-import { DYNAMIC_FORM_LOGGER, DynamicFormLogger } from '../providers/features/logger';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import type { Logger } from '../providers/features/logger/logger.interface';
+import { EvaluationContext } from '../models/expressions/evaluation-context';
 import { normalizeFieldsArray } from '../utils/object-utils';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,7 +44,7 @@ export function createSchemaFromFields<TModel = unknown>(
   // Inject services for cross-field validation
   // These will be available because createSchemaFromFields is called within runInInjectionContext
   const functionRegistry = inject(FunctionRegistryService);
-  const logger = inject(DYNAMIC_FORM_LOGGER);
+  const logger = inject(DynamicFormLogger);
 
   return schema<TModel>((path) => {
     for (const fieldDef of fields) {
@@ -109,7 +111,7 @@ function applyCrossFieldTreeValidator<TModel>(
   rootPath: SchemaPathTree<TModel>,
   validators: CrossFieldValidatorEntry[],
   functionRegistry: FunctionRegistryService,
-  logger: DynamicFormLogger,
+  logger: Logger,
 ): void {
   // Get custom functions for expression evaluation
   const customFunctions = functionRegistry.getCustomFunctions();
@@ -127,7 +129,7 @@ function applyCrossFieldTreeValidator<TModel>(
       const { sourceFieldKey, config } = entry;
 
       try {
-        const error = evaluateCrossFieldValidator(entry, formValue, sourceFieldKey, ctx, customFunctions);
+        const error = evaluateCrossFieldValidator(entry, formValue, sourceFieldKey, ctx, customFunctions, logger);
 
         if (error) {
           errors.push(error);
@@ -160,17 +162,19 @@ function evaluateCrossFieldValidator<TModel>(
   formValue: Record<string, unknown>,
   sourceFieldKey: string,
   ctx: FieldContext<TModel>,
-  customFunctions: Record<string, unknown>,
+  customFunctions: EvaluationContext['customFunctions'],
+  logger: Logger,
 ): ValidationError.WithOptionalField | null {
   const { config } = entry;
   const fieldValue = formValue[sourceFieldKey];
 
   // Create evaluation context for condition/expression evaluation
-  const evaluationContext = {
+  const evaluationContext: EvaluationContext = {
     fieldValue,
     formValue,
     fieldPath: sourceFieldKey,
     customFunctions,
+    logger,
   };
 
   // Check if this is a custom validator (with expression) or a built-in validator (with when condition)
@@ -187,7 +191,7 @@ function evaluateCrossFieldValidator<TModel>(
  */
 function evaluateCustomCrossFieldValidator<TModel>(
   config: CustomValidatorConfig,
-  evaluationContext: Record<string, unknown>,
+  evaluationContext: EvaluationContext,
   sourceFieldKey: string,
   ctx: FieldContext<TModel>,
 ): ValidationError.WithOptionalField | null {
@@ -195,7 +199,7 @@ function evaluateCustomCrossFieldValidator<TModel>(
     return null;
   }
 
-  const { fieldValue, formValue } = evaluationContext as { fieldValue: unknown; formValue: Record<string, unknown> };
+  const { fieldValue, formValue, logger, customFunctions } = evaluationContext;
 
   // First, evaluate the when condition if present
   // If the condition is false, the validator doesn't apply (validation passes)
@@ -204,8 +208,8 @@ function evaluateCustomCrossFieldValidator<TModel>(
       fieldValue,
       formValue,
       fieldPath: sourceFieldKey,
-      customFunctions: (evaluationContext.customFunctions as Record<string, (ctx: unknown) => unknown>) || {},
-      logger: evaluationContext.logger as DynamicFormLogger,
+      customFunctions: customFunctions || {},
+      logger,
     });
 
     if (!conditionMet) {
@@ -252,11 +256,11 @@ function evaluateCustomCrossFieldValidator<TModel>(
  */
 function evaluateBuiltInCrossFieldValidator<TModel>(
   config: ValidatorConfig,
-  evaluationContext: Record<string, unknown>,
+  evaluationContext: EvaluationContext,
   sourceFieldKey: string,
   ctx: FieldContext<TModel>,
 ): ValidationError.WithOptionalField | null {
-  const { fieldValue, formValue } = evaluationContext as { fieldValue: unknown; formValue: Record<string, unknown> };
+  const { fieldValue, formValue, logger, customFunctions } = evaluationContext;
 
   // First, evaluate the when condition
   // If the condition is false, the validator doesn't apply (validation passes)
@@ -265,8 +269,8 @@ function evaluateBuiltInCrossFieldValidator<TModel>(
       fieldValue,
       formValue,
       fieldPath: sourceFieldKey,
-      customFunctions: (evaluationContext.customFunctions as Record<string, (ctx: unknown) => unknown>) || {},
-      logger: evaluationContext.logger as DynamicFormLogger,
+      customFunctions: customFunctions || {},
+      logger,
     });
 
     if (!conditionMet) {

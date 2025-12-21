@@ -1,4 +1,4 @@
-import { DynamicFormLogger } from '../../providers/features/logger/logger.interface';
+import type { Logger } from '../../providers/features/logger/logger.interface';
 
 export interface EvaluationContext<TValue = unknown> {
   /** Current field value */
@@ -14,7 +14,7 @@ export interface EvaluationContext<TValue = unknown> {
   customFunctions?: Record<string, (context: EvaluationContext) => unknown>;
 
   /** Logger for diagnostic output */
-  logger: DynamicFormLogger;
+  logger: Logger;
 
   /** Allow additional properties for flexible expression evaluation */
   [key: string]: unknown;

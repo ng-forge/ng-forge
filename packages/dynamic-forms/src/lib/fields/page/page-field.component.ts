@@ -10,7 +10,7 @@ import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-fi
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { FieldDef } from '../../definitions/base/field-def';
-import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 
 /**
  * Renders a single page in multi-page (wizard) forms.
@@ -49,7 +49,7 @@ export default class PageFieldComponent {
   private readonly fieldRegistry = injectFieldRegistry();
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
-  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
+  private readonly logger = inject(DynamicFormLogger);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs

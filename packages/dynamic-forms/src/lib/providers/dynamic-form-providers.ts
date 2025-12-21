@@ -3,7 +3,8 @@ import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
 import { FieldDef } from '../definitions/base/field-def';
 import { DynamicFormFeature, isDynamicFormFeature } from './features/dynamic-form-feature';
-import { DYNAMIC_FORM_LOGGER } from './features/logger/logger.token';
+import { DynamicFormLogger } from './features/logger/logger.token';
+import { ConsoleLogger } from './features/logger/console-logger';
 
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
@@ -65,7 +66,7 @@ type ExtractFieldTypes<T extends FieldTypeOrFeature[]> = {
  * This function creates environment providers that can be used at application or route level
  * to register field types. It provides type-safe field registration with automatic type inference.
  *
- * @param items - Field type definitions and/or features (like withLogger)
+ * @param items - Field type definitions and/or features (like withLoggerConfig)
  * @returns Environment providers for dependency injection with type inference
  *
  * @example
@@ -80,27 +81,15 @@ type ExtractFieldTypes<T extends FieldTypeOrFeature[]> = {
  *
  * @example
  * ```typescript
- * // With logging configuration
+ * // Disable logging
  * bootstrapApplication(AppComponent, {
  *   providers: [
  *     provideDynamicForm(
  *       ...withMaterialFields(),
- *       withLogger({ level: LogLevel.Debug })
+ *       withLoggerConfig(false)
  *     )
  *   ]
  * });
- * ```
- *
- * @example
- * ```typescript
- * // Route-level setup
- * const routes: Routes = [
- *   {
- *     path: 'form',
- *     component: FormComponent,
- *     providers: [provideDynamicForm(...withMaterialFields())]
- *   }
- * ];
  * ```
  *
  * @example
@@ -139,15 +128,20 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
 
   // Extract providers from features
   const featureProviders: Provider[] = [];
+  const hasLoggerFeature = features.some((feature) => feature.ɵkind === 'logger');
   features.forEach((feature) => {
     featureProviders.push(...feature.ɵproviders);
   });
 
+  // Default logger provider (ConsoleLogger) if no logger feature was provided
+  const defaultLoggerProvider: Provider[] = hasLoggerFeature ? [] : [{ provide: DynamicFormLogger, useValue: new ConsoleLogger() }];
+
   return makeEnvironmentProviders([
+    ...defaultLoggerProvider,
     {
       provide: FIELD_REGISTRY,
       useFactory: () => {
-        const logger = inject(DYNAMIC_FORM_LOGGER);
+        const logger = inject(DynamicFormLogger);
         const registry = new Map();
         // Add custom field types
         fields.forEach((fieldType) => {

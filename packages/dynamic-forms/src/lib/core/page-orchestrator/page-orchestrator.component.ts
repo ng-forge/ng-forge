@@ -13,7 +13,7 @@ import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { evaluateCondition } from '../expressions/condition-evaluator';
 import { FunctionRegistryService } from '../registry/function-registry.service';
-import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 
 /**
@@ -90,7 +90,7 @@ export class PageOrchestratorComponent {
   private readonly eventBus = inject(EventBus);
   private readonly fieldContextRegistry = inject(FieldContextRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
-  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
+  private readonly logger = inject(DynamicFormLogger);
 
   /**
    * Array of page field definitions to render

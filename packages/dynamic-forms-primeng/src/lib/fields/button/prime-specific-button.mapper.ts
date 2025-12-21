@@ -3,7 +3,7 @@ import {
   AddArrayItemEvent,
   ARRAY_CONTEXT,
   buildBaseInputs,
-  DYNAMIC_FORM_LOGGER,
+  DynamicFormLogger,
   FIELD_SIGNAL_CONTEXT,
   FieldDef,
   FieldWithValidation,
@@ -154,7 +154,7 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
   // Try to get array context (available when inside an array)
   // Use optional injection so it doesn't fail when outside an array
   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
-  const logger = inject(DYNAMIC_FORM_LOGGER);
+  const logger = inject(DynamicFormLogger);
 
   // Determine the target array key
   // Priority: explicit arrayKey from fieldDef > arrayKey from context
@@ -221,7 +221,7 @@ export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButton
   // Try to get array context (available when inside an array)
   // Use optional injection so it doesn't fail when outside an array
   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
-  const logger = inject(DYNAMIC_FORM_LOGGER);
+  const logger = inject(DynamicFormLogger);
 
   // Determine the target array key
   // Priority: explicit arrayKey from fieldDef > arrayKey from context

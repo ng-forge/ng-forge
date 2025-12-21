@@ -2,16 +2,16 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { FunctionRegistryService } from './function-registry.service';
-import { createSilentLogger } from '@ng-forge/dynamic-forms/testing';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.interface';
+import { createMockLogger } from '@ng-forge/dynamic-forms/testing';
+import type { Logger } from '../../providers/features/logger/logger.interface';
 
 describe('FunctionRegistryService', () => {
   let service: FunctionRegistryService;
   let mockContext: EvaluationContext;
-  let mockLogger: DynamicFormLogger;
+  let mockLogger: Logger;
 
   beforeEach(() => {
-    mockLogger = createSilentLogger();
+    mockLogger = createMockLogger();
 
     TestBed.configureTestingModule({
       providers: [FunctionRegistryService],
