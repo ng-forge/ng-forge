@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -19,6 +19,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <input
+          #inputRef
           [type]="p?.type ?? 'text'"
           [field]="f"
           [id]="key()"
@@ -53,6 +54,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
         }
         <input
+          #inputRef
           [type]="p?.type ?? 'text'"
           [field]="f"
           [id]="key()"
@@ -104,6 +106,40 @@ export default class BsInputFieldComponent implements BsInputComponent {
 
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
+
+  /**
+   * Reference to the native input element.
+   * Used to imperatively sync the readonly attribute since Angular Signal Forms'
+   * [field] directive doesn't sync FieldState.readonly() to the DOM.
+   */
+  private readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('inputRef');
+
+  /**
+   * Computed signal that extracts the readonly state from the field.
+   * Used by the effect to reactively sync the readonly attribute to the DOM.
+   */
+  private readonly isReadonly = computed(() => this.field()().readonly());
+
+  /**
+   * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
+   * attribute to the DOM. This effect imperatively sets/removes the readonly attribute
+   * on the native input element whenever the readonly state changes.
+   *
+   * Uses afterRenderEffect to ensure DOM is ready before manipulating attributes.
+   */
+  private readonly syncReadonlyToDom = afterRenderEffect({
+    write: () => {
+      const inputRef = this.inputRef();
+      const isReadonly = this.isReadonly();
+      if (inputRef?.nativeElement) {
+        if (isReadonly) {
+          inputRef.nativeElement.setAttribute('readonly', '');
+        } else {
+          inputRef.nativeElement.removeAttribute('readonly');
+        }
+      }
+    },
+  });
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();
