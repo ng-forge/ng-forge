@@ -12,8 +12,8 @@ import { Signal, ResourceRef } from '@angular/core';
  * - Field state: `ctx.state` (errors, touched, dirty, etc.)
  * - Other field values: `ctx.valueOf(path)` where path is a FieldPath
  * - Other field states: `ctx.stateOf(path)`
- * - Other fields: `ctx.fieldOf(path)`
- * - Current field tree: `ctx.field`
+ * - Other fields: `ctx.fieldTreeOf(path)`
+ * - Current field tree: `ctx.fieldTree`
  *
  * **Return Types:**
  * - Single error: `{ kind: 'errorKind' }` for field-level validation
