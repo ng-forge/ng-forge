@@ -1,3 +1,5 @@
+import { DynamicFormError } from '../../../errors/dynamic-form-error';
+
 /**
  * Token types for expression parsing
  */
@@ -102,7 +104,7 @@ export interface ArrayLiteralNode {
 /**
  * Parser error with position information
  */
-export class ExpressionParserError extends Error {
+export class ExpressionParserError extends DynamicFormError {
   constructor(
     message: string,
     public position: number,

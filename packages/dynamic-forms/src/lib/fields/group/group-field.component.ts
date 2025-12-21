@@ -30,6 +30,7 @@ import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
 import { flattenFields } from '../../utils/flattener/field-flattener';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 /**
  * Container component for rendering nested form groups.
@@ -174,8 +175,8 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
     const child = parentForm[groupKey];
 
     if (!child) {
-      throw new Error(
-        `[Dynamic Forms] Group field "${groupKey}" not found in parent form. ` + `Ensure the parent form schema includes this group field.`,
+      throw new DynamicFormError(
+        `Group field "${groupKey}" not found in parent form. ` + `Ensure the parent form schema includes this group field.`,
       );
     }
 

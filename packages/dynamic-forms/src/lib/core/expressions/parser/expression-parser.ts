@@ -106,7 +106,7 @@ export class ExpressionParser {
       }
       // Wrap other errors for consistency
       throw new ExpressionParserError(
-        `[Dynamic Forms] Error evaluating expression: ${error instanceof Error ? error.message : String(error)}`,
+        `Error evaluating expression: ${error instanceof Error ? error.message : String(error)}`,
         0,
         expression,
       );

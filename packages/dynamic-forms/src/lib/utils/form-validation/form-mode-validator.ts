@@ -1,6 +1,7 @@
 import { detectFormMode, FormModeDetectionResult, isPageField } from '../../models/types/form-mode';
 import { RegisteredFieldTypes } from '../../models/registry';
 import { validatePageNesting } from '../../definitions/default/page-field';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 /**
  * Comprehensive form configuration validator that checks:
@@ -53,12 +54,11 @@ export class FormModeValidator {
     const result = this.validateFormConfiguration(fields);
 
     if (!result.isValid) {
-      const errorMessage = [
-        `[Dynamic Forms] Invalid form configuration (${result.mode} mode):`,
-        ...result.errors.map((error) => `  - ${error}`),
-      ].join('\n');
+      const errorMessage = [`Invalid form configuration (${result.mode} mode):`, ...result.errors.map((error) => `  - ${error}`)].join(
+        '\n',
+      );
 
-      throw new Error(errorMessage);
+      throw new DynamicFormError(errorMessage);
     }
   }
 

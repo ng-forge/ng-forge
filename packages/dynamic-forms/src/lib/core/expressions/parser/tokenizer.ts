@@ -103,7 +103,7 @@ export class Tokenizer {
       }
     }
 
-    throw new ExpressionParserError('[Dynamic Forms] Unterminated string literal', start, this.expression);
+    throw new ExpressionParserError('Unterminated string literal', start, this.expression);
   }
 
   private readNumber(): Token {
@@ -219,7 +219,7 @@ export class Tokenizer {
       case ']':
         return { type: TokenType.RBRACKET, value: ']', position: start };
       default:
-        throw new ExpressionParserError(`[Dynamic Forms] Unexpected character: ${char}`, start, this.expression);
+        throw new ExpressionParserError(`Unexpected character: ${char}`, start, this.expression);
     }
   }
 }

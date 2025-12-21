@@ -1,4 +1,5 @@
 import { inject, Type } from '@angular/core';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
 
 /**
@@ -104,7 +105,7 @@ export function injectFieldRegistry() {
       const fieldType = registry.get(name);
 
       if (!fieldType) {
-        throw new Error(`[Dynamic Forms] Field type "${name}" is not registered`);
+        throw new DynamicFormError(`Field type "${name}" is not registered`);
       }
 
       // Handle async loading
@@ -115,11 +116,11 @@ export function injectFieldRegistry() {
           const moduleResult = result as { default?: Type<unknown> } | Type<unknown>;
           return (typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default) || (result as Type<unknown>);
         } catch (error) {
-          throw new Error(`[Dynamic Forms] Failed to load component for field type "${name}": ${error}`);
+          throw new DynamicFormError(`Failed to load component for field type "${name}": ${error}`);
         }
       }
 
-      throw new Error(`[Dynamic Forms] Field type "${name}" has no component or loadComponent function`);
+      throw new DynamicFormError(`Field type "${name}" has no component or loadComponent function`);
     },
 
     /**
