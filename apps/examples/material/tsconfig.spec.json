@@ -4,13 +4,15 @@
     "allowJs": true,
     "outDir": "../../../../dist/out-tsc",
     "sourceMap": false,
-    "module": "esnext",
+    "module": "preserve",
     "moduleResolution": "bundler",
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "lib": ["dom", "es2022"],
+    "isolatedModules": true
   },
   "include": [
     "**/*.ts",
