@@ -92,7 +92,7 @@ export function createSchemaFromFields<TModel = unknown>(
  * This is the key integration point that routes cross-field validation errors
  * to the appropriate target fields via Angular's form state system.
  *
- * The validateTree function allows returning errors with a `field` property
+ * The validateTree function allows returning errors with a `fieldTree` property
  * that targets specific fields, which Angular automatically routes to those
  * fields' errors() signal.
  *

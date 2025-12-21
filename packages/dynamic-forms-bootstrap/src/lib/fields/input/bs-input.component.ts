@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -18,116 +18,23 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
     @if (effectiveFloatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
-        @switch (p?.type ?? 'text') {
-          @case ('email') {
-            <input
-              type="email"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @case ('password') {
-            <input
-              type="password"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @case ('number') {
-            <input
-              type="number"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @case ('tel') {
-            <input
-              type="tel"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @case ('url') {
-            <input
-              type="url"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @default {
-            <input
-              type="text"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-        }
+        <input
+          #inputRef
+          [type]="p?.type ?? 'text'"
+          [field]="f"
+          [id]="key()"
+          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+          [attr.tabindex]="tabIndex()"
+          [attr.aria-invalid]="ariaInvalid"
+          [attr.aria-required]="ariaRequired"
+          [attr.aria-describedby]="ariaDescribedBy"
+          class="form-control"
+          [class.form-control-sm]="effectiveSize === 'sm'"
+          [class.form-control-lg]="effectiveSize === 'lg'"
+          [class.form-control-plaintext]="p?.plaintext"
+          [class.is-invalid]="f().invalid() && f().touched()"
+          [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+        />
         @if (label()) {
           <label [for]="key()">{{ label() | dynamicText | async }}</label>
         }
@@ -146,116 +53,23 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
         @if (label()) {
           <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
         }
-        @switch (p?.type ?? 'text') {
-          @case ('email') {
-            <input
-              type="email"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @case ('password') {
-            <input
-              type="password"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @case ('number') {
-            <input
-              type="number"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @case ('tel') {
-            <input
-              type="tel"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @case ('url') {
-            <input
-              type="url"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-          @default {
-            <input
-              type="text"
-              [field]="f"
-              [id]="key()"
-              [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-              [attr.tabindex]="tabIndex()"
-              [attr.aria-invalid]="ariaInvalid"
-              [attr.aria-required]="ariaRequired"
-              [attr.aria-describedby]="ariaDescribedBy"
-              class="form-control"
-              [class.form-control-sm]="effectiveSize === 'sm'"
-              [class.form-control-lg]="effectiveSize === 'lg'"
-              [class.form-control-plaintext]="p?.plaintext"
-              [class.is-invalid]="f().invalid() && f().touched()"
-              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-            />
-          }
-        }
+        <input
+          #inputRef
+          [type]="p?.type ?? 'text'"
+          [field]="f"
+          [id]="key()"
+          [placeholder]="(placeholder() | dynamicText | async) ?? ''"
+          [attr.tabindex]="tabIndex()"
+          [attr.aria-invalid]="ariaInvalid"
+          [attr.aria-required]="ariaRequired"
+          [attr.aria-describedby]="ariaDescribedBy"
+          class="form-control"
+          [class.form-control-sm]="effectiveSize === 'sm'"
+          [class.form-control-lg]="effectiveSize === 'lg'"
+          [class.form-control-plaintext]="p?.plaintext"
+          [class.is-invalid]="f().invalid() && f().touched()"
+          [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+        />
         @if (p?.helpText) {
           <div class="form-text" [id]="helpTextId()">
             {{ p?.helpText | dynamicText | async }}
@@ -292,6 +106,40 @@ export default class BsInputFieldComponent implements BsInputComponent {
 
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
+
+  /**
+   * Reference to the native input element.
+   * Used to imperatively sync the readonly attribute since Angular Signal Forms'
+   * [field] directive doesn't sync FieldState.readonly() to the DOM.
+   */
+  private readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('inputRef');
+
+  /**
+   * Computed signal that extracts the readonly state from the field.
+   * Used by the effect to reactively sync the readonly attribute to the DOM.
+   */
+  private readonly isReadonly = computed(() => this.field()().readonly());
+
+  /**
+   * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
+   * attribute to the DOM. This effect imperatively sets/removes the readonly attribute
+   * on the native input element whenever the readonly state changes.
+   *
+   * Uses afterRenderEffect to ensure DOM is ready before manipulating attributes.
+   */
+  private readonly syncReadonlyToDom = afterRenderEffect({
+    write: () => {
+      const inputRef = this.inputRef();
+      const isReadonly = this.isReadonly();
+      if (inputRef?.nativeElement) {
+        if (isReadonly) {
+          inputRef.nativeElement.setAttribute('readonly', '');
+        } else {
+          inputRef.nativeElement.removeAttribute('readonly');
+        }
+      }
+    },
+  });
 
   readonly label = input<DynamicText>();
   readonly placeholder = input<DynamicText>();
