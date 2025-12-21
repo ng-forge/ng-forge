@@ -52,8 +52,10 @@ interface NumberInputField<TProps extends { type?: string } = InputProps> extend
  * When props.type is text/email/etc (or undefined), value must be string.
  * Props type cannot be 'number'.
  */
-interface StringInputField<TProps extends { type?: string } = InputProps>
-  extends BaseValueField<TProps & { type?: StringInputType }, string> {
+interface StringInputField<TProps extends { type?: string } = InputProps> extends BaseValueField<
+  TProps & { type?: StringInputType },
+  string
+> {
   type: 'input';
   props?: TProps & { type?: StringInputType }; // Optional, but type cannot be 'number'
 }
