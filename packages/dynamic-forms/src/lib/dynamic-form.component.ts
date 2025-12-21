@@ -98,8 +98,7 @@ import { DYNAMIC_FORM_LOGGER } from './providers/features/logger/logger.token';
 export class DynamicForm<
   TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
   TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
-> implements OnDestroy
-{
+> implements OnDestroy {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies
   // ─────────────────────────────────────────────────────────────────────────────
