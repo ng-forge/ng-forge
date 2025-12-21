@@ -8,7 +8,8 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "preserve"
+    "module": "preserve",
+    "lib": ["dom", "es2022"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

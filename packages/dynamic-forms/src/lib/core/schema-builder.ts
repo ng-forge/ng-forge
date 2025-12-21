@@ -17,7 +17,7 @@ import { normalizeFieldsArray } from '../utils/object-utils';
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): FieldTree<unknown> | undefined {
-  return (ctx.field as Record<string, FieldTree<unknown>>)[key];
+  return (ctx.fieldTree as Record<string, FieldTree<unknown>>)[key];
 }
 
 /**
@@ -142,7 +142,7 @@ function applyCrossFieldTreeValidator<TModel>(
           const customConfig = config as CustomValidatorConfig;
           errors.push({
             kind: customConfig.kind || config.type || 'custom',
-            field: targetField,
+            fieldTree: targetField,
           });
         }
       }
@@ -229,7 +229,7 @@ function evaluateCustomCrossFieldValidator<TModel>(
 
   const errorObj: Record<string, unknown> = {
     kind: config.kind || 'custom',
-    field: targetField,
+    fieldTree: targetField,
   };
 
   // Evaluate and include errorParams for message interpolation
@@ -289,7 +289,7 @@ function evaluateBuiltInCrossFieldValidator<TModel>(
 
   return {
     kind: config.type,
-    field: targetField,
+    fieldTree: targetField,
   } as ValidationError.WithOptionalField;
 }
 
