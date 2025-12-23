@@ -82,16 +82,15 @@ git tag -l "v*" | sort -V | tail -1
 Then generate the changelog:
 
 ```bash
-pnpm nx release changelog {VERSION} --from={PREVIOUS_TAG}
+pnpm nx release changelog {VERSION} --from={PREVIOUS_TAG} --git-tag=false --create-release=false
 ```
 
 This command automatically:
 
 - Updates CHANGELOG.md with entries since the previous release
 - Commits the changelog
-- Creates the git tag `v{VERSION}`
-- Pushes the tag to origin
-- Creates a GitHub Release
+
+**Note:** Tags and GitHub releases are created automatically by the Release GitHub Action after the PR is merged and manually triggered.
 
 ### 6. Push the branch
 
@@ -114,15 +113,17 @@ gh pr create --title "chore(release): bump version to {VERSION}" --body "## Summ
 - @ng-forge/dynamic-forms-material: {OLD_VERSION} -> {VERSION}
 - @ng-forge/dynamic-forms-primeng: {OLD_VERSION} -> {VERSION}
 
-## Release Notes
-See the generated [GitHub Release](https://github.com/ng-forge/ng-forge/releases/tag/v{VERSION}) for full changelog.
+## Changelog
+[Include changelog entries from CHANGELOG.md for this version]
 
 ## Next Steps
-After merging, trigger the Release workflow manually from GitHub Actions to publish to npm."
+After merging, trigger the Release workflow manually from GitHub Actions to create the tag, GitHub release, and publish to npm."
 ```
 
 ## What This Skill Does NOT Do
 
+- **Creating git tags**: Handled by the Release GitHub Action after PR merge
+- **Creating GitHub releases**: Handled by the Release GitHub Action after PR merge
 - **Publishing to npm**: Handled by the Release GitHub Action after PR merge
 
 ## Failure Recovery
@@ -134,9 +135,4 @@ If something goes wrong, clean up with:
 git checkout main
 git branch -D release-{VERSION}
 git push origin --delete release-{VERSION}
-
-# Delete tag and GitHub release (if created)
-git tag -d v{VERSION}
-git push origin --delete v{VERSION}
-gh release delete v{VERSION} --yes
 ```
