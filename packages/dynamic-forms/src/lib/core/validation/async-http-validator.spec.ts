@@ -6,6 +6,8 @@ import { AsyncValidatorConfig, HttpValidatorConfig } from '../../models/validati
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { applyValidator } from './validator-factory';
 import { AsyncCustomValidator, HttpCustomValidator } from './validator-types';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 
 // Helper type for mock ResourceRef
 type MockResourceRef<T> = {
@@ -23,7 +25,13 @@ describe('Async and HTTP Validator Integration', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService],
+      providers: [
+        RootFormRegistryService,
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        // Provide ConsoleLogger to enable logging in tests
+        { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
+      ],
     });
 
     injector = TestBed.inject(Injector);

@@ -17,7 +17,7 @@ import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-fi
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { keyBy, mapValues, memoize } from '../../utils/object-utils';
-import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { GroupField } from '../../definitions/default/group-field';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTypeDefinition } from '../../models/field-type';
@@ -67,7 +67,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
   private readonly injector = inject(Injector);
   private readonly eventBus = inject(EventBus);
-  private readonly logger = inject(DYNAMIC_FORM_LOGGER);
+  private readonly logger = inject(DynamicFormLogger);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Memoized Functions

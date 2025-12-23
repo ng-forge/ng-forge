@@ -8,6 +8,7 @@ import { form } from '@angular/forms/signals';
 import { baseFieldMapper, FieldSignalContext, rowFieldMapper } from '../../mappers';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { provideDynamicForm } from '../../providers';
+import { withLoggerConfig } from '../../providers/features/logger/with-logger-config';
 import { FIELD_REGISTRY } from '../../models/field-type';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
@@ -29,7 +30,8 @@ describe('ArrayFieldComponent', () => {
     TestBed.configureTestingModule({
       imports: [ArrayFieldComponent],
       providers: [
-        provideDynamicForm(),
+        // Include withLoggerConfig() to enable logging in tests
+        provideDynamicForm(withLoggerConfig()),
         EventBus,
         FunctionRegistryService,
         {

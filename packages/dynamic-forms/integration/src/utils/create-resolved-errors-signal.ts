@@ -6,7 +6,8 @@ import { map, switchMap } from 'rxjs/operators';
 import { ValidationMessages } from '@ng-forge/dynamic-forms';
 import { dynamicTextToObservable } from '@ng-forge/dynamic-forms';
 import { interpolateParams } from '@ng-forge/dynamic-forms';
-import { DYNAMIC_FORM_LOGGER, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import type { Logger } from '@ng-forge/dynamic-forms';
 
 /**
  * Resolved validation error with interpolated message
@@ -42,7 +43,7 @@ export function createResolvedErrorsSignal<T>(
   injector = inject(Injector),
 ): Signal<ResolvedError[]> {
   // Get logger from injector
-  const logger = injector.get(DYNAMIC_FORM_LOGGER);
+  const logger = injector.get(DynamicFormLogger);
 
   // Ensure validationMessages is never undefined (mappers pass {} if not defined)
   const messages = computed(() => validationMessages() ?? {});
@@ -93,7 +94,7 @@ function resolveErrorMessage(
   fieldMessages: ValidationMessages,
   defaultMessages: ValidationMessages,
   injector: Injector,
-  logger: DynamicFormLogger,
+  logger: Logger,
 ): Observable<ResolvedError | null> {
   // Check for field-level custom message first
   const fieldMessage = fieldMessages[error.kind];

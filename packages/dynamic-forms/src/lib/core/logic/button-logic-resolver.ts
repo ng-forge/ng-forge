@@ -4,13 +4,13 @@ import { FormOptions, NextButtonOptions, SubmitButtonOptions } from '../../model
 import { LogicConfig, FormStateCondition, isFormStateCondition } from '../../models/logic';
 import { ConditionalExpression } from '../../models/expressions';
 import { evaluateCondition } from '../expressions';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.interface';
+import type { Logger } from '../../providers/features/logger/logger.interface';
 
 /**
  * No-op logger for when no logger is provided.
  * Used as fallback in button logic evaluation to avoid breaking downstream packages.
  */
-const noOpLogger: DynamicFormLogger = {
+const noOpLogger: Logger = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   debug: () => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -46,7 +46,7 @@ export interface ButtonLogicContext {
   formValue?: unknown;
 
   /** Optional logger for diagnostic output. Falls back to no-op logger if not provided. */
-  logger?: DynamicFormLogger;
+  logger?: Logger;
 }
 
 /**

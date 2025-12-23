@@ -1,11 +1,12 @@
+import { Provider } from '@angular/core';
 import { vi, type Mock } from 'vitest';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
-import { NoopLogger } from '@ng-forge/dynamic-forms';
+import { DynamicFormLogger, ConsoleLogger } from '@ng-forge/dynamic-forms';
+import type { Logger } from '@ng-forge/dynamic-forms';
 
 /**
  * Mock logger with vitest spies for testing.
  */
-export interface MockLogger extends DynamicFormLogger {
+export interface MockLogger extends Logger {
   debug: Mock;
   info: Mock;
   warn: Mock;
@@ -26,9 +27,9 @@ export function createMockLogger(): MockLogger {
 }
 
 /**
- * Creates a silent logger that doesn't output anything.
- * Useful for tests where logging output is not relevant.
+ * Provider for a console logger in tests.
+ * Add this to TestBed.configureTestingModule providers when not using provideDynamicForm().
  */
-export function createSilentLogger(): DynamicFormLogger {
-  return new NoopLogger();
+export function provideTestLogger(): Provider {
+  return { provide: DynamicFormLogger, useValue: new ConsoleLogger() };
 }

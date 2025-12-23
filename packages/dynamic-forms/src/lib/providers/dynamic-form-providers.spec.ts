@@ -4,9 +4,8 @@ import { EnvironmentProviders, Provider } from '@angular/core';
 import { provideDynamicForm } from './dynamic-form-providers';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { BUILT_IN_FIELDS } from './built-in-fields';
-import { withLogger } from './features/logger/with-logger';
-import { LogLevel } from './features/logger/log-level';
-import { DYNAMIC_FORM_LOGGER } from './features/logger/logger.token';
+import { withLoggerConfig } from './features/logger/with-logger-config';
+import { DynamicFormLogger } from './features/logger/logger.token';
 import { ConsoleLogger } from './features/logger/console-logger';
 import { NoopLogger } from './features/logger/noop-logger';
 
@@ -50,7 +49,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm();
       const providers = getProviders(envProviders);
 
-      expect(providers).toHaveLength(1);
+      // Logger + FIELD_REGISTRY
+      expect(providers).toHaveLength(2);
     });
 
     it('should contain providers for custom fields', () => {
@@ -64,7 +64,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm(customField);
       const providers = getProviders(envProviders);
 
-      expect(providers).toHaveLength(1);
+      // Logger + FIELD_REGISTRY
+      expect(providers).toHaveLength(2);
     });
   });
 
@@ -171,7 +172,8 @@ describe('provideDynamicForm', () => {
         valueHandling: 'exclude',
       };
 
-      const envProviders = provideDynamicForm(customRow);
+      // Include withLoggerConfig() to enable logging in this test
+      const envProviders = provideDynamicForm(customRow, withLoggerConfig());
       createRegistryWithInjection(envProviders);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms]', 'Field type "row" is already registered. Overwriting.');
@@ -207,7 +209,8 @@ describe('provideDynamicForm', () => {
         valueHandling: 'include',
       };
 
-      const envProviders = provideDynamicForm(customField1, customField2);
+      // Include withLoggerConfig() to enable logging in this test
+      const envProviders = provideDynamicForm(customField1, customField2, withLoggerConfig());
       createRegistryWithInjection(envProviders);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms]', 'Field type "myfield" is already registered. Overwriting.');
@@ -234,7 +237,7 @@ describe('provideDynamicForm', () => {
   });
 
   describe('Feature integration', () => {
-    it('should accept withLogger feature alongside field types', () => {
+    it('should accept withLoggerConfig feature alongside field types', () => {
       const customField: FieldTypeDefinition = {
         name: 'custom',
         loadComponent: () => import('../fields/text/text-field.component'),
@@ -242,40 +245,40 @@ describe('provideDynamicForm', () => {
         valueHandling: 'exclude',
       };
 
-      const envProviders = provideDynamicForm(customField, withLogger({ level: LogLevel.Debug }));
+      const envProviders = provideDynamicForm(customField, withLoggerConfig());
       const providers = getProviders(envProviders);
 
-      // Should have 2 providers: FIELD_REGISTRY and DYNAMIC_FORM_LOGGER
+      // Should have 2 providers: FIELD_REGISTRY and DynamicFormLogger
       expect(providers.length).toBe(2);
     });
 
-    it('should include logger provider when withLogger is used', () => {
-      const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Debug }));
+    it('should include logger provider when withLoggerConfig is used', () => {
+      const envProviders = provideDynamicForm(withLoggerConfig());
       const providers = getProviders(envProviders);
       const loggerProvider = providers.find(
-        (p): p is { provide: unknown } => typeof p === 'object' && p !== null && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER,
+        (p): p is { provide: unknown } => typeof p === 'object' && p !== null && 'provide' in p && p.provide === DynamicFormLogger,
       );
 
       expect(loggerProvider).toBeDefined();
     });
 
-    it('should use ConsoleLogger when level is specified', () => {
-      const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Debug }));
+    it('should use ConsoleLogger when enabled is true', () => {
+      const envProviders = provideDynamicForm(withLoggerConfig(true));
       const providers = getProviders(envProviders);
       const loggerProvider = providers.find(
         (p): p is { provide: unknown; useValue: unknown } =>
-          typeof p === 'object' && p !== null && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER,
+          typeof p === 'object' && p !== null && 'provide' in p && p.provide === DynamicFormLogger,
       );
 
       expect(loggerProvider?.useValue).toBeInstanceOf(ConsoleLogger);
     });
 
-    it('should use NoopLogger when level is Off', () => {
-      const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Off }));
+    it('should use NoopLogger when enabled is false', () => {
+      const envProviders = provideDynamicForm(withLoggerConfig(false));
       const providers = getProviders(envProviders);
       const loggerProvider = providers.find(
         (p): p is { provide: unknown; useValue: unknown } =>
-          typeof p === 'object' && p !== null && 'provide' in p && p.provide === DYNAMIC_FORM_LOGGER,
+          typeof p === 'object' && p !== null && 'provide' in p && p.provide === DynamicFormLogger,
       );
 
       expect(loggerProvider?.useValue).toBeInstanceOf(NoopLogger);
@@ -297,7 +300,7 @@ describe('provideDynamicForm', () => {
       };
 
       // Mix field types and features in different positions
-      const envProviders = provideDynamicForm(customField1, withLogger({ level: LogLevel.Warn }), customField2);
+      const envProviders = provideDynamicForm(customField1, withLoggerConfig(), customField2);
       const registry = createRegistryWithInjection(envProviders);
 
       // Both custom fields should be registered
@@ -305,7 +308,7 @@ describe('provideDynamicForm', () => {
       expect(registry.has('custom2')).toBe(true);
 
       // Logger provider should exist (verified by successful registry creation)
-      const logger = TestBed.inject(DYNAMIC_FORM_LOGGER);
+      const logger = TestBed.inject(DynamicFormLogger);
       expect(logger).toBeDefined();
     });
 
@@ -318,7 +321,7 @@ describe('provideDynamicForm', () => {
       };
 
       // Feature first, then field type
-      const envProviders = provideDynamicForm(withLogger({ level: LogLevel.Error }), customField);
+      const envProviders = provideDynamicForm(withLoggerConfig(), customField);
       const registry = createRegistryWithInjection(envProviders);
 
       expect(registry.has('custom')).toBe(true);

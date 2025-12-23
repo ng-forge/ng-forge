@@ -6,9 +6,15 @@ import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-
 import { getTestBed } from '@angular/core/testing';
 // Reset TestBed after each test (critical for browser mode where TestBed is shared)
 import { afterEach } from 'vitest';
+import { DynamicFormLogger } from './lib/providers/features/logger/logger.token';
+import { ConsoleLogger } from './lib/providers/features/logger/console-logger';
 
 @NgModule({
-  providers: [provideZonelessChangeDetection()],
+  providers: [
+    provideZonelessChangeDetection(),
+    // Provide console logger for all tests to see diagnostic output
+    { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
+  ],
 })
 export class ZonelessTestModule {}
 

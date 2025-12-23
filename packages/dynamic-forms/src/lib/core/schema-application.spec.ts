@@ -7,6 +7,8 @@ import { RootFormRegistryService } from './registry/root-form-registry.service';
 import { FunctionRegistryService } from './registry/function-registry.service';
 import { FieldContextRegistryService } from './registry/field-context-registry.service';
 import { SchemaApplicationConfig, SchemaDefinition } from '../models';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { ConsoleLogger } from '../providers/features/logger/console-logger';
 
 import { applySchema, createSchemaFunction } from './schema-application';
 
@@ -26,7 +28,14 @@ describe('schema-application', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      providers: [SchemaRegistryService, RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService],
+      providers: [
+        SchemaRegistryService,
+        RootFormRegistryService,
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        // Provide ConsoleLogger to enable logging in tests
+        { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
+      ],
     });
 
     injector = TestBed.inject(Injector);

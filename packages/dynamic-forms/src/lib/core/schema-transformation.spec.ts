@@ -8,6 +8,8 @@ import { FieldTypeDefinition } from '../models/field-type';
 import { RootFormRegistryService, SchemaRegistryService, FunctionRegistryService, FieldContextRegistryService } from './registry';
 import { applySchema, createSchemaFunction } from './schema-application';
 import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { ConsoleLogger } from '../providers/features/logger/console-logger';
 
 describe('schema-transformation', () => {
   let injector: Injector;
@@ -16,7 +18,14 @@ describe('schema-transformation', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService, SchemaRegistryService, FunctionRegistryService, FieldContextRegistryService],
+      providers: [
+        RootFormRegistryService,
+        SchemaRegistryService,
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        // Provide ConsoleLogger to enable logging in tests
+        { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
+      ],
     });
 
     injector = TestBed.inject(Injector);

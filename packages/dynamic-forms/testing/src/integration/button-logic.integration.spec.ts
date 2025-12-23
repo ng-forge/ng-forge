@@ -5,7 +5,7 @@ import { form, schema } from '@angular/forms/signals';
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../../core/registry';
 import { resolveSubmitButtonDisabled, resolveNextButtonDisabled, ButtonLogicContext } from '../../core/logic/button-logic-resolver';
 import { FormOptions, FormStateCondition, LogicConfig, isFormStateCondition } from '../../models';
-import { createSilentLogger } from '../mock-logger';
+import { createMockLogger } from '../mock-logger';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
 
 describe('Button Logic Integration', () => {
@@ -14,7 +14,7 @@ describe('Button Logic Integration', () => {
   let mockLogger: DynamicFormLogger;
 
   beforeEach(() => {
-    mockLogger = createSilentLogger();
+    mockLogger = createMockLogger();
 
     TestBed.configureTestingModule({
       providers: [FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService],

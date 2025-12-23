@@ -1,4 +1,4 @@
-import { DynamicFormLogger } from '../../providers/features/logger/logger.interface';
+import type { Logger } from '../../providers/features/logger/logger.interface';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
 
 /**
@@ -20,7 +20,7 @@ import { ExpressionParser } from '../expressions/parser/expression-parser';
  * createTypePredicateFunction('Array.isArray(value)')
  * createTypePredicateFunction('value instanceof Date')
  */
-export function createTypePredicateFunction<T = unknown>(predicate: string, logger: DynamicFormLogger): (value: unknown) => value is T {
+export function createTypePredicateFunction<T = unknown>(predicate: string, logger: Logger): (value: unknown) => value is T {
   return (value: unknown): value is T => {
     try {
       // Evaluate using secure AST-based parser with value in scope

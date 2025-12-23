@@ -15,7 +15,7 @@ import {
   ValidationError,
 } from '@angular/forms/signals';
 import { inject } from '@angular/core';
-import { DYNAMIC_FORM_LOGGER } from '../../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import {
   AsyncValidatorConfig,
   CustomValidatorConfig,
@@ -150,7 +150,7 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
   } else if (config.functionName) {
     validatorFn = createFunctionValidator(config);
   } else {
-    const logger = inject(DYNAMIC_FORM_LOGGER);
+    const logger = inject(DynamicFormLogger);
     logger.warn('Custom validator must have either "expression" or "functionName"');
     return;
   }
@@ -165,7 +165,7 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
 function createFunctionValidator(
   config: CustomValidatorConfig,
 ): (ctx: FieldContext<unknown>) => ValidationError | ValidationError[] | null {
-  const logger = inject(DYNAMIC_FORM_LOGGER);
+  const logger = inject(DynamicFormLogger);
   const functionName = config.functionName;
   if (!functionName) {
     logger.warn('Custom validator missing functionName');
@@ -189,7 +189,7 @@ function createFunctionValidator(
 function createExpressionValidator(
   config: CustomValidatorConfig,
 ): (ctx: FieldContext<unknown>) => ValidationError | ValidationError[] | null {
-  const logger = inject(DYNAMIC_FORM_LOGGER);
+  const logger = inject(DynamicFormLogger);
   const expression = config.expression;
   if (!expression) {
     logger.warn('Custom validator missing expression');
@@ -241,7 +241,7 @@ function createExpressionValidator(
  * - onError: Optional handler for resource errors
  */
 function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<unknown>): void {
-  const logger = inject(DYNAMIC_FORM_LOGGER);
+  const logger = inject(DynamicFormLogger);
   const registry = inject(FunctionRegistryService);
   const validatorConfig = registry.getAsyncValidator(config.functionName);
 
@@ -276,7 +276,7 @@ function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath
  * - onError: Optional handler for HTTP errors
  */
 function applyHttpValidator(config: HttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
-  const logger = inject(DYNAMIC_FORM_LOGGER);
+  const logger = inject(DynamicFormLogger);
   const registry = inject(FunctionRegistryService);
   const httpValidatorConfig = registry.getHttpValidator(config.functionName);
 

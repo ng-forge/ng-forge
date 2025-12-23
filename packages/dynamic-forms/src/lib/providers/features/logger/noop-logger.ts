@@ -1,10 +1,10 @@
-import { DynamicFormLogger } from './logger.interface';
+import type { Logger } from './logger.interface';
 
 /**
  * No-operation logger implementation.
  * All methods are no-ops - used in production by default.
  */
-export class NoopLogger implements DynamicFormLogger {
+export class NoopLogger implements Logger {
   debug(): void {
     // Intentionally empty
   }

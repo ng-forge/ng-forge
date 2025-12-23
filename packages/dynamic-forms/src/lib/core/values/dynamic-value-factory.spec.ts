@@ -4,6 +4,8 @@ import { signal, Injector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { createDynamicValueFunction } from './dynamic-value-factory';
 import { RootFormRegistryService, FieldContextRegistryService } from '../registry';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 
 describe('dynamic-value-factory', () => {
   let injector: Injector;
@@ -11,7 +13,12 @@ describe('dynamic-value-factory', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RootFormRegistryService, FieldContextRegistryService],
+      providers: [
+        RootFormRegistryService,
+        FieldContextRegistryService,
+        // Provide ConsoleLogger to enable logging in tests
+        { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
+      ],
     });
 
     injector = TestBed.inject(Injector);

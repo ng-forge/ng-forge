@@ -2,7 +2,7 @@
  * Interface for dynamic forms logger implementations.
  * Allows custom logging integrations (Sentry, DataDog, etc.)
  */
-export interface DynamicFormLogger {
+export interface Logger {
   /**
    * Log a debug message.
    * Use for detailed diagnostic information during development.
