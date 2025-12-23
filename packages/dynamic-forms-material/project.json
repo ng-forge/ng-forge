@@ -7,7 +7,7 @@
   "implicitDependencies": ["dynamic-forms"],
   "release": {
     "version": {
-      "manifestRootsToUpdate": ["dist/{projectRoot}"],
+      "manifestRootsToUpdate": ["{projectRoot}", "dist/{projectRoot}"],
       "currentVersionResolver": "git-tag",
       "fallbackCurrentVersionResolver": "disk"
     }
