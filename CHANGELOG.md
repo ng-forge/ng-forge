@@ -1,3 +1,16 @@
+## 0.2.0 (2025-12-23)
+
+### ♻️ Code Refactoring
+
+- **dynamic-forms:** replace any types with unknown for improved type safety ([#106](https://github.com/ng-forge/ng-forge/pull/106))
+- **dynamic-forms:** centralize error prefix in base error class ([#113](https://github.com/ng-forge/ng-forge/pull/113))
+- **dynamic-forms:** extract shared utilities and simplify input templates ([#116](https://github.com/ng-forge/ng-forge/pull/116))
+- **dynamic-forms:** simplify logger configuration ([#118](https://github.com/ng-forge/ng-forge/pull/118))
+
+### ❤️ Thank You
+
+- Antim Prisacaru @antimprisacaru
+
 ## 0.1.3 (2025-12-20)
 
 ### 🚀 Features
