@@ -36,6 +36,12 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/dynamic-forms-bootstrap/vite.config.ts"
+      }
     }
   }
 }
