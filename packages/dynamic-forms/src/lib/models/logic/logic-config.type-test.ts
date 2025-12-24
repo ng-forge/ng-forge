@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for LogicConfig interface.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
 import type { LogicConfig, FormStateCondition } from './logic-config';
 import { isFormStateCondition } from './logic-config';

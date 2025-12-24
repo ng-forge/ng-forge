@@ -5,7 +5,7 @@
  * the expected properties. If a property is added, removed, or its type
  * changes, these tests will fail.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 

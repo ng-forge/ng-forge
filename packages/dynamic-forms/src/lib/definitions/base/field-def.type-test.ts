@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for FieldDef interface.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { FieldDef, FieldComponent } from './field-def';
 

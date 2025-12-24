@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for BsInput field.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { BsInputProps, BsInputField } from './bs-input.type';

@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for BsDatepicker field.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { BsDatepickerProps, BsDatepickerField } from './bs-datepicker.type';

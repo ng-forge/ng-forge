@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for MatToggle field.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { MatFormFieldAppearance } from '@angular/material/form-field';
 import type { ThemePalette } from '@angular/material/core';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';

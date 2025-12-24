@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for MatButton field types.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig } from '@ng-forge/dynamic-forms';
 
 import type {

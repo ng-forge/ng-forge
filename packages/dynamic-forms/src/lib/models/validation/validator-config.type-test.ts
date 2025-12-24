@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for ValidatorConfig types.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
 import type {
   BaseValidatorConfig,

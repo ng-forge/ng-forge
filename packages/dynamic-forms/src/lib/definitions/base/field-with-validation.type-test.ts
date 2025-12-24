@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for FieldWithValidation interface.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { ValidatorConfig } from '../../models/validation/validator-config';
 import type { LogicConfig } from '../../models/logic/logic-config';
 import type { SchemaApplicationConfig } from '../../models/schemas/schema-definition';

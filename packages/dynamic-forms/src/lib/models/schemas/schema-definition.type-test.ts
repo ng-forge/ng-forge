@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for SchemaApplicationConfig and SchemaDefinition interfaces.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { ValidatorConfig } from '../validation/validator-config';
 import type { LogicConfig } from '../logic/logic-config';
 import type { ConditionalExpression } from '../expressions/conditional-expression';

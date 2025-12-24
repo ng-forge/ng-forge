@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for MatSelect field.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import type {
   DynamicText,

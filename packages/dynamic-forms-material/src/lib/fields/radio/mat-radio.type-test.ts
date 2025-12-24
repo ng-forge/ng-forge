@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for MatRadio field.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { ThemePalette } from '@angular/material/core';
 import type {
   DynamicText,

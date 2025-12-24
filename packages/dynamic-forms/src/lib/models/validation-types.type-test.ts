@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for ValidationMessages type.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type { DynamicText } from './types/dynamic-text';
 import type { ValidationMessages } from './validation-types';
 

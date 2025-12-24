@@ -1,7 +1,7 @@
 /**
  * Exhaustive type tests for PrimeMultiCheckbox field.
  */
-import { describe, it, expectTypeOf } from 'vitest';
+import { expectTypeOf } from 'vitest';
 import type {
   DynamicText,
   FieldOption,
