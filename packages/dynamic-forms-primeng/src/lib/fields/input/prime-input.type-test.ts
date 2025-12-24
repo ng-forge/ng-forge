@@ -1,0 +1,313 @@
+/**
+ * Exhaustive type tests for PrimeInput field.
+ */
+import { describe, it, expectTypeOf } from 'vitest';
+import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
+
+import type { PrimeInputProps, PrimeInputField } from './prime-input.type';
+
+// ============================================================================
+// Type Utilities
+// ============================================================================
+
+type RequiredKeys<T> = {
+  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
+}[keyof T];
+
+// ============================================================================
+// PrimeInputProps - Whitelist Test
+// ============================================================================
+
+describe('PrimeInputProps - Exhaustive Whitelist', () => {
+  type ExpectedKeys = 'styleClass' | 'hint' | 'size' | 'variant' | 'type' | 'placeholder';
+  type ActualKeys = keyof PrimeInputProps;
+
+  it('should have exactly the expected keys', () => {
+    expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
+  });
+
+  it('should have all keys optional', () => {
+    expectTypeOf<RequiredKeys<PrimeInputProps>>().toEqualTypeOf<never>();
+  });
+
+  describe('property types', () => {
+    it('styleClass', () => {
+      expectTypeOf<PrimeInputProps['styleClass']>().toEqualTypeOf<string | undefined>();
+    });
+
+    it('hint', () => {
+      expectTypeOf<PrimeInputProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
+    });
+
+    it('size', () => {
+      expectTypeOf<PrimeInputProps['size']>().toEqualTypeOf<'small' | 'large' | undefined>();
+    });
+
+    it('variant', () => {
+      expectTypeOf<PrimeInputProps['variant']>().toEqualTypeOf<'outlined' | 'filled' | undefined>();
+    });
+
+    it('type', () => {
+      expectTypeOf<PrimeInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | undefined>();
+    });
+
+    it('placeholder', () => {
+      expectTypeOf<PrimeInputProps['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
+    });
+  });
+});
+
+// ============================================================================
+// PrimeInputField (String) - Whitelist Test
+// ============================================================================
+
+describe('PrimeInputField (String) - Exhaustive Whitelist', () => {
+  type ExpectedKeys =
+    // From FieldDef
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    // From FieldWithValidation
+    | 'required'
+    | 'email'
+    | 'min'
+    | 'max'
+    | 'minLength'
+    | 'maxLength'
+    | 'pattern'
+    | 'validators'
+    | 'validationMessages'
+    | 'logic'
+    | 'schemas'
+    // From BaseValueField
+    | 'value'
+    | 'placeholder';
+
+  // String input field (without props.type: 'number')
+  type StringInputField = Extract<PrimeInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' } }>;
+  type ActualKeys = keyof StringInputField;
+
+  it('should have exactly the expected keys', () => {
+    expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
+  });
+
+  describe('required keys', () => {
+    it('key is required', () => {
+      expectTypeOf<StringInputField['key']>().toEqualTypeOf<string>();
+    });
+
+    it('type is required and literal', () => {
+      expectTypeOf<StringInputField['type']>().toEqualTypeOf<'input'>();
+    });
+  });
+
+  describe('optional keys from FieldDef', () => {
+    it('label', () => {
+      expectTypeOf<StringInputField['label']>().toEqualTypeOf<DynamicText | undefined>();
+    });
+
+    it('props', () => {
+      type PropsType = StringInputField['props'];
+      expectTypeOf<undefined>().toMatchTypeOf<PropsType>();
+    });
+
+    it('className', () => {
+      expectTypeOf<StringInputField['className']>().toEqualTypeOf<string | undefined>();
+    });
+
+    it('disabled', () => {
+      expectTypeOf<StringInputField['disabled']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('readonly', () => {
+      expectTypeOf<StringInputField['readonly']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('hidden', () => {
+      expectTypeOf<StringInputField['hidden']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('tabIndex', () => {
+      expectTypeOf<StringInputField['tabIndex']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('col', () => {
+      expectTypeOf<StringInputField['col']>().toEqualTypeOf<number | undefined>();
+    });
+  });
+
+  describe('validation keys from FieldWithValidation', () => {
+    it('required', () => {
+      expectTypeOf<StringInputField['required']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('email', () => {
+      expectTypeOf<StringInputField['email']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('min', () => {
+      expectTypeOf<StringInputField['min']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('max', () => {
+      expectTypeOf<StringInputField['max']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('minLength', () => {
+      expectTypeOf<StringInputField['minLength']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('maxLength', () => {
+      expectTypeOf<StringInputField['maxLength']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('pattern', () => {
+      expectTypeOf<StringInputField['pattern']>().toEqualTypeOf<string | RegExp | undefined>();
+    });
+
+    it('validators', () => {
+      expectTypeOf<StringInputField['validators']>().toEqualTypeOf<ValidatorConfig[] | undefined>();
+    });
+
+    it('validationMessages', () => {
+      expectTypeOf<StringInputField['validationMessages']>().toEqualTypeOf<ValidationMessages | undefined>();
+    });
+
+    it('logic', () => {
+      expectTypeOf<StringInputField['logic']>().toEqualTypeOf<LogicConfig[] | undefined>();
+    });
+
+    it('schemas', () => {
+      expectTypeOf<StringInputField['schemas']>().toEqualTypeOf<SchemaApplicationConfig[] | undefined>();
+    });
+  });
+
+  describe('value field keys from BaseValueField', () => {
+    it('value is string for string input', () => {
+      expectTypeOf<StringInputField['value']>().toEqualTypeOf<string | undefined>();
+    });
+
+    it('placeholder', () => {
+      expectTypeOf<StringInputField['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
+    });
+  });
+});
+
+// ============================================================================
+// PrimeInputField (Number) - Whitelist Test
+// ============================================================================
+
+describe('PrimeInputField (Number) - Exhaustive Whitelist', () => {
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'required'
+    | 'email'
+    | 'min'
+    | 'max'
+    | 'minLength'
+    | 'maxLength'
+    | 'pattern'
+    | 'validators'
+    | 'validationMessages'
+    | 'logic'
+    | 'schemas'
+    | 'value'
+    | 'placeholder';
+
+  // Number input field (with props.type: 'number')
+  type NumberInputField = Extract<PrimeInputField, { props: { type: 'number' } }>;
+  type ActualKeys = keyof NumberInputField;
+
+  it('should have exactly the expected keys', () => {
+    expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
+  });
+
+  describe('required keys', () => {
+    it('key is required', () => {
+      expectTypeOf<NumberInputField['key']>().toEqualTypeOf<string>();
+    });
+
+    it('type is required and literal', () => {
+      expectTypeOf<NumberInputField['type']>().toEqualTypeOf<'input'>();
+    });
+
+    it('props is required for number input', () => {
+      expectTypeOf<NumberInputField['props']>().toMatchTypeOf<{ type: 'number' }>();
+    });
+  });
+
+  describe('value type', () => {
+    it('value is number for number input', () => {
+      expectTypeOf<NumberInputField['value']>().toEqualTypeOf<number | undefined>();
+    });
+  });
+});
+
+// ============================================================================
+// PrimeInputField - Discriminated Union
+// ============================================================================
+
+describe('PrimeInputField - Discriminated Union', () => {
+  it('should accept string value when props.type is text', () => {
+    const field = {
+      type: 'input',
+      key: 'username',
+      props: { type: 'text' },
+      value: 'hello',
+    } as const satisfies PrimeInputField;
+
+    expectTypeOf(field.value).toEqualTypeOf<'hello'>();
+  });
+
+  it('should accept number value when props.type is number', () => {
+    const field = {
+      type: 'input',
+      key: 'age',
+      props: { type: 'number' },
+      value: 25,
+    } as const satisfies PrimeInputField;
+
+    expectTypeOf(field.value).toEqualTypeOf<25>();
+  });
+
+  it('should accept string value when props is omitted', () => {
+    const field = {
+      type: 'input',
+      key: 'name',
+      value: 'test',
+    } as const satisfies PrimeInputField;
+
+    expectTypeOf(field.value).toEqualTypeOf<'test'>();
+  });
+
+  it('should accept PrimeNG-specific props', () => {
+    const field = {
+      type: 'input',
+      key: 'email',
+      props: {
+        type: 'email',
+        size: 'large',
+        variant: 'outlined',
+        hint: 'Enter your email',
+      },
+    } as const satisfies PrimeInputField;
+
+    expectTypeOf(field.type).toEqualTypeOf<'input'>();
+  });
+});
