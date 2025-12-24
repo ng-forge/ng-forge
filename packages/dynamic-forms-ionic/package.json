@@ -38,5 +38,8 @@
   },
   "dependencies": {
     "date-fns": "^4.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.0"
   }
 }
