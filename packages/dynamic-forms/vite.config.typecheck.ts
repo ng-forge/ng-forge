@@ -5,25 +5,13 @@ export default defineConfig({
   plugins: [nxViteTsPaths()],
   test: {
     globals: true,
-    include: [
-      'src/lib/definitions/base/**/*.type-test.ts',
-      'src/lib/models/logic/**/*.type-test.ts',
-      'src/lib/models/validation/**/*.type-test.ts',
-      'src/lib/models/schemas/**/*.type-test.ts',
-      'src/lib/models/**/*.type-test.ts',
-    ],
+    include: ['src/**/*.type-test.ts'],
     reporters: ['verbose'],
     passWithNoTests: false,
     typecheck: {
       enabled: true,
       only: true,
-      include: [
-        'src/lib/definitions/base/**/*.type-test.ts',
-        'src/lib/models/logic/**/*.type-test.ts',
-        'src/lib/models/validation/**/*.type-test.ts',
-        'src/lib/models/schemas/**/*.type-test.ts',
-        'src/lib/models/**/*.type-test.ts',
-      ],
+      include: ['src/**/*.type-test.ts'],
       tsconfig: './tsconfig.typecheck.json',
     },
   },

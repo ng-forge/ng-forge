@@ -5,13 +5,13 @@ export default defineConfig({
   plugins: [nxViteTsPaths()],
   test: {
     globals: true,
-    include: ['src/lib/fields/**/*.type-test.ts'],
+    include: ['src/**/*.type-test.ts'],
     reporters: ['verbose'],
     passWithNoTests: false,
     typecheck: {
       enabled: true,
       only: true,
-      include: ['src/lib/fields/**/*.type-test.ts'],
+      include: ['src/**/*.type-test.ts'],
       tsconfig: './tsconfig.spec.json',
     },
   },
