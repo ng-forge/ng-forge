@@ -385,4 +385,59 @@ test.describe('Submission Behavior Tests', () => {
       await expect(page.locator('[data-testid="submission-result"]')).toHaveClass(/error/);
     });
   });
+
+  test.describe('Hidden Field', () => {
+    test.beforeEach(async ({ helpers, mockApi }) => {
+      await mockApi.mockSuccess('/api/hidden-field-submit', { delay: 300 });
+      await helpers.navigateToScenario('/test/submission-behavior/hidden-field');
+    });
+
+    test('should include hidden field values in form submission', async ({ page, helpers, mockApi }) => {
+      const scenario = helpers.getScenario('hidden-field');
+      await expect(scenario).toBeVisible();
+
+      // Fill the visible input field
+      await helpers.fillInput(helpers.getInput(scenario, 'name'), 'John Doe');
+
+      // Hidden fields should not have any visible elements
+      await expect(scenario.locator('[id="id"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="version"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="isActive"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="tagIds"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="labels"]')).not.toBeVisible();
+
+      // Submit the form
+      const submitButton = scenario.locator('#submitHidden button');
+      await expect(submitButton).toBeEnabled();
+      await submitButton.click();
+
+      // Wait for submission to complete
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
+
+      // Verify the request was intercepted with all hidden values
+      const requests = mockApi.getInterceptedRequests('/api/hidden-field-submit');
+      expect(requests).toHaveLength(1);
+      expect(requests[0].body).toEqual({
+        id: 'uuid-550e8400-e29b-41d4-a716-446655440000',
+        version: 42,
+        isActive: true,
+        tagIds: [1, 2, 3],
+        labels: ['draft', 'review'],
+        name: 'John Doe',
+      });
+    });
+
+    test('should not render any DOM elements for hidden fields', async ({ helpers }) => {
+      const scenario = helpers.getScenario('hidden-field');
+      await expect(scenario).toBeVisible();
+
+      // Count the field containers - should only have name input and submit button visible
+      // Hidden fields should not create any DOM elements
+      const visibleFields = scenario.locator('mat-form-field, button[type="submit"]');
+
+      // We expect to see: 1 input field (name) + 1 submit button = 2 visible elements
+      // Hidden fields should not add any visible elements
+      await expect(visibleFields).toHaveCount(2);
+    });
+  });
 });

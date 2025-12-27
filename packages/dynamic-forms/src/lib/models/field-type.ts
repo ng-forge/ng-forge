@@ -39,8 +39,11 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   /** Field definition type marker (internal use) */
   _fieldDef?: T;
   /**
-   * Function to load the component (supports lazy loading)
-   * Returns a Promise that resolves to the component class or module with default export
+   * Function to load the component (supports lazy loading).
+   * Returns a Promise that resolves to the component class or module with default export.
+   *
+   * Optional - omit for componentless fields (e.g., hidden fields) that only
+   * contribute to form values without rendering any UI.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Component loading returns dynamic module structure
   loadComponent?: () => Promise<any>;

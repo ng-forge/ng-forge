@@ -57,6 +57,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getSubmissionBehaviorScenario('http-error-handling') },
   },
+  {
+    path: 'hidden-field',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('hidden-field') },
+  },
 ];
 
 export default routes;

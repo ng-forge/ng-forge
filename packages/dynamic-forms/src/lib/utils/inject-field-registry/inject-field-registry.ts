@@ -87,40 +87,43 @@ export function injectFieldRegistry() {
      * Handles both synchronous component references and asynchronous
      * dynamic imports. Automatically extracts default exports from ES modules.
      *
+     * Returns `undefined` for componentless field types (e.g., hidden fields)
+     * that only contribute to form values without rendering UI.
+     *
      * @param name - The name of the field type to load
-     * @returns Promise resolving to the component constructor
+     * @returns Promise resolving to the component constructor, or undefined for componentless fields
      * @throws {Error} When field type is not registered or loading fails
      *
      * @example
      * ```typescript
-     * try {
-     *   const InputComponent = await fieldRegistry.loadTypeComponent('input');
-     *   const componentRef = vcr.createComponent(InputComponent);
-     * } catch (error) {
-     *   console.error('Failed to load component:', error);
+     * const component = await fieldRegistry.loadTypeComponent('input');
+     * if (component) {
+     *   const componentRef = vcr.createComponent(component);
      * }
+     * // For componentless fields like 'hidden', component will be undefined
      * ```
      */
-    async loadTypeComponent(name: string): Promise<Type<unknown>> {
+    async loadTypeComponent(name: string): Promise<Type<unknown> | undefined> {
       const fieldType = registry.get(name);
 
       if (!fieldType) {
         throw new DynamicFormError(`Field type "${name}" is not registered`);
       }
 
-      // Handle async loading
-      if (fieldType.loadComponent) {
-        try {
-          const result = await fieldType.loadComponent();
-          // Handle ES module imports - extract default export if needed
-          const moduleResult = result as { default?: Type<unknown> } | Type<unknown>;
-          return (typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default) || (result as Type<unknown>);
-        } catch (error) {
-          throw new DynamicFormError(`Failed to load component for field type "${name}": ${error}`);
-        }
+      // Componentless field types (e.g., hidden) don't have loadComponent
+      if (!fieldType.loadComponent) {
+        return undefined;
       }
 
-      throw new DynamicFormError(`Field type "${name}" has no component or loadComponent function`);
+      // Handle async loading
+      try {
+        const result = await fieldType.loadComponent();
+        // Handle ES module imports - extract default export if needed
+        const moduleResult = result as { default?: Type<unknown> } | Type<unknown>;
+        return (typeof moduleResult === 'object' && 'default' in moduleResult && moduleResult.default) || (result as Type<unknown>);
+      } catch (error) {
+        throw new DynamicFormError(`Failed to load component for field type "${name}": ${error}`);
+      }
     },
 
     /**

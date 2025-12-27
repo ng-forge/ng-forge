@@ -18,8 +18,11 @@ export interface ResolvedField {
  * Context required to resolve a field.
  */
 export interface ResolveFieldContext {
-  /** The field registry to load components from */
-  loadTypeComponent: (type: string) => Promise<Type<unknown>>;
+  /**
+   * The field registry to load components from.
+   * Returns undefined for componentless fields (e.g., hidden fields).
+   */
+  loadTypeComponent: (type: string) => Promise<Type<unknown> | undefined>;
   /** The raw field registry map for mappers */
   registry: Map<string, FieldTypeDefinition>;
   /** The injector to use for the resolved field */
@@ -34,15 +37,24 @@ export interface ResolveFieldContext {
  * Resolves a single field definition to a ResolvedField using RxJS.
  * Loads the component asynchronously and maps inputs in the injection context.
  *
+ * For componentless fields (e.g., hidden fields), returns undefined since
+ * there's nothing to render. These fields still contribute to form values
+ * through the form schema.
+ *
  * @param fieldDef - The field definition to resolve
  * @param context - The context containing dependencies for resolution
- * @returns Observable that emits ResolvedField or undefined on error
+ * @returns Observable that emits ResolvedField or undefined (for componentless fields or on error)
  */
 export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldContext): Observable<ResolvedField | undefined> {
   return from(context.loadTypeComponent(fieldDef.type)).pipe(
     map((component) => {
       // Check if component is destroyed before proceeding
       if (context.destroyRef.destroyed) {
+        return undefined;
+      }
+
+      // Componentless fields (e.g., hidden) return undefined - nothing to render
+      if (!component) {
         return undefined;
       }
 

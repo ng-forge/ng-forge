@@ -5,3 +5,4 @@ export { groupFieldMapper } from './group/group-field-mapper';
 export { arrayFieldMapper } from './array/array-field-mapper';
 export { pageFieldMapper } from './page/page-field-mapper';
 export { textFieldMapper } from './text/text-field-mapper';
+export { hiddenFieldMapper } from './hidden/hidden-field-mapper';

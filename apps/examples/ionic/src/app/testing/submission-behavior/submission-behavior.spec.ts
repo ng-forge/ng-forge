@@ -535,4 +535,75 @@ test.describe('Submission Behavior Tests', () => {
       await expect(page.locator('[data-testid="submission-result"]')).toHaveClass(/error/);
     });
   });
+
+  test.describe('Hidden Field', () => {
+    test.beforeEach(async ({ helpers, mockApi }) => {
+      await mockApi.mockSuccess('/api/hidden-field-submit', { delay: 300 });
+      await helpers.navigateToScenario('/testing/submission-behavior/hidden-field');
+    });
+
+    test('should include hidden field values in form submission', async ({ page, helpers, mockApi }) => {
+      const scenario = helpers.getScenario('hidden-field');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Wait for fields to be ready
+      await page.waitForSelector('[data-testid="hidden-field"] #name input', { state: 'visible', timeout: 10000 });
+
+      // Fill the visible input field
+      const nameInput = helpers.getInput(scenario, 'name');
+      await nameInput.fill('John Doe');
+      await expect(nameInput).toHaveValue('John Doe', { timeout: 5000 });
+      await ionBlur(nameInput);
+
+      // Hidden fields should not have any visible elements
+      await expect(scenario.locator('[id="id"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="version"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="isActive"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="tagIds"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="labels"]')).not.toBeVisible();
+
+      // Wait for submit button to be enabled
+      await page.waitForSelector('[data-testid="hidden-field"] #submitHidden ion-button:not([aria-disabled="true"])', {
+        state: 'visible',
+        timeout: 10000,
+      });
+
+      // Submit the form
+      const submitButton = scenario.locator('#submitHidden ion-button');
+      await submitButton.click();
+
+      // Wait for submission to complete
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
+
+      // Verify the request was intercepted with all hidden values
+      const requests = mockApi.getInterceptedRequests('/api/hidden-field-submit');
+      expect(requests).toHaveLength(1);
+      expect(requests[0].body).toEqual({
+        id: 'uuid-550e8400-e29b-41d4-a716-446655440000',
+        version: 42,
+        isActive: true,
+        tagIds: [1, 2, 3],
+        labels: ['draft', 'review'],
+        name: 'John Doe',
+      });
+    });
+
+    test('should not render any DOM elements for hidden fields', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('hidden-field');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Wait for fields to be ready
+      await page.waitForSelector('[data-testid="hidden-field"] #name input', { state: 'visible', timeout: 10000 });
+
+      // Count visible field containers - should only have name input and submit button
+      // Ionic uses ion-input and ion-button
+      const visibleInputs = scenario.locator('#name input');
+      const visibleButtons = scenario.locator('#submitHidden ion-button');
+
+      // We expect to see: 1 input field (name) + 1 submit button
+      // Hidden fields should not add any visible elements
+      await expect(visibleInputs).toHaveCount(1);
+      await expect(visibleButtons).toHaveCount(1);
+    });
+  });
 });

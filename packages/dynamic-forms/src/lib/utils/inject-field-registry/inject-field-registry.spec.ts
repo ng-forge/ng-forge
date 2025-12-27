@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Component, Type } from '@angular/core';
+import { Component, signal, Type } from '@angular/core';
 import { injectFieldRegistry } from './inject-field-registry';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
 
@@ -114,15 +114,17 @@ describe('injectFieldRegistry', () => {
       await expect(fieldRegistry.loadTypeComponent('nonexistent')).rejects.toThrow('Field type "nonexistent" is not registered');
     });
 
-    it('should throw error if field type has no loadComponent function', async () => {
-      registry.set('input', {
-        name: 'input',
-        component: TestComponent,
+    it('should return undefined for componentless field types', async () => {
+      // Componentless fields (like hidden) only have a mapper, no component
+      registry.set('hidden', {
+        name: 'hidden',
+        mapper: () => ({ value: signal({}) }),
+        valueHandling: 'include',
       });
 
-      await expect(fieldRegistry.loadTypeComponent('input')).rejects.toThrow(
-        'Field type "input" has no component or loadComponent function',
-      );
+      const result = await fieldRegistry.loadTypeComponent('hidden');
+
+      expect(result).toBeUndefined();
     });
 
     it('should throw error if loadComponent fails', async () => {

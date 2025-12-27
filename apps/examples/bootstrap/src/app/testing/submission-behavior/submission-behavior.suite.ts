@@ -7,6 +7,7 @@ import {
   conditionalExpressionScenario,
   explicitDisabledScenario,
   formStateConditionScenario,
+  hiddenFieldScenario,
   httpErrorHandlingScenario,
   nextButtonNeverDisabledScenario,
   nextButtonPageValidationScenario,
@@ -28,6 +29,7 @@ export const submissionBehaviorSuite: TestSuite = {
     conditionalExpressionScenario,
     explicitDisabledScenario,
     httpErrorHandlingScenario,
+    hiddenFieldScenario,
   ],
 };
 
