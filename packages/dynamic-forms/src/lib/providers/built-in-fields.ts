@@ -1,7 +1,6 @@
 import { FieldTypeDefinition } from '../models/field-type';
 import { arrayFieldMapper } from '../mappers/array/array-field-mapper';
 import { groupFieldMapper } from '../mappers/group/group-field-mapper';
-import { hiddenFieldMapper } from '../mappers/hidden/hidden-field-mapper';
 import { rowFieldMapper } from '../mappers/row/row-field-mapper';
 import { pageFieldMapper } from '../mappers/page/page-field-mapper';
 import { textFieldMapper } from '../mappers/text/text-field-mapper';
@@ -83,8 +82,7 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
   } satisfies FieldTypeDefinition<TextField>,
   {
     name: 'hidden',
-    // No loadComponent - componentless field that only contributes to form values
-    mapper: hiddenFieldMapper,
+    // Componentless field - no loadComponent or mapper needed
     valueHandling: 'include',
   } satisfies FieldTypeDefinition<HiddenField>,
 ];

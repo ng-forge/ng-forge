@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { BUILT_IN_FIELDS } from './built-in-fields';
 import { FieldTypeDefinition } from '../models/field-type';
-import { arrayFieldMapper, groupFieldMapper, hiddenFieldMapper, rowFieldMapper, textFieldMapper } from '../mappers';
+import { arrayFieldMapper, groupFieldMapper, rowFieldMapper, textFieldMapper } from '../mappers';
 import { pageFieldMapper } from '../mappers/page/page-field-mapper';
 
 describe('BUILT_IN_FIELDS', () => {
@@ -45,9 +45,8 @@ describe('BUILT_IN_FIELDS', () => {
     it('should have valid FieldTypeDefinition structure for each field', () => {
       BUILT_IN_FIELDS.forEach((field) => {
         expect(field).toHaveProperty('name');
-        expect(field).toHaveProperty('mapper');
         expect(field).toHaveProperty('valueHandling');
-        // loadComponent is optional for componentless fields
+        // loadComponent and mapper are optional for componentless fields
       });
     });
 
@@ -113,14 +112,14 @@ describe('BUILT_IN_FIELDS', () => {
     describe('hidden', () => {
       const field = BUILT_IN_FIELDS.find((f) => f.name === 'hidden') as FieldTypeDefinition;
 
-      it('should have correct mapper and value handling', () => {
+      it('should have correct value handling', () => {
         expect(field.name).toBe('hidden');
-        expect(field.mapper).toBe(hiddenFieldMapper);
         expect(field.valueHandling).toBe('include');
       });
 
-      it('should not have a loadComponent function', () => {
+      it('should not have a loadComponent or mapper (componentless)', () => {
         expect(field.loadComponent).toBeUndefined();
+        expect(field.mapper).toBeUndefined();
       });
     });
   });

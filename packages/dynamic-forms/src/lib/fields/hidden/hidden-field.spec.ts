@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { HiddenField, isHiddenField } from '../../definitions/default/hidden-field';
-import { hiddenFieldMapper } from '../../mappers/hidden/hidden-field-mapper';
 import { FieldDef } from '../../definitions/base/field-def';
+import { validateRowNesting, RowField } from '../../definitions/default/row-field';
 
 describe('HiddenField', () => {
   describe('type definition', () => {
@@ -114,31 +114,67 @@ describe('HiddenField', () => {
     });
   });
 
-  describe('hiddenFieldMapper', () => {
-    it('should return an empty signal', () => {
-      const field: HiddenField<string> = {
-        type: 'hidden',
-        key: 'id',
-        value: '123',
-      };
+  describe('row nesting validation (warnings)', () => {
+    it('should detect hidden fields directly inside rows', () => {
+      const row = {
+        type: 'row',
+        fields: [
+          { type: 'input', key: 'name', value: '' },
+          { type: 'hidden', key: 'id', value: '123' },
+        ],
+      } as RowField;
 
-      const result = hiddenFieldMapper(field);
-
-      // Should return a signal with empty object
-      expect(result()).toEqual({});
+      // Returns false when hidden fields are present (triggers warning)
+      expect(validateRowNesting(row)).toBe(false);
     });
 
-    it('should return consistent empty object for any field', () => {
-      const fields: HiddenField[] = [
-        { type: 'hidden', key: 'id', value: '123' },
-        { type: 'hidden', key: 'ids', value: [1, 2, 3] },
-        { type: 'hidden', key: 'flag', value: true },
-      ];
+    it('should detect hidden fields inside groups within rows', () => {
+      const row = {
+        type: 'row',
+        fields: [
+          {
+            type: 'group',
+            key: 'data',
+            fields: [
+              { type: 'input', key: 'name', value: '' },
+              { type: 'hidden', key: 'id', value: '123' },
+            ],
+          },
+        ],
+      } as RowField;
 
-      fields.forEach((field) => {
-        const result = hiddenFieldMapper(field);
-        expect(result()).toEqual({});
-      });
+      // Returns false when hidden fields are present (triggers warning)
+      expect(validateRowNesting(row)).toBe(false);
+    });
+
+    it('should pass for rows without hidden fields', () => {
+      const row = {
+        type: 'row',
+        fields: [
+          { type: 'input', key: 'firstName', value: '' },
+          { type: 'input', key: 'lastName', value: '' },
+        ],
+      } as RowField;
+
+      expect(validateRowNesting(row)).toBe(true);
+    });
+
+    it('should pass for rows with groups containing only visible fields', () => {
+      const row = {
+        type: 'row',
+        fields: [
+          {
+            type: 'group',
+            key: 'name',
+            fields: [
+              { type: 'input', key: 'first', value: '' },
+              { type: 'input', key: 'last', value: '' },
+            ],
+          },
+        ],
+      } as RowField;
+
+      expect(validateRowNesting(row)).toBe(true);
     });
   });
 });

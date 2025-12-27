@@ -47,8 +47,12 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Component loading returns dynamic module structure
   loadComponent?: () => Promise<any>;
-  /** Mapper function that converts field definition to component bindings */
-  mapper: MapperFn<T>;
+  /**
+   * Mapper function that converts field definition to component bindings.
+   * Optional - omit for componentless fields that don't need input mapping.
+   * Falls back to baseFieldMapper when not provided.
+   */
+  mapper?: MapperFn<T>;
   /** How this field type handles form values and data collection (defaults to 'include') */
   valueHandling?: ValueHandlingMode;
 }

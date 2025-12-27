@@ -2,16 +2,19 @@ import { TestScenario } from '../../shared/types';
 
 /**
  * Hidden Field Scenario
- * Tests that hidden field values are included in form submissions without rendering any UI
+ * Tests that hidden field values are included in form submissions without rendering any UI.
+ * Also tests hidden fields inside groups and arrays.
  */
 export const hiddenFieldScenario: TestScenario = {
   testId: 'hidden-field',
   title: 'Hidden Field',
   description:
     'Tests that hidden fields store values in the form model without rendering UI elements. ' +
-    'Hidden fields are useful for persisting IDs, metadata, or other non-user-facing data.',
+    'Hidden fields are useful for persisting IDs, metadata, or other non-user-facing data. ' +
+    'Also tests hidden fields inside groups and arrays.',
   config: {
     fields: [
+      // Top-level hidden fields
       {
         key: 'id',
         type: 'hidden',
@@ -37,6 +40,31 @@ export const hiddenFieldScenario: TestScenario = {
         type: 'hidden',
         value: ['draft', 'review'],
       },
+      // Hidden field inside a group
+      {
+        type: 'group',
+        key: 'metadata',
+        fields: [
+          {
+            key: 'createdBy',
+            type: 'hidden',
+            value: 'user-admin',
+          },
+          {
+            key: 'source',
+            type: 'hidden',
+            value: 'web-form',
+          },
+          {
+            key: 'description',
+            type: 'input',
+            label: 'Description',
+            value: '',
+            col: 12,
+          },
+        ],
+      },
+      // Visible input field
       {
         key: 'name',
         type: 'input',

@@ -391,12 +391,13 @@ test.describe('Submission Behavior Tests', () => {
       await helpers.navigateToScenario('/test/submission-behavior/hidden-field');
     });
 
-    test('should include hidden field values in form submission', async ({ page, helpers, mockApi }) => {
+    test('should include hidden field values in form submission including inside groups', async ({ page, helpers, mockApi }) => {
       const scenario = helpers.getScenario('hidden-field');
       await expect(scenario).toBeVisible();
 
-      // Fill the visible input field
+      // Fill the visible input fields
       await helpers.fillInput(helpers.getInput(scenario, 'name'), 'John Doe');
+      await helpers.fillInput(helpers.getInput(scenario, 'description'), 'Test description');
 
       // Hidden fields should not have any visible elements
       await expect(scenario.locator('[id="id"]')).not.toBeVisible();
@@ -404,6 +405,9 @@ test.describe('Submission Behavior Tests', () => {
       await expect(scenario.locator('[id="isActive"]')).not.toBeVisible();
       await expect(scenario.locator('[id="tagIds"]')).not.toBeVisible();
       await expect(scenario.locator('[id="labels"]')).not.toBeVisible();
+      // Hidden fields inside groups should also not be visible
+      await expect(scenario.locator('[id="createdBy"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="source"]')).not.toBeVisible();
 
       // Submit the form
       const submitButton = scenario.locator('#submitHidden button');
@@ -413,7 +417,7 @@ test.describe('Submission Behavior Tests', () => {
       // Wait for submission to complete
       await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
 
-      // Verify the request was intercepted with all hidden values
+      // Verify the request was intercepted with all hidden values including nested ones
       const requests = mockApi.getInterceptedRequests('/api/hidden-field-submit');
       expect(requests).toHaveLength(1);
       expect(requests[0].body).toEqual({
@@ -422,6 +426,11 @@ test.describe('Submission Behavior Tests', () => {
         isActive: true,
         tagIds: [1, 2, 3],
         labels: ['draft', 'review'],
+        metadata: {
+          createdBy: 'user-admin',
+          source: 'web-form',
+          description: 'Test description',
+        },
         name: 'John Doe',
       });
     });
@@ -430,14 +439,14 @@ test.describe('Submission Behavior Tests', () => {
       const scenario = helpers.getScenario('hidden-field');
       await expect(scenario).toBeVisible();
 
-      // Count visible field containers - should only have name input and submit button
-      // Hidden fields should not create any DOM elements
-      const visibleInputs = scenario.locator('#name input');
+      // Count visible input fields
+      // We expect to see: name input + description input (in group)
+      const nameInput = scenario.locator('#name input');
+      const descriptionInput = scenario.locator('#description input');
       const visibleButtons = scenario.locator('#submitHidden button');
 
-      // We expect to see: 1 input field (name) + 1 submit button
-      // Hidden fields should not add any visible elements
-      await expect(visibleInputs).toHaveCount(1);
+      await expect(nameInput).toHaveCount(1);
+      await expect(descriptionInput).toHaveCount(1);
       await expect(visibleButtons).toHaveCount(1);
     });
   });

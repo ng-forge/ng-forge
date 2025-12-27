@@ -1,13 +1,18 @@
 import { detectFormMode, FormModeDetectionResult, isPageField } from '../../models/types/form-mode';
 import { RegisteredFieldTypes } from '../../models/registry';
 import { validatePageNesting } from '../../definitions/default/page-field';
+import { isRowField, validateRowNesting } from '../../definitions/default/row-field';
+import { isGroupField } from '../../definitions/default/group-field';
+import { isArrayField } from '../../definitions/default/array-field';
+import { FieldDef } from '../../definitions/base/field-def';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 /**
  * Comprehensive form configuration validator that checks:
  * 1. Form mode consistency (paged vs non-paged)
  * 2. Page nesting rules
- * 3. Field placement constraints
+ * 3. Row nesting rules (no hidden fields in rows)
+ * 4. Field placement constraints
  */
 export class FormModeValidator {
   /**
@@ -88,6 +93,52 @@ export class FormModeValidator {
             warnings.push(`Page field at index ${i} (key: "${field.key || 'unknown'}") contains no fields and will render as empty.`);
           }
         }
+      }
+    }
+
+    // Warn about hidden fields in rows (they work but don't render, which may be confusing)
+    const rowWarnings = this.collectRowHiddenFieldWarnings(fields);
+    warnings.push(...rowWarnings);
+
+    return warnings;
+  }
+
+  /**
+   * Recursively collects warnings for hidden fields inside rows
+   * @param fields The form field definitions to check
+   * @param path Current path for warning messages
+   * @returns Array of warning messages
+   */
+  private static collectRowHiddenFieldWarnings(fields: readonly FieldDef<unknown>[] | undefined, path = ''): string[] {
+    if (!fields) {
+      return [];
+    }
+
+    const warnings: string[] = [];
+
+    for (let i = 0; i < fields.length; i++) {
+      const field = fields[i];
+      const fieldPath = path ? `${path}.fields[${i}]` : `fields[${i}]`;
+      const fieldKey = field.key || 'unknown';
+
+      if (isRowField(field)) {
+        if (!validateRowNesting(field)) {
+          warnings.push(
+            `Row field at ${fieldPath} (key: "${fieldKey}") contains hidden fields. ` +
+              `Hidden fields in rows don't render anything - consider placing them outside the row.`,
+          );
+        }
+        // Continue checking nested rows within the row's children
+        warnings.push(...this.collectRowHiddenFieldWarnings(field.fields, fieldPath));
+      } else if (isPageField(field)) {
+        // Check rows within pages
+        warnings.push(...this.collectRowHiddenFieldWarnings(field.fields, fieldPath));
+      } else if (isGroupField(field)) {
+        // Check rows within groups
+        warnings.push(...this.collectRowHiddenFieldWarnings(field.fields, fieldPath));
+      } else if (isArrayField(field)) {
+        // Check rows within array templates
+        warnings.push(...this.collectRowHiddenFieldWarnings(field.fields, fieldPath));
       }
     }
 

@@ -127,10 +127,9 @@ Hidden fields can be placed:
 
 - At the top level of a form
 - Inside page fields
-- Inside row fields
 - Inside group fields
 
-Since they render nothing, their position in the field array only affects their order in the form value object.
+**Note:** Placing hidden fields inside row fields will generate a validation warning. Rows are meant for horizontal layouts, and since hidden fields don't render anything, placing them in rows serves no purpose. Place hidden fields outside of rows instead.
 
 ## Type Safety
 
