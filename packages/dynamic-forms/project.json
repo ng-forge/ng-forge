@@ -40,6 +40,12 @@
         "configFile": "vite.config.ts"
       }
     },
+    "type-test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/dynamic-forms/vite.config.typecheck.ts"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     }

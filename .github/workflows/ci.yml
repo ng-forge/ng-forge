@@ -188,6 +188,9 @@ jobs:
       - name: Run tests
         run: pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage
 
+      - name: Run type tests
+        run: pnpm nx run-many -t type-test --parallel=3
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         with:

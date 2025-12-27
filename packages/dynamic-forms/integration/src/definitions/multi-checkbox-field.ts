@@ -18,5 +18,5 @@ import { BaseValueField, FieldOption } from '@ng-forge/dynamic-forms';
  */
 export interface MultiCheckboxField<TValue, TProps = object> extends BaseValueField<TProps, TValue[]> {
   type: 'multi-checkbox';
-  options: FieldOption<TValue>[];
+  readonly options: readonly FieldOption<TValue>[];
 }
