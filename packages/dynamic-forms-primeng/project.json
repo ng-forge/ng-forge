@@ -36,6 +36,12 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "type-test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/dynamic-forms-primeng/vite.config.ts"
+      }
     }
   }
 }
