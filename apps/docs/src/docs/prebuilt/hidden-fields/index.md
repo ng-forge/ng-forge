@@ -1,4 +1,4 @@
-Hidden fields store values in the form model without rendering any visible UI. They're useful for persisting IDs, metadata, or other non-user-facing data that should be included in form submissions.
+Hidden fields store values in the form model without rendering any visible UI. They're useful for persisting IDs, metadata, or other non-user-facing data.
 
 ## Basic Usage
 
@@ -23,8 +23,6 @@ This adds `id` to the form value without rendering anything:
 
 Hidden fields support scalar values and arrays of scalars:
 
-### Scalar Values
-
 ```typescript
 // String
 { type: 'hidden', key: 'sessionId', value: 'abc123' }
@@ -34,11 +32,7 @@ Hidden fields support scalar values and arrays of scalars:
 
 // Boolean
 { type: 'hidden', key: 'isActive', value: true }
-```
 
-### Array Values
-
-```typescript
 // String array
 { type: 'hidden', key: 'tags', value: ['draft', 'review'] }
 
@@ -121,53 +115,24 @@ Form value on submission:
 
 ## Use Cases
 
-### Persisting IDs for Updates
+- Persisting record IDs for update operations
+- Tracking version numbers for optimistic concurrency
+- Passing context data (parent IDs, source references)
+- Storing computed values that shouldn't be user-editable
+- Including metadata in form submissions
 
-When editing existing records, include the record ID as a hidden field:
+## Placement
 
-```typescript
-{
-  type: 'hidden',
-  key: 'id',
-  value: existingRecord.id,
-}
-```
+Hidden fields can be placed:
 
-### Tracking Form Metadata
+- At the top level of a form
+- Inside page fields
+- Inside row fields
+- Inside group fields
 
-Include metadata like version numbers for optimistic concurrency:
+Since they render nothing, their position in the field array only affects their order in the form value object.
 
-```typescript
-{
-  type: 'hidden',
-  key: 'version',
-  value: existingRecord.version,
-}
-```
-
-### Passing Context Data
-
-Include context that should be submitted but not displayed:
-
-```typescript
-{
-  type: 'hidden',
-  key: 'sourceId',
-  value: parentRecord.id,
-}
-```
-
-## Technical Details
-
-### Componentless Architecture
-
-Hidden fields are "componentless" - they have no associated Angular component and render nothing to the DOM. This is different from CSS-hidden elements; hidden fields produce zero DOM footprint.
-
-### Value Handling
-
-Hidden fields use `valueHandling: 'include'`, meaning their values are always included in the form's value object. The `value` property is required.
-
-### Type Safety
+## Type Safety
 
 Hidden fields are fully type-safe:
 
@@ -189,8 +154,6 @@ const tagsField: HiddenField<number[]> = {
 };
 ```
 
-### Type Guard
-
 Use the `isHiddenField` type guard to check field types at runtime:
 
 ```typescript
@@ -201,13 +164,8 @@ if (isHiddenField(field)) {
 }
 ```
 
-## Placement
+## Technical Details
 
-Hidden fields can be placed:
-
-- At the top level of a form
-- Inside page fields
-- Inside row fields
-- Inside group fields
-
-Since they render nothing, their position in the field array only affects their order in the form value object.
+- **Componentless**: Hidden fields have no Angular component and render zero DOM elements
+- **Value handling**: Uses `valueHandling: 'include'`, so values are always included in form submissions
+- **Required value**: The `value` property is required (unlike most field types where it's optional)
