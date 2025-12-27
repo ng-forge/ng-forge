@@ -316,3 +316,177 @@ describe('MatInputField - Discriminated Union', () => {
     expectTypeOf(field.props.appearance).toEqualTypeOf<'outline'>();
   });
 });
+
+// ============================================================================
+// Union Type Narrowing Tests
+// ============================================================================
+
+describe('MatInputField - Union Type Narrowing', () => {
+  // Type guard for number input
+  function isNumberInput(field: MatInputField): field is Extract<MatInputField, { props: { type: 'number' } }> {
+    return field.props?.type === 'number';
+  }
+
+  // Type guard for string input
+  function isStringInput(
+    field: MatInputField,
+  ): field is Extract<MatInputField, { props?: { type?: Exclude<MatInputProps['type'], 'number'> } }> {
+    return field.props?.type !== 'number';
+  }
+
+  describe('control flow narrowing with type guards', () => {
+    it('should narrow to number value type when isNumberInput returns true', () => {
+      const field: MatInputField = {
+        type: 'input',
+        key: 'test',
+        props: { type: 'number' },
+        value: 42,
+      };
+
+      if (isNumberInput(field)) {
+        // After narrowing, value should be number | undefined
+        expectTypeOf(field.value).toEqualTypeOf<number | undefined>();
+        expectTypeOf(field.props.type).toEqualTypeOf<'number'>();
+      }
+    });
+
+    it('should narrow to string value type when isStringInput returns true', () => {
+      const field: MatInputField = {
+        type: 'input',
+        key: 'test',
+        props: { type: 'text' },
+        value: 'hello',
+      };
+
+      if (isStringInput(field)) {
+        // After narrowing, value should be string | undefined
+        expectTypeOf(field.value).toEqualTypeOf<string | undefined>();
+      }
+    });
+  });
+
+  describe('Extract/Exclude type narrowing', () => {
+    it('should extract number variant correctly', () => {
+      type NumberVariant = Extract<MatInputField, { props: { type: 'number' } }>;
+
+      // Value must be number
+      expectTypeOf<NumberVariant['value']>().toEqualTypeOf<number | undefined>();
+
+      // Props must have type: 'number'
+      expectTypeOf<NumberVariant['props']['type']>().toEqualTypeOf<'number'>();
+    });
+
+    it('should exclude number variant to get string variant', () => {
+      // Use Exclude instead of Extract for the string variant
+      type StringVariant = Exclude<MatInputField, { props: { type: 'number' } }>;
+
+      // Value must be string
+      expectTypeOf<StringVariant['value']>().toEqualTypeOf<string | undefined>();
+    });
+
+    it('should verify string input types all produce string values', () => {
+      // For string input types, we verify through the union's value type
+      type StringInputValue = Exclude<MatInputField, { props: { type: 'number' } }>['value'];
+      expectTypeOf<StringInputValue>().toEqualTypeOf<string | undefined>();
+    });
+  });
+
+  describe('discriminant-based narrowing', () => {
+    it('should narrow with explicit type guard', () => {
+      // TypeScript's control flow with nested optional properties requires explicit guards
+      const processField = (field: MatInputField) => {
+        if (isNumberInput(field)) {
+          // Type guard narrows correctly
+          expectTypeOf(field.value).toEqualTypeOf<number | undefined>();
+          expectTypeOf(field.props.type).toEqualTypeOf<'number'>();
+        }
+      };
+
+      expectTypeOf(processField).toBeFunction();
+    });
+
+    it('should allow discriminant value checking', () => {
+      const getValueType = (field: MatInputField): 'number' | 'string' => {
+        // Check the discriminant value
+        const inputType = field.props?.type;
+        if (inputType === 'number') {
+          return 'number';
+        }
+        return 'string';
+      };
+
+      expectTypeOf(getValueType).returns.toEqualTypeOf<'number' | 'string'>();
+    });
+  });
+
+  describe('union exhaustiveness', () => {
+    it('should cover all input types in union', () => {
+      // The union should be exactly these two variants
+      type NumberVariant = Extract<MatInputField, { props: { type: 'number' } }>;
+      type StringVariant = Extract<MatInputField, { props?: { type?: Exclude<MatInputProps['type'], 'number'> } }>;
+
+      // Verify the union is complete
+      type ReconstructedUnion = NumberVariant | StringVariant;
+      expectTypeOf<MatInputField>().toMatchTypeOf<ReconstructedUnion>();
+    });
+
+    it('should have mutually exclusive value types', () => {
+      type NumberVariant = Extract<MatInputField, { props: { type: 'number' } }>;
+      type StringVariant = Extract<MatInputField, { props?: { type?: 'text' } }>;
+
+      // Number variant value should not be assignable to string
+      expectTypeOf<NumberVariant['value']>().not.toMatchTypeOf<string>();
+
+      // String variant value should not be assignable to number
+      expectTypeOf<StringVariant['value']>().not.toMatchTypeOf<number>();
+    });
+  });
+
+  describe('real-world narrowing scenarios', () => {
+    it('should allow type-safe value assignment after narrowing', () => {
+      // Extract the number variant - props with type: 'number' is required
+      type NumberInput = Extract<MatInputField, { props: { type: 'number' } }>;
+
+      // The string variant is the other member of the union (props is optional)
+      type StringInput = Exclude<MatInputField, { props: { type: 'number' } }>;
+
+      const numberField: NumberInput = {
+        type: 'input',
+        key: 'age',
+        props: { type: 'number' },
+        value: 25,
+      };
+
+      const textField: StringInput = {
+        type: 'input',
+        key: 'name',
+        props: { type: 'text' },
+        value: 'John',
+      };
+
+      // Verify the extracted types have correct value types
+      expectTypeOf(numberField.value).toEqualTypeOf<number | undefined>();
+      expectTypeOf(textField.value).toEqualTypeOf<string | undefined>();
+    });
+
+    it('should work with array of mixed input fields', () => {
+      const fields: MatInputField[] = [
+        { type: 'input', key: 'name', props: { type: 'text' }, value: 'John' },
+        { type: 'input', key: 'age', props: { type: 'number' }, value: 30 },
+        { type: 'input', key: 'email', props: { type: 'email' }, value: 'john@example.com' },
+      ];
+
+      // When iterating, each field is the full union
+      fields.forEach((field) => {
+        expectTypeOf(field.value).toEqualTypeOf<string | number | undefined>();
+
+        // But we can narrow with type guards
+        if (isNumberInput(field)) {
+          expectTypeOf(field.value).toEqualTypeOf<number | undefined>();
+        } else {
+          expectTypeOf(field.value).toEqualTypeOf<string | undefined>();
+        }
+      });
+    });
+  });
+});
