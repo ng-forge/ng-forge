@@ -3,7 +3,7 @@ import { TestScenario } from '../../shared/types';
 /**
  * Hidden Field Scenario
  * Tests that hidden field values are included in form submissions without rendering any UI.
- * Also tests hidden fields inside groups and arrays.
+ * Also tests hidden fields inside groups.
  */
 export const hiddenFieldScenario: TestScenario = {
   testId: 'hidden-field',
@@ -11,7 +11,7 @@ export const hiddenFieldScenario: TestScenario = {
   description:
     'Tests that hidden fields store values in the form model without rendering UI elements. ' +
     'Hidden fields are useful for persisting IDs, metadata, or other non-user-facing data. ' +
-    'Also tests hidden fields inside groups and arrays.',
+    'Also tests hidden fields inside groups.',
   config: {
     fields: [
       // Top-level hidden fields
