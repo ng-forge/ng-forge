@@ -239,6 +239,9 @@ jobs:
       - name: Test affected projects
         run: pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
 
+      - name: Type test affected projects
+        run: pnpm nx affected -t type-test --base=origin/main
+
   build-apps:
     name: Build Apps
     needs: [should-run, build]
