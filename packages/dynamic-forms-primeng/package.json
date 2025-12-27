@@ -34,8 +34,5 @@
     "@ng-forge/dynamic-forms": "~0.2.0",
     "primeng": ">=17.0.0",
     "rxjs": ">=7.0.0"
-  },
-  "devDependencies": {
-    "vitest": "^4.0.0"
   }
 }

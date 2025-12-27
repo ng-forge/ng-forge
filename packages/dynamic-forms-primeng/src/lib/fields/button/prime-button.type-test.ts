@@ -1,72 +1,80 @@
 /**
- * Exhaustive type tests for BsButton field types.
+ * Exhaustive type tests for PrimeButton field types.
  */
 import { expectTypeOf } from 'vitest';
 import type { LogicConfig } from '@ng-forge/dynamic-forms';
 import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 import type {
-  BsButtonProps,
-  BsSubmitButtonField,
-  BsNextButtonField,
-  BsPreviousButtonField,
+  PrimeButtonProps,
+  PrimeSubmitButtonField,
+  PrimeNextButtonField,
+  PrimePreviousButtonField,
   AddArrayItemButtonField,
   RemoveArrayItemButtonField,
-} from './bs-button.type';
+} from './prime-button.type';
 
 // ============================================================================
-// BsButtonProps - Whitelist Test
+// PrimeButtonProps - Whitelist Test
 // ============================================================================
 
-describe('BsButtonProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'variant' | 'outline' | 'size' | 'block' | 'active' | 'type';
-  type ActualKeys = keyof BsButtonProps;
+describe('PrimeButtonProps - Exhaustive Whitelist', () => {
+  type ExpectedKeys = 'severity' | 'text' | 'outlined' | 'raised' | 'rounded' | 'icon' | 'iconPos' | 'type';
+  type ActualKeys = keyof PrimeButtonProps;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   it('should have all keys optional', () => {
-    expectTypeOf<RequiredKeys<BsButtonProps>>().toEqualTypeOf<never>();
+    expectTypeOf<RequiredKeys<PrimeButtonProps>>().toEqualTypeOf<never>();
   });
 
   describe('property types', () => {
-    it('variant', () => {
-      expectTypeOf<BsButtonProps['variant']>().toEqualTypeOf<
-        'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'link' | undefined
+    it('severity', () => {
+      expectTypeOf<PrimeButtonProps['severity']>().toEqualTypeOf<
+        'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast' | undefined
       >();
     });
 
-    it('outline', () => {
-      expectTypeOf<BsButtonProps['outline']>().toEqualTypeOf<boolean | undefined>();
+    it('text', () => {
+      expectTypeOf<PrimeButtonProps['text']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('size', () => {
-      expectTypeOf<BsButtonProps['size']>().toEqualTypeOf<'sm' | 'lg' | undefined>();
+    it('outlined', () => {
+      expectTypeOf<PrimeButtonProps['outlined']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('block', () => {
-      expectTypeOf<BsButtonProps['block']>().toEqualTypeOf<boolean | undefined>();
+    it('raised', () => {
+      expectTypeOf<PrimeButtonProps['raised']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('active', () => {
-      expectTypeOf<BsButtonProps['active']>().toEqualTypeOf<boolean | undefined>();
+    it('rounded', () => {
+      expectTypeOf<PrimeButtonProps['rounded']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('icon', () => {
+      expectTypeOf<PrimeButtonProps['icon']>().toEqualTypeOf<string | undefined>();
+    });
+
+    it('iconPos', () => {
+      expectTypeOf<PrimeButtonProps['iconPos']>().toEqualTypeOf<'left' | 'right' | 'top' | 'bottom' | undefined>();
     });
 
     it('type', () => {
-      expectTypeOf<BsButtonProps['type']>().toEqualTypeOf<'button' | 'submit' | 'reset' | undefined>();
+      expectTypeOf<PrimeButtonProps['type']>().toEqualTypeOf<'button' | 'submit' | 'reset' | undefined>();
     });
   });
 });
 
 // ============================================================================
-// BsSubmitButtonField - Whitelist Test
+// PrimeSubmitButtonField - Whitelist Test
 // ============================================================================
 
-describe('BsSubmitButtonField - Exhaustive Whitelist', () => {
+describe('PrimeSubmitButtonField - Exhaustive Whitelist', () => {
   type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'logic';
 
-  type ActualKeys = keyof BsSubmitButtonField;
+  type ActualKeys = keyof PrimeSubmitButtonField;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
@@ -74,63 +82,63 @@ describe('BsSubmitButtonField - Exhaustive Whitelist', () => {
 
   describe('required keys', () => {
     it('type is required and literal', () => {
-      expectTypeOf<BsSubmitButtonField['type']>().toEqualTypeOf<'submit'>();
+      expectTypeOf<PrimeSubmitButtonField['type']>().toEqualTypeOf<'submit'>();
     });
 
     it('key is required', () => {
-      expectTypeOf<BsSubmitButtonField['key']>().toEqualTypeOf<string>();
+      expectTypeOf<PrimeSubmitButtonField['key']>().toEqualTypeOf<string>();
     });
 
     it('label is required', () => {
-      expectTypeOf<BsSubmitButtonField['label']>().toEqualTypeOf<string>();
+      expectTypeOf<PrimeSubmitButtonField['label']>().toEqualTypeOf<string>();
     });
   });
 
   describe('optional keys from FieldDef', () => {
     it('disabled', () => {
-      expectTypeOf<BsSubmitButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<PrimeSubmitButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('className', () => {
-      expectTypeOf<BsSubmitButtonField['className']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<PrimeSubmitButtonField['className']>().toEqualTypeOf<string | undefined>();
     });
 
     it('props', () => {
-      expectTypeOf<BsSubmitButtonField['props']>().toEqualTypeOf<BsButtonProps | undefined>();
+      expectTypeOf<PrimeSubmitButtonField['props']>().toEqualTypeOf<PrimeButtonProps | undefined>();
     });
 
     it('readonly', () => {
-      expectTypeOf<BsSubmitButtonField['readonly']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<PrimeSubmitButtonField['readonly']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('hidden', () => {
-      expectTypeOf<BsSubmitButtonField['hidden']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<PrimeSubmitButtonField['hidden']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('tabIndex', () => {
-      expectTypeOf<BsSubmitButtonField['tabIndex']>().toEqualTypeOf<number | undefined>();
+      expectTypeOf<PrimeSubmitButtonField['tabIndex']>().toEqualTypeOf<number | undefined>();
     });
 
     it('col', () => {
-      expectTypeOf<BsSubmitButtonField['col']>().toEqualTypeOf<number | undefined>();
+      expectTypeOf<PrimeSubmitButtonField['col']>().toEqualTypeOf<number | undefined>();
     });
   });
 
   describe('submit-specific keys', () => {
     it('logic', () => {
-      expectTypeOf<BsSubmitButtonField['logic']>().toEqualTypeOf<LogicConfig[] | undefined>();
+      expectTypeOf<PrimeSubmitButtonField['logic']>().toEqualTypeOf<LogicConfig[] | undefined>();
     });
   });
 });
 
 // ============================================================================
-// BsNextButtonField - Whitelist Test
+// PrimeNextButtonField - Whitelist Test
 // ============================================================================
 
-describe('BsNextButtonField - Exhaustive Whitelist', () => {
+describe('PrimeNextButtonField - Exhaustive Whitelist', () => {
   type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'logic';
 
-  type ActualKeys = keyof BsNextButtonField;
+  type ActualKeys = keyof PrimeNextButtonField;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
@@ -138,45 +146,45 @@ describe('BsNextButtonField - Exhaustive Whitelist', () => {
 
   describe('required keys', () => {
     it('type is required and literal', () => {
-      expectTypeOf<BsNextButtonField['type']>().toEqualTypeOf<'next'>();
+      expectTypeOf<PrimeNextButtonField['type']>().toEqualTypeOf<'next'>();
     });
 
     it('key is required', () => {
-      expectTypeOf<BsNextButtonField['key']>().toEqualTypeOf<string>();
+      expectTypeOf<PrimeNextButtonField['key']>().toEqualTypeOf<string>();
     });
 
     it('label is required', () => {
-      expectTypeOf<BsNextButtonField['label']>().toEqualTypeOf<string>();
+      expectTypeOf<PrimeNextButtonField['label']>().toEqualTypeOf<string>();
     });
   });
 
   describe('optional keys', () => {
     it('disabled', () => {
-      expectTypeOf<BsNextButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<PrimeNextButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('className', () => {
-      expectTypeOf<BsNextButtonField['className']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<PrimeNextButtonField['className']>().toEqualTypeOf<string | undefined>();
     });
 
     it('props', () => {
-      expectTypeOf<BsNextButtonField['props']>().toEqualTypeOf<BsButtonProps | undefined>();
+      expectTypeOf<PrimeNextButtonField['props']>().toEqualTypeOf<PrimeButtonProps | undefined>();
     });
 
     it('logic', () => {
-      expectTypeOf<BsNextButtonField['logic']>().toEqualTypeOf<LogicConfig[] | undefined>();
+      expectTypeOf<PrimeNextButtonField['logic']>().toEqualTypeOf<LogicConfig[] | undefined>();
     });
   });
 });
 
 // ============================================================================
-// BsPreviousButtonField - Whitelist Test
+// PrimePreviousButtonField - Whitelist Test
 // ============================================================================
 
-describe('BsPreviousButtonField - Exhaustive Whitelist', () => {
+describe('PrimePreviousButtonField - Exhaustive Whitelist', () => {
   type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col';
 
-  type ActualKeys = keyof BsPreviousButtonField;
+  type ActualKeys = keyof PrimePreviousButtonField;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
@@ -184,29 +192,29 @@ describe('BsPreviousButtonField - Exhaustive Whitelist', () => {
 
   describe('required keys', () => {
     it('type is required and literal', () => {
-      expectTypeOf<BsPreviousButtonField['type']>().toEqualTypeOf<'previous'>();
+      expectTypeOf<PrimePreviousButtonField['type']>().toEqualTypeOf<'previous'>();
     });
 
     it('key is required', () => {
-      expectTypeOf<BsPreviousButtonField['key']>().toEqualTypeOf<string>();
+      expectTypeOf<PrimePreviousButtonField['key']>().toEqualTypeOf<string>();
     });
 
     it('label is required', () => {
-      expectTypeOf<BsPreviousButtonField['label']>().toEqualTypeOf<string>();
+      expectTypeOf<PrimePreviousButtonField['label']>().toEqualTypeOf<string>();
     });
   });
 
   describe('optional keys', () => {
     it('disabled', () => {
-      expectTypeOf<BsPreviousButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<PrimePreviousButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('className', () => {
-      expectTypeOf<BsPreviousButtonField['className']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<PrimePreviousButtonField['className']>().toEqualTypeOf<string | undefined>();
     });
 
     it('props', () => {
-      expectTypeOf<BsPreviousButtonField['props']>().toEqualTypeOf<BsButtonProps | undefined>();
+      expectTypeOf<PrimePreviousButtonField['props']>().toEqualTypeOf<PrimeButtonProps | undefined>();
     });
   });
 });
@@ -259,7 +267,7 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     });
 
     it('props', () => {
-      expectTypeOf<AddArrayItemButtonField['props']>().toEqualTypeOf<BsButtonProps | undefined>();
+      expectTypeOf<AddArrayItemButtonField['props']>().toEqualTypeOf<PrimeButtonProps | undefined>();
     });
 
     it('arrayKey', () => {
@@ -316,7 +324,7 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     });
 
     it('props', () => {
-      expectTypeOf<RemoveArrayItemButtonField['props']>().toEqualTypeOf<BsButtonProps | undefined>();
+      expectTypeOf<RemoveArrayItemButtonField['props']>().toEqualTypeOf<PrimeButtonProps | undefined>();
     });
 
     it('arrayKey', () => {
@@ -336,10 +344,10 @@ describe('Button Fields - Usage', () => {
       key: 'submit',
       label: 'Submit',
       props: {
-        variant: 'primary',
-        size: 'lg',
+        severity: 'primary',
+        raised: true,
       },
-    } as const satisfies BsSubmitButtonField;
+    } as const satisfies PrimeSubmitButtonField;
 
     expectTypeOf(field.type).toEqualTypeOf<'submit'>();
   });
@@ -350,10 +358,10 @@ describe('Button Fields - Usage', () => {
       key: 'next',
       label: 'Next',
       props: {
-        variant: 'success',
-        outline: true,
+        severity: 'success',
+        outlined: true,
       },
-    } as const satisfies BsNextButtonField;
+    } as const satisfies PrimeNextButtonField;
 
     expectTypeOf(field.type).toEqualTypeOf<'next'>();
   });
@@ -364,9 +372,10 @@ describe('Button Fields - Usage', () => {
       key: 'previous',
       label: 'Back',
       props: {
-        variant: 'secondary',
+        severity: 'secondary',
+        text: true,
       },
-    } as const satisfies BsPreviousButtonField;
+    } as const satisfies PrimePreviousButtonField;
 
     expectTypeOf(field.type).toEqualTypeOf<'previous'>();
   });
@@ -378,8 +387,9 @@ describe('Button Fields - Usage', () => {
       label: 'Add Item',
       arrayKey: 'items',
       props: {
-        variant: 'info',
-        size: 'sm',
+        severity: 'info',
+        icon: 'pi pi-plus',
+        iconPos: 'left',
       },
     } as const satisfies AddArrayItemButtonField;
 
@@ -393,11 +403,54 @@ describe('Button Fields - Usage', () => {
       label: 'Remove',
       arrayKey: 'items',
       props: {
-        variant: 'danger',
-        outline: true,
+        severity: 'danger',
+        icon: 'pi pi-trash',
+        rounded: true,
       },
     } as const satisfies RemoveArrayItemButtonField;
 
     expectTypeOf(field.type).toEqualTypeOf<'removeArrayItem'>();
+  });
+
+  it('should accept button with all severity values', () => {
+    const primary = { type: 'submit', key: 's1', label: 'Test', props: { severity: 'primary' } } as const satisfies PrimeSubmitButtonField;
+    const secondary = {
+      type: 'submit',
+      key: 's2',
+      label: 'Test',
+      props: { severity: 'secondary' },
+    } as const satisfies PrimeSubmitButtonField;
+    const success = { type: 'submit', key: 's3', label: 'Test', props: { severity: 'success' } } as const satisfies PrimeSubmitButtonField;
+    const info = { type: 'submit', key: 's4', label: 'Test', props: { severity: 'info' } } as const satisfies PrimeSubmitButtonField;
+    const warn = { type: 'submit', key: 's5', label: 'Test', props: { severity: 'warn' } } as const satisfies PrimeSubmitButtonField;
+    const danger = { type: 'submit', key: 's6', label: 'Test', props: { severity: 'danger' } } as const satisfies PrimeSubmitButtonField;
+    const help = { type: 'submit', key: 's7', label: 'Test', props: { severity: 'help' } } as const satisfies PrimeSubmitButtonField;
+    const contrast = {
+      type: 'submit',
+      key: 's8',
+      label: 'Test',
+      props: { severity: 'contrast' },
+    } as const satisfies PrimeSubmitButtonField;
+
+    expectTypeOf(primary.type).toEqualTypeOf<'submit'>();
+    expectTypeOf(secondary.type).toEqualTypeOf<'submit'>();
+    expectTypeOf(success.type).toEqualTypeOf<'submit'>();
+    expectTypeOf(info.type).toEqualTypeOf<'submit'>();
+    expectTypeOf(warn.type).toEqualTypeOf<'submit'>();
+    expectTypeOf(danger.type).toEqualTypeOf<'submit'>();
+    expectTypeOf(help.type).toEqualTypeOf<'submit'>();
+    expectTypeOf(contrast.type).toEqualTypeOf<'submit'>();
+  });
+
+  it('should accept button with all icon positions', () => {
+    const left = { type: 'submit', key: 's1', label: 'Test', props: { iconPos: 'left' } } as const satisfies PrimeSubmitButtonField;
+    const right = { type: 'submit', key: 's2', label: 'Test', props: { iconPos: 'right' } } as const satisfies PrimeSubmitButtonField;
+    const top = { type: 'submit', key: 's3', label: 'Test', props: { iconPos: 'top' } } as const satisfies PrimeSubmitButtonField;
+    const bottom = { type: 'submit', key: 's4', label: 'Test', props: { iconPos: 'bottom' } } as const satisfies PrimeSubmitButtonField;
+
+    expectTypeOf(left.props?.iconPos).toEqualTypeOf<'left'>();
+    expectTypeOf(right.props?.iconPos).toEqualTypeOf<'right'>();
+    expectTypeOf(top.props?.iconPos).toEqualTypeOf<'top'>();
+    expectTypeOf(bottom.props?.iconPos).toEqualTypeOf<'bottom'>();
   });
 });

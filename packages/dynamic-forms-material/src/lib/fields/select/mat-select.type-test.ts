@@ -13,14 +13,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { MatSelectProps, MatSelectField } from './mat-select.type';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
+import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 // ============================================================================
 // MatSelectProps - Whitelist Test

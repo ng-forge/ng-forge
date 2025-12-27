@@ -5,18 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { BaseValueField, ValueType, ValueFieldComponent } from './base-value-field';
 import type { FieldDef } from './field-def';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
-
-type OptionalKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? K : never;
-}[keyof T];
+import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
 
 // ============================================================================
 // ValueType - Type Tests

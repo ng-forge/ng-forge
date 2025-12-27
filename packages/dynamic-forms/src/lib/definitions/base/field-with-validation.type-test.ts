@@ -7,14 +7,7 @@ import type { LogicConfig } from '../../models/logic/logic-config';
 import type { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 import type { ValidationMessages } from '../../models/validation-types';
 import type { FieldWithValidation } from './field-with-validation';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
+import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
 
 // ============================================================================
 // FieldWithValidation - Whitelist Test

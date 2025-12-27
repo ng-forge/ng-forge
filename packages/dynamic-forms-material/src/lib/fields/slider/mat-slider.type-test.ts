@@ -6,14 +6,7 @@ import type { MatFormFieldAppearance } from '@angular/material/form-field';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatSliderProps, MatSliderField } from './mat-slider.type';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
+import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 // ============================================================================
 // MatSliderProps - Whitelist Test

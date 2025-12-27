@@ -5,14 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { IonicInputProps, IonicInputField } from './ionic-input.type';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
+import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 // ============================================================================
 // IonicInputProps - Whitelist Test

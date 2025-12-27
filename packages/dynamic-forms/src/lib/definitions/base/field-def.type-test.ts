@@ -4,18 +4,7 @@
 import { expectTypeOf } from 'vitest';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { FieldDef, FieldComponent } from './field-def';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
-
-type OptionalKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? K : never;
-}[keyof T];
+import type { RequiredKeys, OptionalKeys } from '../../../../testing/src/type-test-utils';
 
 // ============================================================================
 // FieldDef - Whitelist Test

@@ -5,14 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { PrimeDatepickerProps, PrimeDatepickerField } from './prime-datepicker.type';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
+import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 // ============================================================================
 // PrimeDatepickerProps - Whitelist Test

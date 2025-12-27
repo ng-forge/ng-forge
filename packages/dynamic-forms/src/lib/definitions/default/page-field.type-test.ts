@@ -5,14 +5,7 @@ import { expectTypeOf } from 'vitest';
 import type { PageField, PageLogicConfig } from './page-field';
 import type { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import type { PageAllowedChildren } from '../../models/types/nesting-constraints';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
+import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
 
 // ============================================================================
 // PageLogicConfig - Whitelist Test

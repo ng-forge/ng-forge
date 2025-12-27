@@ -12,14 +12,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { BsSelectProps, BsSelectField } from './bs-select.type';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
+import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 // ============================================================================
 // BsSelectProps - Whitelist Test

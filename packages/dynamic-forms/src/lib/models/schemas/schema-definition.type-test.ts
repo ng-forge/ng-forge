@@ -6,18 +6,7 @@ import type { ValidatorConfig } from '../validation/validator-config';
 import type { LogicConfig } from '../logic/logic-config';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
 import type { SchemaApplicationConfig, SchemaDefinition } from './schema-definition';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
-
-type OptionalKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? K : never;
-}[keyof T];
+import type { RequiredKeys, OptionalKeys } from '../../../../testing/src/type-test-utils';
 
 // ============================================================================
 // SchemaApplicationConfig - Whitelist Test

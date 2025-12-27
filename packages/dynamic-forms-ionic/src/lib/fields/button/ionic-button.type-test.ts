@@ -3,6 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { DynamicText, LogicConfig } from '@ng-forge/dynamic-forms';
+import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 import type {
   IonicButtonProps,
@@ -13,14 +14,6 @@ import type {
   AddArrayItemButtonField,
   RemoveArrayItemButtonField,
 } from './ionic-button.type';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
 
 // ============================================================================
 // IonicButtonProps - Whitelist Test

@@ -3,6 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { ConditionalExpression } from '../expressions/conditional-expression';
+import type { RequiredKeys, OptionalKeys } from '../../../../testing/src/type-test-utils';
 import type {
   BaseValidatorConfig,
   BuiltInValidatorConfig,
@@ -11,18 +12,6 @@ import type {
   HttpValidatorConfig,
   ValidatorConfig,
 } from './validator-config';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
-
-type OptionalKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? K : never;
-}[keyof T];
 
 // ============================================================================
 // BaseValidatorConfig - Whitelist Test

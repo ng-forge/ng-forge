@@ -6,14 +6,7 @@ import type { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatDatepickerProps, MatDatepickerField } from './mat-datepicker.type';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
+import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 // ============================================================================
 // MatDatepickerProps - Whitelist Test

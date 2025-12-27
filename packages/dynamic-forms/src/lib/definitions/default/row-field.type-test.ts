@@ -4,14 +4,7 @@
 import { expectTypeOf } from 'vitest';
 import type { RowField, RowComponent } from './row-field';
 import type { RowAllowedChildren } from '../../models/types/nesting-constraints';
-
-// ============================================================================
-// Type Utilities
-// ============================================================================
-
-type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K;
-}[keyof T];
+import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
 
 // ============================================================================
 // RowField - Whitelist Test
