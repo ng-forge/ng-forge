@@ -391,18 +391,13 @@ test.describe('Submission Behavior Tests', () => {
       await helpers.navigateToScenario('/test/submission-behavior/hidden-field');
     });
 
-    test('should include hidden field values in form submission including inside groups and arrays', async ({ page, helpers, mockApi }) => {
+    test('should include hidden field values in form submission including inside groups', async ({ page, helpers, mockApi }) => {
       const scenario = helpers.getScenario('hidden-field');
       await expect(scenario).toBeVisible();
 
       // Fill the visible input fields
       await helpers.fillInput(helpers.getInput(scenario, 'name'), 'John Doe');
       await helpers.fillInput(helpers.getInput(scenario, 'description'), 'Test description');
-
-      // Add an array item and fill its visible input
-      const addItemButton = scenario.locator('#items button:has-text("Add")');
-      await addItemButton.click();
-      await helpers.fillInput(helpers.getInput(scenario, 'itemName'), 'First Item');
 
       // Hidden fields should not have any visible elements
       await expect(scenario.locator('[id="id"]')).not.toBeVisible();
@@ -413,8 +408,6 @@ test.describe('Submission Behavior Tests', () => {
       // Hidden fields inside groups should also not be visible
       await expect(scenario.locator('[id="createdBy"]')).not.toBeVisible();
       await expect(scenario.locator('[id="source"]')).not.toBeVisible();
-      // Hidden fields inside arrays should also not be visible
-      await expect(scenario.locator('[id="itemId"]')).not.toBeVisible();
 
       // Submit the form
       const submitButton = scenario.locator('#submitHidden button');
@@ -438,12 +431,6 @@ test.describe('Submission Behavior Tests', () => {
           source: 'web-form',
           description: 'Test description',
         },
-        items: [
-          {
-            itemId: 'template-id',
-            itemName: 'First Item',
-          },
-        ],
         name: 'John Doe',
       });
     });

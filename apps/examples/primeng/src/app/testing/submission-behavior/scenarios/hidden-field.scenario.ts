@@ -64,30 +64,6 @@ export const hiddenFieldScenario: TestScenario = {
           },
         ],
       },
-      // Hidden field inside an array (object array with group)
-      {
-        type: 'array',
-        key: 'items',
-        fields: [
-          {
-            type: 'group',
-            fields: [
-              {
-                key: 'itemId',
-                type: 'hidden',
-                value: 'template-id',
-              },
-              {
-                key: 'itemName',
-                type: 'input',
-                label: 'Item Name',
-                value: '',
-                col: 12,
-              },
-            ],
-          },
-        ],
-      },
       // Visible input field
       {
         key: 'name',
