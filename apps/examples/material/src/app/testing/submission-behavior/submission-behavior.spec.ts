@@ -440,13 +440,13 @@ test.describe('Submission Behavior Tests', () => {
       const scenario = helpers.getScenario('hidden-field');
       await expect(scenario).toBeVisible();
 
-      // Count the field containers - should only have name input and submit button visible
+      // Count the field containers - should only have visible input fields and submit button
       // Hidden fields should not create any DOM elements
       const visibleFields = scenario.locator('mat-form-field, button[type="submit"]');
 
-      // We expect to see: 1 input field (name) + 1 submit button = 2 visible elements
-      // Hidden fields should not add any visible elements
-      await expect(visibleFields).toHaveCount(2);
+      // We expect to see: 2 input fields (name + description) + 1 submit button = 3 visible elements
+      // Hidden fields (id, version, isActive, tagIds, labels, createdBy, source) should not add any visible elements
+      await expect(visibleFields).toHaveCount(3);
     });
   });
 });

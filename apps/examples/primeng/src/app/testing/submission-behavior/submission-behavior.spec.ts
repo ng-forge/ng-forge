@@ -604,14 +604,16 @@ test.describe('Submission Behavior Tests', () => {
       // Wait for fields to be ready
       await page.waitForSelector('[data-testid="hidden-field"] #name input', { state: 'visible', timeout: 10000 });
 
-      // Count visible field containers - should only have name input and submit button
+      // Count visible field containers - should only have visible inputs and submit button
       // PrimeNG uses p-floatlabel for inputs and p-button for buttons
-      const visibleInputs = scenario.locator('#name input');
+      const nameInput = scenario.locator('#name input');
+      const descriptionInput = scenario.locator('#description input');
       const visibleButtons = scenario.locator('#submitHidden button');
 
-      // We expect to see: 1 input field (name) + 1 submit button
-      // Hidden fields should not add any visible elements
-      await expect(visibleInputs).toHaveCount(1);
+      // We expect to see: 2 input fields (name + description) + 1 submit button
+      // Hidden fields (id, version, isActive, tagIds, labels, createdBy, source) should not add any visible elements
+      await expect(nameInput).toHaveCount(1);
+      await expect(descriptionInput).toHaveCount(1);
       await expect(visibleButtons).toHaveCount(1);
     });
   });
