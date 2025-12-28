@@ -56,19 +56,19 @@ This discriminated union ensures:
 {
   key: 'total',
   type: 'number',
-  setValue: 'quantity * unitPrice'
+  setValue: 'formValue.quantity * formValue.unitPrice'
 }
 
 {
   key: 'fullName',
   type: 'input',
-  setValue: 'firstName + " " + lastName'
+  setValue: 'formValue.firstName + " " + formValue.lastName'
 }
 
 {
   key: 'discountedPrice',
   type: 'number',
-  setValue: 'price * (1 - discountPercent / 100)'
+  setValue: 'formValue.price * (1 - formValue.discountPercent / 100)'
 }
 ```
 
@@ -151,7 +151,7 @@ customFnConfig: {
     {
       type: 'setValue',
       targetField: 'email',  // Self-reference
-      expression: 'email.toLowerCase()',
+      expression: 'formValue.email.toLowerCase()',
       condition: true,
       trigger: 'onBlur'  // Only transform on blur to avoid mid-typing issues
     }
