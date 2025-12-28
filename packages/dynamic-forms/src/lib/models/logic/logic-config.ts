@@ -40,7 +40,14 @@ export type FormStateCondition =
   | 'pageInvalid';
 
 /**
- * Configuration for conditional field logic.
+ * Logic type for controlling field state (hidden, readonly, disabled, required).
+ *
+ * @public
+ */
+export type StateLogicType = 'hidden' | 'readonly' | 'disabled' | 'required';
+
+/**
+ * Configuration for conditional field state logic.
  *
  * Defines how field behavior changes based on conditions.
  * Supports hiding, disabling, making readonly, or requiring fields
@@ -68,16 +75,16 @@ export type FormStateCondition =
  *
  * @public
  */
-export interface LogicConfig {
+export interface StateLogicConfig {
   /**
-   * Logic type identifier.
+   * Logic type identifier for field state.
    *
    * - `hidden`: Hide the field from view (still participates in form state)
    * - `readonly`: Make the field read-only
    * - `disabled`: Disable user interaction
    * - `required`: Make the field required
    */
-  type: 'hidden' | 'readonly' | 'disabled' | 'required';
+  type: StateLogicType;
 
   /**
    * Condition that determines when this logic applies.
@@ -108,6 +115,187 @@ export interface LogicConfig {
 }
 
 /**
+ * Trigger timing for when derivation is evaluated.
+ *
+ * @public
+ */
+export type DerivationTrigger = 'onChange' | 'onBlur';
+
+/**
+ * Configuration for value derivation logic.
+ *
+ * Enables programmatic value derivation based on conditions.
+ * When the condition is met, the target field's value is set
+ * using a static value, expression, or custom function.
+ *
+ * @example
+ * ```typescript
+ * // Set phone prefix based on country selection
+ * {
+ *   type: 'derivation',
+ *   targetField: 'phonePrefix',
+ *   value: '+1',
+ *   condition: {
+ *     type: 'fieldValue',
+ *     fieldPath: 'country',
+ *     operator: 'equals',
+ *     value: 'USA'
+ *   }
+ * }
+ *
+ * // Compute total from quantity and price
+ * {
+ *   type: 'derivation',
+ *   targetField: 'total',
+ *   expression: 'formValue.quantity * formValue.unitPrice'
+ * }
+ *
+ * // Use custom function for complex logic
+ * {
+ *   type: 'derivation',
+ *   targetField: 'currency',
+ *   functionName: 'getCurrencyForCountry'
+ * }
+ *
+ * // Self-transform (e.g., lowercase email on blur)
+ * {
+ *   type: 'derivation',
+ *   targetField: 'email',
+ *   expression: 'formValue.email.toLowerCase()',
+ *   trigger: 'onBlur'
+ * }
+ *
+ * // Relative path for array items
+ * {
+ *   type: 'derivation',
+ *   targetField: '$.lineTotal',  // Same array index as source field
+ *   expression: 'formValue.quantity * formValue.unitPrice'
+ * }
+ * ```
+ *
+ * @public
+ */
+export interface DerivationLogicConfig {
+  /**
+   * Logic type identifier for value derivation.
+   */
+  type: 'derivation';
+
+  /**
+   * The field whose value will be modified.
+   *
+   * Can be:
+   * - Absolute path: 'fieldName' or 'nested.field.path'
+   * - Relative path for arrays: '$.siblingField' (same index as source)
+   *
+   * @example
+   * ```typescript
+   * targetField: 'phonePrefix'           // Absolute path
+   * targetField: 'address.country'       // Nested path
+   * targetField: '$.lineTotal'           // Relative path (array sibling)
+   * ```
+   */
+  targetField: string;
+
+  /**
+   * Condition that determines when this derivation applies.
+   *
+   * Can be:
+   * - `boolean`: Static value (always applies or never applies)
+   * - `ConditionalExpression`: Expression evaluated against field/form values
+   *
+   * Defaults to `true` (always apply).
+   *
+   * Note: FormStateCondition is not supported for derivations.
+   *
+   * @example
+   * ```typescript
+   * // Always compute (default)
+   * condition: true
+   *
+   * // Conditional derivation
+   * condition: {
+   *   type: 'fieldValue',
+   *   fieldPath: 'country',
+   *   operator: 'equals',
+   *   value: 'USA'
+   * }
+   * ```
+   */
+  condition?: ConditionalExpression | boolean;
+
+  /**
+   * Static value to set on the target field.
+   *
+   * Use when the derived value is a constant.
+   * Mutually exclusive with `expression` and `functionName`.
+   *
+   * @example
+   * ```typescript
+   * value: '+1'           // String
+   * value: 100            // Number
+   * value: true           // Boolean
+   * value: { code: 'US' } // Object
+   * ```
+   */
+  value?: unknown;
+
+  /**
+   * JavaScript expression to evaluate for the derived value.
+   *
+   * Has access to `formValue` object containing all form values.
+   * Uses the same secure AST-based parser as other expressions.
+   * Mutually exclusive with `value` and `functionName`.
+   *
+   * @example
+   * ```typescript
+   * expression: 'formValue.quantity * formValue.unitPrice'
+   * expression: 'formValue.firstName + " " + formValue.lastName'
+   * expression: 'formValue.price * (1 - formValue.discount / 100)'
+   * ```
+   */
+  expression?: string;
+
+  /**
+   * Name of a registered custom derivation function.
+   *
+   * The function receives the evaluation context and returns the derived value.
+   * Register functions in `customFnConfig.derivations`.
+   * Mutually exclusive with `value` and `expression`.
+   *
+   * @example
+   * ```typescript
+   * functionName: 'getCurrencyForCountry'
+   * functionName: 'calculateTax'
+   * functionName: 'formatPhoneNumber'
+   * ```
+   */
+  functionName?: string;
+
+  /**
+   * When to evaluate the derivation.
+   *
+   * - `onChange`: Evaluate when any dependency changes (default)
+   * - `onBlur`: Evaluate when the source field loses focus
+   *
+   * Use `onBlur` for self-transforms to avoid mid-typing issues.
+   *
+   * @default 'onChange'
+   */
+  trigger?: DerivationTrigger;
+}
+
+/**
+ * Union type for all logic configurations.
+ *
+ * - `StateLogicConfig`: For field state changes (hidden, readonly, disabled, required)
+ * - `DerivationLogicConfig`: For value derivation
+ *
+ * @public
+ */
+export type LogicConfig = StateLogicConfig | DerivationLogicConfig;
+
+/**
  * Type guard to check if a condition is a FormStateCondition.
  *
  * @param condition - The condition to check
@@ -115,6 +303,32 @@ export interface LogicConfig {
  *
  * @public
  */
-export function isFormStateCondition(condition: LogicConfig['condition']): condition is FormStateCondition {
+export function isFormStateCondition(
+  condition: StateLogicConfig['condition'] | DerivationLogicConfig['condition'],
+): condition is FormStateCondition {
   return typeof condition === 'string' && ['formInvalid', 'formSubmitting', 'pageInvalid'].includes(condition);
+}
+
+/**
+ * Type guard to check if a logic config is a StateLogicConfig.
+ *
+ * @param config - The logic config to check
+ * @returns true if the config is for field state logic
+ *
+ * @public
+ */
+export function isStateLogicConfig(config: LogicConfig): config is StateLogicConfig {
+  return config.type === 'hidden' || config.type === 'readonly' || config.type === 'disabled' || config.type === 'required';
+}
+
+/**
+ * Type guard to check if a logic config is a DerivationLogicConfig.
+ *
+ * @param config - The logic config to check
+ * @returns true if the config is for value derivation
+ *
+ * @public
+ */
+export function isDerivationLogicConfig(config: LogicConfig): config is DerivationLogicConfig {
+  return config.type === 'derivation';
 }

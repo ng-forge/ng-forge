@@ -48,6 +48,7 @@ type ExcludedKeys =
   | 'pattern'
   | 'validators'
   | 'logic'
+  | 'derivation'
   | 'schemas';
 
 export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown> | unknown, unknown>> = Prettify<
