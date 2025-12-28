@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { computed, Signal } from '@angular/core';
 import { mapFieldToInputs } from './field-mapper';
 import { FieldDef } from '../../definitions/base';
@@ -48,10 +48,11 @@ describe('mapFieldToInputs', () => {
   });
 
   describe('base mapper fallback', () => {
-    it('should use base mapper when no custom mapper defined', () => {
+    it('should use base mapper when no custom mapper defined but has loadComponent', () => {
       registry.set('input', {
-        component: {} as any,
-        // No mapper defined
+        name: 'input',
+        loadComponent: () => Promise.resolve({} as any),
+        // No mapper defined - should fall back to base mapper
       });
 
       const field: FieldDef<any> = { type: 'input', key: 'name' };
@@ -74,6 +75,50 @@ describe('mapFieldToInputs', () => {
       expect(typeof resultSignal).toBe('function'); // Signal is a function
       const result = resultSignal();
       expect(typeof result).toBe('object');
+    });
+  });
+
+  describe('componentless fields', () => {
+    it('should return undefined for componentless fields (no mapper and no loadComponent)', () => {
+      registry.set('hidden', {
+        name: 'hidden',
+        valueHandling: 'include',
+        // No mapper and no loadComponent - componentless field
+      });
+
+      const field: FieldDef<any> = { type: 'hidden', key: 'id', value: 'test-id' };
+      const result = mapFieldToInputs(field, registry);
+
+      // Should return undefined for componentless fields - nothing to map
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for all componentless field types', () => {
+      registry.set('hidden', {
+        name: 'hidden',
+        valueHandling: 'include',
+        // No mapper and no loadComponent
+      });
+
+      const field1: FieldDef<any> = { type: 'hidden', key: 'id1', value: 'val1' };
+      const field2: FieldDef<any> = { type: 'hidden', key: 'id2', value: 'val2' };
+
+      expect(mapFieldToInputs(field1, registry)).toBeUndefined();
+      expect(mapFieldToInputs(field2, registry)).toBeUndefined();
+    });
+
+    it('should not call base mapper for componentless fields', () => {
+      registry.set('hidden', {
+        name: 'hidden',
+        valueHandling: 'include',
+        // No mapper and no loadComponent
+      });
+
+      const field: FieldDef<any> = { type: 'hidden', key: 'id', value: 123 };
+      const result = mapFieldToInputs(field, registry);
+
+      // Undefined for componentless fields - base mapper should not be called
+      expect(result).toBeUndefined();
     });
   });
 

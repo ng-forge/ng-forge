@@ -31,8 +31,11 @@ export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>>
   registry: Map<string, FieldTypeDefinition>;
   /** DestroyRef to abort resolution if component is destroyed. */
   destroyRef: DestroyRef;
-  /** Function to async load the component for the field type. */
-  loadTypeComponent: (type: string) => Promise<unknown>;
+  /**
+   * Function to async load the component for the field type.
+   * Returns undefined for componentless fields (e.g., hidden fields).
+   */
+  loadTypeComponent: (type: string) => Promise<Type<unknown> | undefined>;
 }
 
 /**
@@ -63,6 +66,11 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
         return undefined;
       }
 
+      // Componentless fields (e.g., hidden) return undefined - nothing to render
+      if (!component) {
+        return undefined;
+      }
+
       const itemId = generateArrayItemId();
 
       const indexSignal = linkedSignal(() => {
@@ -81,9 +89,14 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
         arrayField,
       });
 
+      // Array item templates should always have inputs (componentless fields are handled above)
+      if (!inputs) {
+        return undefined;
+      }
+
       return {
         id: itemId,
-        component: component as Type<unknown>,
+        component,
         injector,
         inputs,
       };

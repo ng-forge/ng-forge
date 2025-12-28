@@ -2,6 +2,7 @@ import { LeafFieldTypes } from '../registry/field-registry';
 import type { RowField } from '../../definitions/default/row-field';
 import type { GroupField } from '../../definitions/default/group-field';
 import type { ArrayField } from '../../definitions/default/array-field';
+import type { HiddenField } from '../../definitions/default/hidden-field';
 
 /**
  * Type constraints for field nesting rules
@@ -18,9 +19,10 @@ export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | Array
 
 /**
  * Fields that are allowed as children of Row fields
- * Rows can contain: groups, arrays, and leaf fields (but NOT pages or other rows)
+ * Rows can contain: groups, arrays, and leaf fields (but NOT pages, other rows, or hidden fields)
+ * Hidden fields are excluded because rows are for horizontal layouts and hidden fields don't render
  */
-export type RowAllowedChildren = LeafFieldTypes | GroupField | ArrayField;
+export type RowAllowedChildren = Exclude<LeafFieldTypes, HiddenField> | GroupField | ArrayField;
 
 /**
  * Fields that are allowed as children of Group fields

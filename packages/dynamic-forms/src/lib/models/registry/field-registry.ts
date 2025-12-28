@@ -1,5 +1,6 @@
 import { ArrayField } from '../../definitions/default/array-field';
 import { GroupField } from '../../definitions/default/group-field';
+import { HiddenField } from '../../definitions/default/hidden-field';
 import { PageField } from '../../definitions/default/page-field';
 import { RowField } from '../../definitions/default/row-field';
 import { TextField } from '../../definitions/default/text-field';
@@ -37,6 +38,7 @@ export interface FieldRegistryContainers {
  */
 export interface FieldRegistryLeaves {
   text: TextField;
+  hidden: HiddenField;
 }
 
 /**

@@ -37,8 +37,8 @@ export interface CreateArrayItemInjectorOptions<TModel extends Record<string, un
 export interface ArrayItemInjectorResult {
   /** Scoped injector providing ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT. */
   injector: Injector;
-  /** Inputs signal for ngComponentOutlet, mapped from the field template. */
-  inputs: Signal<Record<string, unknown>>;
+  /** Inputs signal for ngComponentOutlet, mapped from the field template. Undefined for componentless fields. */
+  inputs: Signal<Record<string, unknown>> | undefined;
 }
 
 /**

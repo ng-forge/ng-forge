@@ -39,13 +39,23 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   /** Field definition type marker (internal use) */
   _fieldDef?: T;
   /**
-   * Function to load the component (supports lazy loading)
-   * Returns a Promise that resolves to the component class or module with default export
+   * Function to load the component (supports lazy loading).
+   * Returns a Promise that resolves to the component class or module with default export.
+   *
+   * Optional - omit for componentless fields (e.g., hidden fields) that only
+   * contribute to form values without rendering any UI.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Component loading returns dynamic module structure
   loadComponent?: () => Promise<any>;
-  /** Mapper function that converts field definition to component bindings */
-  mapper: MapperFn<T>;
+  /**
+   * Mapper function that converts field definition to component bindings.
+   *
+   * Optional - omit for componentless fields (like hidden fields) that don't need
+   * input mapping. When omitted for componentless fields (no loadComponent), an empty
+   * signal is returned. When omitted for regular fields with a component, falls back
+   * to baseFieldMapper.
+   */
+  mapper?: MapperFn<T>;
   /** How this field type handles form values and data collection (defaults to 'include') */
   valueHandling?: ValueHandlingMode;
 }

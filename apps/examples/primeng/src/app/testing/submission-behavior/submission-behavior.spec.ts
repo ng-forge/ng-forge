@@ -531,4 +531,90 @@ test.describe('Submission Behavior Tests', () => {
       await expect(page.locator('[data-testid="submission-result"]')).toHaveClass(/error/);
     });
   });
+
+  test.describe('Hidden Field', () => {
+    test.beforeEach(async ({ helpers, mockApi }) => {
+      await mockApi.mockSuccess('/api/hidden-field-submit', { delay: 300 });
+      await helpers.navigateToScenario('/test/submission-behavior/hidden-field');
+    });
+
+    test('should include hidden field values in form submission including inside groups', async ({ page, helpers, mockApi }) => {
+      const scenario = helpers.getScenario('hidden-field');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Wait for fields to be ready
+      await page.waitForSelector('[data-testid="hidden-field"] #name input', { state: 'visible', timeout: 10000 });
+
+      // Fill the visible input fields
+      const nameInput = helpers.getInput(scenario, 'name');
+      await nameInput.fill('John Doe');
+      await expect(nameInput).toHaveValue('John Doe', { timeout: 5000 });
+      await nameInput.blur();
+
+      const descriptionInput = helpers.getInput(scenario, 'description');
+      await descriptionInput.fill('Test description');
+      await expect(descriptionInput).toHaveValue('Test description', { timeout: 5000 });
+      await descriptionInput.blur();
+
+      // Hidden fields should not have any visible elements
+      await expect(scenario.locator('[id="id"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="version"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="isActive"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="tagIds"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="labels"]')).not.toBeVisible();
+      // Hidden fields inside groups should also not be visible
+      await expect(scenario.locator('[id="createdBy"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="source"]')).not.toBeVisible();
+
+      // Wait for submit button to be enabled
+      await page.waitForSelector('[data-testid="hidden-field"] #submitHidden button:not([disabled])', {
+        state: 'visible',
+        timeout: 10000,
+      });
+
+      // Submit the form
+      const submitButton = scenario.locator('#submitHidden button');
+      await submitButton.click();
+
+      // Wait for submission to complete
+      await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
+
+      // Verify the request was intercepted with all hidden values including nested ones
+      const requests = mockApi.getInterceptedRequests('/api/hidden-field-submit');
+      expect(requests).toHaveLength(1);
+      expect(requests[0].body).toEqual({
+        id: 'uuid-550e8400-e29b-41d4-a716-446655440000',
+        version: 42,
+        isActive: true,
+        tagIds: [1, 2, 3],
+        labels: ['draft', 'review'],
+        metadata: {
+          createdBy: 'user-admin',
+          source: 'web-form',
+          description: 'Test description',
+        },
+        name: 'John Doe',
+      });
+    });
+
+    test('should not render any DOM elements for hidden fields', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('hidden-field');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Wait for fields to be ready
+      await page.waitForSelector('[data-testid="hidden-field"] #name input', { state: 'visible', timeout: 10000 });
+
+      // Count visible field containers - should only have visible inputs and submit button
+      // PrimeNG uses p-floatlabel for inputs and p-button for buttons
+      const nameInput = scenario.locator('#name input');
+      const descriptionInput = scenario.locator('#description input');
+      const visibleButtons = scenario.locator('#submitHidden button');
+
+      // We expect to see: 2 input fields (name + description) + 1 submit button
+      // Hidden fields (id, version, isActive, tagIds, labels, createdBy, source) should not add any visible elements
+      await expect(nameInput).toHaveCount(1);
+      await expect(descriptionInput).toHaveCount(1);
+      await expect(visibleButtons).toHaveCount(1);
+    });
+  });
 });

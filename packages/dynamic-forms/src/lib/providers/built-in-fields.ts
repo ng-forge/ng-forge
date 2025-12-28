@@ -6,6 +6,7 @@ import { pageFieldMapper } from '../mappers/page/page-field-mapper';
 import { textFieldMapper } from '../mappers/text/text-field-mapper';
 import { RowField } from '../definitions/default/row-field';
 import { GroupField } from '../definitions/default/group-field';
+import { HiddenField } from '../definitions/default/hidden-field';
 import { ArrayField } from '../definitions/default/array-field';
 import { PageField } from '../definitions/default/page-field';
 import { TextField } from '../definitions/default/text-field';
@@ -79,4 +80,9 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
     mapper: textFieldMapper,
     valueHandling: 'exclude',
   } satisfies FieldTypeDefinition<TextField>,
+  {
+    name: 'hidden',
+    // Componentless field - no loadComponent or mapper needed
+    valueHandling: 'include',
+  } satisfies FieldTypeDefinition<HiddenField>,
 ];
