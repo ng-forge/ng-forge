@@ -89,6 +89,11 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
         arrayField,
       });
 
+      // Array item templates should always have inputs (componentless fields are handled above)
+      if (!inputs) {
+        return undefined;
+      }
+
       return {
         id: itemId,
         component,

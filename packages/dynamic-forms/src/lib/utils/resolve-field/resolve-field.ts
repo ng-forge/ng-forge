@@ -61,6 +61,11 @@ export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldC
       // Run mapper in injection context
       const inputs = runInInjectionContext(context.injector, () => mapFieldToInputs(fieldDef, context.registry));
 
+      // Fields with components should always have inputs (componentless fields are handled above)
+      if (!inputs) {
+        return undefined;
+      }
+
       return {
         key: fieldDef.key,
         component,

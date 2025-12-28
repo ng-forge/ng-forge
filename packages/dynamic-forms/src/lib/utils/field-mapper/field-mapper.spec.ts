@@ -79,7 +79,7 @@ describe('mapFieldToInputs', () => {
   });
 
   describe('componentless fields', () => {
-    it('should return empty signal for componentless fields (no mapper and no loadComponent)', () => {
+    it('should return undefined for componentless fields (no mapper and no loadComponent)', () => {
       registry.set('hidden', {
         name: 'hidden',
         valueHandling: 'include',
@@ -87,15 +87,13 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'hidden', key: 'id', value: 'test-id' };
-      const resultSignal = mapFieldToInputs(field, registry);
+      const result = mapFieldToInputs(field, registry);
 
-      expect(resultSignal).toBeDefined();
-      expect(typeof resultSignal).toBe('function'); // Signal is a function
-      // Should return empty object for componentless fields
-      expect(resultSignal()).toEqual({});
+      // Should return undefined for componentless fields - nothing to map
+      expect(result).toBeUndefined();
     });
 
-    it('should return same empty signal instance for multiple componentless field calls', () => {
+    it('should return undefined for all componentless field types', () => {
       registry.set('hidden', {
         name: 'hidden',
         valueHandling: 'include',
@@ -105,11 +103,8 @@ describe('mapFieldToInputs', () => {
       const field1: FieldDef<any> = { type: 'hidden', key: 'id1', value: 'val1' };
       const field2: FieldDef<any> = { type: 'hidden', key: 'id2', value: 'val2' };
 
-      const result1 = mapFieldToInputs(field1, registry);
-      const result2 = mapFieldToInputs(field2, registry);
-
-      // Should reuse the same empty signal
-      expect(result1).toBe(result2);
+      expect(mapFieldToInputs(field1, registry)).toBeUndefined();
+      expect(mapFieldToInputs(field2, registry)).toBeUndefined();
     });
 
     it('should not call base mapper for componentless fields', () => {
@@ -120,11 +115,10 @@ describe('mapFieldToInputs', () => {
       });
 
       const field: FieldDef<any> = { type: 'hidden', key: 'id', value: 123 };
-      const resultSignal = mapFieldToInputs(field, registry);
+      const result = mapFieldToInputs(field, registry);
 
-      // Empty signal for componentless fields - no base mapper properties
-      const result = resultSignal();
-      expect(Object.keys(result)).toHaveLength(0);
+      // Undefined for componentless fields - base mapper should not be called
+      expect(result).toBeUndefined();
     });
   });
 
