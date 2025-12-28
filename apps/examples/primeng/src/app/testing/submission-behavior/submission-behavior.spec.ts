@@ -538,18 +538,23 @@ test.describe('Submission Behavior Tests', () => {
       await helpers.navigateToScenario('/test/submission-behavior/hidden-field');
     });
 
-    test('should include hidden field values in form submission', async ({ page, helpers, mockApi }) => {
+    test('should include hidden field values in form submission including inside groups', async ({ page, helpers, mockApi }) => {
       const scenario = helpers.getScenario('hidden-field');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       // Wait for fields to be ready
       await page.waitForSelector('[data-testid="hidden-field"] #name input', { state: 'visible', timeout: 10000 });
 
-      // Fill the visible input field
+      // Fill the visible input fields
       const nameInput = helpers.getInput(scenario, 'name');
       await nameInput.fill('John Doe');
       await expect(nameInput).toHaveValue('John Doe', { timeout: 5000 });
       await nameInput.blur();
+
+      const descriptionInput = helpers.getInput(scenario, 'description');
+      await descriptionInput.fill('Test description');
+      await expect(descriptionInput).toHaveValue('Test description', { timeout: 5000 });
+      await descriptionInput.blur();
 
       // Hidden fields should not have any visible elements
       await expect(scenario.locator('[id="id"]')).not.toBeVisible();
@@ -557,6 +562,9 @@ test.describe('Submission Behavior Tests', () => {
       await expect(scenario.locator('[id="isActive"]')).not.toBeVisible();
       await expect(scenario.locator('[id="tagIds"]')).not.toBeVisible();
       await expect(scenario.locator('[id="labels"]')).not.toBeVisible();
+      // Hidden fields inside groups should also not be visible
+      await expect(scenario.locator('[id="createdBy"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="source"]')).not.toBeVisible();
 
       // Wait for submit button to be enabled
       await page.waitForSelector('[data-testid="hidden-field"] #submitHidden button:not([disabled])', {
@@ -571,7 +579,7 @@ test.describe('Submission Behavior Tests', () => {
       // Wait for submission to complete
       await expect(page.locator('[data-testid="submission-result"]')).toBeVisible({ timeout: 5000 });
 
-      // Verify the request was intercepted with all hidden values
+      // Verify the request was intercepted with all hidden values including nested ones
       const requests = mockApi.getInterceptedRequests('/api/hidden-field-submit');
       expect(requests).toHaveLength(1);
       expect(requests[0].body).toEqual({
@@ -580,6 +588,11 @@ test.describe('Submission Behavior Tests', () => {
         isActive: true,
         tagIds: [1, 2, 3],
         labels: ['draft', 'review'],
+        metadata: {
+          createdBy: 'user-admin',
+          source: 'web-form',
+          description: 'Test description',
+        },
         name: 'John Doe',
       });
     });
