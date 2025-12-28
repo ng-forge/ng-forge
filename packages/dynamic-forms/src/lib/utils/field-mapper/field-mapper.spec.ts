@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { computed, Signal } from '@angular/core';
 import { mapFieldToInputs } from './field-mapper';
 import { FieldDef } from '../../definitions/base';
@@ -48,10 +48,11 @@ describe('mapFieldToInputs', () => {
   });
 
   describe('base mapper fallback', () => {
-    it('should use base mapper when no custom mapper defined', () => {
+    it('should use base mapper when no custom mapper defined but has loadComponent', () => {
       registry.set('input', {
-        component: {} as any,
-        // No mapper defined
+        name: 'input',
+        loadComponent: () => Promise.resolve({} as any),
+        // No mapper defined - should fall back to base mapper
       });
 
       const field: FieldDef<any> = { type: 'input', key: 'name' };
@@ -74,6 +75,56 @@ describe('mapFieldToInputs', () => {
       expect(typeof resultSignal).toBe('function'); // Signal is a function
       const result = resultSignal();
       expect(typeof result).toBe('object');
+    });
+  });
+
+  describe('componentless fields', () => {
+    it('should return empty signal for componentless fields (no mapper and no loadComponent)', () => {
+      registry.set('hidden', {
+        name: 'hidden',
+        valueHandling: 'include',
+        // No mapper and no loadComponent - componentless field
+      });
+
+      const field: FieldDef<any> = { type: 'hidden', key: 'id', value: 'test-id' };
+      const resultSignal = mapFieldToInputs(field, registry);
+
+      expect(resultSignal).toBeDefined();
+      expect(typeof resultSignal).toBe('function'); // Signal is a function
+      // Should return empty object for componentless fields
+      expect(resultSignal()).toEqual({});
+    });
+
+    it('should return same empty signal instance for multiple componentless field calls', () => {
+      registry.set('hidden', {
+        name: 'hidden',
+        valueHandling: 'include',
+        // No mapper and no loadComponent
+      });
+
+      const field1: FieldDef<any> = { type: 'hidden', key: 'id1', value: 'val1' };
+      const field2: FieldDef<any> = { type: 'hidden', key: 'id2', value: 'val2' };
+
+      const result1 = mapFieldToInputs(field1, registry);
+      const result2 = mapFieldToInputs(field2, registry);
+
+      // Should reuse the same empty signal
+      expect(result1).toBe(result2);
+    });
+
+    it('should not call base mapper for componentless fields', () => {
+      registry.set('hidden', {
+        name: 'hidden',
+        valueHandling: 'include',
+        // No mapper and no loadComponent
+      });
+
+      const field: FieldDef<any> = { type: 'hidden', key: 'id', value: 123 };
+      const resultSignal = mapFieldToInputs(field, registry);
+
+      // Empty signal for componentless fields - no base mapper properties
+      const result = resultSignal();
+      expect(Object.keys(result)).toHaveLength(0);
     });
   });
 

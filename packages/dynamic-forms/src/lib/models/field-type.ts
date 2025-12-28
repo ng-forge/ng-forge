@@ -49,8 +49,11 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   loadComponent?: () => Promise<any>;
   /**
    * Mapper function that converts field definition to component bindings.
-   * Optional - omit for componentless fields that don't need input mapping.
-   * Falls back to baseFieldMapper when not provided.
+   *
+   * Optional - omit for componentless fields (like hidden fields) that don't need
+   * input mapping. When omitted for componentless fields (no loadComponent), an empty
+   * signal is returned. When omitted for regular fields with a component, falls back
+   * to baseFieldMapper.
    */
   mapper?: MapperFn<T>;
   /** How this field type handles form values and data collection (defaults to 'include') */

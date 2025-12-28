@@ -1,7 +1,10 @@
-import { Signal } from '@angular/core';
+import { Signal, signal } from '@angular/core';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
+
+/** Empty inputs signal for componentless fields */
+const EMPTY_INPUTS: Signal<Record<string, unknown>> = signal({});
 
 /**
  * Main field mapper function that uses the field registry to get the appropriate mapper
@@ -9,6 +12,9 @@ import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
  *
  * This function must be called within an injection context where FIELD_SIGNAL_CONTEXT
  * is provided, as mappers inject the context to access form state.
+ *
+ * For componentless fields (no loadComponent and no mapper), returns an empty signal
+ * since there's no component to bind inputs to.
  *
  * @param fieldDef The field definition to map
  * @param fieldRegistry The registry of field type definitions
@@ -27,7 +33,12 @@ export function mapFieldToInputs(
     return fieldType.mapper(fieldDef);
   }
 
-  // Fallback to base mapper
+  // Componentless field (no mapper and no loadComponent) - return empty inputs
+  if (fieldType && !fieldType.loadComponent) {
+    return EMPTY_INPUTS;
+  }
+
+  // Fallback to base mapper for fields with components but no custom mapper
   // Mapper will inject FIELD_SIGNAL_CONTEXT internally
   return baseFieldMapper(fieldDef);
 }
