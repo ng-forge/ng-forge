@@ -57,9 +57,7 @@ test.describe('Value Derivation Logic Tests', () => {
     });
   });
 
-  // TODO: Investigate page freeze on expression derivation scenarios
-  // Skip until chained expression dependencies are properly handled
-  test.describe.skip('Expression-Based Derivation', () => {
+  test.describe('Expression-Based Derivation', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(testUrl('/test/derivation-logic/expression'));
       await page.waitForLoadState('networkidle');
@@ -181,8 +179,7 @@ test.describe('Value Derivation Logic Tests', () => {
     });
   });
 
-  // TODO: Investigate page freeze on conditional derivation scenarios
-  test.describe.skip('Conditional Derivation', () => {
+  test.describe('Conditional Derivation', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(testUrl('/test/derivation-logic/conditional'));
       await page.waitForLoadState('networkidle');
@@ -194,11 +191,12 @@ test.describe('Value Derivation Logic Tests', () => {
 
       const membershipSelect = scenario.locator('#membershipType');
       const discountInput = helpers.getInput(scenario, 'discountPercent');
-      const freeShippingToggle = scenario.locator('#freeShipping mat-slide-toggle');
+      // Material toggle uses a button with role="switch" for the actual toggle control
+      const freeShippingToggle = scenario.locator('#freeShipping button[role="switch"]');
 
       // Initial: Basic membership
       await expect(discountInput).toHaveValue('0');
-      await expect(freeShippingToggle).toHaveAttribute('aria-checked', 'false');
+      await expect(freeShippingToggle).not.toBeChecked();
 
       // Select Premium
       await membershipSelect.click();
@@ -207,7 +205,7 @@ test.describe('Value Derivation Logic Tests', () => {
       await page.waitForTimeout(500);
 
       await expect(discountInput).toHaveValue('15');
-      await expect(freeShippingToggle).toHaveAttribute('aria-checked', 'true');
+      await expect(freeShippingToggle).toBeChecked();
 
       // Select VIP
       await membershipSelect.click();
@@ -216,7 +214,7 @@ test.describe('Value Derivation Logic Tests', () => {
       await page.waitForTimeout(500);
 
       await expect(discountInput).toHaveValue('30');
-      await expect(freeShippingToggle).toHaveAttribute('aria-checked', 'true');
+      await expect(freeShippingToggle).toBeChecked();
 
       // Back to Basic
       await membershipSelect.click();
@@ -225,7 +223,7 @@ test.describe('Value Derivation Logic Tests', () => {
       await page.waitForTimeout(500);
 
       await expect(discountInput).toHaveValue('0');
-      await expect(freeShippingToggle).toHaveAttribute('aria-checked', 'false');
+      await expect(freeShippingToggle).not.toBeChecked();
     });
 
     test('should derive age category based on age value', async ({ page, helpers }) => {
@@ -270,7 +268,8 @@ test.describe('Value Derivation Logic Tests', () => {
     });
   });
 
-  // TODO: Investigate onBlur self-transform derivation triggering
+  // Skip: onBlur trigger for derivations is not yet implemented in dynamic-form.component
+  // The derivation effect only processes 'onChange' triggers currently
   test.describe.skip('Self-Transform Derivation (onBlur)', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(testUrl('/test/derivation-logic/self-transform'));
@@ -353,8 +352,7 @@ test.describe('Value Derivation Logic Tests', () => {
     });
   });
 
-  // TODO: Investigate chain derivation page freeze
-  test.describe.skip('Chain Derivation (A -> B -> C)', () => {
+  test.describe('Chain Derivation (A -> B -> C)', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(testUrl('/test/derivation-logic/chain'));
       await page.waitForLoadState('networkidle');
@@ -430,8 +428,7 @@ test.describe('Value Derivation Logic Tests', () => {
     });
   });
 
-  // TODO: Investigate shorthand derivation page freeze
-  test.describe.skip('Shorthand Derivation Property', () => {
+  test.describe('Shorthand Derivation Property', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(testUrl('/test/derivation-logic/shorthand'));
       await page.waitForLoadState('networkidle');
@@ -512,7 +509,8 @@ test.describe('Value Derivation Logic Tests', () => {
     });
   });
 
-  // Skip array field derivation tests - requires array item context support in derivation evaluator
+  // Skip: Array field derivations with relative paths ('$.fieldName') require
+  // array item context resolution which is not yet implemented
   test.describe.skip('Array Field Derivation with Relative Paths', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(testUrl('/test/derivation-logic/array-field'));
