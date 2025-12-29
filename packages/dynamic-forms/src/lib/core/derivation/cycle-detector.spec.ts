@@ -71,13 +71,15 @@ describe('cycle-detector', () => {
     });
 
     describe('cycles detected', () => {
-      it('should detect self-referencing cycle', () => {
-        // A -> A (self-loop)
+      it('should allow self-referencing derivations (self-transforms)', () => {
+        // A -> A (self-loop) - allowed for self-transform patterns like email.toLowerCase()
+        // These are not cycles because:
+        // 1. The value equality check prevents re-triggering when value doesn't change
+        // 2. Self-transforms are typically idempotent
         const collection = createCollection([createEntry('a', 'a')]);
         const result = detectCycles(collection);
 
-        expect(result.hasCycle).toBe(true);
-        expect(result.cyclePath).toContain('a');
+        expect(result.hasCycle).toBe(false);
       });
 
       it('should detect simple two-node cycle', () => {

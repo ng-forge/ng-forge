@@ -1,4 +1,4 @@
-import { FormConfig } from '@ng-forge/dynamic-forms';
+import { FormConfig, EvaluationContext } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 const config = {
@@ -84,7 +84,7 @@ const config = {
         {
           type: 'derivation',
           targetField: 'initials',
-          expression: '(formValue.firstName[0] || "") + (formValue.lastName[0] || "")',
+          functionName: 'getInitials',
         },
       ],
     },
@@ -98,7 +98,7 @@ const config = {
         {
           type: 'derivation',
           targetField: 'initials',
-          expression: '(formValue.firstName[0] || "") + (formValue.lastName[0] || "")',
+          functionName: 'getInitials',
         },
       ],
     },
@@ -143,4 +143,13 @@ export const chainDerivationScenario: TestScenario = {
   title: 'Chain Derivation (A -> B -> C)',
   description: 'Tests cascading derivations where derived values trigger further derivations',
   config,
+  customFnConfig: {
+    derivations: {
+      getInitials: (context: EvaluationContext) => {
+        const firstName = String(context.formValue.firstName ?? '');
+        const lastName = String(context.formValue.lastName ?? '');
+        return (firstName.charAt(0) || '') + (lastName.charAt(0) || '');
+      },
+    },
+  },
 };
