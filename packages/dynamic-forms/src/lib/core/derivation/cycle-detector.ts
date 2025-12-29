@@ -104,9 +104,15 @@ function buildDependencyGraph(collection: DerivationCollection): Map<string, Gra
     // A cycle exists if: A -> B -> A
     // (A triggers B, B triggers A)
 
-    // The target depends on the source for its value
-    targetNode.dependsOn.add(entry.sourceFieldKey);
-    sourceNode.dependedOnBy.add(entry.targetFieldKey);
+    // For shorthand derivations (where source === target), don't add source->target edge.
+    // Shorthand derivations define their dependencies via the expression (extracted in dependsOn),
+    // not through a source field change. Adding source->target when they're the same would
+    // incorrectly create a self-loop cycle for legitimate computed fields.
+    if (!entry.isShorthand) {
+      // The target depends on the source for its value
+      targetNode.dependsOn.add(entry.sourceFieldKey);
+      sourceNode.dependedOnBy.add(entry.targetFieldKey);
+    }
 
     // Also track dependencies from the derivation expression/condition
     for (const dep of entry.dependsOn) {

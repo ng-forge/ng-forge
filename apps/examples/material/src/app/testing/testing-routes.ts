@@ -55,6 +55,12 @@ export default [
     loadChildren: () => import('./demo-scenarios/demo-scenarios.routes'),
   },
 
+  // Derivation Logic Tests - Value derivation based on field values, expressions, and custom functions
+  {
+    path: 'derivation-logic',
+    loadChildren: () => import('./derivation-logic/derivation-logic.routes'),
+  },
+
   // Error Handling Tests - Refactored into folder structure
   {
     path: 'error-handling',

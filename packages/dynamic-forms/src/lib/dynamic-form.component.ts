@@ -573,13 +573,11 @@ export class DynamicForm<
       isProcessingDerivations = true;
 
       try {
-        const rootForm = formAccessor();
-
         // Create the applicator context
-        // Type assertion is safe: the form tree structure matches FieldTree<unknown>
+        // Pass formAccessor directly (not called) so child fields can be accessed via bracket notation
         const applicatorContext = {
           formValue: this.formValue as Signal<Record<string, unknown>>,
-          rootForm: rootForm as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          rootForm: formAccessor as unknown as import('@angular/forms/signals').FieldTree<unknown>,
           derivationFunctions: this.functionRegistry.getDerivationFunctions(),
           customFunctions: this.functionRegistry.getCustomFunctions(),
           logger: this.logger,

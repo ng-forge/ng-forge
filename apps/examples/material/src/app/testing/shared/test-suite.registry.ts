@@ -8,6 +8,7 @@ import { comprehensiveFieldTestsSuite } from '../comprehensive-field-tests/compr
 import { crossFieldValidationSuite } from '../cross-field-validation/cross-field-validation.suite';
 import { crossPageValidationSuite } from '../cross-page-validation/cross-page-validation.suite';
 import { demoScenariosSuite } from '../demo-scenarios/demo-scenarios.suite';
+import { derivationLogicSuite } from '../derivation-logic/derivation-logic.suite';
 import { errorHandlingSuite } from '../error-handling/error-handling.suite';
 import { essentialTestsSuite } from '../essential-tests/essential-tests.suite';
 import { expressionBasedLogicSuite } from '../expression-based-logic/expression-based-logic.suite';
@@ -33,6 +34,7 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   crossFieldValidationSuite,
   crossPageValidationSuite,
   demoScenariosSuite,
+  derivationLogicSuite,
   errorHandlingSuite,
   essentialTestsSuite,
   expressionBasedLogicSuite,

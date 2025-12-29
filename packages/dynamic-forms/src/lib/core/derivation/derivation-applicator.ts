@@ -1,4 +1,4 @@
-import { Signal, untracked } from '@angular/core';
+import { isSignal, Signal, untracked, WritableSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
@@ -314,6 +314,10 @@ function computeDerivedValue(
 /**
  * Applies a value to the form at the specified path.
  *
+ * Uses bracket notation to access child FieldTrees, following the same pattern
+ * as group-field and array-field components. Fields are accessed as signals
+ * and their value is set via the `.value.set()` method.
+ *
  * Handles nested paths and array paths with '$' placeholder.
  *
  * @internal
@@ -321,17 +325,13 @@ function computeDerivedValue(
 function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTree<unknown>): void {
   // Handle simple top-level fields
   if (!targetPath.includes('.')) {
-    const formRecord = rootForm as Record<string, { value?: { set: (v: unknown) => void } }>;
-    const field = formRecord[targetPath];
-    if (field?.value) {
-      field.value.set(value);
-    }
+    setFieldValue(rootForm, targetPath, value);
     return;
   }
 
-  // Handle nested paths
+  // Handle nested paths (e.g., 'address.city' or 'items.$.quantity')
   const parts = targetPath.split('.');
-  let current: Record<string, unknown> = rootForm as Record<string, unknown>;
+  let current: unknown = rootForm;
 
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i];
@@ -343,20 +343,57 @@ function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTre
       return;
     }
 
-    // Navigate to the next level
-    const next = current[part];
-    if (next && typeof next === 'object') {
-      current = next as Record<string, unknown>;
-    } else {
+    // Navigate to the next level using bracket notation
+    const next = (current as Record<string, unknown>)[part];
+    if (next === undefined || next === null) {
       return; // Path doesn't exist
     }
+    current = next;
   }
 
   // Set the final value
   const finalPart = parts[parts.length - 1];
-  const field = current[finalPart] as { value?: { set: (v: unknown) => void } } | undefined;
-  if (field?.value) {
-    field.value.set(value);
+  setFieldValue(current, finalPart, value);
+}
+
+/**
+ * Sets a field value using the Angular Signal Forms pattern.
+ *
+ * Accesses the child field via bracket notation, drills down to find
+ * the WritableSignal, and uses isSignal for type-safe signal detection.
+ *
+ * Angular Signal Forms structure:
+ * - form[key] is a callable function (field accessor)
+ * - form[key]() returns the field instance with { value: WritableSignal<T> }
+ * - form[key]().value.set(newValue) sets the value
+ *
+ * @internal
+ */
+function setFieldValue(parent: unknown, fieldKey: string, value: unknown): void {
+  // Access child field via bracket notation (same pattern as group-field/array-field)
+  const fieldAccessor = (parent as Record<string, unknown>)[fieldKey];
+
+  if (fieldAccessor === undefined || fieldAccessor === null) {
+    return;
+  }
+
+  // Angular Signal Forms: field accessor is a callable function
+  if (typeof fieldAccessor !== 'function') {
+    return;
+  }
+
+  // Call the accessor to get the field instance
+  const fieldInstance = fieldAccessor();
+
+  if (!fieldInstance || typeof fieldInstance !== 'object' || !('value' in fieldInstance)) {
+    return;
+  }
+
+  // Get the value signal and verify it's a WritableSignal
+  const valueSignal = fieldInstance.value;
+
+  if (isSignal(valueSignal) && typeof (valueSignal as WritableSignal<unknown>).set === 'function') {
+    (valueSignal as WritableSignal<unknown>).set(value);
   }
 }
 

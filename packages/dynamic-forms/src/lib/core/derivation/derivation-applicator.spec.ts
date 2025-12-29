@@ -18,23 +18,34 @@ describe('derivation-applicator', () => {
   }
 
   /**
-   * Mock form with settable values.
+   * Mock form that mimics Angular Signal Forms structure.
+   *
+   * Real structure: form[key] is callable, form[key]() returns { value: WritableSignal }
    */
   function createMockForm(initialValue: Record<string, unknown>): {
-    form: Record<string, { value: { set: (v: unknown) => void } }>;
+    form: Record<string, () => { value: WritableSignal<unknown> }>;
     values: Record<string, unknown>;
   } {
     const values = { ...initialValue };
-    const form: Record<string, { value: { set: (v: unknown) => void } }> = {};
+    const form: Record<string, () => { value: WritableSignal<unknown> }> = {};
 
     for (const key of Object.keys(initialValue)) {
-      form[key] = {
-        value: {
-          set: (v: unknown) => {
-            values[key] = v;
-          },
-        },
-      };
+      // Create a writable signal for the value
+      const valueSignal = signal(values[key]);
+
+      // Create a callable field accessor that returns { value: WritableSignal }
+      form[key] = () => ({
+        value: valueSignal,
+      });
+
+      // Sync signal changes back to our values object for assertions
+      // This is a test helper - in real code the signal IS the source of truth
+      Object.defineProperty(values, key, {
+        get: () => valueSignal(),
+        set: (v: unknown) => valueSignal.set(v),
+        enumerable: true,
+        configurable: true,
+      });
     }
 
     return { form, values };
