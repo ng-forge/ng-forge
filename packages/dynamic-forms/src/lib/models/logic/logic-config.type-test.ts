@@ -37,7 +37,7 @@ describe('FormStateCondition - Type Tests', () => {
 // ============================================================================
 
 describe('StateLogicConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'type' | 'condition';
+  type ExpectedKeys = 'type' | 'condition' | 'trigger' | 'debounceMs';
   type ActualKeys = keyof StateLogicConfig;
 
   it('should have exactly the expected keys', () => {
@@ -45,8 +45,10 @@ describe('StateLogicConfig - Exhaustive Whitelist', () => {
   });
 
   describe('required keys', () => {
-    it('should have type and condition as required', () => {
-      expectTypeOf<RequiredKeys<StateLogicConfig>>().toEqualTypeOf<'type' | 'condition'>();
+    // Note: trigger is required in DebouncedStateLogicConfig variant,
+    // which makes it appear in RequiredKeys for the union type
+    it('should have type, condition, and trigger as required', () => {
+      expectTypeOf<RequiredKeys<StateLogicConfig>>().toEqualTypeOf<'type' | 'condition' | 'trigger'>();
     });
   });
 });
@@ -82,7 +84,7 @@ describe('StateLogicConfig - Property Types', () => {
 // ============================================================================
 
 describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'type' | 'targetField' | 'condition' | 'value' | 'expression' | 'functionName' | 'trigger';
+  type ExpectedKeys = 'type' | 'targetField' | 'condition' | 'value' | 'expression' | 'functionName' | 'trigger' | 'debounceMs';
   type ActualKeys = keyof DerivationLogicConfig;
 
   it('should have exactly the expected keys', () => {
@@ -90,8 +92,10 @@ describe('DerivationLogicConfig - Exhaustive Whitelist', () => {
   });
 
   describe('required keys', () => {
-    it('should have type and targetField as required', () => {
-      expectTypeOf<RequiredKeys<DerivationLogicConfig>>().toEqualTypeOf<'type' | 'targetField'>();
+    // Note: trigger is required in DebouncedDerivationLogicConfig variant,
+    // which makes it appear in RequiredKeys for the union type
+    it('should have type, targetField, and trigger as required', () => {
+      expectTypeOf<RequiredKeys<DerivationLogicConfig>>().toEqualTypeOf<'type' | 'targetField' | 'trigger'>();
     });
   });
 });
