@@ -11,4 +11,4 @@ export { detectCycles, validateNoCycles } from './cycle-detector';
 
 // Applicator
 export type { DerivationApplicatorContext, DerivationProcessingResult } from './derivation-applicator';
-export { applyDerivations, applyDerivationsForTrigger } from './derivation-applicator';
+export { applyDerivations, applyDerivationsForTrigger, getDebouncedDerivationEntries } from './derivation-applicator';

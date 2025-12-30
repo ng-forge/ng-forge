@@ -268,15 +268,13 @@ test.describe('Value Derivation Logic Tests', () => {
     });
   });
 
-  // Skip: onBlur trigger for derivations is not yet implemented in dynamic-form.component
-  // The derivation effect only processes 'onChange' triggers currently
-  test.describe.skip('Self-Transform Derivation (onBlur)', () => {
+  test.describe('Self-Transform Derivation (Debounced)', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(testUrl('/test/derivation-logic/self-transform'));
       await page.waitForLoadState('networkidle');
     });
 
-    test('should lowercase email on blur', async ({ page, helpers }) => {
+    test('should lowercase email after debounce', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('self-transform-test');
       await expect(scenario).toBeVisible();
 
@@ -284,20 +282,15 @@ test.describe('Value Derivation Logic Tests', () => {
 
       // Type mixed case email
       await emailInput.fill('John.Doe@EXAMPLE.COM');
-      await page.waitForTimeout(200);
 
-      // Value should still be mixed case while focused
-      await expect(emailInput).toHaveValue('John.Doe@EXAMPLE.COM');
+      // Wait for debounce (500ms default + buffer)
+      await page.waitForTimeout(700);
 
-      // Blur the field
-      await helpers.blurInput(emailInput);
-      await page.waitForTimeout(500);
-
-      // Value should be lowercase after blur
+      // Value should be lowercase after debounce completes
       await expect(emailInput).toHaveValue('john.doe@example.com');
     });
 
-    test('should trim username on blur', async ({ page, helpers }) => {
+    test('should trim username after debounce', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('self-transform-test');
       await expect(scenario).toBeVisible();
 
@@ -305,17 +298,15 @@ test.describe('Value Derivation Logic Tests', () => {
 
       // Type username with spaces
       await usernameInput.fill('  johndoe  ');
-      await page.waitForTimeout(200);
 
-      // Blur the field
-      await helpers.blurInput(usernameInput);
-      await page.waitForTimeout(500);
+      // Wait for debounce
+      await page.waitForTimeout(700);
 
-      // Value should be trimmed after blur
+      // Value should be trimmed after debounce
       await expect(usernameInput).toHaveValue('johndoe');
     });
 
-    test('should format phone number on blur', async ({ page, helpers }) => {
+    test('should format phone number after debounce', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('self-transform-test');
       await expect(scenario).toBeVisible();
 
@@ -323,17 +314,15 @@ test.describe('Value Derivation Logic Tests', () => {
 
       // Type 10-digit phone number
       await phoneInput.fill('5551234567');
-      await page.waitForTimeout(200);
 
-      // Blur the field
-      await helpers.blurInput(phoneInput);
-      await page.waitForTimeout(500);
+      // Wait for debounce
+      await page.waitForTimeout(700);
 
-      // Value should be formatted after blur
+      // Value should be formatted after debounce
       await expect(phoneInput).toHaveValue('(555) 123-4567');
     });
 
-    test('should mask credit card on blur', async ({ page, helpers }) => {
+    test('should mask credit card after debounce', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('self-transform-test');
       await expect(scenario).toBeVisible();
 
@@ -341,13 +330,11 @@ test.describe('Value Derivation Logic Tests', () => {
 
       // Type credit card number
       await creditCardInput.fill('4111111111111111');
-      await page.waitForTimeout(200);
 
-      // Blur the field
-      await helpers.blurInput(creditCardInput);
-      await page.waitForTimeout(500);
+      // Wait for debounce
+      await page.waitForTimeout(700);
 
-      // Value should be masked after blur (showing only last 4 digits)
+      // Value should be masked after debounce (showing only last 4 digits)
       await expect(creditCardInput).toHaveValue('************1111');
     });
   });
@@ -509,9 +496,7 @@ test.describe('Value Derivation Logic Tests', () => {
     });
   });
 
-  // Skip: Array field derivations with relative paths ('$.fieldName') require
-  // array item context resolution which is not yet implemented
-  test.describe.skip('Array Field Derivation with Relative Paths', () => {
+  test.describe('Array Field Derivation with Relative Paths', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(testUrl('/test/derivation-logic/array-field'));
       await page.waitForLoadState('networkidle');
@@ -521,32 +506,37 @@ test.describe('Value Derivation Logic Tests', () => {
       const scenario = helpers.getScenario('array-field-derivation-test');
       await expect(scenario).toBeVisible();
 
-      // Get first line item fields
-      const firstQuantity = scenario.locator('[data-testid="lineItems-0"] #quantity input');
-      const firstUnitPrice = scenario.locator('[data-testid="lineItems-0"] #unitPrice input');
-      const firstLineTotal = scenario.locator('[data-testid="lineItems-0"] #lineTotal input');
+      // Get first line item fields using nth() since array items don't have indexed data-testid
+      const quantityInputs = scenario.locator('#quantity input');
+      const unitPriceInputs = scenario.locator('#unitPrice input');
+      const lineTotalInputs = scenario.locator('#lineTotal input');
+
+      const firstQuantity = quantityInputs.nth(0);
+      const firstUnitPrice = unitPriceInputs.nth(0);
+      const firstLineTotal = lineTotalInputs.nth(0);
+      const secondLineTotal = lineTotalInputs.nth(1);
+
+      // Wait for initial render
+      await expect(firstLineTotal).toBeVisible();
 
       // Initial values for first item: quantity=2, unitPrice=50, lineTotal=100
       await expect(firstLineTotal).toHaveValue('100');
 
-      // Change first item quantity to 5
-      await firstQuantity.clear();
-      await firstQuantity.fill('5');
+      // Change first item quantity to 5 using the helper that works for other tests
+      await helpers.clearAndFill(firstQuantity, '5');
       await page.waitForTimeout(500);
 
       // 5 * 50 = 250
       await expect(firstLineTotal).toHaveValue('250');
 
       // Change first item unit price to 100
-      await firstUnitPrice.clear();
-      await firstUnitPrice.fill('100');
+      await helpers.clearAndFill(firstUnitPrice, '100');
       await page.waitForTimeout(500);
 
       // 5 * 100 = 500
       await expect(firstLineTotal).toHaveValue('500');
 
       // Verify second item is still correct (quantity=3, unitPrice=30, lineTotal=90)
-      const secondLineTotal = scenario.locator('[data-testid="lineItems-1"] #lineTotal input');
       await expect(secondLineTotal).toHaveValue('90');
     });
   });

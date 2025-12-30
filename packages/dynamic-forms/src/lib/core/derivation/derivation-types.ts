@@ -1,5 +1,5 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { DerivationLogicConfig, DerivationTrigger } from '../../models/logic/logic-config';
+import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
 
 /**
  * Entry representing a collected derivation from field definitions.
@@ -69,9 +69,20 @@ export interface DerivationEntry {
   /**
    * When to evaluate the derivation.
    *
+   * - `onChange`: Evaluate immediately when dependencies change (default)
+   * - `debounced`: Evaluate after value has stabilized for debounceMs
+   *
    * @default 'onChange'
    */
-  trigger: DerivationTrigger;
+  trigger: LogicTrigger;
+
+  /**
+   * Debounce duration in milliseconds.
+   *
+   * Only used when `trigger` is 'debounced'.
+   * @default 500
+   */
+  debounceMs?: number;
 
   /**
    * Whether this derivation was created from the shorthand `derivation` property.

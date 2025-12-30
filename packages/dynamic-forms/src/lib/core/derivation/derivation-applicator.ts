@@ -194,6 +194,11 @@ function tryApplyDerivation(
   context: DerivationApplicatorContext,
   chainContext: DerivationChainContext,
 ): DerivationResult {
+  // Check if this is an array field derivation (has '$' placeholder)
+  if (entry.targetFieldKey.includes('.$')) {
+    return tryApplyArrayDerivation(entry, context, chainContext);
+  }
+
   const derivationKey = createDerivationKey(entry.sourceFieldKey, entry.targetFieldKey);
 
   // Check if already applied in this cycle
@@ -245,6 +250,86 @@ function tryApplyDerivation(
 }
 
 /**
+ * Handles array field derivations with '$' placeholder.
+ *
+ * Iterates over all array items and applies the derivation for each,
+ * resolving '$' to the actual index and creating scoped evaluation contexts.
+ *
+ * @internal
+ */
+function tryApplyArrayDerivation(
+  entry: DerivationEntry,
+  context: DerivationApplicatorContext,
+  chainContext: DerivationChainContext,
+): DerivationResult {
+  const formValue = untracked(() => context.formValue());
+
+  // Parse the target path to get array name and relative field path
+  // Format: "arrayName.$.fieldName" or "nested.arrayName.$.fieldName"
+  const dollarIndex = entry.targetFieldKey.indexOf('.$.');
+  if (dollarIndex === -1) {
+    return { applied: false, targetFieldKey: entry.targetFieldKey, error: 'Invalid array derivation path' };
+  }
+
+  const arrayPath = entry.targetFieldKey.substring(0, dollarIndex);
+  const relativePath = entry.targetFieldKey.substring(dollarIndex + 3); // Skip ".$."
+
+  // Get the array from form values
+  const arrayValue = getNestedValue(formValue, arrayPath);
+  if (!Array.isArray(arrayValue)) {
+    return { applied: false, targetFieldKey: entry.targetFieldKey };
+  }
+
+  let appliedAny = false;
+
+  // Process each array item
+  for (let i = 0; i < arrayValue.length; i++) {
+    const resolvedTargetPath = `${arrayPath}.${i}.${relativePath}`;
+    const derivationKey = createDerivationKey(entry.sourceFieldKey, resolvedTargetPath);
+
+    // Skip if already applied in this cycle
+    if (chainContext.appliedDerivations.has(derivationKey)) {
+      continue;
+    }
+
+    // Create evaluation context scoped to this array item
+    const arrayItem = arrayValue[i] as Record<string, unknown>;
+    const evalContext = createArrayItemEvaluationContext(entry, arrayItem, formValue, i, arrayPath, context);
+
+    // Evaluate condition
+    if (!evaluateDerivationCondition(entry.condition, evalContext)) {
+      continue;
+    }
+
+    // Compute derived value
+    let newValue: unknown;
+    try {
+      newValue = computeDerivedValue(entry, evalContext, context);
+    } catch (error) {
+      context.logger.error(`Error computing array derivation for ${resolvedTargetPath}:`, error);
+      continue;
+    }
+
+    // Check if value actually changed
+    const currentValue = getNestedValue(formValue, resolvedTargetPath);
+    if (isEqual(currentValue, newValue)) {
+      continue;
+    }
+
+    // Apply the value
+    try {
+      applyValueToForm(resolvedTargetPath, newValue, context.rootForm);
+      chainContext.appliedDerivations.add(derivationKey);
+      appliedAny = true;
+    } catch (error) {
+      context.logger.error(`Error applying array derivation to ${resolvedTargetPath}:`, error);
+    }
+  }
+
+  return { applied: appliedAny, targetFieldKey: entry.targetFieldKey };
+}
+
+/**
  * Creates an evaluation context for derivation processing.
  *
  * @internal
@@ -262,6 +347,38 @@ function createEvaluationContext(
     fieldPath: entry.sourceFieldKey,
     customFunctions: context.customFunctions,
     logger: context.logger,
+  };
+}
+
+/**
+ * Creates an evaluation context scoped to a specific array item.
+ *
+ * For array derivations, `formValue` in the expression should reference
+ * the current array item's values, not the root form values.
+ *
+ * @internal
+ */
+function createArrayItemEvaluationContext(
+  entry: DerivationEntry,
+  arrayItem: Record<string, unknown>,
+  rootFormValue: Record<string, unknown>,
+  itemIndex: number,
+  arrayPath: string,
+  context: DerivationApplicatorContext,
+): EvaluationContext {
+  // For array item expressions, formValue should be the array item
+  // This allows expressions like 'formValue.quantity * formValue.unitPrice'
+  // to work within the context of each array item
+  return {
+    fieldValue: arrayItem,
+    formValue: arrayItem,
+    fieldPath: `${arrayPath}.${itemIndex}`,
+    customFunctions: context.customFunctions,
+    logger: context.logger,
+    // Provide access to root form value for cross-scope references
+    rootFormValue,
+    arrayIndex: itemIndex,
+    arrayPath,
   };
 }
 
@@ -431,7 +548,7 @@ function isEqual(a: unknown, b: unknown): boolean {
 /**
  * Processes derivations for a specific trigger type.
  *
- * Use this to filter derivations by trigger (onChange vs onBlur).
+ * Use this to filter derivations by trigger (onChange vs debounced).
  *
  * @param collection - The collected derivation entries
  * @param trigger - The trigger type to filter by
@@ -443,13 +560,19 @@ function isEqual(a: unknown, b: unknown): boolean {
  */
 export function applyDerivationsForTrigger(
   collection: DerivationCollection,
-  trigger: 'onChange' | 'onBlur',
+  trigger: 'onChange' | 'debounced',
   context: DerivationApplicatorContext,
   changedFields?: Set<string>,
 ): DerivationProcessingResult {
   // Create a filtered collection with only matching trigger entries
+  // onChange is the default, so entries without a trigger or with trigger: 'onChange' match
   const filteredCollection: DerivationCollection = {
-    entries: collection.entries.filter((entry) => entry.trigger === trigger),
+    entries: collection.entries.filter((entry) => {
+      if (trigger === 'onChange') {
+        return !entry.trigger || entry.trigger === 'onChange';
+      }
+      return entry.trigger === trigger;
+    }),
     byTarget: new Map(),
     bySource: new Map(),
   };
@@ -466,4 +589,18 @@ export function applyDerivationsForTrigger(
   }
 
   return applyDerivations(filteredCollection, context, changedFields);
+}
+
+/**
+ * Gets all debounced derivation entries from a collection.
+ *
+ * Use this to extract debounced entries for separate processing with debounce timers.
+ *
+ * @param collection - The collected derivation entries
+ * @returns Array of debounced derivation entries
+ *
+ * @public
+ */
+export function getDebouncedDerivationEntries(collection: DerivationCollection): DerivationEntry[] {
+  return collection.entries.filter((entry) => entry.trigger === 'debounced');
 }

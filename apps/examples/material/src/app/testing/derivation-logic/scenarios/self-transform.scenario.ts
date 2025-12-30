@@ -6,7 +6,7 @@ const config = {
     {
       key: 'email',
       type: 'input',
-      label: 'Email (auto-lowercase on blur)',
+      label: 'Email (auto-lowercase debounced)',
       value: '',
       col: 6,
       logic: [
@@ -14,14 +14,14 @@ const config = {
           type: 'derivation',
           targetField: 'email',
           expression: 'formValue.email.toLowerCase()',
-          trigger: 'onBlur',
+          trigger: 'debounced',
         },
       ],
     },
     {
       key: 'username',
       type: 'input',
-      label: 'Username (auto-trim on blur)',
+      label: 'Username (auto-trim debounced)',
       value: '',
       col: 6,
       logic: [
@@ -29,14 +29,14 @@ const config = {
           type: 'derivation',
           targetField: 'username',
           expression: 'formValue.username.trim()',
-          trigger: 'onBlur',
+          trigger: 'debounced',
         },
       ],
     },
     {
       key: 'phone',
       type: 'input',
-      label: 'Phone (format on blur)',
+      label: 'Phone (format debounced)',
       value: '',
       props: { placeholder: 'Enter 10 digits' },
       col: 6,
@@ -45,14 +45,14 @@ const config = {
           type: 'derivation',
           targetField: 'phone',
           functionName: 'formatPhoneNumber',
-          trigger: 'onBlur',
+          trigger: 'debounced',
         },
       ],
     },
     {
       key: 'creditCard',
       type: 'input',
-      label: 'Credit Card (mask on blur)',
+      label: 'Credit Card (mask debounced)',
       value: '',
       props: { placeholder: 'Enter 16 digits' },
       col: 6,
@@ -61,7 +61,7 @@ const config = {
           type: 'derivation',
           targetField: 'creditCard',
           functionName: 'maskCreditCard',
-          trigger: 'onBlur',
+          trigger: 'debounced',
         },
       ],
     },
@@ -80,8 +80,8 @@ const config = {
 
 export const selfTransformScenario: TestScenario = {
   testId: 'self-transform-test',
-  title: 'Self-Transform Derivation (onBlur)',
-  description: 'Tests self-transforming fields that modify their own value on blur (e.g., lowercase, trim, format)',
+  title: 'Self-Transform Derivation (Debounced)',
+  description: 'Tests self-transforming fields that modify their own value after typing stops (e.g., lowercase, trim, format)',
   config,
   customFnConfig: {
     derivations: {

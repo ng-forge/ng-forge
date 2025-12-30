@@ -148,6 +148,7 @@ function createShorthandEntry(fieldKey: string, expression: string): DerivationE
  * - Condition extraction and dependency analysis
  * - Relative path resolution for array fields
  * - Multiple value source types (static, expression, function)
+ * - Trigger and debounce configuration
  *
  * @internal
  */
@@ -155,6 +156,11 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
   const targetFieldKey = resolveTargetFieldKey(config.targetField, fieldKey, context);
   const dependsOn = extractDependencies(config);
   const condition = config.condition ?? true;
+  const trigger = config.trigger ?? 'onChange';
+
+  // Extract debounceMs from debounced configs
+  // The type system ensures debounceMs is only present when trigger is 'debounced'
+  const debounceMs = trigger === 'debounced' ? (config as { debounceMs?: number }).debounceMs : undefined;
 
   return {
     sourceFieldKey: fieldKey,
@@ -164,7 +170,8 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     value: config.value,
     expression: config.expression,
     functionName: config.functionName,
-    trigger: config.trigger ?? 'onChange',
+    trigger,
+    debounceMs,
     isShorthand: false,
     originalConfig: config,
   };

@@ -47,35 +47,11 @@ export type FormStateCondition =
 export type StateLogicType = 'hidden' | 'readonly' | 'disabled' | 'required';
 
 /**
- * Configuration for conditional field state logic.
+ * Base configuration for conditional field state logic.
  *
- * Defines how field behavior changes based on conditions.
- * Supports hiding, disabling, making readonly, or requiring fields
- * based on form state or field values.
- *
- * @example
- * ```typescript
- * // Hide email field when contact method is not email
- * {
- *   type: 'hidden',
- *   condition: {
- *     type: 'fieldValue',
- *     fieldPath: 'contactMethod',
- *     operator: 'notEquals',
- *     value: 'email'
- *   }
- * }
- *
- * // Disable button when form is submitting
- * {
- *   type: 'disabled',
- *   condition: 'formSubmitting'
- * }
- * ```
- *
- * @public
+ * @internal
  */
-export interface StateLogicConfig {
+interface BaseStateLogicConfig {
   /**
    * Logic type identifier for field state.
    *
@@ -115,67 +91,106 @@ export interface StateLogicConfig {
 }
 
 /**
- * Trigger timing for when derivation is evaluated.
+ * State logic that evaluates immediately on change (default).
  *
- * @public
+ * @internal
  */
-export type DerivationTrigger = 'onChange' | 'onBlur';
+interface ImmediateStateLogicConfig extends BaseStateLogicConfig {
+  /**
+   * Trigger for immediate evaluation.
+   * @default 'onChange'
+   */
+  trigger?: 'onChange';
+  /** Not allowed for onChange trigger */
+  debounceMs?: never;
+}
 
 /**
- * Configuration for value derivation logic.
+ * State logic that evaluates after a debounce period.
  *
- * Enables programmatic value derivation based on conditions.
- * When the condition is met, the target field's value is set
- * using a static value, expression, or custom function.
+ * @internal
+ */
+interface DebouncedStateLogicConfig extends BaseStateLogicConfig {
+  /**
+   * Trigger for debounced evaluation.
+   * Evaluates after the value has stabilized for the debounce duration.
+   */
+  trigger: 'debounced';
+  /**
+   * Debounce duration in milliseconds.
+   * @default 500
+   */
+  debounceMs?: number;
+}
+
+/**
+ * Configuration for conditional field state logic.
+ *
+ * Defines how field behavior changes based on conditions.
+ * Supports hiding, disabling, making readonly, or requiring fields
+ * based on form state or field values.
  *
  * @example
  * ```typescript
- * // Set phone prefix based on country selection
+ * // Hide email field when contact method is not email
  * {
- *   type: 'derivation',
- *   targetField: 'phonePrefix',
- *   value: '+1',
+ *   type: 'hidden',
  *   condition: {
  *     type: 'fieldValue',
- *     fieldPath: 'country',
- *     operator: 'equals',
- *     value: 'USA'
+ *     fieldPath: 'contactMethod',
+ *     operator: 'notEquals',
+ *     value: 'email'
  *   }
  * }
  *
- * // Compute total from quantity and price
+ * // Disable button when form is submitting
  * {
- *   type: 'derivation',
- *   targetField: 'total',
- *   expression: 'formValue.quantity * formValue.unitPrice'
+ *   type: 'disabled',
+ *   condition: 'formSubmitting'
  * }
  *
- * // Use custom function for complex logic
+ * // Debounced visibility (avoids flicker during rapid typing)
  * {
- *   type: 'derivation',
- *   targetField: 'currency',
- *   functionName: 'getCurrencyForCountry'
- * }
- *
- * // Self-transform (e.g., lowercase email on blur)
- * {
- *   type: 'derivation',
- *   targetField: 'email',
- *   expression: 'formValue.email.toLowerCase()',
- *   trigger: 'onBlur'
- * }
- *
- * // Relative path for array items
- * {
- *   type: 'derivation',
- *   targetField: '$.lineTotal',  // Same array index as source field
- *   expression: 'formValue.quantity * formValue.unitPrice'
+ *   type: 'hidden',
+ *   trigger: 'debounced',
+ *   debounceMs: 300,
+ *   condition: {
+ *     type: 'fieldValue',
+ *     fieldPath: 'search',
+ *     operator: 'isEmpty'
+ *   }
  * }
  * ```
  *
  * @public
  */
-export interface DerivationLogicConfig {
+export type StateLogicConfig = ImmediateStateLogicConfig | DebouncedStateLogicConfig;
+
+/**
+ * Trigger timing for when logic is evaluated.
+ *
+ * - `onChange`: Evaluate immediately when any dependency changes (default)
+ * - `debounced`: Evaluate after the value has stabilized for a duration
+ *
+ * Use `debounced` for self-transforms (lowercase, trim) or to avoid
+ * UI flicker during rapid typing.
+ *
+ * @public
+ */
+export type LogicTrigger = 'onChange' | 'debounced';
+
+/**
+ * @deprecated Use `LogicTrigger` instead. Will be removed in a future version.
+ * @public
+ */
+export type DerivationTrigger = LogicTrigger;
+
+/**
+ * Base configuration for value derivation logic.
+ *
+ * @internal
+ */
+interface BaseDerivationLogicConfig {
   /**
    * Logic type identifier for value derivation.
    */
@@ -271,19 +286,101 @@ export interface DerivationLogicConfig {
    * ```
    */
   functionName?: string;
+}
 
+/**
+ * Derivation logic that evaluates immediately on change (default).
+ *
+ * @internal
+ */
+interface OnChangeDerivationLogicConfig extends BaseDerivationLogicConfig {
   /**
-   * When to evaluate the derivation.
-   *
-   * - `onChange`: Evaluate when any dependency changes (default)
-   * - `onBlur`: Evaluate when the source field loses focus
-   *
-   * Use `onBlur` for self-transforms to avoid mid-typing issues.
-   *
+   * Trigger for immediate evaluation.
    * @default 'onChange'
    */
-  trigger?: DerivationTrigger;
+  trigger?: 'onChange';
+  /** Not allowed for onChange trigger */
+  debounceMs?: never;
 }
+
+/**
+ * Derivation logic that evaluates after a debounce period.
+ *
+ * Use this for self-transforms (lowercase, trim, format) to avoid
+ * interrupting the user while they're actively typing.
+ *
+ * @internal
+ */
+interface DebouncedDerivationLogicConfig extends BaseDerivationLogicConfig {
+  /**
+   * Trigger for debounced evaluation.
+   * Evaluates after the value has stabilized for the debounce duration.
+   */
+  trigger: 'debounced';
+  /**
+   * Debounce duration in milliseconds.
+   * @default 500
+   */
+  debounceMs?: number;
+}
+
+/**
+ * Configuration for value derivation logic.
+ *
+ * Enables programmatic value derivation based on conditions.
+ * When the condition is met, the target field's value is set
+ * using a static value, expression, or custom function.
+ *
+ * @example
+ * ```typescript
+ * // Set phone prefix based on country selection
+ * {
+ *   type: 'derivation',
+ *   targetField: 'phonePrefix',
+ *   value: '+1',
+ *   condition: {
+ *     type: 'fieldValue',
+ *     fieldPath: 'country',
+ *     operator: 'equals',
+ *     value: 'USA'
+ *   }
+ * }
+ *
+ * // Compute total from quantity and price
+ * {
+ *   type: 'derivation',
+ *   targetField: 'total',
+ *   expression: 'formValue.quantity * formValue.unitPrice'
+ * }
+ *
+ * // Use custom function for complex logic
+ * {
+ *   type: 'derivation',
+ *   targetField: 'currency',
+ *   functionName: 'getCurrencyForCountry'
+ * }
+ *
+ * // Self-transform with debounced trigger
+ * // (applies after user stops typing)
+ * {
+ *   type: 'derivation',
+ *   targetField: 'email',
+ *   expression: 'formValue.email.toLowerCase()',
+ *   trigger: 'debounced',
+ *   debounceMs: 500
+ * }
+ *
+ * // Relative path for array items
+ * {
+ *   type: 'derivation',
+ *   targetField: '$.lineTotal',  // Same array index as source field
+ *   expression: 'formValue.quantity * formValue.unitPrice'
+ * }
+ * ```
+ *
+ * @public
+ */
+export type DerivationLogicConfig = OnChangeDerivationLogicConfig | DebouncedDerivationLogicConfig;
 
 /**
  * Union type for all logic configurations.
