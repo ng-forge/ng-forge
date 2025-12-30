@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeDatepickerComponent, PrimeDatepickerProps } from './prime-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { DatePicker } from 'primeng/datepicker';
@@ -62,6 +62,8 @@ import { DatePicker } from 'primeng/datepicker';
   ],
 })
 export default class PrimeDatepickerFieldComponent implements PrimeDatepickerComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<Date | null>>();
   readonly key = input.required<string>();
 
@@ -75,8 +77,13 @@ export default class PrimeDatepickerFieldComponent implements PrimeDatepickerCom
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<PrimeDatepickerProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

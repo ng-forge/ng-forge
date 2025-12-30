@@ -19,6 +19,7 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
     name: IonicField.Input,
     loadComponent: () => import('../fields/input/ionic-input.component'),
     mapper: valueFieldMapper,
+    propsToMeta: ['type'],
   },
   {
     name: IonicField.Select,
@@ -70,6 +71,7 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
     name: IonicField.Textarea,
     loadComponent: () => import('../fields/textarea/ionic-textarea.component'),
     mapper: valueFieldMapper,
+    propsToMeta: ['rows'],
   },
   {
     name: IonicField.Radio,

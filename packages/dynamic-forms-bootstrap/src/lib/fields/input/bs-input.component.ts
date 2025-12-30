@@ -1,7 +1,7 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsInputComponent, BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
@@ -20,7 +20,6 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
       <div class="form-floating mb-3">
         <input
           #inputRef
-          [type]="p?.type ?? 'text'"
           [field]="f"
           [id]="key()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -55,7 +54,6 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
         }
         <input
           #inputRef
-          [type]="p?.type ?? 'text'"
           [field]="f"
           [id]="key()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -103,9 +101,19 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 })
 export default class BsInputFieldComponent implements BsInputComponent {
   private bootstrapConfig = inject(BOOTSTRAP_CONFIG, { optional: true });
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
+
+  readonly label = input<DynamicText>();
+  readonly placeholder = input<DynamicText>();
+  readonly className = input<string>('');
+  readonly tabIndex = input<number>();
+  readonly props = input<BsInputProps>();
+  readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<InputMeta>();
 
   /**
    * Reference to the native input element.
@@ -141,13 +149,9 @@ export default class BsInputFieldComponent implements BsInputComponent {
     },
   });
 
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
-  readonly props = input<BsInputProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   readonly effectiveSize = computed(() => this.props()?.size ?? this.bootstrapConfig?.size);
   readonly effectiveFloatingLabel = computed(() => this.props()?.floatingLabel ?? this.bootstrapConfig?.floatingLabel ?? false);

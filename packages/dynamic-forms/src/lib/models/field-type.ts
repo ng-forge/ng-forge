@@ -58,6 +58,26 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   mapper?: MapperFn<T>;
   /** How this field type handles form values and data collection (defaults to 'include') */
   valueHandling?: ValueHandlingMode;
+  /**
+   * List of prop keys to forward to the meta object.
+   *
+   * Some props (like `type` for inputs, `rows`/`cols` for textareas) are actually
+   * native HTML attributes. Specifying them here causes them to be merged into
+   * the meta object before being passed to the component, ensuring they're applied
+   * via the meta tracking mechanism.
+   *
+   * Note: Meta values always take precedence over forwarded props.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   name: 'input',
+   *   propsToMeta: ['type'],
+   *   // ...
+   * }
+   * ```
+   */
+  propsToMeta?: string[];
 }
 
 /**

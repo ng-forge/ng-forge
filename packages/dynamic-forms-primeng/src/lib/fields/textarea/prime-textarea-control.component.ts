@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
+import { setupMetaTracking, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { TextareaModule } from 'primeng/textarea';
 import { FormsModule } from '@angular/forms';
 
@@ -15,8 +16,6 @@ import { FormsModule } from '@angular/forms';
       pInputTextarea
       [(ngModel)]="value"
       [placeholder]="placeholder()"
-      [rows]="rows()"
-      [cols]="cols()"
       [attr.maxlength]="maxlength()"
       [attr.tabindex]="tabIndex()"
       [autoResize]="autoResize()"
@@ -32,6 +31,8 @@ import { FormsModule } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PrimeTextareaControlComponent implements FormValueControl<string> {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   // ─────────────────────────────────────────────────────────────────────────────
   // FormValueControl implementation
   // ─────────────────────────────────────────────────────────────────────────────
@@ -65,9 +66,14 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   readonly tabIndex = input<number | undefined>(undefined);
   readonly autoResize = input<boolean>(false);
   readonly styleClass = input<string>('');
+  readonly meta = input<TextareaMeta>();
 
   /** aria-describedby IDs passed from parent */
   readonly ariaDescribedBy = input<string | null>(null);
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed ARIA attributes

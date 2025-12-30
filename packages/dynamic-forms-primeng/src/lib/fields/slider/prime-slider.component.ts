@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeSliderComponent, PrimeSliderProps } from './prime-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { Slider } from 'primeng/slider';
@@ -57,6 +57,8 @@ import { Slider } from 'primeng/slider';
   ],
 })
 export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<number>>();
   readonly key = input.required<string>();
 
@@ -66,8 +68,13 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
   readonly tabIndex = input<number>();
 
   readonly props = input<PrimeSliderProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

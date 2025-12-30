@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeTextareaControlComponent } from './prime-textarea-control.component';
@@ -22,6 +22,7 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
       <df-prime-textarea-control
         [id]="inputId()"
         [field]="f"
+        [meta]="meta()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"
         [cols]="props()?.cols"
@@ -56,6 +57,8 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
   ],
 })
 export default class PrimeTextareaFieldComponent implements PrimeTextareaComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -64,8 +67,13 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeTextareaProps>();
+  readonly meta = input<TextareaMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

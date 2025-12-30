@@ -189,6 +189,7 @@ The component must implement these inputs:
 - `className?: string` - CSS classes
 - `tabIndex?: number` - Tab order
 - `props?: TProps` - Custom field-specific props
+- `meta?: FieldMeta` - Native HTML attributes (data-_, aria-_, autocomplete, etc.)
 
 ### CheckedFieldComponent
 
@@ -325,6 +326,101 @@ This enables:
 - Type checking in form configurations
 - Compile-time validation of field definitions
 
+## Handling Meta Attributes
+
+`meta` attributes are native HTML attributes that should be applied to the underlying form element. They differ from `props` (which control UI library behavior). See [Props vs Meta](../../core/field-types#props-vs-meta) for detailed usage guidance.
+
+### Props vs Meta Summary
+
+| Attribute Type     | Example                 | Use `props` | Use `meta` |
+| ------------------ | ----------------------- | ----------- | ---------- |
+| UI appearance      | `appearance: 'outline'` | ✅          | ❌         |
+| Component behavior | `multiple: true`        | ✅          | ❌         |
+| Browser autofill   | `autocomplete: 'email'` | ❌          | ✅         |
+| Testing IDs        | `data-testid: 'email'`  | ❌          | ✅         |
+| Accessibility      | `aria-describedby`      | ❌          | ✅         |
+
+### Using setupMetaTracking
+
+ng-forge provides the `setupMetaTracking` utility to apply meta attributes to native elements. This uses Angular's `afterRenderEffect` for efficient DOM updates.
+
+```typescript
+import { Component, ElementRef, inject, input } from '@angular/core';
+import { FieldMeta, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
+
+@Component({
+  template: ` <input [field]="f" /> `,
+})
+export default class CustomInputComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+  readonly meta = input<FieldMeta>();
+
+  constructor() {
+    // Apply meta attributes to the native input element
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
+}
+```
+
+**Parameters:**
+
+- `elementRef`: Reference to the host element
+- `meta`: Signal containing the meta attributes
+- `options.selector`: CSS selector to find the target element(s) within the host
+
+### Components with Dynamic Options
+
+For components with dynamic options (radio groups, multi-checkbox), pass a `dependents` array to ensure meta updates when options change:
+
+```typescript
+@Component({
+  template: `
+    @for (option of options(); track option.value) {
+      <label>
+        <input type="radio" [value]="option.value" />
+        {% raw %}{{ option.label }}{% endraw %}
+      </label>
+    }
+  `,
+})
+export default class CustomRadioComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+  readonly meta = input<FieldMeta>();
+  readonly options = input<Option[]>([]);
+
+  constructor() {
+    // Re-apply meta when options change (new inputs are rendered)
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'input[type="radio"]',
+      dependents: [this.options],
+    });
+  }
+}
+```
+
+### Shadow DOM Considerations
+
+For components using Shadow DOM (like Ionic), you cannot access the internal input. Apply meta to the host element by omitting the `selector`:
+
+```typescript
+@Component({
+  template: `
+    <ion-checkbox [checked]="value()">
+      {% raw %}{{ label() }}{% endraw %}
+    </ion-checkbox>
+  `,
+})
+export default class IonicCheckboxComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+  readonly meta = input<FieldMeta>();
+
+  constructor() {
+    // No selector: applies meta to the host element itself
+    setupMetaTracking(this.elementRef, this.meta);
+  }
+}
+```
+
 ## Best Practices
 
 **Use proper component interfaces:**
@@ -332,6 +428,13 @@ This enables:
 - Implement `ValueFieldComponent<T>` for value fields
 - Implement `CheckedFieldComponent<T>` for checkboxes/toggles
 - Define clear prop interfaces
+
+**Handle meta attributes:**
+
+- All components must accept a `meta` input
+- Use `setupMetaTracking` with a selector for native elements
+- Pass `dependents` for components with dynamic options
+- Omit selector for Shadow DOM components (applies to host)
 
 **Leverage [field] binding:**
 

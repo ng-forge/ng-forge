@@ -36,6 +36,8 @@ import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
  *
  * Nesting constraints: Arrays can contain rows, leaf fields, or groups (for object arrays),
  * but NOT pages or other arrays. Runtime validation enforces these rules.
+ *
+ * Note: Arrays are container fields and do not support `meta` since they have no native form element.
  */
 export interface ArrayField<TFields extends readonly ArrayAllowedChildren[] = readonly ArrayAllowedChildren[]> extends FieldDef<never> {
   type: 'array';
@@ -50,6 +52,9 @@ export interface ArrayField<TFields extends readonly ArrayAllowedChildren[] = re
 
   /** Array fields do not have a label property **/
   readonly label?: never;
+
+  /** Arrays do not support meta - they have no native form element **/
+  readonly meta?: never;
 }
 
 /**

@@ -1,6 +1,7 @@
 import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
 import { DynamicText } from '../../models/types/dynamic-text';
+import { FieldMeta } from './field-meta';
 
 /**
  * Base interface for all dynamic form field definitions.
@@ -41,10 +42,11 @@ import { DynamicText } from '../../models/types/dynamic-text';
  * ```
  *
  * @typeParam TProps - Field-specific properties interface
+ * @typeParam TMeta - Native HTML attributes interface (extends FieldMeta)
  *
  * @public
  */
-export interface FieldDef<TProps> {
+export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
   /**
    * Unique field identifier used for form binding and value tracking.
    *
@@ -124,6 +126,33 @@ export interface FieldDef<TProps> {
    * ```
    */
   props?: TProps;
+
+  /**
+   * Native HTML attributes to pass through to the underlying element.
+   *
+   * Contains attributes that are applied directly to the native input/element.
+   * Useful for accessibility, autocomplete hints, and custom attributes.
+   * The shape is defined by the TMeta generic parameter, which extends FieldMeta.
+   *
+   * @example
+   * ```typescript
+   * // Input field meta
+   * meta: {
+   *   autocomplete: 'email',
+   *   inputmode: 'email',
+   *   'aria-describedby': 'email-help',
+   *   'data-testid': 'email-input'
+   * }
+   *
+   * // Textarea meta
+   * meta: {
+   *   wrap: 'soft',
+   *   spellcheck: true,
+   *   'aria-label': 'Description field'
+   * }
+   * ```
+   */
+  meta?: TMeta;
 
   /**
    * Additional CSS classes for custom styling.
@@ -232,4 +261,4 @@ type IncludedKeys = 'label' | 'className' | 'hidden' | 'tabIndex';
  *
  * @public
  */
-export type FieldComponent<T extends FieldDef<Record<string, unknown> | unknown>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;
+export type FieldComponent<T extends FieldDef<unknown, FieldMeta>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;

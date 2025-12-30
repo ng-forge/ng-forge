@@ -1,4 +1,5 @@
 import { FieldDef } from './field-def';
+import { FieldMeta } from './field-meta';
 import { FieldWithValidation } from './field-with-validation';
 import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
@@ -10,7 +11,7 @@ import { DynamicText } from '../../models/types/dynamic-text';
  */
 export type ValueType = string | number | boolean | Date | object | unknown[];
 
-export interface BaseValueField<TProps, TValue> extends FieldDef<TProps>, FieldWithValidation {
+export interface BaseValueField<TProps, TValue, TMeta extends FieldMeta = FieldMeta> extends FieldDef<TProps, TMeta>, FieldWithValidation {
   value?: TValue;
 
   /**
@@ -22,7 +23,9 @@ export interface BaseValueField<TProps, TValue> extends FieldDef<TProps>, FieldW
   required?: boolean;
 }
 
-export function isValueField<TProps>(field: FieldDef<TProps>): field is BaseValueField<TProps, ValueType> {
+export function isValueField<TProps, TMeta extends FieldMeta = FieldMeta>(
+  field: FieldDef<TProps, TMeta>,
+): field is BaseValueField<TProps, ValueType, TMeta> {
   return 'value' in field;
 }
 
@@ -49,6 +52,7 @@ type ExcludedKeys =
   | 'validators'
   | 'logic'
   | 'schemas';
+// Note: 'meta' is NOT excluded - components must handle meta attributes
 
 export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown> | unknown, unknown>> = Prettify<
   WithInputSignals<Omit<T, ExcludedKeys>>

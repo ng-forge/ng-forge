@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonItem, IonNote, IonRadio, IonRadioGroup } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicRadioComponent, IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -67,6 +67,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<T> {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 
@@ -77,6 +79,7 @@ export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<
   readonly tabIndex = input<number>();
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<IonicRadioProps<T>>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -86,6 +89,14 @@ export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
+
+  constructor() {
+    // Shadow DOM - apply meta to ion-radio elements, re-apply when options change
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'ion-radio',
+      dependents: [this.options],
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility

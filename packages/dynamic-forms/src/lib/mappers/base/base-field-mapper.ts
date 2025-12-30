@@ -12,7 +12,7 @@ import { getGridClassString } from '../../utils/grid-classes/grid-classes';
  * @returns Record of input names to values
  */
 export function buildBaseInputs(fieldDef: FieldDef<unknown>): Record<string, unknown> {
-  const { key, label, className, tabIndex, props } = fieldDef;
+  const { key, label, className, tabIndex, props, meta } = fieldDef;
   const inputs: Record<string, unknown> = {};
 
   // Always include key - required by components for accessibility and identification
@@ -44,6 +44,10 @@ export function buildBaseInputs(fieldDef: FieldDef<unknown>): Record<string, unk
 
   if (props !== undefined) {
     inputs['props'] = props;
+  }
+
+  if (meta !== undefined) {
+    inputs['meta'] = meta;
   }
 
   return inputs;

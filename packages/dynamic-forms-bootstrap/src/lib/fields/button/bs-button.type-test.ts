@@ -64,7 +64,19 @@ describe('BsButtonProps - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('BsSubmitButtonField - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'logic';
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'logic';
 
   type ActualKeys = keyof BsSubmitButtonField;
 
@@ -128,7 +140,19 @@ describe('BsSubmitButtonField - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('BsNextButtonField - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'logic';
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'logic';
 
   type ActualKeys = keyof BsNextButtonField;
 
@@ -174,7 +198,7 @@ describe('BsNextButtonField - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('BsPreviousButtonField - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col';
+  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'meta';
 
   type ActualKeys = keyof BsPreviousButtonField;
 
@@ -227,6 +251,7 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'arrayKey';
 
   type ActualKeys = keyof AddArrayItemButtonField;
@@ -284,6 +309,7 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'arrayKey';
 
   type ActualKeys = keyof RemoveArrayItemButtonField;

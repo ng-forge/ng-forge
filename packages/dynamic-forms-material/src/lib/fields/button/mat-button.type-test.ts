@@ -60,6 +60,7 @@ describe('MatSubmitButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // Submit-specific
     | 'logic';
 
@@ -125,7 +126,19 @@ describe('MatSubmitButtonField - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('MatNextButtonField - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'logic';
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'logic';
 
   type ActualKeys = keyof MatNextButtonField;
 
@@ -171,7 +184,7 @@ describe('MatNextButtonField - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('MatPreviousButtonField - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col';
+  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'meta';
 
   type ActualKeys = keyof MatPreviousButtonField;
 
@@ -224,6 +237,7 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'arrayKey';
 
   type ActualKeys = keyof AddArrayItemButtonField;
@@ -281,6 +295,7 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'arrayKey';
 
   type ActualKeys = keyof RemoveArrayItemButtonField;

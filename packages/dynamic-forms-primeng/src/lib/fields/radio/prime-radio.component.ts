@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeRadioGroupComponent } from './prime-radio-group.component';
@@ -17,7 +17,13 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
       <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
-    <df-prime-radio-group [field]="$any(f)" [options]="options()" [properties]="props()" [attr.aria-describedby]="ariaDescribedBy" />
+    <df-prime-radio-group
+      [field]="$any(f)"
+      [options]="options()"
+      [properties]="props()"
+      [meta]="meta()"
+      [attr.aria-describedby]="ariaDescribedBy"
+    />
 
     @if (props()?.hint; as hint) {
       <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
@@ -51,6 +57,8 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<T> {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
 
@@ -62,8 +70,16 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<PrimeRadioProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'input[type="radio"]',
+      dependents: [this.options],
+    });
+  }
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

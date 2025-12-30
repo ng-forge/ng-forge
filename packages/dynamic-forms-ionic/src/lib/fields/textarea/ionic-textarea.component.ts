@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { IonicTextareaComponent, IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -55,6 +55,8 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class IonicTextareaFieldComponent implements IonicTextareaComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -63,6 +65,7 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<IonicTextareaProps>();
+  readonly meta = input<TextareaMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -70,6 +73,13 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  constructor() {
+    // Shadow DOM - apply meta to ion-textarea element
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'ion-textarea',
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility

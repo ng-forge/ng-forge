@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
@@ -58,15 +58,10 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 })
 export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
-
-  /**
-   * Host element reference for DOM queries.
-   * Used to find the internal checkbox input for accessibility workarounds.
-   */
-  private readonly hostEl = inject(ElementRef<HTMLElement>);
 
   // Properties
   readonly label = input<DynamicText>();
@@ -74,6 +69,7 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<MatCheckboxProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -83,6 +79,13 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  constructor() {
+    // Apply meta attributes to the internal checkbox input
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'input[type="checkbox"]',
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility
@@ -130,7 +133,7 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
    * @see https://github.com/angular/components/issues/XXXXX (TODO: file issue)
    */
   private readonly syncAriaRequiredToDom = explicitEffect([this.ariaRequired], ([isRequired]) => {
-    const inputEl = this.hostEl.nativeElement.querySelector('input[type="checkbox"]');
+    const inputEl = this.elementRef.nativeElement.querySelector('input[type="checkbox"]');
     if (inputEl) {
       if (isRequired) {
         inputEl.setAttribute('aria-required', 'true');

@@ -87,7 +87,19 @@ describe('TextProps - Exhaustive Whitelist', () => {
 describe('TextField - Exhaustive Whitelist', () => {
   // TextField extends FieldDef<TextProps> and adds: logic
   // From FieldDef: key, type, label, props, className, disabled, readonly, hidden, tabIndex, col
-  type ExpectedKeys = 'key' | 'type' | 'label' | 'props' | 'className' | 'disabled' | 'readonly' | 'hidden' | 'tabIndex' | 'col' | 'logic';
+  type ExpectedKeys =
+    | 'key'
+    | 'type'
+    | 'label'
+    | 'props'
+    | 'className'
+    | 'disabled'
+    | 'readonly'
+    | 'hidden'
+    | 'tabIndex'
+    | 'col'
+    | 'meta'
+    | 'logic';
 
   type ActualKeys = keyof TextField;
 

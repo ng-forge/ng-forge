@@ -1,8 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonItem, IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, isEqual, shouldShowErrors, ValueInArrayPipe } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
+import {
+  createResolvedErrorsSignal,
+  isEqual,
+  setupMetaTracking,
+  shouldShowErrors,
+  ValueInArrayPipe,
+} from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { IonicMultiCheckboxComponent, IonicMultiCheckboxProps } from './ionic-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
@@ -74,6 +80,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicMultiCheckboxFieldComponent<T extends ValueType> implements IonicMultiCheckboxComponent<T> {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<T[]>>();
   readonly key = input.required<string>();
 
@@ -85,6 +93,7 @@ export default class IonicMultiCheckboxFieldComponent<T extends ValueType> imple
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<IonicMultiCheckboxProps<T>>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -120,6 +129,12 @@ export default class IonicMultiCheckboxFieldComponent<T extends ValueType> imple
   );
 
   constructor() {
+    // Shadow DOM - apply meta to ion-checkbox elements, re-apply when options change
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'ion-checkbox',
+      dependents: [this.options],
+    });
+
     explicitEffect([this.valueViewModel], ([selectedOptions]) => {
       const selectedValues = selectedOptions.map((option) => option.value);
 
