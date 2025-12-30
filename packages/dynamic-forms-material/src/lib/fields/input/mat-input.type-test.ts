@@ -88,6 +88,7 @@ describe('MatInputField (String) - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     // From BaseValueField
     | 'value'
@@ -231,6 +232,7 @@ describe('MatInputField (Number) - Exhaustive Whitelist', () => {
     | 'validators'
     | 'validationMessages'
     | 'logic'
+    | 'derivation'
     | 'schemas'
     | 'value'
     | 'placeholder';

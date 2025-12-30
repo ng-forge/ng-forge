@@ -69,9 +69,74 @@ export class UserFormComponent {
 - **UI Agnostic** - Bring your own UI or use official integrations
 - **Validation** - Shorthand validators (`required`, `email`, `minLength`) and custom validators
 - **Conditional Logic** - Dynamic visibility and validation based on form state
+- **Value Derivation** - Automatic value computation with expression, function, or static values
 - **Container Fields** - Groups, rows, and pages for complex layouts
 - **i18n Ready** - Observable/Signal support for labels and messages
 - **Event System** - Custom events for buttons and form actions
+
+## Logic Triggers
+
+Both state logic (hidden, disabled, readonly, required) and value derivations support configurable triggers:
+
+| Trigger     | Description                                         | Use Case                                |
+| ----------- | --------------------------------------------------- | --------------------------------------- |
+| `onChange`  | Evaluates immediately on any value change (default) | Computed totals, conditional visibility |
+| `debounced` | Evaluates after value stabilizes (default 500ms)    | Self-transforms, format masking         |
+
+### Debounced Derivations
+
+Use `trigger: 'debounced'` for self-transforming fields to avoid interrupting the user while typing:
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  logic: [
+    {
+      type: 'derivation',
+      targetField: 'email',
+      expression: 'formValue.email.toLowerCase()',
+      trigger: 'debounced',
+      debounceMs: 500, // optional, defaults to 500
+    },
+  ],
+}
+```
+
+### Array Field Derivations
+
+Derivations support relative paths with `$` for array item siblings:
+
+```typescript
+{
+  key: 'lineItems',
+  type: 'array',
+  fields: [
+    {
+      key: 'itemRow',
+      type: 'row',
+      fields: [
+        { key: 'quantity', type: 'input', label: 'Qty' },
+        { key: 'unitPrice', type: 'input', label: 'Price' },
+        {
+          key: 'lineTotal',
+          type: 'input',
+          label: 'Total',
+          readonly: true,
+          logic: [
+            {
+              type: 'derivation',
+              targetField: '$.lineTotal', // Relative to current array item
+              expression: 'formValue.quantity * formValue.unitPrice',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+}
+```
 
 ## UI Integrations
 

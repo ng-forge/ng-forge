@@ -1,6 +1,6 @@
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import { LogicConfig } from '../../models/logic/logic-config';
+import { isStateLogicConfig, LogicConfig, StateLogicConfig } from '../../models/logic/logic-config';
 import { ValidatorConfig, CustomValidatorConfig, BuiltInValidatorConfig } from '../../models/validation/validator-config';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
@@ -10,7 +10,7 @@ import {
   isCrossFieldValidator,
   isCrossFieldBuiltInValidator,
   hasCrossFieldWhenCondition,
-  isCrossFieldLogic,
+  isCrossFieldStateLogic,
   isCrossFieldSchema,
   extractExpressionDependencies,
   extractStringDependencies,
@@ -130,9 +130,20 @@ function tryCreateValidatorEntry(fieldKey: string, config: ValidatorConfig): Cro
   return null;
 }
 
-/** Returns a logic entry if cross-field, null otherwise. */
+/**
+ * Returns a logic entry if cross-field state logic, null otherwise.
+ *
+ * Note: Derivation logic is handled separately by the derivation system
+ * and is not collected here.
+ */
 function tryCreateLogicEntry(fieldKey: string, config: LogicConfig): CrossFieldLogicEntry | null {
-  if (!isCrossFieldLogic(config)) {
+  // Only process state logic (hidden, readonly, disabled, required)
+  // Derivation logic is handled by the derivation collector
+  if (!isStateLogicConfig(config)) {
+    return null;
+  }
+
+  if (!isCrossFieldStateLogic(config)) {
     return null;
   }
 
@@ -141,7 +152,7 @@ function tryCreateLogicEntry(fieldKey: string, config: LogicConfig): CrossFieldL
     sourceFieldKey: fieldKey,
     logicType: config.type as LogicType,
     condition,
-    config,
+    config: config as StateLogicConfig,
     dependsOn: extractExpressionDependencies(condition),
     category: 'logic',
   };

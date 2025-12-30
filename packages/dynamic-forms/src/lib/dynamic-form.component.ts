@@ -45,6 +45,14 @@ import { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryS
 import { detectFormMode, FormModeDetectionResult } from './models/types/form-mode';
 import { collectCrossFieldEntries } from './core/cross-field/cross-field-collector';
 import { FormModeValidator } from './utils/form-validation/form-mode-validator';
+import {
+  collectDerivations,
+  validateNoCycles,
+  applyDerivationsForTrigger,
+  DerivationCollection,
+  getDebouncedDerivationEntries,
+} from './core/derivation';
+import { createDebouncedEffect, DEFAULT_DEBOUNCE_MS } from './utils/debounce/debounce';
 import { PageOrchestratorComponent } from './core/page-orchestrator';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
@@ -299,6 +307,32 @@ export class DynamicForm<
     });
   });
 
+  /**
+   * Collected derivations from field definitions.
+   *
+   * Validates that no cycles exist during collection.
+   * Returns null if no derivations are defined.
+   */
+  private readonly derivationCollection = computed<DerivationCollection | null>(() => {
+    const setup = this.formSetup();
+
+    if (!setup.schemaFields || setup.schemaFields.length === 0) {
+      return null;
+    }
+
+    const collection = collectDerivations(setup.schemaFields as FieldDef<unknown>[]);
+
+    // Skip validation if no derivations
+    if (collection.entries.length === 0) {
+      return null;
+    }
+
+    // Validate no cycles exist - this will throw if cycles are detected
+    validateNoCycles(collection);
+
+    return collection;
+  });
+
   private readonly componentId = 'dynamic-form';
 
   private readonly totalComponentsCount = computed(() => {
@@ -520,6 +554,114 @@ export class DynamicForm<
         );
       }
     });
+
+    // Process derivations when form values change
+    this.setupDerivationEffect();
+  }
+
+  /**
+   * Sets up the effect that processes derivations when form values change.
+   *
+   * Uses a flag to prevent re-triggering during derivation application.
+   * Handles both immediate (onChange) and debounced derivations.
+   *
+   * @internal
+   */
+  private setupDerivationEffect(): void {
+    // Flag to prevent re-entry during derivation processing
+    let isProcessingDerivations = false;
+
+    // Set up immediate (onChange) derivations effect
+    explicitEffect([this.formValue, this.derivationCollection, this.form], ([, collection, formAccessor]) => {
+      // Skip if no derivations or already processing
+      if (!collection || isProcessingDerivations) {
+        return;
+      }
+
+      // Prevent re-entry
+      isProcessingDerivations = true;
+
+      try {
+        // Create the applicator context
+        // Pass formAccessor directly (not called) so child fields can be accessed via bracket notation
+        const applicatorContext = {
+          formValue: this.formValue as Signal<Record<string, unknown>>,
+          rootForm: formAccessor as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          derivationFunctions: this.functionRegistry.getDerivationFunctions(),
+          customFunctions: this.functionRegistry.getCustomFunctions(),
+          logger: this.logger,
+        };
+
+        // Apply derivations with onChange trigger (use untracked to avoid dependency on result)
+        untracked(() => {
+          const result = applyDerivationsForTrigger(collection, 'onChange', applicatorContext);
+
+          if (result.maxIterationsReached) {
+            this.logger.warn(
+              `Derivation processing reached max iterations. ` +
+                `This may indicate a loop in derivation logic that wasn't caught at build time. ` +
+                `Applied: ${result.appliedCount}, Skipped: ${result.skippedCount}, Errors: ${result.errorCount}`,
+            );
+          }
+        });
+      } finally {
+        // Allow future processing
+        isProcessingDerivations = false;
+      }
+    });
+
+    // Set up debounced derivations
+    this.setupDebouncedDerivations();
+  }
+
+  /**
+   * Sets up debounced derivation processing.
+   *
+   * Groups debounced derivations by their debounce duration and creates
+   * separate debounced signals for each group.
+   *
+   * @internal
+   */
+  private setupDebouncedDerivations(): void {
+    // Create a debounced effect that processes debounced derivations
+    // The callback will be invoked after the debounce period
+    createDebouncedEffect(
+      this.formValue as Signal<Record<string, unknown>>,
+      () => {
+        const collection = untracked(() => this.derivationCollection());
+        const formAccessor = untracked(() => this.form());
+
+        if (!collection || !formAccessor) {
+          return;
+        }
+
+        // Check if there are any debounced entries
+        const debouncedEntries = getDebouncedDerivationEntries(collection);
+        if (debouncedEntries.length === 0) {
+          return;
+        }
+
+        // Create applicator context
+        const applicatorContext = {
+          formValue: this.formValue as Signal<Record<string, unknown>>,
+          rootForm: formAccessor as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+          derivationFunctions: this.functionRegistry.getDerivationFunctions(),
+          customFunctions: this.functionRegistry.getCustomFunctions(),
+          logger: this.logger,
+        };
+
+        // Apply debounced derivations
+        const result = applyDerivationsForTrigger(collection, 'debounced', applicatorContext);
+
+        if (result.maxIterationsReached) {
+          this.logger.warn(
+            `Debounced derivation processing reached max iterations. ` +
+              `Applied: ${result.appliedCount}, Skipped: ${result.skippedCount}, Errors: ${result.errorCount}`,
+          );
+        }
+      },
+      { ms: DEFAULT_DEBOUNCE_MS, injector: this.injector },
+    );
   }
 
   private setupEventHandlers(): void {
@@ -557,6 +699,11 @@ export class DynamicForm<
       Object.entries(customFnConfig.customFunctions).forEach(([name, fn]) => {
         this.functionRegistry.registerCustomFunction(name, fn);
       });
+    }
+
+    // Register derivation functions (stored separately for use by derivation applicator)
+    if (customFnConfig.derivations) {
+      this.functionRegistry.setDerivationFunctions(customFnConfig.derivations);
     }
 
     this.functionRegistry.setValidators(customFnConfig.validators);

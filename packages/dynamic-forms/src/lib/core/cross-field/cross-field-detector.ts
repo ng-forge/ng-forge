@@ -1,5 +1,11 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { FormStateCondition, isFormStateCondition, LogicConfig } from '../../models/logic/logic-config';
+import {
+  FormStateCondition,
+  isFormStateCondition,
+  isStateLogicConfig,
+  LogicConfig,
+  StateLogicConfig,
+} from '../../models/logic/logic-config';
 import { CustomValidatorConfig, ValidatorConfig } from '../../models/validation/validator-config';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 import { CustomFunctionScope } from '../expressions/custom-function-types';
@@ -236,13 +242,34 @@ export function hasCrossFieldWhenCondition(config: ValidatorConfig, context?: Cr
 // ============================================================================
 
 /**
+ * Detects if a StateLogicConfig has a cross-field condition.
+ *
+ * Note: This function only handles state logic (hidden, readonly, disabled, required).
+ * Derivation logic is handled separately by the derivation system.
+ *
+ * @param config The state logic configuration to check
+ * @param context Optional context providing function scope lookup
+ * @returns true if the logic condition references other fields
+ */
+export function isCrossFieldStateLogic(config: StateLogicConfig, context?: CrossFieldDetectionContext): boolean {
+  return isCrossFieldExpression(config.condition, context);
+}
+
+/**
  * Detects if a LogicConfig has a cross-field condition.
  *
  * @param config The logic configuration to check
  * @param context Optional context providing function scope lookup
  * @returns true if the logic condition references other fields
+ *
+ * @deprecated Use `isCrossFieldStateLogic` for state logic configs.
+ *             Derivation logic is handled by the derivation system.
  */
 export function isCrossFieldLogic(config: LogicConfig, context?: CrossFieldDetectionContext): boolean {
+  // Only check state logic configs
+  if (!isStateLogicConfig(config)) {
+    return false;
+  }
   return isCrossFieldExpression(config.condition, context);
 }
 

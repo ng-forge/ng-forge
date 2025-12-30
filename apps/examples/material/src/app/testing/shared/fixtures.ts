@@ -306,7 +306,7 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
       },
 
       clearAndFill: async (input: Locator, value: string) => {
-        await input.clear();
+        // Use fill directly - it replaces content atomically
         await input.fill(value);
         await page.waitForTimeout(200);
       },

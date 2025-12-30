@@ -1,2 +1,9 @@
-export type { LogicConfig, FormStateCondition } from './logic-config';
-export { isFormStateCondition } from './logic-config';
+export type {
+  LogicConfig,
+  StateLogicConfig,
+  StateLogicType,
+  DerivationLogicConfig,
+  DerivationTrigger,
+  FormStateCondition,
+} from './logic-config';
+export { isFormStateCondition, isStateLogicConfig, isDerivationLogicConfig } from './logic-config';
