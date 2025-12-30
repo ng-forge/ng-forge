@@ -1,4 +1,4 @@
-import { computed, inject, Injector, signal, Signal, untracked } from '@angular/core';
+import { inject, Injector, signal, Signal, untracked } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
@@ -235,14 +235,16 @@ export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpr
     const result = evaluateCondition(expression, evaluationContext);
 
     // Update immediate value (this triggers the debounce chain)
+    // signalPair is guaranteed to exist here due to the initialization above
+    const { immediateValue, debouncedValue } = signalPair;
     untracked(() => {
-      if (signalPair!.immediateValue() !== result) {
-        signalPair!.immediateValue.set(result);
+      if (immediateValue() !== result) {
+        immediateValue.set(result);
       }
     });
 
     // Return the debounced value
-    return signalPair.debouncedValue() ?? false;
+    return debouncedValue() ?? false;
   };
 
   // Cache the function
