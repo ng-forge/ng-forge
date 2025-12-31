@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
-import { DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
+import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { RadioButton } from 'primeng/radiobutton';
 
@@ -60,6 +61,8 @@ export interface PrimeRadioGroupProps {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PrimeRadioGroupComponent<T = unknown> implements FormValueControl<T> {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   // Required by FormValueControl
   readonly value = model.required<T>();
 
@@ -72,6 +75,15 @@ export class PrimeRadioGroupComponent<T = unknown> implements FormValueControl<T
   // Component-specific inputs
   readonly options = input.required<FieldOption<T>[]>();
   readonly properties = input<PrimeRadioGroupProps>();
+  readonly meta = input<FieldMeta>();
+
+  constructor() {
+    // Apply meta attributes to all radio inputs, re-apply when options change
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'input[type="radio"]',
+      dependents: [this.options],
+    });
+  }
 
   /**
    * Handle radio button change event

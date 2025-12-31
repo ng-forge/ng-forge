@@ -61,6 +61,7 @@ export type {
   CheckedFieldComponent,
   FieldComponent,
   FieldDef,
+  FieldMeta,
   FieldWithValidation,
   ValueFieldComponent,
   ValueType,
@@ -181,3 +182,6 @@ export { omit } from './utils/object-utils';
 
 // Interpolation utility (used by integration error utilities)
 export { interpolateParams } from './utils/interpolate-params';
+
+// Meta utilities (used by UI library wrapped-meta directives)
+export { applyMetaToElement } from './utils/apply-meta';

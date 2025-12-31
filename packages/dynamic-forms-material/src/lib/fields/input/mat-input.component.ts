@@ -3,7 +3,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatInputComponent, MatInputProps } from './mat-input.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
@@ -23,8 +23,8 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       <input
         #inputRef
         matInput
-        [type]="inputType()"
         [field]="f"
+        [type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"
@@ -65,9 +65,23 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 })
 export default class MatInputFieldComponent implements MatInputComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
+
+  readonly label = input<DynamicText>();
+  readonly placeholder = input<DynamicText>();
+  readonly className = input<string>('');
+  readonly tabIndex = input<number>();
+  readonly props = input<MatInputProps>();
+  readonly meta = input<InputMeta>();
+  readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   /**
    * Reference to the native input element.
@@ -109,20 +123,9 @@ export default class MatInputFieldComponent implements MatInputComponent {
     },
   });
 
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
-  readonly props = input<MatInputProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
-
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
 
   readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');
-
-  /** Computed input type - defaults to 'text' if not specified in props */
-  readonly inputType = computed(() => this.props()?.type ?? 'text');
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);

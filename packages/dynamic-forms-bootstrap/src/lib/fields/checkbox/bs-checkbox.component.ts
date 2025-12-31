@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, input, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, viewChild } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsCheckboxComponent, BsCheckboxProps } from './bs-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -68,6 +68,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsCheckboxFieldComponent implements BsCheckboxComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -78,6 +80,7 @@ export default class BsCheckboxFieldComponent implements BsCheckboxComponent {
   readonly props = input<BsCheckboxProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<FieldMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -87,6 +90,8 @@ export default class BsCheckboxFieldComponent implements BsCheckboxComponent {
   readonly checkboxInput = viewChild<ElementRef<HTMLInputElement>>('checkboxInput');
 
   constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="checkbox"]' });
+
     // Handle indeterminate state
     effect(() => {
       const indeterminate = this.props()?.indeterminate;

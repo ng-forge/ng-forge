@@ -15,6 +15,7 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
     name: BsField.Input,
     loadComponent: () => import('../fields/input/bs-input.component'),
     mapper: valueFieldMapper,
+    propsToMeta: ['type'],
   },
   {
     name: BsField.Select,
@@ -66,6 +67,7 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
     name: BsField.Textarea,
     loadComponent: () => import('../fields/textarea/bs-textarea.component'),
     mapper: valueFieldMapper,
+    propsToMeta: ['rows'],
   },
   {
     name: BsField.Radio,

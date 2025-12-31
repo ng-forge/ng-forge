@@ -30,6 +30,8 @@ export interface PageLogicConfig {
  * TypeScript cannot enforce field nesting rules due to circular dependency limitations.
  * For documentation: Pages should contain rows, groups, and leaf fields, but NOT other pages.
  * Runtime validation enforces these rules.
+ *
+ * Note: Pages are container fields and do not support `meta` since they have no native form element.
  */
 export interface PageField<TFields extends readonly PageAllowedChildren[] = PageAllowedChildren[]> extends FieldDef<never> {
   type: 'page';
@@ -39,6 +41,9 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
 
   /** Page fields do not have a label property **/
   readonly label?: never;
+
+  /** Pages do not support meta - they have no native form element **/
+  readonly meta?: never;
 
   /**
    * Logic configurations for conditional page visibility.

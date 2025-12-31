@@ -73,6 +73,12 @@ export default [
     loadChildren: () => import('./expression-based-logic/expression-based-logic.routes'),
   },
 
+  // Field Meta Tests - Tests for meta attribute passthrough
+  {
+    path: 'field-meta',
+    loadChildren: () => import('./field-meta/field-meta.routes'),
+  },
+
   // Form Reset/Clear Tests - Refactored into folder structure
   {
     path: 'form-reset-clear',

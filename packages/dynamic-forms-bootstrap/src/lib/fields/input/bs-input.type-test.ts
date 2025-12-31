@@ -75,6 +75,7 @@ describe('BsInputField (String) - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     // From FieldWithValidation
     | 'required'
     | 'email'
@@ -217,6 +218,7 @@ describe('BsInputField (Number) - Exhaustive Whitelist', () => {
     | 'hidden'
     | 'tabIndex'
     | 'col'
+    | 'meta'
     | 'required'
     | 'email'
     | 'min'

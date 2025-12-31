@@ -599,6 +599,98 @@ bindings.push(inputBinding('hidden', shouldHide));
 - **disabled**: Field disabled (grayed out)
 - **required**: Field validation added conditionally
 
+## Field Configuration: Props vs Meta
+
+When configuring fields, there are two distinct ways to customize behavior: `props` and `meta`. Understanding the difference is crucial for proper field configuration.
+
+### Props (Component Properties)
+
+`props` are **UI library-specific configuration** passed to the field component. They control the behavior and appearance of the UI library's widget.
+
+```typescript
+{
+  key: 'country',
+  type: 'select',
+  label: 'Country',
+  props: {
+    // Material-specific: controls form field appearance
+    appearance: 'outline',
+    multiple: true,
+    // PrimeNG-specific: enables filtering
+    filter: true,
+    showClear: true,
+  },
+}
+```
+
+**Characteristics of props:**
+
+- UI library-specific (different props for Material vs PrimeNG)
+- Control component behavior (multiple selection, filtering, etc.)
+- Affect visual appearance (appearance, size, color)
+- Passed to wrapper components, not native elements
+- Defined by each UI adapter's type definitions
+
+### Meta (Native Element Attributes)
+
+`meta` contains **native HTML attributes** that should be applied to the underlying DOM element. These are framework-agnostic attributes used for accessibility, testing, and browser features.
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  meta: {
+    // HTML autocomplete for browser autofill
+    autocomplete: 'email',
+    // Keyboard input mode hint
+    inputmode: 'email',
+    // Testing attribute
+    'data-testid': 'email-input',
+    // Analytics tracking
+    'data-analytics': 'email-field',
+    // ARIA attributes
+    'aria-describedby': 'email-help',
+  },
+}
+```
+
+**Characteristics of meta:**
+
+- Framework-agnostic (same across all UI libraries)
+- Applied to native DOM elements (input, select, textarea)
+- Used for accessibility (aria-_), testing (data-_), and browser features (autocomplete)
+- Important for screen readers, automated testing, and browser autofill
+- Defined in core library types
+
+### When to Use Each
+
+| Use Case                              | Use `props` | Use `meta` |
+| ------------------------------------- | ----------- | ---------- |
+| UI appearance (size, color)           | ✅          | ❌         |
+| Component behavior (multiple, filter) | ✅          | ❌         |
+| Browser autofill (autocomplete)       | ❌          | ✅         |
+| Testing IDs (data-testid)             | ❌          | ✅         |
+| Accessibility (aria-\*)               | ❌          | ✅         |
+| Analytics tracking (data-\*)          | ❌          | ✅         |
+| Input mode hints (inputmode)          | ❌          | ✅         |
+
+### Meta Propagation in Wrapped Components
+
+UI libraries like Material, PrimeNG, and Ionic wrap native HTML elements inside their own components. The `meta` attributes need to reach the native element for proper functionality:
+
+```
+┌─────────────────────────────────────────────┐
+│  mat-checkbox                               │
+│  ┌───────────────────────────────────────┐ │
+│  │  <input type="checkbox">              │ │
+│  │  ← meta attributes applied here       │ │
+│  └───────────────────────────────────────┘ │
+└─────────────────────────────────────────────┘
+```
+
+For wrapped components, UI adapters provide **wrapped-meta directives** that find the native input inside the wrapper and apply the meta attributes. See the [Creating a UI Adapter](./03-creating-ui-adapter.md) guide for implementation details.
+
 ## Value Handling
 
 Fields have different value handling behaviors:

@@ -247,6 +247,105 @@ Fields integrate with Angular's signal forms validation system. ng-forge provide
 }
 ```
 
+## Props vs Meta
+
+When configuring fields, there are two distinct ways to customize behavior: `props` and `meta`. Understanding the difference is important for proper field configuration.
+
+### Props (Component Properties)
+
+`props` are **UI library-specific configuration** passed to the field component. They control the behavior and appearance of the UI library's widget.
+
+```typescript
+{
+  key: 'country',
+  type: 'select',
+  label: 'Country',
+  props: {
+    // Material-specific: controls form field appearance
+    appearance: 'outline',
+    // PrimeNG-specific: enables filtering
+    filter: true,
+    showClear: true,
+  },
+}
+```
+
+**Characteristics of props:**
+
+- UI library-specific (different props for Material vs PrimeNG)
+- Control component behavior (multiple selection, filtering, etc.)
+- Affect visual appearance (appearance, size, variant)
+- Passed to wrapper components, not native elements
+- Defined by each UI adapter's type definitions
+
+### Meta (Native Element Attributes)
+
+`meta` contains **native HTML attributes** that should be applied to the underlying DOM element. These are framework-agnostic attributes used for accessibility, testing, and browser features.
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  meta: {
+    // HTML autocomplete for browser autofill
+    autocomplete: 'email',
+    // Keyboard input mode hint
+    inputmode: 'email',
+    // Testing attribute
+    'data-testid': 'email-input',
+    // Analytics tracking
+    'data-analytics': 'email-field',
+    // ARIA attributes
+    'aria-describedby': 'email-help',
+  },
+}
+```
+
+**Characteristics of meta:**
+
+- Framework-agnostic (same across all UI libraries)
+- Applied to native DOM elements (input, select, textarea)
+- Used for accessibility (`aria-*`), testing (`data-*`), and browser features (`autocomplete`)
+- Important for screen readers, automated testing, and browser autofill
+- Defined in core library types
+
+### When to Use Each
+
+| Use Case                              | Use `props` | Use `meta` |
+| ------------------------------------- | ----------- | ---------- |
+| UI appearance (size, variant)         | ✅          | ❌         |
+| Component behavior (multiple, filter) | ✅          | ❌         |
+| Browser autofill (`autocomplete`)     | ❌          | ✅         |
+| Testing IDs (`data-testid`)           | ❌          | ✅         |
+| Accessibility (`aria-*`)              | ❌          | ✅         |
+| Analytics tracking (`data-*`)         | ❌          | ✅         |
+| Input mode hints (`inputmode`)        | ❌          | ✅         |
+
+### Complete Example
+
+```typescript
+{
+  key: 'email',
+  type: 'input',
+  label: 'Email Address',
+  required: true,
+  email: true,
+  // UI library-specific configuration
+  props: {
+    type: 'email',
+    appearance: 'outline',  // Material-specific
+    hint: 'We will never share your email',
+  },
+  // Native HTML attributes
+  meta: {
+    autocomplete: 'email',
+    inputmode: 'email',
+    'data-testid': 'registration-email',
+  },
+}
+```
+
 ## UI Integrations
 
 UI framework integrations extend field types with framework-specific styling and features while maintaining the same configuration API.

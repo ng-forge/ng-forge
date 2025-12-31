@@ -12,6 +12,8 @@ import { isGroupField } from './group-field';
  * TypeScript cannot enforce field nesting rules due to circular dependency limitations.
  * For documentation: Rows should contain groups and leaf fields, but NOT pages, other rows, or hidden fields.
  * Runtime validation enforces these rules.
+ *
+ * Note: Rows are container fields and do not support `meta` since they have no native form element.
  */
 export interface RowField<TFields extends readonly RowAllowedChildren[] = readonly RowAllowedChildren[]> extends FieldDef<never> {
   type: 'row';
@@ -21,6 +23,9 @@ export interface RowField<TFields extends readonly RowAllowedChildren[] = readon
 
   /** Row fields do not have a label property **/
   readonly label?: never;
+
+  /** Rows do not support meta - they have no native form element **/
+  readonly meta?: never;
 }
 
 /**

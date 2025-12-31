@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 
 import { MatToggleComponent, MatToggleProps } from './mat-toggle.type';
 import { MatError } from '@angular/material/input';
@@ -58,6 +58,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 })
 export default class MatToggleFieldComponent implements MatToggleComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
@@ -69,6 +70,7 @@ export default class MatToggleFieldComponent implements MatToggleComponent {
   readonly tabIndex = input<number>();
 
   readonly props = input<MatToggleProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -78,6 +80,14 @@ export default class MatToggleFieldComponent implements MatToggleComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  constructor() {
+    // Apply meta attributes to the internal toggle button
+    // Note: mat-slide-toggle uses <button role="switch"> instead of <input type="checkbox">
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'button[role="switch"]',
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility

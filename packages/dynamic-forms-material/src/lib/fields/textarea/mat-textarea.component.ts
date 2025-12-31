@@ -3,7 +3,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
@@ -27,8 +27,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
         matInput
         [field]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [rows]="props()?.rows || 4"
-        [cols]="props()?.cols"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"
         [attr.aria-required]="ariaRequired"
@@ -70,9 +68,23 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 })
 export default class MatTextareaFieldComponent implements MatTextareaComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
+
+  readonly label = input<DynamicText>();
+  readonly placeholder = input<DynamicText>();
+  readonly className = input<string>('');
+  readonly tabIndex = input<number>();
+  readonly props = input<MatTextareaProps>();
+  readonly meta = input<TextareaMeta>();
+  readonly validationMessages = input<ValidationMessages>();
+  readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
+  }
 
   /**
    * Reference to the native textarea element.
@@ -107,14 +119,6 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
       }
     }
   });
-
-  readonly label = input<DynamicText>();
-  readonly placeholder = input<DynamicText>();
-  readonly className = input<string>('');
-  readonly tabIndex = input<number>();
-  readonly props = input<MatTextareaProps>();
-  readonly validationMessages = input<ValidationMessages>();
-  readonly defaultValidationMessages = input<ValidationMessages>();
 
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
   readonly effectiveSubscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');

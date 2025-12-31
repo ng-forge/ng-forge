@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
+import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 
 export interface BsRadioGroupProps {
@@ -88,6 +89,8 @@ export interface BsRadioGroupProps {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BsRadioGroupComponent<T = unknown> implements FormValueControl<T> {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   // Required by FormValueControl
   readonly value = model.required<T>();
 
@@ -100,9 +103,14 @@ export class BsRadioGroupComponent<T = unknown> implements FormValueControl<T> {
   readonly label = input<DynamicText>();
   readonly options = input.required<FieldOption<T>[]>();
   readonly properties = input<BsRadioGroupProps>();
+  readonly meta = input<FieldMeta>();
 
   // Accessibility - this will be provided by parent component through input
   readonly ariaDescribedBy = input<string | null>(null);
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="radio"]', dependents: [this.options] });
+  }
 
   /**
    * Handle radio button change event

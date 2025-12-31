@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeToggleComponent, PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';
 import { ToggleSwitch } from 'primeng/toggleswitch';
@@ -56,6 +56,8 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
   ],
 })
 export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -64,6 +66,7 @@ export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeToggleProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -71,6 +74,13 @@ export default class PrimeToggleFieldComponent implements PrimeToggleComponent {
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  constructor() {
+    // Apply meta attributes to the internal toggle input
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'input[type="checkbox"]',
+    });
+  }
 
   readonly toggleClasses = computed(() => {
     const classes: string[] = [];

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import {
   IonButton,
@@ -13,7 +13,7 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicDatepickerComponent, IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
@@ -109,6 +109,8 @@ import { format } from 'date-fns';
   },
 })
 export default class IonicDatepickerFieldComponent implements IonicDatepickerComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<Date | null>>();
   readonly key = input.required<string>();
 
@@ -122,6 +124,7 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
   readonly maxDate = input<Date | null>(null);
   readonly startAt = input<Date | null>(null);
   readonly props = input<IonicDatepickerProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -131,6 +134,13 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   readonly isModalOpen = signal(false);
+
+  constructor() {
+    // Shadow DOM - apply meta to ion-input element
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'ion-input',
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility

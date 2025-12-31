@@ -19,6 +19,7 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
     name: PrimeField.Input,
     loadComponent: () => import('../fields/input/prime-input.component'),
     mapper: valueFieldMapper,
+    propsToMeta: ['type'],
   },
   {
     name: PrimeField.Select,
@@ -70,6 +71,7 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
     name: PrimeField.Textarea,
     loadComponent: () => import('../fields/textarea/prime-textarea.component'),
     mapper: valueFieldMapper,
+    propsToMeta: ['rows', 'cols'],
   },
   {
     name: PrimeField.Radio,

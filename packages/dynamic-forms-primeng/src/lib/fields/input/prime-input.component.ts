@@ -1,7 +1,7 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
 import { AsyncPipe } from '@angular/common';
 import { InputText } from 'primeng/inputtext';
@@ -57,6 +57,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
   ],
 })
 export default class PrimeInputFieldComponent implements PrimeInputComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
   private primeNGConfig = inject(PRIMENG_CONFIG, { optional: true });
 
   readonly field = input.required<FieldTree<string>>();
@@ -101,8 +102,13 @@ export default class PrimeInputFieldComponent implements PrimeInputComponent {
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<PrimeInputProps>();
+  readonly meta = input<InputMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input' });
+  }
 
   readonly effectiveSize = computed(() => this.props()?.size ?? this.primeNGConfig?.size);
   readonly effectiveVariant = computed(() => this.props()?.variant ?? this.primeNGConfig?.variant);

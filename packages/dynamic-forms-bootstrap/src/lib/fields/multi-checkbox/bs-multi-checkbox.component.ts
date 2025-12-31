@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, isEqual, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, isEqual, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { BsMultiCheckboxComponent, BsMultiCheckboxProps } from './bs-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
@@ -79,6 +79,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsMultiCheckboxFieldComponent<T extends ValueType> implements BsMultiCheckboxComponent<T> {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<T[]>>();
   readonly key = input.required<string>();
 
@@ -92,6 +94,7 @@ export default class BsMultiCheckboxFieldComponent<T extends ValueType> implemen
   readonly props = input<BsMultiCheckboxProps<T>>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<FieldMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
@@ -107,6 +110,8 @@ export default class BsMultiCheckboxFieldComponent<T extends ValueType> implemen
   );
 
   constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'input[type="checkbox"]', dependents: [this.options] });
+
     explicitEffect([this.valueViewModel], ([selectedOptions]: [FieldOption<T>[]]) => {
       const selectedValues = selectedOptions.map((option: FieldOption<T>) => option.value);
 

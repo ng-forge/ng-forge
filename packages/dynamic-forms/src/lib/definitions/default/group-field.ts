@@ -9,6 +9,8 @@ import { GroupAllowedChildren } from '../../models/types/nesting-constraints';
  * TypeScript cannot enforce field nesting rules due to circular dependency limitations.
  * For documentation: Groups should contain rows and leaf fields, but NOT pages or other groups.
  * Runtime validation enforces these rules.
+ *
+ * Note: Groups are container fields and do not support `meta` since they have no native form element.
  */
 export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never> {
   type: 'group';
@@ -17,6 +19,9 @@ export interface GroupField<TFields extends readonly GroupAllowedChildren[] = re
 
   /** Groups do not have a label property - they are logical containers only **/
   readonly label?: never;
+
+  /** Groups do not support meta - they have no native form element **/
+  readonly meta?: never;
 }
 
 /**

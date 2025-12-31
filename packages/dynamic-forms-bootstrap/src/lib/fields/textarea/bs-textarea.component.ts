@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { BsTextareaComponent, BsTextareaProps } from './bs-textarea.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -19,7 +19,6 @@ import { AsyncPipe } from '@angular/common';
           [field]="f"
           [id]="key()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [rows]="p?.rows || 4"
           [attr.tabindex]="tabIndex()"
           [attr.aria-invalid]="ariaInvalid"
           [attr.aria-required]="ariaRequired"
@@ -54,7 +53,6 @@ import { AsyncPipe } from '@angular/common';
           [field]="f"
           [id]="key()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-          [rows]="p?.rows || 4"
           [attr.tabindex]="tabIndex()"
           [attr.aria-invalid]="ariaInvalid"
           [attr.aria-required]="ariaRequired"
@@ -98,6 +96,8 @@ import { AsyncPipe } from '@angular/common';
   ],
 })
 export default class BsTextareaFieldComponent implements BsTextareaComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
@@ -108,11 +108,16 @@ export default class BsTextareaFieldComponent implements BsTextareaComponent {
   readonly props = input<BsTextareaProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
+  readonly meta = input<TextareaMeta>();
 
   readonly resolvedErrors = createResolvedErrorsSignal(this.field, this.validationMessages, this.defaultValidationMessages);
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  constructor() {
+    setupMetaTracking(this.elementRef, this.meta, { selector: 'textarea' });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility

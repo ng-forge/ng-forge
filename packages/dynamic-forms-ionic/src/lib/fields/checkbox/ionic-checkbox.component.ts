@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { IonCheckbox, IonNote } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicCheckboxComponent, IonicCheckboxProps } from './ionic-checkbox.type';
 import { AsyncPipe } from '@angular/common';
 
@@ -49,6 +49,8 @@ import { AsyncPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicCheckboxFieldComponent implements IonicCheckboxComponent {
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+
   readonly field = input.required<FieldTree<boolean>>();
   readonly key = input.required<string>();
 
@@ -58,6 +60,7 @@ export default class IonicCheckboxFieldComponent implements IonicCheckboxCompone
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
   readonly props = input<IonicCheckboxProps>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -65,6 +68,13 @@ export default class IonicCheckboxFieldComponent implements IonicCheckboxCompone
   readonly showErrors = shouldShowErrors(this.field);
 
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
+
+  constructor() {
+    // Shadow DOM - apply meta to ion-checkbox element
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'ion-checkbox',
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility

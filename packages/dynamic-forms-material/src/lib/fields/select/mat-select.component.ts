@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { Field, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatHint } from '@angular/material/input';
-import { DynamicText, DynamicTextPipe, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
-import { createResolvedErrorsSignal, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { MatSelectComponent, MatSelectProps } from './mat-select.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
@@ -72,6 +72,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 })
 export default class MatSelectFieldComponent<T> implements MatSelectComponent<T> {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly field = input.required<FieldTree<T>>();
   readonly key = input.required<string>();
@@ -84,6 +85,7 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
 
   readonly options = input<FieldOption<T>[]>([]);
   readonly props = input<MatSelectProps<T>>();
+  readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
 
@@ -97,6 +99,13 @@ export default class MatSelectFieldComponent<T> implements MatSelectComponent<T>
   readonly errorsToDisplay = computed(() => (this.showErrors() ? this.resolvedErrors() : []));
 
   defaultCompare = Object.is;
+
+  constructor() {
+    // mat-select has no native input - apply meta to mat-select element
+    setupMetaTracking(this.elementRef, this.meta, {
+      selector: 'mat-select',
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility
