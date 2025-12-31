@@ -22,6 +22,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           #inputRef
           [field]="f"
           [id]="key()"
+          [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
           [attr.aria-invalid]="ariaInvalid"
@@ -56,6 +57,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           #inputRef
           [field]="f"
           [id]="key()"
+          [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
           [attr.aria-invalid]="ariaInvalid"

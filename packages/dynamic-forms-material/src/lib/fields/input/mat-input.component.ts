@@ -24,6 +24,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         #inputRef
         matInput
         [field]="f"
+        [type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"

@@ -25,11 +25,11 @@ describe('applyMetaToElement', () => {
       expect(applied).toEqual(new Set(['tabindex']));
     });
 
-    it('should convert true boolean to empty string', () => {
+    it('should convert true boolean to "true" string', () => {
       const meta = { 'aria-required': true } as Record<string, unknown>;
       const applied = applyMetaToElement(element, meta, new Set());
 
-      expect(element.getAttribute('aria-required')).toBe('');
+      expect(element.getAttribute('aria-required')).toBe('true');
       expect(applied).toEqual(new Set(['aria-required']));
     });
 

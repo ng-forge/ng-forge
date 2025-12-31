@@ -72,14 +72,27 @@ export function setupMetaTracking(
   options?: MetaTrackingOptions,
 ): void {
   let appliedAttributes = new Set<string>();
+  let previousMeta: FieldMeta | undefined;
+  let previousDeps: unknown[] | undefined;
 
   afterRenderEffect({
     write: () => {
-      // Read dependents to establish signal tracking
-      options?.dependents?.forEach((dep) => dep());
+      // Read dependents to establish signal tracking and collect their values
+      const currentDeps = options?.dependents?.map((dep) => dep());
 
       const currentMeta = meta();
       const hostElement = elementRef.nativeElement;
+
+      // Early exit if nothing changed
+      const depsChanged =
+        !previousDeps || currentDeps?.length !== previousDeps.length || currentDeps?.some((d, i) => d !== previousDeps![i]);
+
+      if (currentMeta === previousMeta && !depsChanged) {
+        return;
+      }
+
+      previousMeta = currentMeta;
+      previousDeps = currentDeps;
 
       if (options?.selector) {
         // Apply to elements matching selector

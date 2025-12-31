@@ -6,7 +6,7 @@ import { FieldMeta } from '../definitions/base/field-meta';
  * This utility handles:
  * - Removing previously applied attributes that are no longer in meta
  * - Setting new attributes from meta
- * - Converting boolean values to appropriate attribute formats
+ * - Converting all values to strings via String()
  *
  * @param element - The DOM element to apply attributes to
  * @param meta - The meta object containing attributes to apply
@@ -41,10 +41,7 @@ export function applyMetaToElement(element: Element, meta: FieldMeta | undefined
   for (const [key, value] of Object.entries(meta)) {
     if (value === undefined || value === null) continue;
 
-    // Convert value to appropriate attribute format
-    const attrValue = typeof value === 'boolean' ? (value ? '' : 'false') : String(value);
-
-    element.setAttribute(key, attrValue);
+    element.setAttribute(key, String(value));
     newApplied.add(key);
   }
 
