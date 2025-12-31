@@ -1,4 +1,5 @@
 import { BaseValueField, DynamicText } from '@ng-forge/dynamic-forms';
+import { InputMeta } from './input-meta';
 
 /**
  * HTML input types supported by input fields
@@ -42,7 +43,11 @@ export type StringInputType = Exclude<InputType, 'number'>;
  * When props.type is 'number', value must be number.
  * Props is REQUIRED and must include type: 'number'.
  */
-interface NumberInputField<TProps extends { type?: string } = InputProps> extends BaseValueField<TProps & { type: 'number' }, number> {
+interface NumberInputField<TProps extends { type?: string } = InputProps> extends BaseValueField<
+  TProps & { type: 'number' },
+  number,
+  InputMeta
+> {
   type: 'input';
   props: TProps & { type: 'number' }; // Required with type: 'number'
 }
@@ -54,7 +59,8 @@ interface NumberInputField<TProps extends { type?: string } = InputProps> extend
  */
 interface StringInputField<TProps extends { type?: string } = InputProps> extends BaseValueField<
   TProps & { type?: StringInputType },
-  string
+  string,
+  InputMeta
 > {
   type: 'input';
   props?: TProps & { type?: StringInputType }; // Optional, but type cannot be 'number'
