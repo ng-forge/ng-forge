@@ -42,7 +42,7 @@ const config = {
       },
       meta: {
         'data-testid': 'comments-textarea',
-        spellcheck: 'true',
+        spellcheck: true,
       },
       col: 12,
     },
