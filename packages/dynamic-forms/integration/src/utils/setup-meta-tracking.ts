@@ -1,5 +1,6 @@
 import { afterRenderEffect, ElementRef, Signal } from '@angular/core';
 import { applyMetaToElement, FieldMeta } from '@ng-forge/dynamic-forms';
+import { isEqual } from './is-equal';
 
 /**
  * Configuration options for setupMetaTracking.
@@ -83,11 +84,12 @@ export function setupMetaTracking(
       const currentMeta = meta();
       const hostElement = elementRef.nativeElement;
 
-      // Early exit if nothing changed
+      // Early exit if nothing changed (using deep equality for meta)
+      const metaChanged = !isEqual(currentMeta, previousMeta);
       const depsChanged =
         !previousDeps || currentDeps?.length !== previousDeps.length || currentDeps?.some((d, i) => d !== previousDeps![i]);
 
-      if (currentMeta === previousMeta && !depsChanged) {
+      if (!metaChanged && !depsChanged) {
         return;
       }
 
