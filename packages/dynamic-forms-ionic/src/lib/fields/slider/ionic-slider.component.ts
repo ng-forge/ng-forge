@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonRange } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -8,12 +8,12 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ionic-slider',
-  imports: [IonRange, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonRange, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
     <ion-range
-      [field]="f"
+      [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [step]="props()?.step ?? 1"

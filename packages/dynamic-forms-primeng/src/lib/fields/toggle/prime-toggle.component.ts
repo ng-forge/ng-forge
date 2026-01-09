@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeToggleComponent, PrimeToggleProps } from './prime-toggle.type';
@@ -8,7 +8,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 
 @Component({
   selector: 'df-prime-toggle',
-  imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, Field],
+  imports: [ToggleSwitch, DynamicTextPipe, AsyncPipe, FormField],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -22,7 +22,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 
       <p-toggleSwitch
         [id]="key()"
-        [field]="f"
+        [formField]="f"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"
         [attr.aria-required]="ariaRequired"

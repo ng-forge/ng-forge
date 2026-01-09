@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { ValidationMessages } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'df-test-checkbox',
-  template: ` <input type="checkbox" [field]="field()" /> `,
+  template: ` <input type="checkbox" [formField]="field()" /> `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Field],
+  imports: [FormField],
 })
 export default class TestCheckboxHarness {
   readonly field = input.required<FieldTree<boolean>>();

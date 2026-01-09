@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsToggleComponent, BsToggleProps } from './bs-toggle.type';
@@ -7,7 +7,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-toggle',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -24,7 +24,7 @@ import { AsyncPipe } from '@angular/common';
     >
       <input
         type="checkbox"
-        [field]="f"
+        [formField]="f"
         [id]="key()"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
@@ -32,7 +32,6 @@ import { AsyncPipe } from '@angular/common';
         [attr.aria-invalid]="ariaInvalid"
         [attr.aria-required]="ariaRequired"
         [attr.aria-describedby]="ariaDescribedBy"
-        [attr.hidden]="f().hidden() || null"
       />
       <label [for]="key()" class="form-check-label">
         {{ label() | dynamicText | async }}

@@ -1,5 +1,5 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsInputComponent, BsInputProps } from './bs-input.type';
@@ -8,7 +8,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
 
 @Component({
   selector: 'df-bs-input',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @let effectiveSize = this.effectiveSize();
@@ -20,7 +20,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
       <div class="form-floating mb-3">
         <input
           #inputRef
-          [field]="f"
+          [formField]="f"
           [id]="key()"
           [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -55,7 +55,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
         }
         <input
           #inputRef
-          [field]="f"
+          [formField]="f"
           [id]="key()"
           [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -8,7 +8,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-prime-checkbox',
-  imports: [Checkbox, DynamicTextPipe, AsyncPipe, Field],
+  imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormField],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let checkboxId = key() + '-checkbox'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -16,7 +16,7 @@ import { AsyncPipe } from '@angular/common';
 
     <div class="flex items-center">
       <p-checkbox
-        [field]="f"
+        [formField]="f"
         [inputId]="checkboxId"
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -9,7 +9,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-slider',
-  imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, Field],
+  imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, FormField],
   template: `
     @let f = field();
     @let ariaInvalid = this.ariaInvalid();
@@ -30,7 +30,7 @@ import { AsyncPipe } from '@angular/common';
     >
       <input
         matSliderThumb
-        [field]="f"
+        [formField]="f"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"
         [attr.aria-describedby]="ariaDescribedBy"

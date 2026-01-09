@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 
 /**
  * Test harness component for select fields
@@ -8,7 +8,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
   selector: 'df-test-select',
   template: `
     @let f = field();
-    <select [field]="f">
+    <select [formField]="f">
       <option value="">Select...</option>
       @for (option of options(); track option.value) {
         <option [value]="option.value">{{ option.label }}</option>
@@ -16,7 +16,7 @@ import { Field, FieldTree } from '@angular/forms/signals';
     </select>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Field],
+  imports: [FormField],
 })
 export default class TestSelectHarness {
   readonly field = input.required<FieldTree<string>>();

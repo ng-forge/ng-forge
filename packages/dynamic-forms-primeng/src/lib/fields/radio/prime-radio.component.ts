@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
@@ -8,7 +8,7 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
 
 @Component({
   selector: 'df-prime-radio',
-  imports: [PrimeRadioGroupComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [PrimeRadioGroupComponent, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -18,7 +18,7 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
     }
 
     <df-prime-radio-group
-      [field]="$any(f)"
+      [formField]="$any(f)"
       [options]="options()"
       [properties]="props()"
       [meta]="meta()"

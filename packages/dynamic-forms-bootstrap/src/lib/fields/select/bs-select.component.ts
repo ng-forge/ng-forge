@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsSelectComponent, BsSelectProps } from './bs-select.type';
@@ -7,7 +7,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-select',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -19,7 +19,7 @@ import { AsyncPipe } from '@angular/common';
         <label [for]="key()" class="form-label">{{ label | dynamicText | async }}</label>
       }
       <select
-        [field]="f"
+        [formField]="f"
         [id]="key()"
         class="form-select"
         [class.form-select-sm]="props()?.size === 'sm'"

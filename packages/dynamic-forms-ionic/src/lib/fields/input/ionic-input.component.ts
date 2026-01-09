@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -9,7 +9,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 @Component({
   selector: 'df-ionic-input',
-  imports: [IonInput, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
     @let ariaInvalid = isAriaInvalid();
@@ -17,7 +17,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
     <ion-input
       [type]="props()?.type ?? 'text'"
-      [field]="f"
+      [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="effectiveLabelPlacement()"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"

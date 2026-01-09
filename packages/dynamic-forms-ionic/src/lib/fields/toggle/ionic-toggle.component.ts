@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -9,12 +9,12 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ionic-toggle',
-  imports: [IonicToggleControlComponent, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonicToggleControlComponent, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
     <df-ionic-toggle-control
-      [field]="f"
+      [formField]="f"
       [meta]="meta()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"

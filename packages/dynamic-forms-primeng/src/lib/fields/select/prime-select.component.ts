@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
@@ -9,7 +9,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
 
 @Component({
   selector: 'df-prime-select',
-  imports: [Field, Select, MultiSelect, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, Select, MultiSelect, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -22,7 +22,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
       }
       @if (isMultiple()) {
         <p-multiSelect
-          [field]="f"
+          [formField]="f"
           [inputId]="key()"
           [options]="options()"
           optionLabel="label"
@@ -37,7 +37,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         />
       } @else {
         <p-select
-          [field]="f"
+          [formField]="f"
           [inputId]="key()"
           [options]="options()"
           optionLabel="label"

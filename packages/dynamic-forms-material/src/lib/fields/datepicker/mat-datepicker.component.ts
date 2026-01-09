@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
@@ -21,7 +21,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     MatDatepickerInput,
     MatDatepickerToggle,
     MatSuffix,
-    Field,
+    FormField,
     MatError,
     DynamicTextPipe,
     AsyncPipe,
@@ -44,7 +44,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       <input
         matInput
         [matDatepicker]="picker"
-        [field]="f"
+        [formField]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
         [min]="minDate()"

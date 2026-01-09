@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -11,13 +11,13 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'df-mat-checkbox',
-  imports: [MatCheckbox, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatCheckbox, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-checkbox
-      [field]="f"
+      [formField]="f"
       [labelPosition]="props()?.labelPosition || 'after'"
       [indeterminate]="props()?.indeterminate || false"
       [color]="props()?.color || 'primary'"

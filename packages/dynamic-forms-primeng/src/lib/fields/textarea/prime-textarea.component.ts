@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
@@ -8,7 +8,7 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
 
 @Component({
   selector: 'df-prime-textarea',
-  imports: [DynamicTextPipe, AsyncPipe, Field, PrimeTextareaControlComponent],
+  imports: [DynamicTextPipe, AsyncPipe, FormField, PrimeTextareaControlComponent],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -21,7 +21,7 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
 
       <df-prime-textarea-control
         [id]="inputId()"
-        [field]="f"
+        [formField]="f"
         [meta]="meta()"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [rows]="props()?.rows || 4"

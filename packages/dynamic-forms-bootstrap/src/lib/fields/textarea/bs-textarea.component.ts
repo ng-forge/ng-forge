@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { BsTextareaComponent, BsTextareaProps } from './bs-textarea.type';
@@ -7,7 +7,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-bs-textarea',
-  imports: [Field, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -16,7 +16,7 @@ import { AsyncPipe } from '@angular/common';
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <textarea
-          [field]="f"
+          [formField]="f"
           [id]="key()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
@@ -50,7 +50,7 @@ import { AsyncPipe } from '@angular/common';
         }
 
         <textarea
-          [field]="f"
+          [formField]="f"
           [id]="key()"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"

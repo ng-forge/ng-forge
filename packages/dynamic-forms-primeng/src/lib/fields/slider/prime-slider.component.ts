@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeSliderComponent, PrimeSliderProps } from './prime-slider.type';
@@ -8,7 +8,7 @@ import { Slider } from 'primeng/slider';
 
 @Component({
   selector: 'df-prime-slider',
-  imports: [Slider, Field, DynamicTextPipe, AsyncPipe],
+  imports: [Slider, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -22,7 +22,7 @@ import { Slider } from 'primeng/slider';
 
       <p-slider
         [id]="key()"
-        [field]="f"
+        [formField]="f"
         [step]="props()?.step ?? 1"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"

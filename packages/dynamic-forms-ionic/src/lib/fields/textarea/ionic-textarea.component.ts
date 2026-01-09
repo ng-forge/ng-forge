@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
@@ -8,12 +8,12 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ionic-textarea',
-  imports: [IonTextarea, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonTextarea, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
     <ion-textarea
-      [field]="f"
+      [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"

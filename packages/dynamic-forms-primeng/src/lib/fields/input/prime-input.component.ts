@@ -1,5 +1,5 @@
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeInputComponent, PrimeInputProps } from './prime-input.type';
@@ -9,7 +9,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
 
 @Component({
   selector: 'df-prime-input',
-  imports: [InputText, DynamicTextPipe, AsyncPipe, Field],
+  imports: [InputText, DynamicTextPipe, AsyncPipe, FormField],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -24,7 +24,7 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
         #inputRef
         pInputText
         [id]="inputId()"
-        [field]="f"
+        [formField]="f"
         [type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"

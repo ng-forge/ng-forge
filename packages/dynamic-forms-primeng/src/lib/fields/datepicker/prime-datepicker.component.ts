@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeDatepickerComponent, PrimeDatepickerProps } from './prime-datepicker.type';
@@ -8,7 +8,7 @@ import { DatePicker } from 'primeng/datepicker';
 
 @Component({
   selector: 'df-prime-datepicker',
-  imports: [DatePicker, Field, DynamicTextPipe, AsyncPipe],
+  imports: [DatePicker, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -22,7 +22,7 @@ import { DatePicker } from 'primeng/datepicker';
 
       <p-datepicker
         [inputId]="key()"
-        [field]="f"
+        [formField]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"
