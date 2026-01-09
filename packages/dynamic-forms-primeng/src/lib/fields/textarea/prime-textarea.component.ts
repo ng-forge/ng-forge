@@ -46,6 +46,7 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [

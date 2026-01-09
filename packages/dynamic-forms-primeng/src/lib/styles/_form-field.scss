@@ -43,3 +43,39 @@
   display: block;
   margin-top: 0.25rem;
 }
+
+/**
+ * Override PrimeNG invalid styling when field is not touched.
+ *
+ * PrimeNG components inject NgControl and use its `invalid` property to add
+ * `p-invalid` class. Angular Signal Forms' InteropNgControl returns the raw
+ * invalid state without considering touched. We override this with CSS to
+ * only show invalid styling when the field has been touched.
+ *
+ * Components must add [class.df-touched]="field()().touched()" to their host.
+ */
+:host:not(.df-touched) {
+  // Reset input border color to default when not touched
+  ::ng-deep {
+    .p-inputtext.p-invalid,
+    .p-select.p-invalid,
+    .p-multiselect.p-invalid,
+    .p-datepicker.p-invalid,
+    .p-slider.p-invalid,
+    .p-toggleswitch.p-invalid,
+    .p-checkbox.p-invalid,
+    .p-radiobutton.p-invalid,
+    .p-textarea.p-invalid {
+      border-color: var(--p-form-field-border-color, var(--p-surface-300, #dee2e6)) !important;
+    }
+
+    // Also handle focused state for untouched invalid fields
+    .p-inputtext.p-invalid:focus,
+    .p-select.p-invalid.p-focus,
+    .p-multiselect.p-invalid.p-focus,
+    .p-datepicker.p-invalid .p-inputtext:focus {
+      border-color: var(--p-form-field-focus-border-color, var(--p-primary-color, #3b82f6)) !important;
+      box-shadow: var(--p-form-field-focus-ring-shadow, 0 0 0 0.2rem rgba(59, 130, 246, 0.25)) !important;
+    }
+  }
+}

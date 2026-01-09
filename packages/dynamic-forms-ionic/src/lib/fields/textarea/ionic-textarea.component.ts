@@ -11,6 +11,8 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonTextarea, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let ariaInvalid = isAriaInvalid();
+    @let ariaRequired = isRequired() || null;
 
     <ion-textarea
       [formField]="f"
@@ -25,19 +27,13 @@ import { AsyncPipe } from '@angular/common';
       [shape]="props()?.shape"
       [readonly]="f().readonly()"
       [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-      [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="isAriaInvalid()"
-      [attr.aria-required]="isRequired() || null"
-      [class.ion-invalid]="f().invalid()"
-      [class.ion-touched]="f().touched()"
-    >
-      <div slot="error">
-        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-        }
-      </div>
-    </ion-textarea>
+      [attr.aria-invalid]="ariaInvalid"
+      [attr.aria-required]="ariaRequired"
+    />
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

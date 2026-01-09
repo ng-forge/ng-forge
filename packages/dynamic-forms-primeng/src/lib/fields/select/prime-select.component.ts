@@ -64,6 +64,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [

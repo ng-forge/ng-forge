@@ -28,19 +28,13 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [shape]="effectiveShape()"
       [readonly]="f().readonly()"
       [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-      [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="ariaInvalid"
       [attr.aria-required]="ariaRequired"
-      [class.ion-invalid]="f().invalid()"
-      [class.ion-touched]="f().touched()"
-    >
-      <div slot="error">
-        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-        }
-      </div>
-    </ion-input>
+    />
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

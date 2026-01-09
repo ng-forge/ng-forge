@@ -11,6 +11,8 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonSelect, IonSelectOption, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let ariaInvalid = isAriaInvalid();
+    @let ariaRequired = isRequired() || null;
 
     <ion-select
       [formField]="f"
@@ -27,22 +29,18 @@ import { AsyncPipe } from '@angular/common';
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="isAriaInvalid()"
-      [attr.aria-required]="isRequired() || null"
-      [class.ion-invalid]="f().invalid()"
-      [class.ion-touched]="f().touched()"
+      [attr.aria-invalid]="ariaInvalid"
+      [attr.aria-required]="ariaRequired"
     >
       @for (option of options(); track option.value) {
         <ion-select-option [value]="option.value" [disabled]="option.disabled || false">
           {{ option.label | dynamicText | async }}
         </ion-select-option>
       }
-      <div slot="error">
-        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-        }
-      </div>
     </ion-select>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

@@ -50,6 +50,7 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   ],
   host: {
     '[class]': 'className()',
+    '[class.df-touched]': 'field()().touched()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',

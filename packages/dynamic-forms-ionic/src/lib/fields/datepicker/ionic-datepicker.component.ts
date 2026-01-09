@@ -36,6 +36,8 @@ import { format } from 'date-fns';
   ],
   template: `
     @let f = field(); @let dateValue = f().value();
+    @let ariaInvalid = isAriaInvalid();
+    @let ariaRequired = isRequired() || null;
 
     <ion-input
       [label]="(label() | dynamicText | async) ?? undefined"
@@ -46,18 +48,13 @@ import { format } from 'date-fns';
       [readonly]="true"
       [fill]="'outline'"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="isAriaInvalid()"
-      [attr.aria-required]="isRequired() || null"
-      [class.ion-invalid]="f().invalid()"
-      [class.ion-touched]="f().touched()"
+      [attr.aria-invalid]="ariaInvalid"
+      [attr.aria-required]="ariaRequired"
       (click)="!f().disabled() && openModal()"
-    >
-      <div slot="error">
-        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-        }
-      </div>
-    </ion-input>
+    />
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    }
 
     <ion-modal [isOpen]="isModalOpen()" (didDismiss)="closeModal()">
       <ng-template>
