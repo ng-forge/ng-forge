@@ -101,6 +101,8 @@ pnpm run test
 pnpm run serve:docs
 ```
 
+See [Developer Guides](./guides/) for architecture docs, testing strategy, and creating UI adapters.
+
 ## 📄 License
 
 MIT © ng-forge
