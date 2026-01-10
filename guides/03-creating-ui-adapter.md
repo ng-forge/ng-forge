@@ -24,12 +24,12 @@ packages/dynamic-forms-superui/
 │   │   │   ├── input/
 │   │   │   │   ├── superui-input.component.ts
 │   │   │   │   ├── superui-input.type.ts
-│   │   │   │   ├── superui-input.spec.ts
+│   │   │   │   ├── superui-input.type-test.ts
 │   │   │   │   └── index.ts
 │   │   │   ├── select/
 │   │   │   │   ├── superui-select.component.ts
 │   │   │   │   ├── superui-select.type.ts
-│   │   │   │   ├── superui-select.spec.ts
+│   │   │   │   ├── superui-select.type-test.ts
 │   │   │   │   └── index.ts
 │   │   │   ├── checkbox/
 │   │   │   │   └── ...
@@ -356,131 +356,88 @@ export default class SuperUIInputFieldComponent implements SuperUIInputComponent
 7. ✅ Uses `@let` for template variables
 8. ✅ DynamicTextPipe for i18n support
 
-### Input Tests
+### Input Type Tests
 
-**`src/lib/fields/input/superui-input.spec.ts`:**
+UI adapters use type tests to verify compile-time type safety. Runtime behavior is covered by E2E tests in the example applications.
+
+**`src/lib/fields/input/superui-input.type-test.ts`:**
 
 ```typescript
-import { ComponentFixture } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { SuperUIFormTestUtils } from '../../testing/superui-test-utils';
+import { expectTypeOf } from 'vitest';
+import type { FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-forms';
+import type { SuperUIInputField } from './superui-input.type';
+import { SuperUIField } from '../../types/types';
 
-describe('SuperUIInputFieldComponent', () => {
-  it('should render input with label', async () => {
-    const config = SuperUIFormTestUtils.builder()
-      .field({
-        key: 'email',
-        type: 'input',
-        value: '',
-        label: 'Email Address',
-      })
-      .build();
+// Verify field type is registered in the global registry
+expectTypeOf<SuperUIInputField>().toMatchTypeOf<RegisteredFieldTypes>();
 
-    const { fixture } = await SuperUIFormTestUtils.createTest({
-      config,
-      initialValue: { email: '' },
-    });
+// Verify FormConfig accepts SuperUIInputField with correct props
+const validConfig = {
+  fields: [
+    {
+      type: SuperUIField.INPUT,
+      key: 'email',
+      value: '',
+      label: 'Email Address',
+      props: {
+        type: 'email',
+        placeholder: 'Enter email',
+        size: 'medium',
+        variant: 'outlined',
+        icon: 'mail',
+        iconPosition: 'left',
+      },
+    },
+  ],
+} as const satisfies FormConfig;
 
-    const label = fixture.debugElement.query(By.css('label'));
-    expect(label.nativeElement.textContent).toContain('Email Address');
+// Verify inferred form value type is correct
+type FormValue = typeof validConfig extends FormConfig<infer V> ? V : never;
+expectTypeOf<FormValue>().toEqualTypeOf<{ email: string }>();
 
-    const input = fixture.debugElement.query(By.css('super-input'));
-    expect(input).toBeTruthy();
-  });
+// Verify props type inference
+type InputProps = Extract<RegisteredFieldTypes, { type: 'input' }>['props'];
+expectTypeOf<InputProps>().toMatchTypeOf<{
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
+  size?: 'small' | 'medium' | 'large';
+  variant?: 'outlined' | 'filled' | 'underlined';
+}>();
 
-  it('should handle user input', async () => {
-    const config = SuperUIFormTestUtils.builder()
-      .field({
-        key: 'email',
-        type: 'input',
-        value: '',
-      })
-      .build();
+// @ts-expect-error - Invalid size value should error
+const invalidSizeConfig: FormConfig = {
+  fields: [
+    {
+      type: SuperUIField.INPUT,
+      key: 'test',
+      value: '',
+      props: {
+        size: 'extra-large', // Invalid - not in union
+      },
+    },
+  ],
+};
 
-    const { fixture, component } = await SuperUIFormTestUtils.createTest({
-      config,
-      initialValue: { email: '' },
-    });
-
-    await SuperUIFormTestUtils.simulateSuperUIInput(fixture, 'super-input', 'test@example.com');
-
-    expect(SuperUIFormTestUtils.getFormValue(component).email).toBe('test@example.com');
-  });
-
-  it('should display validation errors', async () => {
-    const config = SuperUIFormTestUtils.builder()
-      .field({
-        key: 'email',
-        type: 'input',
-        value: '',
-        required: true,
-        email: true,
-      })
-      .build();
-
-    const { fixture, component } = await SuperUIFormTestUtils.createTest({
-      config,
-      initialValue: { email: '' },
-    });
-
-    // Trigger validation
-    const formState = component.formState();
-    formState.form().controls.email.markAsTouched();
-    fixture.detectChanges();
-
-    const errors = fixture.debugElement.query(By.css('df-superui-errors'));
-    expect(errors).toBeTruthy();
-  });
-
-  it('should render with icon', async () => {
-    const config = SuperUIFormTestUtils.builder()
-      .field({
-        key: 'search',
-        type: 'input',
-        value: '',
-        props: {
-          icon: 'search',
-          iconPosition: 'left',
-        },
-      })
-      .build();
-
-    const { fixture } = await SuperUIFormTestUtils.createTest({
-      config,
-      initialValue: { search: '' },
-    });
-
-    const icon = fixture.debugElement.query(By.css('super-icon'));
-    expect(icon).toBeTruthy();
-    expect(icon.componentInstance.name).toBe('search');
-  });
-
-  it('should apply custom styling', async () => {
-    const config = SuperUIFormTestUtils.builder()
-      .field({
-        key: 'username',
-        type: 'input',
-        value: '',
-        props: {
-          styleClass: 'custom-input',
-          size: 'large',
-          variant: 'filled',
-        },
-      })
-      .build();
-
-    const { fixture } = await SuperUIFormTestUtils.createTest({
-      config,
-      initialValue: { username: '' },
-    });
-
-    const input = fixture.debugElement.query(By.css('super-input'));
-    expect(input.nativeElement.classList.contains('custom-input')).toBe(true);
-    expect(input.componentInstance.size).toBe('large');
-    expect(input.componentInstance.variant).toBe('filled');
-  });
-});
+// @ts-expect-error - Invalid prop should error
+const invalidPropConfig: FormConfig = {
+  fields: [
+    {
+      type: SuperUIField.INPUT,
+      key: 'test',
+      value: '',
+      props: {
+        nonExistentProp: true, // Invalid - not in interface
+      },
+    },
+  ],
+};
 ```
+
+**Why type tests instead of unit tests?**
+
+1. **Field components are thin wrappers** - They delegate to SuperUI components and Angular forms
+2. **Type safety is critical** - Incorrect prop types cause runtime errors that are hard to debug
+3. **E2E tests cover runtime behavior** - Real browser tests in example apps verify actual functionality
+4. **Faster feedback** - Type tests run at compile time, catching errors before runtime
 
 ### Barrel Export
 
@@ -950,16 +907,16 @@ export type SuperUIButtonField = ButtonField<SuperUIButtonProps>;
 
 ✅ **DO:**
 
-- Test rendering with all props
-- Test user interactions
-- Test validation
-- Test edge cases
+- Write type tests for each field type (`.type-test.ts`)
+- Verify field types are registered in the global registry
+- Test prop type inference and constraints
+- Use `@ts-expect-error` for invalid type scenarios
 
 ❌ **DON'T:**
 
-- Skip tests
-- Test only happy paths
-- Forget to test disabled/readonly states
+- Write unit tests for field components (use E2E tests instead)
+- Skip type tests for new field types
+- Forget to test generic type parameters
 
 ## Summary
 
@@ -972,8 +929,13 @@ Creating a UI adapter involves:
 5. ✅ Create shared error component
 6. ✅ Configure field type definitions
 7. ✅ Create provider function
-8. ✅ Build test utilities
+8. ✅ Write type tests for each field type
 9. ✅ Add styles
 10. ✅ Export public API
+
+**Testing Strategy:**
+
+- **Type tests** (`.type-test.ts`) - Verify compile-time type safety for each field type
+- **E2E tests** - Runtime behavior is tested in the corresponding example app (`apps/examples/`)
 
 Following this pattern ensures consistency, type safety, and maintainability across all UI adapters.

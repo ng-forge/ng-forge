@@ -67,9 +67,11 @@ ng-forge is a type-safe, UI-agnostic dynamic forms library for Angular 21+ that 
 
 **Topics Covered:**
 
-- Test utilities architecture
-- Testing field components
-- Testing user interactions
+- Testing strategy overview (unit tests, type tests, E2E, visual regression)
+- E2E testing with Docker-based Playwright
+- Visual regression testing with screenshot comparison
+- Type tests for UI adapters
+- Unit test utilities for core library
 - Testing validation (required, email, length, pattern)
 - Testing conditional logic (visibility, required, disabled)
 - Testing complex scenarios (multi-step forms, groups)
@@ -101,7 +103,9 @@ ng-forge is a type-safe, UI-agnostic dynamic forms library for Angular 21+ that 
 | Understanding type inference           | [Type System Deep Dive](./02-type-system-deep-dive.md)         | Form Value Type Inference  |
 | Extending the type registry            | [Type System Deep Dive](./02-type-system-deep-dive.md)         | Type Registry Architecture |
 | Creating a custom mapper               | [Mappers & Binding System](./04-mappers-and-binding-system.md) | Creating Custom Mappers    |
-| Writing component tests                | [Testing Guide](./05-testing-guide.md)                         | Testing Field Components   |
+| Writing type tests                     | [Testing Guide](./05-testing-guide.md)                         | Type Tests                 |
+| Running E2E tests                      | [Testing Guide](./05-testing-guide.md)                         | E2E Testing                |
+| Visual regression testing              | [Testing Guide](./05-testing-guide.md)                         | Visual Regression Testing  |
 | Testing validation                     | [Testing Guide](./05-testing-guide.md)                         | Testing Validation         |
 | Releasing a new version                | [Release Process](./06-release-process.md)                     | Release Workflow           |
 | Creating a hotfix release              | [Release Process](./06-release-process.md)                     | Hotfix Workflow            |
@@ -128,14 +132,15 @@ ng-forge is a type-safe, UI-agnostic dynamic forms library for Angular 21+ that 
 2. Read [Type System Deep Dive](./02-type-system-deep-dive.md) sections on module augmentation
 3. Follow [Creating a UI Adapter](./03-creating-ui-adapter.md) step-by-step
 4. Reference [Mappers & Binding System](./04-mappers-and-binding-system.md) for custom mappers
-5. Implement tests following [Testing Guide](./05-testing-guide.md)
+5. Write type tests for each field type: [Testing Guide](./05-testing-guide.md) - Type Tests
+6. Add E2E tests to the corresponding example app: [Testing Guide](./05-testing-guide.md) - E2E Testing
 
 ### For Creating a Custom Field Type
 
 1. Understand field component patterns: [Creating a UI Adapter](./03-creating-ui-adapter.md) - Step 4
 2. Create custom mapper if needed: [Mappers & Binding System](./04-mappers-and-binding-system.md)
 3. Register in field config: [Creating a UI Adapter](./03-creating-ui-adapter.md) - Step 6
-4. Write tests: [Testing Guide](./05-testing-guide.md)
+4. Write type test: [Testing Guide](./05-testing-guide.md) - Type Tests
 
 ### For Understanding Type Safety
 
