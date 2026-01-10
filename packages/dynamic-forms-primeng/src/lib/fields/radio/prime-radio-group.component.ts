@@ -60,11 +60,11 @@ export interface PrimeRadioGroupProps {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PrimeRadioGroupComponent<T = unknown> implements FormValueControl<T> {
+export class PrimeRadioGroupComponent<T = unknown> implements FormValueControl<T | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  // Required by FormValueControl
-  readonly value = model.required<T>();
+  // Value model - FormField directive binds form value to this
+  readonly value = model<T | undefined>(undefined);
 
   // Optional FormValueControl properties - Field directive will bind these
   readonly disabled = input<boolean>(false);

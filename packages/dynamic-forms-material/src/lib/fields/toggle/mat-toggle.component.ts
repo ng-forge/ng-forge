@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -11,13 +11,13 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-toggle',
-  imports: [MatSlideToggle, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatSlideToggle, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-slide-toggle
-      [field]="f"
+      [formField]="f"
       [color]="props()?.color || 'primary'"
       [labelPosition]="props()?.labelPosition || 'after'"
       [hideIcon]="props()?.hideIcon || false"

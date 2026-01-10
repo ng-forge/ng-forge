@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeSliderComponent, PrimeSliderProps } from './prime-slider.type';
@@ -8,7 +8,7 @@ import { Slider } from 'primeng/slider';
 
 @Component({
   selector: 'df-prime-slider',
-  imports: [Slider, Field, DynamicTextPipe, AsyncPipe],
+  imports: [Slider, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -22,7 +22,7 @@ import { Slider } from 'primeng/slider';
 
       <p-slider
         [id]="key()"
-        [field]="f"
+        [formField]="f"
         [step]="props()?.step ?? 1"
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
@@ -46,6 +46,7 @@ import { Slider } from 'primeng/slider';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [
@@ -89,11 +90,7 @@ export default class PrimeSliderFieldComponent implements PrimeSliderComponent {
       classes.push(styleClass);
     }
 
-    // Add p-invalid class when there are errors to display
-    if (this.errorsToDisplay().length > 0) {
-      classes.push('p-invalid');
-    }
-
+    // Note: p-invalid is handled by [invalid] input binding, not manual class
     return classes.join(' ');
   });
 

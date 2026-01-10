@@ -32,3 +32,58 @@
   color: var(--df-ionic-hint-color);
   font-size: var(--df-ionic-hint-font-size);
 }
+
+/**
+ * Error State Styling
+ *
+ * Angular 21.0.7+ automatically propagates form state (invalid, required, etc.)
+ * to component inputs. Unlike PrimeNG which uses input bindings, Ionic components
+ * rely on CSS classes for error styling.
+ *
+ * We apply error styles when both .df-invalid AND .df-touched are present on the host,
+ * which aligns with standard UX: show errors only after user interaction.
+ *
+ * Each Ionic component exposes CSS custom properties for theming, which we override
+ * to show the danger color when in error state.
+ */
+
+// Text inputs (ion-input, ion-textarea)
+:host(.df-invalid.df-touched) {
+  ion-input,
+  ion-textarea {
+    --highlight-color: var(--ion-color-danger);
+    --border-color: var(--ion-color-danger);
+  }
+}
+
+// Select dropdown
+:host(.df-invalid.df-touched) ion-select {
+  --highlight-color: var(--ion-color-danger);
+  --border-color: var(--ion-color-danger);
+}
+
+// Checkbox
+:host(.df-invalid.df-touched) ion-checkbox {
+  --checkbox-background-checked: var(--ion-color-danger);
+  --border-color: var(--ion-color-danger);
+  --border-color-checked: var(--ion-color-danger);
+}
+
+// Radio buttons
+:host(.df-invalid.df-touched) ion-radio {
+  --color: var(--ion-color-danger);
+  --color-checked: var(--ion-color-danger);
+}
+
+// Range slider
+:host(.df-invalid.df-touched) ion-range {
+  --bar-background: var(--ion-color-danger);
+  --knob-background: var(--ion-color-danger);
+}
+
+// Toggle switch
+:host(.df-invalid.df-touched) ion-toggle {
+  --track-background: var(--ion-color-danger-tint);
+  --track-background-checked: var(--ion-color-danger);
+  --handle-background-checked: var(--ion-color-danger-contrast);
+}

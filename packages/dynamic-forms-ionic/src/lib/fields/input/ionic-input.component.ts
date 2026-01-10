@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -9,7 +9,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 @Component({
   selector: 'df-ionic-input',
-  imports: [IonInput, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
     @let ariaInvalid = isAriaInvalid();
@@ -17,7 +17,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
     <ion-input
       [type]="props()?.type ?? 'text'"
-      [field]="f"
+      [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="effectiveLabelPlacement()"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -28,27 +28,24 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [shape]="effectiveShape()"
       [readonly]="f().readonly()"
       [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
-      [errorText]="f().invalid() && f().touched() ? ((props()?.errorText | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="ariaInvalid"
       [attr.aria-required]="ariaRequired"
-      [class.ion-invalid]="f().invalid()"
-      [class.ion-touched]="f().touched()"
-    >
-      <div slot="error">
-        @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-          <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
-        }
-      </div>
-    </ion-input>
+    />
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[class.df-invalid]': 'showErrors()',
+    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
       :host([hidden]) {

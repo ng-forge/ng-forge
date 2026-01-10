@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { ValidationMessages } from '@ng-forge/dynamic-forms';
 
 @Component({
   selector: 'df-test-input',
-  template: `<input [type]="type()" [field]="field()" />`,
+  template: `<input [type]="type()" [formField]="field()" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Field],
+  imports: [FormField],
 })
 export default class TestInputHarness {
   readonly field = input.required<FieldTree<string>>();

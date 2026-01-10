@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsSliderComponent, BsSliderProps } from './bs-slider.type';
@@ -8,7 +8,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
 
 @Component({
   selector: 'df-bs-slider',
-  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
+  imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -28,7 +28,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
       <input
         type="range"
         dfBsInputConstraints
-        [field]="f"
+        [formField]="f"
         [id]="key()"
         [dfMin]="props()?.min ?? min()"
         [dfMax]="props()?.max ?? max()"

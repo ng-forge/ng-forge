@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 
 @Component({
   selector: 'df-test-button',
-  template: `<button type="button" [field]="field()" (click)="handleClick()">{{ label() || 'Button' }}</button>`,
+  template: `<button type="button" [formField]="field()" (click)="handleClick()">{{ label() || 'Button' }}</button>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Field],
+  imports: [FormField],
 })
 export default class TestButtonHarness {
   readonly field = input.required<FieldTree<string>>();

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonItem, IonNote, IonRadio, IonRadioGroup } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -8,7 +8,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-ionic-radio',
-  imports: [IonRadioGroup, IonRadio, IonItem, IonNote, Field, DynamicTextPipe, AsyncPipe],
+  imports: [IonRadioGroup, IonRadio, IonItem, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
     @if (label(); as label) {
@@ -16,7 +16,7 @@ import { AsyncPipe } from '@angular/common';
     }
 
     <ion-radio-group
-      [field]="f"
+      [formField]="f"
       [compareWith]="props()?.compareWith || defaultCompare"
       [attr.aria-invalid]="isAriaInvalid()"
       [attr.aria-required]="isRequired() || null"
@@ -40,6 +40,7 @@ import { AsyncPipe } from '@angular/common';
       <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
     }
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
       :host {
@@ -60,6 +61,8 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className()',
+    '[class.df-invalid]': 'showErrors()',
+    '[class.df-touched]': 'field()().touched()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',

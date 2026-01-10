@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsRadioComponent, BsRadioProps } from './bs-radio.type';
@@ -8,7 +8,7 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
 
 @Component({
   selector: 'df-bs-radio',
-  imports: [BsRadioGroupComponent, Field, DynamicTextPipe, AsyncPipe],
+  imports: [BsRadioGroupComponent, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
@@ -20,7 +20,7 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
       }
 
       <df-bs-radio-group
-        [field]="$any(f)"
+        [formField]="$any(f)"
         [label]="label()"
         [options]="options()"
         [properties]="props()"

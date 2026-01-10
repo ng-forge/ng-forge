@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsDatepickerComponent, BsDatepickerProps } from './bs-datepicker.type';
@@ -8,7 +8,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
 
 @Component({
   selector: 'df-bs-datepicker',
-  imports: [Field, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
+  imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -18,7 +18,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
       <div class="form-floating mb-3">
         <input
           dfBsInputConstraints
-          [field]="f"
+          [formField]="f"
           [id]="key()"
           type="date"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
@@ -55,7 +55,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
 
         <input
           dfBsInputConstraints
-          [field]="f"
+          [formField]="f"
           [id]="key()"
           type="date"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"

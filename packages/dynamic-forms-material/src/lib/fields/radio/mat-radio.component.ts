@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
-import { Field, FieldTree } from '@angular/forms/signals';
+import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
@@ -9,7 +9,7 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-mat-radio',
-  imports: [MatRadioGroup, MatRadioButton, Field, MatError, DynamicTextPipe, AsyncPipe],
+  imports: [MatRadioGroup, MatRadioButton, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
@@ -20,7 +20,7 @@ import { AsyncPipe } from '@angular/common';
     }
 
     <mat-radio-group
-      [field]="f"
+      [formField]="f"
       [attr.aria-invalid]="ariaInvalid"
       [attr.aria-required]="ariaRequired"
       [attr.aria-describedby]="ariaDescribedBy"

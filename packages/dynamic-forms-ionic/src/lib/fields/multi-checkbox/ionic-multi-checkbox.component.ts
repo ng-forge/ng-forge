@@ -22,7 +22,14 @@ import { AsyncPipe } from '@angular/common';
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
-    <div class="checkbox-group" role="group" [attr.aria-invalid]="isAriaInvalid()" [attr.aria-required]="isRequired() || null">
+    <div
+      class="checkbox-group"
+      role="group"
+      [attr.aria-invalid]="isAriaInvalid()"
+      [attr.aria-required]="isRequired() || null"
+      [class.ion-invalid]="showErrors()"
+      [class.ion-touched]="field()().touched()"
+    >
       @for (option of options(); track option.value) {
         <ion-item lines="none">
           <ion-checkbox
@@ -43,6 +50,7 @@ import { AsyncPipe } from '@angular/common';
       <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
     }
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
       :host {
@@ -72,6 +80,8 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className() || ""',
+    '[class.df-invalid]': 'showErrors()',
+    '[class.df-touched]': 'field()().touched()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',

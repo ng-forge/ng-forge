@@ -102,9 +102,8 @@ test.describe('Accessibility Tests', () => {
       const usernameIonInput = scenario.locator('#username ion-input');
       await expect(usernameIonInput).toHaveAttribute('aria-invalid', 'true', { timeout: 5000 });
 
-      // Error messages in Ionic are rendered in a slot and should have role="alert"
-      // Note: errors may be hidden via CSS depending on implementation
-      const errorContainer = scenario.locator('#username [slot="error"] ion-note[color="danger"]');
+      // Error messages should be visible ion-note elements with role="alert"
+      const errorContainer = scenario.locator('#username ion-note.df-ionic-error[color="danger"]');
       const errorCount = await errorContainer.count();
       expect(errorCount).toBeGreaterThan(0);
     });
@@ -131,9 +130,9 @@ test.describe('Accessibility Tests', () => {
       await expect(usernameIonInput).toHaveAttribute('aria-invalid', 'true', { timeout: 5000 });
       await expect(emailIonInput).toHaveAttribute('aria-invalid', 'true', { timeout: 5000 });
 
-      // Error elements should exist in the DOM (may be hidden via CSS)
-      const usernameErrors = scenario.locator('#username [slot="error"] ion-note[color="danger"]');
-      const emailErrors = scenario.locator('#email [slot="error"] ion-note[color="danger"]');
+      // Error elements should be visible ion-note elements
+      const usernameErrors = scenario.locator('#username ion-note.df-ionic-error[color="danger"]');
+      const emailErrors = scenario.locator('#email ion-note.df-ionic-error[color="danger"]');
 
       expect(await usernameErrors.count()).toBeGreaterThan(0);
       expect(await emailErrors.count()).toBeGreaterThan(0);

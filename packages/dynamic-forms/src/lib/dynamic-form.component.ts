@@ -87,6 +87,7 @@ import { DynamicFormLogger } from './providers/features/logger/logger.token';
   providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
   host: {
     class: 'df-dynamic-form df-form',
+    novalidate: '', // Disable browser validation - Angular Signal Forms handles validation
     '[class.disabled]': 'disabled()',
     '[class.df-form-paged]': 'formModeDetection().mode === "paged"',
     '[class.df-form-non-paged]': 'formModeDetection().mode === "non-paged"',
