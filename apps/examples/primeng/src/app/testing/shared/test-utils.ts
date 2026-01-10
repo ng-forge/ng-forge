@@ -1,4 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
+import { logTestResult } from '../../../../../shared/testing';
 
 /**
  * Base URL for the test application
@@ -131,11 +132,5 @@ export async function waitForFieldHidden(field: Locator, timeout = 5000): Promis
   await expect(field).not.toBeVisible({ timeout });
 }
 
-/**
- * Logs test result on pass (for use in afterEach)
- */
-export function logTestResult(testInfo: { status?: string; title: string }): void {
-  if (testInfo.status === 'passed') {
-    console.info(`✅ TEST PASSED: ${testInfo.title}`);
-  }
-}
+// Re-export for convenience
+export { logTestResult };

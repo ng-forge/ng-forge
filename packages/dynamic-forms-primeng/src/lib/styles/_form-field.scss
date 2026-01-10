@@ -76,8 +76,9 @@
  * This CSS override hides invalid styling until the field is touched (.ng-touched),
  * which aligns with standard UX: show errors only after user interaction.
  *
- * NOTE: ::ng-deep is required because PrimeNG elements don't have Angular's
- * _ngcontent attribute, so view-encapsulated styles won't match.
+ * ::ng-deep is required because PrimeNG elements don't receive Angular's _ngcontent
+ * attribute, so view-encapsulated styles won't match. The selector is scoped to
+ * :host to prevent style leakage.
  */
 :host(:not(.ng-touched)) ::ng-deep {
   // Reset border colors for invalid inputs that haven't been touched

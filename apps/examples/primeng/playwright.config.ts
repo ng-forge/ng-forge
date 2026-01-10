@@ -56,6 +56,15 @@ export default defineConfig({
   /* Expect timeout - how long to wait for expect() assertions */
   expect: {
     timeout: 5000,
+    /* Snapshot comparison thresholds for visual regression tests */
+    toHaveScreenshot: {
+      /* 1% of pixels can differ - catches real changes while allowing anti-aliasing differences */
+      maxDiffPixelRatio: 0.01,
+      /* 20% color difference tolerance per pixel */
+      threshold: 0.2,
+      /* Disable animations for consistent snapshots */
+      animations: 'disabled',
+    },
   },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {

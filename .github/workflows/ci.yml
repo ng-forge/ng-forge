@@ -260,7 +260,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
+        include:
+          - app: bootstrap-examples
+            short: bootstrap
+          - app: material-examples
+            short: material
+          - app: primeng-examples
+            short: primeng
+          - app: ionic-examples
+            short: ionic
 
     steps:
       - name: Checkout
@@ -294,14 +302,14 @@ jobs:
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Run E2E tests in Docker
-        run: pnpm e2e:${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}
+        run: pnpm e2e:${{ matrix.short }}
 
       - name: Upload test results on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report-${{ matrix.app }}
-          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/
+          path: dist/.playwright/apps/examples/${{ matrix.short }}/
           retention-days: 7
 
       - name: Upload screenshots
@@ -310,7 +318,7 @@ jobs:
         with:
           name: screenshots-${{ matrix.app }}
           path: |
-            apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/test-results/screenshots/
+            apps/examples/${{ matrix.short }}/test-results/screenshots/
           if-no-files-found: ignore
           retention-days: 30
 
@@ -320,7 +328,7 @@ jobs:
         with:
           name: visual-diffs-${{ matrix.app }}
           path: |
-            apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/test-results/**/*-diff.png
-            apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/test-results/**/*-actual.png
+            apps/examples/${{ matrix.short }}/test-results/**/*-diff.png
+            apps/examples/${{ matrix.short }}/test-results/**/*-actual.png
           if-no-files-found: ignore
           retention-days: 7

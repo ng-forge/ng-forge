@@ -42,17 +42,9 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       }
     </mat-form-field>
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-        width: 100%;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
       mat-form-field {
         width: 100%;
       }

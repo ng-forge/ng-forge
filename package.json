@@ -19,6 +19,8 @@
     "test:watch": "nx run-many -t test --watch",
     "lint": "nx run-many -t lint",
     "lint:fix": "nx run-many -t lint --fix",
+    "e2e:all": "pnpm e2e:material && pnpm e2e:bootstrap && pnpm e2e:primeng && pnpm e2e:ionic",
+    "e2e:all:update": "pnpm e2e:material:update && pnpm e2e:bootstrap:update && pnpm e2e:primeng:update && pnpm e2e:ionic:update",
     "e2e:bootstrap": "./scripts/playwright-docker.sh bootstrap-examples",
     "e2e:material": "./scripts/playwright-docker.sh material-examples",
     "e2e:primeng": "./scripts/playwright-docker.sh primeng-examples",

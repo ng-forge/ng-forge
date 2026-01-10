@@ -34,12 +34,9 @@ import { AsyncPipe } from '@angular/common';
       {{ label() | dynamicText | async }}
     </button>
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-      }
-
       button {
         min-width: fit-content;
       }
