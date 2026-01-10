@@ -62,15 +62,20 @@ export default defineConfig({
     baseURL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    /* Save screenshots to ionic examples folder */
+    /* Save screenshots on failure for debugging */
     screenshot: 'only-on-failure',
     /* Add action timeout to prevent hangs */
     actionTimeout: 5000,
     /* Navigation timeout - prevents page.goto() from hanging */
     navigationTimeout: 10000,
   },
-  /* Configure output directories */
-  outputDir: './screenshots',
+  /* Configure output directories for test artifacts */
+  outputDir: './test-results',
+  /* Store baseline snapshots in src directory (committed to git) */
+  /* Use Docker (scripts/playwright-docker.sh) locally to match CI rendering */
+  snapshotDir: './src/app/testing/__snapshots__',
+  /* Configure snapshot path template */
+  snapshotPathTemplate: '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{ext}',
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'pnpm exec nx run ionic-examples:serve --port 4203',

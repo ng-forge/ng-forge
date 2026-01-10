@@ -293,27 +293,34 @@ jobs:
             dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
-      - name: Get Playwright version
-        id: playwright-version
-        run: echo "version=$(pnpm exec playwright --version | head -1)" >> $GITHUB_OUTPUT
+      - name: Run E2E tests in Docker
+        run: pnpm e2e:${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
-
-      - name: Run E2E tests
-        run: pnpm nx run ${{ matrix.app }}:e2e
-
-      - name: Upload test results
+      - name: Upload test results on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report-${{ matrix.app }}
           path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/
+          retention-days: 7
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-${{ matrix.app }}
+          path: |
+            apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/test-results/screenshots/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Upload visual diff images on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-diffs-${{ matrix.app }}
+          path: |
+            apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/test-results/**/*-diff.png
+            apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/test-results/**/*-actual.png
+          if-no-files-found: ignore
           retention-days: 7

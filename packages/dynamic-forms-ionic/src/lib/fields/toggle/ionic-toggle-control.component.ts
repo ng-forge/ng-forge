@@ -33,10 +33,7 @@ import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
     </ion-toggle>
   `,
   styleUrl: '../../styles/_form-field.scss',
-  host: {
-    '[class.df-invalid]': 'invalid() && touched()',
-    '[class.df-touched]': 'touched()',
-  },
+  host: {},
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IonicToggleControlComponent implements FormCheckboxControl {

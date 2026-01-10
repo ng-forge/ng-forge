@@ -97,6 +97,30 @@ export interface TestHelpers {
   waitForFieldHidden: (field: Locator, timeout?: number) => Promise<void>;
   /** Blur (unfocus) an input to trigger error display */
   blurInput: (input: Locator) => Promise<void>;
+  /**
+   * Assert that an error message is visible for a field.
+   * This checks both existence AND visibility, catching styling issues where errors exist in DOM but aren't displayed.
+   */
+  expectErrorVisible: (scenario: Locator, fieldId: string, options?: { timeout?: number }) => Promise<void>;
+  /**
+   * Assert that no error message is visible for a field.
+   */
+  expectNoErrorVisible: (scenario: Locator, fieldId: string, options?: { timeout?: number }) => Promise<void>;
+  /**
+   * Take a screenshot of a scenario for visual verification.
+   * Screenshots are saved to test-results directory with descriptive names.
+   */
+  takeScreenshot: (scenario: Locator, name: string) => Promise<void>;
+  /**
+   * Compare a screenshot against a baseline for visual regression testing.
+   * On first run, creates the baseline. On subsequent runs, compares and fails if different.
+   * Baselines are stored in __snapshots__ directory and should be committed to git.
+   *
+   * @param scenario - The locator to screenshot
+   * @param name - Unique name for this snapshot (will be used as filename)
+   * @param options - Optional threshold settings
+   */
+  expectScreenshotMatch: (scenario: Locator, name: string, options?: { maxDiffPixelRatio?: number; threshold?: number }) => Promise<void>;
 }
 
 /**
@@ -347,6 +371,52 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
       blurInput: async (input: Locator) => {
         await input.blur();
         await page.waitForTimeout(200); // Wait for validation to trigger
+      },
+
+      expectErrorVisible: async (scenario: Locator, fieldId: string, options?: { timeout?: number }) => {
+        const timeout = options?.timeout ?? 5000;
+        const errorLocator = scenario.locator(`#${fieldId} .invalid-feedback`).first();
+
+        // First check that the error element exists
+        await expect(errorLocator).toBeAttached({ timeout });
+
+        // Then verify it's actually visible (not hidden by CSS)
+        await expect(errorLocator).toBeVisible({ timeout });
+
+        // Additionally check it has actual text content
+        const textContent = await errorLocator.textContent();
+        expect(textContent?.trim().length).toBeGreaterThan(0);
+      },
+
+      expectNoErrorVisible: async (scenario: Locator, fieldId: string, options?: { timeout?: number }) => {
+        const timeout = options?.timeout ?? 5000;
+        const errorLocator = scenario.locator(`#${fieldId} .invalid-feedback`);
+
+        // Either no error elements exist, or they're not visible
+        const count = await errorLocator.count();
+        if (count > 0) {
+          // If elements exist, they should not be visible
+          await expect(errorLocator.first()).not.toBeVisible({ timeout });
+        }
+      },
+
+      takeScreenshot: async (scenario: Locator, name: string) => {
+        // Take a screenshot of the scenario element
+        await scenario.screenshot({
+          path: `test-results/screenshots/${name}.png`,
+          animations: 'disabled',
+        });
+      },
+
+      expectScreenshotMatch: async (scenario: Locator, name: string, options?: { maxDiffPixelRatio?: number; threshold?: number }) => {
+        // Compare screenshot against baseline
+        // First run creates baseline, subsequent runs compare
+        await expect(scenario).toHaveScreenshot(`${name}.png`, {
+          animations: 'disabled',
+          // Allow small differences for anti-aliasing and font rendering
+          maxDiffPixelRatio: options?.maxDiffPixelRatio ?? 0.01,
+          threshold: options?.threshold ?? 0.2,
+        });
       },
     };
 

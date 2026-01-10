@@ -1,0 +1,21 @@
+services:
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.57.0-noble
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - playwright-cache:/root/.cache/ms-playwright
+    environment:
+      - CI=true
+      - E2E_BROWSERS=${E2E_BROWSERS:-chromium}
+    network_mode: host
+    command: >
+      bash -c "
+        pnpm install --frozen-lockfile &&
+        pnpm exec playwright install chromium &&
+        ${PLAYWRIGHT_CMD:-echo 'No command specified'}
+      "
+
+volumes:
+  playwright-cache:

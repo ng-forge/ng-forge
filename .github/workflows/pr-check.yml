@@ -354,39 +354,39 @@ jobs:
             echo "affected=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Get Playwright version
+      - name: Run E2E tests in Docker
         if: steps.check-affected.outputs.affected == 'true'
-        id: playwright-version
-        run: echo "version=$(pnpm exec playwright --version | head -1)" >> $GITHUB_OUTPUT
-
-      - name: Cache Playwright browsers
-        if: steps.check-affected.outputs.affected == 'true'
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-chromium
-
-      - name: Install Playwright browser
-        if: steps.check-affected.outputs.affected == 'true'
-        run: pnpm exec playwright install chromium --with-deps
-
-      - name: Run E2E tests
-        if: steps.check-affected.outputs.affected == 'true'
-        env:
-          E2E_BROWSERS: chromium
-        run: |
-          echo "Running e2e tests for ${{ matrix.app }}..."
-          pnpm nx run ${{ matrix.app }}:e2e
+        run: pnpm e2e:${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}
 
       - name: Skip E2E tests (not affected)
         if: steps.check-affected.outputs.affected == 'false'
         run: echo "E2E tests for ${{ matrix.app }} not affected, skipping"
 
-      - name: Upload test results
+      - name: Upload test results on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report-pr-${{ matrix.app }}
           path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/
+          retention-days: 7
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: always() && steps.check-affected.outputs.affected == 'true'
+        with:
+          name: screenshots-${{ matrix.app }}
+          path: |
+            apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/test-results/screenshots/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Upload visual diff images on failure
+        uses: actions/upload-artifact@v4
+        if: failure() && steps.check-affected.outputs.affected == 'true'
+        with:
+          name: visual-diffs-${{ matrix.app }}
+          path: |
+            apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/test-results/**/*-diff.png
+            apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/test-results/**/*-actual.png
+          if-no-files-found: ignore
           retention-days: 7

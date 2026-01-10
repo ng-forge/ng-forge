@@ -70,7 +70,12 @@ export default defineConfig({
     navigationTimeout: 10000,
   },
   /* Configure output directories */
-  outputDir: './screenshots',
+  outputDir: './test-results',
+  /* Store baseline snapshots in src directory (committed to git) */
+  /* Use Docker (scripts/playwright-docker.sh) locally to match CI rendering */
+  snapshotDir: './src/app/testing/__snapshots__',
+  /* Configure snapshot path template */
+  snapshotPathTemplate: '{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{ext}',
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'pnpm exec nx run bootstrap-examples:serve --port 4204',

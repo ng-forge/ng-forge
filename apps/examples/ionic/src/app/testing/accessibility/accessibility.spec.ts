@@ -86,12 +86,15 @@ test.describe('Accessibility Tests', () => {
       await page.waitForLoadState('networkidle');
     });
 
-    test('error messages should have role="alert"', async ({ page, helpers }) => {
+    test('error messages should have role="alert" and be visible', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('error-announcements');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
       await page.waitForSelector('[data-testid="error-announcements"] #username input', { state: 'visible', timeout: 10000 });
       const usernameInput = scenario.locator('#username input');
+
+      // Visual regression: compare empty state against baseline
+      await helpers.expectScreenshotMatch(scenario, 'ionic-error-announcements-empty');
 
       // Trigger validation error - focus, enter short value, blur
       await usernameInput.fill('ab'); // Too short
@@ -102,10 +105,15 @@ test.describe('Accessibility Tests', () => {
       const usernameIonInput = scenario.locator('#username ion-input');
       await expect(usernameIonInput).toHaveAttribute('aria-invalid', 'true', { timeout: 5000 });
 
-      // Error messages should be visible ion-note elements with role="alert"
-      const errorContainer = scenario.locator('#username ion-note.df-ionic-error[color="danger"]');
-      const errorCount = await errorContainer.count();
-      expect(errorCount).toBeGreaterThan(0);
+      // Error messages should be VISIBLE (not just exist in DOM) - this catches styling issues
+      await helpers.expectErrorVisible(scenario, 'username');
+
+      // Visual regression: compare error state against baseline
+      await helpers.expectScreenshotMatch(scenario, 'ionic-error-announcements-with-error');
+
+      // Additionally verify role="alert" for screen reader announcements
+      const errorNote = scenario.locator('#username ion-note[color="danger"]').first();
+      await expect(errorNote).toHaveAttribute('role', 'alert');
     });
 
     test('multiple errors should each be properly identified', async ({ page, helpers }) => {

@@ -45,7 +45,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.df-touched]': 'field()().touched()',
+    '[class.ng-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [
