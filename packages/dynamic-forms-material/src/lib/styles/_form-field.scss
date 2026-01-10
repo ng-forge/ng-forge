@@ -6,10 +6,11 @@
  *
  * --df-field-gap: gap between label, input, and hint (default: 0.5rem)
  * --df-label-font-weight: label font weight (default: 500)
+ * --df-label-color: label text color (default: inherit)
  * --df-hint-color: hint text color (default: rgba(0, 0, 0, 0.6))
- * --df-hint-font-size: hint text size (default: 0.75rem)
+ * --df-hint-font-size: hint text size (default: 0.875rem)
  * --df-error-color: error text color (default: #f44336)
- * --df-error-font-size: error text size (default: 0.75rem)
+ * --df-error-font-size: error text size (default: 0.875rem)
  *
  * Note: Material components primarily use Angular Material's native theming.
  * These variables provide additional customization for non-Material elements.
@@ -22,10 +23,11 @@
 :host {
   --df-field-gap: 0.5rem;
   --df-label-font-weight: 500;
+  --df-label-color: inherit;
   --df-hint-color: rgba(0, 0, 0, 0.6);
-  --df-hint-font-size: 0.75rem;
+  --df-hint-font-size: 0.875rem;
   --df-error-color: #f44336;
-  --df-error-font-size: 0.75rem;
+  --df-error-font-size: 0.875rem;
 
   display: block;
   width: 100%;
@@ -52,6 +54,7 @@
 
 .df-mat-label {
   font-weight: var(--df-label-font-weight);
+  color: var(--df-label-color);
 }
 
 .df-mat-hint {

@@ -7,7 +7,7 @@ import { IonicSliderComponent, IonicSliderProps } from './ionic-slider.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'df-ionic-slider',
+  selector: 'df-ion-slider',
   imports: [IonRange, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();

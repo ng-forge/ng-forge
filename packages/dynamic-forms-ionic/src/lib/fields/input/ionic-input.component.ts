@@ -8,7 +8,7 @@ import { AsyncPipe } from '@angular/common';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 @Component({
-  selector: 'df-ionic-input',
+  selector: 'df-ion-input',
   imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
@@ -33,7 +33,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [attr.aria-required]="ariaRequired"
     />
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

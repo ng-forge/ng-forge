@@ -14,7 +14,7 @@ import { IonicMultiCheckboxComponent, IonicMultiCheckboxProps } from './ionic-mu
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'df-ionic-multi-checkbox',
+  selector: 'df-ion-multi-checkbox',
   imports: [IonCheckbox, IonItem, IonNote, ValueInArrayPipe, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();

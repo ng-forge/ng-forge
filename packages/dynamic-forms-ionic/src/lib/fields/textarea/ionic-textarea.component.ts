@@ -7,7 +7,7 @@ import { IonicTextareaComponent, IonicTextareaProps } from './ionic-textarea.typ
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'df-ionic-textarea',
+  selector: 'df-ion-textarea',
   imports: [IonTextarea, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
@@ -32,7 +32,7 @@ import { AsyncPipe } from '@angular/common';
       [attr.aria-required]="ariaRequired"
     />
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

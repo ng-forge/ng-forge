@@ -64,8 +64,8 @@ async function waitForFieldComponents(fixture: ComponentFixture<any>, timeoutMs 
 
     // Check for Ionic field components
     const ionicComponents = formElement.querySelectorAll(
-      'df-ionic-input, df-ionic-select, df-ionic-checkbox, df-ionic-radio, df-ionic-toggle, ' +
-        'df-ionic-textarea, df-ionic-datepicker, df-ionic-slider, df-ionic-button, df-ionic-multi-checkbox, ' +
+      'df-ion-input, df-ion-select, df-ion-checkbox, df-ion-radio, df-ion-toggle, ' +
+        'df-ion-textarea, df-ion-datepicker, df-ion-slider, df-ion-button, df-ion-multi-checkbox, ' +
         'ion-input, ion-select, ion-checkbox, ion-radio, ion-toggle, ion-textarea, ' +
         'ion-datetime, ion-range, ion-button, [data-testid]',
     );

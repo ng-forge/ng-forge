@@ -7,7 +7,7 @@ import { IonicCheckboxComponent, IonicCheckboxProps } from './ionic-checkbox.typ
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'df-ionic-checkbox',
+  selector: 'df-ion-checkbox',
   imports: [IonCheckbox, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();

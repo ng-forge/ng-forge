@@ -6,6 +6,7 @@
  *
  * --df-field-gap: gap between label, input, and hint (default: 0.5rem)
  * --df-label-font-weight: label font weight (default: 500)
+ * --df-label-color: label text color (default: inherit)
  * --df-hint-color: hint text color (default: --ion-color-medium)
  * --df-hint-font-size: hint text size (default: 0.875rem)
  * --df-error-color: error text color (default: --ion-color-danger)
@@ -19,6 +20,7 @@
 :host {
   --df-field-gap: 0.5rem;
   --df-label-font-weight: 500;
+  --df-label-color: inherit;
   --df-hint-color: var(--ion-color-medium, #92949c);
   --df-hint-font-size: 0.875rem;
   --df-error-color: var(--ion-color-danger, #eb445a);
@@ -29,23 +31,24 @@
 // Field Layout
 // ============================================
 
-.df-ionic-field {
+.df-ion-field {
   display: flex;
   flex-direction: column;
   gap: var(--df-field-gap);
   width: 100%;
 }
 
-.df-ionic-label {
+.df-ion-label {
   font-weight: var(--df-label-font-weight);
+  color: var(--df-label-color);
 }
 
-.df-ionic-hint {
+.df-ion-hint {
   color: var(--df-hint-color);
   font-size: var(--df-hint-font-size);
 }
 
-.df-ionic-error {
+.df-ion-error {
   color: var(--df-error-color);
   font-size: var(--df-error-font-size);
 }

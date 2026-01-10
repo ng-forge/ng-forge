@@ -7,7 +7,7 @@ import { IonicRadioComponent, IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'df-ionic-radio',
+  selector: 'df-ion-radio',
   imports: [IonRadioGroup, IonRadio, IonItem, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();

@@ -8,12 +8,12 @@ import { IonicToggleControlComponent } from './ionic-toggle-control.component';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'df-ionic-toggle',
+  selector: 'df-ion-toggle',
   imports: [IonicToggleControlComponent, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
 
-    <df-ionic-toggle-control
+    <df-ion-toggle-control
       [formField]="f"
       [meta]="meta()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
@@ -23,7 +23,7 @@ import { AsyncPipe } from '@angular/common';
       [tabIndex]="tabIndex()"
     >
       {{ label() | dynamicText | async }}
-    </df-ionic-toggle-control>
+    </df-ion-toggle-control>
 
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
