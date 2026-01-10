@@ -18,6 +18,9 @@ test.describe('Comprehensive Bootstrap Field Tests', () => {
       const scenario = helpers.getScenario('comprehensive-fields-test');
       await expect(scenario).toBeVisible();
 
+      // Visual regression: empty form state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-comprehensive-fields-empty');
+
       // Test Text Input
       await expect(scenario.locator('#textInput input')).toBeVisible();
       await scenario.locator('#textInput input').fill('Test text value');
@@ -70,6 +73,9 @@ test.describe('Comprehensive Bootstrap Field Tests', () => {
       // Test Slider Field (Bootstrap uses native range input)
       await expect(scenario.locator('#sliderField input[type="range"]')).toBeVisible();
       await scenario.locator('#sliderField input[type="range"]').fill('70');
+
+      // Visual regression: filled form state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-comprehensive-fields-filled');
 
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
@@ -125,6 +131,9 @@ test.describe('Comprehensive Bootstrap Field Tests', () => {
       // Button should still be disabled due to validation errors
       await expect(submitButton).toBeDisabled();
 
+      // Visual regression: validation errors state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-validation-with-errors');
+
       // Now fill with valid data
       await scenario.locator('#requiredText input').fill('Valid text input');
       await scenario.locator('#emailValidation input').fill('valid@example.com');
@@ -133,6 +142,9 @@ test.describe('Comprehensive Bootstrap Field Tests', () => {
 
       // Button should now be enabled
       await expect(submitButton).toBeEnabled();
+
+      // Visual regression: valid form state
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-validation-valid');
 
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
@@ -188,8 +200,14 @@ test.describe('Comprehensive Bootstrap Field Tests', () => {
       await scenario.locator('#thirdWidth2 input').fill('Third 2');
       await scenario.locator('#thirdWidth3 input').fill('Third 3');
 
+      // Visual regression: grid layout desktop
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-grid-layout-desktop');
+
       // Test mobile layout
       await page.setViewportSize({ width: 375, height: 667 }); // iPhone 6/7/8 size
+
+      // Visual regression: grid layout mobile
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-grid-layout-mobile');
 
       // Fields should still be visible and functional on mobile
       await expect(scenario.getByTestId('fullWidth')).toBeVisible();

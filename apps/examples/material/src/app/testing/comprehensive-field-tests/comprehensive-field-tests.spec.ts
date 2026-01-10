@@ -18,6 +18,9 @@ test.describe('Comprehensive Material Field Tests', () => {
       const scenario = helpers.getScenario('comprehensive-fields-test');
       await expect(scenario).toBeVisible();
 
+      // Visual regression: empty form state
+      await helpers.expectScreenshotMatch(scenario, 'material-comprehensive-fields-empty');
+
       // Test Text Input
       await expect(scenario.locator('#textInput input')).toBeVisible();
       await scenario.locator('#textInput input').fill('Test text value');
@@ -79,6 +82,9 @@ test.describe('Comprehensive Material Field Tests', () => {
         await page.keyboard.press('ArrowRight');
       }
 
+      // Visual regression: filled form state
+      await helpers.expectScreenshotMatch(scenario, 'material-comprehensive-fields-filled');
+
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
         () =>
@@ -133,6 +139,9 @@ test.describe('Comprehensive Material Field Tests', () => {
       // Button should still be disabled due to validation errors
       await expect(submitButton).toBeDisabled();
 
+      // Visual regression: validation errors state
+      await helpers.expectScreenshotMatch(scenario, 'material-validation-with-errors');
+
       // Now fill with valid data
       await scenario.locator('#requiredText input').fill('Valid text input');
       await scenario.locator('#emailValidation input').fill('valid@example.com');
@@ -143,6 +152,9 @@ test.describe('Comprehensive Material Field Tests', () => {
 
       // Button should now be enabled
       await expect(submitButton).toBeEnabled();
+
+      // Visual regression: valid form state
+      await helpers.expectScreenshotMatch(scenario, 'material-validation-valid');
 
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
@@ -198,8 +210,14 @@ test.describe('Comprehensive Material Field Tests', () => {
       await scenario.locator('#thirdWidth2 input').fill('Third 2');
       await scenario.locator('#thirdWidth3 input').fill('Third 3');
 
+      // Visual regression: grid layout desktop
+      await helpers.expectScreenshotMatch(scenario, 'material-grid-layout-desktop');
+
       // Test mobile layout
       await page.setViewportSize({ width: 375, height: 667 }); // iPhone 6/7/8 size
+
+      // Visual regression: grid layout mobile
+      await helpers.expectScreenshotMatch(scenario, 'material-grid-layout-mobile');
 
       // Fields should still be visible and functional on mobile
       await expect(scenario.locator('#fullWidth')).toBeVisible();
