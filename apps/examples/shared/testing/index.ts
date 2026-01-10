@@ -26,3 +26,7 @@ export {
   base,
   expect,
 } from './base-fixtures';
+
+// Playwright configuration
+export { createPlaywrightConfig, APP_PORTS } from './playwright-config';
+export type { ExampleApp } from './playwright-config';
