@@ -1,0 +1,629 @@
+[
+  {
+    "id": "login-form",
+    "name": "Login Form",
+    "description": "Simple authentication form with email and password",
+    "category": "authentication",
+    "config": {
+      "defaultValidationMessages": {
+        "required": "This field is required",
+        "minLength": "Must be at least {{requiredLength}} characters"
+      },
+      "fields": [
+        {
+          "key": "title",
+          "type": "text",
+          "label": "Sign In",
+          "props": { "elementType": "h2" }
+        },
+        {
+          "key": "email",
+          "type": "input",
+          "label": "Email Address",
+          "required": true,
+          "email": true,
+          "validationMessages": { "email": "Please enter a valid email address" },
+          "props": { "type": "email", "placeholder": "your@email.com" }
+        },
+        {
+          "key": "password",
+          "type": "input",
+          "label": "Password",
+          "required": true,
+          "minLength": 8,
+          "props": { "type": "password", "placeholder": "Enter your password" }
+        },
+        {
+          "key": "remember",
+          "type": "checkbox",
+          "label": "Remember me for 30 days"
+        },
+        {
+          "key": "submit",
+          "type": "submit",
+          "label": "Sign In",
+          "props": { "color": "primary" }
+        }
+      ]
+    }
+  },
+  {
+    "id": "user-registration",
+    "name": "User Registration",
+    "description": "Complete registration form with personal info, country selection, and newsletter opt-in",
+    "category": "authentication",
+    "config": {
+      "fields": [
+        {
+          "key": "firstName",
+          "type": "input",
+          "label": "First Name",
+          "required": true,
+          "minLength": 2,
+          "validationMessages": {
+            "required": "First name is required",
+            "minLength": "Must be at least {{requiredLength}} characters"
+          },
+          "props": { "placeholder": "Enter your first name" }
+        },
+        {
+          "key": "lastName",
+          "type": "input",
+          "label": "Last Name",
+          "required": true,
+          "minLength": 2,
+          "validationMessages": {
+            "required": "Last name is required",
+            "minLength": "Must be at least {{requiredLength}} characters"
+          },
+          "props": { "placeholder": "Enter your last name" }
+        },
+        {
+          "key": "email",
+          "type": "input",
+          "label": "Email Address",
+          "required": true,
+          "email": true,
+          "validationMessages": {
+            "required": "Email is required",
+            "email": "Please enter a valid email address"
+          },
+          "props": { "type": "email", "placeholder": "user@example.com" }
+        },
+        {
+          "key": "age",
+          "type": "input",
+          "label": "Age",
+          "required": true,
+          "min": 18,
+          "max": 120,
+          "validationMessages": {
+            "required": "Age is required",
+            "min": "Must be at least {{min}}",
+            "max": "Must not exceed {{max}}"
+          },
+          "props": { "type": "number", "placeholder": "18" }
+        },
+        {
+          "key": "country",
+          "type": "select",
+          "label": "Country",
+          "required": true,
+          "validationMessages": { "required": "Please select a country" },
+          "options": [
+            { "value": "us", "label": "United States" },
+            { "value": "uk", "label": "United Kingdom" },
+            { "value": "ca", "label": "Canada" },
+            { "value": "au", "label": "Australia" },
+            { "value": "de", "label": "Germany" }
+          ],
+          "props": { "placeholder": "Select your country" }
+        },
+        {
+          "key": "newsletter",
+          "type": "checkbox",
+          "label": "Subscribe to newsletter"
+        },
+        {
+          "key": "terms",
+          "type": "checkbox",
+          "label": "I agree to the terms and conditions",
+          "required": true,
+          "validationMessages": { "required": "You must accept the terms" }
+        },
+        {
+          "key": "submit",
+          "type": "submit",
+          "label": "Create Account",
+          "props": { "color": "primary" }
+        }
+      ]
+    }
+  },
+  {
+    "id": "contact-form",
+    "name": "Contact Form",
+    "description": "Basic contact form with name, email, and message",
+    "category": "contact",
+    "config": {
+      "defaultValidationMessages": {
+        "required": "This field is required"
+      },
+      "fields": [
+        {
+          "key": "nameRow",
+          "type": "row",
+          "fields": [
+            {
+              "key": "firstName",
+              "type": "input",
+              "label": "First Name",
+              "required": true,
+              "col": 6,
+              "props": { "placeholder": "Your first name" }
+            },
+            {
+              "key": "lastName",
+              "type": "input",
+              "label": "Last Name",
+              "required": true,
+              "col": 6,
+              "props": { "placeholder": "Your last name" }
+            }
+          ]
+        },
+        {
+          "key": "email",
+          "type": "input",
+          "label": "Email Address",
+          "required": true,
+          "email": true,
+          "validationMessages": { "email": "Please enter a valid email" },
+          "props": { "type": "email", "placeholder": "email@example.com" }
+        },
+        {
+          "key": "subject",
+          "type": "select",
+          "label": "Subject",
+          "required": true,
+          "options": [
+            { "value": "general", "label": "General Inquiry" },
+            { "value": "support", "label": "Technical Support" },
+            { "value": "billing", "label": "Billing Question" },
+            { "value": "feedback", "label": "Feedback" }
+          ],
+          "props": { "placeholder": "Select a subject" }
+        },
+        {
+          "key": "message",
+          "type": "textarea",
+          "label": "Message",
+          "required": true,
+          "minLength": 10,
+          "maxLength": 1000,
+          "validationMessages": {
+            "minLength": "Message must be at least {{requiredLength}} characters",
+            "maxLength": "Message cannot exceed {{requiredLength}} characters"
+          },
+          "props": { "rows": 5, "placeholder": "How can we help you?" }
+        },
+        {
+          "key": "submit",
+          "type": "submit",
+          "label": "Send Message",
+          "props": { "color": "primary" }
+        }
+      ]
+    }
+  },
+  {
+    "id": "address-form",
+    "name": "Address Form with Group",
+    "description": "Form demonstrating nested object structure using group fields",
+    "category": "data-entry",
+    "config": {
+      "defaultValidationMessages": {
+        "required": "This field is required"
+      },
+      "fields": [
+        {
+          "key": "name",
+          "type": "input",
+          "label": "Full Name",
+          "required": true
+        },
+        {
+          "key": "email",
+          "type": "input",
+          "label": "Email",
+          "required": true,
+          "email": true,
+          "props": { "type": "email" }
+        },
+        {
+          "key": "addressTitle",
+          "type": "text",
+          "label": "Shipping Address",
+          "props": { "elementType": "h4" }
+        },
+        {
+          "key": "address",
+          "type": "group",
+          "fields": [
+            {
+              "key": "street",
+              "type": "input",
+              "label": "Street Address",
+              "required": true
+            },
+            {
+              "key": "cityStateRow",
+              "type": "row",
+              "fields": [
+                { "key": "city", "type": "input", "label": "City", "required": true, "col": 6 },
+                { "key": "state", "type": "input", "label": "State", "required": true, "col": 3 },
+                {
+                  "key": "zip",
+                  "type": "input",
+                  "label": "ZIP",
+                  "required": true,
+                  "col": 3,
+                  "pattern": "^\\d{5}$",
+                  "validationMessages": { "pattern": "ZIP must be 5 digits" }
+                }
+              ]
+            },
+            {
+              "key": "country",
+              "type": "select",
+              "label": "Country",
+              "required": true,
+              "options": [
+                { "value": "us", "label": "United States" },
+                { "value": "ca", "label": "Canada" }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "submit",
+          "type": "submit",
+          "label": "Save Address"
+        }
+      ]
+    }
+  },
+  {
+    "id": "wizard-form",
+    "name": "Multi-Step Wizard",
+    "description": "Multi-page form with navigation between steps",
+    "category": "wizard",
+    "config": {
+      "defaultValidationMessages": {
+        "required": "This field is required"
+      },
+      "fields": [
+        {
+          "key": "step1",
+          "type": "page",
+          "fields": [
+            {
+              "key": "stepTitle1",
+              "type": "text",
+              "label": "Step 1: Personal Information",
+              "props": { "elementType": "h3" }
+            },
+            { "key": "firstName", "type": "input", "label": "First Name", "required": true },
+            { "key": "lastName", "type": "input", "label": "Last Name", "required": true },
+            { "key": "email", "type": "input", "label": "Email", "required": true, "email": true, "props": { "type": "email" } },
+            { "key": "next1", "type": "next", "label": "Continue" }
+          ]
+        },
+        {
+          "key": "step2",
+          "type": "page",
+          "fields": [
+            {
+              "key": "stepTitle2",
+              "type": "text",
+              "label": "Step 2: Address",
+              "props": { "elementType": "h3" }
+            },
+            { "key": "street", "type": "input", "label": "Street Address", "required": true },
+            { "key": "city", "type": "input", "label": "City", "required": true },
+            { "key": "state", "type": "input", "label": "State", "required": true },
+            {
+              "key": "navRow2",
+              "type": "row",
+              "fields": [
+                { "key": "prev2", "type": "previous", "label": "Back", "col": 6 },
+                { "key": "next2", "type": "next", "label": "Continue", "col": 6 }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "step3",
+          "type": "page",
+          "fields": [
+            {
+              "key": "stepTitle3",
+              "type": "text",
+              "label": "Step 3: Review & Submit",
+              "props": { "elementType": "h3" }
+            },
+            {
+              "key": "confirm",
+              "type": "checkbox",
+              "label": "I confirm all information is correct",
+              "required": true,
+              "validationMessages": { "required": "Please confirm before submitting" }
+            },
+            {
+              "key": "navRow3",
+              "type": "row",
+              "fields": [
+                { "key": "prev3", "type": "previous", "label": "Back", "col": 6 },
+                { "key": "submit", "type": "submit", "label": "Submit", "col": 6 }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "conditional-form",
+    "name": "Conditional Fields",
+    "description": "Form with fields that show/hide based on other field values",
+    "category": "advanced",
+    "config": {
+      "fields": [
+        {
+          "key": "accountType",
+          "type": "radio",
+          "label": "Account Type",
+          "required": true,
+          "options": [
+            { "value": "personal", "label": "Personal" },
+            { "value": "business", "label": "Business" }
+          ]
+        },
+        {
+          "key": "businessName",
+          "type": "input",
+          "label": "Business Name",
+          "logic": [
+            {
+              "type": "hidden",
+              "condition": {
+                "type": "fieldValue",
+                "fieldPath": "accountType",
+                "operator": "notEquals",
+                "value": "business"
+              }
+            },
+            {
+              "type": "required",
+              "condition": {
+                "type": "fieldValue",
+                "fieldPath": "accountType",
+                "operator": "equals",
+                "value": "business"
+              }
+            }
+          ],
+          "validationMessages": { "required": "Business name is required" }
+        },
+        {
+          "key": "taxId",
+          "type": "input",
+          "label": "Tax ID",
+          "logic": [
+            {
+              "type": "hidden",
+              "condition": {
+                "type": "fieldValue",
+                "fieldPath": "accountType",
+                "operator": "notEquals",
+                "value": "business"
+              }
+            }
+          ],
+          "props": { "placeholder": "XX-XXXXXXX" }
+        },
+        {
+          "key": "newsletter",
+          "type": "checkbox",
+          "label": "Subscribe to newsletter"
+        },
+        {
+          "key": "frequency",
+          "type": "select",
+          "label": "Email Frequency",
+          "options": [
+            { "value": "daily", "label": "Daily" },
+            { "value": "weekly", "label": "Weekly" },
+            { "value": "monthly", "label": "Monthly" }
+          ],
+          "logic": [
+            {
+              "type": "hidden",
+              "condition": {
+                "type": "fieldValue",
+                "fieldPath": "newsletter",
+                "operator": "notEquals",
+                "value": true
+              }
+            }
+          ]
+        },
+        {
+          "key": "submit",
+          "type": "submit",
+          "label": "Continue"
+        }
+      ]
+    }
+  },
+  {
+    "id": "emergency-contacts",
+    "name": "Dynamic Array Form",
+    "description": "Form with repeatable contact entries using array fields",
+    "category": "advanced",
+    "config": {
+      "defaultValidationMessages": {
+        "required": "This field is required"
+      },
+      "fields": [
+        {
+          "key": "name",
+          "type": "input",
+          "label": "Your Name",
+          "required": true
+        },
+        {
+          "key": "contactsTitle",
+          "type": "text",
+          "label": "Emergency Contacts",
+          "props": { "elementType": "h4" }
+        },
+        {
+          "key": "contacts",
+          "type": "array",
+          "label": "Contacts",
+          "fields": [
+            {
+              "key": "contact",
+              "type": "group",
+              "fields": [
+                {
+                  "key": "contactRow",
+                  "type": "row",
+                  "fields": [
+                    { "key": "name", "type": "input", "label": "Contact Name", "required": true, "col": 4 },
+                    { "key": "phone", "type": "input", "label": "Phone", "required": true, "col": 4, "props": { "type": "tel" } },
+                    {
+                      "key": "relationship",
+                      "type": "select",
+                      "label": "Relationship",
+                      "col": 4,
+                      "options": [
+                        { "value": "spouse", "label": "Spouse" },
+                        { "value": "parent", "label": "Parent" },
+                        { "value": "sibling", "label": "Sibling" },
+                        { "value": "friend", "label": "Friend" },
+                        { "value": "other", "label": "Other" }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "submit",
+          "type": "submit",
+          "label": "Save Contacts"
+        }
+      ]
+    }
+  },
+  {
+    "id": "survey-form",
+    "name": "Survey/Feedback Form",
+    "description": "Form with rating slider, radio options, and optional comments",
+    "category": "feedback",
+    "config": {
+      "fields": [
+        {
+          "key": "title",
+          "type": "text",
+          "label": "Customer Feedback",
+          "props": { "elementType": "h2" }
+        },
+        {
+          "key": "satisfaction",
+          "type": "slider",
+          "label": "Overall Satisfaction (1-10)",
+          "required": true,
+          "props": { "min": 1, "max": 10, "step": 1 },
+          "validationMessages": { "required": "Please rate your satisfaction" }
+        },
+        {
+          "key": "recommend",
+          "type": "radio",
+          "label": "Would you recommend us?",
+          "required": true,
+          "options": [
+            { "value": "yes", "label": "Yes, definitely" },
+            { "value": "maybe", "label": "Maybe" },
+            { "value": "no", "label": "No" }
+          ],
+          "validationMessages": { "required": "Please select an option" }
+        },
+        {
+          "key": "improvements",
+          "type": "select",
+          "label": "What could we improve?",
+          "props": { "multiple": true, "placeholder": "Select all that apply" },
+          "options": [
+            { "value": "speed", "label": "Response Time" },
+            { "value": "quality", "label": "Product Quality" },
+            { "value": "price", "label": "Pricing" },
+            { "value": "support", "label": "Customer Support" },
+            { "value": "ui", "label": "User Interface" }
+          ]
+        },
+        {
+          "key": "comments",
+          "type": "textarea",
+          "label": "Additional Comments",
+          "props": { "rows": 4, "placeholder": "Share any additional feedback..." }
+        },
+        {
+          "key": "followUp",
+          "type": "toggle",
+          "label": "May we contact you for follow-up?"
+        },
+        {
+          "key": "email",
+          "type": "input",
+          "label": "Email Address",
+          "email": true,
+          "props": { "type": "email", "placeholder": "your@email.com" },
+          "logic": [
+            {
+              "type": "hidden",
+              "condition": {
+                "type": "fieldValue",
+                "fieldPath": "followUp",
+                "operator": "notEquals",
+                "value": true
+              }
+            },
+            {
+              "type": "required",
+              "condition": {
+                "type": "fieldValue",
+                "fieldPath": "followUp",
+                "operator": "equals",
+                "value": true
+              }
+            }
+          ],
+          "validationMessages": {
+            "required": "Email required for follow-up",
+            "email": "Please enter a valid email"
+          }
+        },
+        {
+          "key": "submit",
+          "type": "submit",
+          "label": "Submit Feedback"
+        }
+      ]
+    }
+  }
+]

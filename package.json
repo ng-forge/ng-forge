@@ -45,8 +45,10 @@
     "@commitlint/config-angular": "^20.3.1",
     "@eslint/js": "^9.39.2",
     "@ionic/angular": "8.7.16",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "@nx/angular": "22.3.3",
     "@nx/devkit": "22.3.3",
+    "@nx/esbuild": "^22.3.3",
     "@nx/eslint": "22.3.3",
     "@nx/eslint-plugin": "22.3.3",
     "@nx/js": "22.3.3",
@@ -96,7 +98,8 @@
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^6.0.3",
     "vitest": "4.0.16",
-    "wait-on": "^9.0.1"
+    "wait-on": "^9.0.1",
+    "zod": "^4.3.5"
   },
   "dependencies": {
     "@angular/animations": "^21.0.8",

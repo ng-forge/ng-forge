@@ -33,6 +33,8 @@ export default {
         'bootstrap',
         'primeng',
         'ionic',
+        // MCP server
+        'mcp',
         // Apps
         'docs',
         'examples',

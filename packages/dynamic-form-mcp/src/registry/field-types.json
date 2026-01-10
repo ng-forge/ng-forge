@@ -1,0 +1,321 @@
+[
+  {
+    "type": "input",
+    "category": "value",
+    "description": "Text-based input field with HTML5 type support (text, email, password, number, tel, url)",
+    "valueType": "string | number",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "type": {
+        "name": "type",
+        "type": "'text' | 'email' | 'password' | 'number' | 'tel' | 'url'",
+        "description": "HTML input type",
+        "required": false,
+        "default": "text"
+      },
+      "placeholder": {
+        "name": "placeholder",
+        "type": "DynamicText",
+        "description": "Placeholder text displayed when field is empty",
+        "required": false
+      }
+    },
+    "validationSupported": true,
+    "example": "{\n  key: 'email',\n  type: 'input',\n  label: 'Email Address',\n  required: true,\n  email: true,\n  props: { type: 'email', placeholder: 'user@example.com' }\n}"
+  },
+  {
+    "type": "textarea",
+    "category": "value",
+    "description": "Multi-line text input field for longer content",
+    "valueType": "string",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "rows": {
+        "name": "rows",
+        "type": "number",
+        "description": "Number of visible text lines",
+        "required": false,
+        "default": 3
+      },
+      "placeholder": {
+        "name": "placeholder",
+        "type": "DynamicText",
+        "description": "Placeholder text displayed when field is empty",
+        "required": false
+      }
+    },
+    "validationSupported": true,
+    "example": "{\n  key: 'description',\n  type: 'textarea',\n  label: 'Description',\n  props: { rows: 5, placeholder: 'Enter description...' }\n}"
+  },
+  {
+    "type": "select",
+    "category": "value",
+    "description": "Dropdown selection field with single or multiple selection",
+    "valueType": "T | T[]",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "options": {
+        "name": "options",
+        "type": "FieldOption[]",
+        "description": "Array of selectable options with label and value",
+        "required": true
+      },
+      "multiple": {
+        "name": "multiple",
+        "type": "boolean",
+        "description": "Allow multiple selections",
+        "required": false,
+        "default": false
+      },
+      "placeholder": {
+        "name": "placeholder",
+        "type": "DynamicText",
+        "description": "Placeholder text for empty selection",
+        "required": false
+      }
+    },
+    "validationSupported": true,
+    "example": "{\n  key: 'country',\n  type: 'select',\n  label: 'Country',\n  required: true,\n  props: {\n    options: [\n      { label: 'United States', value: 'us' },\n      { label: 'Canada', value: 'ca' }\n    ]\n  }\n}"
+  },
+  {
+    "type": "checkbox",
+    "category": "value",
+    "description": "Boolean toggle checkbox field",
+    "valueType": "boolean",
+    "baseInterface": "BaseCheckedField",
+    "props": {},
+    "validationSupported": true,
+    "example": "{\n  key: 'acceptTerms',\n  type: 'checkbox',\n  label: 'I accept the terms and conditions',\n  required: true\n}"
+  },
+  {
+    "type": "radio",
+    "category": "value",
+    "description": "Radio button group for single selection from options",
+    "valueType": "T",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "options": {
+        "name": "options",
+        "type": "FieldOption[]",
+        "description": "Array of selectable options",
+        "required": true
+      }
+    },
+    "validationSupported": true,
+    "example": "{\n  key: 'gender',\n  type: 'radio',\n  label: 'Gender',\n  props: {\n    options: [\n      { label: 'Male', value: 'male' },\n      { label: 'Female', value: 'female' },\n      { label: 'Other', value: 'other' }\n    ]\n  }\n}"
+  },
+  {
+    "type": "datepicker",
+    "category": "value",
+    "description": "Date selection field with calendar picker",
+    "valueType": "Date | string",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "minDate": {
+        "name": "minDate",
+        "type": "Date | string",
+        "description": "Minimum selectable date",
+        "required": false
+      },
+      "maxDate": {
+        "name": "maxDate",
+        "type": "Date | string",
+        "description": "Maximum selectable date",
+        "required": false
+      }
+    },
+    "validationSupported": true,
+    "example": "{\n  key: 'birthDate',\n  type: 'datepicker',\n  label: 'Date of Birth',\n  required: true,\n  props: { maxDate: new Date() }\n}"
+  },
+  {
+    "type": "toggle",
+    "category": "value",
+    "description": "Switch/toggle control for boolean values",
+    "valueType": "boolean",
+    "baseInterface": "BaseCheckedField",
+    "props": {},
+    "validationSupported": true,
+    "example": "{\n  key: 'notifications',\n  type: 'toggle',\n  label: 'Enable notifications'\n}"
+  },
+  {
+    "type": "slider",
+    "category": "value",
+    "description": "Numeric range slider for value selection",
+    "valueType": "number",
+    "baseInterface": "BaseValueField",
+    "props": {
+      "min": {
+        "name": "min",
+        "type": "number",
+        "description": "Minimum value",
+        "required": false,
+        "default": 0
+      },
+      "max": {
+        "name": "max",
+        "type": "number",
+        "description": "Maximum value",
+        "required": false,
+        "default": 100
+      },
+      "step": {
+        "name": "step",
+        "type": "number",
+        "description": "Step increment",
+        "required": false,
+        "default": 1
+      }
+    },
+    "validationSupported": true,
+    "example": "{\n  key: 'volume',\n  type: 'slider',\n  label: 'Volume',\n  value: 50,\n  props: { min: 0, max: 100, step: 5 }\n}"
+  },
+  {
+    "type": "hidden",
+    "category": "value",
+    "description": "Hidden field that participates in form values without rendering",
+    "valueType": "T",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "example": "{\n  key: 'userId',\n  type: 'hidden',\n  value: 'abc123'\n}"
+  },
+  {
+    "type": "text",
+    "category": "display",
+    "description": "Static text display element (headings, paragraphs, labels)",
+    "baseInterface": "FieldDef",
+    "props": {
+      "content": {
+        "name": "content",
+        "type": "DynamicText",
+        "description": "Text content to display",
+        "required": true
+      },
+      "element": {
+        "name": "element",
+        "type": "'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'label'",
+        "description": "HTML element type for rendering",
+        "required": false,
+        "default": "p"
+      }
+    },
+    "validationSupported": false,
+    "example": "{\n  key: 'sectionTitle',\n  type: 'text',\n  props: { content: 'Personal Information', element: 'h2' }\n}"
+  },
+  {
+    "type": "row",
+    "category": "container",
+    "description": "Horizontal layout container for grouping fields in columns",
+    "baseInterface": "FieldDef",
+    "props": {
+      "fields": {
+        "name": "fields",
+        "type": "FieldDef[]",
+        "description": "Child fields to render horizontally",
+        "required": true
+      }
+    },
+    "validationSupported": false,
+    "example": "{\n  key: 'nameRow',\n  type: 'row',\n  fields: [\n    { key: 'firstName', type: 'input', label: 'First Name', col: 6 },\n    { key: 'lastName', type: 'input', label: 'Last Name', col: 6 }\n  ]\n}"
+  },
+  {
+    "type": "group",
+    "category": "container",
+    "description": "Nested form group container creating a sub-object in form values",
+    "valueType": "object",
+    "baseInterface": "FieldDef",
+    "props": {
+      "fields": {
+        "name": "fields",
+        "type": "FieldDef[]",
+        "description": "Child fields in the group",
+        "required": true
+      }
+    },
+    "validationSupported": true,
+    "example": "{\n  key: 'address',\n  type: 'group',\n  label: 'Address',\n  fields: [\n    { key: 'street', type: 'input', label: 'Street' },\n    { key: 'city', type: 'input', label: 'City' },\n    { key: 'zip', type: 'input', label: 'ZIP Code' }\n  ]\n}"
+  },
+  {
+    "type": "array",
+    "category": "container",
+    "description": "Repeatable field group for dynamic lists/arrays",
+    "valueType": "T[]",
+    "baseInterface": "FieldDef",
+    "props": {
+      "template": {
+        "name": "template",
+        "type": "FieldDef[]",
+        "description": "Template fields for each array item",
+        "required": true
+      },
+      "minItems": {
+        "name": "minItems",
+        "type": "number",
+        "description": "Minimum number of items",
+        "required": false
+      },
+      "maxItems": {
+        "name": "maxItems",
+        "type": "number",
+        "description": "Maximum number of items",
+        "required": false
+      }
+    },
+    "validationSupported": true,
+    "example": "{\n  key: 'phones',\n  type: 'array',\n  label: 'Phone Numbers',\n  template: [\n    { key: 'type', type: 'select', label: 'Type', props: { options: [...] } },\n    { key: 'number', type: 'input', label: 'Number' }\n  ],\n  props: { minItems: 1, maxItems: 5 }\n}"
+  },
+  {
+    "type": "page",
+    "category": "container",
+    "description": "Multi-step form page container for wizard-style forms",
+    "baseInterface": "FieldDef",
+    "props": {
+      "fields": {
+        "name": "fields",
+        "type": "FieldDef[]",
+        "description": "Fields in this page",
+        "required": true
+      },
+      "title": {
+        "name": "title",
+        "type": "DynamicText",
+        "description": "Page title",
+        "required": false
+      }
+    },
+    "validationSupported": false,
+    "example": "{\n  key: 'step1',\n  type: 'page',\n  label: 'Personal Info',\n  fields: [\n    { key: 'firstName', type: 'input', label: 'First Name' },\n    { key: 'lastName', type: 'input', label: 'Last Name' }\n  ]\n}"
+  },
+  {
+    "type": "button",
+    "category": "button",
+    "description": "Generic button for custom actions",
+    "baseInterface": "FieldDef",
+    "props": {
+      "buttonType": {
+        "name": "buttonType",
+        "type": "'button' | 'submit' | 'reset'",
+        "description": "HTML button type",
+        "required": false,
+        "default": "button"
+      },
+      "onClick": {
+        "name": "onClick",
+        "type": "string",
+        "description": "Click event handler function name",
+        "required": false
+      }
+    },
+    "validationSupported": false,
+    "example": "{\n  key: 'customAction',\n  type: 'button',\n  label: 'Custom Action',\n  props: { buttonType: 'button', onClick: 'handleCustomAction' }\n}"
+  },
+  {
+    "type": "submit",
+    "category": "button",
+    "description": "Form submit button",
+    "baseInterface": "FieldDef",
+    "props": {},
+    "validationSupported": false,
+    "example": "{\n  key: 'submit',\n  type: 'submit',\n  label: 'Submit Form'\n}"
+  }
+]
