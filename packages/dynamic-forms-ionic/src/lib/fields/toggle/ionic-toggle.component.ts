@@ -29,6 +29,7 @@ import { AsyncPipe } from '@angular/common';
       <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
     }
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
       :host {
@@ -42,6 +43,8 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className()',
+    '[class.df-invalid]': 'showErrors()',
+    '[class.df-touched]': 'field()().touched()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',

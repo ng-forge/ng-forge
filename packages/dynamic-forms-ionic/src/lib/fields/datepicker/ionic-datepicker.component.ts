@@ -86,6 +86,7 @@ import { format } from 'date-fns';
       </ng-template>
     </ion-modal>
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
       ion-input {
@@ -102,6 +103,8 @@ import { format } from 'date-fns';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[class.df-invalid]': 'showErrors()',
+    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
 })

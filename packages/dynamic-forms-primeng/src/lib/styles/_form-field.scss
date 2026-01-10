@@ -45,37 +45,38 @@
 }
 
 /**
- * Override PrimeNG invalid styling when field is not touched.
+ * Angular 21.0.7+ Auto-Propagation Override
  *
- * PrimeNG components inject NgControl and use its `invalid` property to add
- * `p-invalid` class. Angular Signal Forms' InteropNgControl returns the raw
- * invalid state without considering touched. We override this with CSS to
- * only show invalid styling when the field has been touched.
+ * Angular Signal Forms automatically propagates form state (invalid, required, etc.)
+ * to component inputs via `updateInteropControl`. This causes PrimeNG components to
+ * receive `invalid=true` immediately when validation fails, BEFORE the field is touched.
  *
- * Components must add [class.df-touched]="field()().touched()" to their host.
+ * We cannot override this via [invalid] binding - Angular explicitly prevents binding
+ * to auto-propagated inputs when using [formField]:
+ * "Binding to '[invalid]' is not allowed on nodes using the '[field]' directive"
+ *
+ * This CSS override hides invalid styling until the field is touched (.df-touched),
+ * which aligns with standard UX: show errors only after user interaction.
+ *
+ * NOTE: ::ng-deep is required because PrimeNG elements don't have Angular's _ngcontent
+ * attribute, so view-encapsulated styles won't match. While ::ng-deep is deprecated,
+ * it's the only way to style third-party component internals without global CSS.
  */
-:host:not(.df-touched) {
-  // Reset input border color to default when not touched
-  ::ng-deep {
-    .p-inputtext.p-invalid,
-    .p-select.p-invalid,
-    .p-multiselect.p-invalid,
-    .p-datepicker.p-invalid,
-    .p-slider.p-invalid,
-    .p-toggleswitch.p-invalid,
-    .p-checkbox.p-invalid,
-    .p-radiobutton.p-invalid,
-    .p-textarea.p-invalid {
-      border-color: var(--p-form-field-border-color, var(--p-surface-300, #dee2e6)) !important;
-    }
+:host(:not(.df-touched)) ::ng-deep {
+  // Reset border colors for invalid inputs that haven't been touched
+  .p-inputtext.p-invalid,
+  .p-select.p-invalid,
+  .p-multiselect.p-invalid,
+  .p-datepicker.p-invalid,
+  .p-checkbox.p-invalid,
+  .p-toggleswitch.p-invalid,
+  .p-slider.p-invalid {
+    border-color: var(--p-inputtext-border-color, var(--p-form-field-border-color));
+  }
 
-    // Also handle focused state for untouched invalid fields
-    .p-inputtext.p-invalid:focus,
-    .p-select.p-invalid.p-focus,
-    .p-multiselect.p-invalid.p-focus,
-    .p-datepicker.p-invalid .p-inputtext:focus {
-      border-color: var(--p-form-field-focus-border-color, var(--p-primary-color, #3b82f6)) !important;
-      box-shadow: var(--p-form-field-focus-ring-shadow, 0 0 0 0.2rem rgba(59, 130, 246, 0.25)) !important;
-    }
+  // Reset placeholder color for select components
+  .p-select.p-invalid .p-select-label.p-placeholder,
+  .p-multiselect.p-invalid .p-multiselect-label.p-placeholder {
+    color: var(--p-select-placeholder-color, var(--p-text-muted-color));
   }
 }

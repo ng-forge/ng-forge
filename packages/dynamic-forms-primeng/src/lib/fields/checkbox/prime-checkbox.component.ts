@@ -95,11 +95,7 @@ export default class PrimeCheckboxFieldComponent implements PrimeCheckboxCompone
       classes.push(styleClass);
     }
 
-    // Add p-invalid class when there are errors to display
-    if (this.errorsToDisplay().length > 0) {
-      classes.push('p-invalid');
-    }
-
+    // Note: p-invalid is handled by [invalid] input binding, not manual class
     return classes.join(' ');
   });
 
