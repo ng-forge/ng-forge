@@ -1,5 +1,5 @@
 import { Locator, test as base } from '@playwright/test';
-import type { BaseTestHelpers, ConsoleCheckOptions, ConsoleTracker, MockApiHelpers } from '../../../../../shared/testing';
+import type { BaseTestHelpers, ConsoleCheckOptions, ConsoleTracker, MockApiHelpers } from '@examples/shared/testing';
 import {
   createBaseHelpers,
   createConsoleTrackerFixture,
@@ -8,7 +8,7 @@ import {
   createTestUrl,
   expect,
   logTestResult,
-} from '../../../../../shared/testing';
+} from '@examples/shared/testing';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PrimeNG-specific Configuration
@@ -123,7 +123,7 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
 export { expect };
 
 // Re-export types for convenience
-export type { ConsoleTracker, MockApiHelpers } from '../../../../../shared/testing';
+export type { ConsoleTracker, MockApiHelpers } from '@examples/shared/testing';
 
 /**
  * Creates afterEach hook for logging test results

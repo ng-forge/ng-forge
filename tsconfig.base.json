@@ -19,6 +19,7 @@
       "@examples/ionic/*": ["apps/examples/ionic/src/app/examples/*"],
       "@examples/material/*": ["apps/examples/material/src/app/examples/*"],
       "@examples/primeng/*": ["apps/examples/primeng/src/app/examples/*"],
+      "@examples/shared/*": ["apps/examples/shared/*"],
       "@ng-doc/generated": ["dist/ng-doc/docs"],
       "@ng-forge/dynamic-forms": ["packages/dynamic-forms/src/index.ts"],
       "@ng-forge/dynamic-forms/integration": ["packages/dynamic-forms/integration/src/public_api.ts"],

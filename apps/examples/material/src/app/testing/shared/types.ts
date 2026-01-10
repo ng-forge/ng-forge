@@ -7,4 +7,4 @@ export type {
   SimulatedSubmission,
   TestScenario,
   TestSuite,
-} from '../../../../../shared/testing';
+} from '@examples/shared/testing';

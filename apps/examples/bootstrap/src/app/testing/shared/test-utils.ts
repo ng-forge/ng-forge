@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { logTestResult } from '../../../../../shared/testing';
+import { logTestResult } from '@examples/shared/testing';
 
 /**
  * Base URL for the test application
