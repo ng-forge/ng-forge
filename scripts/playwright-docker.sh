@@ -13,6 +13,10 @@
 
 set -e
 
+# Extract Playwright version from package.json to keep Docker image in sync
+PLAYWRIGHT_VERSION=$(node -p "require('./package.json').devDependencies['@playwright/test']")
+export PLAYWRIGHT_VERSION
+
 APP=${1:-ionic-examples}
 shift || true
 EXTRA_ARGS="$@"
