@@ -76,11 +76,26 @@ function extractErrorParams(error: ValidationError): Record<string, unknown> {
   // Common validation error parameters
   if ('min' in error) params.min = error.min;
   if ('max' in error) params.max = error.max;
-  if ('requiredLength' in error) params.requiredLength = error.requiredLength;
-  if ('actualLength' in error) params.actualLength = error.actualLength;
   if ('pattern' in error) params.pattern = error.pattern;
   if ('actual' in error) params.actual = error.actual;
   if ('expected' in error) params.expected = error.expected;
+
+  // Handle length validation parameters
+  // Angular Signal Forms uses 'minLength'/'maxLength' properties
+  // Angular Classic Forms uses 'requiredLength'/'actualLength' properties
+  // We support both formats and normalize to 'requiredLength' for message templates
+  if ('requiredLength' in error) {
+    params.requiredLength = error.requiredLength;
+  } else if ('minLength' in error) {
+    // Angular Signal Forms: minLength property maps to requiredLength for templates
+    params.requiredLength = error.minLength;
+    params.minLength = error.minLength;
+  } else if ('maxLength' in error) {
+    // Angular Signal Forms: maxLength property maps to requiredLength for templates
+    params.requiredLength = error.maxLength;
+    params.maxLength = error.maxLength;
+  }
+  if ('actualLength' in error) params.actualLength = error.actualLength;
 
   // Include all custom properties from error object (for custom validators)
   // Skip 'kind' as it's the error type identifier, not a parameter

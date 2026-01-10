@@ -15,6 +15,9 @@ test.describe('Group Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
+      // Screenshot: Empty group layout
+      await helpers.expectScreenshotMatch(scenario, 'material-group-value-propagation-empty');
+
       // Fill the top-level name field
       const nameInput = scenario.locator('#name input');
       await expect(nameInput).toBeVisible({ timeout: 5000 });
@@ -39,6 +42,9 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(streetInput).toHaveValue('123 Main St', { timeout: 5000 });
       await expect(cityInput).toHaveValue('Springfield', { timeout: 5000 });
       await expect(zipInput).toHaveValue('12345', { timeout: 5000 });
+
+      // Screenshot: Filled group layout
+      await helpers.expectScreenshotMatch(scenario, 'material-group-value-propagation-filled');
     });
 
     test('should update parent form value when editing group fields', async ({ page, helpers }) => {
@@ -123,6 +129,9 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(personalInputs.nth(1)).toHaveValue('Doe', { timeout: 5000 });
       await expect(workInputs.nth(0)).toHaveValue('Acme Corp', { timeout: 5000 });
       await expect(workInputs.nth(1)).toHaveValue('Developer', { timeout: 5000 });
+
+      // Screenshot: Multiple groups filled
+      await helpers.expectScreenshotMatch(scenario, 'material-group-nested-filled');
     });
 
     test('should maintain one group values when editing another group', async ({ page, helpers }) => {

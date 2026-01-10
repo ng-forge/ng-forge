@@ -25,6 +25,9 @@ test.describe('Array Fields E2E Tests', () => {
       await expect(emailInputs.first()).toBeVisible({ timeout: 10000 });
       await expect(emailInputs).toHaveCount(1, { timeout: 10000 });
 
+      // Screenshot: Initial array with one item
+      await helpers.expectScreenshotMatch(scenario, 'ionic-array-add-initial');
+
       // Should have one add button (inside the first item)
       const addButton = scenario.locator('ion-button:has-text("Add Email")').first();
       await expect(addButton).toBeVisible({ timeout: 10000 });
@@ -39,6 +42,9 @@ test.describe('Array Fields E2E Tests', () => {
       await expect(addButtons.first()).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
       await addButtons.first().click();
       await expect(emailInputs).toHaveCount(3, { timeout: 10000 });
+
+      // Screenshot: Array with three items
+      await helpers.expectScreenshotMatch(scenario, 'ionic-array-add-three-items');
     });
 
     test('should remove array items', async ({ page, helpers }) => {

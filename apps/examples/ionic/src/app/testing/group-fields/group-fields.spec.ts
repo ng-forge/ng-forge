@@ -17,6 +17,9 @@ test.describe('Group Fields E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
+      // Screenshot: Empty group layout
+      await helpers.expectScreenshotMatch(scenario, 'ionic-group-value-propagation-empty');
+
       // Fill the top-level name field
       const nameInput = scenario.locator('#name input');
       await expect(nameInput).toBeVisible({ timeout: 5000 });
@@ -41,6 +44,9 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(streetInput).toHaveValue('123 Main St', { timeout: 5000 });
       await expect(cityInput).toHaveValue('Springfield', { timeout: 5000 });
       await expect(zipInput).toHaveValue('12345', { timeout: 5000 });
+
+      // Screenshot: Filled group layout
+      await helpers.expectScreenshotMatch(scenario, 'ionic-group-value-propagation-filled');
     });
 
     test('should update parent form value when editing group fields', async ({ page, helpers }) => {

@@ -26,11 +26,17 @@ test.describe('Expression-Based Logic Tests', () => {
       const paymentField = scenario.getByTestId('paymentMethod');
       await expect(paymentField).toBeHidden({ timeout: 10000 });
 
+      // Screenshot: Free subscription - payment hidden
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-hidden-logic-free');
+
       // Select premium - payment should be visible
       await subscriptionSelect.selectOption({ label: 'Premium' });
       await subscriptionSelect.blur();
 
       await expect(paymentField).toBeVisible({ timeout: 10000 });
+
+      // Screenshot: Premium subscription - payment visible
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-hidden-logic-premium');
     });
   });
 
@@ -46,11 +52,17 @@ test.describe('Expression-Based Logic Tests', () => {
       const vehicleInput = scenario.locator('#vehicleType input');
       await expect(vehicleInput).toBeDisabled();
 
+      // Screenshot: Vehicle type disabled
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-disabled-logic-disabled');
+
       // Check the checkbox - vehicle type should be enabled
       await scenario.locator('#hasVehicle input[type="checkbox"]').check();
 
       // Use auto-waiting assertion to wait for Angular to update disabled state
       await expect(vehicleInput).toBeEnabled();
+
+      // Screenshot: Vehicle type enabled
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-disabled-logic-enabled');
     });
   });
 
@@ -67,6 +79,9 @@ test.describe('Expression-Based Logic Tests', () => {
       // Initially both unchecked - regular price should be visible
       await expect(regularPriceField).toBeVisible();
 
+      // Screenshot: Initial state - regular price visible
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-and-logic-initial');
+
       // Check only hasDiscount - regular price should still be visible (only one condition true)
       await scenario.locator('#hasDiscount input[type="checkbox"]').check();
       await expect(regularPriceField).toBeVisible();
@@ -74,6 +89,9 @@ test.describe('Expression-Based Logic Tests', () => {
       // Check isPremiumMember too - now both conditions true, regular price should be hidden
       await scenario.locator('#isPremiumMember input[type="checkbox"]').check();
       await expect(regularPriceField).toBeHidden();
+
+      // Screenshot: Both conditions true - regular price hidden
+      await helpers.expectScreenshotMatch(scenario, 'bootstrap-and-logic-both-true');
 
       // Uncheck hasDiscount - regular price should be visible again (only one condition true)
       await scenario.locator('#hasDiscount input[type="checkbox"]').uncheck();

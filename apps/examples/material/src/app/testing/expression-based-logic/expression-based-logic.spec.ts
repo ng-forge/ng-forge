@@ -25,6 +25,9 @@ test.describe('Expression-Based Logic Tests', () => {
       const paymentField = scenario.locator('#paymentMethod');
       await expect(paymentField).toBeHidden();
 
+      // Screenshot: Free subscription - payment hidden
+      await helpers.expectScreenshotMatch(scenario, 'material-hidden-logic-free');
+
       // Select premium - payment should be visible
       await scenario.locator('#subscriptionType').click();
       await page.waitForTimeout(300);
@@ -32,6 +35,9 @@ test.describe('Expression-Based Logic Tests', () => {
       await page.waitForTimeout(500);
 
       await expect(paymentField).toBeVisible();
+
+      // Screenshot: Premium subscription - payment visible
+      await helpers.expectScreenshotMatch(scenario, 'material-hidden-logic-premium');
     });
   });
 
@@ -48,12 +54,18 @@ test.describe('Expression-Based Logic Tests', () => {
       const isDisabled = await vehicleInput.isDisabled();
       expect(isDisabled).toBeTruthy();
 
+      // Screenshot: Vehicle type disabled
+      await helpers.expectScreenshotMatch(scenario, 'material-disabled-logic-disabled');
+
       // Check the checkbox - vehicle type should be enabled
       await scenario.locator('#hasVehicle input[type="checkbox"]').check();
       await page.waitForTimeout(500);
 
       const isEnabled = await vehicleInput.isEnabled();
       expect(isEnabled).toBeTruthy();
+
+      // Screenshot: Vehicle type enabled
+      await helpers.expectScreenshotMatch(scenario, 'material-disabled-logic-enabled');
     });
   });
 
@@ -70,6 +82,9 @@ test.describe('Expression-Based Logic Tests', () => {
       // Initially both unchecked - regular price should be visible
       await expect(regularPriceField).toBeVisible();
 
+      // Screenshot: Initial state - regular price visible
+      await helpers.expectScreenshotMatch(scenario, 'material-and-logic-initial');
+
       // Check only hasDiscount - regular price should still be visible (only one condition true)
       await scenario.locator('#hasDiscount input[type="checkbox"]').check();
       await page.waitForTimeout(500);
@@ -79,6 +94,9 @@ test.describe('Expression-Based Logic Tests', () => {
       await scenario.locator('#isPremiumMember input[type="checkbox"]').check();
       await page.waitForTimeout(500);
       await expect(regularPriceField).toBeHidden();
+
+      // Screenshot: Both conditions true - regular price hidden
+      await helpers.expectScreenshotMatch(scenario, 'material-and-logic-both-true');
 
       // Uncheck hasDiscount - regular price should be visible again (only one condition true)
       await scenario.locator('#hasDiscount input[type="checkbox"]').uncheck();
@@ -271,10 +289,16 @@ test.describe('Expression-Based Logic Tests', () => {
       // Initial age is 25 - warning should be hidden (age >= 18)
       await expect(underageWarning).toBeHidden();
 
+      // Screenshot: Adult age - no warning
+      await helpers.expectScreenshotMatch(scenario, 'material-comparison-adult');
+
       // Set age below 18 - warning should appear
       await helpers.clearAndFill(ageInput, '16');
       await page.waitForTimeout(500);
       await expect(underageWarning).toBeVisible();
+
+      // Screenshot: Underage - warning visible
+      await helpers.expectScreenshotMatch(scenario, 'material-comparison-underage');
 
       // Set age to exactly 18 - warning should be hidden (greaterOrEqual)
       await helpers.clearAndFill(ageInput, '18');

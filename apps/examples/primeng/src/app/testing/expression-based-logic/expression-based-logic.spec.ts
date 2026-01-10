@@ -29,11 +29,17 @@ test.describe('Expression-Based Logic Tests', () => {
       const paymentField = scenario.getByTestId('paymentMethod');
       await expect(paymentField).toBeHidden({ timeout: 10000 });
 
+      // Screenshot: Free subscription - payment hidden
+      await helpers.expectScreenshotMatch(scenario, 'primeng-hidden-logic-free');
+
       // Select premium - payment should be visible
       await helpers.selectOption(subscriptionSelect, 'Premium');
       await subscriptionSelect.blur();
 
       await expect(paymentField).toBeVisible({ timeout: 10000 });
+
+      // Screenshot: Premium subscription - payment visible
+      await helpers.expectScreenshotMatch(scenario, 'primeng-hidden-logic-premium');
     });
   });
 
@@ -52,6 +58,9 @@ test.describe('Expression-Based Logic Tests', () => {
       const vehicleInput = scenario.locator('#vehicleType input');
       await expect(vehicleInput).toBeDisabled({ timeout: 10000 });
 
+      // Screenshot: Vehicle type disabled
+      await helpers.expectScreenshotMatch(scenario, 'primeng-disabled-logic-disabled');
+
       // Wait for checkbox to be visible
       await page.waitForSelector('[data-testid="disabled-logic-test"] #hasVehicle p-checkbox input', { state: 'visible', timeout: 10000 });
 
@@ -62,6 +71,9 @@ test.describe('Expression-Based Logic Tests', () => {
 
       // Use auto-waiting assertion to wait for Angular to update disabled state
       await expect(vehicleInput).toBeEnabled({ timeout: 10000 });
+
+      // Screenshot: Vehicle type enabled
+      await helpers.expectScreenshotMatch(scenario, 'primeng-disabled-logic-enabled');
     });
   });
 
@@ -81,6 +93,9 @@ test.describe('Expression-Based Logic Tests', () => {
       // Initially both unchecked - regular price should be visible
       await expect(regularPriceField).toBeVisible({ timeout: 10000 });
 
+      // Screenshot: Initial state - regular price visible
+      await helpers.expectScreenshotMatch(scenario, 'primeng-and-logic-initial');
+
       // Check only hasDiscount - regular price should still be visible (only one condition true)
       const hasDiscountCheckbox = scenario.locator('#hasDiscount p-checkbox input');
       await hasDiscountCheckbox.check();
@@ -92,6 +107,9 @@ test.describe('Expression-Based Logic Tests', () => {
       await isPremiumCheckbox.check();
       await expect(isPremiumCheckbox).toBeChecked({ timeout: 5000 });
       await expect(regularPriceField).toBeHidden({ timeout: 10000 });
+
+      // Screenshot: Both conditions true - regular price hidden
+      await helpers.expectScreenshotMatch(scenario, 'primeng-and-logic-both-true');
 
       // Uncheck hasDiscount - regular price should be visible again (only one condition true)
       await hasDiscountCheckbox.uncheck();
