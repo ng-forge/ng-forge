@@ -39,7 +39,7 @@ echo "Extra args: $EXTRA_ARGS"
 
 # Build the command
 # wait-on polls the server URL until it responds (more robust than sleep)
-CMD="pnpm exec nx run $APP:serve --port $PORT & pnpm exec wait-on http://localhost:$PORT --timeout 60000 && pnpm exec nx run $APP:e2e $EXTRA_ARGS; kill %1 2>/dev/null || true"
+CMD="npx nx run $APP:serve --port $PORT & npx wait-on http://localhost:$PORT --timeout 60000 && npx nx run $APP:e2e $EXTRA_ARGS; kill %1 2>/dev/null || true"
 
 # Run in Docker
 PLAYWRIGHT_CMD="$CMD" docker compose -f docker-compose.playwright.yml run --rm playwright
