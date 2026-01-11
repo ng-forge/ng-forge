@@ -353,20 +353,10 @@ jobs:
       - name: Check if app is affected
         id: check-affected
         run: |
-          echo "=== Git refs ==="
-          git branch -a | head -20
-          echo ""
-          echo "=== Checking affected projects ==="
-          AFFECTED=$(npx nx show projects --affected --base=origin/main --with-target=e2e 2>&1) || true
-          echo "Affected projects with e2e target:"
-          echo "$AFFECTED"
-          echo ""
-          echo "=== Checking for ${{ matrix.app }} ==="
+          AFFECTED=$(npx nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || true)
           if echo "$AFFECTED" | grep -q "${{ matrix.app }}"; then
-            echo "✅ ${{ matrix.app }} IS affected"
             echo "affected=true" >> $GITHUB_OUTPUT
           else
-            echo "❌ ${{ matrix.app }} is NOT affected"
             echo "affected=false" >> $GITHUB_OUTPUT
           fi
 
