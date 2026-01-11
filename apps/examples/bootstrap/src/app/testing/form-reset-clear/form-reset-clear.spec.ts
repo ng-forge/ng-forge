@@ -10,7 +10,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
 
   test.describe('Form Reset Functionality', () => {
     test('should reset form to default values', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/reset-defaults');
+      await page.goto('/#/test/form-reset-clear/reset-defaults');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('reset-defaults');
@@ -46,7 +46,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should reset select fields to default values', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/reset-select');
+      await page.goto('/#/test/form-reset-clear/reset-select');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('reset-select');
@@ -71,7 +71,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should reset checkbox fields to default values', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/reset-checkbox');
+      await page.goto('/#/test/form-reset-clear/reset-checkbox');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('reset-checkbox');
@@ -101,7 +101,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should reset form validation state', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/reset-validation');
+      await page.goto('/#/test/form-reset-clear/reset-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('reset-validation');
@@ -129,7 +129,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
 
   test.describe('Form Clear Functionality', () => {
     test('should clear all form fields', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/clear-all');
+      await page.goto('/#/test/form-reset-clear/clear-all');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('clear-all');
@@ -167,7 +167,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should clear select fields', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/clear-select');
+      await page.goto('/#/test/form-reset-clear/clear-select');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('clear-select');
@@ -189,7 +189,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should clear checkbox fields', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/clear-checkbox');
+      await page.goto('/#/test/form-reset-clear/clear-checkbox');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('clear-checkbox');
@@ -213,7 +213,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
 
   test.describe('Reset vs Clear Behavior', () => {
     test('should differentiate between reset and clear actions', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/reset-vs-clear');
+      await page.goto('/#/test/form-reset-clear/reset-vs-clear');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('reset-vs-clear');
@@ -248,7 +248,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should handle reset and clear with required fields', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/required-reset-clear');
+      await page.goto('/#/test/form-reset-clear/required-reset-clear');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('required-reset-clear');
@@ -276,7 +276,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
 
   test.describe('Complex Reset/Clear Scenarios', () => {
     test('should reset nested group fields', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/reset-nested');
+      await page.goto('/#/test/form-reset-clear/reset-nested');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('reset-nested');
@@ -302,7 +302,7 @@ test.describe('Form Reset and Clear Events Tests', () => {
     });
 
     test('should handle multiple reset/clear cycles', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/form-reset-clear/multiple-cycles');
+      await page.goto('/#/test/form-reset-clear/multiple-cycles');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multiple-cycles');

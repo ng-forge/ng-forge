@@ -1,5 +1,4 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
-import { testUrl } from '../shared/test-utils';
 import { ionBlur } from '../shared/test-utils';
 
 setupTestLogging();
@@ -13,7 +12,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Comprehensive Fields Test', () => {
     test('should test all basic field types', async ({ page, helpers }) => {
       // Navigate to the comprehensive fields component
-      await page.goto(testUrl('/comprehensive-field-tests/comprehensive-fields'));
+      await page.goto('/#/comprehensive-field-tests/comprehensive-fields');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -171,7 +170,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Validation Test', () => {
     test('should handle field validation errors', async ({ page, helpers }) => {
       // Navigate to the validation test component
-      await page.goto(testUrl('/comprehensive-field-tests/validation'));
+      await page.goto('/#/comprehensive-field-tests/validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -274,7 +273,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Grid Layout Test', () => {
     test('should test responsive grid layout', async ({ page, helpers }) => {
       // Navigate to the grid layout test component
-      await page.goto(testUrl('/comprehensive-field-tests/grid-layout'));
+      await page.goto('/#/comprehensive-field-tests/grid-layout');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -409,7 +408,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('State Management Test', () => {
     test('should test form state management', async ({ page, helpers }) => {
       // Navigate to the state management test component
-      await page.goto(testUrl('/comprehensive-field-tests/state-management'));
+      await page.goto('/#/comprehensive-field-tests/state-management');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario

@@ -18,7 +18,7 @@ export const TESTING_BASE_PATH = '/testing';
 export function testUrl(path: string): string {
   // If path already starts with /testing, use as-is; otherwise prepend TESTING_BASE_PATH
   const fullPath = path.startsWith(TESTING_BASE_PATH) ? path : `${TESTING_BASE_PATH}${path}`;
-  return `${BASE_URL}/#${fullPath}`;
+  return `/#${fullPath}`;
 }
 
 /**

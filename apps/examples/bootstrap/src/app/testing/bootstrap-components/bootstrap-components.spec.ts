@@ -10,7 +10,7 @@ test.describe('Bootstrap Components Tests', () => {
 
   test.describe('Datepicker Component', () => {
     test('should open calendar and select date', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/datepicker-basic');
+      await page.goto('/#/test/bootstrap-components/datepicker-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-basic');
@@ -29,7 +29,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should respect min/max date constraints', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/datepicker-constraints');
+      await page.goto('/#/test/bootstrap-components/datepicker-constraints');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-constraints');
@@ -49,7 +49,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should handle required field validation', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/datepicker-validation');
+      await page.goto('/#/test/bootstrap-components/datepicker-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-validation');
@@ -64,7 +64,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should clear date value', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/datepicker-clear');
+      await page.goto('/#/test/bootstrap-components/datepicker-clear');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-clear');
@@ -91,7 +91,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/datepicker-disabled');
+      await page.goto('/#/test/bootstrap-components/datepicker-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-disabled');
@@ -103,7 +103,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should work with initial value', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/datepicker-initial-value');
+      await page.goto('/#/test/bootstrap-components/datepicker-initial-value');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('datepicker-initial-value');
@@ -126,7 +126,7 @@ test.describe('Bootstrap Components Tests', () => {
 
   test.describe('Slider Component', () => {
     test('should update value on interaction', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/slider-basic');
+      await page.goto('/#/test/bootstrap-components/slider-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-basic');
@@ -152,7 +152,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should respect min and max bounds', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/slider-bounds');
+      await page.goto('/#/test/bootstrap-components/slider-bounds');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-bounds');
@@ -169,7 +169,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should work with step increments', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/slider-steps');
+      await page.goto('/#/test/bootstrap-components/slider-steps');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-steps');
@@ -182,7 +182,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/slider-disabled');
+      await page.goto('/#/test/bootstrap-components/slider-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-disabled');
@@ -193,7 +193,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should display current value', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/slider-value-display');
+      await page.goto('/#/test/bootstrap-components/slider-value-display');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('slider-value-display');
@@ -207,7 +207,7 @@ test.describe('Bootstrap Components Tests', () => {
 
   test.describe('Toggle Component', () => {
     test('should change state on click', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/toggle-basic');
+      await page.goto('/#/test/bootstrap-components/toggle-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-basic');
@@ -226,7 +226,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should work with keyboard (Space/Enter)', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/toggle-keyboard');
+      await page.goto('/#/test/bootstrap-components/toggle-keyboard');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-keyboard');
@@ -251,7 +251,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should be disabled when disabled prop is true', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/toggle-disabled');
+      await page.goto('/#/test/bootstrap-components/toggle-disabled');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-disabled');
@@ -266,7 +266,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should handle required toggle validation', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/toggle-validation');
+      await page.goto('/#/test/bootstrap-components/toggle-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('toggle-validation');
@@ -286,7 +286,7 @@ test.describe('Bootstrap Components Tests', () => {
 
   test.describe('Multi-Checkbox Component', () => {
     test('should select multiple options', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/multi-checkbox-basic');
+      await page.goto('/#/test/bootstrap-components/multi-checkbox-basic');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-basic');
@@ -315,7 +315,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should collect values as array on submit', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/multi-checkbox-array');
+      await page.goto('/#/test/bootstrap-components/multi-checkbox-array');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-array');
@@ -340,7 +340,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should deselect options', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/multi-checkbox-deselect');
+      await page.goto('/#/test/bootstrap-components/multi-checkbox-deselect');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-deselect');
@@ -369,7 +369,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should handle disabled options', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/multi-checkbox-disabled-options');
+      await page.goto('/#/test/bootstrap-components/multi-checkbox-disabled-options');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-disabled-options');
@@ -397,7 +397,7 @@ test.describe('Bootstrap Components Tests', () => {
     });
 
     test('should handle required multi-checkbox validation', async ({ page, helpers }) => {
-      await page.goto('http://localhost:4204/#/test/bootstrap-components/multi-checkbox-validation');
+      await page.goto('/#/test/bootstrap-components/multi-checkbox-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('multi-checkbox-validation');

@@ -11,7 +11,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Basic Array Operations', () => {
     test('should add new array items dynamically', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-add');
-      await page.goto('http://localhost:4204/#/test/array-fields/array-add');
+      await page.goto('/#/test/array-fields/array-add');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -44,7 +44,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should remove array items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-remove');
-      await page.goto('http://localhost:4204/#/test/array-fields/array-remove');
+      await page.goto('/#/test/array-fields/array-remove');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -63,7 +63,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should maintain input values after add/remove operations', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-values');
-      await page.goto('http://localhost:4204/#/test/array-fields/array-values');
+      await page.goto('/#/test/array-fields/array-values');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -94,7 +94,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should handle array with initial values', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-initial-values');
-      await page.goto('http://localhost:4204/#/test/array-fields/array-initial-values');
+      await page.goto('/#/test/array-fields/array-initial-values');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -115,7 +115,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Array Validation', () => {
     test('should validate individual array items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-item-validation');
-      await page.goto('http://localhost:4204/#/test/array-fields/array-item-validation');
+      await page.goto('/#/test/array-fields/array-item-validation');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -141,7 +141,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should enforce minimum array length', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-min-length');
-      await page.goto('http://localhost:4204/#/test/array-fields/array-min-length');
+      await page.goto('/#/test/array-fields/array-min-length');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible();
 
@@ -151,7 +151,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should enforce maximum array length', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-max-length');
-      await page.goto('http://localhost:4204/#/test/array-fields/array-max-length');
+      await page.goto('/#/test/array-fields/array-max-length');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -173,7 +173,7 @@ test.describe('Array Fields E2E Tests', () => {
   test.describe('Complex Array Structures', () => {
     test('should handle nested fields within array items', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-nested');
-      await page.goto('http://localhost:4204/#/test/array-fields/array-nested');
+      await page.goto('/#/test/array-fields/array-nested');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
@@ -208,7 +208,7 @@ test.describe('Array Fields E2E Tests', () => {
 
     test('should handle multiple add and remove operations', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('array-multiple-ops');
-      await page.goto('http://localhost:4204/#/test/array-fields/array-multiple-ops');
+      await page.goto('/#/test/array-fields/array-multiple-ops');
       await page.waitForLoadState('networkidle');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 

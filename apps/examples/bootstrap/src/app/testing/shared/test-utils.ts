@@ -10,7 +10,7 @@ export const BASE_URL = 'http://localhost:4204';
  * Creates a URL for a specific test route
  */
 export function testUrl(path: string): string {
-  return `${BASE_URL}/#${path}`;
+  return `/#${path}`;
 }
 
 /**

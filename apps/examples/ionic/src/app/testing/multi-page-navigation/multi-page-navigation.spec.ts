@@ -1,5 +1,4 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
-import { testUrl } from '../shared/test-utils';
 import { ionBlur } from '../shared/test-utils';
 
 setupTestLogging();
@@ -13,7 +12,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Multi-Page Registration Wizard', () => {
     test('should complete full 3-page registration workflow', async ({ page, helpers }) => {
       // Navigate to the multi-page registration component
-      await page.goto(testUrl('/multi-page-navigation/multi-page-registration'));
+      await page.goto('/#/multi-page-navigation/multi-page-registration');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -169,7 +168,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Validation-Based Navigation', () => {
     test('should prevent navigation with invalid required fields', async ({ page, helpers }) => {
       // Navigate to the validation navigation component
-      await page.goto(testUrl('/multi-page-navigation/validation-navigation'));
+      await page.goto('/#/multi-page-navigation/validation-navigation');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -249,7 +248,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Backward Navigation and Data Persistence', () => {
     test('should navigate backward and preserve data', async ({ page, helpers }) => {
       // Navigate to the backward navigation component
-      await page.goto(testUrl('/multi-page-navigation/backward-navigation'));
+      await page.goto('/#/multi-page-navigation/backward-navigation');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -373,7 +372,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Direct Page Navigation', () => {
     test('should allow direct navigation to specific pages', async ({ page, helpers }) => {
       // Navigate to the direct navigation component
-      await page.goto(testUrl('/multi-page-navigation/direct-navigation'));
+      await page.goto('/#/multi-page-navigation/direct-navigation');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
@@ -466,7 +465,7 @@ test.describe('Multi-Page Navigation Tests', () => {
   test.describe('Page Transitions and Loading States', () => {
     test('should handle smooth page transitions with large data', async ({ page, helpers }) => {
       // Navigate to the page transitions component
-      await page.goto(testUrl('/multi-page-navigation/page-transitions'));
+      await page.goto('/#/multi-page-navigation/page-transitions');
       await page.waitForLoadState('networkidle');
 
       // Locate the test scenario
