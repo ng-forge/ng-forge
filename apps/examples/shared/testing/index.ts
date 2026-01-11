@@ -27,6 +27,5 @@ export {
   expect,
 } from './base-fixtures';
 
-// Playwright configuration
-export { createPlaywrightConfig, APP_PORTS } from './playwright-config';
-export type { ExampleApp } from './playwright-config';
+// Note: Playwright configuration is NOT exported here to avoid Angular compilation.
+// Import directly from '@examples/shared/testing/playwright-config' in playwright.config.ts files.
