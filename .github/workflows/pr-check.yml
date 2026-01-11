@@ -390,9 +390,13 @@ jobs:
             echo "affected=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Run E2E tests in Docker
+      - name: Install Playwright browsers
         if: steps.check-affected.outputs.affected == 'true'
-        run: pnpm e2e:${{ matrix.short }}
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        if: steps.check-affected.outputs.affected == 'true'
+        run: E2E_BROWSERS=chromium pnpm nx e2e ${{ matrix.app }}
 
       - name: Skip E2E tests (not affected)
         if: steps.check-affected.outputs.affected == 'false'
