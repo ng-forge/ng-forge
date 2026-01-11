@@ -362,17 +362,10 @@ jobs:
       - name: Check if app is affected
         id: check-affected
         run: |
-          echo "=== Running affected check ==="
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>&1) || true
-          echo "Raw output:"
-          echo "$AFFECTED"
-          echo ""
-          echo "=== Checking for ${{ matrix.app }} ==="
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e) || true
           if echo "$AFFECTED" | grep -q "${{ matrix.app }}"; then
-            echo "✅ AFFECTED"
             echo "affected=true" >> $GITHUB_OUTPUT
           else
-            echo "❌ NOT AFFECTED"
             echo "affected=false" >> $GITHUB_OUTPUT
           fi
 
@@ -380,35 +373,11 @@ jobs:
         if: steps.check-affected.outputs.affected == 'true'
         run: ./scripts/playwright-docker.sh ${{ matrix.app }}
 
-      - name: Skip E2E tests (not affected)
-        if: steps.check-affected.outputs.affected == 'false'
-        run: echo "E2E tests for ${{ matrix.app }} not affected, skipping"
-
-      - name: Upload test results on failure
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report-pr-${{ matrix.app }}
-          path: dist/.playwright/apps/examples/${{ matrix.short }}/
-          retention-days: 7
-
-      - name: Upload screenshots
-        uses: actions/upload-artifact@v4
-        if: always() && steps.check-affected.outputs.affected == 'true'
-        with:
-          name: screenshots-${{ matrix.app }}
-          path: |
-            apps/examples/${{ matrix.short }}/test-results/screenshots/
-          if-no-files-found: ignore
-          retention-days: 30
-
-      - name: Upload visual diff images on failure
+      - name: Upload test artifacts on failure
         uses: actions/upload-artifact@v4
         if: failure() && steps.check-affected.outputs.affected == 'true'
         with:
-          name: visual-diffs-${{ matrix.app }}
-          path: |
-            apps/examples/${{ matrix.short }}/test-results/**/*-diff.png
-            apps/examples/${{ matrix.short }}/test-results/**/*-actual.png
+          name: playwright-results-${{ matrix.app }}
+          path: apps/examples/${{ matrix.short }}/test-results/
           if-no-files-found: ignore
           retention-days: 7

@@ -304,31 +304,11 @@ jobs:
       - name: Run E2E tests in Docker
         run: pnpm e2e:${{ matrix.short }}
 
-      - name: Upload test results on failure
+      - name: Upload test artifacts on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-${{ matrix.app }}
-          path: dist/.playwright/apps/examples/${{ matrix.short }}/
-          retention-days: 7
-
-      - name: Upload screenshots
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: screenshots-${{ matrix.app }}
-          path: |
-            apps/examples/${{ matrix.short }}/test-results/screenshots/
-          if-no-files-found: ignore
-          retention-days: 30
-
-      - name: Upload visual diff images on failure
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: visual-diffs-${{ matrix.app }}
-          path: |
-            apps/examples/${{ matrix.short }}/test-results/**/*-diff.png
-            apps/examples/${{ matrix.short }}/test-results/**/*-actual.png
+          name: playwright-results-${{ matrix.app }}
+          path: apps/examples/${{ matrix.short }}/test-results/
           if-no-files-found: ignore
           retention-days: 7
