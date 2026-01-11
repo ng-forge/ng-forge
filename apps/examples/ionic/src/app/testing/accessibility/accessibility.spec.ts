@@ -7,7 +7,7 @@ setupConsoleCheck();
 test.describe('Accessibility Tests', () => {
   test.describe('ARIA Attributes', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/accessibility/aria-attributes');
+      await page.goto('/#/testing/accessibility/aria-attributes');
       await page.waitForLoadState('networkidle');
     });
 
@@ -81,7 +81,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Error Announcements', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/accessibility/error-announcements');
+      await page.goto('/#/testing/accessibility/error-announcements');
       await page.waitForLoadState('networkidle');
     });
 
@@ -148,7 +148,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Keyboard Navigation', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/accessibility/keyboard-navigation');
+      await page.goto('/#/testing/accessibility/keyboard-navigation');
       await page.waitForLoadState('networkidle');
     });
 
@@ -194,7 +194,7 @@ test.describe('Accessibility Tests', () => {
 
     test('toggle should toggle with Space key', async ({ page, helpers }) => {
       // Navigate to fresh page to ensure clean state
-      await page.goto('/#/accessibility/keyboard-navigation');
+      await page.goto('/#/testing/accessibility/keyboard-navigation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('keyboard-navigation');
@@ -266,7 +266,7 @@ test.describe('Accessibility Tests', () => {
 
   test.describe('Focus Management', () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto('/#/accessibility/focus-management');
+      await page.goto('/#/testing/accessibility/focus-management');
       await page.waitForLoadState('networkidle');
     });
 

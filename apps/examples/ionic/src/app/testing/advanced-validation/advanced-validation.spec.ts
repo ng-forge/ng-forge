@@ -280,7 +280,7 @@ test.describe('Advanced Validation E2E Tests', () => {
 
   test.describe('Expression-Based Min/Max Validators', () => {
     test('should validate age against dynamic minAge value', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/expression-based-min-max');
+      await page.goto('/#/testing/advanced-validation/expression-based-min-max');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('expression-based-min-max-test');
@@ -353,7 +353,7 @@ test.describe('Advanced Validation E2E Tests', () => {
 
   test.describe('Cross-Field Error Targeting', () => {
     test('should validate password confirmation matches password', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/cross-field-error-targeting');
+      await page.goto('/#/testing/advanced-validation/cross-field-error-targeting');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('cross-field-error-targeting-test');
@@ -429,7 +429,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should display correct error message for age validation', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/cross-field-error-targeting');
+      await page.goto('/#/testing/advanced-validation/cross-field-error-targeting');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('cross-field-error-targeting-test');
@@ -460,7 +460,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should display correct error message for range validation', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/cross-field-error-targeting');
+      await page.goto('/#/testing/advanced-validation/cross-field-error-targeting');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('cross-field-error-targeting-test');
@@ -494,7 +494,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should validate age against dynamic minAge field', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/cross-field-error-targeting');
+      await page.goto('/#/testing/advanced-validation/cross-field-error-targeting');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('cross-field-error-targeting-test');
@@ -567,7 +567,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should validate target value is within min/max range', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/cross-field-error-targeting');
+      await page.goto('/#/testing/advanced-validation/cross-field-error-targeting');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('cross-field-error-targeting-test');
@@ -653,7 +653,7 @@ test.describe('Advanced Validation E2E Tests', () => {
 
   test.describe('When Clause with AND/OR Logic', () => {
     test('should require company name only for verified business accounts', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/when-with-and-or');
+      await page.goto('/#/testing/advanced-validation/when-with-and-or');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('when-with-and-or-test');
@@ -707,7 +707,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should require payment method for premium OR discounted orders', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/when-with-and-or');
+      await page.goto('/#/testing/advanced-validation/when-with-and-or');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('when-with-and-or-test');
@@ -771,7 +771,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should apply min validator for business OR verified premium accounts', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/when-with-and-or');
+      await page.goto('/#/testing/advanced-validation/when-with-and-or');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('when-with-and-or-test');
@@ -866,7 +866,7 @@ test.describe('Advanced Validation E2E Tests', () => {
 
   test.describe('Nested Field Paths', () => {
     test('should validate with nested field paths', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/nested-field-paths');
+      await page.goto('/#/testing/advanced-validation/nested-field-paths');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('nested-field-paths-test');
@@ -879,7 +879,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should hide shipping zip field when sameAsBilling is checked', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/nested-field-paths');
+      await page.goto('/#/testing/advanced-validation/nested-field-paths');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('nested-field-paths-test');
@@ -914,7 +914,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should validate shipping zip matches billing zip via nested path', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/nested-field-paths');
+      await page.goto('/#/testing/advanced-validation/nested-field-paths');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('nested-field-paths-test');
@@ -961,7 +961,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should validate secondary email differs from nested primary email', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/nested-field-paths');
+      await page.goto('/#/testing/advanced-validation/nested-field-paths');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('nested-field-paths-test');
@@ -1008,7 +1008,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should verify SMS notifications checkbox and phone field exist', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/nested-field-paths');
+      await page.goto('/#/testing/advanced-validation/nested-field-paths');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('nested-field-paths-test');
@@ -1035,7 +1035,7 @@ test.describe('Advanced Validation E2E Tests', () => {
 
   test.describe('Array Cross-Validation', () => {
     test('should validate array item with require email checkbox', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/array-cross-validation');
+      await page.goto('/#/testing/advanced-validation/array-cross-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('array-cross-validation-test');
@@ -1083,7 +1083,7 @@ test.describe('Advanced Validation E2E Tests', () => {
     });
 
     test('should display correct error message for email validation in array item', async ({ page, helpers }) => {
-      await page.goto('/#/advanced-validation/array-cross-validation');
+      await page.goto('/#/testing/advanced-validation/array-cross-validation');
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('array-cross-validation-test');

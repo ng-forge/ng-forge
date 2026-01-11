@@ -12,7 +12,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Comprehensive Fields Test', () => {
     test('should test all basic field types', async ({ page, helpers }) => {
       // Navigate to the comprehensive fields component
-      await page.goto('/#/comprehensive-field-tests/comprehensive-fields');
+      await page.goto('/#/testing/comprehensive-field-tests/comprehensive-fields');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -170,7 +170,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Validation Test', () => {
     test('should handle field validation errors', async ({ page, helpers }) => {
       // Navigate to the validation test component
-      await page.goto('/#/comprehensive-field-tests/validation');
+      await page.goto('/#/testing/comprehensive-field-tests/validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -273,7 +273,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Grid Layout Test', () => {
     test('should test responsive grid layout', async ({ page, helpers }) => {
       // Navigate to the grid layout test component
-      await page.goto('/#/comprehensive-field-tests/grid-layout');
+      await page.goto('/#/testing/comprehensive-field-tests/grid-layout');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -408,7 +408,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('State Management Test', () => {
     test('should test form state management', async ({ page, helpers }) => {
       // Navigate to the state management test component
-      await page.goto('/#/comprehensive-field-tests/state-management');
+      await page.goto('/#/testing/comprehensive-field-tests/state-management');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
