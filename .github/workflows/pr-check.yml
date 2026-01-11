@@ -345,15 +345,24 @@ jobs:
       - name: Fetch base branch for affected detection
         run: git fetch origin main:main
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.1
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Check if app is affected
         id: check-affected
         run: |
-          AFFECTED=$(npx nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || true)
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || true)
           if echo "$AFFECTED" | grep -q "${{ matrix.app }}"; then
             echo "affected=true" >> $GITHUB_OUTPUT
           else
