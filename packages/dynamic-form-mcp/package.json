@@ -1,0 +1,61 @@
+{
+  "name": "@ng-forge/dynamic-form-mcp",
+  "version": "0.2.0",
+  "description": "MCP server for ng-forge dynamic forms - AI-assisted form schema generation",
+  "type": "module",
+  "license": "MIT",
+  "author": "ng-forge",
+  "homepage": "https://ng-forge.com/dynamic-forms/mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ng-forge/ng-forge.git",
+    "directory": "packages/dynamic-form-mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/ng-forge/ng-forge/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "angular",
+    "forms",
+    "dynamic-forms",
+    "ai-assisted",
+    "claude",
+    "llm",
+    "ng-forge"
+  ],
+  "bin": {
+    "ng-forge-mcp": "./bin/ng-forge-mcp.js"
+  },
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    }
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@ng-forge/dynamic-forms": "^0.2.0",
+    "@ng-forge/dynamic-forms-material": "^0.2.0",
+    "@ng-forge/dynamic-forms-bootstrap": "^0.2.0",
+    "@ng-forge/dynamic-forms-primeng": "^0.2.0",
+    "@ng-forge/dynamic-forms-ionic": "^0.2.0",
+    "ts-morph": "^24.0.0",
+    "tsx": "^4.19.0"
+  }
+}

@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "postinstall": "bash scripts/postinstall.sh",
-    "build:libs": "nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-primeng,dynamic-forms-ionic",
+    "build:libs": "nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-form-mcp",
     "build:docs": "nx build docs",
     "build:examples": "nx run-many -t build -p material-examples,bootstrap-examples,primeng-examples,ionic-examples --configuration=production",
     "build:all:prod": "pnpm run build:libs && pnpm run build:docs && pnpm run build:examples",
@@ -25,6 +25,8 @@
     "e2e:primeng": "nx run primeng-examples:e2e",
     "e2e:ionic": "nx run ionic-examples:e2e",
     "clean": "nx reset && rm -rf dist node_modules/.cache",
+    "mcp:build": "nx build dynamic-form-mcp",
+    "mcp:dev": "nx build dynamic-form-mcp && node dist/packages/dynamic-form-mcp/bin/ng-forge-mcp.js",
     "release:branch:patch": "bash scripts/create-release-branch.sh patch",
     "release:branch:minor": "bash scripts/create-release-branch.sh minor",
     "release:branch:major": "bash scripts/create-release-branch.sh major"
@@ -45,8 +47,10 @@
     "@commitlint/config-angular": "^20.3.1",
     "@eslint/js": "^9.39.2",
     "@ionic/angular": "8.7.16",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "@nx/angular": "22.3.3",
     "@nx/devkit": "22.3.3",
+    "@nx/esbuild": "^22.3.3",
     "@nx/eslint": "22.3.3",
     "@nx/eslint-plugin": "22.3.3",
     "@nx/js": "22.3.3",
@@ -96,7 +100,8 @@
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^6.0.3",
     "vitest": "4.0.16",
-    "wait-on": "^9.0.1"
+    "wait-on": "^9.0.1",
+    "zod": "^4.3.5"
   },
   "dependencies": {
     "@angular/animations": "^21.0.8",
