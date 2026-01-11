@@ -1,0 +1,354 @@
+<!-- Noise texture overlay -->
+<div class="noise-overlay"></div>
+
+<!-- Background glow -->
+<div class="bg-glow"></div>
+
+<!-- Fireflies -->
+<div class="fireflies">
+  @for (_ of fireflies; track $index) {
+    <div class="firefly"></div>
+  }
+</div>
+
+<!-- Navigation -->
+<nav [class.scrolled]="navScrolled()">
+  <a routerLink="/" class="logo">
+    <img src="logo-dark.svg" alt="ng-forge" class="logo-img" />
+  </a>
+  <div class="nav-links">
+    <a routerLink="/dynamic-forms">Docs</a>
+    <a href="https://github.com/nicoanadt/ng-forge" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Angular 21+ Signal Forms
+    </div>
+    <h1>
+      <span class="line1">Forms are boring.</span>
+      <span class="line2">Your code shouldn't be.</span>
+    </h1>
+    <p class="hero-tagline">Write the config. We handle the rest. Type-safe. Signal-native. Zero boilerplate.</p>
+    <div class="hero-ctas">
+      <a routerLink="/dynamic-forms/installation" class="btn btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+        Get Started
+      </a>
+      <a href="https://github.com/nicoanadt/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+          />
+        </svg>
+        View on GitHub
+      </a>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-dot"></span>
+        <span class="code-dot"></span>
+        <span class="code-dot"></span>
+        <span class="code-title">config.ts</span>
+      </div>
+      <div class="code-body">
+        <pre><span class="ck">const</span> <span class="cp">config</span> = &#123;
+  <span class="cp">fields</span>: [
+    &#123; <span class="cp">key</span>: <span class="cs">'email'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">required</span>: <span class="ck">true</span>, <span class="cp">email</span>: <span class="ck">true</span> &#125;,
+    &#123; <span class="cp">key</span>: <span class="cs">'plan'</span>, <span class="cp">type</span>: <span class="cs">'select'</span>, <span class="cp">options</span>: [<span class="cs">'starter'</span>, <span class="cs">'pro'</span>, <span class="cs">'enterprise'</span>] &#125;,
+    &#123; <span class="cp">key</span>: <span class="cs">'seats'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">min</span>: <span class="cn">1</span>,
+      <span class="cp">logic</span>: [&#123; <span class="cp">type</span>: <span class="cs">'hidden'</span>, <span class="cp">when</span>: &#123; <span class="cp">field</span>: <span class="cs">'plan'</span>, <span class="cp">equals</span>: <span class="cs">'starter'</span> &#125; &#125;] &#125;,
+  ]
+&#125; <span class="ck">as const satisfies</span> <span class="ct">FormConfig</span>;
+
+<span class="cc">// That's it. Type inference, validation, conditional logic. Done.</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Features -->
+<section class="features">
+  <div class="features-header fade-up" [class.visible]="isVisible('features-header')">
+    <div class="section-label">Why ng-forge</div>
+    <h2 class="section-title">Built different.</h2>
+    <p class="section-desc">Not another forms wrapper. Native signal forms integration, real type safety, actual developer experience.</p>
+  </div>
+
+  <div class="features-container">
+    @for (feature of features; track feature.title) {
+      <div class="feature-card fade-up" [class.visible]="isVisible('feature-' + $index)">
+        <span class="feature-icon">{{ feature.icon }}</span>
+        <h3>{{ feature.title }}</h3>
+        <p [innerHTML]="feature.description"></p>
+      </div>
+    }
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Showcase -->
+<section class="showcase">
+  <div class="showcase-header fade-up" [class.visible]="isVisible('showcase-header')">
+    <div class="section-label">Power features</div>
+    <h2 class="section-title">Simple API. Complex forms.</h2>
+    <p class="section-desc">Conditional logic, multi-step wizards, i18n. All declarative.</p>
+  </div>
+
+  <div class="showcase-grid">
+    <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-0')">
+      <h3>Conditional Everything</h3>
+      <p>Fields that appear, disappear, or become required based on other values. No imperative code.</p>
+      <div class="showcase-code">
+        <pre>&#123; <span class="cp">key</span>: <span class="cs">'company'</span>,
+  <span class="cp">logic</span>: [&#123;
+    <span class="cp">type</span>: <span class="cs">'required'</span>,
+    <span class="cp">when</span>: &#123; <span class="cp">field</span>: <span class="cs">'type'</span>, <span class="cp">equals</span>: <span class="cs">'business'</span> &#125;
+  &#125;]
+&#125;</pre>
+      </div>
+    </div>
+    <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-1')">
+      <h3>Multi-Step Wizards</h3>
+      <p>Page-level validation, navigation controls, progress tracking. Built-in.</p>
+      <div class="showcase-code">
+        <pre>&#123; <span class="cp">fields</span>: [
+  &#123; <span class="cp">type</span>: <span class="cs">'page'</span>, <span class="cp">key</span>: <span class="cs">'info'</span>, <span class="cp">fields</span>: [...] &#125;,
+  &#123; <span class="cp">type</span>: <span class="cs">'page'</span>, <span class="cp">key</span>: <span class="cs">'payment'</span>, <span class="cp">fields</span>: [...] &#125;,
+  &#123; <span class="cp">type</span>: <span class="cs">'page'</span>, <span class="cp">key</span>: <span class="cs">'review'</span>, <span class="cp">fields</span>: [...] &#125;
+]&#125;</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Validation -->
+<section class="validation">
+  <div class="section-container">
+    <div class="validation-header fade-up" [class.visible]="isVisible('validation-header')">
+      <div class="section-label">Validation</div>
+      <h2 class="section-title">Validation without the ceremony.</h2>
+      <p class="section-desc">No Validators import. No arrays. Just properties.</p>
+    </div>
+
+    <div class="validation-demo fade-up" [class.visible]="isVisible('validation-demo')">
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-dot"></span>
+          <span class="code-dot"></span>
+          <span class="code-dot"></span>
+          <span class="code-title">validation.ts</span>
+        </div>
+        <div class="code-body">
+          <pre>&#123; <span class="cp">key</span>: <span class="cs">'email'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">required</span>: <span class="ck">true</span>, <span class="cp">email</span>: <span class="ck">true</span> &#125;,
+&#123; <span class="cp">key</span>: <span class="cs">'age'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">min</span>: <span class="cn">18</span>, <span class="cp">max</span>: <span class="cn">120</span> &#125;,
+&#123; <span class="cp">key</span>: <span class="cs">'username'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">minLength</span>: <span class="cn">3</span>, <span class="cp">maxLength</span>: <span class="cn">20</span> &#125;,
+&#123; <span class="cp">key</span>: <span class="cs">'website'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">pattern</span>: <span class="cs">/^https?:\/\/.+/</span> &#125;</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Field Types -->
+<section class="field-types">
+  <div class="section-container">
+    <div class="field-types-header fade-up" [class.visible]="isVisible('field-types-header')">
+      <div class="section-label">Field types</div>
+      <h2 class="section-title">Everything you need, built in.</h2>
+      <p class="section-desc">Common field types ready to use. Need more? Create your own.</p>
+    </div>
+
+    <div class="field-types-grid fade-up" [class.visible]="isVisible('field-types-grid')">
+      @for (fieldType of fieldTypes; track fieldType.code) {
+        <div class="field-type">
+          <code>{{ fieldType.code }}</code>
+          <span>{{ fieldType.label }}</span>
+        </div>
+      }
+    </div>
+
+    <p class="field-types-cta fade-up" [class.visible]="isVisible('field-types-cta')">
+      <a routerLink="/dynamic-forms/examples" class="inline-link">See live examples &rarr;</a>
+    </p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Quick Start -->
+<section class="quickstart">
+  <div class="section-container">
+    <div class="quickstart-header fade-up" [class.visible]="isVisible('quickstart-header')">
+      <div class="section-label">Quick start</div>
+      <h2 class="section-title">Up and running in 60 seconds.</h2>
+      <p class="section-desc">Copy, paste, customize. That's it.</p>
+    </div>
+
+    <div class="quickstart-code fade-up" [class.visible]="isVisible('quickstart-code')">
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-dot"></span>
+          <span class="code-dot"></span>
+          <span class="code-dot"></span>
+          <span class="code-title">login.component.ts</span>
+        </div>
+        <div class="code-body">
+          <pre><span class="ck">import</span> &#123; DynamicForm, <span class="ck">type</span> FormConfig &#125; <span class="ck">from</span> <span class="cs">'&#64;ng-forge/dynamic-forms'</span>;
+
+&#64;<span class="ct">Component</span>(&#123;
+  <span class="cp">imports</span>: [DynamicForm],
+  <span class="cp">template</span>: <span class="cs">`&lt;form [dynamic-form]="config" (submit)="onSubmit($event)"&gt;&lt;/form&gt;`</span>
+&#125;)
+<span class="ck">export class</span> <span class="ct">LoginComponent</span> &#123;
+  <span class="cp">config</span> = &#123;
+    <span class="cp">fields</span>: [
+      &#123; <span class="cp">key</span>: <span class="cs">'email'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">label</span>: <span class="cs">'Email'</span>, <span class="cp">required</span>: <span class="ck">true</span>, <span class="cp">email</span>: <span class="ck">true</span> &#125;,
+      &#123; <span class="cp">key</span>: <span class="cs">'password'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">label</span>: <span class="cs">'Password'</span>, <span class="cp">required</span>: <span class="ck">true</span>,
+        <span class="cp">minLength</span>: <span class="cn">8</span>, <span class="cp">props</span>: &#123; <span class="cp">type</span>: <span class="cs">'password'</span> &#125; &#125;,
+      &#123; <span class="cp">key</span>: <span class="cs">'submit'</span>, <span class="cp">type</span>: <span class="cs">'submit'</span>, <span class="cp">label</span>: <span class="cs">'Sign In'</span> &#125;
+    ]
+  &#125; <span class="ck">as const satisfies</span> <span class="ct">FormConfig</span>;
+
+  <span class="cp">onSubmit</span>(<span class="cp">value</span>: <span class="ct">InferFormValue</span>&lt;<span class="ck">typeof</span> <span class="ck">this</span>.<span class="cp">config</span>.<span class="cp">fields</span>&gt;) &#123;
+    <span class="cc">// value is fully typed: &#123; email: string, password: string &#125;</span>
+    console.<span class="cp">log</span>(value);
+  &#125;
+&#125;</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- JSON Config -->
+<section class="json-config">
+  <div class="section-container">
+    <div class="json-header fade-up" [class.visible]="isVisible('json-header')">
+      <div class="section-label">CMS-friendly</div>
+      <h2 class="section-title">JSON configs work too.</h2>
+      <p class="section-desc">Load form definitions from your backend. Perfect for dynamic surveys, admin panels, or form builders.</p>
+    </div>
+
+    <div class="json-demo fade-up" [class.visible]="isVisible('json-demo')">
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-dot"></span>
+          <span class="code-dot"></span>
+          <span class="code-dot"></span>
+          <span class="code-title">form-config.json</span>
+        </div>
+        <div class="code-body">
+          <pre>&#123;
+  <span class="cp">"fields"</span>: [
+    &#123; <span class="cp">"key"</span>: <span class="cs">"name"</span>, <span class="cp">"type"</span>: <span class="cs">"input"</span>, <span class="cp">"label"</span>: <span class="cs">"Full Name"</span>, <span class="cp">"required"</span>: <span class="ck">true</span> &#125;,
+    &#123; <span class="cp">"key"</span>: <span class="cs">"feedback"</span>, <span class="cp">"type"</span>: <span class="cs">"textarea"</span>, <span class="cp">"label"</span>: <span class="cs">"Your Feedback"</span> &#125;,
+    &#123; <span class="cp">"key"</span>: <span class="cs">"rating"</span>, <span class="cp">"type"</span>: <span class="cs">"select"</span>, <span class="cp">"label"</span>: <span class="cs">"Rating"</span>,
+      <span class="cp">"options"</span>: [<span class="cs">"Excellent"</span>, <span class="cs">"Good"</span>, <span class="cs">"Average"</span>, <span class="cs">"Poor"</span>] &#125;
+  ]
+&#125;</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Integrations -->
+<section class="integrations">
+  <div class="integrations-header fade-up" [class.visible]="isVisible('integrations-header')">
+    <div class="section-label">Integrations</div>
+    <h2 class="section-title">Your UI library. Our forms.</h2>
+    <p class="section-desc">First-class adapters for everything you're already using.</p>
+  </div>
+
+  <div class="integrations-row fade-up" [class.visible]="isVisible('integrations-row')">
+    @for (integration of integrations; track integration.name) {
+      <a [routerLink]="integration.route" class="integration-logo" [title]="integration.name">
+        <svg
+          [attr.viewBox]="integration.viewBox"
+          [attr.width]="integration.width"
+          [attr.height]="integration.height"
+          [innerHTML]="integration.svgContent"
+        ></svg>
+        <span>{{ integration.name }}</span>
+      </a>
+    }
+  </div>
+
+  <p class="integrations-footnote fade-up" [class.visible]="isVisible('integrations-footnote')">
+    Or <a routerLink="/dynamic-forms/deep-dive/custom-integrations">build your own adapter</a>
+  </p>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2 class="cta-title">Stop writing forms.<br /><span>Start forging them.</span></h2>
+
+  <div class="install-box">
+    <div class="install-selectors">
+      <div class="install-tabs">
+        @for (pkg of packageManagers; track pkg.id) {
+          <button class="install-tab" [class.active]="currentPackageManager() === pkg.id" (click)="setPackageManager(pkg.id)">
+            {{ pkg.label }}
+          </button>
+        }
+      </div>
+      <div class="install-tabs ui-tabs">
+        @for (ui of uiLibraries; track ui.id) {
+          <button class="install-tab" [class.active]="currentUiLibrary() === ui.id" (click)="setUiLibrary(ui.id)">
+            {{ ui.label }}
+          </button>
+        }
+      </div>
+    </div>
+    <div class="install-cmd">
+      <code>{{ installCommand() }}</code>
+      <button class="copy-btn" (click)="copyInstallCommand()" [attr.aria-label]="copied() ? 'Copied!' : 'Copy to clipboard'">
+        @if (copied()) {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#28ca42" stroke-width="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        } @else {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" />
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+          </svg>
+        }
+      </button>
+    </div>
+  </div>
+
+  <div class="cta-buttons">
+    <a routerLink="/dynamic-forms/installation" class="btn btn-primary">Read the Docs</a>
+    <a href="https://github.com/nicoanadt/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">GitHub</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-links">
+    <a routerLink="/dynamic-forms">Documentation</a>
+    <a href="https://github.com/nicoanadt/ng-forge" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://github.com/nicoanadt/ng-forge/issues" target="_blank" rel="noopener">Issues</a>
+    <a href="https://github.com/nicoanadt/ng-forge/discussions" target="_blank" rel="noopener">Discussions</a>
+  </div>
+  <p class="footer-copy">MIT License &copy; ng-forge</p>
+</footer>
