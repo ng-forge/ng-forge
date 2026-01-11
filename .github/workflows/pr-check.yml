@@ -345,30 +345,10 @@ jobs:
       - name: Fetch base branch for affected detection
         run: git fetch origin main:main
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.1
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Restore build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
       - name: Check if app is affected
         id: check-affected
@@ -377,7 +357,7 @@ jobs:
           git branch -a | head -20
           echo ""
           echo "=== Checking affected projects ==="
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>&1) || true
+          AFFECTED=$(npx nx show projects --affected --base=origin/main --with-target=e2e 2>&1) || true
           echo "Affected projects with e2e target:"
           echo "$AFFECTED"
           echo ""
@@ -392,7 +372,7 @@ jobs:
 
       - name: Run E2E tests in Docker
         if: steps.check-affected.outputs.affected == 'true'
-        run: pnpm e2e:${{ matrix.short }}
+        run: ./scripts/playwright-docker.sh ${{ matrix.app }}
 
       - name: Skip E2E tests (not affected)
         if: steps.check-affected.outputs.affected == 'false'
