@@ -82,14 +82,14 @@ describe('cycle-detector', () => {
         expect(result.hasCycle).toBe(false);
       });
 
-      it('should detect simple two-node cycle', () => {
-        // A -> B -> A
+      it('should allow bidirectional two-node patterns (stabilizing cycles)', () => {
+        // A -> B -> A is a bidirectional sync pattern
+        // These stabilize via equality checks at runtime (e.g., USD/EUR conversion)
         const collection = createCollection([createEntry('a', 'b'), createEntry('b', 'a')]);
         const result = detectCycles(collection);
 
-        expect(result.hasCycle).toBe(true);
-        expect(result.cyclePath).toBeDefined();
-        expect(result.cyclePath?.length).toBeGreaterThanOrEqual(2);
+        // Bidirectional patterns are allowed - they stabilize at runtime
+        expect(result.hasCycle).toBe(false);
       });
 
       it('should detect three-node cycle', () => {
@@ -110,8 +110,13 @@ describe('cycle-detector', () => {
         expect(result.hasCycle).toBe(true);
       });
 
-      it('should include error message with cycle path', () => {
-        const collection = createCollection([createEntry('field1', 'field2'), createEntry('field2', 'field1')]);
+      it('should include error message with cycle path for non-bidirectional cycles', () => {
+        // 3-node cycle is not a bidirectional pattern, so should be detected
+        const collection = createCollection([
+          createEntry('field1', 'field2'),
+          createEntry('field2', 'field3'),
+          createEntry('field3', 'field1'),
+        ]);
         const result = detectCycles(collection);
 
         expect(result.errorMessage).toBeDefined();
@@ -158,14 +163,27 @@ describe('cycle-detector', () => {
       expect(() => validateNoCycles(collection)).not.toThrow();
     });
 
-    it('should throw for collection with cycle', () => {
+    it('should not throw for bidirectional patterns', () => {
+      // Bidirectional sync patterns are allowed
       const collection = createCollection([createEntry('a', 'b'), createEntry('b', 'a')]);
+
+      expect(() => validateNoCycles(collection)).not.toThrow();
+    });
+
+    it('should throw for non-bidirectional cycle', () => {
+      // 3-node cycle should still be rejected
+      const collection = createCollection([createEntry('a', 'b'), createEntry('b', 'c'), createEntry('c', 'a')]);
 
       expect(() => validateNoCycles(collection)).toThrow();
     });
 
     it('should include cycle information in error message', () => {
-      const collection = createCollection([createEntry('field1', 'field2'), createEntry('field2', 'field1')]);
+      // Use 3-node cycle for error message test
+      const collection = createCollection([
+        createEntry('field1', 'field2'),
+        createEntry('field2', 'field3'),
+        createEntry('field3', 'field1'),
+      ]);
 
       try {
         validateNoCycles(collection);

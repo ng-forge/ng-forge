@@ -563,12 +563,17 @@ export class DynamicForm<
    * Sets up the effect that processes derivations when form values change.
    *
    * Uses a flag to prevent re-triggering during derivation application.
+   * The flag is reset on a microtask delay to handle Angular's effect scheduling,
+   * which queues re-runs as microtasks when tracked signals change.
+   *
+   * Tracks changed fields for efficient filtering.
    * Handles both immediate (onChange) and debounced derivations.
    *
    * @internal
    */
   private setupDerivationEffect(): void {
     // Flag to prevent re-entry during derivation processing
+    // Reset on microtask to handle Angular's effect scheduling
     let isProcessingDerivations = false;
 
     // Set up immediate (onChange) derivations effect
@@ -578,7 +583,8 @@ export class DynamicForm<
         return;
       }
 
-      // Prevent re-entry
+      // Prevent re-entry - this flag prevents double-triggering when
+      // derivation application updates formValue signal
       isProcessingDerivations = true;
 
       try {
@@ -592,7 +598,11 @@ export class DynamicForm<
           logger: this.logger,
         };
 
-        // Apply derivations with onChange trigger (use untracked to avoid dependency on result)
+        // Apply derivations with onChange trigger
+        // We don't pass changedFields here - the applicator's internal loop needs
+        // access to ALL derivations to handle cascades (A->B->C). The applicator's
+        // equality check naturally skips derivations whose dependencies haven't changed.
+        // Use untracked to prevent establishing additional dependencies during application
         untracked(() => {
           const result = applyDerivationsForTrigger(collection, 'onChange', applicatorContext);
 
@@ -605,8 +615,14 @@ export class DynamicForm<
           }
         });
       } finally {
-        // Allow future processing
-        isProcessingDerivations = false;
+        // Reset flag on microtask to handle Angular's effect scheduling.
+        // When derivations update field values, formValue signal changes,
+        // scheduling a new effect run as a microtask. By resetting the flag
+        // on the next microtask, we ensure the scheduled re-run sees the flag
+        // as true and skips processing (preventing double-trigger).
+        queueMicrotask(() => {
+          isProcessingDerivations = false;
+        });
       }
     });
 
@@ -617,51 +633,123 @@ export class DynamicForm<
   /**
    * Sets up debounced derivation processing.
    *
-   * Groups debounced derivations by their debounce duration and creates
-   * separate debounced signals for each group.
+   * Groups debounced derivations by their debounce duration and processes
+   * each group with its own debounce timing. This allows each derivation
+   * to respect its own `debounceMs` setting.
+   *
+   * Uses a single effect that groups entries at processing time, avoiding
+   * the need to read the derivation collection during component construction.
    *
    * @internal
    */
   private setupDebouncedDerivations(): void {
-    // Create a debounced effect that processes debounced derivations
-    // The callback will be invoked after the debounce period
+    // Track debounce timers by duration
+    const debounceTimers = new Map<number, ReturnType<typeof setTimeout>>();
+
+    // Create a single debounced effect with the default (shortest common) debounce
+    // It will handle per-entry debouncing internally
     createDebouncedEffect(
       this.formValue as Signal<Record<string, unknown>>,
       () => {
         const collection = untracked(() => this.derivationCollection());
         const formAccessor = untracked(() => this.form());
 
-        if (!collection || !formAccessor) {
-          return;
-        }
+        if (!collection || !formAccessor) return;
 
-        // Check if there are any debounced entries
+        // Get all debounced entries
         const debouncedEntries = getDebouncedDerivationEntries(collection);
-        if (debouncedEntries.length === 0) {
-          return;
+        if (debouncedEntries.length === 0) return;
+
+        // Group entries by their debounce duration
+        const entriesByDebounceMs = new Map<number, typeof debouncedEntries>();
+        for (const entry of debouncedEntries) {
+          const ms = entry.debounceMs ?? DEFAULT_DEBOUNCE_MS;
+          const group = entriesByDebounceMs.get(ms) ?? [];
+          group.push(entry);
+          entriesByDebounceMs.set(ms, group);
         }
 
-        // Create applicator context
-        const applicatorContext = {
-          formValue: this.formValue as Signal<Record<string, unknown>>,
-          rootForm: formAccessor as unknown as import('@angular/forms/signals').FieldTree<unknown>,
-          derivationFunctions: this.functionRegistry.getDerivationFunctions(),
-          customFunctions: this.functionRegistry.getCustomFunctions(),
-          logger: this.logger,
-        };
+        // Process entries with the default debounce immediately
+        // (they've already been debounced by createDebouncedEffect)
+        const defaultEntries = entriesByDebounceMs.get(DEFAULT_DEBOUNCE_MS) ?? [];
+        if (defaultEntries.length > 0) {
+          this.applyDebouncedEntriesGroup(defaultEntries, collection, formAccessor);
+        }
 
-        // Apply debounced derivations
-        const result = applyDerivationsForTrigger(collection, 'debounced', applicatorContext);
+        // Schedule entries with different debounce durations
+        // These need additional waiting beyond the default debounce
+        for (const [debounceMs, entries] of entriesByDebounceMs) {
+          if (debounceMs === DEFAULT_DEBOUNCE_MS) continue;
 
-        if (result.maxIterationsReached) {
-          this.logger.warn(
-            `Debounced derivation processing reached max iterations. ` +
-              `Applied: ${result.appliedCount}, Skipped: ${result.skippedCount}, Errors: ${result.errorCount}`,
-          );
+          // Clear existing timer for this duration
+          const existingTimer = debounceTimers.get(debounceMs);
+          if (existingTimer) {
+            clearTimeout(existingTimer);
+          }
+
+          // Calculate additional wait time
+          // If debounceMs > DEFAULT, wait the difference
+          // If debounceMs < DEFAULT, process immediately (already waited longer)
+          const additionalWait = Math.max(0, debounceMs - DEFAULT_DEBOUNCE_MS);
+
+          if (additionalWait === 0) {
+            // Already waited long enough, process now
+            this.applyDebouncedEntriesGroup(entries, collection, formAccessor);
+          } else {
+            // Schedule for later
+            const timer = setTimeout(() => {
+              debounceTimers.delete(debounceMs);
+              // Re-read form state at execution time
+              const currentCollection = untracked(() => this.derivationCollection());
+              const currentFormAccessor = untracked(() => this.form());
+              if (currentCollection && currentFormAccessor) {
+                this.applyDebouncedEntriesGroup(entries, currentCollection, currentFormAccessor);
+              }
+            }, additionalWait);
+            debounceTimers.set(debounceMs, timer);
+          }
         }
       },
       { ms: DEFAULT_DEBOUNCE_MS, injector: this.injector },
     );
+  }
+
+  /**
+   * Applies a group of debounced derivation entries.
+   * @internal
+   */
+  private applyDebouncedEntriesGroup(
+    entries: import('./core/derivation').DerivationEntry[],
+    collection: import('./core/derivation').DerivationCollection,
+    formAccessor: ReturnType<typeof this.form>,
+  ): void {
+    // Create a filtered collection with only entries for this group
+    const entrySet = new Set(entries);
+    const filteredCollection: import('./core/derivation').DerivationCollection = {
+      entries,
+      byTarget: new Map(Array.from(collection.byTarget.entries()).map(([key, vals]) => [key, vals.filter((e) => entrySet.has(e))])),
+      bySource: new Map(Array.from(collection.bySource.entries()).map(([key, vals]) => [key, vals.filter((e) => entrySet.has(e))])),
+      byDependency: new Map(Array.from(collection.byDependency.entries()).map(([key, vals]) => [key, vals.filter((e) => entrySet.has(e))])),
+    };
+
+    // Create applicator context
+    const applicatorContext = {
+      formValue: this.formValue as Signal<Record<string, unknown>>,
+      rootForm: formAccessor as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+      derivationFunctions: this.functionRegistry.getDerivationFunctions(),
+      customFunctions: this.functionRegistry.getCustomFunctions(),
+      logger: this.logger,
+    };
+
+    // Apply debounced derivations for this group
+    const result = applyDerivationsForTrigger(filteredCollection, 'debounced', applicatorContext);
+
+    if (result.maxIterationsReached) {
+      this.logger.warn(
+        `Debounced derivation processing reached max iterations. ` +
+          `Applied: ${result.appliedCount}, Skipped: ${result.skippedCount}, Errors: ${result.errorCount}`,
+      );
+    }
   }
 
   private setupEventHandlers(): void {

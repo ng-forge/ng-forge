@@ -34,7 +34,8 @@ const enum VisitState {
  * Detects cycles in the derivation dependency graph.
  *
  * Uses Kahn's algorithm variant with DFS to detect cycles.
- * Cycles in derivation logic would cause infinite loops at runtime.
+ * Bidirectional sync patterns (A→B→A) are allowed because they stabilize
+ * via the equality check at runtime.
  *
  * @param collection - The collected derivation entries
  * @returns Result indicating whether a cycle exists and details if found
@@ -61,8 +62,67 @@ export function detectCycles(collection: DerivationCollection): CycleDetectionRe
     return { hasCycle: false };
   }
 
+  // Build bidirectional pairs set for cycle exemption
+  const bidirectionalPairs = detectBidirectionalPairs(collection);
+
   // Run DFS to detect cycles
-  return detectCyclesWithDFS(graph);
+  return detectCyclesWithDFS(graph, bidirectionalPairs);
+}
+
+/**
+ * Detects bidirectional derivation pairs (A→B and B→A).
+ *
+ * These patterns are allowed because they stabilize via equality checks.
+ * Example: USD/EUR conversion where both fields derive from each other.
+ *
+ * @internal
+ */
+function detectBidirectionalPairs(collection: DerivationCollection): Set<string> {
+  const pairs = new Set<string>();
+  const edgeSet = new Set<string>();
+
+  // Build set of all source→target edges
+  for (const entry of collection.entries) {
+    if (entry.sourceFieldKey !== entry.targetFieldKey) {
+      edgeSet.add(`${entry.sourceFieldKey}→${entry.targetFieldKey}`);
+    }
+  }
+
+  // Find bidirectional pairs (A→B exists AND B→A exists)
+  for (const entry of collection.entries) {
+    const reverseEdge = `${entry.targetFieldKey}→${entry.sourceFieldKey}`;
+    if (edgeSet.has(reverseEdge)) {
+      // Normalize pair key (alphabetically sorted)
+      const pairKey =
+        entry.sourceFieldKey < entry.targetFieldKey
+          ? `${entry.sourceFieldKey}↔${entry.targetFieldKey}`
+          : `${entry.targetFieldKey}↔${entry.sourceFieldKey}`;
+      pairs.add(pairKey);
+    }
+  }
+
+  return pairs;
+}
+
+/**
+ * Checks if a cycle path represents a bidirectional pair.
+ *
+ * @internal
+ */
+function isBidirectionalCycle(cyclePath: string[], bidirectionalPairs: Set<string>): boolean {
+  // Bidirectional cycles are exactly: [A, B, A] (length 3 with first=last)
+  if (cyclePath.length !== 3) {
+    return false;
+  }
+
+  const [first, second, third] = cyclePath;
+  if (first !== third) {
+    return false;
+  }
+
+  // Check if this pair is in our bidirectional set
+  const pairKey = first < second ? `${first}↔${second}` : `${second}↔${first}`;
+  return bidirectionalPairs.has(pairKey);
 }
 
 /**
@@ -138,11 +198,12 @@ function buildDependencyGraph(collection: DerivationCollection): Map<string, Gra
  * - InProgress (gray): Currently in the DFS stack
  * - Completed (black): Fully processed
  *
- * A cycle is detected when we visit a node that's InProgress.
+ * A cycle is detected when we visit a node that's InProgress,
+ * unless it's a bidirectional sync pattern (allowed).
  *
  * @internal
  */
-function detectCyclesWithDFS(graph: Map<string, GraphNode>): CycleDetectionResult {
+function detectCyclesWithDFS(graph: Map<string, GraphNode>, bidirectionalPairs: Set<string>): CycleDetectionResult {
   const visitState = new Map<string, VisitState>();
   const parent = new Map<string, string | null>();
 
@@ -154,7 +215,7 @@ function detectCyclesWithDFS(graph: Map<string, GraphNode>): CycleDetectionResul
   // Process each unvisited node
   for (const fieldKey of graph.keys()) {
     if (visitState.get(fieldKey) === VisitState.Unvisited) {
-      const cycleResult = dfsVisit(fieldKey, graph, visitState, parent, []);
+      const cycleResult = dfsVisit(fieldKey, graph, visitState, parent, [], bidirectionalPairs);
       if (cycleResult) {
         return cycleResult;
       }
@@ -175,6 +236,7 @@ function dfsVisit(
   visitState: Map<string, VisitState>,
   parent: Map<string, string | null>,
   path: string[],
+  bidirectionalPairs: Set<string>,
 ): CycleDetectionResult | null {
   visitState.set(fieldKey, VisitState.InProgress);
   path.push(fieldKey);
@@ -191,8 +253,16 @@ function dfsVisit(
     const targetState = visitState.get(targetFieldKey);
 
     if (targetState === VisitState.InProgress) {
-      // Back edge found - this is a cycle!
+      // Back edge found - potential cycle
       const cyclePath = extractCyclePath(path, targetFieldKey);
+
+      // Allow bidirectional sync patterns (A→B→A)
+      // These stabilize via equality checks at runtime
+      if (isBidirectionalCycle(cyclePath, bidirectionalPairs)) {
+        // Continue DFS without reporting this as a cycle
+        continue;
+      }
+
       return {
         hasCycle: true,
         cyclePath,
@@ -202,7 +272,7 @@ function dfsVisit(
 
     if (targetState === VisitState.Unvisited) {
       parent.set(targetFieldKey, fieldKey);
-      const result = dfsVisit(targetFieldKey, graph, visitState, parent, path);
+      const result = dfsVisit(targetFieldKey, graph, visitState, parent, path, bidirectionalPairs);
       if (result) {
         return result;
       }

@@ -121,6 +121,14 @@ export interface DerivationCollection {
    * Used for finding derivations when a field's value changes.
    */
   bySource: Map<string, DerivationEntry[]>;
+
+  /**
+   * Map of dependency field key to entries that depend on it.
+   *
+   * Used for efficient O(1) lookup when filtering by changed fields.
+   * A derivation entry appears in this map for each field in its dependsOn array.
+   */
+  byDependency: Map<string, DerivationEntry[]>;
 }
 
 /**
@@ -181,6 +189,7 @@ export function createEmptyDerivationCollection(): DerivationCollection {
     entries: [],
     byTarget: new Map(),
     bySource: new Map(),
+    byDependency: new Map(),
   };
 }
 

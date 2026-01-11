@@ -286,6 +286,38 @@ interface BaseDerivationLogicConfig {
    * ```
    */
   functionName?: string;
+
+  /**
+   * Explicit field dependencies for derivations.
+   *
+   * When using `functionName`, you can optionally specify which fields
+   * the function depends on. This enables more efficient re-evaluation
+   * by only triggering when specific dependencies change.
+   *
+   * If not provided with `functionName`, defaults to all fields ('*').
+   * For `expression`, dependencies are automatically extracted from the expression.
+   * For `value`, no dependencies are needed (static value).
+   *
+   * @example
+   * ```typescript
+   * // Only re-evaluate when country changes
+   * {
+   *   type: 'derivation',
+   *   targetField: 'currency',
+   *   functionName: 'getCurrencyForCountry',
+   *   dependsOn: ['country']
+   * }
+   *
+   * // Override automatic detection for complex expressions
+   * {
+   *   type: 'derivation',
+   *   targetField: 'total',
+   *   expression: 'calculateTotal(formValue)',
+   *   dependsOn: ['quantity', 'unitPrice', 'discount']
+   * }
+   * ```
+   */
+  dependsOn?: string[];
 }
 
 /**

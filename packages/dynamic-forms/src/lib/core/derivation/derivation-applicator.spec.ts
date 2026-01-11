@@ -84,6 +84,15 @@ describe('derivation-applicator', () => {
       const sourceEntries = collection.bySource.get(entry.sourceFieldKey) ?? [];
       sourceEntries.push(entry);
       collection.bySource.set(entry.sourceFieldKey, sourceEntries);
+
+      // Build byDependency map
+      for (const dep of entry.dependsOn) {
+        if (dep !== '*') {
+          const depEntries = collection.byDependency.get(dep) ?? [];
+          depEntries.push(entry);
+          collection.byDependency.set(dep, depEntries);
+        }
+      }
     }
 
     return collection;

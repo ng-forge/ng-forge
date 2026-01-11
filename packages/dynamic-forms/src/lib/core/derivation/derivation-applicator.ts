@@ -125,10 +125,9 @@ export function applyDerivations(
   let skippedCount = 0;
   let errorCount = 0;
 
-  // Filter entries based on changed fields if provided
-  const entriesToProcess = changedFields
-    ? collection.entries.filter((entry) => shouldProcessEntry(entry, changedFields))
-    : collection.entries;
+  // Filter entries based on changed fields using O(k) lookup via bySource map
+  // where k = number of changed fields (much faster than O(n*m) filter)
+  const entriesToProcess = changedFields ? getEntriesForChangedFields(collection, changedFields) : collection.entries;
 
   // Process derivations iteratively until no more changes
   let hasChanges = true;
@@ -170,18 +169,48 @@ export function applyDerivations(
 }
 
 /**
- * Determines if a derivation entry should be processed based on changed fields.
+ * Gets entries that should be processed based on changed fields.
+ *
+ * Uses O(k) lookup via byDependency map instead of O(n*m) filter,
+ * where k = number of changed fields, n = total entries, m = avg deps per entry.
  *
  * @internal
  */
-function shouldProcessEntry(entry: DerivationEntry, changedFields: Set<string>): boolean {
-  // Always process if dependencies include '*' (full form access)
-  if (entry.dependsOn.includes('*')) {
-    return true;
+function getEntriesForChangedFields(collection: DerivationCollection, changedFields: Set<string>): DerivationEntry[] {
+  const entrySet = new Set<DerivationEntry>();
+
+  // Add entries triggered by each changed field via byDependency map
+  for (const fieldKey of changedFields) {
+    const entries = collection.byDependency.get(fieldKey);
+    if (entries) {
+      for (const entry of entries) {
+        entrySet.add(entry);
+      }
+    }
   }
 
-  // Process if any dependency field changed
-  return entry.dependsOn.some((dep) => changedFields.has(dep));
+  // Handle array derivations specially:
+  // Array derivations have dependencies like 'quantity', 'unitPrice' (local names)
+  // but the changed field detected is the array path like 'lineItems'.
+  // We need to include array derivations when their parent array changes.
+  for (const entry of collection.entries) {
+    // Wildcard dependency - matches all changes
+    if (entry.dependsOn.includes('*')) {
+      entrySet.add(entry);
+      continue;
+    }
+
+    // Array derivation - check if parent array changed
+    if (entry.targetFieldKey.includes('.$.')) {
+      // Extract array path from target (e.g., 'lineItems.$.lineTotal' -> 'lineItems')
+      const arrayPath = entry.targetFieldKey.split('.$.')[0];
+      if (changedFields.has(arrayPath)) {
+        entrySet.add(entry);
+      }
+    }
+  }
+
+  return Array.from(entrySet);
 }
 
 /**
@@ -236,7 +265,7 @@ function tryApplyDerivation(
 
   // Apply the value
   try {
-    applyValueToForm(entry.targetFieldKey, newValue, context.rootForm);
+    applyValueToForm(entry.targetFieldKey, newValue, context.rootForm, context.logger);
     chainContext.appliedDerivations.add(derivationKey);
     return { applied: true, targetFieldKey: entry.targetFieldKey, newValue };
   } catch (error) {
@@ -318,7 +347,7 @@ function tryApplyArrayDerivation(
 
     // Apply the value
     try {
-      applyValueToForm(resolvedTargetPath, newValue, context.rootForm);
+      applyValueToForm(resolvedTargetPath, newValue, context.rootForm, context.logger);
       chainContext.appliedDerivations.add(derivationKey);
       appliedAny = true;
     } catch (error) {
@@ -439,10 +468,10 @@ function computeDerivedValue(
  *
  * @internal
  */
-function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTree<unknown>): void {
+function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTree<unknown>, logger?: Logger): void {
   // Handle simple top-level fields
   if (!targetPath.includes('.')) {
-    setFieldValue(rootForm, targetPath, value);
+    setFieldValue(rootForm, targetPath, value, logger);
     return;
   }
 
@@ -463,6 +492,7 @@ function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTre
     // Navigate to the next level using bracket notation
     const next = (current as Record<string, unknown>)[part];
     if (next === undefined || next === null) {
+      warnMissingField(targetPath, logger);
       return; // Path doesn't exist
     }
     current = next;
@@ -470,8 +500,11 @@ function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTre
 
   // Set the final value
   const finalPart = parts[parts.length - 1];
-  setFieldValue(current, finalPart, value);
+  setFieldValue(current, finalPart, value, logger);
 }
+
+/** Set of target fields we've already warned about to avoid log spam */
+const warnedMissingFields = new Set<string>();
 
 /**
  * Sets a field value using the Angular Signal Forms pattern.
@@ -486,16 +519,18 @@ function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTre
  *
  * @internal
  */
-function setFieldValue(parent: unknown, fieldKey: string, value: unknown): void {
+function setFieldValue(parent: unknown, fieldKey: string, value: unknown, logger?: Logger): void {
   // Access child field via bracket notation (same pattern as group-field/array-field)
   const fieldAccessor = (parent as Record<string, unknown>)[fieldKey];
 
   if (fieldAccessor === undefined || fieldAccessor === null) {
+    warnMissingField(fieldKey, logger);
     return;
   }
 
   // Angular Signal Forms: field accessor is a callable function
   if (typeof fieldAccessor !== 'function') {
+    warnMissingField(fieldKey, logger);
     return;
   }
 
@@ -503,6 +538,7 @@ function setFieldValue(parent: unknown, fieldKey: string, value: unknown): void 
   const fieldInstance = fieldAccessor();
 
   if (!fieldInstance || typeof fieldInstance !== 'object' || !('value' in fieldInstance)) {
+    warnMissingField(fieldKey, logger);
     return;
   }
 
@@ -511,6 +547,23 @@ function setFieldValue(parent: unknown, fieldKey: string, value: unknown): void 
 
   if (isSignal(valueSignal) && typeof (valueSignal as WritableSignal<unknown>).set === 'function') {
     (valueSignal as WritableSignal<unknown>).set(value);
+  } else {
+    warnMissingField(fieldKey, logger);
+  }
+}
+
+/**
+ * Logs a warning for a missing target field (once per field).
+ * @internal
+ */
+function warnMissingField(fieldKey: string, logger?: Logger): void {
+  if (!warnedMissingFields.has(fieldKey)) {
+    warnedMissingFields.add(fieldKey);
+    logger?.warn(
+      `Derivation target field '${fieldKey}' not found in form. ` +
+        `Ensure the field is defined in your form configuration. ` +
+        `This warning is shown once per field.`,
+    );
   }
 }
 
@@ -575,6 +628,7 @@ export function applyDerivationsForTrigger(
     }),
     byTarget: new Map(),
     bySource: new Map(),
+    byDependency: new Map(),
   };
 
   // Rebuild lookup maps for filtered entries
@@ -586,6 +640,15 @@ export function applyDerivationsForTrigger(
     const sourceEntries = filteredCollection.bySource.get(entry.sourceFieldKey) ?? [];
     sourceEntries.push(entry);
     filteredCollection.bySource.set(entry.sourceFieldKey, sourceEntries);
+
+    // Build byDependency map
+    for (const dep of entry.dependsOn) {
+      if (dep !== '*') {
+        const depEntries = filteredCollection.byDependency.get(dep) ?? [];
+        depEntries.push(entry);
+        filteredCollection.byDependency.set(dep, depEntries);
+      }
+    }
   }
 
   return applyDerivations(filteredCollection, context, changedFields);

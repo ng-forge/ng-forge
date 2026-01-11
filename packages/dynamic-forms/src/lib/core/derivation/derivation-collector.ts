@@ -4,6 +4,7 @@ import { DerivationLogicConfig, isDerivationLogicConfig } from '../../models/log
 import { hasChildFields } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
+import { topologicalSort } from './derivation-sorter';
 import { DerivationCollection, DerivationEntry, createEmptyDerivationCollection } from './derivation-types';
 
 /**
@@ -64,6 +65,11 @@ export function collectDerivations(fields: FieldDef<unknown>[]): DerivationColle
 
   traverseFields(fields, collection, context);
   buildLookupMaps(collection);
+
+  // Sort entries in topological order for efficient processing
+  // This ensures derivations are processed in dependency order,
+  // reducing the number of iterations needed in the applicator
+  collection.entries = topologicalSort(collection);
 
   return collection;
 }
@@ -229,30 +235,38 @@ function resolveTargetFieldKey(targetField: string, sourceFieldKey: string, cont
  * Extracts all field dependencies from a derivation config.
  *
  * Combines dependencies from:
+ * - Explicit `dependsOn` array (if provided, takes precedence)
  * - Condition expression
  * - Value expression
- * - Function name (assumes all form access for custom functions)
+ * - Function name (defaults to '*' if no explicit dependsOn)
  *
  * @internal
  */
 function extractDependencies(config: DerivationLogicConfig): string[] {
   const deps = new Set<string>();
 
-  // Extract from condition
+  // If explicit dependsOn is provided, use it as the primary source
+  // This allows users to override automatic detection and control
+  // when derivations are triggered
+  if (config.dependsOn && config.dependsOn.length > 0) {
+    config.dependsOn.forEach((dep) => deps.add(dep));
+  } else {
+    // Extract from expression (automatic dependency detection)
+    if (config.expression) {
+      const exprDeps = extractStringDependencies(config.expression);
+      exprDeps.forEach((dep) => deps.add(dep));
+    }
+
+    // Custom functions assume full form access if no explicit dependsOn
+    if (config.functionName) {
+      deps.add('*');
+    }
+  }
+
+  // Always extract from condition (these are additional runtime guards)
   if (config.condition && config.condition !== true) {
     const conditionDeps = extractExpressionDependencies(config.condition);
     conditionDeps.forEach((dep) => deps.add(dep));
-  }
-
-  // Extract from expression
-  if (config.expression) {
-    const exprDeps = extractStringDependencies(config.expression);
-    exprDeps.forEach((dep) => deps.add(dep));
-  }
-
-  // Custom functions assume full form access
-  if (config.functionName) {
-    deps.add('*');
   }
 
   return Array.from(deps);
@@ -274,5 +288,15 @@ function buildLookupMaps(collection: DerivationCollection): void {
     const sourceEntries = collection.bySource.get(entry.sourceFieldKey) ?? [];
     sourceEntries.push(entry);
     collection.bySource.set(entry.sourceFieldKey, sourceEntries);
+
+    // Build byDependency map - key by each dependency field
+    for (const dep of entry.dependsOn) {
+      if (dep !== '*') {
+        // Skip wildcard - handled separately
+        const depEntries = collection.byDependency.get(dep) ?? [];
+        depEntries.push(entry);
+        collection.byDependency.set(dep, depEntries);
+      }
+    }
   }
 }
