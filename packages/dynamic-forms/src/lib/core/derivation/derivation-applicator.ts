@@ -2,6 +2,7 @@ import { isSignal, Signal, untracked, WritableSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
+import { parseArrayPath, resolveArrayPath, isArrayPlaceholderPath } from '../../utils/path-utils/path-utils';
 import { CustomFunction } from '../expressions/custom-function-types';
 import { evaluateCondition } from '../expressions/condition-evaluator';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
@@ -17,6 +18,19 @@ import {
 
 /**
  * Maximum number of derivation iterations before stopping to prevent infinite loops.
+ *
+ * The value of 10 is chosen based on:
+ * - Most derivation chains are 2-3 levels deep (A→B→C)
+ * - Complex forms with conditional cascades rarely exceed 5-6 levels
+ * - 10 provides headroom for bidirectional sync patterns (A↔B) which may need
+ *   2 iterations per pair to stabilize
+ * - Higher values delay detection of actual infinite loops
+ * - Lower values risk false positives on legitimate deep chains
+ *
+ * If you hit this limit legitimately, consider:
+ * 1. Restructuring derivations to reduce chain depth
+ * 2. Using explicit `dependsOn` to control evaluation order
+ * 3. Breaking complex derivations into computed signals outside the form
  *
  * @internal
  */
@@ -154,8 +168,9 @@ export function applyDerivations(
 
   if (maxIterationsReached) {
     context.logger.error(
-      `Derivation processing reached max iterations (${MAX_DERIVATION_ITERATIONS}). ` +
-        `This may indicate a loop in derivation logic that wasn't caught at build time.`,
+      `[Derivation] Processing reached max iterations (${MAX_DERIVATION_ITERATIONS}). ` +
+        `This may indicate a loop in derivation logic that wasn't caught at build time. ` +
+        `Consider restructuring derivations to reduce chain depth or using explicit 'dependsOn'.`,
     );
   }
 
@@ -171,7 +186,7 @@ export function applyDerivations(
 /**
  * Gets entries that should be processed based on changed fields.
  *
- * Uses O(k) lookup via byDependency map instead of O(n*m) filter,
+ * Uses O(k) lookup via indexed maps instead of O(n*m) filter,
  * where k = number of changed fields, n = total entries, m = avg deps per entry.
  *
  * @internal
@@ -187,27 +202,19 @@ function getEntriesForChangedFields(collection: DerivationCollection, changedFie
         entrySet.add(entry);
       }
     }
-  }
 
-  // Handle array derivations specially:
-  // Array derivations have dependencies like 'quantity', 'unitPrice' (local names)
-  // but the changed field detected is the array path like 'lineItems'.
-  // We need to include array derivations when their parent array changes.
-  for (const entry of collection.entries) {
-    // Wildcard dependency - matches all changes
-    if (entry.dependsOn.includes('*')) {
-      entrySet.add(entry);
-      continue;
-    }
-
-    // Array derivation - check if parent array changed
-    if (entry.targetFieldKey.includes('.$.')) {
-      // Extract array path from target (e.g., 'lineItems.$.lineTotal' -> 'lineItems')
-      const arrayPath = entry.targetFieldKey.split('.$.')[0];
-      if (changedFields.has(arrayPath)) {
+    // Check if this changed field is an array path - O(1) lookup
+    const arrayEntries = collection.byArrayPath.get(fieldKey);
+    if (arrayEntries) {
+      for (const entry of arrayEntries) {
         entrySet.add(entry);
       }
     }
+  }
+
+  // Add all wildcard entries - O(w) where w = number of wildcard entries
+  for (const entry of collection.wildcardEntries) {
+    entrySet.add(entry);
   }
 
   return Array.from(entrySet);
@@ -224,7 +231,7 @@ function tryApplyDerivation(
   chainContext: DerivationChainContext,
 ): DerivationResult {
   // Check if this is an array field derivation (has '$' placeholder)
-  if (entry.targetFieldKey.includes('.$')) {
+  if (isArrayPlaceholderPath(entry.targetFieldKey)) {
     return tryApplyArrayDerivation(entry, context, chainContext);
   }
 
@@ -249,11 +256,12 @@ function tryApplyDerivation(
   try {
     newValue = computeDerivedValue(entry, evalContext, context);
   } catch (error) {
-    context.logger.error(`Error computing derivation for ${entry.targetFieldKey}:`, error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    context.logger.error(formatDerivationError(entry, 'compute', errorMessage));
     return {
       applied: false,
       targetFieldKey: entry.targetFieldKey,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage,
     };
   }
 
@@ -269,11 +277,12 @@ function tryApplyDerivation(
     chainContext.appliedDerivations.add(derivationKey);
     return { applied: true, targetFieldKey: entry.targetFieldKey, newValue };
   } catch (error) {
-    context.logger.error(`Error applying derivation to ${entry.targetFieldKey}:`, error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    context.logger.error(formatDerivationError(entry, 'apply', errorMessage));
     return {
       applied: false,
       targetFieldKey: entry.targetFieldKey,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage,
     };
   }
 }
@@ -293,15 +302,13 @@ function tryApplyArrayDerivation(
 ): DerivationResult {
   const formValue = untracked(() => context.formValue());
 
-  // Parse the target path to get array name and relative field path
-  // Format: "arrayName.$.fieldName" or "nested.arrayName.$.fieldName"
-  const dollarIndex = entry.targetFieldKey.indexOf('.$.');
-  if (dollarIndex === -1) {
+  // Parse the target path using path utilities
+  const pathInfo = parseArrayPath(entry.targetFieldKey);
+  if (!pathInfo.isArrayPath) {
     return { applied: false, targetFieldKey: entry.targetFieldKey, error: 'Invalid array derivation path' };
   }
 
-  const arrayPath = entry.targetFieldKey.substring(0, dollarIndex);
-  const relativePath = entry.targetFieldKey.substring(dollarIndex + 3); // Skip ".$."
+  const { arrayPath } = pathInfo;
 
   // Get the array from form values
   const arrayValue = getNestedValue(formValue, arrayPath);
@@ -313,7 +320,7 @@ function tryApplyArrayDerivation(
 
   // Process each array item
   for (let i = 0; i < arrayValue.length; i++) {
-    const resolvedTargetPath = `${arrayPath}.${i}.${relativePath}`;
+    const resolvedTargetPath = resolveArrayPath(entry.targetFieldKey, i);
     const derivationKey = createDerivationKey(entry.sourceFieldKey, resolvedTargetPath);
 
     // Skip if already applied in this cycle
@@ -335,7 +342,8 @@ function tryApplyArrayDerivation(
     try {
       newValue = computeDerivedValue(entry, evalContext, context);
     } catch (error) {
-      context.logger.error(`Error computing array derivation for ${resolvedTargetPath}:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      context.logger.error(formatDerivationError(entry, 'compute', `[index ${i}] ${errorMessage}`));
       continue;
     }
 
@@ -351,7 +359,8 @@ function tryApplyArrayDerivation(
       chainContext.appliedDerivations.add(derivationKey);
       appliedAny = true;
     } catch (error) {
-      context.logger.error(`Error applying array derivation to ${resolvedTargetPath}:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      context.logger.error(formatDerivationError(entry, 'apply', `[index ${i}] ${errorMessage}`));
     }
   }
 
@@ -507,6 +516,28 @@ function applyValueToForm(targetPath: string, value: unknown, rootForm: FieldTre
 const warnedMissingFields = new Set<string>();
 
 /**
+ * Error message prefix for derivation-related errors.
+ * @internal
+ */
+const ERROR_PREFIX = '[Derivation]';
+
+/**
+ * Creates a standardized error message for derivation errors.
+ * @internal
+ */
+function formatDerivationError(entry: DerivationEntry, phase: 'compute' | 'apply' | 'condition', message: string): string {
+  const source = entry.expression
+    ? `expression: "${entry.expression.substring(0, 50)}${entry.expression.length > 50 ? '...' : ''}"`
+    : entry.functionName
+      ? `function: "${entry.functionName}"`
+      : entry.value !== undefined
+        ? 'static value'
+        : 'unknown source';
+
+  return `${ERROR_PREFIX} Failed to ${phase} derivation (${entry.sourceFieldKey} → ${entry.targetFieldKey}, ${source}): ${message}`;
+}
+
+/**
  * Sets a field value using the Angular Signal Forms pattern.
  *
  * Accesses the child field via bracket notation, drills down to find
@@ -560,7 +591,7 @@ function warnMissingField(fieldKey: string, logger?: Logger): void {
   if (!warnedMissingFields.has(fieldKey)) {
     warnedMissingFields.add(fieldKey);
     logger?.warn(
-      `Derivation target field '${fieldKey}' not found in form. ` +
+      `${ERROR_PREFIX} Target field '${fieldKey}' not found in form. ` +
         `Ensure the field is defined in your form configuration. ` +
         `This warning is shown once per field.`,
     );
@@ -629,6 +660,8 @@ export function applyDerivationsForTrigger(
     byTarget: new Map(),
     bySource: new Map(),
     byDependency: new Map(),
+    byArrayPath: new Map(),
+    wildcardEntries: [],
   };
 
   // Rebuild lookup maps for filtered entries
@@ -641,12 +674,29 @@ export function applyDerivationsForTrigger(
     sourceEntries.push(entry);
     filteredCollection.bySource.set(entry.sourceFieldKey, sourceEntries);
 
-    // Build byDependency map
+    // Build byDependency map and track wildcards
+    let hasWildcard = false;
     for (const dep of entry.dependsOn) {
-      if (dep !== '*') {
+      if (dep === '*') {
+        hasWildcard = true;
+      } else {
         const depEntries = filteredCollection.byDependency.get(dep) ?? [];
         depEntries.push(entry);
         filteredCollection.byDependency.set(dep, depEntries);
+      }
+    }
+
+    if (hasWildcard) {
+      filteredCollection.wildcardEntries.push(entry);
+    }
+
+    // Build byArrayPath map
+    if (isArrayPlaceholderPath(entry.targetFieldKey)) {
+      const arrayPath = parseArrayPath(entry.targetFieldKey).arrayPath;
+      if (arrayPath) {
+        const arrayEntries = filteredCollection.byArrayPath.get(arrayPath) ?? [];
+        arrayEntries.push(entry);
+        filteredCollection.byArrayPath.set(arrayPath, arrayEntries);
       }
     }
   }

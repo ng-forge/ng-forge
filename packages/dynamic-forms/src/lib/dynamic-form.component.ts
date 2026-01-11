@@ -730,6 +730,8 @@ export class DynamicForm<
       byTarget: new Map(Array.from(collection.byTarget.entries()).map(([key, vals]) => [key, vals.filter((e) => entrySet.has(e))])),
       bySource: new Map(Array.from(collection.bySource.entries()).map(([key, vals]) => [key, vals.filter((e) => entrySet.has(e))])),
       byDependency: new Map(Array.from(collection.byDependency.entries()).map(([key, vals]) => [key, vals.filter((e) => entrySet.has(e))])),
+      byArrayPath: new Map(Array.from(collection.byArrayPath.entries()).map(([key, vals]) => [key, vals.filter((e) => entrySet.has(e))])),
+      wildcardEntries: collection.wildcardEntries.filter((e) => entrySet.has(e)),
     };
 
     // Create applicator context

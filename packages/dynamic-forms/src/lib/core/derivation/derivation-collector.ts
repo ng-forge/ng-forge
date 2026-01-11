@@ -3,6 +3,7 @@ import { FieldWithValidation } from '../../definitions/base/field-with-validatio
 import { DerivationLogicConfig, isDerivationLogicConfig } from '../../models/logic/logic-config';
 import { hasChildFields } from '../../models/types/type-guards';
 import { normalizeFieldsArray } from '../../utils/object-utils';
+import { extractArrayPath, isArrayPlaceholderPath } from '../../utils/path-utils/path-utils';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
 import { topologicalSort } from './derivation-sorter';
 import { DerivationCollection, DerivationEntry, createEmptyDerivationCollection } from './derivation-types';
@@ -290,12 +291,30 @@ function buildLookupMaps(collection: DerivationCollection): void {
     collection.bySource.set(entry.sourceFieldKey, sourceEntries);
 
     // Build byDependency map - key by each dependency field
+    // Also track wildcard entries separately
+    let hasWildcard = false;
     for (const dep of entry.dependsOn) {
-      if (dep !== '*') {
-        // Skip wildcard - handled separately
+      if (dep === '*') {
+        hasWildcard = true;
+      } else {
         const depEntries = collection.byDependency.get(dep) ?? [];
         depEntries.push(entry);
         collection.byDependency.set(dep, depEntries);
+      }
+    }
+
+    // Add to wildcardEntries if has * dependency
+    if (hasWildcard) {
+      collection.wildcardEntries.push(entry);
+    }
+
+    // Build byArrayPath map for array derivations
+    if (isArrayPlaceholderPath(entry.targetFieldKey)) {
+      const arrayPath = extractArrayPath(entry.targetFieldKey);
+      if (arrayPath) {
+        const arrayEntries = collection.byArrayPath.get(arrayPath) ?? [];
+        arrayEntries.push(entry);
+        collection.byArrayPath.set(arrayPath, arrayEntries);
       }
     }
   }

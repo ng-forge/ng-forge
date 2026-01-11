@@ -85,13 +85,28 @@ describe('derivation-applicator', () => {
       sourceEntries.push(entry);
       collection.bySource.set(entry.sourceFieldKey, sourceEntries);
 
-      // Build byDependency map
+      // Build byDependency map and track wildcards
+      let hasWildcard = false;
       for (const dep of entry.dependsOn) {
-        if (dep !== '*') {
+        if (dep === '*') {
+          hasWildcard = true;
+        } else {
           const depEntries = collection.byDependency.get(dep) ?? [];
           depEntries.push(entry);
           collection.byDependency.set(dep, depEntries);
         }
+      }
+
+      if (hasWildcard) {
+        collection.wildcardEntries.push(entry);
+      }
+
+      // Handle array paths
+      if (entry.targetFieldKey.includes('.$.')) {
+        const arrayPath = entry.targetFieldKey.split('.$.')[0];
+        const arrayEntries = collection.byArrayPath.get(arrayPath) ?? [];
+        arrayEntries.push(entry);
+        collection.byArrayPath.set(arrayPath, arrayEntries);
       }
     }
 

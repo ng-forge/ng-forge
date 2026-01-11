@@ -124,7 +124,7 @@ export function topologicalSort(collection: DerivationCollection): DerivationEnt
  * Creates a sorted derivation collection.
  *
  * Returns a new collection with entries in topological order.
- * The lookup maps (byTarget, bySource, byDependency) are preserved.
+ * All lookup maps are preserved from the original collection.
  *
  * @param collection - The original derivation collection
  * @returns A new collection with sorted entries
@@ -139,5 +139,7 @@ export function createSortedCollection(collection: DerivationCollection): Deriva
     byTarget: collection.byTarget,
     bySource: collection.bySource,
     byDependency: collection.byDependency,
+    byArrayPath: collection.byArrayPath,
+    wildcardEntries: collection.wildcardEntries,
   };
 }

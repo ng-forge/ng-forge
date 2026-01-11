@@ -129,6 +129,23 @@ export interface DerivationCollection {
    * A derivation entry appears in this map for each field in its dependsOn array.
    */
   byDependency: Map<string, DerivationEntry[]>;
+
+  /**
+   * Map of array path to entries that derive array item values.
+   *
+   * Used for O(1) lookup when an array field changes.
+   * Key is the array field path (e.g., "items" or "orders.lineItems").
+   * Entries have targets like "items.$.quantity" or "orders.lineItems.$.total".
+   */
+  byArrayPath: Map<string, DerivationEntry[]>;
+
+  /**
+   * Entries that have wildcard (*) dependency.
+   *
+   * These entries depend on all form values and must always be considered.
+   * Stored separately to avoid scanning all entries for wildcards.
+   */
+  wildcardEntries: DerivationEntry[];
 }
 
 /**
@@ -190,6 +207,8 @@ export function createEmptyDerivationCollection(): DerivationCollection {
     byTarget: new Map(),
     bySource: new Map(),
     byDependency: new Map(),
+    byArrayPath: new Map(),
+    wildcardEntries: [],
   };
 }
 

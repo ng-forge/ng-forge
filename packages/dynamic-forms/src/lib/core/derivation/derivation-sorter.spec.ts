@@ -34,12 +34,27 @@ describe('derivation-sorter', () => {
       sourceEntries.push(entry);
       collection.bySource.set(entry.sourceFieldKey, sourceEntries);
 
+      let hasWildcard = false;
       for (const dep of entry.dependsOn) {
-        if (dep !== '*') {
+        if (dep === '*') {
+          hasWildcard = true;
+        } else {
           const depEntries = collection.byDependency.get(dep) ?? [];
           depEntries.push(entry);
           collection.byDependency.set(dep, depEntries);
         }
+      }
+
+      if (hasWildcard) {
+        collection.wildcardEntries.push(entry);
+      }
+
+      // Handle array paths
+      if (entry.targetFieldKey.includes('.$.')) {
+        const arrayPath = entry.targetFieldKey.split('.$.')[0];
+        const arrayEntries = collection.byArrayPath.get(arrayPath) ?? [];
+        arrayEntries.push(entry);
+        collection.byArrayPath.set(arrayPath, arrayEntries);
       }
     }
 
@@ -157,10 +172,12 @@ describe('derivation-sorter', () => {
       // Entries should be sorted
       expect(sorted.entries.indexOf(entry1)).toBeLessThan(sorted.entries.indexOf(entry2));
 
-      // Lookup maps should be preserved
+      // All lookup maps should be preserved
       expect(sorted.byTarget).toBe(collection.byTarget);
       expect(sorted.bySource).toBe(collection.bySource);
       expect(sorted.byDependency).toBe(collection.byDependency);
+      expect(sorted.byArrayPath).toBe(collection.byArrayPath);
+      expect(sorted.wildcardEntries).toBe(collection.wildcardEntries);
     });
   });
 });
