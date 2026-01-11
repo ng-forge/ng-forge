@@ -13,7 +13,7 @@ services:
     command: >
       bash -c "
         npm install -g pnpm &&
-        export PATH=\"$(npm config get prefix)/bin:\$PATH\" &&
+        export PATH=\"$$(npm config get prefix)/bin:$$PATH\" &&
         pnpm install --frozen-lockfile &&
         pnpm exec playwright install chromium &&
         ${PLAYWRIGHT_CMD:-echo 'No command specified'}
