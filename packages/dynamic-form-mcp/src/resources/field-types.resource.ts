@@ -9,7 +9,7 @@ import { getFieldTypes, getFieldType, getFieldTypesByCategory } from '../registr
 
 export function registerFieldTypesResource(server: McpServer): void {
   // List all field types
-  server.resource('ng-forge://field-types', 'ng-forge Field Types', async () => {
+  server.resource('ng-forge Field Types', 'ng-forge://field-types', async () => {
     const fieldTypes = getFieldTypes();
     return {
       contents: [
@@ -42,7 +42,7 @@ export function registerFieldTypesResource(server: McpServer): void {
   });
 
   // Get specific field type details
-  server.resource('ng-forge://field-types/{type}', 'Field Type Details', async (uri: URL) => {
+  server.resource('Field Type Details', 'ng-forge://field-types/{type}', async (uri: URL) => {
     const match = uri.href.match(/ng-forge:\/\/field-types\/(.+)/);
     const typeName = match?.[1];
 
@@ -86,7 +86,7 @@ export function registerFieldTypesResource(server: McpServer): void {
   });
 
   // Get field types by category
-  server.resource('ng-forge://field-types/category/{category}', 'Field Types by Category', async (uri: URL) => {
+  server.resource('Field Types by Category', 'ng-forge://field-types/category/{category}', async (uri: URL) => {
     const match = uri.href.match(/ng-forge:\/\/field-types\/category\/(.+)/);
     const category = match?.[1] as 'value' | 'container' | 'button' | 'display';
 

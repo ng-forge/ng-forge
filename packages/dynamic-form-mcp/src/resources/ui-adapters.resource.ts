@@ -9,7 +9,7 @@ import { getUIAdapters, getUIAdapter } from '../registry/index.js';
 
 export function registerUIAdaptersResource(server: McpServer): void {
   // List all UI adapters
-  server.resource('ng-forge://ui-adapters', 'ng-forge UI Adapters', async () => {
+  server.resource('ng-forge UI Adapters', 'ng-forge://ui-adapters', async () => {
     const adapters = getUIAdapters();
     return {
       contents: [
@@ -49,7 +49,7 @@ export const appConfig: ApplicationConfig = {
   });
 
   // Get specific UI adapter details
-  server.resource('ng-forge://ui-adapters/{library}', 'UI Adapter Details', async (uri: URL) => {
+  server.resource('UI Adapter Details', 'ng-forge://ui-adapters/{library}', async (uri: URL) => {
     const match = uri.href.match(/ng-forge:\/\/ui-adapters\/(.+)/);
     const library = match?.[1] as 'material' | 'bootstrap' | 'primeng' | 'ionic';
 

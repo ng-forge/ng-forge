@@ -3,14 +3,13 @@
  *
  * This module provides access to field types, validators, and UI adapters
  * that are generated at build time from the ng-forge packages.
+ *
+ * JSON data is imported directly to work correctly with esbuild bundling.
  */
 
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import fieldTypesData from './field-types.json' with { type: 'json' };
+import validatorsData from './validators.json' with { type: 'json' };
+import uiAdaptersData from './ui-adapters.json' with { type: 'json' };
 
 export interface PropertyInfo {
   name: string;
@@ -59,81 +58,68 @@ export interface DocTopic {
   content: string;
 }
 
-// Lazy loading of registry data
-let fieldTypesCache: FieldTypeInfo[] | null = null;
-let validatorsCache: ValidatorInfo[] | null = null;
-let uiAdaptersCache: UIAdapterInfo[] | null = null;
-let docsCache: DocTopic[] | null = null;
+// Type the imported JSON data
+const fieldTypes = fieldTypesData as FieldTypeInfo[];
+const validators = validatorsData as ValidatorInfo[];
+const uiAdapters = uiAdaptersData as UIAdapterInfo[];
 
-function loadJson<T>(filename: string): T {
-  const filePath = join(__dirname, filename);
-  const content = readFileSync(filePath, 'utf-8');
-  return JSON.parse(content) as T;
-}
+// Docs are loaded dynamically since they may not exist
+let docsCache: DocTopic[] | null = null;
 
 /**
  * Get all available field types
  */
 export function getFieldTypes(): FieldTypeInfo[] {
-  if (!fieldTypesCache) {
-    fieldTypesCache = loadJson<FieldTypeInfo[]>('field-types.json');
-  }
-  return fieldTypesCache;
+  return fieldTypes;
 }
 
 /**
  * Get a specific field type by name
  */
 export function getFieldType(type: string): FieldTypeInfo | undefined {
-  return getFieldTypes().find((ft) => ft.type === type);
+  return fieldTypes.find((ft) => ft.type === type);
 }
 
 /**
  * Get field types by category
  */
 export function getFieldTypesByCategory(category: 'value' | 'container' | 'button' | 'display'): FieldTypeInfo[] {
-  return getFieldTypes().filter((ft) => ft.category === category);
+  return fieldTypes.filter((ft) => ft.category === category);
 }
 
 /**
  * Get all available validators
  */
 export function getValidators(): ValidatorInfo[] {
-  if (!validatorsCache) {
-    validatorsCache = loadJson<ValidatorInfo[]>('validators.json');
-  }
-  return validatorsCache;
+  return validators;
 }
 
 /**
  * Get a specific validator by type
  */
 export function getValidator(type: string): ValidatorInfo | undefined {
-  return getValidators().find((v) => v.type === type);
+  return validators.find((v) => v.type === type);
 }
 
 /**
  * Get validators by category
  */
 export function getValidatorsByCategory(category: 'built-in' | 'custom' | 'async' | 'http'): ValidatorInfo[] {
-  return getValidators().filter((v) => v.category === category);
+  return validators.filter((v) => v.category === category);
 }
 
 /**
  * Get all UI adapters
  */
 export function getUIAdapters(): UIAdapterInfo[] {
-  if (!uiAdaptersCache) {
-    uiAdaptersCache = loadJson<UIAdapterInfo[]>('ui-adapters.json');
-  }
-  return uiAdaptersCache;
+  return uiAdapters;
 }
 
 /**
  * Get a specific UI adapter by library name
  */
 export function getUIAdapter(library: 'material' | 'bootstrap' | 'primeng' | 'ionic'): UIAdapterInfo | undefined {
-  return getUIAdapters().find((a) => a.library === library);
+  return uiAdapters.find((a) => a.library === library);
 }
 
 /**
@@ -153,7 +139,9 @@ export function getUIAdapterFieldType(
 export function getDocs(): DocTopic[] {
   if (!docsCache) {
     try {
-      docsCache = loadJson<DocTopic[]>('docs.json');
+      // Docs are optional and loaded dynamically
+
+      docsCache = require('./docs.json') as DocTopic[];
     } catch {
       // docs.json may not exist if docs weren't generated
       docsCache = [];

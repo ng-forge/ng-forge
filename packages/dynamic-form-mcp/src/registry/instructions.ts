@@ -1,16 +1,23 @@
-# ng-forge Dynamic Forms - Best Practices
+/**
+ * ng-forge Best Practices
+ *
+ * This content is served via the ng-forge://instructions resource
+ * to guide AI assistants in generating FormConfig objects.
+ */
+
+export const INSTRUCTIONS = `# ng-forge Dynamic Forms - Best Practices
 
 You MUST follow these practices when generating FormConfig objects for ng-forge.
 
 ## Core Principles
 
-1. **Configuration-driven**: ng-forge wraps Angular Reactive Forms. Define structure declaratively via `FormConfig`, not imperatively.
+1. **Configuration-driven**: ng-forge wraps Angular Reactive Forms. Define structure declaratively via \`FormConfig\`, not imperatively.
 2. **Type-safe**: Use TypeScript interfaces for form values. The library provides full type inference.
 3. **Validation-first**: Always include validation and user-friendly error messages.
 
 ## FormConfig Structure
 
-```typescript
+\`\`\`typescript
 const config: FormConfig = {
   // Optional: Default validation messages for all fields
   defaultValidationMessages: {
@@ -23,7 +30,7 @@ const config: FormConfig = {
     // ... field definitions
   ],
 };
-```
+\`\`\`
 
 ## Field Definition Rules
 
@@ -31,15 +38,15 @@ const config: FormConfig = {
 
 Every field MUST have:
 
-- `key`: Unique identifier (except for `row` type which is layout-only)
-- `type`: One of the registered field types
-- `label`: Human-readable label (for accessibility)
+- \`key\`: Unique identifier (except for \`row\` type which is layout-only)
+- \`type\`: One of the registered field types
+- \`label\`: Human-readable label (for accessibility)
 
 ### Value Fields
 
-For fields that collect user input (`input`, `textarea`, `select`, `checkbox`, `radio`, `datepicker`, `toggle`, `slider`):
+For fields that collect user input (\`input\`, \`textarea\`, \`select\`, \`checkbox\`, \`radio\`, \`datepicker\`, \`toggle\`, \`slider\`):
 
-```typescript
+\`\`\`typescript
 {
   key: 'email',
   type: 'input',
@@ -56,13 +63,13 @@ For fields that collect user input (`input`, `textarea`, `select`, `checkbox`, `
     hint: 'We will never share your email'  // UI library specific
   }
 }
-```
+\`\`\`
 
 ### Select/Radio Fields
 
-MUST include `options` array:
+MUST include \`options\` array:
 
-```typescript
+\`\`\`typescript
 {
   key: 'country',
   type: 'select',
@@ -74,7 +81,7 @@ MUST include `options` array:
   ],
   props: { placeholder: 'Select a country' }
 }
-```
+\`\`\`
 
 ### Container Fields
 
@@ -82,7 +89,7 @@ MUST include `options` array:
 
 Use for side-by-side fields. Row fields do NOT create nested values - children are flat.
 
-```typescript
+\`\`\`typescript
 {
   key: 'nameRow',
   type: 'row',
@@ -92,15 +99,15 @@ Use for side-by-side fields. Row fields do NOT create nested values - children a
   ]
 }
 // Result: { firstName: '...', lastName: '...' }
-```
+\`\`\`
 
-Use `col` property (1-12) to control column widths.
+Use \`col\` property (1-12) to control column widths.
 
 #### Group (Nested Object)
 
 Use when you need nested object structure in form values:
 
-```typescript
+\`\`\`typescript
 {
   key: 'address',
   type: 'group',
@@ -110,13 +117,13 @@ Use when you need nested object structure in form values:
   ]
 }
 // Result: { address: { street: '...', city: '...' } }
-```
+\`\`\`
 
 #### Array (Repeatable Items)
 
 Use for dynamic lists:
 
-```typescript
+\`\`\`typescript
 {
   key: 'contacts',
   type: 'array',
@@ -133,13 +140,13 @@ Use for dynamic lists:
   ]
 }
 // Result: { contacts: [{ name: '...', phone: '...' }, ...] }
-```
+\`\`\`
 
 #### Page (Multi-step Forms)
 
 Use for wizard-style forms:
 
-```typescript
+\`\`\`typescript
 {
   fields: [
     {
@@ -160,7 +167,7 @@ Use for wizard-style forms:
     },
   ];
 }
-```
+\`\`\`
 
 ## Validation
 
@@ -168,7 +175,7 @@ Use for wizard-style forms:
 
 Use shorthand properties directly on field definitions:
 
-```typescript
+\`\`\`typescript
 {
   key: 'age',
   type: 'input',
@@ -182,23 +189,23 @@ Use shorthand properties directly on field definitions:
     max: 'Cannot exceed {{max}}'
   }
 }
-```
+\`\`\`
 
-Available shorthands: `required`, `email`, `min`, `max`, `minLength`, `maxLength`, `pattern`
+Available shorthands: \`required\`, \`email\`, \`min\`, \`max\`, \`minLength\`, \`maxLength\`, \`pattern\`
 
 ### Validation Messages
 
 ALWAYS provide validation messages. Use template variables:
 
-- `{{requiredLength}}` - for minLength/maxLength
-- `{{min}}`, `{{max}}` - for min/max
-- `{{requiredPattern}}` - for pattern
+- \`{{requiredLength}}\` - for minLength/maxLength
+- \`{{min}}\`, \`{{max}}\` - for min/max
+- \`{{requiredPattern}}\` - for pattern
 
 ## Conditional Logic
 
-Use `logic` array for conditional behavior:
+Use \`logic\` array for conditional behavior:
 
-```typescript
+\`\`\`typescript
 {
   key: 'businessName',
   type: 'input',
@@ -224,58 +231,58 @@ Use `logic` array for conditional behavior:
     }
   ]
 }
-```
+\`\`\`
 
 ### Logic Types
 
-- `hidden` - Show/hide field
-- `disabled` - Enable/disable field
-- `required` - Conditional requirement
+- \`hidden\` - Show/hide field
+- \`disabled\` - Enable/disable field
+- \`required\` - Conditional requirement
 
 ### Condition Operators
 
-- `equals`, `notEquals`
-- `greaterThan`, `lessThan`, `greaterThanOrEquals`, `lessThanOrEquals`
-- `contains`, `notContains`
-- `empty`, `notEmpty`
+- \`equals\`, \`notEquals\`
+- \`greaterThan\`, \`lessThan\`, \`greaterThanOrEquals\`, \`lessThanOrEquals\`
+- \`contains\`, \`notContains\`
+- \`empty\`, \`notEmpty\`
 
 ## UI Library Integration
 
-ng-forge supports multiple UI libraries. Configure in `app.config.ts`:
+ng-forge supports multiple UI libraries. Configure in \`app.config.ts\`:
 
-```typescript
+\`\`\`typescript
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 
 export const appConfig = {
   providers: [provideDynamicForm(...withMaterialFields())],
 };
-```
+\`\`\`
 
 Available adapters:
 
-- `@ng-forge/dynamic-forms-material` - Angular Material
-- `@ng-forge/dynamic-forms-bootstrap` - Bootstrap 5
-- `@ng-forge/dynamic-forms-primeng` - PrimeNG
-- `@ng-forge/dynamic-forms-ionic` - Ionic
+- \`@ng-forge/dynamic-forms-material\` - Angular Material
+- \`@ng-forge/dynamic-forms-bootstrap\` - Bootstrap 5
+- \`@ng-forge/dynamic-forms-primeng\` - PrimeNG
+- \`@ng-forge/dynamic-forms-ionic\` - Ionic
 
 ## Common Patterns
 
 ### Always End with Submit Button
 
-```typescript
+\`\`\`typescript
 { type: 'submit', key: 'submit', label: 'Submit', props: { color: 'primary' } }
-```
+\`\`\`
 
 ### Use Text Fields for Headings
 
-```typescript
+\`\`\`typescript
 { key: 'sectionTitle', type: 'text', label: 'Personal Info', props: { elementType: 'h3' } }
-```
+\`\`\`
 
 ### Input Types via Props
 
-```typescript
+\`\`\`typescript
 // Email input
 { key: 'email', type: 'input', props: { type: 'email' } }
 
@@ -287,7 +294,7 @@ Available adapters:
 
 // Phone input
 { key: 'phone', type: 'input', props: { type: 'tel' } }
-```
+\`\`\`
 
 ## Anti-patterns to Avoid
 
@@ -301,4 +308,5 @@ Available adapters:
 
 ## Validation Before Use
 
-Always validate your FormConfig using the `validate_form_config` tool before using it. This catches structural errors and provides warnings for potential issues.
+Always validate your FormConfig using the \`validate_form_config\` tool before using it. This catches structural errors and provides warnings for potential issues.
+`;

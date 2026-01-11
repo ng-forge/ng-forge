@@ -5,12 +5,7 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import examplesData from '../registry/examples.json' with { type: 'json' };
 
 interface FormConfigExample {
   id: string;
@@ -20,29 +15,19 @@ interface FormConfigExample {
   config: Record<string, unknown>;
 }
 
-let examplesCache: FormConfigExample[] | null = null;
-
-function getExamples(): FormConfigExample[] {
-  if (!examplesCache) {
-    const filePath = join(__dirname, '../registry/examples.json');
-    const content = readFileSync(filePath, 'utf-8');
-    examplesCache = JSON.parse(content) as FormConfigExample[];
-  }
-  return examplesCache;
-}
+const examples = examplesData as FormConfigExample[];
 
 function getExample(id: string): FormConfigExample | undefined {
-  return getExamples().find((e) => e.id === id);
+  return examples.find((e) => e.id === id);
 }
 
 function getExamplesByCategory(category: string): FormConfigExample[] {
-  return getExamples().filter((e) => e.category === category);
+  return examples.filter((e) => e.category === category);
 }
 
 export function registerExamplesResource(server: McpServer): void {
   // List all examples
-  server.resource('ng-forge://examples', 'Curated FormConfig Examples', async () => {
-    const examples = getExamples();
+  server.resource('Curated FormConfig Examples', 'ng-forge://examples', async () => {
     const categories = [...new Set(examples.map((e) => e.category))];
 
     return {
@@ -76,12 +61,11 @@ export function registerExamplesResource(server: McpServer): void {
   });
 
   // Get specific example
-  server.resource('ng-forge://examples/{id}', 'FormConfig Example', async (uri: URL) => {
+  server.resource('FormConfig Example', 'ng-forge://examples/{id}', async (uri: URL) => {
     const match = uri.href.match(/ng-forge:\/\/examples\/(.+)/);
     const exampleId = match?.[1];
 
     if (!exampleId) {
-      const examples = getExamples();
       return {
         contents: [
           {
@@ -122,7 +106,6 @@ export function registerExamplesResource(server: McpServer): void {
     const example = getExample(exampleId);
 
     if (!example) {
-      const examples = getExamples();
       return {
         contents: [
           {

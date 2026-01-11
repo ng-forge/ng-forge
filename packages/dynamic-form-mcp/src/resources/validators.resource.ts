@@ -9,7 +9,7 @@ import { getValidators, getValidator, getValidatorsByCategory } from '../registr
 
 export function registerValidatorsResource(server: McpServer): void {
   // List all validators
-  server.resource('ng-forge://validators', 'ng-forge Validators', async () => {
+  server.resource('ng-forge Validators', 'ng-forge://validators', async () => {
     const validators = getValidators();
     return {
       contents: [
@@ -58,7 +58,7 @@ export function registerValidatorsResource(server: McpServer): void {
   });
 
   // Get specific validator details
-  server.resource('ng-forge://validators/{type}', 'Validator Details', async (uri: URL) => {
+  server.resource('Validator Details', 'ng-forge://validators/{type}', async (uri: URL) => {
     const match = uri.href.match(/ng-forge:\/\/validators\/(.+)/);
     const typeName = match?.[1];
 
@@ -102,7 +102,7 @@ export function registerValidatorsResource(server: McpServer): void {
   });
 
   // Get validators by category
-  server.resource('ng-forge://validators/category/{category}', 'Validators by Category', async (uri: URL) => {
+  server.resource('Validators by Category', 'ng-forge://validators/category/{category}', async (uri: URL) => {
     const match = uri.href.match(/ng-forge:\/\/validators\/category\/(.+)/);
     const category = match?.[1] as 'built-in' | 'custom' | 'async' | 'http';
 

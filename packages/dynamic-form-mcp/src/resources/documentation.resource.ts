@@ -9,7 +9,7 @@ import { getDocs, getDoc, getDocsByCategory } from '../registry/index.js';
 
 export function registerDocumentationResource(server: McpServer): void {
   // List all documentation topics
-  server.resource('ng-forge://docs', 'ng-forge Documentation', async () => {
+  server.resource('ng-forge Documentation', 'ng-forge://docs', async () => {
     const docs = getDocs();
     const categories = [...new Set(docs.map((d) => d.category))];
 
@@ -43,7 +43,7 @@ export function registerDocumentationResource(server: McpServer): void {
   });
 
   // Get specific documentation topic
-  server.resource('ng-forge://docs/{topic}', 'Documentation Topic', async (uri: URL) => {
+  server.resource('Documentation Topic', 'ng-forge://docs/{topic}', async (uri: URL) => {
     const match = uri.href.match(/ng-forge:\/\/docs\/(.+)/);
     const topicId = match?.[1];
 
