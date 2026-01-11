@@ -362,10 +362,17 @@ jobs:
       - name: Check if app is affected
         id: check-affected
         run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || true)
+          echo "=== Running affected check ==="
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>&1) || true
+          echo "Raw output:"
+          echo "$AFFECTED"
+          echo ""
+          echo "=== Checking for ${{ matrix.app }} ==="
           if echo "$AFFECTED" | grep -q "${{ matrix.app }}"; then
+            echo "✅ AFFECTED"
             echo "affected=true" >> $GITHUB_OUTPUT
           else
+            echo "❌ NOT AFFECTED"
             echo "affected=false" >> $GITHUB_OUTPUT
           fi
 
