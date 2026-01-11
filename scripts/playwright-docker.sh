@@ -38,8 +38,16 @@ echo "Running Playwright tests for $APP in Docker..."
 echo "Extra args: $EXTRA_ARGS"
 
 # Build the command
-# wait-on polls the server URL until it responds (more robust than sleep)
-CMD="pnpm exec nx run $APP:serve --port $PORT & pnpm exec wait-on http://localhost:$PORT --timeout 60000 && pnpm exec nx run $APP:e2e $EXTRA_ARGS; kill %1 2>/dev/null || true"
+# 1. Install dependencies
+# 2. Install Playwright browsers (cached in volume)
+# 3. Start dev server, wait for it, run tests
+CMD="pnpm install --frozen-lockfile && \
+pnpm exec playwright install chromium && \
+(pnpm exec nx run $APP:serve --port $PORT &) && \
+pnpm exec wait-on http://localhost:$PORT --timeout 60000 && \
+pnpm exec nx run $APP:e2e $EXTRA_ARGS; \
+kill %1 2>/dev/null || true"
 
-# Run in Docker
+# Build the image (uses cache if unchanged) and run
+docker compose -f docker-compose.playwright.yml build
 PLAYWRIGHT_CMD="$CMD" docker compose -f docker-compose.playwright.yml run --rm playwright
