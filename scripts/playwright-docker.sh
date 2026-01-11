@@ -41,12 +41,15 @@ echo "Extra args: $EXTRA_ARGS"
 # 1. Install dependencies
 # 2. Install Playwright browsers (cached in volume)
 # 3. Start dev server, wait for it, run tests
+# 4. Capture exit code, kill server, exit with test result
 CMD="pnpm install --frozen-lockfile && \
 pnpm exec playwright install chromium && \
 (pnpm exec nx run $APP:serve --port $PORT &) && \
 pnpm exec wait-on http://localhost:$PORT --timeout 60000 && \
 pnpm exec nx run $APP:e2e $EXTRA_ARGS; \
-kill %1 2>/dev/null || true"
+E2E_EXIT=\$?; \
+kill %1 2>/dev/null || true; \
+exit \$E2E_EXIT"
 
 # Build the image (uses cache if unchanged) and run
 docker compose -f docker-compose.playwright.yml build
