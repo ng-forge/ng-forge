@@ -27,5 +27,8 @@ export {
   expect,
 } from './base-fixtures';
 
-// Note: Playwright configuration is NOT exported here to avoid Angular compilation.
-// Import directly from '@examples/shared/testing/playwright-config' in playwright.config.ts files.
+// App port configuration - use this to derive baseURL in fixtures
+export { APP_PORTS, type ExampleApp } from './app-config';
+
+// Note: Full Playwright configuration is NOT exported here to avoid Angular compilation issues.
+// Import directly from '@ng-forge/examples-shared-testing/playwright-config' in playwright.config.ts files.

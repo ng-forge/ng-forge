@@ -2,18 +2,10 @@ import { defineConfig, devices, PlaywrightTestConfig } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
 import { fileURLToPath } from 'node:url';
+import { APP_PORTS, ExampleApp } from './app-config';
 
-/**
- * App-to-port mapping for example applications.
- */
-export const APP_PORTS = {
-  'material-examples': 4201,
-  'primeng-examples': 4202,
-  'ionic-examples': 4203,
-  'bootstrap-examples': 4204,
-} as const;
-
-export type ExampleApp = keyof typeof APP_PORTS;
+// Re-export for backwards compatibility
+export { APP_PORTS, type ExampleApp } from './app-config';
 
 /**
  * Browser project configurations with Firefox-specific timeouts.
@@ -63,7 +55,7 @@ const getProjects = () => {
  * @example
  * ```ts
  * // playwright.config.ts
- * import { createPlaywrightConfig } from '@examples/shared/testing';
+ * import { createPlaywrightConfig } from '@ng-forge/examples-shared-testing/playwright-config';
  * export default createPlaywrightConfig(import.meta.url, 'material-examples');
  * ```
  */

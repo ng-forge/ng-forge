@@ -1,6 +1,7 @@
 import { Locator, test as base } from '@playwright/test';
-import type { BaseTestHelpers, ConsoleCheckOptions, ConsoleTracker, MockApiHelpers } from '@examples/shared/testing';
+import type { BaseTestHelpers, ConsoleCheckOptions, ConsoleTracker, MockApiHelpers } from '@ng-forge/examples-shared-testing';
 import {
+  APP_PORTS,
   createBaseHelpers,
   createConsoleTrackerFixture,
   createErrorHelpers,
@@ -8,14 +9,13 @@ import {
   createTestUrl,
   expect,
   logTestResult,
-} from '@examples/shared/testing';
+} from '@ng-forge/examples-shared-testing';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PrimeNG-specific Configuration
 // ─────────────────────────────────────────────────────────────────────────────
 
-const BASE_URL = 'http://localhost:4202';
-export const testUrl = createTestUrl(BASE_URL);
+export const testUrl = createTestUrl(`http://localhost:${APP_PORTS['primeng-examples']}`);
 
 const PRIMENG_SELECTORS = {
   errorSelector: '.p-error',
@@ -123,7 +123,7 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
 export { expect };
 
 // Re-export types for convenience
-export type { ConsoleTracker, MockApiHelpers } from '@examples/shared/testing';
+export type { ConsoleTracker, MockApiHelpers } from '@ng-forge/examples-shared-testing';
 
 /**
  * Creates afterEach hook for logging test results

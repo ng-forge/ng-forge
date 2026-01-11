@@ -1,10 +1,10 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { logTestResult } from '@examples/shared/testing';
+import { logTestResult } from '@ng-forge/examples-shared-testing';
 
 /**
  * Base URL for the test application
  */
-export const BASE_URL = 'http://localhost:4203';
+// BASE_URL is now derived from APP_PORTS in fixtures.ts
 
 /**
  * Base path for testing routes

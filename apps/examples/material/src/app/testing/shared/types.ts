@@ -7,4 +7,4 @@ export type {
   SimulatedSubmission,
   TestScenario,
   TestSuite,
-} from '@examples/shared/testing';
+} from '@ng-forge/examples-shared-testing';
