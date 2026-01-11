@@ -12,8 +12,10 @@ services:
     network_mode: host
     command: >
       bash -c "
-        npm ci &&
-        npx playwright install chromium &&
+        npm install -g pnpm &&
+        export PATH=\"$(npm config get prefix)/bin:\$PATH\" &&
+        pnpm install --frozen-lockfile &&
+        pnpm exec playwright install chromium &&
         ${PLAYWRIGHT_CMD:-echo 'No command specified'}
       "
 
