@@ -12,7 +12,7 @@ import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
  * The Field directive binds to the `checked` model for checkbox controls.
  */
 @Component({
-  selector: 'df-ionic-toggle-control',
+  selector: 'df-ion-toggle-control',
   imports: [IonToggle],
   template: `
     <ion-toggle
@@ -33,10 +33,7 @@ import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
     </ion-toggle>
   `,
   styleUrl: '../../styles/_form-field.scss',
-  host: {
-    '[class.df-invalid]': 'invalid() && touched()',
-    '[class.df-touched]': 'touched()',
-  },
+  host: {},
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IonicToggleControlComponent implements FormCheckboxControl {

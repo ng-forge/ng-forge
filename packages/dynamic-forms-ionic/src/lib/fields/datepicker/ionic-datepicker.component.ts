@@ -19,7 +19,7 @@ import { AsyncPipe } from '@angular/common';
 import { format } from 'date-fns';
 
 @Component({
-  selector: 'df-ionic-datepicker',
+  selector: 'df-ion-datepicker',
   imports: [
     IonInput,
     IonModal,
@@ -53,7 +53,7 @@ import { format } from 'date-fns';
       (click)="!f().disabled() && openModal()"
     />
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
     }
 
     <ion-modal [isOpen]="isModalOpen()" (didDismiss)="closeModal()">
@@ -103,8 +103,6 @@ import { format } from 'date-fns';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.df-invalid]': 'showErrors()',
-    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
 })

@@ -53,17 +53,7 @@ import { AsyncPipe } from '@angular/common';
       <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
     }
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-    `,
-  ],
+  styleUrl: '../../styles/_form-field.scss',
   host: {
     '[class]': 'className() || ""',
     '[id]': '`${key()}`',

@@ -38,6 +38,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -98,6 +101,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -160,6 +166,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -211,6 +220,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -253,6 +265,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -311,13 +326,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
+        include:
+          - app: bootstrap-examples
+            short: bootstrap
+          - app: material-examples
+            short: material
+          - app: primeng-examples
+            short: primeng
+          - app: ionic-examples
+            short: ionic
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Fetch base branch for affected detection
+        run: git fetch origin main:main
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -333,60 +359,25 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Restore build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-
       - name: Check if app is affected
         id: check-affected
         run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || true)
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e) || true
           if echo "$AFFECTED" | grep -q "${{ matrix.app }}"; then
             echo "affected=true" >> $GITHUB_OUTPUT
           else
             echo "affected=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Get Playwright version
+      - name: Run E2E tests in Docker
         if: steps.check-affected.outputs.affected == 'true'
-        id: playwright-version
-        run: echo "version=$(pnpm exec playwright --version | head -1)" >> $GITHUB_OUTPUT
+        run: ./scripts/playwright-docker.sh ${{ matrix.app }}
 
-      - name: Cache Playwright browsers
-        if: steps.check-affected.outputs.affected == 'true'
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}-chromium
-
-      - name: Install Playwright browser
-        if: steps.check-affected.outputs.affected == 'true'
-        run: pnpm exec playwright install chromium --with-deps
-
-      - name: Run E2E tests
-        if: steps.check-affected.outputs.affected == 'true'
-        env:
-          E2E_BROWSERS: chromium
-        run: |
-          echo "Running e2e tests for ${{ matrix.app }}..."
-          pnpm nx run ${{ matrix.app }}:e2e
-
-      - name: Skip E2E tests (not affected)
-        if: steps.check-affected.outputs.affected == 'false'
-        run: echo "E2E tests for ${{ matrix.app }} not affected, skipping"
-
-      - name: Upload test results
+      - name: Upload test artifacts on failure
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() && steps.check-affected.outputs.affected == 'true'
         with:
-          name: playwright-report-pr-${{ matrix.app }}
-          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/
+          name: playwright-results-${{ matrix.app }}
+          path: apps/examples/${{ matrix.short }}/test-results/
+          if-no-files-found: ignore
           retention-days: 7

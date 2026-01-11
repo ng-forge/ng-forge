@@ -52,7 +52,7 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className()',
-    '[class.df-touched]': 'field()().touched()',
+    '[class.ng-touched]': 'field()().touched()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',

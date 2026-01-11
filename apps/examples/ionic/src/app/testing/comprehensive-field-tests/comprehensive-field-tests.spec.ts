@@ -1,5 +1,4 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
-import { testUrl } from '../shared/test-utils';
 import { ionBlur } from '../shared/test-utils';
 
 setupTestLogging();
@@ -13,12 +12,15 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Comprehensive Fields Test', () => {
     test('should test all basic field types', async ({ page, helpers }) => {
       // Navigate to the comprehensive fields component
-      await page.goto(testUrl('/comprehensive-field-tests/comprehensive-fields'));
+      await page.goto('/#/testing/comprehensive-field-tests/comprehensive-fields');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
       const scenario = helpers.getScenario('comprehensive-fields-test');
       await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      // Visual regression: empty form state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-comprehensive-fields-empty');
 
       // Test Text Input
       await page.waitForSelector('[data-testid="comprehensive-fields-test"] #textInput input', { state: 'visible', timeout: 10000 });
@@ -123,6 +125,9 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       // For Ionic range, we interact with the range element directly
       await scenario.locator('#sliderField ion-range').click();
 
+      // Visual regression: filled form state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-comprehensive-fields-filled');
+
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
         () =>
@@ -165,7 +170,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Validation Test', () => {
     test('should handle field validation errors', async ({ page, helpers }) => {
       // Navigate to the validation test component
-      await page.goto(testUrl('/comprehensive-field-tests/validation'));
+      await page.goto('/#/testing/comprehensive-field-tests/validation');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -206,6 +211,9 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       // Button should still be disabled due to validation errors
       await expect(submitButton).toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
 
+      // Visual regression: validation errors state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-validation-with-errors');
+
       // Now fill with valid data
       await requiredTextInput.fill('Valid text input');
       await expect(requiredTextInput).toHaveValue('Valid text input', { timeout: 5000 });
@@ -229,6 +237,9 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
         timeout: 10000,
       });
       await expect(submitButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
+
+      // Visual regression: valid form state
+      await helpers.expectScreenshotMatch(scenario, 'ionic-validation-valid');
 
       // Set up event listener BEFORE clicking submit
       const submittedDataPromise = page.evaluate(
@@ -262,7 +273,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('Grid Layout Test', () => {
     test('should test responsive grid layout', async ({ page, helpers }) => {
       // Navigate to the grid layout test component
-      await page.goto(testUrl('/comprehensive-field-tests/grid-layout'));
+      await page.goto('/#/testing/comprehensive-field-tests/grid-layout');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario
@@ -297,6 +308,9 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
       await expect(halfWidth2Input).toHaveValue('Half 2', { timeout: 5000 });
       await ionBlur(halfWidth2Input);
 
+      // Visual regression: grid layout desktop
+      await helpers.expectScreenshotMatch(scenario, 'ionic-grid-layout-desktop');
+
       await page.waitForSelector('[data-testid="grid-layout-test"] #thirdWidth1 input', { state: 'visible', timeout: 10000 });
       const thirdWidth1Input = scenario.locator('#thirdWidth1 input');
       await thirdWidth1Input.fill('Third 1');
@@ -317,6 +331,9 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
 
       // Test mobile layout
       await page.setViewportSize({ width: 375, height: 667 }); // iPhone 6/7/8 size
+
+      // Visual regression: grid layout mobile
+      await helpers.expectScreenshotMatch(scenario, 'ionic-grid-layout-mobile');
 
       // Fields should still be visible and functional on mobile
       await expect(scenario.getByTestId('fullWidth')).toBeVisible({ timeout: 10000 });
@@ -391,7 +408,7 @@ test.describe('Comprehensive PrimeNG Field Tests', () => {
   test.describe('State Management Test', () => {
     test('should test form state management', async ({ page, helpers }) => {
       // Navigate to the state management test component
-      await page.goto(testUrl('/comprehensive-field-tests/state-management'));
+      await page.goto('/#/testing/comprehensive-field-tests/state-management');
       await page.waitForLoadState('networkidle');
 
       // Locate the specific test scenario

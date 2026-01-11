@@ -39,17 +39,9 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       }
     </mat-form-field>
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-        width: 100%;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
       mat-form-field {
         width: 100%;
       }

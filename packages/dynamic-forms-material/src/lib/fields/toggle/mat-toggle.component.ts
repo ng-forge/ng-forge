@@ -37,17 +37,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
     }
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-    `,
-  ],
+  styleUrl: '../../styles/_form-field.scss',
   host: {
     '[class]': 'className()',
     '[id]': '`${key()}`',

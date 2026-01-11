@@ -35,7 +35,7 @@ export default [
         'error',
         {
           type: 'element',
-          prefix: 'df-ionic',
+          prefix: 'df-ion',
           style: 'kebab-case',
         },
       ],

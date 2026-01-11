@@ -260,7 +260,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [bootstrap-examples, material-examples, primeng-examples, ionic-examples]
+        include:
+          - app: bootstrap-examples
+            short: bootstrap
+          - app: material-examples
+            short: material
+          - app: primeng-examples
+            short: primeng
+          - app: ionic-examples
+            short: ionic
 
     steps:
       - name: Checkout
@@ -293,27 +301,14 @@ jobs:
             dist/packages/dynamic-forms-primeng
           key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
 
-      - name: Get Playwright version
-        id: playwright-version
-        run: echo "version=$(pnpm exec playwright --version | head -1)" >> $GITHUB_OUTPUT
+      - name: Run E2E tests in Docker
+        run: pnpm e2e:${{ matrix.short }}
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
-
-      - name: Run E2E tests
-        run: pnpm nx run ${{ matrix.app }}:e2e
-
-      - name: Upload test results
+      - name: Upload test artifacts on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-${{ matrix.app }}
-          path: dist/.playwright/apps/examples/${{ matrix.app == 'bootstrap-examples' && 'bootstrap' || matrix.app == 'material-examples' && 'material' || matrix.app == 'ionic-examples' && 'ionic' || 'primeng' }}/
+          name: playwright-results-${{ matrix.app }}
+          path: apps/examples/${{ matrix.short }}/test-results/
+          if-no-files-found: ignore
           retention-days: 7

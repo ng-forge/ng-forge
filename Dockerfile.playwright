@@ -1,0 +1,11 @@
+# Playwright image with pnpm support
+# Extends official Playwright image and enables corepack for pnpm
+
+ARG PLAYWRIGHT_VERSION=1.57.0
+FROM mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
+
+# Enable corepack and install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Verify installation
+RUN pnpm --version

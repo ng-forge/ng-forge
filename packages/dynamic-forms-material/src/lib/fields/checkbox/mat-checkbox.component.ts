@@ -37,17 +37,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       <mat-error [id]="errorId() + '-' + i" [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
     }
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-    `,
-  ],
+  styleUrl: '../../styles/_form-field.scss',
   host: {
     '[class]': 'className()',
     '[id]': '`${key()}`',

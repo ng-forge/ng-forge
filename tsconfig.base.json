@@ -26,7 +26,9 @@
       "@ng-forge/dynamic-forms-bootstrap": ["packages/dynamic-forms-bootstrap/src/index.ts"],
       "@ng-forge/dynamic-forms-ionic": ["packages/dynamic-forms-ionic/src/index.ts"],
       "@ng-forge/dynamic-forms-material": ["packages/dynamic-forms-material/src/index.ts"],
-      "@ng-forge/dynamic-forms-primeng": ["packages/dynamic-forms-primeng/src/index.ts"]
+      "@ng-forge/dynamic-forms-primeng": ["packages/dynamic-forms-primeng/src/index.ts"],
+      "@ng-forge/examples-shared-testing": ["libs/examples-shared-testing/src/index.ts"],
+      "@ng-forge/examples-shared-testing/playwright-config": ["libs/examples-shared-testing/src/lib/playwright-config.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

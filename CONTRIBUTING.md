@@ -203,6 +203,49 @@ describe('MyComponent', () => {
 - Test error handling
 - Test accessibility
 
+### E2E and Visual Regression Testing
+
+We use Playwright for E2E tests with visual regression testing via Docker for consistent cross-platform snapshots.
+
+#### Running E2E Tests
+
+```bash
+# Run E2E tests for a specific UI library
+pnpm e2e:material     # Material Design
+pnpm e2e:bootstrap    # Bootstrap
+pnpm e2e:primeng      # PrimeNG
+pnpm e2e:ionic        # Ionic
+
+# Run E2E tests for all UI libraries
+pnpm e2e:all
+```
+
+#### Visual Regression (Snapshot) Testing
+
+Snapshots are stored in `apps/examples/{framework}/src/app/testing/**/__snapshots__/` and should be committed to git. Docker ensures consistent rendering across all platforms.
+
+**Updating Snapshots:**
+
+```bash
+# Update snapshots for a specific UI library
+pnpm e2e:material:update
+pnpm e2e:bootstrap:update
+pnpm e2e:primeng:update
+pnpm e2e:ionic:update
+
+# Update all snapshots
+pnpm e2e:all:update
+```
+
+**Snapshot Workflow:**
+
+1. Run tests locally to see failures: `pnpm e2e:material`
+2. If visual changes are intentional, update snapshots: `pnpm e2e:material:update`
+3. Review the diff in git to ensure only expected changes
+4. Commit the updated snapshots with your feature/fix
+
+**Important:** Always use Docker-based commands (`pnpm e2e:*`) for snapshot operations to ensure consistency. Running tests directly with Playwright may produce different results due to font rendering differences across platforms.
+
 ## Commit Guidelines
 
 We use [Conventional Commits](https://www.conventionalcommits.org/) with the Angular preset. **PRs are squash-merged**, so only the **PR title** matters for the changelog. PR titles are validated by commitlint in CI.

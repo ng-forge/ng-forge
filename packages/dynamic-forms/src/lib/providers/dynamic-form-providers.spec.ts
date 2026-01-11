@@ -49,8 +49,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm();
       const providers = getProviders(envProviders);
 
-      // Logger + FIELD_REGISTRY
-      expect(providers).toHaveLength(2);
+      // Logger + provideSignalFormsConfig + FIELD_REGISTRY
+      expect(providers).toHaveLength(3);
     });
 
     it('should contain providers for custom fields', () => {
@@ -64,8 +64,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm(customField);
       const providers = getProviders(envProviders);
 
-      // Logger + FIELD_REGISTRY
-      expect(providers).toHaveLength(2);
+      // Logger + provideSignalFormsConfig + FIELD_REGISTRY
+      expect(providers).toHaveLength(3);
     });
   });
 
@@ -248,8 +248,8 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm(customField, withLoggerConfig());
       const providers = getProviders(envProviders);
 
-      // Should have 2 providers: FIELD_REGISTRY and DynamicFormLogger
-      expect(providers.length).toBe(2);
+      // Should have 3 providers: DynamicFormLogger, provideSignalFormsConfig, and FIELD_REGISTRY
+      expect(providers.length).toBe(3);
     });
 
     it('should include logger provider when withLoggerConfig is used', () => {

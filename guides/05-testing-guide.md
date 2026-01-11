@@ -2,9 +2,242 @@
 
 ## Introduction
 
-This guide covers testing patterns for ng-forge dynamic forms, including testing field components, form configurations, validation, conditional logic, and test utilities.
+This guide covers testing patterns for ng-forge dynamic forms, including unit tests, type tests, E2E tests, and visual regression testing.
 
-## Test Utilities
+## Testing Strategy Overview
+
+ng-forge uses a layered testing approach:
+
+| Layer                 | Location                                   | Purpose                                               | Tools                         |
+| --------------------- | ------------------------------------------ | ----------------------------------------------------- | ----------------------------- |
+| **Unit Tests**        | `packages/dynamic-forms/`                  | Core library logic (mappers, validators, expressions) | Vitest                        |
+| **Type Tests**        | `packages/dynamic-forms-*/src/lib/fields/` | Compile-time type safety for UI adapters              | Vitest typecheck              |
+| **E2E Tests**         | `apps/examples/*/src/app/testing/`         | User-facing behavior across all UI libraries          | Playwright in Docker          |
+| **Visual Regression** | `apps/examples/*/src/app/testing/`         | Screenshot comparison for UI consistency              | Playwright toHaveScreenshot() |
+
+### Why This Approach?
+
+1. **Core logic is thoroughly unit tested** - The `dynamic-forms` package has 65+ spec files covering expressions, mappers, validators, and components.
+
+2. **UI adapters use type tests** - Field components in UI adapters (Material, Bootstrap, PrimeNG, Ionic) are thin wrappers. Type tests verify compile-time correctness; runtime behavior is covered by E2E tests.
+
+3. **E2E tests verify real user behavior** - Running against actual example applications ensures components work correctly in real browser environments.
+
+4. **Visual regression catches styling issues** - Screenshot comparison ensures UI changes are intentional and consistent.
+
+## E2E Testing
+
+### Docker-Based Setup
+
+All E2E tests run in Docker to ensure consistent rendering across developer machines and CI. This eliminates platform-specific screenshot differences.
+
+```bash
+# Run E2E tests for any UI library
+pnpm e2e:ionic
+pnpm e2e:material
+pnpm e2e:bootstrap
+pnpm e2e:primeng
+
+# Update visual regression baselines
+pnpm e2e:ionic:update
+pnpm e2e:material:update
+pnpm e2e:bootstrap:update
+pnpm e2e:primeng:update
+```
+
+### Test Structure
+
+E2E tests are organized by scenario in each example app:
+
+```
+apps/examples/ionic/src/app/testing/
+├── shared/
+│   ├── fixtures.ts          # Test helpers and custom matchers
+│   ├── test-utils.ts         # URL helpers, ionBlur, etc.
+│   └── types.ts              # TypeScript interfaces
+├── accessibility/
+│   └── accessibility.spec.ts # ARIA, keyboard navigation, focus
+├── comprehensive-field-tests/
+│   └── comprehensive-field-tests.spec.ts  # All field types
+├── validation/
+│   └── advanced-validation.spec.ts        # Validation scenarios
+└── ...
+```
+
+### Writing E2E Tests
+
+Use the provided fixtures and helpers:
+
+```typescript
+import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+import { testUrl } from '../shared/test-utils';
+
+setupTestLogging();
+setupConsoleCheck();
+
+test.describe('My Feature', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(testUrl('/my-feature'));
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display form fields', async ({ page, helpers }) => {
+    const scenario = helpers.getScenario('my-scenario');
+    await expect(scenario).toBeVisible({ timeout: 10000 });
+
+    // Interact with fields
+    const input = scenario.locator('#myField input');
+    await input.fill('test value');
+    await input.blur();
+
+    // Verify behavior
+    await expect(input).toHaveValue('test value');
+  });
+});
+```
+
+### Visual Regression Testing
+
+Capture screenshots at key states for visual comparison:
+
+```typescript
+test('should render form states correctly', async ({ page, helpers }) => {
+  const scenario = helpers.getScenario('validation-test');
+  await expect(scenario).toBeVisible({ timeout: 10000 });
+
+  // Screenshot 1: Empty state
+  await helpers.expectScreenshotMatch(scenario, 'ionic-validation-empty');
+
+  // Fill with invalid data
+  await scenario.locator('#email input').fill('invalid');
+  await scenario.locator('#email input').blur();
+
+  // Screenshot 2: Error state
+  await helpers.expectScreenshotMatch(scenario, 'ionic-validation-errors');
+
+  // Fill with valid data
+  await scenario.locator('#email input').fill('valid@example.com');
+  await scenario.locator('#email input').blur();
+
+  // Screenshot 3: Valid state
+  await helpers.expectScreenshotMatch(scenario, 'ionic-validation-valid');
+});
+```
+
+**Baseline Management:**
+
+- Baselines are stored in `apps/examples/*/src/app/testing/__snapshots__/`
+- Baselines are committed to git
+- Update baselines with `pnpm e2e:{lib}:update`
+- Review screenshot changes carefully before committing
+
+### Error Visibility Testing
+
+Use `expectErrorVisible` to verify errors are not just in the DOM but actually visible to users:
+
+```typescript
+test('should show visible error messages', async ({ page, helpers }) => {
+  const scenario = helpers.getScenario('error-test');
+
+  // Trigger validation error
+  const input = scenario.locator('#required input');
+  await input.focus();
+  await input.blur();
+
+  // Verify error is VISIBLE (not just exists in DOM)
+  await helpers.expectErrorVisible(scenario, 'required');
+});
+```
+
+### Console Error Checking
+
+Tests automatically fail on console errors:
+
+```typescript
+setupConsoleCheck(); // Add this to catch console errors
+
+// Optionally ignore specific patterns:
+setupConsoleCheck({
+  ignorePatterns: [/Expected warning pattern/],
+});
+```
+
+## Type Tests
+
+UI adapter packages use type tests instead of unit tests. Type tests verify compile-time type safety without runtime execution.
+
+### Purpose
+
+Type tests ensure:
+
+1. **Field definitions are correctly typed** - Props match expected interfaces
+2. **Union type narrowing works** - Discriminated unions narrow correctly
+3. **Form value inference is correct** - `FormConfig` infers proper value types
+4. **Module augmentation is working** - Field types are registered properly
+
+### Writing Type Tests
+
+Type tests use `// @ts-expect-error` and `expectTypeOf` assertions:
+
+**`packages/dynamic-forms-material/src/lib/fields/input/mat-input.type-test.ts`:**
+
+```typescript
+import { expectTypeOf } from 'vitest';
+import type { FormConfig, RegisteredFieldTypes } from '@ng-forge/dynamic-forms';
+import type { MatInputField } from './mat-input.type';
+import { MatField } from '../../types/types';
+
+// Verify field type is registered
+expectTypeOf<MatInputField>().toMatchTypeOf<RegisteredFieldTypes>();
+
+// Verify FormConfig accepts MatInputField
+const config = {
+  fields: [
+    {
+      type: MatField.Input,
+      key: 'email',
+      value: '',
+      label: 'Email',
+      props: {
+        type: 'email',
+        placeholder: 'Enter email',
+      },
+    },
+  ],
+} as const satisfies FormConfig;
+
+// Verify inferred form value type
+type FormValue = typeof config extends FormConfig<infer V> ? V : never;
+expectTypeOf<FormValue>().toEqualTypeOf<{ email: string }>();
+
+// @ts-expect-error - Invalid prop should error
+const invalidConfig: FormConfig = {
+  fields: [
+    {
+      type: MatField.Input,
+      key: 'test',
+      value: '',
+      props: {
+        invalidProp: true, // This should error
+      },
+    },
+  ],
+};
+```
+
+### Running Type Tests
+
+```bash
+# Run type tests for all packages
+pnpm nx run-many -t type-test
+
+# Run for specific package
+pnpm nx run dynamic-forms-material:type-test
+```
+
+Type tests run via Vitest's `typecheck` mode and don't execute code - they only verify types at compile time.
+
+## Unit Test Utilities
 
 ### Why Test Utilities?
 

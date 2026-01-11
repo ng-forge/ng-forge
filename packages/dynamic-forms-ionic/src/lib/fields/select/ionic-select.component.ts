@@ -7,7 +7,7 @@ import { IonicSelectComponent, IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'df-ionic-select',
+  selector: 'df-ion-select',
   imports: [IonSelect, IonSelectOption, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
@@ -39,7 +39,7 @@ import { AsyncPipe } from '@angular/common';
       }
     </ion-select>
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ionic-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,8 +47,6 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.df-invalid]': 'showErrors()',
-    '[class.df-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styleUrl: '../../styles/_form-field.scss',

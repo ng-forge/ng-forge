@@ -44,17 +44,9 @@ import { AsyncPipe } from '@angular/common';
       <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
     }
   `,
+  styleUrl: '../../styles/_form-field.scss',
   styles: [
     `
-      :host {
-        display: block;
-        width: 100%;
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
       .slider-container {
         width: 100%;
       }

@@ -1,0 +1,68 @@
+/**
+ * Material Form Field Styling
+ *
+ * Customizable styles for Material form field components.
+ * Override CSS variables to customize:
+ *
+ * --df-field-gap: gap between label, input, and hint (default: 0.5rem)
+ * --df-label-font-weight: label font weight (default: 500)
+ * --df-label-color: label text color (default: inherit)
+ * --df-hint-color: hint text color (default: rgba(0, 0, 0, 0.6))
+ * --df-hint-font-size: hint text size (default: 0.875rem)
+ * --df-error-color: error text color (default: #f44336)
+ * --df-error-font-size: error text size (default: 0.875rem)
+ *
+ * Note: Material components primarily use Angular Material's native theming.
+ * These variables provide additional customization for non-Material elements.
+ */
+
+// ============================================
+// CSS Variables (Material-themed defaults)
+// ============================================
+
+:host {
+  --df-field-gap: 0.5rem;
+  --df-label-font-weight: 500;
+  --df-label-color: inherit;
+  --df-hint-color: rgba(0, 0, 0, 0.6);
+  --df-hint-font-size: 0.875rem;
+  --df-error-color: #f44336;
+  --df-error-font-size: 0.875rem;
+
+  display: block;
+  width: 100%;
+}
+
+// ============================================
+// Hidden State
+// ============================================
+
+:host([hidden]) {
+  display: none !important;
+}
+
+// ============================================
+// Field Layout
+// ============================================
+
+.df-mat-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--df-field-gap);
+  width: 100%;
+}
+
+.df-mat-label {
+  font-weight: var(--df-label-font-weight);
+  color: var(--df-label-color);
+}
+
+.df-mat-hint {
+  color: var(--df-hint-color);
+  font-size: var(--df-hint-font-size);
+}
+
+.df-mat-error {
+  color: var(--df-error-color);
+  font-size: var(--df-error-font-size);
+}
