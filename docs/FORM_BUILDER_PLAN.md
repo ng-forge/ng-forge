@@ -97,6 +97,18 @@ ng-forge-builder/
 
 ## Tech Stack
 
+### ng-forge (public) - Vercel
+
+| Layer | Technology |
+|-------|------------|
+| **Docs** | ng-doc (static) |
+| **Landing** | Angular (static/SSR) |
+| **Hosting** | Vercel |
+| **Analytics** | Existing setup |
+| **CI/CD** | Vercel (automatic) |
+
+### ng-forge-builder (private) - AWS Amplify
+
 | Layer | Technology |
 |-------|------------|
 | **Frontend** | Angular 21 (SPA) |
