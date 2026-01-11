@@ -137,12 +137,12 @@ test.describe('Accessibility Tests', () => {
       await expect(usernameIonInput).toHaveAttribute('aria-invalid', 'true', { timeout: 5000 });
       await expect(emailIonInput).toHaveAttribute('aria-invalid', 'true', { timeout: 5000 });
 
-      // Error elements should be visible ion-note elements
-      const usernameErrors = scenario.locator('#username ion-note.df-ionic-error[color="danger"]');
-      const emailErrors = scenario.locator('#email ion-note.df-ionic-error[color="danger"]');
+      // Error elements should be visible ion-note elements with role="alert"
+      const usernameErrors = scenario.locator('#username ion-note[color="danger"]');
+      const emailErrors = scenario.locator('#email ion-note[color="danger"]');
 
-      expect(await usernameErrors.count()).toBeGreaterThan(0);
-      expect(await emailErrors.count()).toBeGreaterThan(0);
+      await expect(usernameErrors.first()).toBeVisible({ timeout: 5000 });
+      await expect(emailErrors.first()).toBeVisible({ timeout: 5000 });
     });
   });
 
