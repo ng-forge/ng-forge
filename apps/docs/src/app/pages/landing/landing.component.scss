@@ -1901,52 +1901,6 @@ section {
   }
 }
 
-.integrations-preview {
-  max-width: 400px;
-  margin: 0 auto 2rem;
-  height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: all 0.4s ease;
-
-  &.active {
-    height: 320px;
-    opacity: 1;
-  }
-
-  .preview-frame {
-    background: $bg-surface;
-    border: 1px solid $steel-dark;
-    border-radius: 12px;
-    overflow: hidden;
-    height: 100%;
-
-    ::ng-deep {
-      .example-iframe-container {
-        border: none;
-        border-radius: 0;
-        box-shadow: none;
-      }
-
-      iframe {
-        height: 320px !important;
-      }
-    }
-  }
-
-  @media (max-width: 768px) {
-    max-width: 100%;
-
-    &.active {
-      height: 280px;
-    }
-
-    .preview-frame ::ng-deep iframe {
-      height: 280px !important;
-    }
-  }
-}
-
 .integrations-row {
   display: flex;
   justify-content: center;
@@ -1981,8 +1935,7 @@ section {
     transition: color 0.3s;
   }
 
-  &:hover,
-  &.active {
+  &:hover {
     opacity: 1;
     transform: translateY(-6px);
     border-color: rgba($ember-glow, 0.4);

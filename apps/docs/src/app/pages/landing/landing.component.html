@@ -352,25 +352,9 @@
     <p class="section-desc">First-class adapters for everything you're already using.</p>
   </div>
 
-  <!-- Preview area that shows on hover -->
-  <div class="integrations-preview fade-up" [class.visible]="isVisible('integrations-row')" [class.active]="hoveredIntegration()">
-    @if (hoveredIntegration(); as lib) {
-      <div class="preview-frame">
-        <example-iframe [library]="lib" example="login-form?minimal=true&theme=landing" />
-      </div>
-    }
-  </div>
-
   <div class="integrations-row fade-up" [class.visible]="isVisible('integrations-row')">
-    @for (integration of integrations; track integration.id) {
-      <a
-        [routerLink]="integration.route"
-        class="integration-logo"
-        [class.active]="hoveredIntegration() === integration.id"
-        [title]="integration.name"
-        (mouseenter)="onIntegrationHover(integration.id)"
-        (mouseleave)="onIntegrationHover(null)"
-      >
+    @for (integration of integrations; track integration.name) {
+      <a [routerLink]="integration.route" class="integration-logo" [title]="integration.name">
         <img [src]="integration.icon" [alt]="integration.name" />
         <span>{{ integration.name }}</span>
       </a>
