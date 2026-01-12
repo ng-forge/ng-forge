@@ -396,10 +396,144 @@ nav {
 .hero-ctas {
   display: flex;
   gap: 1rem;
-  margin-bottom: 4rem;
+  margin-bottom: 2rem;
 
   @media (max-width: 768px) {
     flex-direction: column;
+  }
+}
+
+// ============================================
+// HERO DEMO
+// ============================================
+.hero-demo {
+  max-width: 800px;
+}
+
+.hero-demo-container {
+  background: $bg-deep;
+  border: 1px solid $steel-dark;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, $ember-core, transparent);
+    opacity: 0.5;
+  }
+}
+
+.hero-demo-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: $bg-surface;
+  border-bottom: 1px solid $steel-dark;
+  gap: 1rem;
+}
+
+.header-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.header-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.header-tab {
+  padding: 0.4rem 0.9rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: $steel-dim;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    color: $steel-mid;
+    background: rgba($steel-dark, 0.5);
+  }
+
+  &.active {
+    color: $ember-glow;
+    background: $bg-deep;
+    border-color: $steel-dark;
+  }
+}
+
+.hero-demo-body {
+  min-height: 300px;
+}
+
+.code-content {
+  padding: 1.25rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  overflow-x: auto;
+
+  pre {
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.75rem;
+    padding: 1rem;
+  }
+}
+
+.demo-content {
+  // Override iframe component styles for dark theme
+  ::ng-deep {
+    .example-iframe-container {
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .example-loading {
+      background: $bg-deep;
+
+      p {
+        color: $steel-mid;
+      }
+    }
+
+    .spinner {
+      border-color: $steel-dark;
+      border-top-color: $ember-hot;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-demo-header {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .header-tabs {
+    gap: 0.15rem;
+  }
+
+  .header-tab {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.7rem;
+  }
+
+  .hero-demo-body {
+    min-height: 280px;
   }
 }
 
@@ -524,25 +658,27 @@ nav {
   }
 }
 
-// Code syntax highlighting
-.ck {
-  color: #c792ea;
-}
-.cs {
-  color: #c3e88d;
-}
-.cn {
-  color: #f78c6c;
-}
-.ct {
-  color: #ffcb6b;
-}
-.cp {
-  color: #82aaff;
-}
-.cc {
-  color: $steel-dim;
-  font-style: italic;
+// Shiki code highlighting overrides
+.code-content,
+.code-body,
+.showcase-code {
+  pre {
+    margin: 0;
+    background: transparent !important;
+    padding: 0;
+
+    code {
+      background: transparent !important;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+
+      span {
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+    }
+  }
 }
 
 // ============================================

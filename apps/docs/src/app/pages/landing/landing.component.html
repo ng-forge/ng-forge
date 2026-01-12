@@ -51,24 +51,29 @@
       </a>
     </div>
 
-    <div class="code-block">
-      <div class="code-header">
-        <span class="code-dot"></span>
-        <span class="code-dot"></span>
-        <span class="code-dot"></span>
-        <span class="code-title">config.ts</span>
-      </div>
-      <div class="code-body">
-        <pre><span class="ck">const</span> <span class="cp">config</span> = &#123;
-  <span class="cp">fields</span>: [
-    &#123; <span class="cp">key</span>: <span class="cs">'email'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">required</span>: <span class="ck">true</span>, <span class="cp">email</span>: <span class="ck">true</span> &#125;,
-    &#123; <span class="cp">key</span>: <span class="cs">'plan'</span>, <span class="cp">type</span>: <span class="cs">'select'</span>, <span class="cp">options</span>: [<span class="cs">'starter'</span>, <span class="cs">'pro'</span>, <span class="cs">'enterprise'</span>] &#125;,
-    &#123; <span class="cp">key</span>: <span class="cs">'seats'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">min</span>: <span class="cn">1</span>,
-      <span class="cp">logic</span>: [&#123; <span class="cp">type</span>: <span class="cs">'hidden'</span>, <span class="cp">when</span>: &#123; <span class="cp">field</span>: <span class="cs">'plan'</span>, <span class="cp">equals</span>: <span class="cs">'starter'</span> &#125; &#125;] &#125;,
-  ]
-&#125; <span class="ck">as const satisfies</span> <span class="ct">FormConfig</span>;
+    <div class="hero-demo">
+      <div class="hero-demo-container">
+        <div class="hero-demo-header">
+          <div class="header-dots">
+            <span class="code-dot"></span>
+            <span class="code-dot"></span>
+            <span class="code-dot"></span>
+          </div>
+          <div class="header-tabs">
+            <button class="header-tab" [class.active]="heroTab() === 'demo'" (click)="setHeroTab('demo')">Live Demo</button>
+            <button class="header-tab" [class.active]="heroTab() === 'config'" (click)="setHeroTab('config')">Config</button>
+          </div>
+        </div>
 
-<span class="cc">// That's it. Type inference, validation, conditional logic. Done.</span></pre>
+        <div class="hero-demo-body">
+          @if (heroTab() === 'demo') {
+            <div class="demo-content">
+              <example-iframe library="material" example="login?minimal=true&theme=landing" />
+            </div>
+          } @else {
+            <div class="code-content" [innerHTML]="highlightedCode()['heroConfig']"></div>
+          }
+        </div>
       </div>
     </div>
   </div>
@@ -109,25 +114,12 @@
     <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-0')">
       <h3>Conditional Everything</h3>
       <p>Fields that appear, disappear, or become required based on other values. No imperative code.</p>
-      <div class="showcase-code">
-        <pre>&#123; <span class="cp">key</span>: <span class="cs">'company'</span>,
-  <span class="cp">logic</span>: [&#123;
-    <span class="cp">type</span>: <span class="cs">'required'</span>,
-    <span class="cp">when</span>: &#123; <span class="cp">field</span>: <span class="cs">'type'</span>, <span class="cp">equals</span>: <span class="cs">'business'</span> &#125;
-  &#125;]
-&#125;</pre>
-      </div>
+      <div class="showcase-code" [innerHTML]="highlightedCode()['conditionalLogic']"></div>
     </div>
     <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-1')">
       <h3>Multi-Step Wizards</h3>
       <p>Page-level validation, navigation controls, progress tracking. Built-in.</p>
-      <div class="showcase-code">
-        <pre>&#123; <span class="cp">fields</span>: [
-  &#123; <span class="cp">type</span>: <span class="cs">'page'</span>, <span class="cp">key</span>: <span class="cs">'info'</span>, <span class="cp">fields</span>: [...] &#125;,
-  &#123; <span class="cp">type</span>: <span class="cs">'page'</span>, <span class="cp">key</span>: <span class="cs">'payment'</span>, <span class="cp">fields</span>: [...] &#125;,
-  &#123; <span class="cp">type</span>: <span class="cs">'page'</span>, <span class="cp">key</span>: <span class="cs">'review'</span>, <span class="cp">fields</span>: [...] &#125;
-]&#125;</pre>
-      </div>
+      <div class="showcase-code" [innerHTML]="highlightedCode()['multiStepWizard']"></div>
     </div>
   </div>
 </section>
@@ -151,12 +143,7 @@
           <span class="code-dot"></span>
           <span class="code-title">validation.ts</span>
         </div>
-        <div class="code-body">
-          <pre>&#123; <span class="cp">key</span>: <span class="cs">'email'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">required</span>: <span class="ck">true</span>, <span class="cp">email</span>: <span class="ck">true</span> &#125;,
-&#123; <span class="cp">key</span>: <span class="cs">'age'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">min</span>: <span class="cn">18</span>, <span class="cp">max</span>: <span class="cn">120</span> &#125;,
-&#123; <span class="cp">key</span>: <span class="cs">'username'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">minLength</span>: <span class="cn">3</span>, <span class="cp">maxLength</span>: <span class="cn">20</span> &#125;,
-&#123; <span class="cp">key</span>: <span class="cs">'website'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">pattern</span>: <span class="cs">/^https?:\/\/.+/</span> &#125;</pre>
-        </div>
+        <div class="code-body" [innerHTML]="highlightedCode()['validation']"></div>
       </div>
     </div>
   </div>
@@ -207,29 +194,7 @@
           <span class="code-dot"></span>
           <span class="code-title">login.component.ts</span>
         </div>
-        <div class="code-body">
-          <pre><span class="ck">import</span> &#123; DynamicForm, <span class="ck">type</span> FormConfig &#125; <span class="ck">from</span> <span class="cs">'&#64;ng-forge/dynamic-forms'</span>;
-
-&#64;<span class="ct">Component</span>(&#123;
-  <span class="cp">imports</span>: [DynamicForm],
-  <span class="cp">template</span>: <span class="cs">`&lt;form [dynamic-form]="config" (submit)="onSubmit($event)"&gt;&lt;/form&gt;`</span>
-&#125;)
-<span class="ck">export class</span> <span class="ct">LoginComponent</span> &#123;
-  <span class="cp">config</span> = &#123;
-    <span class="cp">fields</span>: [
-      &#123; <span class="cp">key</span>: <span class="cs">'email'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">label</span>: <span class="cs">'Email'</span>, <span class="cp">required</span>: <span class="ck">true</span>, <span class="cp">email</span>: <span class="ck">true</span> &#125;,
-      &#123; <span class="cp">key</span>: <span class="cs">'password'</span>, <span class="cp">type</span>: <span class="cs">'input'</span>, <span class="cp">label</span>: <span class="cs">'Password'</span>, <span class="cp">required</span>: <span class="ck">true</span>,
-        <span class="cp">minLength</span>: <span class="cn">8</span>, <span class="cp">props</span>: &#123; <span class="cp">type</span>: <span class="cs">'password'</span> &#125; &#125;,
-      &#123; <span class="cp">key</span>: <span class="cs">'submit'</span>, <span class="cp">type</span>: <span class="cs">'submit'</span>, <span class="cp">label</span>: <span class="cs">'Sign In'</span> &#125;
-    ]
-  &#125; <span class="ck">as const satisfies</span> <span class="ct">FormConfig</span>;
-
-  <span class="cp">onSubmit</span>(<span class="cp">value</span>: <span class="ct">InferFormValue</span>&lt;<span class="ck">typeof</span> <span class="ck">this</span>.<span class="cp">config</span>.<span class="cp">fields</span>&gt;) &#123;
-    <span class="cc">// value is fully typed: &#123; email: string, password: string &#125;</span>
-    console.<span class="cp">log</span>(value);
-  &#125;
-&#125;</pre>
-        </div>
+        <div class="code-body" [innerHTML]="highlightedCode()['quickStart']"></div>
       </div>
     </div>
   </div>
@@ -254,16 +219,7 @@
           <span class="code-dot"></span>
           <span class="code-title">form-config.json</span>
         </div>
-        <div class="code-body">
-          <pre>&#123;
-  <span class="cp">"fields"</span>: [
-    &#123; <span class="cp">"key"</span>: <span class="cs">"name"</span>, <span class="cp">"type"</span>: <span class="cs">"input"</span>, <span class="cp">"label"</span>: <span class="cs">"Full Name"</span>, <span class="cp">"required"</span>: <span class="ck">true</span> &#125;,
-    &#123; <span class="cp">"key"</span>: <span class="cs">"feedback"</span>, <span class="cp">"type"</span>: <span class="cs">"textarea"</span>, <span class="cp">"label"</span>: <span class="cs">"Your Feedback"</span> &#125;,
-    &#123; <span class="cp">"key"</span>: <span class="cs">"rating"</span>, <span class="cp">"type"</span>: <span class="cs">"select"</span>, <span class="cp">"label"</span>: <span class="cs">"Rating"</span>,
-      <span class="cp">"options"</span>: [<span class="cs">"Excellent"</span>, <span class="cs">"Good"</span>, <span class="cs">"Average"</span>, <span class="cs">"Poor"</span>] &#125;
-  ]
-&#125;</pre>
-        </div>
+        <div class="code-body" [innerHTML]="highlightedCode()['jsonConfig']"></div>
       </div>
     </div>
   </div>

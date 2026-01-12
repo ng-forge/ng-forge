@@ -2,6 +2,8 @@ import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyR
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ExampleIframeComponent } from '../../components/example-iframe/example-iframe.component';
+import { codeToHtml } from 'shiki';
 
 interface Feature {
   icon: string;
@@ -37,7 +39,7 @@ interface UiLibrary {
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink],
+  imports: [RouterLink, ExampleIframeComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,12 +50,16 @@ export class LandingComponent {
   private readonly sanitizer = inject(DomSanitizer);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
+  // Highlighted code signals - populated after shiki initializes
+  readonly highlightedCode = signal<Record<string, SafeHtml>>({});
+
   readonly navScrolled = signal(false);
   readonly copied = signal(false);
   readonly visibleElements = signal<Set<string>>(new Set());
 
   readonly currentPackageManager = signal('npm');
   readonly currentUiLibrary = signal('material');
+  readonly heroTab = signal<'config' | 'demo'>('demo');
 
   readonly fireflies = Array(10).fill(null);
 
@@ -170,6 +176,75 @@ export class LandingComponent {
     { id: 'bootstrap', label: 'Bootstrap', package: '@ng-forge/bootstrap' },
   ];
 
+  // Code snippets for syntax highlighting
+  readonly codeSnippets = {
+    heroConfig: `const config = {
+  fields: [
+    { key: 'title', type: 'text', label: 'Sign In', props: { elementType: 'h2' } },
+    { key: 'email', type: 'input', label: 'Email',
+      required: true, email: true, props: { type: 'email' } },
+    { key: 'password', type: 'input', label: 'Password',
+      required: true, minLength: 8, props: { type: 'password' } },
+    { key: 'remember', type: 'checkbox', label: 'Remember me' },
+    { key: 'submit', type: 'submit', label: 'Sign In' },
+  ]
+} as const satisfies FormConfig;`,
+
+    conditionalLogic: `{
+  key: 'company',
+  type: 'input',
+  label: 'Company Name',
+  logic: [{
+    type: 'required',
+    when: { field: 'accountType', equals: 'business' }
+  }]
+}`,
+
+    multiStepWizard: `{
+  fields: [
+    { type: 'page', key: 'info', label: 'Your Info', fields: [...] },
+    { type: 'page', key: 'payment', label: 'Payment', fields: [...] },
+    { type: 'page', key: 'review', label: 'Review', fields: [...] }
+  ]
+}`,
+
+    validation: `{ key: 'email', type: 'input', required: true, email: true },
+{ key: 'age', type: 'input', min: 18, max: 120 },
+{ key: 'username', type: 'input', minLength: 3, maxLength: 20 },
+{ key: 'website', type: 'input', pattern: /^https?:\\/\\/.+/ }`,
+
+    quickStart: `import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
+
+@Component({
+  imports: [DynamicForm],
+  template: \`<form [dynamic-form]="config" (submit)="onSubmit($event)"></form>\`
+})
+export class LoginComponent {
+  config = {
+    fields: [
+      { key: 'email', type: 'input', label: 'Email', required: true, email: true },
+      { key: 'password', type: 'input', label: 'Password', required: true,
+        minLength: 8, props: { type: 'password' } },
+      { key: 'submit', type: 'submit', label: 'Sign In' }
+    ]
+  } as const satisfies FormConfig;
+
+  onSubmit(value: InferFormValue<typeof this.config.fields>) {
+    // value is fully typed: { email: string, password: string }
+    console.log(value);
+  }
+}`,
+
+    jsonConfig: `{
+  "fields": [
+    { "key": "name", "type": "input", "label": "Full Name", "required": true },
+    { "key": "feedback", "type": "textarea", "label": "Your Feedback" },
+    { "key": "rating", "type": "select", "label": "Rating",
+      "options": ["Excellent", "Good", "Average", "Poor"] }
+  ]
+}`,
+  };
+
   readonly installCommand = computed(() => {
     const pkg = this.packageManagers.find((p) => p.id === this.currentPackageManager());
     const ui = this.uiLibraries.find((u) => u.id === this.currentUiLibrary());
@@ -180,7 +255,30 @@ export class LandingComponent {
     afterNextRender(() => {
       this.setupScrollListener();
       this.setupIntersectionObserver();
+      this.initializeHighlighting();
     });
+  }
+
+  private async initializeHighlighting(): Promise<void> {
+    try {
+      const highlighted: Record<string, SafeHtml> = {};
+
+      for (const [key, code] of Object.entries(this.codeSnippets)) {
+        const html = await codeToHtml(code, {
+          lang: key === 'jsonConfig' ? 'json' : 'typescript',
+          themes: {
+            light: 'material-theme-lighter',
+            dark: 'material-theme-darker',
+          },
+          defaultColor: false,
+        });
+        highlighted[key] = this.sanitizer.bypassSecurityTrustHtml(html);
+      }
+
+      this.highlightedCode.set(highlighted);
+    } catch (error) {
+      console.error('Shiki highlighting failed:', error);
+    }
   }
 
   private setupScrollListener(): void {
@@ -245,6 +343,10 @@ export class LandingComponent {
 
   setUiLibrary(id: string): void {
     this.currentUiLibrary.set(id);
+  }
+
+  setHeroTab(tab: 'config' | 'demo'): void {
+    this.heroTab.set(tab);
   }
 
   copyInstallCommand(): void {
