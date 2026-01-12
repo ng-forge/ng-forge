@@ -384,6 +384,17 @@ export class LoginComponent {
     }
   ]
 }`,
+
+    jsonFetch: `@Component({
+  template: \`<form [dynamic-form]="config()" />\`
+})
+export class SurveyComponent {
+  private http = inject(HttpClient);
+
+  config = toSignal(
+    this.http.get<FormConfig>('/api/forms/survey')
+  );
+}`,
   };
 
   readonly installCommand = computed(() => {

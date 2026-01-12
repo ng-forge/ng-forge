@@ -1063,9 +1063,381 @@ section {
 }
 
 .validation-demo .code-block,
-.quickstart-code .code-block,
-.json-demo .code-block {
+.quickstart-code .code-block {
   max-width: 800px;
+}
+
+// ============================================
+// JSON CONFIG FLOW SECTION
+// ============================================
+.json-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.flow-diagram {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 0 4rem; // Extra bottom padding for labels
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 0 3rem;
+  }
+}
+
+.flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.flow-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-deep;
+  border: 1px solid $steel-dark;
+  transition: all 0.3s ease;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    color: $steel-mid;
+  }
+
+  &.database {
+    background: linear-gradient(135deg, rgba($ember-core, 0.1), rgba($ember-glow, 0.05));
+    border-color: rgba($ember-core, 0.3);
+
+    svg {
+      color: $ember-glow;
+    }
+  }
+
+  &.api {
+    background: linear-gradient(135deg, rgba($molten, 0.1), rgba($molten, 0.05));
+    border-color: rgba($molten, 0.3);
+
+    svg {
+      color: $molten;
+    }
+  }
+
+  &.json {
+    background: linear-gradient(135deg, rgba($steel, 0.1), rgba($steel, 0.05));
+    border-color: rgba($steel-mid, 0.3);
+
+    span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $steel;
+    }
+  }
+
+  &.form {
+    background: linear-gradient(135deg, rgba($success, 0.1), rgba($success, 0.05));
+    border-color: rgba($success, 0.3);
+
+    svg {
+      color: $success;
+    }
+  }
+
+  @media (max-width: 768px) {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    &.json span {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.flow-label {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: $steel-dim;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.flow-connector {
+  width: 60px;
+  height: 2px;
+  position: relative;
+  margin-top: 31px; // Center with 64px icon (64/2 - 1)
+
+  @media (max-width: 768px) {
+    width: 2px;
+    height: 40px;
+    margin-top: 0;
+  }
+}
+
+.flow-line {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, $steel-dark, $steel-dim, $steel-dark);
+
+  @media (max-width: 768px) {
+    background: linear-gradient(180deg, $steel-dark, $steel-dim, $steel-dark);
+  }
+}
+
+.flow-packet {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: $ember-glow;
+  border-radius: 50%;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  box-shadow: 0 0 10px $ember-glow;
+  opacity: 0;
+
+  @media (max-width: 768px) {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+// Sequential animation - packets flow with overlap (next starts before previous ends)
+// Total cycle: 5s, packets visible simultaneously during handoff
+.flow-connector:nth-child(2) .flow-packet {
+  animation: packet-flow-1 5s ease-in-out infinite;
+}
+
+.flow-connector:nth-child(4) .flow-packet {
+  animation: packet-flow-2 5s ease-in-out infinite;
+}
+
+.flow-connector:nth-child(6) .flow-packet {
+  animation: packet-flow-3 5s ease-in-out infinite;
+}
+
+// First connector: 0% - 28% (packet 2 starts at 22%, overlap 22-28%)
+@keyframes packet-flow-1 {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  24% {
+    opacity: 1;
+  }
+  28% {
+    left: calc(100% - 8px);
+    opacity: 0;
+  }
+  100% {
+    left: calc(100% - 8px);
+    opacity: 0;
+  }
+}
+
+// Second connector: 22% - 50% (starts while packet 1 still visible, packet 3 starts at 44%)
+@keyframes packet-flow-2 {
+  0%,
+  22% {
+    left: 0;
+    opacity: 0;
+  }
+  24% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 1;
+  }
+  50% {
+    left: calc(100% - 8px);
+    opacity: 0;
+  }
+  100% {
+    left: calc(100% - 8px);
+    opacity: 0;
+  }
+}
+
+// Third connector: 44% - 72% (starts while packet 2 still visible)
+@keyframes packet-flow-3 {
+  0%,
+  44% {
+    left: 0;
+    opacity: 0;
+  }
+  46% {
+    opacity: 1;
+  }
+  68% {
+    opacity: 1;
+  }
+  72% {
+    left: calc(100% - 8px);
+    opacity: 0;
+  }
+  100% {
+    left: calc(100% - 8px);
+    opacity: 0;
+  }
+}
+
+// Mobile vertical animations
+@media (max-width: 768px) {
+  .flow-connector:nth-child(2) .flow-packet {
+    animation: packet-flow-1-vertical 5s ease-in-out infinite;
+  }
+
+  .flow-connector:nth-child(4) .flow-packet {
+    animation: packet-flow-2-vertical 5s ease-in-out infinite;
+  }
+
+  .flow-connector:nth-child(6) .flow-packet {
+    animation: packet-flow-3-vertical 5s ease-in-out infinite;
+  }
+
+  @keyframes packet-flow-1-vertical {
+    0% {
+      top: 0;
+      opacity: 0;
+    }
+    2% {
+      opacity: 1;
+    }
+    24% {
+      opacity: 1;
+    }
+    28% {
+      top: calc(100% - 8px);
+      opacity: 0;
+    }
+    100% {
+      top: calc(100% - 8px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes packet-flow-2-vertical {
+    0%,
+    22% {
+      top: 0;
+      opacity: 0;
+    }
+    24% {
+      opacity: 1;
+    }
+    46% {
+      opacity: 1;
+    }
+    50% {
+      top: calc(100% - 8px);
+      opacity: 0;
+    }
+    100% {
+      top: calc(100% - 8px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes packet-flow-3-vertical {
+    0%,
+    44% {
+      top: 0;
+      opacity: 0;
+    }
+    46% {
+      opacity: 1;
+    }
+    68% {
+      opacity: 1;
+    }
+    72% {
+      top: calc(100% - 8px);
+      opacity: 0;
+    }
+    100% {
+      top: calc(100% - 8px);
+      opacity: 0;
+    }
+  }
+}
+
+.json-code-example {
+  .code-block {
+    max-width: 550px;
+    margin: 0 auto;
+  }
+}
+
+.json-use-cases {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.use-case {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: $bg-deep;
+  border: 1px solid $steel-dark;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $steel-dim;
+  }
+}
+
+.use-case-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.use-case-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  strong {
+    color: $steel;
+    font-size: 0.95rem;
+  }
+
+  span {
+    color: $steel-dim;
+    font-size: 0.85rem;
+  }
 }
 
 // ============================================

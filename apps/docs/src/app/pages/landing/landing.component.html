@@ -199,20 +199,113 @@
 <section class="json-config">
   <div class="section-container">
     <div class="json-header fade-up" [class.visible]="isVisible('json-header')">
-      <div class="section-label">CMS-friendly</div>
-      <h2 class="section-title">JSON configs work too.</h2>
-      <p class="section-desc">Load form definitions from your backend. Perfect for dynamic surveys, admin panels, or form builders.</p>
+      <div class="section-label">Backend-driven</div>
+      <h2 class="section-title">Forms don't have to live in code.</h2>
+      <p class="section-desc">Store configs in your database. Fetch via API. Update forms without redeploying.</p>
     </div>
 
-    <div class="json-demo fade-up" [class.visible]="isVisible('json-demo')">
-      <div class="code-block">
-        <div class="code-header">
-          <span class="code-dot"></span>
-          <span class="code-dot"></span>
-          <span class="code-dot"></span>
-          <span class="code-title">form-config.json</span>
+    <div class="json-flow fade-up" [class.visible]="isVisible('json-demo')">
+      <!-- Flow diagram -->
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-icon database">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <ellipse cx="12" cy="5" rx="9" ry="3" />
+              <path d="M21 5v14c0 1.66-4.03 3-9 3s-9-1.34-9-3V5" />
+              <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3" />
+            </svg>
+          </div>
+          <span class="flow-label">Database</span>
         </div>
-        <div class="code-body" [codeHighlight]="codeSnippets.jsonConfig" lang="json"></div>
+
+        <div class="flow-connector">
+          <div class="flow-line"></div>
+          <div class="flow-packet"></div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-icon api">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+              <circle cx="8" cy="6" r="1" fill="currentColor" />
+              <circle cx="8" cy="12" r="1" fill="currentColor" />
+              <circle cx="8" cy="18" r="1" fill="currentColor" />
+            </svg>
+          </div>
+          <span class="flow-label">/api/forms</span>
+        </div>
+
+        <div class="flow-connector">
+          <div class="flow-line"></div>
+          <div class="flow-packet"></div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-icon json">
+            <span>{{ '{' }} {{ '}' }}</span>
+          </div>
+          <span class="flow-label">JSON</span>
+        </div>
+
+        <div class="flow-connector">
+          <div class="flow-line"></div>
+          <div class="flow-packet"></div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-icon form">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M7 8h10M7 12h10M7 16h6" />
+            </svg>
+          </div>
+          <span class="flow-label">Form</span>
+        </div>
+      </div>
+
+      <!-- Code example -->
+      <div class="json-code-example">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-dot"></span>
+            <span class="code-dot"></span>
+            <span class="code-dot"></span>
+            <span class="code-title">form.component.ts</span>
+          </div>
+          <div class="code-body" [codeHighlight]="codeSnippets.jsonFetch"></div>
+        </div>
+      </div>
+
+      <!-- Use cases -->
+      <div class="json-use-cases">
+        <div class="use-case">
+          <span class="use-case-icon">🎨</span>
+          <div class="use-case-text">
+            <strong>Form Builders</strong>
+            <span>Visual editors that output JSON</span>
+          </div>
+        </div>
+        <div class="use-case">
+          <span class="use-case-icon">👥</span>
+          <div class="use-case-text">
+            <strong>Multi-tenant</strong>
+            <span>Custom forms per customer</span>
+          </div>
+        </div>
+        <div class="use-case">
+          <span class="use-case-icon">📊</span>
+          <div class="use-case-text">
+            <strong>Dynamic Surveys</strong>
+            <span>Change questions on the fly</span>
+          </div>
+        </div>
+        <div class="use-case">
+          <span class="use-case-icon">🔥</span>
+          <div class="use-case-text">
+            <strong>Hot Swappable</strong>
+            <span>Forms update when config changes</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
