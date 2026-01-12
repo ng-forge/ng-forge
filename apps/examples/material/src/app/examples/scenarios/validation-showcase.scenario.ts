@@ -9,10 +9,10 @@ export const validationShowcaseScenario: ExampleScenario = {
     defaultValidationMessages: {
       required: 'This field is required',
       email: 'Enter a valid email address',
-      minLength: 'At least {{requiredLength}} characters needed',
-      maxLength: 'Maximum {{requiredLength}} characters allowed',
-      min: 'Must be at least {{min}}',
-      max: 'Must be at most {{max}}',
+      minLength: 'Too short',
+      maxLength: 'Too long',
+      min: 'Value too low',
+      max: 'Value too high',
       pattern: 'Invalid format',
     },
     fields: [
@@ -35,6 +35,7 @@ export const validationShowcaseScenario: ExampleScenario = {
         minLength: 8,
         pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
         validationMessages: {
+          minLength: 'At least 8 characters needed',
           pattern: 'Need uppercase, lowercase & number',
         },
         props: {
@@ -49,6 +50,10 @@ export const validationShowcaseScenario: ExampleScenario = {
         required: true,
         min: 18,
         max: 120,
+        validationMessages: {
+          min: 'Must be at least 18',
+          max: 'Must be at most 120',
+        },
         props: {
           type: 'number',
           placeholder: 'try 10 or 150',
@@ -63,6 +68,8 @@ export const validationShowcaseScenario: ExampleScenario = {
         maxLength: 15,
         pattern: /^[a-z0-9_]+$/,
         validationMessages: {
+          minLength: 'At least 3 characters needed',
+          maxLength: 'Maximum 15 characters allowed',
           pattern: 'Only lowercase letters, numbers, underscores',
         },
         props: {

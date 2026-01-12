@@ -26,7 +26,15 @@
     <img src="logo-dark.svg" alt="ng-forge" class="logo-img" />
   </a>
   <div class="nav-links">
-    <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="github-link" title="GitHub">
+    <button
+      class="nav-btn theme-toggle"
+      (click)="toggleTheme()"
+      [attr.aria-label]="'Theme: ' + currentTheme() + '. Click to toggle.'"
+      title="Toggle theme"
+    >
+      <span class="icon icon--{{ themeIcon() }}"></span>
+    </button>
+    <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="nav-btn github-link" title="GitHub">
       <span class="icon icon--github"></span>
     </a>
   </div>
@@ -136,7 +144,7 @@
 
   <!-- Features -->
   <section id="features" class="features">
-    <div class="features-header fade-up" [class.visible]="isVisible('features-header')">
+    <div class="features-header fade-up" [class.visible]="visibleElements().has('features-header')">
       <div class="section-label">Why ng-forge</div>
       <h2 class="section-title">Built different.</h2>
       <p class="section-desc">Not another forms wrapper. Native signal forms integration, real type safety, actual developer experience.</p>
@@ -146,7 +154,7 @@
       @for (feature of features; track feature.title) {
         <div
           class="feature-card fade-up"
-          [class.visible]="isVisible('feature-' + $index)"
+          [class.visible]="visibleElements().has('feature-' + $index)"
           (mousemove)="onCardMouseMove($event)"
           (mouseleave)="onCardMouseLeave($event)"
         >
@@ -169,14 +177,14 @@
 
   <!-- Showcase -->
   <section id="showcase" class="showcase">
-    <div class="showcase-header fade-up" [class.visible]="isVisible('showcase-header')">
+    <div class="showcase-header fade-up" [class.visible]="visibleElements().has('showcase-header')">
       <div class="section-label">Power features</div>
       <h2 class="section-title">Simple API. Complex forms.</h2>
       <p class="section-desc">Conditional logic, multi-step wizards, i18n. All declarative.</p>
     </div>
 
     <div class="showcase-grid">
-      <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-0')">
+      <div class="showcase-item fade-up" [class.visible]="visibleElements().has('showcase-0')">
         <h3>
           <span class="showcase-icon icon icon--git-branch"></span>
           Conditional Everything
@@ -184,7 +192,7 @@
         <p>Fields that appear, disappear, or become required based on other values. No imperative code.</p>
         <div class="showcase-code" [codeHighlight]="codeSnippets.conditionalLogic"></div>
       </div>
-      <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-1')">
+      <div class="showcase-item fade-up" [class.visible]="visibleElements().has('showcase-1')">
         <h3>
           <span class="showcase-icon icon icon--workflow"></span>
           Multi-Step Wizards
@@ -200,13 +208,13 @@
   <!-- Validation -->
   <section id="validation" class="validation">
     <div class="section-container">
-      <div class="validation-header fade-up" [class.visible]="isVisible('validation-header')">
+      <div class="validation-header fade-up" [class.visible]="visibleElements().has('validation-header')">
         <div class="section-label">Validation</div>
         <h2 class="section-title">Try to break it.</h2>
         <p class="section-desc">Real-time validation. No Validators import. Just properties.</p>
       </div>
 
-      <div class="validation-showcase fade-up" [class.visible]="isVisible('validation-demo')">
+      <div class="validation-showcase fade-up" [class.visible]="visibleElements().has('validation-demo')">
         <div class="validation-demo-panel">
           <div class="demo-panel-header">
             <span class="panel-icon icon icon--play"></span>
@@ -230,7 +238,7 @@
         </div>
       </div>
 
-      <p class="validation-cta fade-up" [class.visible]="isVisible('validation-cta')">
+      <p class="validation-cta fade-up" [class.visible]="visibleElements().has('validation-cta')">
         <a routerLink="/core/validation" class="inline-link">Learn more about validation &rarr;</a>
       </p>
     </div>
@@ -241,13 +249,13 @@
   <!-- Field Types -->
   <section id="field-types" class="field-types">
     <div class="section-container">
-      <div class="field-types-header fade-up" [class.visible]="isVisible('field-types-header')">
+      <div class="field-types-header fade-up" [class.visible]="visibleElements().has('field-types-header')">
         <div class="section-label">Field types</div>
         <h2 class="section-title">Everything you need, built in.</h2>
         <p class="section-desc">Common field types ready to use. Need more? Create your own.</p>
       </div>
 
-      <div class="field-types-grid fade-up" [class.visible]="isVisible('field-types-grid')">
+      <div class="field-types-grid fade-up" [class.visible]="visibleElements().has('field-types-grid')">
         @for (fieldType of fieldTypes; track fieldType.code) {
           <div class="field-type">
             <code>{{ fieldType.code }}</code>
@@ -259,7 +267,7 @@
         }
       </div>
 
-      <p class="field-types-cta fade-up" [class.visible]="isVisible('field-types-cta')">
+      <p class="field-types-cta fade-up" [class.visible]="visibleElements().has('field-types-cta')">
         <a routerLink="/examples/login-form" class="inline-link">See live examples &rarr;</a>
       </p>
     </div>
@@ -270,13 +278,13 @@
   <!-- JSON Config -->
   <section id="json-config" class="json-config">
     <div class="section-container">
-      <div class="json-header fade-up" [class.visible]="isVisible('json-header')">
+      <div class="json-header fade-up" [class.visible]="visibleElements().has('json-header')">
         <div class="section-label">Backend-driven</div>
         <h2 class="section-title">Forms don't have to live in code.</h2>
         <p class="section-desc">Store configs in your database. Fetch via API. Update forms without redeploying.</p>
       </div>
 
-      <div class="json-flow fade-up" [class.visible]="isVisible('json-demo')">
+      <div class="json-flow fade-up" [class.visible]="visibleElements().has('json-demo')">
         <!-- Flow diagram -->
         <div class="flow-diagram">
           <div class="flow-step">
@@ -375,13 +383,13 @@
 
   <!-- Integrations -->
   <section id="integrations" class="integrations">
-    <div class="integrations-header fade-up" [class.visible]="isVisible('integrations-header')">
+    <div class="integrations-header fade-up" [class.visible]="visibleElements().has('integrations-header')">
       <div class="section-label">Integrations</div>
       <h2 class="section-title">Your UI library. Our forms.</h2>
       <p class="section-desc">First-class adapters for everything you're already using.</p>
     </div>
 
-    <div class="integrations-row fade-up" [class.visible]="isVisible('integrations-row')">
+    <div class="integrations-row fade-up" [class.visible]="visibleElements().has('integrations-row')">
       @for (integration of integrations; track integration.name) {
         <a [routerLink]="integration.route" class="integration-logo" [title]="integration.name">
           <img [src]="integration.icon" [alt]="integration.name" loading="lazy" />
@@ -390,7 +398,7 @@
       }
     </div>
 
-    <p class="integrations-footnote fade-up" [class.visible]="isVisible('integrations-footnote')">
+    <p class="integrations-footnote fade-up" [class.visible]="visibleElements().has('integrations-footnote')">
       Or <a routerLink="/deep-dive/custom-integrations" class="inline-link">build your own adapter</a>
     </p>
   </section>

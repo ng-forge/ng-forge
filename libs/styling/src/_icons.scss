@@ -137,4 +137,17 @@
   &--star {
     @include icon-mask('/assets/icons/star.svg', 32px);
   }
+
+  // Theme toggle icons
+  &--sun {
+    @include icon-mask('/assets/icons/sun.svg', 20px);
+  }
+
+  &--moon {
+    @include icon-mask('/assets/icons/moon.svg', 20px);
+  }
+
+  &--monitor {
+    @include icon-mask('/assets/icons/monitor.svg', 20px);
+  }
 }

@@ -1,6 +1,6 @@
-import { afterNextRender, Component } from '@angular/core';
+import { afterNextRender, Component, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { fromEvent } from 'rxjs';
+import { fromEvent, merge, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -14,21 +14,26 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 export class App {
   protected title = 'Material Examples';
 
-  // Listen for theme change messages from parent window
+  // Get initial theme from URL query parameter
+  private getInitialTheme(): string {
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    return params.get('theme') || hashParams.get('theme') || 'auto';
+  }
+
+  // Listen for theme change messages from parent window, starting with URL param value
   private readonly theme = toSignal(
-    fromEvent<MessageEvent>(window, 'message').pipe(
-      filter((event) => event.data?.type === 'theme-change'),
-      map((event) => event.data.theme as string),
+    merge(
+      of(this.getInitialTheme()),
+      fromEvent<MessageEvent>(window, 'message').pipe(
+        filter((event) => event.data?.type === 'theme-change'),
+        map((event) => event.data.theme as string),
+      ),
     ),
-    { initialValue: 'auto' },
+    { initialValue: this.getInitialTheme() },
   );
 
   constructor() {
-    // Request initial theme state after first render
-    afterNextRender(() => {
-      window.parent.postMessage({ type: 'request-theme' }, '*');
-    });
-
     // Update document root data-theme attribute when theme changes
     explicitEffect([this.theme], ([theme]) => {
       if (theme === 'auto') {

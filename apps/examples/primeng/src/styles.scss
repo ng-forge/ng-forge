@@ -1,104 +1,48 @@
+// ============================================
+// PRIMENG EXAMPLE APP STYLES
+// ============================================
+// Uses ng-forge styling library with ember preset
 // PrimeNG theme is configured via providePrimeNG in app.config.ts
-// Only need to import primeicons
+
+@use 'index' as *;
+@use 'examples' as examples;
 @import 'primeicons/primeicons.css';
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-// Ensure root element is block-level for proper height measurement
-example-root {
-  display: block;
-}
-
-html,
-body {
-  // Use auto height for iframe embedding - content determines height
-  height: auto;
-  font-family: var(--font-family);
-  // Hide overflow to prevent scrollbars in iframe - parent controls scrolling
-  overflow: hidden;
-  // ng-doc light mode colors
-  background-color: #f6f6f6;
-  color: rgb(78, 78, 78);
-}
-
-// Auto mode - use system preference when no data-theme is set
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]),
-  html:not([data-theme]) body {
-    // ng-doc dark mode colors
-    background-color: rgb(41, 41, 41);
-    color: #a9a9a9;
-  }
-}
-
-// Explicit dark theme
-html[data-theme='dark'],
-html[data-theme='dark'] body {
-  // ng-doc dark mode colors
-  background-color: rgb(41, 41, 41);
-  color: #a9a9a9;
-}
-
 // ============================================
-// Shared Example App Styles
+// EXAMPLE APP STYLES
 // ============================================
 
+@include examples.example-base();
+@include examples.example-theme-variables();
+@include examples.example-body-themes();
+@include examples.example-components();
+
+// ============================================
+// THEME APPLICATION
+// ============================================
+
+// Light theme (default)
 :root {
-  // ng-doc light mode colors
-  --example-result-bg: #ebebeb;
-  --example-result-border: #ddd;
-  --example-result-text: rgb(78, 78, 78);
+  @include apply-theme($theme-light);
 }
 
-// Auto mode - use system preference when no data-theme is set
+// Auto dark mode
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]),
   :root:not([data-theme]) {
-    // ng-doc dark mode colors
-    --example-result-bg: rgb(48, 48, 48);
-    --example-result-border: rgb(71, 71, 71);
-    --example-result-text: #a9a9a9;
+    @include apply-theme($theme-dark);
   }
 }
 
 // Explicit dark theme
 html[data-theme='dark'],
 :root[data-theme='dark'] {
-  // ng-doc dark mode colors
-  --example-result-bg: rgb(48, 48, 48);
-  --example-result-border: rgb(71, 71, 71);
-  --example-result-text: #a9a9a9;
+  @include apply-theme($theme-dark);
 }
 
-// Example demo component shared styles
-.example-container {
-  display: block;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-.example-result {
-  margin-top: 24px;
-  padding: 16px;
-  background: var(--example-result-bg);
-  border: 1px solid var(--example-result-border);
-  border-radius: 0.375rem;
-
-  h4 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    color: var(--example-result-text);
-  }
-
-  pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    color: var(--example-result-text);
-  }
+// Landing page theme (dark variant with landing background)
+html[data-theme='landing'],
+:root[data-theme='landing'] {
+  @include apply-theme($theme-dark);
+  --bg-void: #{$bg-deep};
 }

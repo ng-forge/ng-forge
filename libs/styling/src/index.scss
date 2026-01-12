@@ -4,10 +4,19 @@
 // Main entry point - forwards all modules
 //
 // Usage:
-//   @use 'styling' as *;        // Import everything
-//   @use 'styling/tokens';      // Just tokens
-//   @use 'styling/mixins';      // Just mixins
-//   @use 'styling/themes';      // Just themes
+//   @use 'index' as *;          // Import everything
+//   @use 'tokens';              // Just tokens
+//   @use 'mixins';              // Just mixins
+//   @use 'themes';              // Just themes
+//
+// Framework-specific imports:
+//   @use 'material';            // Angular Material theme
+//   @use 'ember-bs';             // Bootstrap overrides
+//   @use 'ionic';               // Ionic theme
+//   @use 'examples';            // Shared example styles
+//
+// For PrimeNG preset (TypeScript):
+//   import { EmberPreset, PRIMENG_EMBER_THEME } from '@ng-forge/styling';
 
 // Forward all modules for direct access
 @forward 'tokens';
@@ -15,3 +24,4 @@
 @forward 'animations';
 @forward 'mixins';
 @forward 'icons';
+@forward 'examples';

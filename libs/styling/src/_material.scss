@@ -1,0 +1,151 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+@use 'tokens' as *;
+@use 'themes' as *;
+
+// ============================================
+// ANGULAR MATERIAL EMBER THEME
+// ============================================
+// Generates Material theme using our ember color palette
+
+// ============================================
+// EMBER PALETTE FOR MATERIAL
+// ============================================
+// Standard Material palette format with ember colors
+$ember-palette: (
+  50: #fff7ed,
+  100: #ffedd5,
+  200: #fed7aa,
+  300: #fdba74,
+  400: $ember-glow,
+  // #ff8c42
+  500: $ember-core,
+  // #ff4d00 - Primary
+  600: $ember-hot,
+  // #ff6b2b
+  700: #c2410c,
+  800: #9a3412,
+  900: #7c2d12,
+  A100: $ember-glow,
+  // #ff8c42
+  A200: $ember-hot,
+  // #ff6b2b
+  A400: $ember-core,
+  // #ff4d00
+  A700: #ff6d00,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: white,
+    A700: white,
+  ),
+);
+
+// Molten/gold accent palette
+$molten-palette: (
+  50: #fffbeb,
+  100: #fef3c7,
+  200: #fde68a,
+  300: #fcd34d,
+  400: $molten,
+  // #ffb627
+  500: #f59e0b,
+  600: #d97706,
+  700: #b45309,
+  800: #92400e,
+  900: #78350f,
+  A100: #fef3c7,
+  A200: $molten,
+  // #ffb627
+  A400: #f59e0b,
+  A700: #d97706,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: rgba(black, 0.87),
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: white,
+  ),
+);
+
+// ============================================
+// MATERIAL PALETTES
+// ============================================
+$mat-ember-primary: mat.m2-define-palette($ember-palette, 500, 300, 700);
+$mat-ember-accent: mat.m2-define-palette($molten-palette, 400, 200, 600);
+
+// ============================================
+// THEME DEFINITIONS
+// ============================================
+
+// Light theme
+$mat-ember-light-theme: mat.m2-define-light-theme(
+  (
+    color: (
+      primary: $mat-ember-primary,
+      accent: $mat-ember-accent,
+    ),
+    typography: mat.m2-define-typography-config(
+        $font-family: $font-primary,
+      ),
+    density: 0,
+  )
+);
+
+// Dark theme
+$mat-ember-dark-theme: mat.m2-define-dark-theme(
+  (
+    color: (
+      primary: $mat-ember-primary,
+      accent: $mat-ember-accent,
+    ),
+  )
+);
+
+// ============================================
+// THEME APPLICATION MIXINS
+// ============================================
+
+/// Applies the complete ember light Material theme
+/// Should be called once at root level
+@mixin material-theme-light {
+  @include mat.all-component-themes($mat-ember-light-theme);
+
+  :root {
+    @include apply-theme($theme-light);
+  }
+}
+
+/// Applies ember dark Material colors
+/// Use for dark mode overrides (call inside selector)
+@mixin material-theme-dark {
+  @include mat.all-component-colors($mat-ember-dark-theme);
+  @include apply-theme($theme-dark);
+}
+
+/// Applies ember dark Material colors with landing page background
+/// Use for landing page iframe embeds (call inside selector)
+@mixin material-theme-landing {
+  @include mat.all-component-colors($mat-ember-dark-theme);
+  @include apply-theme($theme-dark);
+  --bg-void: #{$bg-deep};
+}

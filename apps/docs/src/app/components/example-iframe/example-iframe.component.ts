@@ -1,9 +1,20 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, PLATFORM_ID, signal } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  PLATFORM_ID,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { ENVIRONMENT } from '../../config/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, fromEvent, map } from 'rxjs';
+import { filter, fromEvent, map, merge, startWith } from 'rxjs';
 
 @Component({
   selector: 'example-iframe',
@@ -16,6 +27,7 @@ import { filter, fromEvent, map } from 'rxjs';
         </div>
       }
       <iframe
+        #iframeEl
         [src]="trustedSrc()"
         [style.height.px]="iframeHeight()"
         [style.width]="width()"
@@ -159,14 +171,19 @@ export class ExampleIframeComponent {
   private readonly env = inject(ENVIRONMENT);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly document = inject(DOCUMENT);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
+
+  private readonly iframeEl = viewChild<ElementRef<HTMLIFrameElement>>('iframeEl');
 
   loading = signal(true);
   iframeHeight = signal(100); // Start small, will adjust via postMessage
+  currentTheme = signal<string>('auto');
 
   iframeSrc = computed(() => {
     const baseUrl = this.env.exampleBaseUrls[this.library()];
-    return `${baseUrl}/#/examples/${this.example()}`;
+    const theme = this.currentTheme();
+    return `${baseUrl}/#/examples/${this.example()}?theme=${theme}`;
   });
 
   trustedSrc = computed<SafeResourceUrl>(() => {
@@ -174,8 +191,11 @@ export class ExampleIframeComponent {
   });
 
   constructor() {
-    // Listen for height messages from iframe
     if (this.isBrowser) {
+      // Watch for theme changes on the document
+      this.watchThemeChanges();
+
+      // Listen for height messages from iframe
       fromEvent<MessageEvent>(window, 'message')
         .pipe(
           filter((event) => event.data?.type === 'example-iframe-height'),
@@ -191,10 +211,58 @@ export class ExampleIframeComponent {
         .subscribe((height) => {
           this.iframeHeight.set(height);
         });
+
+      // Send theme to iframe when theme changes
+      effect(() => {
+        const theme = this.currentTheme();
+        const iframe = this.iframeEl();
+        if (iframe?.nativeElement?.contentWindow) {
+          iframe.nativeElement.contentWindow.postMessage({ type: 'theme-change', theme }, '*');
+        }
+      });
     }
+  }
+
+  private watchThemeChanges(): void {
+    // Initial theme
+    this.currentTheme.set(this.getTheme());
+
+    // Watch for attribute changes on <html> element
+    const observer = new MutationObserver(() => {
+      this.currentTheme.set(this.getTheme());
+    });
+
+    observer.observe(this.document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+
+    // Also listen for system preference changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', () => {
+      // Only update if in auto mode (no explicit theme set)
+      if (!this.document.documentElement.hasAttribute('data-theme')) {
+        this.currentTheme.set(this.getTheme());
+      }
+    });
+  }
+
+  private getTheme(): string {
+    const dataTheme = this.document.documentElement.getAttribute('data-theme');
+    if (dataTheme) {
+      return dataTheme;
+    }
+    // Auto mode - check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
   }
 
   onLoad(): void {
     this.loading.set(false);
+    // Send initial theme to iframe after it loads
+    const iframe = this.iframeEl();
+    if (iframe?.nativeElement?.contentWindow) {
+      iframe.nativeElement.contentWindow.postMessage({ type: 'theme-change', theme: this.currentTheme() }, '*');
+    }
   }
 }

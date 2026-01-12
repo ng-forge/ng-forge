@@ -18,6 +18,131 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css' layer(material);
 
 // ============================================
+// NG-DOC EMBER THEME OVERRIDES
+// ============================================
+// Override ng-doc's default colors to match landing page forge aesthetic
+
+// Ember colors (matching landing page)
+$ember-core: #ff4d00;
+$ember-hot: #ff6b2b;
+$ember-glow: #ff8c42;
+$molten: #ffb627;
+
+// Forge dark theme colors (matching landing page)
+$bg-void: #000000;
+$bg-deep: #0a0908;
+$bg-surface: #131210;
+$bg-elevated: #1a1916;
+$steel: #e8e4de;
+$steel-mid: #9a958c;
+$steel-dim: #5c5850;
+$steel-dark: #2a2824;
+
+// Light theme - ember colors with light backgrounds
+:root {
+  // Ember primary colors
+  --ng-doc-primary: #{$ember-core};
+  --ng-doc-primary-rgb: 255, 77, 0;
+  --ng-doc-primary-hover: #{$ember-hot};
+
+  // Links use ember colors
+  --ng-doc-link-color: #{$ember-core};
+  --ng-doc-link-hover-color: #{$ember-hot};
+
+  // Selection highlight
+  --ng-doc-selection-background: rgba(255, 77, 0, 0.15);
+
+  // Active/selected states
+  --ng-doc-sidebar-category-color: #{$ember-core};
+
+  // Light mode backgrounds (default ng-doc light theme)
+  --ng-doc-base-0: #ffffff;
+  --ng-doc-base-1: #fafafa;
+  --ng-doc-base-2: #f5f5f5;
+  --ng-doc-base-3: #e5e5e5;
+  --ng-doc-base-4: #d4d4d4;
+
+  // Light mode text
+  --ng-doc-text: #1a1a1a;
+  --ng-doc-text-muted: #666666;
+
+  // Light mode borders
+  --ng-doc-border-color: #e0e0e0;
+}
+
+// Dark mode - match landing page exactly
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) {
+    // Ember accent colors
+    --ng-doc-primary: #{$ember-glow};
+    --ng-doc-primary-rgb: 255, 140, 66;
+    --ng-doc-primary-hover: #{$ember-core};
+    --ng-doc-link-color: #{$ember-glow};
+    --ng-doc-link-hover-color: #{$molten};
+    --ng-doc-selection-background: rgba(255, 140, 66, 0.2);
+    --ng-doc-sidebar-category-color: #{$ember-glow};
+
+    // Background colors - match landing page forge aesthetic
+    --ng-doc-base-0: #{$bg-deep};
+    --ng-doc-base-1: #{$bg-surface};
+    --ng-doc-base-2: #{$bg-elevated};
+    --ng-doc-base-3: #{$steel-dark};
+    --ng-doc-base-4: #{$steel-dim};
+
+    // Text colors - match landing page
+    --ng-doc-text: #{$steel};
+    --ng-doc-text-muted: #{$steel-mid};
+
+    // Border colors
+    --ng-doc-border-color: #{$steel-dark};
+
+    // Code block styling
+    --ng-doc-code-background: #{$bg-surface};
+
+    // Sidebar
+    --ng-doc-sidebar-background: #{$bg-deep};
+
+    // Navbar
+    --ng-doc-navbar-background: #{$bg-deep};
+  }
+}
+
+// Explicit dark theme - match landing page exactly
+html[data-theme='dark'] {
+  // Ember accent colors
+  --ng-doc-primary: #{$ember-glow};
+  --ng-doc-primary-rgb: 255, 140, 66;
+  --ng-doc-primary-hover: #{$ember-core};
+  --ng-doc-link-color: #{$ember-glow};
+  --ng-doc-link-hover-color: #{$molten};
+  --ng-doc-selection-background: rgba(255, 140, 66, 0.2);
+  --ng-doc-sidebar-category-color: #{$ember-glow};
+
+  // Background colors - match landing page forge aesthetic
+  --ng-doc-base-0: #{$bg-deep};
+  --ng-doc-base-1: #{$bg-surface};
+  --ng-doc-base-2: #{$bg-elevated};
+  --ng-doc-base-3: #{$steel-dark};
+  --ng-doc-base-4: #{$steel-dim};
+
+  // Text colors - match landing page
+  --ng-doc-text: #{$steel};
+  --ng-doc-text-muted: #{$steel-mid};
+
+  // Border colors
+  --ng-doc-border-color: #{$steel-dark};
+
+  // Code block styling
+  --ng-doc-code-background: #{$bg-surface};
+
+  // Sidebar
+  --ng-doc-sidebar-background: #{$bg-deep};
+
+  // Navbar
+  --ng-doc-navbar-background: #{$bg-deep};
+}
+
+// ============================================
 // THEME-AWARE LOGO
 // ============================================
 // Show light logo by default
@@ -64,6 +189,86 @@ body[data-theme='light'] .logo-light {
 html[data-theme='light'] .logo-dark,
 body[data-theme='light'] .logo-dark {
   display: none !important;
+}
+
+// ============================================
+// NAVBAR ICON BUTTONS (match landing page style)
+// ============================================
+// Style the ng-doc header controls to look like landing page nav buttons
+.ng-doc-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  // Style all icon buttons (theme toggle, GitHub, etc.)
+  [ng-doc-button-icon],
+  ng-doc-theme-toggle button,
+  ng-doc-theme-toggle [ng-doc-button-icon] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    background: var(--ng-doc-base-2) !important;
+    border: 1px solid var(--ng-doc-border-color) !important;
+    color: var(--ng-doc-text-muted) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    padding: 0 !important;
+
+    &:hover {
+      background: var(--ng-doc-base-1) !important;
+      border-color: var(--ng-doc-text-muted) !important;
+      color: var(--ng-doc-text) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    &:active {
+      transform: translateY(0) !important;
+    }
+
+    ng-doc-icon {
+      width: 20px !important;
+      height: 20px !important;
+    }
+  }
+}
+
+// Dark theme icon button styling
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .ng-doc-header-controls {
+    [ng-doc-button-icon],
+    ng-doc-theme-toggle button,
+    ng-doc-theme-toggle [ng-doc-button-icon] {
+      background: #{$bg-surface} !important;
+      border-color: #{$steel-dark} !important;
+      color: #{$steel-mid} !important;
+
+      &:hover {
+        background: #{$bg-elevated} !important;
+        border-color: #{$steel-dim} !important;
+        color: #{$steel} !important;
+      }
+    }
+  }
+}
+
+html[data-theme='dark'] .ng-doc-header-controls {
+  [ng-doc-button-icon],
+  ng-doc-theme-toggle button,
+  ng-doc-theme-toggle [ng-doc-button-icon] {
+    background: #{$bg-surface} !important;
+    border-color: #{$steel-dark} !important;
+    color: #{$steel-mid} !important;
+
+    &:hover {
+      background: #{$bg-elevated} !important;
+      border-color: #{$steel-dim} !important;
+      color: #{$steel} !important;
+    }
+  }
 }
 
 // ============================================
@@ -120,7 +325,7 @@ ng-doc-demo-displayer {
 // LANDING PAGE SCROLLBAR & SCROLL SNAP
 // ============================================
 // Custom scrollbar for landing page to match the forge aesthetic
-// Main page scrollbar (on html element)
+// Dark mode scrollbar (default)
 html:has(app-landing) {
   scrollbar-width: thin;
   scrollbar-color: #ff4d00 #0a0908;
@@ -149,7 +354,42 @@ html:has(app-landing) {
   }
 }
 
-// Inner scrollbars (code blocks, etc.)
+// Light mode scrollbar for landing page
+@media (prefers-color-scheme: light) {
+  html:not([data-theme]):has(app-landing) {
+    scrollbar-color: #ff4d00 #f5f5f5;
+
+    &::-webkit-scrollbar-track {
+      background: #f5f5f5;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border: 2px solid #f5f5f5;
+    }
+
+    &::-webkit-scrollbar-corner {
+      background: #f5f5f5;
+    }
+  }
+}
+
+html[data-theme='light']:has(app-landing) {
+  scrollbar-color: #ff4d00 #f5f5f5;
+
+  &::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border: 2px solid #f5f5f5;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #f5f5f5;
+  }
+}
+
+// Inner scrollbars (code blocks, etc.) - dark mode
 body:has(app-landing) {
   ::-webkit-scrollbar {
     width: 10px;
@@ -172,5 +412,36 @@ body:has(app-landing) {
 
   ::-webkit-scrollbar-corner {
     background: #0a0908;
+  }
+}
+
+// Light mode inner scrollbars
+@media (prefers-color-scheme: light) {
+  html:not([data-theme]) body:has(app-landing) {
+    ::-webkit-scrollbar-track {
+      background: #f5f5f5;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border: 2px solid #f5f5f5;
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: #f5f5f5;
+    }
+  }
+}
+
+html[data-theme='light'] body:has(app-landing) {
+  ::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 2px solid #f5f5f5;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: #f5f5f5;
   }
 }
