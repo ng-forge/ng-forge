@@ -64,6 +64,7 @@ export class LandingComponent {
   readonly currentPackageManager = signal('npm');
   readonly currentUiLibrary = signal('material');
   readonly heroTab = signal<'config' | 'demo'>('demo');
+  readonly hoveredIntegration = signal<'material' | 'primeng' | 'ionic' | 'bootstrap' | null>(null);
   readonly copied = signal(false);
   readonly copyConfetti = signal<{ id: number; x: number; y: number; angle: number }[]>([]);
   private readonly visibleElements = signal<Set<string>>(new Set());
@@ -216,6 +217,10 @@ export class LandingComponent {
 
   setHeroTab(tab: 'config' | 'demo'): void {
     this.heroTab.set(tab);
+  }
+
+  onIntegrationHover(id: 'material' | 'primeng' | 'ionic' | 'bootstrap' | null): void {
+    this.hoveredIntegration.set(id);
   }
 
   copyInstallCommand(): void {

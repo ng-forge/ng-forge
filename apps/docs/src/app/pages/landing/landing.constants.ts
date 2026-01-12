@@ -15,6 +15,7 @@ export interface FieldType {
 }
 
 export interface Integration {
+  id: 'material' | 'primeng' | 'ionic' | 'bootstrap';
   name: string;
   route: string;
   icon: string;
@@ -298,10 +299,10 @@ export const FIELD_TYPES: FieldType[] = [
 // ============================================
 
 export const INTEGRATIONS: Integration[] = [
-  { name: 'Material', route: '/ui-libs-integrations/material', icon: 'assets/icons/material.svg' },
-  { name: 'PrimeNG', route: '/ui-libs-integrations/primeng', icon: 'assets/icons/primeng.webp' },
-  { name: 'Ionic', route: '/ui-libs-integrations/ionic', icon: 'assets/icons/ionic.svg' },
-  { name: 'Bootstrap', route: '/ui-libs-integrations/bootstrap', icon: 'assets/icons/bootstrap.svg' },
+  { id: 'material', name: 'Material', route: '/ui-libs-integrations/material', icon: 'assets/icons/material.svg' },
+  { id: 'primeng', name: 'PrimeNG', route: '/ui-libs-integrations/primeng', icon: 'assets/icons/primeng.webp' },
+  { id: 'ionic', name: 'Ionic', route: '/ui-libs-integrations/ionic', icon: 'assets/icons/ionic.svg' },
+  { id: 'bootstrap', name: 'Bootstrap', route: '/ui-libs-integrations/bootstrap', icon: 'assets/icons/bootstrap.svg' },
 ];
 
 // ============================================
