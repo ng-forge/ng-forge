@@ -178,6 +178,10 @@ nav {
   display: flex;
   align-items: center;
   text-decoration: none;
+
+  &:hover .logo-img {
+    filter: brightness(1.2) saturate(1.2) hue-rotate(-10deg) drop-shadow(0 0 4px rgba($molten, 0.4));
+  }
 }
 
 .logo-img {
@@ -185,7 +189,9 @@ nav {
   width: auto;
   transform: scale(2.5);
   transform-origin: left center;
-  transition: transform 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    filter 0.2s ease;
 
   .scrolled & {
     transform: scale(2);
@@ -235,8 +241,7 @@ nav {
     color: $steel-dim;
 
     &:hover {
-      background: rgba($steel-dark, 0.5);
-      color: $steel;
+      color: $ember-glow;
     }
 
     svg {
@@ -277,13 +282,49 @@ nav {
 .hero-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   background: $bg-elevated;
-  border: 1px solid $steel-dark;
   padding: 0.4rem 0.9rem;
   border-radius: 100px;
   font-size: 0.8rem;
   color: $steel-mid;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s ease;
+
+  // Animated gradient border
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 100px;
+    background: linear-gradient(90deg, $steel-dark, $ember-core, $molten, $ember-core, $steel-dark);
+    background-size: 300% 100%;
+    animation: shimmer-border 4s ease-in-out infinite;
+    z-index: -1;
+    opacity: 0.6;
+  }
+
+  // Inner background to cover the gradient
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: 100px;
+    background: $bg-elevated;
+    z-index: -1;
+  }
+
+  &:hover {
+    color: $steel;
+
+    &::before {
+      opacity: 1;
+      animation-duration: 2s;
+    }
+  }
 }
 
 .hero-badge-dot {
@@ -291,17 +332,63 @@ nav {
   height: 6px;
   background: $ember-hot;
   border-radius: 50%;
-  box-shadow: 0 0 8px $ember-hot;
+  position: relative;
+  flex-shrink: 0;
+
+  // Core glow
+  box-shadow: 0 0 6px $ember-hot;
   animation: pulse-dot 2s ease-in-out infinite;
+
+  // Radiating pulse rings
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid $ember-hot;
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  &::after {
+    animation-delay: 1s;
+  }
 }
 
 @keyframes pulse-dot {
   0%,
   100% {
     opacity: 1;
+    box-shadow: 0 0 6px $ember-hot;
   }
   50% {
+    opacity: 0.8;
+    box-shadow:
+      0 0 10px $ember-hot,
+      0 0 20px rgba($ember-hot, 0.3);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
     opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer-border {
+  0% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
   }
 }
 
