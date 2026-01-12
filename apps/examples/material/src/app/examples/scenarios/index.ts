@@ -11,6 +11,7 @@ export { buttonScenario } from './button.scenario';
 export { completeFormScenario } from './complete-form.scenario';
 export { userRegistrationScenario } from './user-registration.scenario';
 export { loginScenario } from './login.scenario';
+export { heroDemoScenario } from './hero-demo.scenario';
 export { paginatedFormScenario } from './paginated-form.scenario';
 export { groupScenario } from './group.scenario';
 export { rowScenario } from './row.scenario';
@@ -30,6 +31,7 @@ import { buttonScenario } from './button.scenario';
 import { completeFormScenario } from './complete-form.scenario';
 import { userRegistrationScenario } from './user-registration.scenario';
 import { loginScenario } from './login.scenario';
+import { heroDemoScenario } from './hero-demo.scenario';
 import { paginatedFormScenario } from './paginated-form.scenario';
 import { groupScenario } from './group.scenario';
 import { rowScenario } from './row.scenario';
@@ -51,6 +53,7 @@ export const ALL_SCENARIOS: ExampleScenario[] = [
   completeFormScenario,
   userRegistrationScenario,
   loginScenario,
+  heroDemoScenario,
   paginatedFormScenario,
   groupScenario,
   rowScenario,

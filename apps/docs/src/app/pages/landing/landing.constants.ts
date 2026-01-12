@@ -336,21 +336,21 @@ export const CODE_SNIPPETS = {
   imports: [DynamicForm],
   template: \`<form [dynamic-form]="config" (submit)="onSubmit($event)"></form>\`
 })
-export class LoginComponent {
+export class ContactComponent {
   config = {
     fields: [
-      { key: 'title', type: 'text', label: 'Sign In', props: { elementType: 'h2' } },
+      { key: 'title', type: 'text', label: 'Get in Touch', props: { elementType: 'h2' } },
+      { key: 'name', type: 'input', label: 'Your Name', required: true },
       { key: 'email', type: 'input', label: 'Email',
         required: true, email: true, props: { type: 'email' } },
-      { key: 'password', type: 'input', label: 'Password',
-        required: true, minLength: 8, props: { type: 'password' } },
-      { key: 'remember', type: 'checkbox', label: 'Remember me' },
-      { key: 'submit', type: 'submit', label: 'Sign In' },
+      { key: 'message', type: 'textarea', label: 'Message',
+        required: true, minLength: 10, props: { rows: 3 } },
+      { key: 'submit', type: 'submit', label: 'Send Message' },
     ]
   } as const satisfies FormConfig;
 
   onSubmit(value: InferFormValue<typeof this.config.fields>) {
-    // value is fully typed: { email: string, password: string, remember: boolean }
+    // value is fully typed: { name: string, email: string, message: string }
     console.log(value);
   }
 }`,

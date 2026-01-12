@@ -72,6 +72,11 @@ export default [
     data: { scenario: getScenarioById('login') },
   },
   {
+    path: 'hero-demo',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('hero-demo') },
+  },
+  {
     path: 'paginated-form',
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('paginated-form') },
