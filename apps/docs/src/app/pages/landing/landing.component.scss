@@ -864,6 +864,7 @@ section {
   position: relative;
   z-index: 2;
   scroll-snap-align: start;
+  overflow-x: hidden;
 
   @media (max-width: 768px) {
     padding: 3rem 1.25rem;
@@ -1195,6 +1196,8 @@ section {
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   align-items: stretch;
+  max-width: 100%;
+  overflow: hidden;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -1242,6 +1245,8 @@ section {
   padding: 0;
   flex: 1;
   min-height: 350px;
+  max-width: 100%;
+  overflow: hidden;
 
   // Override iframe component styles for dark theme
   ::ng-deep {
@@ -1249,6 +1254,7 @@ section {
       border: none;
       border-radius: 0;
       box-shadow: none;
+      max-width: 100%;
     }
 
     .example-loading {

@@ -315,16 +315,68 @@ function updateSparks(sparks: Spark[], newSparks: Spark[]): Spark[] {
 }
 
 /**
+ * Creates an Observable for window resize events.
+ */
+function windowResize$(): Observable<{ width: number; height: number }> {
+  return fromEvent(window, 'resize', { passive: true }).pipe(
+    debounceTime(100),
+    map(() => ({ width: window.innerWidth, height: window.innerHeight })),
+    startWith({ width: window.innerWidth, height: window.innerHeight }),
+  );
+}
+
+/**
+ * Recalculates base positions for fireflies when viewport changes.
+ */
+function recalculateBasePositions(positions: FireflyPosition[], newWidth: number, newHeight: number): FireflyPosition[] {
+  const { count, gridCols } = FIREFLY_CONFIG;
+  const rows = Math.ceil(count / gridCols);
+  const cellWidth = newWidth / gridCols;
+  const cellHeight = newHeight / rows;
+
+  return positions.map((firefly, i) => {
+    const col = i % gridCols;
+    const row = Math.floor(i / gridCols);
+    const baseX = cellWidth * col + cellWidth * 0.2 + cellWidth * 0.6 * (firefly.baseX % 1 || Math.random());
+    const baseY = cellHeight * row + cellHeight * 0.2 + cellHeight * 0.6 * (firefly.baseY % 1 || Math.random());
+
+    // Scale current position proportionally
+    const scaleX = newWidth / (firefly.baseX > 0 ? firefly.baseX / ((i % gridCols) / gridCols + 0.5) : newWidth);
+    const scaleY = newHeight / (firefly.baseY > 0 ? firefly.baseY / (Math.floor(i / gridCols) / rows + 0.5) : newHeight);
+
+    return {
+      ...firefly,
+      baseX,
+      baseY,
+      // Gently move current position toward new base
+      x: firefly.x + (baseX - firefly.baseX) * 0.5,
+      y: firefly.y + (baseY - firefly.baseY) * 0.5,
+    };
+  });
+}
+
+/**
  * Creates a stateful firefly animation Observable.
  * Consumer should handle cleanup with takeUntilDestroyed.
  */
 export function createFireflyAnimation(mouse$: Observable<MousePosition>): Observable<FireflyState> {
   let positions = initializeFireflyPositions();
   let sparks: Spark[] = [];
+  let lastWidth = window.innerWidth;
+  let lastHeight = window.innerHeight;
+
+  const resize$ = windowResize$();
 
   return animationFrames$().pipe(
-    withLatestFrom(mouse$),
-    map(([, mousePos]) => {
+    withLatestFrom(mouse$, resize$),
+    map(([, mousePos, viewport]) => {
+      // Check if viewport changed
+      if (viewport.width !== lastWidth || viewport.height !== lastHeight) {
+        positions = recalculateBasePositions(positions, viewport.width, viewport.height);
+        lastWidth = viewport.width;
+        lastHeight = viewport.height;
+      }
+
       positions = positions.map((firefly, i) => updateFirefly(firefly, mousePos, positions, i));
       const newSparks = generateSparks(positions);
       sparks = updateSparks(sparks, newSparks);
