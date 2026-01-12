@@ -327,26 +327,29 @@ function windowResize$(): Observable<{ width: number; height: number }> {
 
 /**
  * Recalculates base positions for fireflies when viewport changes.
+ * Scales positions proportionally to maintain relative placement.
  */
-function recalculateBasePositions(positions: FireflyPosition[], newWidth: number, newHeight: number): FireflyPosition[] {
-  const { count, gridCols } = FIREFLY_CONFIG;
-  const rows = Math.ceil(count / gridCols);
-  const cellWidth = newWidth / gridCols;
-  const cellHeight = newHeight / rows;
+function recalculateBasePositions(
+  positions: FireflyPosition[],
+  newWidth: number,
+  newHeight: number,
+  oldWidth: number,
+  oldHeight: number,
+): FireflyPosition[] {
+  const scaleX = newWidth / oldWidth;
+  const scaleY = newHeight / oldHeight;
 
-  return positions.map((firefly, i) => {
-    const col = i % gridCols;
-    const row = Math.floor(i / gridCols);
-    const baseX = cellWidth * col + cellWidth * 0.2 + cellWidth * 0.6 * (firefly.baseX % 1 || Math.random());
-    const baseY = cellHeight * row + cellHeight * 0.2 + cellHeight * 0.6 * (firefly.baseY % 1 || Math.random());
+  return positions.map((firefly) => {
+    const baseX = firefly.baseX * scaleX;
+    const baseY = firefly.baseY * scaleY;
 
     return {
       ...firefly,
       baseX,
       baseY,
-      // Gently move current position toward new base
-      x: firefly.x + (baseX - firefly.baseX) * 0.5,
-      y: firefly.y + (baseY - firefly.baseY) * 0.5,
+      // Scale current position proportionally
+      x: firefly.x * scaleX,
+      y: firefly.y * scaleY,
     };
   });
 }
@@ -382,7 +385,7 @@ export function createFireflyAnimation(mouse$: Observable<MousePosition>): Obser
 
       // Check if viewport changed
       if (viewport.width !== lastWidth || viewport.height !== lastHeight) {
-        positions = recalculateBasePositions(positions, viewport.width, viewport.height);
+        positions = recalculateBasePositions(positions, viewport.width, viewport.height, lastWidth, lastHeight);
         lastWidth = viewport.width;
         lastHeight = viewport.height;
       }
