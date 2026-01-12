@@ -1,4 +1,5 @@
-@use 'variables' as *;
+@use 'tokens' as *;
+@use 'themes' as *;
 
 // ============================================
 // CARD STYLES
@@ -298,27 +299,6 @@
   color: $steel-mid;
   font-size: $text-lg;
   max-width: 500px;
-}
-
-// ============================================
-// ANIMATION UTILITIES
-// ============================================
-
-/// Fade up animation setup (for intersection observer)
-@mixin fade-up {
-  opacity: 1;
-  transform: translateY(0);
-
-  &.animate {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s $transition-bounce;
-  }
-
-  &.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 // ============================================

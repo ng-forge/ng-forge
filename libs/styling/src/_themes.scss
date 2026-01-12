@@ -1,0 +1,111 @@
+@use 'tokens' as *;
+
+// ============================================
+// THEME DEFINITIONS
+// ============================================
+// Each theme is a map of semantic color names to values.
+// Use apply-theme() mixin to generate CSS custom properties.
+
+// ============================================
+// DARK THEME (Forge aesthetic)
+// ============================================
+$theme-dark: (
+  // Backgrounds - layered dark from void to elevated
+  bg-void: #000000,
+  bg-deep: #0a0908,
+  bg-surface: #131210,
+  bg-elevated: #1a1916,
+
+  // Text - steel palette with warm undertones
+  text-primary: #e8e4de,
+  text-secondary: #9a958c,
+  text-muted: #5c5850,
+  text-max-contrast: #fff7ed,
+
+  // Borders
+  border: #2a2824,
+  border-hover: #5c5850,
+
+  // Shadows
+  shadow-subtle: rgba(0, 0, 0, 0.2),
+  shadow-elevated: rgba(0, 0, 0, 0.4),
+  shadow-ember-sm: rgba($ember-core, 0.2),
+  shadow-ember-md: rgba($ember-hot, 0.3),
+  shadow-ember-lg: rgba($ember-hot, 0.5)
+);
+
+// ============================================
+// LIGHT THEME (Clean, professional)
+// ============================================
+$theme-light: (
+  // Backgrounds - layered light
+  bg-void: #ffffff,
+  bg-deep: #fafafa,
+  bg-surface: #f5f5f5,
+  bg-elevated: #ffffff,
+
+  // Text
+  text-primary: #1a1a1a,
+  text-secondary: #666666,
+  text-muted: #999999,
+  text-max-contrast: #000000,
+
+  // Borders
+  border: #e0e0e0,
+  border-hover: #cccccc,
+
+  // Shadows
+  shadow-subtle: rgba(0, 0, 0, 0.08),
+  shadow-elevated: rgba(0, 0, 0, 0.15),
+  shadow-ember-sm: rgba($ember-core, 0.15),
+  shadow-ember-md: rgba($ember-hot, 0.2),
+  shadow-ember-lg: rgba($ember-hot, 0.35)
+);
+
+// ============================================
+// THEME APPLICATION MIXIN
+// ============================================
+// Generates CSS custom properties from a theme map
+@mixin apply-theme($theme) {
+  // Backgrounds
+  --bg-void: #{map-get($theme, bg-void)};
+  --bg-deep: #{map-get($theme, bg-deep)};
+  --bg-surface: #{map-get($theme, bg-surface)};
+  --bg-elevated: #{map-get($theme, bg-elevated)};
+
+  // Text
+  --text-primary: #{map-get($theme, text-primary)};
+  --text-secondary: #{map-get($theme, text-secondary)};
+  --text-muted: #{map-get($theme, text-muted)};
+  --text-max-contrast: #{map-get($theme, text-max-contrast)};
+
+  // Borders
+  --border: #{map-get($theme, border)};
+  --border-hover: #{map-get($theme, border-hover)};
+
+  // Shadows
+  --shadow-subtle: 0 2px 8px #{map-get($theme, shadow-subtle)};
+  --shadow-elevated: 0 8px 32px #{map-get($theme, shadow-elevated)};
+  --shadow-ember-sm: 0 4px 20px #{map-get($theme, shadow-ember-sm)};
+  --shadow-ember-md: 0 4px 30px #{map-get($theme, shadow-ember-md)};
+  --shadow-ember-lg: 0 12px 40px #{map-get($theme, shadow-ember-lg)};
+}
+
+// ============================================
+// CONVENIENCE VARIABLES (for direct SCSS use)
+// ============================================
+// These map to dark theme by default. Components can
+// override by using CSS custom properties instead.
+
+// Dark theme colors (SCSS variables for backward compat)
+$bg-void: map-get($theme-dark, bg-void);
+$bg-deep: map-get($theme-dark, bg-deep);
+$bg-surface: map-get($theme-dark, bg-surface);
+$bg-elevated: map-get($theme-dark, bg-elevated);
+
+$steel: map-get($theme-dark, text-primary);
+$steel-mid: map-get($theme-dark, text-secondary);
+$steel-dim: map-get($theme-dark, text-muted);
+$white-hot: map-get($theme-dark, text-max-contrast);
+
+$steel-dark: map-get($theme-dark, border);

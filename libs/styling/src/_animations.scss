@@ -1,4 +1,5 @@
-@use 'variables' as *;
+@use 'tokens' as *;
+@use 'themes' as *;
 
 // ============================================
 // PULSE ANIMATIONS
@@ -66,6 +67,22 @@
 }
 
 // ============================================
+// REVEAL ANIMATIONS
+// ============================================
+
+/// Hero reveal animation
+@keyframes hero-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ============================================
 // BORDER ANIMATIONS
 // ============================================
 
@@ -100,6 +117,22 @@
   }
   100% {
     background-position: 200% 0;
+  }
+}
+
+// ============================================
+// CONFETTI ANIMATION
+// ============================================
+
+/// Copy confetti burst
+@keyframes confetti-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--confetti-x), var(--confetti-y)) rotate(var(--confetti-angle)) scale(0);
   }
 }
 
@@ -177,4 +210,21 @@
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
   border-radius: $radius-md;
+}
+
+/// Fade up animation setup (for intersection observer)
+@mixin fade-up {
+  opacity: 1;
+  transform: translateY(0);
+
+  &.animate {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s $transition-bounce;
+  }
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

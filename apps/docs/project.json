@@ -35,7 +35,7 @@
         ],
         "styles": ["apps/docs/src/styles.scss"],
         "stylePreprocessorOptions": {
-          "includePaths": ["apps/docs/src/styles"]
+          "includePaths": ["libs/styling/src"]
         },
         "allowedCommonJsDependencies": ["dayjs", "@braintree/sanitize-url", "dompurify", "cytoscape-cose-bilkent", "elkjs", "@ng-doc/core"]
       },

@@ -1,18 +1,9 @@
 // ============================================
-// NG-FORGE DOCS DESIGN TOKENS
+// NG-FORGE DESIGN TOKENS
 // ============================================
 // Design language: "Forge" - Dark industrial aesthetic
 // with ember/fire accents representing the creative
 // process of forging dynamic forms.
-
-// ============================================
-// BACKGROUND COLORS
-// ============================================
-// Layered dark backgrounds from void to elevated
-$bg-void: #000000; // Absolute black, used sparingly
-$bg-deep: #0a0908; // Primary dark background
-$bg-surface: #131210; // Elevated surface (headers, panels)
-$bg-elevated: #1a1916; // Cards, interactive elements
 
 // ============================================
 // EMBER/FIRE PALETTE (Primary Accent)
@@ -22,16 +13,6 @@ $ember-core: #ff4d00; // Primary action color
 $ember-hot: #ff6b2b; // Hover/active states
 $ember-glow: #ff8c42; // Highlights, links, code
 $molten: #ffb627; // Gold accent, premium feel
-
-// ============================================
-// STEEL PALETTE (Text & Borders)
-// ============================================
-// Neutral grays with warm undertones
-$white-hot: #fff7ed; // Maximum contrast text
-$steel: #e8e4de; // Primary text color
-$steel-mid: #9a958c; // Secondary text, descriptions
-$steel-dim: #5c5850; // Muted text, placeholders
-$steel-dark: #2a2824; // Borders, dividers
 
 // ============================================
 // SEMANTIC COLORS
@@ -74,18 +55,6 @@ $radius-md: 8px;
 $radius-lg: 12px;
 $radius-xl: 16px;
 $radius-pill: 100px;
-
-// ============================================
-// SHADOWS
-// ============================================
-// Ember glow shadows for interactive elements
-$shadow-ember-sm: 0 4px 20px rgba($ember-core, 0.2);
-$shadow-ember-md: 0 4px 30px rgba($ember-hot, 0.3);
-$shadow-ember-lg: 0 12px 40px rgba($ember-hot, 0.5);
-
-// Subtle shadows for depth
-$shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.2);
-$shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.4);
 
 // ============================================
 // TRANSITIONS
