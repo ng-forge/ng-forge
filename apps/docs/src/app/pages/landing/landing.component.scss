@@ -1548,18 +1548,31 @@ section {
   }
 }
 
-.field-types-cta {
+.field-types-cta,
+.validation-cta {
   color: $steel-mid;
+  margin-top: 2rem;
 }
 
 .inline-link {
   color: $ember-glow;
   text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s;
+  position: relative;
 
-  &:hover {
-    border-bottom-color: $ember-glow;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%;
+    height: 1px;
+    background: $ember-glow;
+    transition: width 0.3s ease;
+  }
+
+  &:hover::after {
+    width: 100%;
   }
 }
 

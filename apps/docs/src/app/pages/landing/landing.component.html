@@ -161,6 +161,10 @@
         </div>
       </div>
     </div>
+
+    <p class="validation-cta fade-up" [class.visible]="isVisible('validation-cta')">
+      <a routerLink="/dynamic-forms/validation" class="inline-link">Learn more about validation &rarr;</a>
+    </p>
   </div>
 </section>
 
@@ -232,7 +236,7 @@
               <circle cx="8" cy="18" r="1" fill="currentColor" />
             </svg>
           </div>
-          <span class="flow-label">/api/forms</span>
+          <span class="flow-label">API Request</span>
         </div>
 
         <div class="flow-connector">
@@ -259,7 +263,7 @@
               <path d="M7 8h10M7 12h10M7 16h6" />
             </svg>
           </div>
-          <span class="flow-label">Form</span>
+          <span class="flow-label">Live Form</span>
         </div>
       </div>
 
