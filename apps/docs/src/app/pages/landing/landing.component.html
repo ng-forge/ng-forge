@@ -6,8 +6,11 @@
 
 <!-- Fireflies -->
 <div class="fireflies">
-  @for (_ of fireflies; track $index) {
-    <div class="firefly"></div>
+  @for (firefly of fireflyPositions(); track $index) {
+    <div class="firefly interactive" [style.left.px]="firefly.x" [style.top.px]="firefly.y"></div>
+  }
+  @for (spark of sparks(); track $index) {
+    <div class="spark" [style.left.px]="spark.x" [style.top.px]="spark.y" [style.opacity]="spark.opacity"></div>
   }
 </div>
 
@@ -17,7 +20,6 @@
     <img src="logo-dark.svg" alt="ng-forge" class="logo-img" />
   </a>
   <div class="nav-links">
-    <a routerLink="/installation">Docs</a>
     <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="github-link" title="GitHub">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
         <path

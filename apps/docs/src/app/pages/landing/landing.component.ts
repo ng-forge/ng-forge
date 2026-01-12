@@ -54,7 +54,11 @@ export class LandingComponent {
   readonly currentUiLibrary = signal('material');
   readonly heroTab = signal<'config' | 'demo'>('demo');
 
-  readonly fireflies = Array(10).fill(null);
+  readonly fireflyCount = 12;
+  readonly fireflyPositions = signal<{ x: number; y: number; vx: number; vy: number; baseX: number; baseY: number }[]>([]);
+  readonly sparks = signal<{ x: number; y: number; opacity: number }[]>([]);
+  private mousePos = { x: -1000, y: -1000 };
+  private animationFrame: number | null = null;
 
   readonly features: Feature[] = [
     {
@@ -404,21 +408,15 @@ export class SurveyComponent {
   });
 
   private readonly sectionIds = ['features', 'showcase', 'validation', 'field-types', 'json-config', 'integrations'];
-  private currentSection = '';
 
   constructor() {
     afterNextRender(() => {
       this.setupScrollListener();
       this.setupIntersectionObserver();
-      this.setupSectionObserver();
-      this.enableSmoothScroll();
+      this.setupScrollSnap();
+      this.setupInteractiveFireflies();
       this.scrollToInitialHash();
     });
-  }
-
-  private enableSmoothScroll(): void {
-    if (!this.isBrowser) return;
-    document.documentElement.style.scrollBehavior = 'smooth';
   }
 
   private scrollToInitialHash(): void {
@@ -426,6 +424,7 @@ export class SurveyComponent {
 
     const hash = window.location.hash.slice(1);
     if (hash && this.sectionIds.includes(hash)) {
+      // Scroll to hash section
       setTimeout(() => {
         const element = document.getElementById(hash);
         if (element) {
@@ -487,6 +486,235 @@ export class SurveyComponent {
     });
   }
 
+  private setupScrollSnap(): void {
+    if (!this.isBrowser) return;
+
+    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isSnapping = false;
+
+    const getSnapTargets = (): HTMLElement[] => {
+      const hero = document.querySelector('.hero') as HTMLElement;
+      const sections = Array.from(document.querySelectorAll('section[id]')) as HTMLElement[];
+      const footer = document.querySelector('footer') as HTMLElement;
+      return [hero, ...sections, footer].filter(Boolean);
+    };
+
+    const findClosestSnapTarget = (): HTMLElement | null => {
+      const targets = getSnapTargets();
+      const viewportHeight = window.innerHeight;
+      const snapThreshold = viewportHeight * 0.6; // Snap if within 60% of viewport height
+
+      let closest: HTMLElement | null = null;
+      let closestDistance = Infinity;
+
+      for (const target of targets) {
+        const rect = target.getBoundingClientRect();
+        const targetTop = rect.top;
+        const isHero = target.classList.contains('hero');
+
+        // Only snap when approaching a section (its top is near viewport top from below)
+        // OR when section fits in viewport and we're close to aligning it
+        const sectionFitsInViewport = rect.height <= viewportHeight * 0.9;
+
+        // For tall sections: only snap if section top is slightly below viewport (approaching)
+        // For short sections: snap if we're close to aligning
+        if (!sectionFitsInViewport) {
+          // Tall section: only snap when approaching (targetTop between 0 and threshold)
+          // Don't snap if we've scrolled into it (targetTop < 0)
+          if (targetTop < 0 && !isHero) {
+            continue;
+          }
+        }
+
+        // Hero only snaps when very close to top (scrolling back up)
+        const threshold = isHero ? 150 : snapThreshold;
+
+        // Check if the top of the section is close to the viewport top
+        if (targetTop >= 0 && targetTop < threshold && targetTop < closestDistance) {
+          closestDistance = targetTop;
+          closest = target;
+        }
+      }
+
+      return closest;
+    };
+
+    const handleScrollEnd = (): void => {
+      if (isSnapping) return;
+
+      const target = findClosestSnapTarget();
+      if (target) {
+        isSnapping = true;
+
+        // Account for fixed navbar (approx 70px when scrolled)
+        const navOffset = 80;
+        const targetRect = target.getBoundingClientRect();
+        const targetTop = window.scrollY + targetRect.top - navOffset;
+
+        // For hero section, scroll to very top
+        const isHero = target.classList.contains('hero');
+        const scrollTo = isHero ? 0 : Math.max(0, targetTop);
+
+        window.scrollTo({ top: scrollTo, behavior: 'smooth' });
+
+        // Reset snapping flag after animation completes
+        setTimeout(() => {
+          isSnapping = false;
+        }, 500);
+      }
+    };
+
+    const handleScroll = (): void => {
+      if (isSnapping) return;
+
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+
+      // Wait for scroll to stop, then snap
+      scrollTimeout = setTimeout(handleScrollEnd, 80);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    this.destroyRef.onDestroy(() => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    });
+  }
+
+  private setupInteractiveFireflies(): void {
+    if (!this.isBrowser) return;
+
+    // Initialize firefly positions in a grid pattern to avoid clusters
+    const cols = 4;
+    const rows = Math.ceil(this.fireflyCount / cols);
+    const cellWidth = window.innerWidth / cols;
+    const cellHeight = window.innerHeight / rows;
+
+    const initialPositions = Array.from({ length: this.fireflyCount }, (_, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      // Position within cell with some randomness
+      const x = cellWidth * col + cellWidth * 0.2 + Math.random() * cellWidth * 0.6;
+      const y = cellHeight * row + cellHeight * 0.2 + Math.random() * cellHeight * 0.6;
+      return {
+        x,
+        y,
+        vx: 0,
+        vy: 0,
+        baseX: x,
+        baseY: y,
+      };
+    });
+    this.fireflyPositions.set(initialPositions);
+
+    // Track mouse movement
+    const handleMouseMove = (e: MouseEvent): void => {
+      this.mousePos = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    // Animation loop
+    const animate = (): void => {
+      const positions = this.fireflyPositions();
+      const newSparks: { x: number; y: number; opacity: number }[] = [];
+      const mouseRadius = 150;
+      const returnForce = 0.003; // Very slow return for dreamy motion
+      const friction = 0.99; // High friction = floaty, slow deceleration
+
+      const newPositions = positions.map((firefly, i) => {
+        let { x, y, vx, vy, baseX, baseY } = firefly;
+
+        // Calculate distance from mouse
+        const dx = x - this.mousePos.x;
+        const dy = y - this.mousePos.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Scatter away from mouse (soft push)
+        if (dist < mouseRadius && dist > 0) {
+          const force = (mouseRadius - dist) / mouseRadius;
+          vx += (dx / dist) * force * 0.6;
+          vy += (dy / dist) * force * 0.6;
+        }
+
+        // Repulsion from other fireflies to prevent clustering (very gentle)
+        const repulsionRadius = 100;
+        for (let j = 0; j < positions.length; j++) {
+          if (i === j) continue;
+          const other = positions[j];
+          const repDx = x - other.x;
+          const repDy = y - other.y;
+          const repDist = Math.sqrt(repDx * repDx + repDy * repDy);
+
+          if (repDist < repulsionRadius && repDist > 0) {
+            const repForce = (repulsionRadius - repDist) / repulsionRadius;
+            vx += (repDx / repDist) * repForce * 0.08;
+            vy += (repDy / repDist) * repForce * 0.08;
+          }
+        }
+
+        // Gentle drift back to base position
+        vx += (baseX - x) * returnForce;
+        vy += (baseY - y) * returnForce;
+
+        // Subtle random drift
+        vx += (Math.random() - 0.5) * 0.05;
+        vy += (Math.random() - 0.5) * 0.05;
+
+        // Apply friction
+        vx *= friction;
+        vy *= friction;
+
+        // Update position
+        x += vx;
+        y += vy;
+
+        // Check for nearby fireflies and create sparks
+        for (let j = i + 1; j < positions.length; j++) {
+          const other = positions[j];
+          const sparkDx = x - other.x;
+          const sparkDy = y - other.y;
+          const sparkDist = Math.sqrt(sparkDx * sparkDx + sparkDy * sparkDy);
+
+          // Create spark when fireflies are close (but not too often due to repulsion)
+          if (sparkDist < 80 && Math.random() < 0.02) {
+            newSparks.push({
+              x: (x + other.x) / 2,
+              y: (y + other.y) / 2,
+              opacity: 1,
+            });
+          }
+        }
+
+        return { x, y, vx, vy, baseX, baseY };
+      });
+
+      this.fireflyPositions.set(newPositions);
+
+      // Update sparks (fade out)
+      const currentSparks = this.sparks();
+      const updatedSparks = [...currentSparks, ...newSparks]
+        .map((spark) => ({ ...spark, opacity: spark.opacity - 0.05 }))
+        .filter((spark) => spark.opacity > 0)
+        .slice(-20); // Keep max 20 sparks
+      this.sparks.set(updatedSparks);
+
+      this.animationFrame = requestAnimationFrame(animate);
+    };
+
+    this.animationFrame = requestAnimationFrame(animate);
+
+    this.destroyRef.onDestroy(() => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (this.animationFrame) {
+        cancelAnimationFrame(this.animationFrame);
+      }
+    });
+  }
+
   isVisible(id: string): boolean {
     return this.visibleElements().has(id);
   }
@@ -509,41 +737,6 @@ export class SurveyComponent {
     navigator.clipboard.writeText(this.installCommand()).then(() => {
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 2000);
-    });
-  }
-
-  private setupSectionObserver(): void {
-    if (!this.isBrowser) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Find the most visible section
-        const visibleEntries = entries.filter((e) => e.isIntersecting);
-        if (visibleEntries.length === 0) return;
-
-        // Get the one with highest intersection ratio
-        const mostVisible = visibleEntries.reduce((prev, curr) => (curr.intersectionRatio > prev.intersectionRatio ? curr : prev));
-
-        const id = mostVisible.target.id;
-        if (id && id !== this.currentSection) {
-          this.currentSection = id;
-          // Use replaceState with full path to avoid router conflicts
-          const newUrl = `${window.location.pathname}#${id}`;
-          window.history.replaceState(window.history.state, '', newUrl);
-        }
-      },
-      { threshold: [0.2, 0.4, 0.6, 0.8] },
-    );
-
-    this.sectionIds.forEach((id) => {
-      const section = document.getElementById(id);
-      if (section) {
-        observer.observe(section);
-      }
-    });
-
-    this.destroyRef.onDestroy(() => {
-      observer.disconnect();
     });
   }
 }
