@@ -17,8 +17,14 @@
     <img src="logo-dark.svg" alt="ng-forge" class="logo-img" />
   </a>
   <div class="nav-links">
-    <a routerLink="/dynamic-forms">Docs</a>
-    <a href="https://github.com/nicoanadt/ng-forge" target="_blank" rel="noopener">GitHub</a>
+    <a routerLink="/installation">Docs</a>
+    <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="github-link" title="GitHub">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+        />
+      </svg>
+    </a>
   </div>
 </nav>
 
@@ -35,13 +41,13 @@
     </h1>
     <p class="hero-tagline">Write the config. We handle the rest. Type-safe. Signal-native. Zero boilerplate.</p>
     <div class="hero-ctas">
-      <a routerLink="/dynamic-forms/installation" class="btn btn-primary">
+      <a routerLink="/installation" class="btn btn-primary">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
         </svg>
         Get Started
       </a>
-      <a href="https://github.com/nicoanadt/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">
+      <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path
             d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
@@ -66,13 +72,10 @@
         </div>
 
         <div class="hero-demo-body">
-          @if (heroTab() === 'demo') {
-            <div class="demo-content">
-              <example-iframe library="material" example="login?minimal=true&theme=landing" />
-            </div>
-          } @else {
-            <div class="code-content" [innerHTML]="highlightedCode()['heroConfig']"></div>
-          }
+          <div class="demo-content" [class.hidden]="heroTab() !== 'demo'">
+            <example-iframe library="material" example="login?minimal=true&theme=landing" />
+          </div>
+          <div class="code-content" [class.hidden]="heroTab() !== 'config'" [codeHighlight]="codeSnippets.heroConfig"></div>
         </div>
       </div>
     </div>
@@ -114,12 +117,12 @@
     <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-0')">
       <h3>Conditional Everything</h3>
       <p>Fields that appear, disappear, or become required based on other values. No imperative code.</p>
-      <div class="showcase-code" [innerHTML]="highlightedCode()['conditionalLogic']"></div>
+      <div class="showcase-code" [codeHighlight]="codeSnippets.conditionalLogic"></div>
     </div>
     <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-1')">
       <h3>Multi-Step Wizards</h3>
       <p>Page-level validation, navigation controls, progress tracking. Built-in.</p>
-      <div class="showcase-code" [innerHTML]="highlightedCode()['multiStepWizard']"></div>
+      <div class="showcase-code" [codeHighlight]="codeSnippets.multiStepWizard"></div>
     </div>
   </div>
 </section>
@@ -143,7 +146,7 @@
           <span class="code-dot"></span>
           <span class="code-title">validation.ts</span>
         </div>
-        <div class="code-body" [innerHTML]="highlightedCode()['validation']"></div>
+        <div class="code-body" [codeHighlight]="codeSnippets.validation"></div>
       </div>
     </div>
   </div>
@@ -170,33 +173,8 @@
     </div>
 
     <p class="field-types-cta fade-up" [class.visible]="isVisible('field-types-cta')">
-      <a routerLink="/dynamic-forms/examples" class="inline-link">See live examples &rarr;</a>
+      <a routerLink="/examples" class="inline-link">See live examples &rarr;</a>
     </p>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- Quick Start -->
-<section class="quickstart">
-  <div class="section-container">
-    <div class="quickstart-header fade-up" [class.visible]="isVisible('quickstart-header')">
-      <div class="section-label">Quick start</div>
-      <h2 class="section-title">Up and running in 60 seconds.</h2>
-      <p class="section-desc">Copy, paste, customize. That's it.</p>
-    </div>
-
-    <div class="quickstart-code fade-up" [class.visible]="isVisible('quickstart-code')">
-      <div class="code-block">
-        <div class="code-header">
-          <span class="code-dot"></span>
-          <span class="code-dot"></span>
-          <span class="code-dot"></span>
-          <span class="code-title">login.component.ts</span>
-        </div>
-        <div class="code-body" [innerHTML]="highlightedCode()['quickStart']"></div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -219,7 +197,7 @@
           <span class="code-dot"></span>
           <span class="code-title">form-config.json</span>
         </div>
-        <div class="code-body" [innerHTML]="highlightedCode()['jsonConfig']"></div>
+        <div class="code-body" [codeHighlight]="codeSnippets.jsonConfig" lang="json"></div>
       </div>
     </div>
   </div>
@@ -238,19 +216,14 @@
   <div class="integrations-row fade-up" [class.visible]="isVisible('integrations-row')">
     @for (integration of integrations; track integration.name) {
       <a [routerLink]="integration.route" class="integration-logo" [title]="integration.name">
-        <svg
-          [attr.viewBox]="integration.viewBox"
-          [attr.width]="integration.width"
-          [attr.height]="integration.height"
-          [innerHTML]="integration.svgContent"
-        ></svg>
+        <img [src]="integration.icon" [alt]="integration.name" />
         <span>{{ integration.name }}</span>
       </a>
     }
   </div>
 
   <p class="integrations-footnote fade-up" [class.visible]="isVisible('integrations-footnote')">
-    Or <a routerLink="/dynamic-forms/deep-dive/custom-integrations">build your own adapter</a>
+    Or <a routerLink="/deep-dive/custom-integrations">build your own adapter</a>
   </p>
 </section>
 
@@ -293,18 +266,18 @@
   </div>
 
   <div class="cta-buttons">
-    <a routerLink="/dynamic-forms/installation" class="btn btn-primary">Read the Docs</a>
-    <a href="https://github.com/nicoanadt/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">GitHub</a>
+    <a routerLink="/installation" class="btn btn-primary">Read the Docs</a>
+    <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">GitHub</a>
   </div>
 </section>
 
 <!-- Footer -->
 <footer>
   <div class="footer-links">
-    <a routerLink="/dynamic-forms">Documentation</a>
-    <a href="https://github.com/nicoanadt/ng-forge" target="_blank" rel="noopener">GitHub</a>
-    <a href="https://github.com/nicoanadt/ng-forge/issues" target="_blank" rel="noopener">Issues</a>
-    <a href="https://github.com/nicoanadt/ng-forge/discussions" target="_blank" rel="noopener">Discussions</a>
+    <a routerLink="/">Documentation</a>
+    <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://github.com/ng-forge/ng-forge/issues" target="_blank" rel="noopener">Issues</a>
+    <a href="https://github.com/ng-forge/ng-forge/discussions" target="_blank" rel="noopener">Discussions</a>
   </div>
   <p class="footer-copy">MIT License &copy; ng-forge</p>
 </footer>

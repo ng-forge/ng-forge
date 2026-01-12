@@ -1,10 +1,21 @@
-@use '@ng-doc/app/styles/global';
-@use '@ng-doc/app/styles/themes/dark.css';
+// ============================================
+// CSS LAYER ORDER
+// ============================================
+// Define layer order - later layers have higher priority
+// ng-doc styles are in lowest priority layer so they don't
+// affect landing page or other non-docs pages
+@layer ng-doc, material, app;
+
+// ============================================
+// NG-DOC STYLES (scoped to ng-doc layer)
+// ============================================
+@import '@ng-doc/app/styles/global.css' layer(ng-doc);
+@import '@ng-doc/app/styles/themes/dark.css' layer(ng-doc);
 
 // ============================================
 // MATERIAL THEME (for docs UI only)
 // ============================================
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import '@angular/material/prebuilt-themes/indigo-pink.css' layer(material);
 
 // ============================================
 // THEME-AWARE LOGO
@@ -102,5 +113,64 @@ ng-doc-demo-displayer {
   ::ng-deep ng-doc-code,
   ::ng-deep .ng-doc-code-viewer {
     display: none !important;
+  }
+}
+
+// ============================================
+// LANDING PAGE SCROLLBAR
+// ============================================
+// Custom scrollbar for landing page to match the forge aesthetic
+// Main page scrollbar (on html element)
+html:has(app-landing) {
+  scrollbar-width: thin;
+  scrollbar-color: #ff4d00 #0a0908;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #0a0908;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff5a15, #ff4d00);
+    border-radius: 5px;
+    border: 2px solid #0a0908;
+
+    &:hover {
+      background: linear-gradient(180deg, #ff6b2b, #ff5a15);
+    }
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #0a0908;
+  }
+}
+
+// Inner scrollbars (code blocks, etc.)
+body:has(app-landing) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0a0908;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff5a15, #ff4d00);
+    border-radius: 5px;
+    border: 2px solid #0a0908;
+
+    &:hover {
+      background: linear-gradient(180deg, #ff6b2b, #ff5a15);
+    }
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: #0a0908;
   }
 }

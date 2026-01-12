@@ -7,10 +7,7 @@ export const appRoutes: Route[] = [
     path: '',
     loadComponent: () => import('./pages/landing/landing.component').then((m) => m.LandingComponent),
   },
-  {
-    path: 'dynamic-forms',
-    children: NG_DOC_ROUTING,
-  },
+  ...NG_DOC_ROUTING,
   {
     path: '**',
     redirectTo: '',

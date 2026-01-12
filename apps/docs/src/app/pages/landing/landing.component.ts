@@ -1,9 +1,8 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ExampleIframeComponent } from '../../components/example-iframe/example-iframe.component';
-import { codeToHtml } from 'shiki';
+import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 
 interface Feature {
   icon: string;
@@ -19,10 +18,7 @@ interface FieldType {
 interface Integration {
   name: string;
   route: string;
-  viewBox: string;
-  width: number;
-  height: number;
-  svgContent: SafeHtml;
+  icon: string;
 }
 
 interface PackageManager {
@@ -39,7 +35,7 @@ interface UiLibrary {
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, ExampleIframeComponent],
+  imports: [RouterLink, ExampleIframeComponent, CodeHighlightDirective],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,11 +43,7 @@ interface UiLibrary {
 export class LandingComponent {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
-
-  // Highlighted code signals - populated after shiki initializes
-  readonly highlightedCode = signal<Record<string, SafeHtml>>({});
 
   readonly navScrolled = signal(false);
   readonly copied = signal(false);
@@ -115,52 +107,10 @@ export class LandingComponent {
   ];
 
   readonly integrations: Integration[] = [
-    {
-      name: 'Material',
-      route: '/dynamic-forms/ui-libs-integrations/material',
-      viewBox: '0 0 24 24',
-      width: 48,
-      height: 48,
-      svgContent: this.sanitizer.bypassSecurityTrustHtml(`
-        <path fill="#FF4081" d="M12 2.25L2.25 6v6c0 5.55 4.16 10.74 9.75 12 5.59-1.26 9.75-6.45 9.75-12V6L12 2.25zm0 2.1l7.5 2.9v5c0 4.36-3.27 8.42-7.5 9.5-4.23-1.08-7.5-5.14-7.5-9.5v-5l7.5-2.9z"/>
-        <path fill="#FF4081" d="M12 6.5l-5 2v4c0 2.89 2.11 5.58 5 6.5 2.89-.92 5-3.61 5-6.5v-4l-5-2z"/>
-      `),
-    },
-    {
-      name: 'PrimeNG',
-      route: '/dynamic-forms/ui-libs-integrations/primeng',
-      viewBox: '0 0 64 64',
-      width: 48,
-      height: 48,
-      svgContent: this.sanitizer.bypassSecurityTrustHtml(`
-        <path fill="#DD0031" d="M32 0L0 16v32l32 16 32-16V16L32 0z"/>
-        <path fill="#C3002F" d="M32 0v64l32-16V16L32 0z"/>
-        <path fill="#FFF" d="M32 8L8 20v24l24 12 24-12V20L32 8z"/>
-        <path fill="#DD0031" d="M32 16l-16 8v16l16 8 16-8V24l-16-8z"/>
-      `),
-    },
-    {
-      name: 'Ionic',
-      route: '/dynamic-forms/ui-libs-integrations/ionic',
-      viewBox: '0 0 512 512',
-      width: 48,
-      height: 48,
-      svgContent: this.sanitizer.bypassSecurityTrustHtml(`
-        <path fill="#3880FF" d="M256 48C141.1 48 48 141.1 48 256s93.1 208 208 208 208-93.1 208-208S370.9 48 256 48zm0 368c-88.4 0-160-71.6-160-160S167.6 96 256 96s160 71.6 160 160-71.6 160-160 160z"/>
-        <circle fill="#3880FF" cx="256" cy="256" r="72"/>
-        <circle fill="#3880FF" cx="392" cy="120" r="32"/>
-      `),
-    },
-    {
-      name: 'Bootstrap',
-      route: '/dynamic-forms/ui-libs-integrations/bootstrap',
-      viewBox: '0 0 118 94',
-      width: 52,
-      height: 42,
-      svgContent: this.sanitizer.bypassSecurityTrustHtml(`
-        <path fill="#7952B3" d="M24.509 0c-6.733 0-11.715 5.893-11.492 12.284.214 6.14-.064 14.092-2.066 20.577C8.943 39.365 5.547 43.485 0 44.014v5.972c5.547.529 8.943 4.649 10.951 11.153 2.002 6.485 2.28 14.437 2.066 20.577C12.794 88.106 17.776 94 24.51 94H93.5c6.733 0 11.714-5.893 11.491-12.284-.214-6.14.064-14.092 2.066-20.577 2.009-6.504 5.396-10.624 10.943-11.153v-5.972c-5.547-.529-8.934-4.649-10.943-11.153-2.002-6.484-2.28-14.437-2.066-20.577C105.214 5.894 100.233 0 93.5 0H24.508zM80 57.863C80 66.663 73.436 72 62.543 72H44a2 2 0 01-2-2V24a2 2 0 012-2h18.437c9.083 0 15.044 4.92 15.044 12.474 0 5.302-4.01 10.049-9.119 10.88v.277C75.317 46.394 80 51.21 80 57.863zM60.521 28.34H49.948v14.934h8.905c6.884 0 10.68-2.772 10.68-7.727 0-4.643-3.264-7.207-9.012-7.207zM49.948 49.2v16.458H60.91c7.167 0 10.964-2.876 10.964-8.281 0-5.406-3.903-8.178-11.425-8.178H49.948z"/>
-      `),
-    },
+    { name: 'Material', route: '/dynamic-forms/ui-libs-integrations/material', icon: 'assets/icons/material.svg' },
+    { name: 'PrimeNG', route: '/dynamic-forms/ui-libs-integrations/primeng', icon: 'assets/icons/primeng.webp' },
+    { name: 'Ionic', route: '/dynamic-forms/ui-libs-integrations/ionic', icon: 'assets/icons/ionic.svg' },
+    { name: 'Bootstrap', route: '/dynamic-forms/ui-libs-integrations/bootstrap', icon: 'assets/icons/bootstrap.svg' },
   ];
 
   readonly packageManagers: PackageManager[] = [
@@ -178,42 +128,7 @@ export class LandingComponent {
 
   // Code snippets for syntax highlighting
   readonly codeSnippets = {
-    heroConfig: `const config = {
-  fields: [
-    { key: 'title', type: 'text', label: 'Sign In', props: { elementType: 'h2' } },
-    { key: 'email', type: 'input', label: 'Email',
-      required: true, email: true, props: { type: 'email' } },
-    { key: 'password', type: 'input', label: 'Password',
-      required: true, minLength: 8, props: { type: 'password' } },
-    { key: 'remember', type: 'checkbox', label: 'Remember me' },
-    { key: 'submit', type: 'submit', label: 'Sign In' },
-  ]
-} as const satisfies FormConfig;`,
-
-    conditionalLogic: `{
-  key: 'company',
-  type: 'input',
-  label: 'Company Name',
-  logic: [{
-    type: 'required',
-    when: { field: 'accountType', equals: 'business' }
-  }]
-}`,
-
-    multiStepWizard: `{
-  fields: [
-    { type: 'page', key: 'info', label: 'Your Info', fields: [...] },
-    { type: 'page', key: 'payment', label: 'Payment', fields: [...] },
-    { type: 'page', key: 'review', label: 'Review', fields: [...] }
-  ]
-}`,
-
-    validation: `{ key: 'email', type: 'input', required: true, email: true },
-{ key: 'age', type: 'input', min: 18, max: 120 },
-{ key: 'username', type: 'input', minLength: 3, maxLength: 20 },
-{ key: 'website', type: 'input', pattern: /^https?:\\/\\/.+/ }`,
-
-    quickStart: `import { DynamicForm, type FormConfig } from '@ng-forge/dynamic-forms';
+    heroConfig: `import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dynamic-forms';
 
 @Component({
   imports: [DynamicForm],
@@ -222,25 +137,78 @@ export class LandingComponent {
 export class LoginComponent {
   config = {
     fields: [
-      { key: 'email', type: 'input', label: 'Email', required: true, email: true },
-      { key: 'password', type: 'input', label: 'Password', required: true,
-        minLength: 8, props: { type: 'password' } },
-      { key: 'submit', type: 'submit', label: 'Sign In' }
+      { key: 'title', type: 'text', label: 'Sign In', props: { elementType: 'h2' } },
+      { key: 'email', type: 'input', label: 'Email',
+        required: true, email: true, props: { type: 'email' } },
+      { key: 'password', type: 'input', label: 'Password',
+        required: true, minLength: 8, props: { type: 'password' } },
+      { key: 'remember', type: 'checkbox', label: 'Remember me' },
+      { key: 'submit', type: 'submit', label: 'Sign In' },
     ]
   } as const satisfies FormConfig;
 
   onSubmit(value: InferFormValue<typeof this.config.fields>) {
-    // value is fully typed: { email: string, password: string }
+    // value is fully typed: { email: string, password: string, remember: boolean }
     console.log(value);
   }
 }`,
 
+    conditionalLogic: `{
+  key: 'company',
+  type: 'input',
+  label: 'Company Name',
+  logic: [
+    {
+      type: 'required',
+      when: {
+        field: 'accountType',
+        equals: 'business',
+      },
+    },
+  ],
+}`,
+
+    multiStepWizard: `{
+  fields: [
+    {
+      type: 'page',
+      key: 'info',
+      label: 'Your Info',
+      fields: [...],
+    },
+    {
+      type: 'page',
+      key: 'payment',
+      label: 'Payment',
+      fields: [...],
+    },
+  ],
+}`,
+
+    validation: `{ key: 'email', type: 'input', required: true, email: true },
+{ key: 'age', type: 'input', min: 18, max: 120 },
+{ key: 'username', type: 'input', minLength: 3, maxLength: 20 },
+{ key: 'website', type: 'input', pattern: /^https?:\\/\\/.+/ }`,
+
     jsonConfig: `{
   "fields": [
-    { "key": "name", "type": "input", "label": "Full Name", "required": true },
-    { "key": "feedback", "type": "textarea", "label": "Your Feedback" },
-    { "key": "rating", "type": "select", "label": "Rating",
-      "options": ["Excellent", "Good", "Average", "Poor"] }
+    {
+      "key": "name",
+      "type": "input",
+      "label": "Full Name",
+      "required": true
+    },
+    {
+      "key": "feedback",
+      "type": "textarea",
+      "label": "Your Feedback"
+    },
+    {
+      "key": "rating",
+      "type": "select",
+      "label": "Rating",
+      "options": ["Excellent", "Good", "Average", "Poor"]
+    }
   ]
 }`,
   };
@@ -255,30 +223,7 @@ export class LoginComponent {
     afterNextRender(() => {
       this.setupScrollListener();
       this.setupIntersectionObserver();
-      this.initializeHighlighting();
     });
-  }
-
-  private async initializeHighlighting(): Promise<void> {
-    try {
-      const highlighted: Record<string, SafeHtml> = {};
-
-      for (const [key, code] of Object.entries(this.codeSnippets)) {
-        const html = await codeToHtml(code, {
-          lang: key === 'jsonConfig' ? 'json' : 'typescript',
-          themes: {
-            light: 'material-theme-lighter',
-            dark: 'material-theme-darker',
-          },
-          defaultColor: false,
-        });
-        highlighted[key] = this.sanitizer.bypassSecurityTrustHtml(html);
-      }
-
-      this.highlightedCode.set(highlighted);
-    } catch (error) {
-      console.error('Shiki highlighting failed:', error);
-    }
   }
 
   private setupScrollListener(): void {
