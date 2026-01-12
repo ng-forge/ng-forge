@@ -59,7 +59,8 @@ export class App implements OnInit {
 
   readonly isLandingPage = computed(() => {
     const url = this.currentUrl();
-    return url === '/' || url === '';
+    // Handle hash-based URLs like /#features, /#validation, etc.
+    return url === '/' || url === '' || url.startsWith('/#');
   });
 
   theme = toSignal(

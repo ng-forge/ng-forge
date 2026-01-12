@@ -26,6 +26,7 @@ $success: #28ca42;
   color: $steel;
   overflow-x: hidden;
   line-height: 1.5;
+  scroll-behavior: smooth;
 
   *,
   *::before,
@@ -290,15 +291,32 @@ nav {
   gap: 1.5rem;
   align-items: center;
 
-  a {
+  a:not(.github-link) {
     color: $steel-mid;
     text-decoration: none;
     font-weight: 500;
     font-size: 0.9rem;
     transition: color 0.2s;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: $ember-glow;
+      border-radius: 1px;
+      transition: width 0.3s ease;
+    }
 
     &:hover {
       color: $steel;
+
+      &::after {
+        width: 100%;
+      }
     }
   }
 
@@ -488,6 +506,11 @@ nav {
   &:hover {
     color: $steel-mid;
     background: rgba($steel-dark, 0.5);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(1px);
   }
 
   &.active {
@@ -596,8 +619,13 @@ nav {
   box-shadow: 0 4px 30px rgba($ember-hot, 0.3);
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 40px rgba($ember-hot, 0.5);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 40px rgba($ember-hot, 0.5);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 4px 20px rgba($ember-hot, 0.4);
   }
 }
 
@@ -605,10 +633,18 @@ nav {
   background: $bg-elevated;
   color: $steel;
   border: 1px solid $steel-dim;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
   &:hover {
-    background: $steel-dim;
+    transform: translateY(-2px) scale(1.02);
+    background: $bg-surface;
     border-color: $steel-mid;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -806,11 +842,15 @@ section {
 
   &:hover {
     border-color: $steel-dim;
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.01);
 
     &::before {
       opacity: 0.9;
     }
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(0.99);
   }
 
   // Varied sizes
@@ -909,7 +949,11 @@ section {
 
   &:hover {
     border-color: $steel-dim;
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.01);
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(0.99);
   }
 
   @media (max-width: 768px) {
@@ -1416,6 +1460,11 @@ section {
 
   &:hover {
     border-color: $steel-dim;
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
   }
 }
 
@@ -1472,12 +1521,17 @@ section {
 
   &:hover {
     border-color: $steel-dim;
+    transform: translateY(-2px) scale(1.02);
 
     .field-type-tooltip {
       opacity: 1;
       visibility: visible;
       transform: translateX(-50%) translateY(0);
     }
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
   }
 
   code {
@@ -1562,17 +1616,21 @@ section {
   &::after {
     content: '';
     position: absolute;
-    bottom: -2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 30%;
-    height: 1px;
+    bottom: -5px;
+    left: 0;
+    width: 60%;
+    height: 3px;
     background: $ember-glow;
-    transition: width 0.3s ease;
+    border-radius: 1px 40% 40% 1px;
+    opacity: 0.5;
+    transition:
+      width 0.3s ease,
+      opacity 0.3s ease;
   }
 
   &:hover::after {
     width: 100%;
+    opacity: 0.8;
   }
 }
 
@@ -1623,6 +1681,7 @@ section {
     width: 48px;
     height: 48px;
     object-fit: contain;
+    transition: transform 0.3s ease;
   }
 
   span {
@@ -1633,8 +1692,15 @@ section {
 
   &:hover {
     opacity: 1;
-    transform: translateY(-4px);
-    border-color: $steel-dim;
+    transform: translateY(-6px);
+    border-color: rgba($ember-glow, 0.4);
+    box-shadow:
+      0 8px 30px rgba($ember-core, 0.15),
+      0 0 0 1px rgba($ember-glow, 0.1);
+
+    img {
+      transform: scale(1.1);
+    }
 
     span {
       color: $steel;
@@ -1734,6 +1800,10 @@ section {
     background: $bg-elevated;
   }
 
+  &:active {
+    background: $bg-deep;
+  }
+
   &.active {
     color: $ember-glow;
     background: $bg-deep;
@@ -1767,11 +1837,18 @@ section {
   color: $steel-dim;
   cursor: pointer;
   padding: 4px;
-  transition: color 0.2s;
+  transition: all 0.2s;
   display: flex;
+  border-radius: 4px;
 
   &:hover {
     color: $steel;
+    background: rgba($steel-dark, 0.5);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.9);
   }
 }
 

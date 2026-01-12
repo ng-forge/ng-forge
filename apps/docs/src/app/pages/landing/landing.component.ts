@@ -403,11 +403,36 @@ export class SurveyComponent {
     return `${pkg?.command ?? 'npm install'} @ng-forge/dynamic-forms ${ui?.package ?? '@ng-forge/material'}`;
   });
 
+  private readonly sectionIds = ['features', 'showcase', 'validation', 'field-types', 'json-config', 'integrations'];
+  private currentSection = '';
+
   constructor() {
     afterNextRender(() => {
       this.setupScrollListener();
       this.setupIntersectionObserver();
+      this.setupSectionObserver();
+      this.enableSmoothScroll();
+      this.scrollToInitialHash();
     });
+  }
+
+  private enableSmoothScroll(): void {
+    if (!this.isBrowser) return;
+    document.documentElement.style.scrollBehavior = 'smooth';
+  }
+
+  private scrollToInitialHash(): void {
+    if (!this.isBrowser) return;
+
+    const hash = window.location.hash.slice(1);
+    if (hash && this.sectionIds.includes(hash)) {
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
+    }
   }
 
   private setupScrollListener(): void {
@@ -484,6 +509,41 @@ export class SurveyComponent {
     navigator.clipboard.writeText(this.installCommand()).then(() => {
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 2000);
+    });
+  }
+
+  private setupSectionObserver(): void {
+    if (!this.isBrowser) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the most visible section
+        const visibleEntries = entries.filter((e) => e.isIntersecting);
+        if (visibleEntries.length === 0) return;
+
+        // Get the one with highest intersection ratio
+        const mostVisible = visibleEntries.reduce((prev, curr) => (curr.intersectionRatio > prev.intersectionRatio ? curr : prev));
+
+        const id = mostVisible.target.id;
+        if (id && id !== this.currentSection) {
+          this.currentSection = id;
+          // Use replaceState with full path to avoid router conflicts
+          const newUrl = `${window.location.pathname}#${id}`;
+          window.history.replaceState(window.history.state, '', newUrl);
+        }
+      },
+      { threshold: [0.2, 0.4, 0.6, 0.8] },
+    );
+
+    this.sectionIds.forEach((id) => {
+      const section = document.getElementById(id);
+      if (section) {
+        observer.observe(section);
+      }
+    });
+
+    this.destroyRef.onDestroy(() => {
+      observer.disconnect();
     });
   }
 }
