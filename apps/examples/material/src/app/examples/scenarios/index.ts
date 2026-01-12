@@ -15,6 +15,7 @@ export { paginatedFormScenario } from './paginated-form.scenario';
 export { groupScenario } from './group.scenario';
 export { rowScenario } from './row.scenario';
 export { arrayScenario, AddTagsEvent, AddContactEvent } from './array.scenario';
+export { validationShowcaseScenario } from './validation-showcase.scenario';
 
 import { inputScenario } from './input.scenario';
 import { checkboxScenario } from './checkbox.scenario';
@@ -33,6 +34,7 @@ import { paginatedFormScenario } from './paginated-form.scenario';
 import { groupScenario } from './group.scenario';
 import { rowScenario } from './row.scenario';
 import { arrayScenario } from './array.scenario';
+import { validationShowcaseScenario } from './validation-showcase.scenario';
 import { ExampleScenario } from '../shared/types';
 
 export const ALL_SCENARIOS: ExampleScenario[] = [
@@ -53,6 +55,7 @@ export const ALL_SCENARIOS: ExampleScenario[] = [
   groupScenario,
   rowScenario,
   arrayScenario,
+  validationShowcaseScenario,
 ];
 
 export function getScenarioById(id: string): ExampleScenario | undefined {

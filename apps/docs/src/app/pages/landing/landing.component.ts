@@ -13,6 +13,7 @@ interface Feature {
 interface FieldType {
   code: string;
   label: string;
+  snippet: string;
 }
 
 interface Integration {
@@ -89,21 +90,159 @@ export class LandingComponent {
   ];
 
   readonly fieldTypes: FieldType[] = [
-    { code: 'input', label: 'Text, email, password, number' },
-    { code: 'textarea', label: 'Multi-line text' },
-    { code: 'select', label: 'Dropdown selection' },
-    { code: 'radio', label: 'Single choice' },
-    { code: 'checkbox', label: 'Boolean toggle' },
-    { code: 'multi-checkbox', label: 'Multiple selections' },
-    { code: 'toggle', label: 'Switch control' },
-    { code: 'slider', label: 'Range input' },
-    { code: 'datepicker', label: 'Date selection' },
-    { code: 'submit', label: 'Form submission' },
-    { code: 'row', label: 'Horizontal layout' },
-    { code: 'group', label: 'Nested objects' },
-    { code: 'page', label: 'Multi-step wizards' },
-    { code: 'array', label: 'Repeatable fields' },
-    { code: 'text', label: 'Static content' },
+    {
+      code: 'input',
+      label: 'Text, email, password, number',
+      snippet: `{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  props: { type: 'email' }
+}`,
+    },
+    {
+      code: 'textarea',
+      label: 'Multi-line text',
+      snippet: `{
+  key: 'bio',
+  type: 'textarea',
+  label: 'Bio',
+  props: { rows: 4 }
+}`,
+    },
+    {
+      code: 'select',
+      label: 'Dropdown selection',
+      snippet: `{
+  key: 'country',
+  type: 'select',
+  label: 'Country',
+  options: [
+    { label: 'United States', value: 'us' },
+    { label: 'United Kingdom', value: 'uk' },
+  ]
+}`,
+    },
+    {
+      code: 'radio',
+      label: 'Single choice',
+      snippet: `{
+  key: 'plan',
+  type: 'radio',
+  label: 'Plan',
+  options: [
+    { label: 'Free', value: 'free' },
+    { label: 'Pro', value: 'pro' },
+  ]
+}`,
+    },
+    {
+      code: 'checkbox',
+      label: 'Boolean toggle',
+      snippet: `{
+  key: 'agree',
+  type: 'checkbox',
+  label: 'I agree to the terms'
+}`,
+    },
+    {
+      code: 'multi-checkbox',
+      label: 'Multiple selections',
+      snippet: `{
+  key: 'interests',
+  type: 'multi-checkbox',
+  label: 'Interests',
+  options: [
+    { label: 'Sports', value: 'sports' },
+    { label: 'Music', value: 'music' },
+  ]
+}`,
+    },
+    {
+      code: 'toggle',
+      label: 'Switch control',
+      snippet: `{
+  key: 'notifications',
+  type: 'toggle',
+  label: 'Enable notifications'
+}`,
+    },
+    {
+      code: 'slider',
+      label: 'Range input',
+      snippet: `{
+  key: 'volume',
+  type: 'slider',
+  label: 'Volume',
+  props: { min: 0, max: 100 }
+}`,
+    },
+    {
+      code: 'datepicker',
+      label: 'Date selection',
+      snippet: `{
+  key: 'birthday',
+  type: 'datepicker',
+  label: 'Birthday'
+}`,
+    },
+    {
+      code: 'submit',
+      label: 'Form submission',
+      snippet: `{
+  key: 'submit',
+  type: 'submit',
+  label: 'Save'
+}`,
+    },
+    {
+      code: 'row',
+      label: 'Horizontal layout',
+      snippet: `{
+  type: 'row',
+  fields: [
+    { key: 'firstName', type: 'input', label: 'First' },
+    { key: 'lastName', type: 'input', label: 'Last' },
+  ]
+}`,
+    },
+    {
+      code: 'group',
+      label: 'Nested objects',
+      snippet: `{
+  key: 'address',
+  type: 'group',
+  fields: [...]
+}`,
+    },
+    {
+      code: 'page',
+      label: 'Multi-step wizards',
+      snippet: `{
+  type: 'page',
+  key: 'step1',
+  label: 'Info',
+  fields: [...]
+}`,
+    },
+    {
+      code: 'array',
+      label: 'Repeatable fields',
+      snippet: `{
+  key: 'items',
+  type: 'array',
+  fields: [...]
+}`,
+    },
+    {
+      code: 'text',
+      label: 'Static content',
+      snippet: `{
+  type: 'text',
+  label: 'Section Title',
+  props: { elementType: 'h3' }
+}`,
+    },
   ];
 
   readonly integrations: Integration[] = [
@@ -189,6 +328,40 @@ export class LoginComponent {
 { key: 'age', type: 'input', min: 18, max: 120 },
 { key: 'username', type: 'input', minLength: 3, maxLength: 20 },
 { key: 'website', type: 'input', pattern: /^https?:\\/\\/.+/ }`,
+
+    validationShowcase: `{
+  key: 'email',
+  type: 'input',
+  label: 'Email',
+  required: true,
+  email: true,
+},
+{
+  key: 'password',
+  type: 'input',
+  label: 'Password',
+  required: true,
+  minLength: 8,
+  pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$/,
+  validationMessages: {
+    pattern: 'Need uppercase, lowercase & number',
+  },
+},
+{
+  key: 'age',
+  type: 'input',
+  label: 'Age',
+  min: 18,
+  max: 120,
+},
+{
+  key: 'username',
+  type: 'input',
+  label: 'Username',
+  minLength: 3,
+  maxLength: 15,
+  pattern: /^[a-z0-9_]+$/,
+}`,
 
     jsonConfig: `{
   "fields": [

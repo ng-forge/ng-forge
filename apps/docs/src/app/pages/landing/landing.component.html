@@ -134,19 +134,31 @@
   <div class="section-container">
     <div class="validation-header fade-up" [class.visible]="isVisible('validation-header')">
       <div class="section-label">Validation</div>
-      <h2 class="section-title">Validation without the ceremony.</h2>
-      <p class="section-desc">No Validators import. No arrays. Just properties.</p>
+      <h2 class="section-title">Try to break it.</h2>
+      <p class="section-desc">Real-time validation. No Validators import. Just properties.</p>
     </div>
 
-    <div class="validation-demo fade-up" [class.visible]="isVisible('validation-demo')">
-      <div class="code-block">
-        <div class="code-header">
-          <span class="code-dot"></span>
-          <span class="code-dot"></span>
-          <span class="code-dot"></span>
-          <span class="code-title">validation.ts</span>
+    <div class="validation-showcase fade-up" [class.visible]="isVisible('validation-demo')">
+      <div class="validation-demo-panel">
+        <div class="demo-panel-header">
+          <span class="panel-icon">🎮</span>
+          <span>Live Demo</span>
         </div>
-        <div class="code-body" [codeHighlight]="codeSnippets.validation"></div>
+        <div class="demo-panel-body">
+          <example-iframe library="material" example="validation-showcase?minimal=true&theme=landing" />
+        </div>
+      </div>
+
+      <div class="validation-code-panel">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-dot"></span>
+            <span class="code-dot"></span>
+            <span class="code-dot"></span>
+            <span class="code-title">validation-config.ts</span>
+          </div>
+          <div class="code-body" [codeHighlight]="codeSnippets.validationShowcase"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -168,6 +180,9 @@
         <div class="field-type">
           <code>{{ fieldType.code }}</code>
           <span>{{ fieldType.label }}</span>
+          <div class="field-type-tooltip">
+            <pre>{{ fieldType.snippet }}</pre>
+          </div>
         </div>
       }
     </div>
