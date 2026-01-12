@@ -57,6 +57,20 @@ export function navScrolled$(): Observable<boolean> {
   );
 }
 
+/**
+ * Creates an Observable that emits scroll progress as a percentage (0-100).
+ */
+export function scrollProgress$(): Observable<number> {
+  return windowScroll$().pipe(
+    startWith(null),
+    map(() => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      return docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
+    }),
+  );
+}
+
 // ============================================
 // SCROLL SNAP UTILITIES
 // ============================================

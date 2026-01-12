@@ -121,6 +121,15 @@
   &--workflow {
     @include icon-mask('/assets/icons/workflow.svg', 22px);
   }
+
+  // Stats icons
+  &--download {
+    @include icon-mask('/assets/icons/download.svg', 32px);
+  }
+
+  &--star {
+    @include icon-mask('/assets/icons/star.svg', 32px);
+  }
 }
 
 // ============================================
@@ -139,6 +148,24 @@
   *::after {
     box-sizing: border-box;
   }
+}
+
+// ============================================
+// SCROLL PROGRESS INDICATOR
+// ============================================
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, $ember-core, $ember-hot, $ember-glow);
+  transform-origin: left;
+  z-index: 10001;
+  pointer-events: none;
+  box-shadow:
+    0 0 10px rgba($ember-hot, 0.5),
+    0 0 20px rgba($ember-glow, 0.3);
 }
 
 // ============================================
@@ -498,6 +525,17 @@ nav {
   }
 }
 
+@keyframes hero-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .hero h1 {
   font-size: clamp(3.5rem, 10vw, 7rem);
   font-weight: 700;
@@ -515,6 +553,8 @@ nav {
 .hero h1 .line1 {
   display: block;
   color: $steel;
+  opacity: 0;
+  animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .hero h1 .line2 {
@@ -523,6 +563,8 @@ nav {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  opacity: 0;
+  animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
 }
 
 .hero-tagline {
@@ -531,6 +573,8 @@ nav {
   max-width: 550px;
   margin-bottom: 2.5rem;
   line-height: 1.5;
+  opacity: 0;
+  animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
 
   @media (max-width: 768px) {
     font-size: 1.15rem;
@@ -541,6 +585,8 @@ nav {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
+  opacity: 0;
+  animation: hero-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -642,6 +688,7 @@ nav {
   font-size: 0.85rem;
   line-height: 1.5;
   overflow-x: auto;
+  position: relative;
 
   pre {
     margin: 0;
@@ -651,6 +698,53 @@ nav {
     font-size: 0.75rem;
     padding: 0 0.625rem;
   }
+
+  // Typing animation state - reveals line by line from top
+  &.typing {
+    .code-typing-wrapper {
+      animation: code-reveal-lines 2s steps(20, end) forwards;
+      clip-path: inset(0 0 100% 0);
+    }
+  }
+}
+
+// Line-by-line reveal animation (top to bottom)
+@keyframes code-reveal-lines {
+  0% {
+    clip-path: inset(0 0 100% 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+// Blinking cursor
+@keyframes cursor-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.typing-cursor {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: $ember-glow;
+  animation: cursor-blink 0.8s infinite;
+  box-shadow: 0 0 8px rgba($ember-glow, 0.6);
+}
+
+.code-typing-wrapper {
+  display: block;
 }
 
 .demo-content {
@@ -840,6 +934,102 @@ nav {
 }
 
 // ============================================
+// STATS
+// ============================================
+.stats {
+  padding: 3rem 2rem;
+  position: relative;
+  z-index: 2;
+
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+  }
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.75rem;
+  background: rgba($bg-surface, 0.4);
+  border: 1px solid rgba($steel-dark, 0.4);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba($bg-surface, 0.6);
+    border-color: rgba($ember-glow, 0.3);
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.2),
+      0 0 20px rgba($ember-glow, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 280px;
+    padding: 1rem 1.25rem;
+  }
+}
+
+.stat-icon {
+  // Force size override since icon-mask mixin sets its own sizes
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, $ember-glow, $ember-hot);
+  opacity: 0.9;
+
+  @media (max-width: 768px) {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $steel;
+  line-height: 1.2;
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: $steel-dim;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+  }
+}
+
+// ============================================
 // SECTIONS (COMMON)
 // ============================================
 section {
@@ -944,6 +1134,20 @@ section {
       linear-gradient(#fff 0 0);
     mask-composite: intersect, exclude;
     padding: 2px;
+    z-index: 1;
+  }
+
+  // Mouse-following glow effect
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: radial-gradient(350px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba($ember-glow, 0.12), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
   }
 
   &:hover {
@@ -952,6 +1156,10 @@ section {
 
     &::before {
       opacity: 0.9;
+    }
+
+    &::after {
+      opacity: 1;
     }
   }
 
@@ -1491,6 +1699,84 @@ section {
   }
 }
 
+// Icon pulse animations - each pulses only when its packet arrives
+// Packet 1 arrives at 28%, Packet 2 at 50%, Packet 3 at 72%
+
+// API icon pulses at 28% (when packet 1 arrives)
+@keyframes icon-pulse-api {
+  0%,
+  26% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  28% {
+    transform: scale(1.1);
+    box-shadow: 0 0 24px rgba($molten, 0.6);
+  }
+  34% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+// JSON icon pulses at 50% (when packet 2 arrives)
+@keyframes icon-pulse-json {
+  0%,
+  48% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 24px rgba($steel, 0.6);
+  }
+  56% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+// Form icon pulses at 72% (when packet 3 arrives)
+@keyframes icon-pulse-form {
+  0%,
+  70% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  72% {
+    transform: scale(1.1);
+    box-shadow: 0 0 24px rgba($success, 0.6);
+  }
+  78% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+.flow-step:nth-child(3) .flow-icon {
+  animation: icon-pulse-api 5s ease-in-out infinite;
+}
+
+.flow-step:nth-child(5) .flow-icon {
+  animation: icon-pulse-json 5s ease-in-out infinite;
+}
+
+.flow-step:nth-child(7) .flow-icon {
+  animation: icon-pulse-form 5s ease-in-out infinite;
+}
+
 .json-code-example {
   .code-block {
     max-width: 550px;
@@ -1913,6 +2199,8 @@ section {
   transition: all 0.2s;
   display: flex;
   border-radius: 4px;
+  position: relative;
+  overflow: visible;
 
   &:hover {
     color: $steel;
@@ -1923,6 +2211,33 @@ section {
   &:active {
     transform: scale(0.9);
   }
+}
+
+// Copy confetti animation
+@keyframes confetti-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--confetti-x), var(--confetti-y)) rotate(var(--confetti-angle)) scale(0);
+  }
+}
+
+.copy-confetti {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: linear-gradient(135deg, $ember-hot, $ember-glow);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: confetti-burst 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  box-shadow:
+    0 0 6px rgba($ember-hot, 0.8),
+    0 0 12px rgba($ember-glow, 0.4);
+  top: 50%;
+  left: 50%;
 }
 
 .cta-buttons {

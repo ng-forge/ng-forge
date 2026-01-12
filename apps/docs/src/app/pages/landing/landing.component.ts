@@ -1,8 +1,9 @@
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
+import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
 
 import { ExampleIframeComponent } from '../../components/example-iframe/example-iframe.component';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
@@ -26,6 +27,7 @@ import {
   fromIntersectionObserver,
   mousePosition$,
   navScrolled$,
+  scrollProgress$,
   scrollSnap$,
   scrollToHash,
 } from './landing.utils';
@@ -41,6 +43,7 @@ const EMPTY_FIREFLY_STATE = { positions: [] as FireflyPosition[], sparks: [] as 
 })
 export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   // ============================================
@@ -61,8 +64,46 @@ export class LandingComponent {
   readonly currentPackageManager = signal('npm');
   readonly currentUiLibrary = signal('material');
   readonly heroTab = signal<'config' | 'demo'>('demo');
+  readonly configTyping = signal(false);
+  readonly configTyped = signal(false);
   readonly copied = signal(false);
+  readonly copyConfetti = signal<{ id: number; x: number; y: number; angle: number }[]>([]);
   private readonly visibleElements = signal<Set<string>>(new Set());
+  private confettiIdCounter = 0;
+
+  // ============================================
+  // STATS (fetched dynamically)
+  // ============================================
+
+  readonly npmDownloads = toSignal(
+    iif(
+      () => this.isBrowser,
+      of(null).pipe(
+        delay(500), // Delay to not block initial render
+        switchMap(() => this.http.get<{ downloads?: number }>('https://api.npmjs.org/downloads/point/last-month/@ng-forge/dynamic-forms')),
+        map((data) => this.formatNumber(data?.downloads ?? 0)),
+        catchError(() => of('—')),
+      ),
+      of('—'),
+    ),
+    { initialValue: '—' },
+  );
+
+  readonly githubStars = toSignal(
+    iif(
+      () => this.isBrowser,
+      of(null).pipe(
+        delay(600), // Slight stagger from npm fetch
+        switchMap(() => this.http.get<{ stargazers_count?: number }>('https://api.github.com/repos/ng-forge/ng-forge')),
+        map((data) => this.formatNumber(data?.stargazers_count ?? 0)),
+        catchError(() => of('—')),
+      ),
+      of('—'),
+    ),
+    { initialValue: '—' },
+  );
+
+  readonly uiLibraryCount = '4'; // Static: Material, Bootstrap, PrimeNG, Ionic
 
   // ============================================
   // REACTIVE STATE (RxJS -> Signal)
@@ -73,11 +114,16 @@ export class LandingComponent {
     { requireSync: true },
   );
 
+  readonly scrollProgress = toSignal(
+    iif(() => this.isBrowser, scrollProgress$(), of(0)),
+    { requireSync: true },
+  );
+
   private readonly fireflyState = toSignal(
     iif(
       () => this.isBrowser,
       of(null).pipe(
-        delay(0),
+        delay(1200), // Delay fireflies for better LCP - starts after hero animation
         switchMap(() => createFireflyAnimation(mousePosition$())),
       ),
       of(EMPTY_FIREFLY_STATE),
@@ -172,13 +218,64 @@ export class LandingComponent {
 
   setHeroTab(tab: 'config' | 'demo'): void {
     this.heroTab.set(tab);
+
+    // Trigger typing animation on first config tab visit
+    if (tab === 'config' && !this.configTyped()) {
+      this.configTyping.set(true);
+      // Animation duration matches CSS (2s typing + buffer)
+      setTimeout(() => {
+        this.configTyping.set(false);
+        this.configTyped.set(true);
+      }, 2200);
+    }
   }
 
   copyInstallCommand(): void {
     // User actions only happen in browser, no check needed
     copyToClipboard(this.installCommand()).then(() => {
       this.copied.set(true);
+      this.spawnCopyConfetti();
       setTimeout(() => this.copied.set(false), 2000);
     });
+  }
+
+  private spawnCopyConfetti(): void {
+    const particleCount = 12;
+    const newParticles = Array.from({ length: particleCount }, (_, i) => ({
+      id: this.confettiIdCounter++,
+      x: (Math.random() - 0.5) * 60, // Spread horizontally
+      y: (Math.random() - 0.5) * 40, // Spread vertically
+      angle: (i / particleCount) * 360 + Math.random() * 30, // Distribute angles
+    }));
+
+    this.copyConfetti.set(newParticles);
+
+    // Clear confetti after animation completes
+    setTimeout(() => this.copyConfetti.set([]), 800);
+  }
+
+  private formatNumber(num: number): string {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    }
+    return num.toString();
+  }
+
+  onCardMouseMove(event: MouseEvent): void {
+    const card = event.currentTarget as HTMLElement;
+    const rect = card.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    card.style.setProperty('--mouse-x', `${x}px`);
+    card.style.setProperty('--mouse-y', `${y}px`);
+  }
+
+  onCardMouseLeave(event: MouseEvent): void {
+    const card = event.currentTarget as HTMLElement;
+    card.style.removeProperty('--mouse-x');
+    card.style.removeProperty('--mouse-y');
   }
 }

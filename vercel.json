@@ -33,6 +33,10 @@
     {
       "source": "/dynamic-forms/:path((?!.*\\.).+)",
       "destination": "/dynamic-forms/index.html"
+    },
+    {
+      "source": "/assets/:path*",
+      "destination": "/dynamic-forms/assets/:path*"
     }
   ],
   "headers": [

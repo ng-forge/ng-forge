@@ -1,3 +1,6 @@
+<!-- Scroll progress indicator -->
+<div class="scroll-progress" [style.transform]="'scaleX(' + scrollProgress() / 100 + ')'"></div>
+
 <!-- Noise texture overlay -->
 <div class="noise-overlay"></div>
 
@@ -71,8 +74,40 @@
           <div class="demo-content" [class.hidden]="heroTab() !== 'demo'">
             <example-iframe library="material" example="hero-demo?minimal=true&theme=landing" />
           </div>
-          <div class="code-content" [class.hidden]="heroTab() !== 'config'" [codeHighlight]="codeSnippets.heroConfig"></div>
+          <div class="code-content" [class.hidden]="heroTab() !== 'config'" [class.typing]="configTyping()">
+            <div class="code-typing-wrapper" [codeHighlight]="codeSnippets.heroConfig"></div>
+            @if (configTyping()) {
+              <span class="typing-cursor"></span>
+            }
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-icon icon icon--download"></span>
+      <div class="stat-content">
+        <span class="stat-value">{{ npmDownloads() }}</span>
+        <span class="stat-label">Monthly Downloads</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon icon icon--star"></span>
+      <div class="stat-content">
+        <span class="stat-value">{{ githubStars() }}</span>
+        <span class="stat-label">GitHub Stars</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon icon icon--layers"></span>
+      <div class="stat-content">
+        <span class="stat-value">{{ uiLibraryCount }}</span>
+        <span class="stat-label">UI Integrations</span>
       </div>
     </div>
   </div>
@@ -90,7 +125,12 @@
 
   <div class="features-container">
     @for (feature of features; track feature.title) {
-      <div class="feature-card fade-up" [class.visible]="isVisible('feature-' + $index)">
+      <div
+        class="feature-card fade-up"
+        [class.visible]="isVisible('feature-' + $index)"
+        (mousemove)="onCardMouseMove($event)"
+        (mouseleave)="onCardMouseLeave($event)"
+      >
         <div class="feature-header">
           <span class="feature-icon icon icon--{{ feature.icon }}"></span>
           <h3>{{ feature.title }}</h3>
@@ -359,6 +399,15 @@
           <span class="icon icon--check" style="color: #28ca42"></span>
         } @else {
           <span class="icon icon--copy"></span>
+        }
+        <!-- Confetti particles -->
+        @for (particle of copyConfetti(); track particle.id) {
+          <span
+            class="copy-confetti"
+            [style.--confetti-x]="particle.x + 'px'"
+            [style.--confetti-y]="particle.y + 'px'"
+            [style.--confetti-angle]="particle.angle + 'deg'"
+          ></span>
         }
       </button>
     </div>
