@@ -21,11 +21,7 @@
   </a>
   <div class="nav-links">
     <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="github-link" title="GitHub">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
-        />
-      </svg>
+      <span class="icon icon--github"></span>
     </a>
   </div>
 </nav>
@@ -44,17 +40,11 @@
     <p class="hero-tagline">Write the config. We handle the rest. Type-safe. Signal-native. Zero boilerplate.</p>
     <div class="hero-ctas">
       <a routerLink="/installation" class="btn btn-primary">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-        </svg>
+        <span class="icon icon--sparkles"></span>
         Get Started
       </a>
       <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
-          />
-        </svg>
+        <span class="icon icon--github"></span>
         View on GitHub
       </a>
     </div>
@@ -68,8 +58,12 @@
             <span class="code-dot"></span>
           </div>
           <div class="header-tabs">
-            <button class="header-tab" [class.active]="heroTab() === 'demo'" (click)="setHeroTab('demo')">Live Demo</button>
-            <button class="header-tab" [class.active]="heroTab() === 'config'" (click)="setHeroTab('config')">Config</button>
+            <button class="header-tab" [class.active]="heroTab() === 'demo'" (click)="setHeroTab('demo')">
+              <span class="icon icon--play"></span> Live Demo
+            </button>
+            <button class="header-tab" [class.active]="heroTab() === 'config'" (click)="setHeroTab('config')">
+              <span class="icon icon--code"></span> Config
+            </button>
           </div>
         </div>
 
@@ -97,8 +91,10 @@
   <div class="features-container">
     @for (feature of features; track feature.title) {
       <div class="feature-card fade-up" [class.visible]="isVisible('feature-' + $index)">
-        <span class="feature-icon">{{ feature.icon }}</span>
-        <h3>{{ feature.title }}</h3>
+        <div class="feature-header">
+          <span class="feature-icon icon icon--{{ feature.icon }}"></span>
+          <h3>{{ feature.title }}</h3>
+        </div>
         <p [innerHTML]="feature.description"></p>
       </div>
     }
@@ -117,12 +113,18 @@
 
   <div class="showcase-grid">
     <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-0')">
-      <h3>Conditional Everything</h3>
+      <h3>
+        <span class="showcase-icon icon icon--git-branch"></span>
+        Conditional Everything
+      </h3>
       <p>Fields that appear, disappear, or become required based on other values. No imperative code.</p>
       <div class="showcase-code" [codeHighlight]="codeSnippets.conditionalLogic"></div>
     </div>
     <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-1')">
-      <h3>Multi-Step Wizards</h3>
+      <h3>
+        <span class="showcase-icon icon icon--workflow"></span>
+        Multi-Step Wizards
+      </h3>
       <p>Page-level validation, navigation controls, progress tracking. Built-in.</p>
       <div class="showcase-code" [codeHighlight]="codeSnippets.multiStepWizard"></div>
     </div>
@@ -143,7 +145,7 @@
     <div class="validation-showcase fade-up" [class.visible]="isVisible('validation-demo')">
       <div class="validation-demo-panel">
         <div class="demo-panel-header">
-          <span class="panel-icon">🎮</span>
+          <span class="panel-icon icon icon--play"></span>
           <span>Live Demo</span>
         </div>
         <div class="demo-panel-body">
@@ -215,11 +217,7 @@
       <div class="flow-diagram">
         <div class="flow-step">
           <div class="flow-icon database">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <ellipse cx="12" cy="5" rx="9" ry="3" />
-              <path d="M21 5v14c0 1.66-4.03 3-9 3s-9-1.34-9-3V5" />
-              <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3" />
-            </svg>
+            <span class="icon icon--database"></span>
           </div>
           <span class="flow-label">Database</span>
         </div>
@@ -231,12 +229,7 @@
 
         <div class="flow-step">
           <div class="flow-icon api">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-              <circle cx="8" cy="6" r="1" fill="currentColor" />
-              <circle cx="8" cy="12" r="1" fill="currentColor" />
-              <circle cx="8" cy="18" r="1" fill="currentColor" />
-            </svg>
+            <span class="icon icon--api"></span>
           </div>
           <span class="flow-label">API Request</span>
         </div>
@@ -248,7 +241,7 @@
 
         <div class="flow-step">
           <div class="flow-icon json">
-            <span>{{ '{' }} {{ '}' }}</span>
+            <span class="icon icon--json"></span>
           </div>
           <span class="flow-label">JSON</span>
         </div>
@@ -260,10 +253,7 @@
 
         <div class="flow-step">
           <div class="flow-icon form">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M7 8h10M7 12h10M7 16h6" />
-            </svg>
+            <span class="icon icon--form"></span>
           </div>
           <span class="flow-label">Live Form</span>
         </div>
@@ -285,28 +275,28 @@
       <!-- Use cases -->
       <div class="json-use-cases">
         <div class="use-case">
-          <span class="use-case-icon">🎨</span>
+          <span class="use-case-icon icon icon--palette"></span>
           <div class="use-case-text">
             <strong>Form Builders</strong>
             <span>Visual editors that output JSON</span>
           </div>
         </div>
         <div class="use-case">
-          <span class="use-case-icon">👥</span>
+          <span class="use-case-icon icon icon--users"></span>
           <div class="use-case-text">
             <strong>Multi-tenant</strong>
             <span>Custom forms per customer</span>
           </div>
         </div>
         <div class="use-case">
-          <span class="use-case-icon">📊</span>
+          <span class="use-case-icon icon icon--bar-chart"></span>
           <div class="use-case-text">
             <strong>Dynamic Surveys</strong>
             <span>Change questions on the fly</span>
           </div>
         </div>
         <div class="use-case">
-          <span class="use-case-icon">🔥</span>
+          <span class="use-case-icon icon icon--flame"></span>
           <div class="use-case-text">
             <strong>Hot Swappable</strong>
             <span>Forms update when config changes</span>
@@ -337,7 +327,7 @@
   </div>
 
   <p class="integrations-footnote fade-up" [class.visible]="isVisible('integrations-footnote')">
-    Or <a routerLink="/deep-dive/custom-integrations">build your own adapter</a>
+    Or <a routerLink="/deep-dive/custom-integrations" class="inline-link">build your own adapter</a>
   </p>
 </section>
 
@@ -366,14 +356,9 @@
       <code>{{ installCommand() }}</code>
       <button class="copy-btn" (click)="copyInstallCommand()" [attr.aria-label]="copied() ? 'Copied!' : 'Copy to clipboard'">
         @if (copied()) {
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#28ca42" stroke-width="2">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+          <span class="icon icon--check" style="color: #28ca42"></span>
         } @else {
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" />
-            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-          </svg>
+          <span class="icon icon--copy"></span>
         }
       </button>
     </div>
@@ -381,18 +366,11 @@
 
   <div class="cta-buttons">
     <a routerLink="/installation" class="btn btn-primary">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-      </svg>
+      <span class="icon icon--book"></span>
       Read the Docs
     </a>
     <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
-        />
-      </svg>
+      <span class="icon icon--github"></span>
       GitHub
     </a>
   </div>

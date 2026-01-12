@@ -5,6 +5,125 @@
 @use 'variables' as *;
 
 // ============================================
+// ICON SYSTEM (CSS Mask-based)
+// ============================================
+@mixin icon-mask($url, $size: 24px) {
+  display: inline-block;
+  width: $size;
+  height: $size;
+  background-color: currentColor;
+  -webkit-mask-image: url($url);
+  mask-image: url($url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  flex-shrink: 0;
+}
+
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+
+  &--github {
+    @include icon-mask('/assets/icons/github.svg', 24px);
+  }
+
+  &--book {
+    @include icon-mask('/assets/icons/book.svg', 20px);
+  }
+
+  &--copy {
+    @include icon-mask('/assets/icons/copy.svg', 18px);
+  }
+
+  &--check {
+    @include icon-mask('/assets/icons/check.svg', 18px);
+  }
+
+  &--database {
+    @include icon-mask('/assets/icons/database.svg', 28px);
+  }
+
+  &--api {
+    @include icon-mask('/assets/icons/api.svg', 28px);
+  }
+
+  &--json {
+    @include icon-mask('/assets/icons/json.svg', 28px);
+  }
+
+  &--form {
+    @include icon-mask('/assets/icons/form.svg', 28px);
+  }
+
+  // Feature icons
+  &--signal {
+    @include icon-mask('/assets/icons/signal.svg', 22px);
+  }
+
+  &--target {
+    @include icon-mask('/assets/icons/target.svg', 22px);
+  }
+
+  &--layers {
+    @include icon-mask('/assets/icons/layers.svg', 22px);
+  }
+
+  &--package {
+    @include icon-mask('/assets/icons/package.svg', 22px);
+  }
+
+  &--zap {
+    @include icon-mask('/assets/icons/zap.svg', 22px);
+  }
+
+  &--plug {
+    @include icon-mask('/assets/icons/plug.svg', 22px);
+  }
+
+  &--sparkles {
+    @include icon-mask('/assets/icons/sparkles.svg', 20px);
+  }
+
+  &--play {
+    @include icon-mask('/assets/icons/play.svg', 14px);
+  }
+
+  &--code {
+    @include icon-mask('/assets/icons/code.svg', 14px);
+  }
+
+  // Use case icons (Backend-driven section)
+  &--palette {
+    @include icon-mask('/assets/icons/palette.svg', 24px);
+  }
+
+  &--users {
+    @include icon-mask('/assets/icons/users.svg', 24px);
+  }
+
+  &--bar-chart {
+    @include icon-mask('/assets/icons/bar-chart.svg', 24px);
+  }
+
+  &--flame {
+    @include icon-mask('/assets/icons/flame.svg', 24px);
+  }
+
+  // Showcase icons (Power features section)
+  &--git-branch {
+    @include icon-mask('/assets/icons/git-branch.svg', 22px);
+  }
+
+  &--workflow {
+    @include icon-mask('/assets/icons/workflow.svg', 22px);
+  }
+}
+
+// ============================================
 // HOST & GLOBAL
 // ============================================
 :host {
@@ -154,11 +273,10 @@ nav {
   transition: all 0.3s ease;
 
   &.scrolled {
-    background: rgba($bg-deep, 0.92);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba($bg-deep, 0.15);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     padding: 1rem 2rem;
-    box-shadow: 0 1px 0 rgba($steel-dark, 0.5);
   }
 }
 
@@ -476,6 +594,9 @@ nav {
 }
 
 .header-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.4rem 0.9rem;
   background: transparent;
   border: 1px solid transparent;
@@ -867,16 +988,45 @@ section {
   }
 }
 
+.feature-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .feature-icon {
-  font-size: 1.75rem;
-  margin-bottom: 1rem;
-  display: inline-block;
+  flex-shrink: 0;
+
+  &.icon--signal {
+    color: $ember-glow;
+  }
+
+  &.icon--target {
+    color: $molten;
+  }
+
+  &.icon--layers {
+    color: #f472b6; // pink
+  }
+
+  &.icon--package {
+    color: #34d399; // emerald
+  }
+
+  &.icon--zap {
+    color: #60a5fa; // blue
+  }
+
+  &.icon--plug {
+    color: #a78bfa; // purple
+  }
 }
 
 .feature-card h3 {
   font-size: 1.15rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin: 0;
   color: $steel;
 }
 
@@ -954,6 +1104,18 @@ section {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.showcase-icon {
+  flex-shrink: 0;
+
+  &.icon--git-branch {
+    color: #a78bfa; // purple
+  }
+
+  &.icon--workflow {
+    color: #34d399; // green
+  }
 }
 
 .showcase-item > p {
@@ -1110,11 +1272,11 @@ section {
   align-items: flex-start;
   justify-content: center;
   padding: 2rem 0 4rem; // Extra bottom padding for labels
+  overflow-x: auto;
+  gap: 0;
 
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem 0 3rem;
+  @media (max-width: 600px) {
+    padding: 1.5rem 0 3rem;
   }
 }
 
@@ -1135,8 +1297,9 @@ section {
   background: $bg-deep;
   border: 1px solid $steel-dark;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 
-  svg {
+  .icon {
     width: 28px;
     height: 28px;
     color: $steel-mid;
@@ -1146,7 +1309,7 @@ section {
     background: linear-gradient(135deg, rgba($ember-core, 0.1), rgba($ember-glow, 0.05));
     border-color: rgba($ember-core, 0.3);
 
-    svg {
+    .icon {
       color: $ember-glow;
     }
   }
@@ -1155,7 +1318,7 @@ section {
     background: linear-gradient(135deg, rgba($molten, 0.1), rgba($molten, 0.05));
     border-color: rgba($molten, 0.3);
 
-    svg {
+    .icon {
       color: $molten;
     }
   }
@@ -1164,10 +1327,7 @@ section {
     background: linear-gradient(135deg, rgba($steel, 0.1), rgba($steel, 0.05));
     border-color: rgba($steel-mid, 0.3);
 
-    span {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.5rem;
-      font-weight: 600;
+    .icon {
       color: $steel;
     }
   }
@@ -1176,23 +1336,19 @@ section {
     background: linear-gradient(135deg, rgba($success, 0.1), rgba($success, 0.05));
     border-color: rgba($success, 0.3);
 
-    svg {
+    .icon {
       color: $success;
     }
   }
 
-  @media (max-width: 768px) {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
+  @media (max-width: 600px) {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
 
-    svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    &.json span {
-      font-size: 1.25rem;
+    .icon {
+      width: 22px;
+      height: 22px;
     }
   }
 }
@@ -1208,6 +1364,12 @@ section {
   text-transform: uppercase;
   letter-spacing: 1px;
   white-space: nowrap;
+
+  @media (max-width: 600px) {
+    font-size: 0.6rem;
+    letter-spacing: 0.5px;
+    top: calc(100% + 0.5rem);
+  }
 }
 
 .flow-connector {
@@ -1215,11 +1377,11 @@ section {
   height: 2px;
   position: relative;
   margin-top: 31px; // Center with 64px icon (64/2 - 1)
+  flex-shrink: 0;
 
-  @media (max-width: 768px) {
-    width: 2px;
-    height: 40px;
-    margin-top: 0;
+  @media (max-width: 600px) {
+    width: 32px;
+    margin-top: 23px; // Center with 48px icon (48/2 - 1)
   }
 }
 
@@ -1227,10 +1389,6 @@ section {
   position: absolute;
   inset: 0;
   background: linear-gradient(90deg, $steel-dark, $steel-dim, $steel-dark);
-
-  @media (max-width: 768px) {
-    background: linear-gradient(180deg, $steel-dark, $steel-dim, $steel-dark);
-  }
 }
 
 .flow-packet {
@@ -1245,10 +1403,9 @@ section {
   box-shadow: 0 0 10px $ember-glow;
   opacity: 0;
 
-  @media (max-width: 768px) {
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
+  @media (max-width: 600px) {
+    width: 6px;
+    height: 6px;
   }
 }
 
@@ -1334,86 +1491,6 @@ section {
   }
 }
 
-// Mobile vertical animations
-@media (max-width: 768px) {
-  .flow-connector:nth-child(2) .flow-packet {
-    animation: packet-flow-1-vertical 5s ease-in-out infinite;
-  }
-
-  .flow-connector:nth-child(4) .flow-packet {
-    animation: packet-flow-2-vertical 5s ease-in-out infinite;
-  }
-
-  .flow-connector:nth-child(6) .flow-packet {
-    animation: packet-flow-3-vertical 5s ease-in-out infinite;
-  }
-
-  @keyframes packet-flow-1-vertical {
-    0% {
-      top: 0;
-      opacity: 0;
-    }
-    2% {
-      opacity: 1;
-    }
-    24% {
-      opacity: 1;
-    }
-    28% {
-      top: calc(100% - 8px);
-      opacity: 0;
-    }
-    100% {
-      top: calc(100% - 8px);
-      opacity: 0;
-    }
-  }
-
-  @keyframes packet-flow-2-vertical {
-    0%,
-    22% {
-      top: 0;
-      opacity: 0;
-    }
-    24% {
-      opacity: 1;
-    }
-    46% {
-      opacity: 1;
-    }
-    50% {
-      top: calc(100% - 8px);
-      opacity: 0;
-    }
-    100% {
-      top: calc(100% - 8px);
-      opacity: 0;
-    }
-  }
-
-  @keyframes packet-flow-3-vertical {
-    0%,
-    44% {
-      top: 0;
-      opacity: 0;
-    }
-    46% {
-      opacity: 1;
-    }
-    68% {
-      opacity: 1;
-    }
-    72% {
-      top: calc(100% - 8px);
-      opacity: 0;
-    }
-    100% {
-      top: calc(100% - 8px);
-      opacity: 0;
-    }
-  }
-}
-
 .json-code-example {
   .code-block {
     max-width: 550px;
@@ -1454,8 +1531,23 @@ section {
 }
 
 .use-case-icon {
-  font-size: 1.5rem;
-  line-height: 1;
+  flex-shrink: 0;
+
+  &.icon--palette {
+    color: #f472b6; // pink
+  }
+
+  &.icon--users {
+    color: #60a5fa; // blue
+  }
+
+  &.icon--bar-chart {
+    color: #34d399; // green
+  }
+
+  &.icon--flame {
+    color: $ember-glow; // orange
+  }
 }
 
 .use-case-text {
@@ -1597,6 +1689,7 @@ section {
   color: $ember-glow;
   text-decoration: none;
   position: relative;
+  transition: color 0.3s ease;
 
   &::after {
     content: '';
@@ -1610,12 +1703,18 @@ section {
     opacity: 0.5;
     transition:
       width 0.3s ease,
-      opacity 0.3s ease;
+      opacity 0.3s ease,
+      background 0.3s ease;
   }
 
-  &:hover::after {
-    width: 100%;
-    opacity: 0.8;
+  &:hover {
+    color: $ember-hot;
+
+    &::after {
+      width: 100%;
+      opacity: 0.8;
+      background: $ember-hot;
+    }
   }
 }
 
@@ -1697,17 +1796,6 @@ section {
   margin-top: 2rem;
   font-size: 0.95rem;
   color: $steel-mid;
-
-  a {
-    color: $ember-glow;
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.2s;
-
-    &:hover {
-      border-bottom-color: $ember-glow;
-    }
-  }
 }
 
 // ============================================

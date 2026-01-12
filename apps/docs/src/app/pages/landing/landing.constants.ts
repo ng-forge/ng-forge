@@ -102,32 +102,32 @@ export const SECTION_IDS = ['features', 'showcase', 'validation', 'field-types',
 
 export const FEATURES: Feature[] = [
   {
-    icon: '⚡',
+    icon: 'signal',
     title: 'Signal Forms Native',
     description: "Built directly on Angular Signal Forms. Not a wrapper — real integration with Angular's reactive future.",
   },
   {
-    icon: '🎯',
+    icon: 'target',
     title: 'Actually Type-Safe',
     description: '<code>as const satisfies</code> — your IDE knows everything. No more guessing.',
   },
   {
-    icon: '🔥',
+    icon: 'layers',
     title: 'Any UI Library',
     description: 'One import swap. Same logic everywhere.',
   },
   {
-    icon: '📦',
+    icon: 'package',
     title: 'Ship Less',
     description: 'Tree-shakeable. Lazy-loaded. Bundle only what you use.',
   },
   {
-    icon: '🚀',
+    icon: 'zap',
     title: 'Zoneless Ready',
     description: 'No Zone.js required. OnPush everywhere. Built for where Angular is going.',
   },
   {
-    icon: '🔌',
+    icon: 'plug',
     title: 'Escape Hatches',
     description: 'Need custom controls? Same patterns as built-ins. Full power when you need it.',
   },
