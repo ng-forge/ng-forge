@@ -1,20 +1,8 @@
 // ============================================
-// VARIABLES
+// THEME IMPORTS
 // ============================================
-$bg-void: #000000;
-$bg-deep: #0a0908;
-$bg-surface: #131210;
-$bg-elevated: #1a1916;
-$ember-core: #ff4d00;
-$ember-hot: #ff6b2b;
-$ember-glow: #ff8c42;
-$molten: #ffb627;
-$white-hot: #fff7ed;
-$steel: #e8e4de;
-$steel-mid: #9a958c;
-$steel-dim: #5c5850;
-$steel-dark: #2a2824;
-$success: #28ca42;
+// Uses includePaths configured in project.json
+@use 'variables' as *;
 
 // ============================================
 // HOST & GLOBAL

@@ -1,0 +1,18 @@
+// ============================================
+// NG-FORGE DOCS THEME
+// ============================================
+// Main entry point for the ng-forge docs theme.
+// Import this file to get access to all variables,
+// mixins, and animations.
+//
+// Usage in component SCSS:
+//   @use 'styles' as *;
+//
+// Or import specific modules:
+//   @use 'styles/variables' as vars;
+//   @use 'styles/mixins' as mix;
+//   @use 'styles/animations' as anim;
+
+@forward 'variables';
+@forward 'mixins';
+@forward 'animations';
