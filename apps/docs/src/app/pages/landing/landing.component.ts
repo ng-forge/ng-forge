@@ -34,6 +34,10 @@ import {
 
 const EMPTY_FIREFLY_STATE = { positions: [] as FireflyPosition[], sparks: [] as Spark[] };
 
+// Animation timing constants
+const COPY_FEEDBACK_DURATION_MS = 2000;
+const CONFETTI_ANIMATION_DURATION_MS = 800;
+
 @Component({
   selector: 'app-landing',
   imports: [RouterLink, ExampleIframeComponent, CodeHighlightDirective],
@@ -220,11 +224,16 @@ export class LandingComponent {
 
   copyInstallCommand(): void {
     // User actions only happen in browser, no check needed
-    copyToClipboard(this.installCommand()).then(() => {
-      this.copied.set(true);
-      this.spawnCopyConfetti();
-      setTimeout(() => this.copied.set(false), 2000);
-    });
+    copyToClipboard(this.installCommand())
+      .then(() => {
+        this.copied.set(true);
+        this.spawnCopyConfetti();
+        setTimeout(() => this.copied.set(false), COPY_FEEDBACK_DURATION_MS);
+      })
+      .catch(() => {
+        // Clipboard API may fail in some contexts (e.g., insecure origins)
+        console.warn('Failed to copy to clipboard');
+      });
   }
 
   private spawnCopyConfetti(): void {
@@ -239,7 +248,7 @@ export class LandingComponent {
     this.copyConfetti.set(newParticles);
 
     // Clear confetti after animation completes
-    setTimeout(() => this.copyConfetti.set([]), 800);
+    setTimeout(() => this.copyConfetti.set([]), CONFETTI_ANIMATION_DURATION_MS);
   }
 
   private formatNumber(num: number): string {

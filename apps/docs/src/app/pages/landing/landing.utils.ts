@@ -1,5 +1,5 @@
 import { Observable, animationFrameScheduler, fromEvent, interval } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, map, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, map, scan, share, startWith, tap, withLatestFrom } from 'rxjs/operators';
 import { FIREFLY_CONFIG, SCROLL_SNAP_CONFIG, type FireflyPosition, type Spark } from './landing.constants';
 
 // ============================================
@@ -340,10 +340,6 @@ function recalculateBasePositions(positions: FireflyPosition[], newWidth: number
     const baseX = cellWidth * col + cellWidth * 0.2 + cellWidth * 0.6 * (firefly.baseX % 1 || Math.random());
     const baseY = cellHeight * row + cellHeight * 0.2 + cellHeight * 0.6 * (firefly.baseY % 1 || Math.random());
 
-    // Scale current position proportionally
-    const scaleX = newWidth / (firefly.baseX > 0 ? firefly.baseX / ((i % gridCols) / gridCols + 0.5) : newWidth);
-    const scaleY = newHeight / (firefly.baseY > 0 ? firefly.baseY / (Math.floor(i / gridCols) / rows + 0.5) : newHeight);
-
     return {
       ...firefly,
       baseX,
@@ -356,20 +352,34 @@ function recalculateBasePositions(positions: FireflyPosition[], newWidth: number
 }
 
 /**
- * Creates a stateful firefly animation Observable.
+ * Internal state for the firefly animation scan operator.
+ */
+interface FireflyAnimationState {
+  positions: FireflyPosition[];
+  sparks: Spark[];
+  lastWidth: number;
+  lastHeight: number;
+}
+
+/**
+ * Creates a stateful firefly animation Observable using scan for pure state management.
  * Consumer should handle cleanup with takeUntilDestroyed.
  */
 export function createFireflyAnimation(mouse$: Observable<MousePosition>): Observable<FireflyState> {
-  let positions = initializeFireflyPositions();
-  let sparks: Spark[] = [];
-  let lastWidth = window.innerWidth;
-  let lastHeight = window.innerHeight;
-
   const resize$ = windowResize$();
+
+  const initialState: FireflyAnimationState = {
+    positions: initializeFireflyPositions(),
+    sparks: [],
+    lastWidth: window.innerWidth,
+    lastHeight: window.innerHeight,
+  };
 
   return animationFrames$().pipe(
     withLatestFrom(mouse$, resize$),
-    map(([, mousePos, viewport]) => {
+    scan((state: FireflyAnimationState, [, mousePos, viewport]) => {
+      let { positions, sparks, lastWidth, lastHeight } = state;
+
       // Check if viewport changed
       if (viewport.width !== lastWidth || viewport.height !== lastHeight) {
         positions = recalculateBasePositions(positions, viewport.width, viewport.height);
@@ -377,11 +387,16 @@ export function createFireflyAnimation(mouse$: Observable<MousePosition>): Obser
         lastHeight = viewport.height;
       }
 
+      // Update firefly positions
       positions = positions.map((firefly, i) => updateFirefly(firefly, mousePos, positions, i));
+
+      // Generate and update sparks
       const newSparks = generateSparks(positions);
       sparks = updateSparks(sparks, newSparks);
-      return { positions: [...positions], sparks: [...sparks] };
-    }),
+
+      return { positions, sparks, lastWidth, lastHeight };
+    }, initialState),
+    map((state) => ({ positions: state.positions, sparks: state.sparks })),
   );
 }
 

@@ -6,6 +6,7 @@ export interface Feature {
   icon: string;
   title: string;
   description: string;
+  highlightCode?: string; // Optional inline code to highlight
 }
 
 export interface FieldType {
@@ -109,7 +110,8 @@ export const FEATURES: Feature[] = [
   {
     icon: 'target',
     title: 'Actually Type-Safe',
-    description: '<code>as const satisfies</code> — your IDE knows everything. No more guessing.',
+    description: ' — your IDE knows everything. No more guessing.',
+    highlightCode: 'as const satisfies',
   },
   {
     icon: 'layers',
