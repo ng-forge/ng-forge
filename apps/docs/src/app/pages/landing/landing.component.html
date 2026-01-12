@@ -74,12 +74,7 @@
           <div class="demo-content" [class.hidden]="heroTab() !== 'demo'">
             <example-iframe library="material" example="hero-demo?minimal=true&theme=landing" />
           </div>
-          <div class="code-content" [class.hidden]="heroTab() !== 'config'" [class.typing]="configTyping()">
-            <div class="code-typing-wrapper" [codeHighlight]="codeSnippets.heroConfig"></div>
-            @if (configTyping()) {
-              <span class="typing-cursor"></span>
-            }
-          </div>
+          <div class="code-content" [class.hidden]="heroTab() !== 'config'" [codeHighlight]="codeSnippets.heroConfig"></div>
         </div>
       </div>
     </div>

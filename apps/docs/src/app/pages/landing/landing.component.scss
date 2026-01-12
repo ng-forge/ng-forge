@@ -698,53 +698,6 @@ nav {
     font-size: 0.75rem;
     padding: 0 0.625rem;
   }
-
-  // Typing animation state - reveals line by line from top
-  &.typing {
-    .code-typing-wrapper {
-      animation: code-reveal-lines 2s steps(20, end) forwards;
-      clip-path: inset(0 0 100% 0);
-    }
-  }
-}
-
-// Line-by-line reveal animation (top to bottom)
-@keyframes code-reveal-lines {
-  0% {
-    clip-path: inset(0 0 100% 0);
-  }
-  100% {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-// Blinking cursor
-@keyframes cursor-blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
-}
-
-.typing-cursor {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: inline-block;
-  width: 2px;
-  height: 1.2em;
-  background: $ember-glow;
-  animation: cursor-blink 0.8s infinite;
-  box-shadow: 0 0 8px rgba($ember-glow, 0.6);
-}
-
-.code-typing-wrapper {
-  display: block;
 }
 
 .demo-content {
@@ -1697,84 +1650,6 @@ section {
     left: calc(100% - 8px);
     opacity: 0;
   }
-}
-
-// Icon pulse animations - each pulses only when its packet arrives
-// Packet 1 arrives at 28%, Packet 2 at 50%, Packet 3 at 72%
-
-// API icon pulses at 28% (when packet 1 arrives)
-@keyframes icon-pulse-api {
-  0%,
-  26% {
-    transform: scale(1);
-    box-shadow: none;
-  }
-  28% {
-    transform: scale(1.1);
-    box-shadow: 0 0 24px rgba($molten, 0.6);
-  }
-  34% {
-    transform: scale(1);
-    box-shadow: none;
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: none;
-  }
-}
-
-// JSON icon pulses at 50% (when packet 2 arrives)
-@keyframes icon-pulse-json {
-  0%,
-  48% {
-    transform: scale(1);
-    box-shadow: none;
-  }
-  50% {
-    transform: scale(1.1);
-    box-shadow: 0 0 24px rgba($steel, 0.6);
-  }
-  56% {
-    transform: scale(1);
-    box-shadow: none;
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: none;
-  }
-}
-
-// Form icon pulses at 72% (when packet 3 arrives)
-@keyframes icon-pulse-form {
-  0%,
-  70% {
-    transform: scale(1);
-    box-shadow: none;
-  }
-  72% {
-    transform: scale(1.1);
-    box-shadow: 0 0 24px rgba($success, 0.6);
-  }
-  78% {
-    transform: scale(1);
-    box-shadow: none;
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: none;
-  }
-}
-
-.flow-step:nth-child(3) .flow-icon {
-  animation: icon-pulse-api 5s ease-in-out infinite;
-}
-
-.flow-step:nth-child(5) .flow-icon {
-  animation: icon-pulse-json 5s ease-in-out infinite;
-}
-
-.flow-step:nth-child(7) .flow-icon {
-  animation: icon-pulse-form 5s ease-in-out infinite;
 }
 
 .json-code-example {

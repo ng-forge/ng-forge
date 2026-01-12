@@ -64,8 +64,6 @@ export class LandingComponent {
   readonly currentPackageManager = signal('npm');
   readonly currentUiLibrary = signal('material');
   readonly heroTab = signal<'config' | 'demo'>('demo');
-  readonly configTyping = signal(false);
-  readonly configTyped = signal(false);
   readonly copied = signal(false);
   readonly copyConfetti = signal<{ id: number; x: number; y: number; angle: number }[]>([]);
   private readonly visibleElements = signal<Set<string>>(new Set());
@@ -218,16 +216,6 @@ export class LandingComponent {
 
   setHeroTab(tab: 'config' | 'demo'): void {
     this.heroTab.set(tab);
-
-    // Trigger typing animation on first config tab visit
-    if (tab === 'config' && !this.configTyped()) {
-      this.configTyping.set(true);
-      // Animation duration matches CSS (2s typing + buffer)
-      setTimeout(() => {
-        this.configTyping.set(false);
-        this.configTyped.set(true);
-      }, 2200);
-    }
   }
 
   copyInstallCommand(): void {
