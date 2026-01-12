@@ -1,0 +1,342 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+// ============================================
+// CARD STYLES
+// ============================================
+
+/// Standard card with hover effect
+/// @param {boolean} $with-ember-border - Include ember gradient top border
+@mixin card($with-ember-border: false) {
+  background: $bg-deep;
+  border: 1px solid $steel-dark;
+  border-radius: $radius-xl;
+  transition: all $transition-smooth;
+
+  @if $with-ember-border {
+    position: relative;
+    overflow: visible;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      height: 40px;
+      background: linear-gradient(180deg, $ember-core 0%, $molten 40%, transparent 100%);
+      opacity: 0.5;
+      transition: opacity $transition-smooth;
+      border-radius: $radius-xl $radius-xl 0 0;
+      // Mask to show only the border
+      -webkit-mask:
+        linear-gradient(to bottom, black 60%, transparent 100%),
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: source-in, xor;
+      mask:
+        linear-gradient(to bottom, black 60%, transparent 100%),
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      mask-composite: intersect, exclude;
+      padding: 2px;
+    }
+  }
+
+  &:hover {
+    border-color: $steel-dim;
+    transform: translateY(-4px) scale(1.01);
+
+    @if $with-ember-border {
+      &::before {
+        opacity: 0.9;
+      }
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(0.99);
+  }
+}
+
+/// Simple card without hover transforms
+@mixin card-static {
+  background: $bg-deep;
+  border: 1px solid $steel-dark;
+  border-radius: $radius-xl;
+}
+
+// ============================================
+// CODE BLOCK STYLES
+// ============================================
+
+/// Code block container with terminal-style header
+@mixin code-block {
+  background: $bg-deep;
+  border: 1px solid $steel-dark;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  position: relative;
+
+  // Ember accent line at top
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, $ember-core, transparent);
+    opacity: 0.5;
+  }
+}
+
+/// Code block header with traffic light dots
+@mixin code-header {
+  display: flex;
+  align-items: center;
+  padding: $space-3 $space-4;
+  background: $bg-surface;
+  border-bottom: 1px solid $steel-dark;
+  gap: $space-2;
+}
+
+/// Traffic light dots for code blocks
+@mixin code-dots {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+
+  &:nth-child(1) {
+    background: $error;
+  }
+  &:nth-child(2) {
+    background: $warning;
+  }
+  &:nth-child(3) {
+    background: $success;
+  }
+}
+
+/// Code block body/content area
+@mixin code-body {
+  padding: 0 $space-3;
+  font-family: $font-mono;
+  font-size: $text-sm;
+  line-height: 1.5;
+  overflow-x: auto;
+
+  pre {
+    margin: 0;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $text-xs;
+    padding: 0 0.625rem;
+  }
+}
+
+// ============================================
+// BUTTON STYLES
+// ============================================
+
+/// Base button styles
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-4 $space-8;
+  border-radius: $radius-lg;
+  font-weight: 600;
+  font-size: $text-base;
+  text-decoration: none;
+  transition: all $transition-smooth;
+  cursor: pointer;
+  border: none;
+
+  @media (max-width: $breakpoint-md) {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+/// Primary button with ember gradient
+@mixin btn-primary {
+  @include btn-base;
+  background: linear-gradient(135deg, $ember-hot, $ember-glow);
+  color: $bg-void;
+  box-shadow: $shadow-ember-md;
+
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: $shadow-ember-lg;
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: $shadow-ember-sm;
+  }
+}
+
+/// Secondary button with border
+@mixin btn-secondary {
+  @include btn-base;
+  background: $bg-elevated;
+  color: $steel;
+  border: 1px solid $steel-dim;
+  box-shadow: $shadow-subtle;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    background: $bg-surface;
+    border-color: $steel-mid;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: $shadow-subtle;
+  }
+}
+
+// ============================================
+// LINK STYLES
+// ============================================
+
+/// Inline link with animated underline
+@mixin link-inline {
+  color: $ember-glow;
+  text-decoration: none;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 60%;
+    height: 3px;
+    background: $ember-glow;
+    border-radius: 1px 40% 40% 1px;
+    opacity: 0.5;
+    transition:
+      width $transition-smooth,
+      opacity $transition-smooth;
+  }
+
+  &:hover::after {
+    width: 100%;
+    opacity: 0.8;
+  }
+}
+
+/// Nav link with underline animation
+@mixin link-nav {
+  color: $steel-mid;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: $text-sm;
+  transition: color $transition-base;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: $ember-glow;
+    border-radius: 1px;
+    transition: width $transition-smooth;
+  }
+
+  &:hover {
+    color: $steel;
+
+    &::after {
+      width: 100%;
+    }
+  }
+}
+
+// ============================================
+// SECTION STYLES
+// ============================================
+
+/// Section container with standard padding
+@mixin section-container {
+  max-width: $breakpoint-xl;
+  margin: 0 auto;
+  padding: $space-8;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $space-8 $space-5;
+  }
+}
+
+/// Section label (e.g., "FEATURES", "INTEGRATIONS")
+@mixin section-label {
+  font-family: $font-mono;
+  font-size: $text-xs;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: $ember-glow;
+  margin-bottom: $space-4;
+}
+
+/// Section title
+@mixin section-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: $space-4;
+  color: $steel;
+}
+
+/// Section description
+@mixin section-desc {
+  color: $steel-mid;
+  font-size: $text-lg;
+  max-width: 500px;
+}
+
+// ============================================
+// LAYOUT UTILITIES
+// ============================================
+
+/// Divider line with gradient
+@mixin divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, $steel-dark, transparent);
+  margin: $space-12 0;
+}
+
+/// Glass panel effect (for nav, modals)
+@mixin glass-panel {
+  background: rgba($bg-deep, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+// ============================================
+// RESPONSIVE HELPERS
+// ============================================
+
+@mixin mobile {
+  @media (max-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (max-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: $breakpoint-lg) {
+    @content;
+  }
+}

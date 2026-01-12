@@ -1,0 +1,230 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+
+// ============================================
+// PULSE ANIMATIONS
+// ============================================
+
+/// Dot pulse animation (for status indicators)
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 6px $ember-hot;
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow:
+      0 0 10px $ember-hot,
+      0 0 20px rgba($ember-hot, 0.3);
+  }
+}
+
+/// Ring pulse animation (radiating rings)
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+// ============================================
+// GLOW ANIMATIONS
+// ============================================
+
+/// Firefly pulse animation
+@keyframes firefly-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    box-shadow:
+      0 0 8px $ember-hot,
+      0 0 16px $ember-glow;
+  }
+  50% {
+    opacity: 1;
+    box-shadow:
+      0 0 12px $ember-hot,
+      0 0 24px $ember-glow,
+      0 0 36px rgba($ember-glow, 0.3);
+  }
+}
+
+/// Spark burst animation
+@keyframes spark-burst {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+// ============================================
+// REVEAL ANIMATIONS
+// ============================================
+
+/// Hero reveal animation
+@keyframes hero-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ============================================
+// BORDER ANIMATIONS
+// ============================================
+
+/// Shimmer border animation (gradient moving)
+@keyframes shimmer-border {
+  0% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+// ============================================
+// LOADING ANIMATIONS
+// ============================================
+
+/// Spinner rotation
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/// Skeleton loading shimmer
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// ============================================
+// CONFETTI ANIMATION
+// ============================================
+
+/// Copy confetti burst
+@keyframes confetti-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--confetti-x), var(--confetti-y)) rotate(var(--confetti-angle)) scale(0);
+  }
+}
+
+// ============================================
+// UTILITY MIXINS FOR ANIMATIONS
+// ============================================
+
+/// Apply animated shimmer border effect
+@mixin animated-border($duration: 4s) {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, $steel-dark, $ember-core, $molten, $ember-core, $steel-dark);
+    background-size: 300% 100%;
+    animation: shimmer-border $duration ease-in-out infinite;
+    z-index: -1;
+    opacity: 0.6;
+  }
+
+  // Inner background to cover the gradient
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: inherit;
+    z-index: -1;
+  }
+
+  &:hover::before {
+    opacity: 1;
+    animation-duration: calc($duration / 2);
+  }
+}
+
+/// Apply pulse ring effect to an element
+@mixin pulse-rings($color: $ember-hot, $ring-count: 2) {
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid $color;
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  @if $ring-count > 1 {
+    &::after {
+      animation-delay: 1s;
+    }
+  }
+}
+
+/// Loading spinner mixin
+@mixin spinner($size: 24px, $border-width: 3px) {
+  width: $size;
+  height: $size;
+  border: $border-width solid $steel-dark;
+  border-top-color: $ember-hot;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/// Skeleton loading effect
+@mixin skeleton {
+  background: linear-gradient(90deg, $bg-surface 0%, $bg-elevated 50%, $bg-surface 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: $radius-md;
+}
+
+/// Fade up animation setup (for intersection observer)
+@mixin fade-up {
+  opacity: 1;
+  transform: translateY(0);
+
+  &.animate {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s $transition-bounce;
+  }
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

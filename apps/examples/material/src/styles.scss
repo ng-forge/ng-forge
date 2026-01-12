@@ -44,6 +44,13 @@ html[data-theme='dark'],
   @include mat.all-component-colors($my-dark-theme);
 }
 
+// Landing page theme
+[data-theme='landing'],
+html[data-theme='landing'],
+:root[data-theme='landing'] {
+  @include mat.all-component-colors($my-dark-theme);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -85,6 +92,13 @@ html[data-theme='dark'] body {
   color: #a9a9a9;
 }
 
+// Landing page theme - matches docs landing page colors
+html[data-theme='landing'],
+html[data-theme='landing'] body {
+  background-color: #0a0908;
+  color: #e8e4de;
+}
+
 // ============================================
 // Shared Example App Styles
 // ============================================
@@ -114,6 +128,15 @@ html[data-theme='dark'],
   --example-result-bg: rgb(48, 48, 48);
   --example-result-border: rgb(71, 71, 71);
   --example-result-text: #a9a9a9;
+}
+
+// Landing page theme
+html[data-theme='landing'],
+:root[data-theme='landing'] {
+  // Matches landing page colors
+  --example-result-bg: #131210;
+  --example-result-border: #2a2824;
+  --example-result-text: #e8e4de;
 }
 
 // Example demo component shared styles

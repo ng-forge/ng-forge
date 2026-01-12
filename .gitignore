@@ -64,3 +64,4 @@ vitest.config.*.timestamp*
 **/screenshots/
 **/__screenshots__/
 .vercel
+.pnpm-store

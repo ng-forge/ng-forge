@@ -11,10 +11,12 @@ export { buttonScenario } from './button.scenario';
 export { completeFormScenario } from './complete-form.scenario';
 export { userRegistrationScenario } from './user-registration.scenario';
 export { loginScenario } from './login.scenario';
+export { heroDemoScenario } from './hero-demo.scenario';
 export { paginatedFormScenario } from './paginated-form.scenario';
 export { groupScenario } from './group.scenario';
 export { rowScenario } from './row.scenario';
 export { arrayScenario, AddTagsEvent, AddContactEvent } from './array.scenario';
+export { validationShowcaseScenario } from './validation-showcase.scenario';
 
 import { inputScenario } from './input.scenario';
 import { checkboxScenario } from './checkbox.scenario';
@@ -29,10 +31,12 @@ import { buttonScenario } from './button.scenario';
 import { completeFormScenario } from './complete-form.scenario';
 import { userRegistrationScenario } from './user-registration.scenario';
 import { loginScenario } from './login.scenario';
+import { heroDemoScenario } from './hero-demo.scenario';
 import { paginatedFormScenario } from './paginated-form.scenario';
 import { groupScenario } from './group.scenario';
 import { rowScenario } from './row.scenario';
 import { arrayScenario } from './array.scenario';
+import { validationShowcaseScenario } from './validation-showcase.scenario';
 import { ExampleScenario } from '../shared/types';
 
 export const ALL_SCENARIOS: ExampleScenario[] = [
@@ -49,10 +53,12 @@ export const ALL_SCENARIOS: ExampleScenario[] = [
   completeFormScenario,
   userRegistrationScenario,
   loginScenario,
+  heroDemoScenario,
   paginatedFormScenario,
   groupScenario,
   rowScenario,
   arrayScenario,
+  validationShowcaseScenario,
 ];
 
 export function getScenarioById(id: string): ExampleScenario | undefined {

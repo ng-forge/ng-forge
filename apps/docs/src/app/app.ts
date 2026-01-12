@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, PLATFORM_ID, afterNextRender, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, PLATFORM_ID, afterNextRender, DestroyRef, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocThemeToggleComponent } from '@ng-doc/app';
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
 import { fromEvent, map, startWith, of, skip, filter } from 'rxjs';
@@ -45,7 +45,23 @@ export class App implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   readonly themeService = inject(NgDocThemeService);
+
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { requireSync: true },
+  );
+
+  readonly isLandingPage = computed(() => {
+    const url = this.currentUrl();
+    // Handle hash-based URLs like /#features, /#validation, etc.
+    return url === '/' || url === '' || url.startsWith('/#');
+  });
 
   theme = toSignal(
     this.isBrowser ? this.themeService.themeChanges().pipe(startWith(this.themeService.currentTheme)) : of('auto' as const),

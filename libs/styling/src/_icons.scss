@@ -1,0 +1,140 @@
+// ============================================
+// ICON SYSTEM (CSS Mask-based)
+// ============================================
+// Uses CSS masks for scalable, colorable icons.
+// Icons inherit their color from currentColor.
+
+/// Icon mask mixin - creates a mask-based icon from an SVG
+/// @param {string} $url - Path to the SVG icon
+/// @param {length} $size - Size of the icon (default 24px)
+@mixin icon-mask($url, $size: 24px) {
+  display: inline-block;
+  width: $size;
+  height: $size;
+  background-color: currentColor;
+  -webkit-mask-image: url($url);
+  mask-image: url($url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  flex-shrink: 0;
+}
+
+// ============================================
+// ICON CLASSES
+// ============================================
+
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+
+  // Navigation icons
+  &--github {
+    @include icon-mask('/assets/icons/github.svg', 24px);
+  }
+
+  &--book {
+    @include icon-mask('/assets/icons/book.svg', 20px);
+  }
+
+  // Action icons
+  &--copy {
+    @include icon-mask('/assets/icons/copy.svg', 18px);
+  }
+
+  &--check {
+    @include icon-mask('/assets/icons/check.svg', 18px);
+  }
+
+  &--play {
+    @include icon-mask('/assets/icons/play.svg', 14px);
+  }
+
+  &--code {
+    @include icon-mask('/assets/icons/code.svg', 14px);
+  }
+
+  // Flow diagram icons
+  &--database {
+    @include icon-mask('/assets/icons/database.svg', 28px);
+  }
+
+  &--api {
+    @include icon-mask('/assets/icons/api.svg', 28px);
+  }
+
+  &--json {
+    @include icon-mask('/assets/icons/json.svg', 28px);
+  }
+
+  &--form {
+    @include icon-mask('/assets/icons/form.svg', 28px);
+  }
+
+  // Feature icons
+  &--signal {
+    @include icon-mask('/assets/icons/signal.svg', 22px);
+  }
+
+  &--target {
+    @include icon-mask('/assets/icons/target.svg', 22px);
+  }
+
+  &--layers {
+    @include icon-mask('/assets/icons/layers.svg', 22px);
+  }
+
+  &--package {
+    @include icon-mask('/assets/icons/package.svg', 22px);
+  }
+
+  &--zap {
+    @include icon-mask('/assets/icons/zap.svg', 22px);
+  }
+
+  &--plug {
+    @include icon-mask('/assets/icons/plug.svg', 22px);
+  }
+
+  &--sparkles {
+    @include icon-mask('/assets/icons/sparkles.svg', 20px);
+  }
+
+  // Use case icons (Backend-driven section)
+  &--palette {
+    @include icon-mask('/assets/icons/palette.svg', 24px);
+  }
+
+  &--users {
+    @include icon-mask('/assets/icons/users.svg', 24px);
+  }
+
+  &--bar-chart {
+    @include icon-mask('/assets/icons/bar-chart.svg', 24px);
+  }
+
+  &--flame {
+    @include icon-mask('/assets/icons/flame.svg', 24px);
+  }
+
+  // Showcase icons (Power features section)
+  &--git-branch {
+    @include icon-mask('/assets/icons/git-branch.svg', 22px);
+  }
+
+  &--workflow {
+    @include icon-mask('/assets/icons/workflow.svg', 22px);
+  }
+
+  // Stats icons
+  &--download {
+    @include icon-mask('/assets/icons/download.svg', 32px);
+  }
+
+  &--star {
+    @include icon-mask('/assets/icons/star.svg', 32px);
+  }
+}
