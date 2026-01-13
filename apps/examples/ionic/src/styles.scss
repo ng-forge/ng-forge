@@ -188,6 +188,16 @@ ion-select::part(placeholder) {
   }
 }
 
+// ============================================
+// MULTI-CHECKBOX PADDING
+// ============================================
+// Add padding to multi-checkbox ion-items for better visual spacing
+
+df-ion-multi-checkbox ion-item {
+  --padding-start: 0.5rem !important;
+  --padding-end: 0.5rem !important;
+}
+
 html[data-theme='dark'],
 html[data-theme='landing'] {
   // Input and textarea styling
