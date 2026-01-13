@@ -47,6 +47,16 @@
     --example-result-text: #1a1a1a;
   }
 
+  // Auto mode - use system preference when no data-theme is set
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]),
+    :root:not([data-theme]) {
+      --example-result-bg: #000000;
+      --example-result-border: #{$steel-dark};
+      --example-result-text: #{$steel};
+    }
+  }
+
   // Explicit light theme (same as default)
   html[data-theme='light'],
   :root[data-theme='light'] {
@@ -135,6 +145,14 @@
   html,
   body {
     @include example-body-light;
+  }
+
+  // Auto mode - use system preference when no data-theme is set
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]),
+    html:not([data-theme]) body {
+      @include example-body-dark;
+    }
   }
 
   // Explicit light theme (same as default)

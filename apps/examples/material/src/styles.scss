@@ -18,6 +18,14 @@
 // Apply ember-themed Material (light default)
 @include ember-mat.material-theme-light();
 
+// Auto mode - use system preference when no data-theme is set
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    @include ember-mat.material-theme-dark();
+  }
+}
+
 // Explicit light theme (same as default, for when data-theme='light' is set)
 [data-theme='light'] {
   @include ember-mat.material-theme-light();
@@ -64,6 +72,19 @@ body {
   background-color: #ffffff !important;
 }
 
+// Auto mode - black input backgrounds when system prefers dark
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .mat-mdc-form-field {
+    --mat-form-field-filled-container-color: #000000 !important;
+  }
+
+  html:not([data-theme]) .mdc-text-field--outlined .mdc-notched-outline__leading,
+  html:not([data-theme]) .mdc-text-field--outlined .mdc-notched-outline__notch,
+  html:not([data-theme]) .mdc-text-field--outlined .mdc-notched-outline__trailing {
+    background-color: #000000 !important;
+  }
+}
+
 // Dark mode - black input backgrounds
 [data-theme='dark'] .mat-mdc-form-field {
   --mat-form-field-filled-container-color: #000000 !important;
@@ -84,4 +105,33 @@ body {
 [data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__notch,
 [data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__trailing {
   background-color: #000000 !important;
+}
+
+// ============================================
+// MATERIAL DATEPICKER OVERRIDE
+// ============================================
+// Set datepicker backgrounds to white (light) and black (dark) for contrast
+
+// Light mode - white datepicker background
+.mat-datepicker-content {
+  --mat-datepicker-calendar-container-background-color: #ffffff !important;
+  --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-core} !important;
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-core} !important;
+}
+
+// Auto mode - black datepicker when system prefers dark
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .mat-datepicker-content {
+    --mat-datepicker-calendar-container-background-color: #000000 !important;
+    --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-glow} !important;
+    --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-glow} !important;
+  }
+}
+
+// Dark mode - black datepicker background
+[data-theme='dark'] .mat-datepicker-content,
+[data-theme='landing'] .mat-datepicker-content {
+  --mat-datepicker-calendar-container-background-color: #000000 !important;
+  --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-glow} !important;
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-glow} !important;
 }

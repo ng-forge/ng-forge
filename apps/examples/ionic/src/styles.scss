@@ -51,6 +51,13 @@ body {
   font-family: $font-primary;
 }
 
+// Auto mode - use system preference when no data-theme is set
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    @include ember-ionic.ionic-theme-dark();
+  }
+}
+
 // Explicit light theme (same as default, for when data-theme='light' is set)
 :root[data-theme='light'] {
   @include ember-ionic.ionic-theme-light();
@@ -76,6 +83,13 @@ ion-content {
   --background: rgb(250, 250, 250);
 }
 
+// Auto mode - dark background when system prefers dark
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) ion-content {
+    --background: rgb(19, 18, 16);
+  }
+}
+
 html[data-theme='light'] ion-content {
   --background: rgb(250, 250, 250);
 }
@@ -98,6 +112,15 @@ ion-input,
 ion-textarea,
 ion-select {
   --background: #ffffff !important;
+}
+
+// Auto mode - black input backgrounds when system prefers dark
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) ion-input,
+  html:not([data-theme]) ion-textarea,
+  html:not([data-theme]) ion-select {
+    --background: #000000 !important;
+  }
 }
 
 // Dark mode - black input backgrounds
@@ -130,6 +153,40 @@ ion-select::part(placeholder) {
 // ============================================
 // DARK MODE COMPONENT STYLING
 // ============================================
+
+// Auto mode dark styling
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    // Select styling for auto dark mode
+    ion-select {
+      color: #ffffff;
+    }
+
+    ion-select::part(text),
+    ion-select::part(placeholder) {
+      color: #ffffff;
+    }
+
+    // Input and textarea styling
+    ion-input,
+    ion-textarea {
+      --color: #dee2e6;
+      --placeholder-color: rgb(108, 117, 125);
+      --border-color: rgb(73, 80, 87);
+    }
+
+    // Item styling with padding
+    ion-item {
+      --background: #000000;
+      --color: #dee2e6;
+      --border-color: rgb(73, 80, 87);
+      --padding-start: 1rem;
+      --padding-end: 1rem;
+      --inner-padding-start: 0.5rem;
+      --inner-padding-end: 0.5rem;
+    }
+  }
+}
 
 html[data-theme='dark'],
 html[data-theme='landing'] {

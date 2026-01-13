@@ -44,6 +44,20 @@ body {
   font-family: $font-primary;
 }
 
+// Auto mode - use system preference when no data-theme is set
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    @include ember-bs.bootstrap-theme-dark();
+  }
+
+  html:not([data-theme]),
+  html:not([data-theme]) body {
+    background-color: rgb(19, 18, 16);
+    color: #a9a9a9;
+  }
+}
+
 // Explicit light theme (same as default, for when data-theme='light' is set)
 html[data-theme='light'],
 :root[data-theme='light'] {

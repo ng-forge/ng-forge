@@ -26,6 +26,14 @@
   @include apply-theme($theme-light);
 }
 
+// Auto mode - use system preference when no data-theme is set
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]),
+  :root:not([data-theme]) {
+    @include apply-theme($theme-dark);
+  }
+}
+
 // Explicit light theme (same as default, for when data-theme='light' is set)
 html[data-theme='light'],
 :root[data-theme='light'] {
@@ -98,6 +106,55 @@ p-checkbox ~ label {
 // DARK MODE OVERRIDES
 // ============================================
 // Fix datepicker button and panel backgrounds in dark mode
+
+// Auto mode dark overrides
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    // Datepicker trigger button should match input background
+    .p-datepicker-dropdown {
+      background: #000000 !important;
+      border-color: rgb(73, 80, 87) !important;
+
+      .p-icon {
+        color: $ember-core !important;
+      }
+    }
+
+    .p-datepicker-panel {
+      background: #000000 !important;
+    }
+
+    .p-datepicker-header {
+      background: rgb(10, 9, 8) !important;
+    }
+
+    .p-datepicker-today > span,
+    .p-datepicker-calendar td > span.p-highlight,
+    .p-datepicker-calendar td.p-datepicker-today > span {
+      background: $ember-core !important;
+      color: #ffffff !important;
+    }
+
+    .p-select-overlay {
+      background: #000000 !important;
+      border-color: rgb(73, 80, 87) !important;
+
+      .p-select-option {
+        color: rgb(222, 226, 230) !important;
+
+        &:hover,
+        &.p-focus {
+          background: rgb(33, 37, 41) !important;
+        }
+
+        &.p-highlight {
+          background: $ember-core !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
+}
 
 html[data-theme='dark'],
 html[data-theme='landing'] {
