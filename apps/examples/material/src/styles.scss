@@ -56,63 +56,25 @@ body {
 }
 
 // ============================================
-// MATERIAL INPUT BACKGROUND & TEXT OVERRIDE
+// MATERIAL INPUT TEXT COLOR OVERRIDE
 // ============================================
-// Set input backgrounds and text colors for proper contrast
-// Note: Default appearance is 'outline', so we target the notched outline elements
+// Material theme handles backgrounds - we only override text colors for contrast
 
-// Light mode - white background, dark text
-.mat-mdc-form-field {
-  --mat-form-field-filled-container-color: #ffffff !important;
-  --mdc-filled-text-field-input-text-color: #000000 !important;
-  --mdc-outlined-text-field-input-text-color: #000000 !important;
-}
+// Light mode uses default Material text colors (dark on light)
 
-.mdc-text-field--outlined .mdc-notched-outline__leading,
-.mdc-text-field--outlined .mdc-notched-outline__notch,
-.mdc-text-field--outlined .mdc-notched-outline__trailing {
-  background-color: #ffffff !important;
-}
-
-// Auto mode - black background, light text when system prefers dark
+// Auto mode - light text when system prefers dark
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]) .mat-mdc-form-field {
-    --mat-form-field-filled-container-color: #000000 !important;
-    --mdc-filled-text-field-input-text-color: #dee2e6 !important;
-    --mdc-outlined-text-field-input-text-color: #dee2e6 !important;
-  }
-
-  html:not([data-theme]) .mdc-text-field--outlined .mdc-notched-outline__leading,
-  html:not([data-theme]) .mdc-text-field--outlined .mdc-notched-outline__notch,
-  html:not([data-theme]) .mdc-text-field--outlined .mdc-notched-outline__trailing {
-    background-color: #000000 !important;
+    --mat-form-field-outlined-input-text-color: #dee2e6;
+    --mat-form-field-filled-input-text-color: #dee2e6;
   }
 }
 
-// Dark mode - black background, light text
-[data-theme='dark'] .mat-mdc-form-field {
-  --mat-form-field-filled-container-color: #000000 !important;
-  --mdc-filled-text-field-input-text-color: #dee2e6 !important;
-  --mdc-outlined-text-field-input-text-color: #dee2e6 !important;
-}
-
-[data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__leading,
-[data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__notch,
-[data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__trailing {
-  background-color: #000000 !important;
-}
-
-// Landing mode - black background, light text (dark variant)
+// Dark mode - light text
+[data-theme='dark'] .mat-mdc-form-field,
 [data-theme='landing'] .mat-mdc-form-field {
-  --mat-form-field-filled-container-color: #000000 !important;
-  --mdc-filled-text-field-input-text-color: #dee2e6 !important;
-  --mdc-outlined-text-field-input-text-color: #dee2e6 !important;
-}
-
-[data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__leading,
-[data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__notch,
-[data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__trailing {
-  background-color: #000000 !important;
+  --mat-form-field-outlined-input-text-color: #dee2e6;
+  --mat-form-field-filled-input-text-color: #dee2e6;
 }
 
 // ============================================
