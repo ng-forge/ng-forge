@@ -70,9 +70,10 @@ $steel-dark: #2a2824;
   --ng-doc-border-color: #e0e0e0;
 }
 
-// Dark mode - match landing page exactly
+// Dark mode - only when explicitly set or auto mode with dark system preference
+// NgDoc uses: no data-theme = light, data-theme='dark' = dark, data-theme='auto' = system
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme='light']) {
+  html[data-theme='auto'] {
     // Ember accent colors
     --ng-doc-primary: #{$ember-glow};
     --ng-doc-primary-rgb: 255, 140, 66;
@@ -153,14 +154,15 @@ html[data-theme='dark'] {
   display: none !important;
 }
 
-// Swap to dark logo when system prefers dark (only in auto mode - no explicit theme set)
+// Swap to dark logo when system prefers dark AND in auto mode
+// NgDoc uses: no data-theme = light, data-theme='auto' = system preference
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme]) .logo-light,
-  body:not([data-theme]) .logo-light {
+  html[data-theme='auto'] .logo-light,
+  body[data-theme='auto'] .logo-light {
     display: none !important;
   }
-  html:not([data-theme]) .logo-dark,
-  body:not([data-theme]) .logo-dark {
+  html[data-theme='auto'] .logo-dark,
+  body[data-theme='auto'] .logo-dark {
     display: block !important;
   }
 }
@@ -257,9 +259,9 @@ body[data-theme='light'] .logo-dark {
   }
 }
 
-// Dark theme icon button styling
+// Dark theme icon button styling (auto mode with dark system preference)
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme='light']) .ng-doc-header-controls {
+  html[data-theme='auto'] .ng-doc-header-controls {
     > *,
     a,
     button,
