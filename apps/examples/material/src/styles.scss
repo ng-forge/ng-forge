@@ -1,212 +1,87 @@
-/* You can add global styles to this file, and also import other style files */
+// ============================================
+// MATERIAL EXAMPLE APP STYLES
+// ============================================
+// Uses ng-forge styling library with ember-themed Material
 
 @use '@angular/material' as mat;
+@use 'material' as ember-mat;
+@use 'examples' as examples;
+@use 'tokens' as *;
 
+// Initialize Material core
 @include mat.core();
 
 // ============================================
-// EMBER COLOR PALETTE FOR MATERIAL
+// THEME APPLICATION
 // ============================================
-// Using ember-glow (#ff8c42) as primary to distinguish from error states
-$ember-palette: (
-  50: #fff3e0,
-  100: #ffe0b2,
-  200: #ffcc80,
-  300: #ffb74d,
-  400: #ffa726,
-  500: #ff8c42,
-  // ember-glow - lighter orange, distinct from errors
-  600: #ff6b2b,
-  // ember-hot
-  700: #ff4d00,
-  // ember-core
-  800: #ef6c00,
-  900: #e65100,
-  A100: #ffb74d,
-  A200: #ff8c42,
-  // ember-glow
-  A400: #ff6b2b,
-  // ember-hot
-  A700: #ff4d00,
-  // ember-core
-  contrast: (
-      50: rgba(black, 0.87),
-      100: rgba(black, 0.87),
-      200: rgba(black, 0.87),
-      300: rgba(black, 0.87),
-      400: rgba(black, 0.87),
-      500: rgba(black, 0.87),
-      600: white,
-      700: white,
-      800: white,
-      900: white,
-      A100: rgba(black, 0.87),
-      A200: rgba(black, 0.87),
-      A400: white,
-      A700: white,
-    ),
-);
 
-$my-primary: mat.m2-define-palette($ember-palette, 500, 300, 700);
-$my-accent: mat.m2-define-palette($ember-palette, A200, A100, A400);
+// Apply ember-themed Material (light default)
+@include ember-mat.material-theme-light();
 
-$my-light-theme: mat.m2-define-light-theme(
-  (
-    color: (
-      primary: $my-primary,
-      accent: $my-accent,
-    ),
-    typography: mat.m2-define-typography-config(),
-    density: 0,
-  )
-);
-
-$my-dark-theme: mat.m2-define-dark-theme(
-  (
-    color: (
-      primary: $my-primary,
-      accent: $my-accent,
-    ),
-  )
-);
-
-@include mat.all-component-themes($my-light-theme);
-
-// Auto mode - use system preference when no data-theme is set
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]),
-  :root:not([data-theme]) {
-    @include mat.all-component-colors($my-dark-theme);
-  }
+// Explicit light theme (same as default, for when data-theme='light' is set)
+[data-theme='light'] {
+  @include ember-mat.material-theme-light();
 }
 
 // Explicit dark theme
-[data-theme='dark'],
-html[data-theme='dark'],
-:root[data-theme='dark'] {
-  @include mat.all-component-colors($my-dark-theme);
+[data-theme='dark'] {
+  @include ember-mat.material-theme-dark();
 }
 
-// Landing page theme
-[data-theme='landing'],
-html[data-theme='landing'],
-:root[data-theme='landing'] {
-  @include mat.all-component-colors($my-dark-theme);
+// Landing page theme (dark variant with landing background)
+[data-theme='landing'] {
+  @include ember-mat.material-theme-landing();
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+// ============================================
+// EXAMPLE APP STYLES
+// ============================================
 
-// Ensure root element is block-level for proper height measurement
-example-root {
-  display: block;
-}
+@include examples.example-base();
+@include examples.example-theme-variables();
+@include examples.example-body-themes();
+@include examples.example-components();
 
-html,
+// Material-specific body font
 body {
-  // Use auto height for iframe embedding - content determines height
-  height: auto;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-  // Hide overflow to prevent scrollbars in iframe - parent controls scrolling
-  overflow: hidden;
-  // ng-doc light mode colors
-  background-color: #f6f6f6;
-  color: rgb(78, 78, 78);
-}
-
-// Auto mode - use system preference when no data-theme is set
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]),
-  html:not([data-theme]) body {
-    // ng-doc dark mode colors
-    background-color: rgb(41, 41, 41);
-    color: #a9a9a9;
-  }
-}
-
-// Explicit dark theme
-html[data-theme='dark'],
-html[data-theme='dark'] body {
-  // ng-doc dark mode colors
-  background-color: rgb(41, 41, 41);
-  color: #a9a9a9;
-}
-
-// Landing page theme - matches docs landing page colors
-html[data-theme='landing'],
-html[data-theme='landing'] body {
-  background-color: #0a0908;
-  color: #e8e4de;
+  font-family: $font-primary;
 }
 
 // ============================================
-// Shared Example App Styles
+// MATERIAL INPUT BACKGROUND OVERRIDE
 // ============================================
+// Set input backgrounds to white (light) and black (dark) for contrast
+// Note: Default appearance is 'outline', so we target the notched outline elements
 
-:root {
-  // ng-doc light mode colors
-  --example-result-bg: #ebebeb;
-  --example-result-border: #ddd;
-  --example-result-text: rgb(78, 78, 78);
+// Light mode - white input backgrounds
+.mat-mdc-form-field {
+  --mat-form-field-filled-container-color: #ffffff !important;
 }
 
-// Auto mode - use system preference when no data-theme is set
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]),
-  :root:not([data-theme]) {
-    // ng-doc dark mode colors
-    --example-result-bg: rgb(48, 48, 48);
-    --example-result-border: rgb(71, 71, 71);
-    --example-result-text: #a9a9a9;
-  }
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  background-color: #ffffff !important;
 }
 
-// Explicit dark theme
-html[data-theme='dark'],
-:root[data-theme='dark'] {
-  // ng-doc dark mode colors
-  --example-result-bg: rgb(48, 48, 48);
-  --example-result-border: rgb(71, 71, 71);
-  --example-result-text: #a9a9a9;
+// Dark mode - black input backgrounds
+[data-theme='dark'] .mat-mdc-form-field {
+  --mat-form-field-filled-container-color: #000000 !important;
 }
 
-// Landing page theme
-html[data-theme='landing'],
-:root[data-theme='landing'] {
-  // Matches landing page colors
-  --example-result-bg: #131210;
-  --example-result-border: #2a2824;
-  --example-result-text: #e8e4de;
+[data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__leading,
+[data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__notch,
+[data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__trailing {
+  background-color: #000000 !important;
 }
 
-// Example demo component shared styles
-.example-container {
-  display: block;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 24px;
+// Landing mode - black input backgrounds (dark variant)
+[data-theme='landing'] .mat-mdc-form-field {
+  --mat-form-field-filled-container-color: #000000 !important;
 }
 
-.example-result {
-  margin-top: 24px;
-  padding: 16px;
-  background: var(--example-result-bg);
-  border: 1px solid var(--example-result-border);
-  border-radius: 0.375rem;
-
-  h4 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    color: var(--example-result-text);
-  }
-
-  pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    color: var(--example-result-text);
-  }
+[data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__leading,
+[data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__notch,
+[data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__trailing {
+  background-color: #000000 !important;
 }
