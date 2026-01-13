@@ -12,12 +12,6 @@ const EMBER = {
   molten: '#ffb627',
 } as const;
 
-const SEMANTIC = {
-  success: '#28ca42',
-  error: '#ff5f57',
-  warning: '#ffbd2e',
-} as const;
-
 // ============================================
 // SURFACE PALETTES
 // ============================================
