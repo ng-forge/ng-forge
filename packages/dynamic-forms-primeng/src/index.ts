@@ -15,8 +15,6 @@ export {
   withPrimeNGFields,
 } from './lib';
 
-// Theme exports
-export { EmberPreset, PRIMENG_EMBER_THEME } from './primeng-theme';
 export type {
   PrimeButtonProps,
   PrimeButtonField,
