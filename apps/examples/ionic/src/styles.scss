@@ -44,7 +44,6 @@
 // Light theme (default)
 :root {
   @include ember-ionic.ionic-theme-light();
-  @include ember-ionic.ionic-light-inputs();
 }
 
 html,
@@ -55,7 +54,6 @@ body {
 // Explicit light theme (same as default, for when data-theme='light' is set)
 :root[data-theme='light'] {
   @include ember-ionic.ionic-theme-light();
-  @include ember-ionic.ionic-light-inputs();
 }
 
 // Explicit dark theme
@@ -63,17 +61,9 @@ body {
   @include ember-ionic.ionic-theme-dark();
 }
 
-html[data-theme='dark'] {
-  @include ember-ionic.ionic-dark-inputs();
-}
-
 // Landing page theme (dark variant with landing background)
 :root[data-theme='landing'] {
   @include ember-ionic.ionic-theme-landing();
-}
-
-html[data-theme='landing'] {
-  @include ember-ionic.ionic-dark-inputs();
 }
 
 // ============================================
@@ -122,4 +112,89 @@ html[data-theme='landing'] ion-input,
 html[data-theme='landing'] ion-textarea,
 html[data-theme='landing'] ion-select {
   --background: #000000 !important;
+}
+
+// ============================================
+// LIGHT MODE SELECT TEXT
+// ============================================
+
+ion-select {
+  color: #000000;
+}
+
+ion-select::part(text),
+ion-select::part(placeholder) {
+  color: #000000;
+}
+
+// ============================================
+// DARK MODE COMPONENT STYLING
+// ============================================
+
+html[data-theme='dark'],
+html[data-theme='landing'] {
+  // Input and textarea styling
+  ion-input,
+  ion-textarea {
+    --color: #dee2e6;
+    --placeholder-color: rgb(108, 117, 125);
+    --border-color: rgb(73, 80, 87);
+  }
+
+  // Select styling
+  ion-select {
+    --placeholder-color: rgb(108, 117, 125);
+    --border-color: rgb(73, 80, 87);
+    color: #ffffff;
+  }
+
+  ion-select::part(text),
+  ion-select::part(placeholder) {
+    color: #ffffff;
+  }
+
+  // Item styling with padding
+  ion-item {
+    --background: #000000;
+    --color: #dee2e6;
+    --border-color: rgb(73, 80, 87);
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --inner-padding-start: 0.5rem;
+    --inner-padding-end: 0.5rem;
+  }
+
+  // Alert dialog (used by select) styling
+  ion-alert {
+    --background: #000000;
+
+    .alert-wrapper {
+      background: #000000 !important;
+    }
+
+    .alert-head {
+      background: rgb(10, 9, 8) !important;
+    }
+
+    .alert-message,
+    .alert-radio-group,
+    .alert-checkbox-group {
+      background: #000000 !important;
+    }
+
+    .alert-button-group {
+      background: #000000 !important;
+    }
+
+    // Radio and checkbox options
+    .alert-radio-label,
+    .alert-checkbox-label {
+      color: #dee2e6 !important;
+    }
+
+    [aria-checked='true'].alert-radio-button .alert-radio-label,
+    [aria-checked='true'].alert-checkbox-button .alert-checkbox-label {
+      color: $ember-glow !important;
+    }
+  }
 }
