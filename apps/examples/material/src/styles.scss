@@ -119,12 +119,41 @@ body {
   --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-core} !important;
 }
 
+// Datepicker toggle button - remove circle/background, use ember color for icon
+.mat-datepicker-toggle {
+  --mat-datepicker-toggle-icon-color: #{$ember-core};
+
+  .mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 40px;
+    --mdc-icon-button-icon-size: 24px;
+
+    // Remove the circle background
+    &::before {
+      display: none !important;
+    }
+
+    // Style the ripple to use ember color
+    .mat-mdc-button-persistent-ripple::before {
+      background-color: #{$ember-core} !important;
+      opacity: 0 !important;
+    }
+
+    &:hover .mat-mdc-button-persistent-ripple::before {
+      opacity: 0.04 !important;
+    }
+  }
+}
+
 // Auto mode - black datepicker when system prefers dark
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]) .mat-datepicker-content {
     --mat-datepicker-calendar-container-background-color: #000000 !important;
     --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-glow} !important;
     --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-glow} !important;
+  }
+
+  html:not([data-theme]) .mat-datepicker-toggle {
+    --mat-datepicker-toggle-icon-color: #{$ember-glow};
   }
 }
 
@@ -134,4 +163,9 @@ body {
   --mat-datepicker-calendar-container-background-color: #000000 !important;
   --mat-datepicker-calendar-date-selected-state-background-color: #{$ember-glow} !important;
   --mat-datepicker-calendar-date-today-selected-state-outline-color: #{$ember-glow} !important;
+}
+
+[data-theme='dark'] .mat-datepicker-toggle,
+[data-theme='landing'] .mat-datepicker-toggle {
+  --mat-datepicker-toggle-icon-color: #{$ember-glow};
 }
