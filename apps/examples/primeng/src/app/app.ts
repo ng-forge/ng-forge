@@ -35,14 +35,10 @@ export class App {
 
   constructor() {
     // Update document root data-theme attribute when theme changes
+    // Always set explicit value to override media query-based auto detection
     explicitEffect([this.theme], ([theme]) => {
-      if (theme === 'auto') {
-        // For auto mode, set based on system preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-      } else {
-        document.documentElement.setAttribute('data-theme', theme);
-      }
+      const resolvedTheme = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', resolvedTheme);
     });
   }
 }

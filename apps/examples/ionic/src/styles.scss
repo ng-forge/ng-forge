@@ -50,15 +50,9 @@ body {
   font-family: $font-primary;
 }
 
-// Auto dark mode - use system preference when no data-theme is set
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    @include ember-ionic.ionic-theme-dark();
-  }
-
-  html:not([data-theme]) {
-    @include ember-ionic.ionic-dark-inputs();
-  }
+// Explicit light theme (same as default, for when data-theme='light' is set)
+:root[data-theme='light'] {
+  @include ember-ionic.ionic-theme-light();
 }
 
 // Explicit dark theme
@@ -89,10 +83,8 @@ ion-content {
   --background: #f6f6f6;
 }
 
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]) ion-content {
-    --background: rgb(41, 41, 41);
-  }
+html[data-theme='light'] ion-content {
+  --background: #f6f6f6;
 }
 
 html[data-theme='dark'] ion-content {

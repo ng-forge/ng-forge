@@ -1,4 +1,4 @@
-import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -44,15 +44,10 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[class.theme-light]': 'isLightTheme()',
-    '[class.theme-dark]': 'isDarkTheme()',
-  },
 })
 export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly http = inject(HttpClient);
-  private readonly document = inject(DOCUMENT);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   // ============================================
@@ -77,13 +72,6 @@ export class LandingComponent {
   readonly copyConfetti = signal<{ id: number; x: number; y: number; angle: number }[]>([]);
   readonly visibleElements = signal<Set<string>>(new Set());
   private confettiIdCounter = 0;
-
-  // Theme state: 'light', 'dark', or 'auto' (follows system)
-  readonly currentTheme = signal<'light' | 'dark' | 'auto'>('auto');
-
-  // Computed signals for host class bindings
-  readonly isLightTheme = computed(() => this.currentTheme() === 'light');
-  readonly isDarkTheme = computed(() => this.currentTheme() === 'dark');
 
   // ============================================
   // STATS (fetched dynamically)
@@ -152,13 +140,6 @@ export class LandingComponent {
     const pkg = this.packageManagers.find((p) => p.id === this.currentPackageManager());
     const ui = this.uiLibraries.find((u) => u.id === this.currentUiLibrary());
     return `${pkg?.command ?? 'npm install'} @ng-forge/dynamic-forms ${ui?.package ?? '@ng-forge/material'}`;
-  });
-
-  readonly themeIcon = computed(() => {
-    const theme = this.currentTheme();
-    if (theme === 'light') return 'sun';
-    if (theme === 'dark') return 'moon';
-    return 'monitor'; // auto follows system
   });
 
   constructor() {
@@ -235,23 +216,6 @@ export class LandingComponent {
 
   setHeroTab(tab: 'config' | 'demo'): void {
     this.heroTab.set(tab);
-  }
-
-  toggleTheme(): void {
-    const themes: Array<'light' | 'dark' | 'auto'> = ['light', 'dark', 'auto'];
-    const currentIndex = themes.indexOf(this.currentTheme());
-    const nextTheme = themes[(currentIndex + 1) % themes.length];
-    this.currentTheme.set(nextTheme);
-    this.applyTheme(nextTheme);
-  }
-
-  private applyTheme(theme: 'light' | 'dark' | 'auto'): void {
-    const html = this.document.documentElement;
-    if (theme === 'auto') {
-      html.removeAttribute('data-theme');
-    } else {
-      html.setAttribute('data-theme', theme);
-    }
   }
 
   copyInstallCommand(): void {

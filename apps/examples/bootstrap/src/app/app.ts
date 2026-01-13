@@ -35,17 +35,11 @@ export class App {
 
   constructor() {
     // Update document root data-theme and data-bs-theme attributes when theme changes
+    // Always set explicit value to override media query-based auto detection
     explicitEffect([this.theme], ([theme]) => {
-      if (theme === 'auto') {
-        // For auto mode, set based on system preference (Bootstrap needs data-bs-theme)
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const resolvedTheme = prefersDark ? 'dark' : 'light';
-        document.documentElement.removeAttribute('data-theme');
-        document.documentElement.setAttribute('data-bs-theme', resolvedTheme);
-      } else {
-        document.documentElement.setAttribute('data-theme', theme);
-        document.documentElement.setAttribute('data-bs-theme', theme);
-      }
+      const resolvedTheme = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', resolvedTheme);
+      document.documentElement.setAttribute('data-bs-theme', resolvedTheme);
     });
   }
 }

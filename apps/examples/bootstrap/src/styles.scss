@@ -44,19 +44,17 @@ body {
   font-family: $font-primary;
 }
 
-// Auto dark mode - use system preference when no data-theme is set
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]),
-  :root:not([data-theme]) {
-    @include ember-bs.bootstrap-theme-dark();
-  }
+// Explicit light theme (same as default, for when data-theme='light' is set)
+html[data-theme='light'],
+:root[data-theme='light'] {
+  @include ember-bs.bootstrap-theme-light();
+}
 
-  html:not([data-theme]),
-  html:not([data-theme]) body {
-    // ng-doc dark mode colors
-    background-color: rgb(41, 41, 41);
-    color: #a9a9a9;
-  }
+html[data-theme='light'],
+html[data-theme='light'] body {
+  // ng-doc light mode colors
+  background-color: #f6f6f6;
+  color: rgb(78, 78, 78);
 }
 
 // Explicit dark theme

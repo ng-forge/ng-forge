@@ -18,11 +18,9 @@
 // Apply ember-themed Material (light default)
 @include ember-mat.material-theme-light();
 
-// Auto dark mode - use system preference when no data-theme is set
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]) {
-    @include ember-mat.material-theme-dark();
-  }
+// Explicit light theme (same as default, for when data-theme='light' is set)
+[data-theme='light'] {
+  @include ember-mat.material-theme-light();
 }
 
 // Explicit dark theme

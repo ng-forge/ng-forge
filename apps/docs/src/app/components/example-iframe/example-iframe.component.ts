@@ -182,8 +182,14 @@ export class ExampleIframeComponent {
 
   iframeSrc = computed(() => {
     const baseUrl = this.env.exampleBaseUrls[this.library()];
+    const examplePath = this.example();
+    // If example URL already contains theme param (e.g., on landing page), don't add another
+    if (examplePath.includes('theme=')) {
+      return `${baseUrl}/#/examples/${examplePath}`;
+    }
     const theme = this.currentTheme();
-    return `${baseUrl}/#/examples/${this.example()}?theme=${theme}`;
+    const separator = examplePath.includes('?') ? '&' : '?';
+    return `${baseUrl}/#/examples/${examplePath}${separator}theme=${theme}`;
   });
 
   trustedSrc = computed<SafeResourceUrl>(() => {
@@ -213,9 +219,15 @@ export class ExampleIframeComponent {
         });
 
       // Send theme to iframe when theme changes
+      // But skip if example already has theme in URL (e.g., landing page examples)
       effect(() => {
         const theme = this.currentTheme();
         const iframe = this.iframeEl();
+        const examplePath = this.example();
+        // Don't override URL-specified theme (landing page uses theme=landing)
+        if (examplePath.includes('theme=')) {
+          return;
+        }
         if (iframe?.nativeElement?.contentWindow) {
           iframe.nativeElement.contentWindow.postMessage({ type: 'theme-change', theme }, '*');
         }
@@ -249,17 +261,27 @@ export class ExampleIframeComponent {
 
   private getTheme(): string {
     const dataTheme = this.document.documentElement.getAttribute('data-theme');
-    if (dataTheme) {
-      return dataTheme;
+    // NgDoc uses: 'dark' for dark, 'auto' for auto, null/undefined for light
+    if (dataTheme === 'dark') {
+      return 'dark';
     }
-    // Auto mode - check system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
+    if (dataTheme === 'auto') {
+      // Auto mode - resolve based on system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return prefersDark ? 'dark' : 'light';
+    }
+    // No data-theme or unknown value = light mode
+    return 'light';
   }
 
   onLoad(): void {
     this.loading.set(false);
     // Send initial theme to iframe after it loads
+    // But skip if example already has theme in URL (e.g., landing page examples)
+    const examplePath = this.example();
+    if (examplePath.includes('theme=')) {
+      return;
+    }
     const iframe = this.iframeEl();
     if (iframe?.nativeElement?.contentWindow) {
       iframe.nativeElement.contentWindow.postMessage({ type: 'theme-change', theme: this.currentTheme() }, '*');

@@ -43,15 +43,12 @@
     --example-result-text: rgb(78, 78, 78);
   }
 
-  // Auto mode - use system preference when no data-theme is set
-  @media (prefers-color-scheme: dark) {
-    html:not([data-theme]),
-    :root:not([data-theme]) {
-      // ng-doc dark mode colors
-      --example-result-bg: rgb(48, 48, 48);
-      --example-result-border: rgb(71, 71, 71);
-      --example-result-text: #a9a9a9;
-    }
+  // Explicit light theme (same as default)
+  html[data-theme='light'],
+  :root[data-theme='light'] {
+    --example-result-bg: #ebebeb;
+    --example-result-border: #ddd;
+    --example-result-text: rgb(78, 78, 78);
   }
 
   // Explicit dark theme
@@ -139,12 +136,10 @@
     @include example-body-light;
   }
 
-  // Auto mode - use system preference when no data-theme is set
-  @media (prefers-color-scheme: dark) {
-    html:not([data-theme]),
-    html:not([data-theme]) body {
-      @include example-body-dark;
-    }
+  // Explicit light theme (same as default)
+  html[data-theme='light'],
+  html[data-theme='light'] body {
+    @include example-body-light;
   }
 
   // Explicit dark theme

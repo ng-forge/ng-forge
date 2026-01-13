@@ -26,12 +26,10 @@
   @include apply-theme($theme-light);
 }
 
-// Auto dark mode
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]),
-  :root:not([data-theme]) {
-    @include apply-theme($theme-dark);
-  }
+// Explicit light theme (same as default, for when data-theme='light' is set)
+html[data-theme='light'],
+:root[data-theme='light'] {
+  @include apply-theme($theme-light);
 }
 
 // Explicit dark theme

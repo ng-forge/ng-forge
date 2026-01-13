@@ -196,12 +196,17 @@ body[data-theme='light'] .logo-dark {
 // ============================================
 // Style the ng-doc header controls to look like landing page nav buttons
 .ng-doc-header-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
 
   // Style all icon buttons (theme toggle, GitHub, etc.)
+  // Need to override ng-doc's encapsulated styles
+  > *,
+  a,
+  button,
   [ng-doc-button-icon],
+  ng-doc-theme-toggle,
   ng-doc-theme-toggle button,
   ng-doc-theme-toggle [ng-doc-button-icon] {
     display: flex !important;
@@ -209,6 +214,8 @@ body[data-theme='light'] .logo-dark {
     justify-content: center !important;
     width: 40px !important;
     height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
     border-radius: 50% !important;
     background: var(--ng-doc-base-2) !important;
     border: 1px solid var(--ng-doc-border-color) !important;
@@ -217,11 +224,12 @@ body[data-theme='light'] .logo-dark {
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     padding: 0 !important;
+    box-sizing: border-box !important;
 
     &:hover {
       background: var(--ng-doc-base-1) !important;
-      border-color: var(--ng-doc-text-muted) !important;
-      color: var(--ng-doc-text) !important;
+      border-color: #{$ember-glow} !important;
+      color: #{$ember-glow} !important;
       transform: translateY(-2px) !important;
     }
 
@@ -229,9 +237,22 @@ body[data-theme='light'] .logo-dark {
       transform: translateY(0) !important;
     }
 
-    ng-doc-icon {
+    ng-doc-icon,
+    .ng-doc-icon {
       width: 20px !important;
       height: 20px !important;
+    }
+  }
+
+  // Ensure theme toggle wrapper doesn't break layout
+  ng-doc-theme-toggle {
+    background: transparent !important;
+    border: none !important;
+
+    button,
+    [ng-doc-button-icon] {
+      background: var(--ng-doc-base-2) !important;
+      border: 1px solid var(--ng-doc-border-color) !important;
     }
   }
 }
@@ -239,6 +260,9 @@ body[data-theme='light'] .logo-dark {
 // Dark theme icon button styling
 @media (prefers-color-scheme: dark) {
   html:not([data-theme='light']) .ng-doc-header-controls {
+    > *,
+    a,
+    button,
     [ng-doc-button-icon],
     ng-doc-theme-toggle button,
     ng-doc-theme-toggle [ng-doc-button-icon] {
@@ -248,14 +272,28 @@ body[data-theme='light'] .logo-dark {
 
       &:hover {
         background: #{$bg-elevated} !important;
-        border-color: #{$steel-dim} !important;
-        color: #{$steel} !important;
+        border-color: #{$ember-glow} !important;
+        color: #{$ember-glow} !important;
+      }
+    }
+
+    ng-doc-theme-toggle {
+      background: transparent !important;
+      border: none !important;
+
+      button,
+      [ng-doc-button-icon] {
+        background: #{$bg-surface} !important;
+        border: 1px solid #{$steel-dark} !important;
       }
     }
   }
 }
 
 html[data-theme='dark'] .ng-doc-header-controls {
+  > *,
+  a,
+  button,
   [ng-doc-button-icon],
   ng-doc-theme-toggle button,
   ng-doc-theme-toggle [ng-doc-button-icon] {
@@ -265,8 +303,19 @@ html[data-theme='dark'] .ng-doc-header-controls {
 
     &:hover {
       background: #{$bg-elevated} !important;
-      border-color: #{$steel-dim} !important;
-      color: #{$steel} !important;
+      border-color: #{$ember-glow} !important;
+      color: #{$ember-glow} !important;
+    }
+  }
+
+  ng-doc-theme-toggle {
+    background: transparent !important;
+    border: none !important;
+
+    button,
+    [ng-doc-button-icon] {
+      background: #{$bg-surface} !important;
+      border: 1px solid #{$steel-dark} !important;
     }
   }
 }
@@ -325,7 +374,7 @@ ng-doc-demo-displayer {
 // LANDING PAGE SCROLLBAR & SCROLL SNAP
 // ============================================
 // Custom scrollbar for landing page to match the forge aesthetic
-// Dark mode scrollbar (default)
+// Landing page is always dark
 html:has(app-landing) {
   scrollbar-width: thin;
   scrollbar-color: #ff4d00 #0a0908;
@@ -354,42 +403,7 @@ html:has(app-landing) {
   }
 }
 
-// Light mode scrollbar for landing page
-@media (prefers-color-scheme: light) {
-  html:not([data-theme]):has(app-landing) {
-    scrollbar-color: #ff4d00 #f5f5f5;
-
-    &::-webkit-scrollbar-track {
-      background: #f5f5f5;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      border: 2px solid #f5f5f5;
-    }
-
-    &::-webkit-scrollbar-corner {
-      background: #f5f5f5;
-    }
-  }
-}
-
-html[data-theme='light']:has(app-landing) {
-  scrollbar-color: #ff4d00 #f5f5f5;
-
-  &::-webkit-scrollbar-track {
-    background: #f5f5f5;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border: 2px solid #f5f5f5;
-  }
-
-  &::-webkit-scrollbar-corner {
-    background: #f5f5f5;
-  }
-}
-
-// Inner scrollbars (code blocks, etc.) - dark mode
+// Inner scrollbars (code blocks, etc.) - always dark for landing
 body:has(app-landing) {
   ::-webkit-scrollbar {
     width: 10px;
@@ -412,36 +426,5 @@ body:has(app-landing) {
 
   ::-webkit-scrollbar-corner {
     background: #0a0908;
-  }
-}
-
-// Light mode inner scrollbars
-@media (prefers-color-scheme: light) {
-  html:not([data-theme]) body:has(app-landing) {
-    ::-webkit-scrollbar-track {
-      background: #f5f5f5;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      border: 2px solid #f5f5f5;
-    }
-
-    ::-webkit-scrollbar-corner {
-      background: #f5f5f5;
-    }
-  }
-}
-
-html[data-theme='light'] body:has(app-landing) {
-  ::-webkit-scrollbar-track {
-    background: #f5f5f5;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    border: 2px solid #f5f5f5;
-  }
-
-  ::-webkit-scrollbar-corner {
-    background: #f5f5f5;
   }
 }
