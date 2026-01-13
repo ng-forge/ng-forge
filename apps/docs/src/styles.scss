@@ -299,6 +299,14 @@ ng-doc-theme-toggle .letter {
       border-color: #{$ember-glow} !important;
       color: #{$ember-glow} !important;
       transform: translateY(-2px) !important;
+
+      // Ensure icons inside also get ember color on hover
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
     }
 
     &:active {
@@ -309,6 +317,7 @@ ng-doc-theme-toggle .letter {
     .ng-doc-icon {
       width: 20px !important;
       height: 20px !important;
+      transition: color 0.2s ease !important;
     }
   }
 
@@ -321,6 +330,65 @@ ng-doc-theme-toggle .letter {
     [ng-doc-button-icon] {
       background: var(--ng-doc-base-2) !important;
       border: 1px solid var(--ng-doc-border-color) !important;
+
+      &:hover {
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// SEARCH BUTTON STYLING (match header buttons)
+// ============================================
+// Make search button circular with ember hover effects
+ng-doc-search {
+  button,
+  [ng-doc-button-icon] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    border-radius: 50% !important;
+    background: var(--ng-doc-base-2) !important;
+    border: 1px solid var(--ng-doc-border-color) !important;
+    color: var(--ng-doc-text-muted) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+
+    &:hover {
+      background: var(--ng-doc-base-1) !important;
+      border-color: #{$ember-glow} !important;
+      color: #{$ember-glow} !important;
+      transform: translateY(-2px) !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
+    }
+
+    &:active {
+      transform: translateY(0) !important;
+    }
+
+    ng-doc-icon,
+    .ng-doc-icon {
+      width: 20px !important;
+      height: 20px !important;
+      transition: color 0.2s ease !important;
     }
   }
 }
@@ -342,6 +410,13 @@ ng-doc-theme-toggle .letter {
         background: #{$bg-elevated} !important;
         border-color: #{$ember-glow} !important;
         color: #{$ember-glow} !important;
+
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
       }
     }
 
@@ -353,6 +428,38 @@ ng-doc-theme-toggle .letter {
       [ng-doc-button-icon] {
         background: #{$bg-surface} !important;
         border: 1px solid #{$steel-dark} !important;
+
+        &:hover {
+          ng-doc-icon,
+          .ng-doc-icon,
+          svg {
+            color: #{$ember-glow} !important;
+            fill: #{$ember-glow} !important;
+          }
+        }
+      }
+    }
+  }
+
+  // Dark mode search button styling
+  html[data-theme='auto'] ng-doc-search {
+    button,
+    [ng-doc-button-icon] {
+      background: #{$bg-surface} !important;
+      border-color: #{$steel-dark} !important;
+      color: #{$steel-mid} !important;
+
+      &:hover {
+        background: #{$bg-elevated} !important;
+        border-color: #{$ember-glow} !important;
+        color: #{$ember-glow} !important;
+
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
       }
     }
   }
@@ -373,6 +480,13 @@ html[data-theme='dark'] .ng-doc-header-controls {
       background: #{$bg-elevated} !important;
       border-color: #{$ember-glow} !important;
       color: #{$ember-glow} !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
     }
   }
 
@@ -384,6 +498,38 @@ html[data-theme='dark'] .ng-doc-header-controls {
     [ng-doc-button-icon] {
       background: #{$bg-surface} !important;
       border: 1px solid #{$steel-dark} !important;
+
+      &:hover {
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
+      }
+    }
+  }
+}
+
+// Dark mode search button styling
+html[data-theme='dark'] ng-doc-search {
+  button,
+  [ng-doc-button-icon] {
+    background: #{$bg-surface} !important;
+    border-color: #{$steel-dark} !important;
+    color: #{$steel-mid} !important;
+
+    &:hover {
+      background: #{$bg-elevated} !important;
+      border-color: #{$ember-glow} !important;
+      color: #{$ember-glow} !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
     }
   }
 }
