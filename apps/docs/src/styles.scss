@@ -420,6 +420,29 @@ ng-doc-search {
       }
     }
 
+    // GitHub icon should be white in dark mode
+    a[href*='github'] {
+      color: #ffffff !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #ffffff !important;
+        fill: #ffffff !important;
+      }
+
+      &:hover {
+        color: #{$ember-glow} !important;
+
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: #{$ember-glow} !important;
+          fill: #{$ember-glow} !important;
+        }
+      }
+    }
+
     ng-doc-theme-toggle {
       background: transparent !important;
       border: none !important;
@@ -479,6 +502,29 @@ html[data-theme='dark'] .ng-doc-header-controls {
     &:hover {
       background: #{$bg-elevated} !important;
       border-color: #{$ember-glow} !important;
+      color: #{$ember-glow} !important;
+
+      ng-doc-icon,
+      .ng-doc-icon,
+      svg {
+        color: #{$ember-glow} !important;
+        fill: #{$ember-glow} !important;
+      }
+    }
+  }
+
+  // GitHub icon should be white in dark mode
+  a[href*='github'] {
+    color: #ffffff !important;
+
+    ng-doc-icon,
+    .ng-doc-icon,
+    svg {
+      color: #ffffff !important;
+      fill: #ffffff !important;
+    }
+
+    &:hover {
       color: #{$ember-glow} !important;
 
       ng-doc-icon,
