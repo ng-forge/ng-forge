@@ -121,7 +121,7 @@ export const FEATURES: Feature[] = [
   {
     icon: 'package',
     title: 'Ship Less',
-    description: 'Tree-shakeable. Lazy-loaded. Bundle only what you use.',
+    description: 'Lazy-loaded field components. Load only what you render.',
   },
   {
     icon: 'zap',
