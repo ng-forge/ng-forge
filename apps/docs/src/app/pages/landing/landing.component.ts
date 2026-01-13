@@ -3,9 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { NgDocSearchComponent } from '@ng-doc/app';
 import { catchError, delay, filter, iif, map, merge, of, switchMap, tap } from 'rxjs';
 
 import { ExampleIframeComponent } from '../../components/example-iframe/example-iframe.component';
+import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 
 import {
@@ -40,7 +42,7 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
 
 @Component({
   selector: 'app-landing',
-  imports: [RouterLink, ExampleIframeComponent, CodeHighlightDirective],
+  imports: [RouterLink, ExampleIframeComponent, CodeHighlightDirective, NgDocSearchComponent, Logo],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -230,28 +230,16 @@ nav {
   align-items: center;
   text-decoration: none;
 
-  &:hover .logo-img {
-    filter: brightness(1.2) saturate(1.2) hue-rotate(-10deg) drop-shadow(0 0 4px rgba($molten, 0.4));
-  }
-}
-
-.logo-img {
-  height: 48px;
-  width: auto;
-  transform: scale(2.5);
-  transform-origin: left center;
-  transition:
-    transform 0.3s ease,
-    filter 0.2s ease;
-
-  .scrolled & {
-    transform: scale(2);
+  &:focus-visible {
+    outline: 2px solid $ember-glow;
+    outline-offset: 4px;
+    border-radius: 4px;
   }
 }
 
 .nav-links {
   display: flex;
-  gap: 1.5rem;
+  gap: 0.75rem;
   align-items: center;
 
   a:not(.github-link) {
@@ -283,26 +271,160 @@ nav {
     }
   }
 
+  // Shared button style for nav buttons (search, github, etc.)
+  // Landing page style: no border, transparent bg, simple color change + scale on hover
   .github-link {
     display: flex;
     align-items: center;
-    padding: 0.5rem;
-    border-radius: 8px;
-    transition: all 0.2s;
-    color: $steel-dim;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: $steel-mid;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
 
     &:hover {
       color: $ember-glow;
+      transform: scale(1.1);
     }
 
-    svg {
+    &:active {
+      transform: scale(0.95);
+    }
+
+    .icon {
       width: 22px;
       height: 22px;
+      transition: color 0.3s ease;
     }
   }
 
-  @media (max-width: 768px) {
-    gap: 1rem;
+  // Smaller buttons on narrow screens
+  @media (max-width: 400px) {
+    gap: 0.5rem;
+
+    .github-link {
+      width: 36px;
+      height: 36px;
+
+      .icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  // Search component styling
+  // Desktop: show search input (dark themed)
+  // Mobile/tablet: show just the icon (like GitHub)
+  ::ng-deep ng-doc-search {
+    // Desktop (>= 1024px): show search input bar, hide icon button
+    ng-doc-input-wrapper {
+      display: flex !important;
+      background: $bg-surface !important;
+      border: 1px solid $steel-dark !important;
+      border-radius: 8px !important;
+      transition: all 0.2s ease !important;
+
+      &:hover,
+      &:focus-within {
+        border-color: $ember-glow !important;
+        box-shadow: 0 0 12px rgba($ember-glow, 0.2) !important;
+      }
+
+      input {
+        color: $steel !important;
+        background: transparent !important;
+
+        &::placeholder {
+          color: $steel-dim !important;
+        }
+      }
+
+      ng-doc-icon,
+      .ng-doc-icon {
+        color: $steel-mid !important;
+      }
+
+      // Keyboard shortcut badge
+      ng-doc-tag {
+        background: $bg-elevated !important;
+        color: $steel-dim !important;
+        border: 1px solid $steel-dark !important;
+      }
+    }
+
+    // Hide icon button on desktop
+    > button[ng-doc-button-icon] {
+      display: none !important;
+    }
+
+    // Mobile/tablet (< 1024px): show icon button, hide input
+    @media (max-width: 1023px) {
+      ng-doc-input-wrapper {
+        display: none !important;
+      }
+
+      // Match GitHub icon style exactly - simple color + scale
+      > button[ng-doc-button-icon] {
+        display: flex !important;
+        background: transparent !important;
+        border: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        padding: 0 !important;
+        transition: all 0.3s ease !important;
+
+        &:hover {
+          background: transparent !important;
+          transform: scale(1.1) !important;
+
+          ng-doc-icon,
+          .ng-doc-icon,
+          svg {
+            color: $ember-glow !important;
+          }
+        }
+
+        &:active {
+          transform: scale(0.95) !important;
+        }
+
+        // Icon color and size to match GitHub
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          color: $steel-mid !important;
+          width: 22px !important;
+          height: 22px !important;
+          transition: color 0.3s ease !important;
+        }
+      }
+    }
+
+    // Smaller icon on very narrow screens
+    @media (max-width: 400px) {
+      > button[ng-doc-button-icon] {
+        width: 36px !important;
+        height: 36px !important;
+
+        ng-doc-icon,
+        .ng-doc-icon,
+        svg {
+          width: 20px !important;
+          height: 20px !important;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 1023px) {
+    gap: 0.5rem;
   }
 }
 

@@ -14,6 +14,7 @@ export {
   PrimeField,
   withPrimeNGFields,
 } from './lib';
+
 export type {
   PrimeButtonProps,
   PrimeButtonField,

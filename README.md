@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo-light.svg" alt="ng-forge logo" width="400"/>
+  <img src="logo.svg" alt="ng-forge Dynamic Forms" width="400"/>
 </p>
 
 <p align="center">

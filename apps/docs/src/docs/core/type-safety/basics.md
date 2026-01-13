@@ -7,7 +7,7 @@ Complete type inference for form configurations using TypeScript's type system a
 
 ## Overview
 
-ng-forge provides compile-time type inference for form configurations, eliminating manual type definitions and catching errors before runtime. All form values are automatically inferred from your configuration using TypeScript's advanced type features.
+Dynamic Forms provides compile-time type inference for form configurations, eliminating manual type definitions and catching errors before runtime. All form values are automatically inferred from your configuration using TypeScript's advanced type features.
 
 ## Basic Type Inference
 

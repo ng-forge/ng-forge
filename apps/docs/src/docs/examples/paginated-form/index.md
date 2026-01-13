@@ -290,14 +290,14 @@ Each page validates independently. Users cannot proceed to the next page until a
 
 ## Performance & Lazy Loading
 
-ng-forge uses Angular's `@defer` blocks with **smart prefetching** to achieve true lazy loading while maintaining flicker-free navigation.
+Dynamic Forms uses Angular's `@defer` blocks with **smart prefetching** to achieve true lazy loading while maintaining flicker-free navigation.
 
 ### How It Works
 
 - **Current page loads immediately** - The active page renders instantly
 - **Adjacent pages (±1) prefetch** - Next/previous pages load in background for instant navigation
 - **Distant pages defer until idle** - Pages 2+ steps away load when browser is idle
-- **Automatic optimization** - No configuration needed - ng-forge handles this automatically
+- **Automatic optimization** - No configuration needed - Dynamic Forms handles this automatically
 
 ### Benefits
 

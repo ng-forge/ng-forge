@@ -22,7 +22,10 @@
             "input": "apps/examples/ionic/public"
           }
         ],
-        "styles": ["apps/examples/ionic/src/styles.scss"]
+        "styles": ["apps/examples/ionic/src/styles.scss"],
+        "stylePreprocessorOptions": {
+          "includePaths": ["libs/styling/src", "packages/dynamic-forms-ionic/src/styles"]
+        }
       },
       "configurations": {
         "production": {

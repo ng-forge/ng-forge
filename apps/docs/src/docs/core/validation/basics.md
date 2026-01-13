@@ -3,11 +3,11 @@ title: Basics
 keyword: ValidationBasicsPage
 ---
 
-ng-forge provides powerful, type-safe validation that integrates directly with Angular's signal forms. Start with simple shorthand validators and progress to advanced conditional validation as your needs grow.
+Dynamic Forms provides powerful, type-safe validation that integrates directly with Angular's signal forms. Start with simple shorthand validators and progress to advanced conditional validation as your needs grow.
 
 ## Signal Forms Integration
 
-ng-forge validation maps directly to Angular's signal forms validators:
+Dynamic Forms validation maps directly to Angular's signal forms validators:
 
 ```typescript
 // Your configuration

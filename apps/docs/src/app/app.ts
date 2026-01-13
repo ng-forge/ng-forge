@@ -7,6 +7,8 @@ import { fromEvent, map, startWith, of, skip, filter } from 'rxjs';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgDocButtonIconComponent, NgDocIconComponent, NgDocTooltipDirective } from '@ng-doc/ui-kit';
 
+import { Logo } from './components/logo';
+
 const THEME_STORAGE_KEY = 'ng-forge-docs-theme';
 type ThemeType = 'auto' | 'light' | 'dark';
 
@@ -33,6 +35,7 @@ function storageValueToTheme(value: string | null): string | undefined {
     NgDocIconComponent,
     NgDocButtonIconComponent,
     NgDocTooltipDirective,
+    Logo,
   ],
   selector: 'app-root',
   templateUrl: './app.html',
