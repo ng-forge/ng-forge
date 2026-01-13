@@ -46,3 +46,42 @@
 body {
   font-family: $font-primary;
 }
+
+// ============================================
+// MATERIAL INPUT BACKGROUND OVERRIDE
+// ============================================
+// Set input backgrounds to white (light) and black (dark) for contrast
+// Note: Default appearance is 'outline', so we target the notched outline elements
+
+// Light mode - white input backgrounds
+.mat-mdc-form-field {
+  --mat-form-field-filled-container-color: #ffffff !important;
+}
+
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  background-color: #ffffff !important;
+}
+
+// Dark mode - black input backgrounds
+[data-theme='dark'] .mat-mdc-form-field {
+  --mat-form-field-filled-container-color: #000000 !important;
+}
+
+[data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__leading,
+[data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__notch,
+[data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__trailing {
+  background-color: #000000 !important;
+}
+
+// Landing mode - black input backgrounds (dark variant)
+[data-theme='landing'] .mat-mdc-form-field {
+  --mat-form-field-filled-container-color: #000000 !important;
+}
+
+[data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__leading,
+[data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__notch,
+[data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__trailing {
+  background-color: #000000 !important;
+}

@@ -11,9 +11,10 @@
 // BASE STYLES MIXIN
 // ============================================
 @mixin example-base {
-  * {
-    margin: 0;
-    padding: 0;
+  // Apply box-sizing globally but preserve framework component margins/padding
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
 
@@ -24,6 +25,8 @@
 
   html,
   body {
+    margin: 0;
+    padding: 0;
     // Use auto height for iframe embedding - content determines height
     height: auto;
     // Hide overflow to prevent scrollbars in iframe - parent controls scrolling
@@ -35,35 +38,35 @@
 // THEME VARIABLES MIXIN
 // ============================================
 // Sets up CSS custom properties for example result components
+// Uses actual docs background colors for consistency
 @mixin example-theme-variables {
   :root {
-    // Light mode defaults (ng-doc light mode colors)
-    --example-result-bg: #ebebeb;
-    --example-result-border: #ddd;
-    --example-result-text: rgb(78, 78, 78);
+    // Light mode - white background for contrast
+    --example-result-bg: #ffffff;
+    --example-result-border: #e0e0e0;
+    --example-result-text: #1a1a1a;
   }
 
   // Explicit light theme (same as default)
   html[data-theme='light'],
   :root[data-theme='light'] {
-    --example-result-bg: #ebebeb;
-    --example-result-border: #ddd;
-    --example-result-text: rgb(78, 78, 78);
+    --example-result-bg: #ffffff;
+    --example-result-border: #e0e0e0;
+    --example-result-text: #1a1a1a;
   }
 
-  // Explicit dark theme
+  // Explicit dark theme - black background for contrast
   html[data-theme='dark'],
   :root[data-theme='dark'] {
-    // ng-doc dark mode colors
-    --example-result-bg: rgb(48, 48, 48);
-    --example-result-border: rgb(71, 71, 71);
-    --example-result-text: #a9a9a9;
+    --example-result-bg: #000000;
+    --example-result-border: #{$steel-dark};
+    --example-result-text: #{$steel};
   }
 
-  // Landing page theme - matches docs landing page colors
+  // Landing page theme - black background
   html[data-theme='landing'],
   :root[data-theme='landing'] {
-    --example-result-bg: #{$bg-surface};
+    --example-result-bg: #000000;
     --example-result-border: #{$steel-dark};
     --example-result-text: #{$steel};
   }
@@ -109,14 +112,12 @@
 // ============================================
 // Standard body theming for example apps
 @mixin example-body-light {
-  // ng-doc light mode colors
-  background-color: #f6f6f6;
+  background-color: rgb(250, 250, 250);
   color: rgb(78, 78, 78);
 }
 
 @mixin example-body-dark {
-  // ng-doc dark mode colors
-  background-color: rgb(41, 41, 41);
+  background-color: rgb(19, 18, 16);
   color: #a9a9a9;
 }
 

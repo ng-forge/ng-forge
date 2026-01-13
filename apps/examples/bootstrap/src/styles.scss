@@ -52,8 +52,7 @@ html[data-theme='light'],
 
 html[data-theme='light'],
 html[data-theme='light'] body {
-  // ng-doc light mode colors
-  background-color: #f6f6f6;
+  background-color: rgb(250, 250, 250);
   color: rgb(78, 78, 78);
 }
 
@@ -65,8 +64,7 @@ html[data-theme='dark'],
 
 html[data-theme='dark'],
 html[data-theme='dark'] body {
-  // ng-doc dark mode colors
-  background-color: rgb(41, 41, 41);
+  background-color: rgb(19, 18, 16);
   color: #a9a9a9;
 }
 

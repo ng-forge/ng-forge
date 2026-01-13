@@ -37,9 +37,18 @@ export class App {
     // Update document root data-theme and data-bs-theme attributes when theme changes
     // Always set explicit value to override media query-based auto detection
     explicitEffect([this.theme], ([theme]) => {
-      const resolvedTheme = theme === 'dark' ? 'dark' : 'light';
+      const resolvedTheme = this.resolveTheme(theme);
       document.documentElement.setAttribute('data-theme', resolvedTheme);
       document.documentElement.setAttribute('data-bs-theme', resolvedTheme);
     });
+  }
+
+  // Resolve theme to 'dark' or 'light', handling 'auto' by checking system preference
+  private resolveTheme(theme: string): 'dark' | 'light' {
+    if (theme === 'dark') return 'dark';
+    if (theme === 'light') return 'light';
+    // Auto or unknown - check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
   }
 }

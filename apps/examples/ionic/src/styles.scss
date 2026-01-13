@@ -27,6 +27,7 @@
 
 @include examples.example-base();
 @include examples.example-theme-variables();
+@include examples.example-body-themes();
 @include examples.example-components();
 
 // ============================================
@@ -43,6 +44,7 @@
 // Light theme (default)
 :root {
   @include ember-ionic.ionic-theme-light();
+  @include ember-ionic.ionic-light-inputs();
 }
 
 html,
@@ -53,6 +55,7 @@ body {
 // Explicit light theme (same as default, for when data-theme='light' is set)
 :root[data-theme='light'] {
   @include ember-ionic.ionic-theme-light();
+  @include ember-ionic.ionic-light-inputs();
 }
 
 // Explicit dark theme
@@ -80,17 +83,43 @@ html[data-theme='landing'] {
 
 ion-content {
   // Light mode (default)
-  --background: #f6f6f6;
+  --background: rgb(250, 250, 250);
 }
 
 html[data-theme='light'] ion-content {
-  --background: #f6f6f6;
+  --background: rgb(250, 250, 250);
 }
 
 html[data-theme='dark'] ion-content {
-  --background: rgb(41, 41, 41);
+  --background: rgb(19, 18, 16);
 }
 
 html[data-theme='landing'] ion-content {
   --background: var(--bg-void);
+}
+
+// ============================================
+// IONIC INPUT BACKGROUND OVERRIDE
+// ============================================
+// Set input backgrounds to white (light) and black (dark) for contrast
+
+// Light mode - white input backgrounds
+ion-input,
+ion-textarea,
+ion-select {
+  --background: #ffffff !important;
+}
+
+// Dark mode - black input backgrounds
+html[data-theme='dark'] ion-input,
+html[data-theme='dark'] ion-textarea,
+html[data-theme='dark'] ion-select {
+  --background: #000000 !important;
+}
+
+// Landing mode - black input backgrounds
+html[data-theme='landing'] ion-input,
+html[data-theme='landing'] ion-textarea,
+html[data-theme='landing'] ion-select {
+  --background: #000000 !important;
 }

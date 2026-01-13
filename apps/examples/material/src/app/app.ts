@@ -1,4 +1,4 @@
-import { afterNextRender, Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { fromEvent, merge, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -37,8 +37,17 @@ export class App {
     // Update document root data-theme attribute when theme changes
     // Always set explicit value to override media query-based auto detection
     explicitEffect([this.theme], ([theme]) => {
-      const resolvedTheme = theme === 'dark' ? 'dark' : 'light';
+      const resolvedTheme = this.resolveTheme(theme);
       document.documentElement.setAttribute('data-theme', resolvedTheme);
     });
+  }
+
+  // Resolve theme to 'dark' or 'light', handling 'auto' by checking system preference
+  private resolveTheme(theme: string): 'dark' | 'light' {
+    if (theme === 'dark') return 'dark';
+    if (theme === 'light') return 'light';
+    // Auto or unknown - check system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
   }
 }

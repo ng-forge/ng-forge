@@ -5,7 +5,6 @@ import { NgDocNavbarComponent, NgDocRootComponent, NgDocSidebarComponent, NgDocT
 import { NgDocThemeService } from '@ng-doc/app/services/theme';
 import { fromEvent, map, startWith, of, skip, filter } from 'rxjs';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NgDocButtonIconComponent, NgDocIconComponent, NgDocTooltipDirective } from '@ng-doc/ui-kit';
 
 const THEME_STORAGE_KEY = 'ng-forge-docs-theme';
 type ThemeType = 'auto' | 'light' | 'dark';
@@ -24,16 +23,7 @@ function storageValueToTheme(value: string | null): string | undefined {
 }
 
 @Component({
-  imports: [
-    RouterModule,
-    NgDocRootComponent,
-    NgDocNavbarComponent,
-    NgDocSidebarComponent,
-    NgDocThemeToggleComponent,
-    NgDocIconComponent,
-    NgDocButtonIconComponent,
-    NgDocTooltipDirective,
-  ],
+  imports: [RouterModule, NgDocRootComponent, NgDocNavbarComponent, NgDocSidebarComponent, NgDocThemeToggleComponent],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',

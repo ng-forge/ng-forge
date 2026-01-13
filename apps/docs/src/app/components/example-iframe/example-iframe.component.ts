@@ -252,8 +252,9 @@ export class ExampleIframeComponent {
     // Also listen for system preference changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     mediaQuery.addEventListener('change', () => {
-      // Only update if in auto mode (no explicit theme set)
-      if (!this.document.documentElement.hasAttribute('data-theme')) {
+      // Only update if in auto mode (NgDoc sets data-theme='auto' for system preference)
+      const dataTheme = this.document.documentElement.getAttribute('data-theme');
+      if (dataTheme === 'auto' || !dataTheme) {
         this.currentTheme.set(this.getTheme());
       }
     });

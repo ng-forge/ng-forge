@@ -82,19 +82,22 @@
   @include ionic-tertiary-colors;
   @include ionic-semantic-colors;
 
-  // Background colors
-  --ion-background-color: #f6f6f6;
-  --ion-background-color-rgb: 246, 246, 246;
+  // Background colors (matches example body light)
+  --ion-background-color: rgb(250, 250, 250);
+  --ion-background-color-rgb: 250, 250, 250;
 
   // Text colors
   --ion-text-color: rgb(78, 78, 78);
   --ion-text-color-rgb: 78, 78, 78;
 
-  // Component backgrounds
+  // Component backgrounds (white for contrast against light gray page)
   --ion-item-background: #ffffff;
   --ion-card-background: #ffffff;
   --ion-toolbar-background: #ffffff;
   --ion-input-background: #ffffff;
+
+  // Border color for inputs
+  --ion-border-color: #dee2e6;
 
   // Step colors for gradients/states
   --ion-color-step-50: #f0f0f0;
@@ -134,40 +137,43 @@
   --ion-color-primary-shade: #{$ember-core};
   --ion-color-primary-tint: #{$molten};
 
-  // Background colors (ng-doc dark mode)
-  --ion-background-color: rgb(41, 41, 41);
-  --ion-background-color-rgb: 41, 41, 41;
+  // Background colors (matches example body dark)
+  --ion-background-color: rgb(19, 18, 16);
+  --ion-background-color-rgb: 19, 18, 16;
 
   // Text colors
-  --ion-text-color: #a9a9a9;
-  --ion-text-color-rgb: 169, 169, 169;
+  --ion-text-color: #dee2e6;
+  --ion-text-color-rgb: 222, 226, 230;
 
-  // Component backgrounds
-  --ion-item-background: rgb(55, 55, 55);
-  --ion-card-background: rgb(55, 55, 55);
-  --ion-toolbar-background: rgb(41, 41, 41);
-  --ion-input-background: rgb(55, 55, 55);
+  // Component backgrounds (black for consistency with page)
+  --ion-item-background: #000000;
+  --ion-card-background: #000000;
+  --ion-toolbar-background: rgb(19, 18, 16);
+  --ion-input-background: #000000;
+
+  // Border color for inputs (Bootstrap-like)
+  --ion-border-color: rgb(73, 80, 87);
 
   // Step colors for gradients/states (dark)
-  --ion-color-step-50: rgb(50, 50, 50);
-  --ion-color-step-100: rgb(60, 60, 60);
-  --ion-color-step-150: rgb(70, 70, 70);
-  --ion-color-step-200: rgb(80, 80, 80);
-  --ion-color-step-250: rgb(90, 90, 90);
-  --ion-color-step-300: rgb(100, 100, 100);
-  --ion-color-step-350: rgb(110, 110, 110);
-  --ion-color-step-400: rgb(120, 120, 120);
-  --ion-color-step-450: rgb(130, 130, 130);
-  --ion-color-step-500: rgb(140, 140, 140);
-  --ion-color-step-550: rgb(150, 150, 150);
-  --ion-color-step-600: rgb(160, 160, 160);
-  --ion-color-step-650: rgb(170, 170, 170);
-  --ion-color-step-700: rgb(180, 180, 180);
-  --ion-color-step-750: rgb(190, 190, 190);
-  --ion-color-step-800: rgb(200, 200, 200);
-  --ion-color-step-850: rgb(210, 210, 210);
-  --ion-color-step-900: rgb(220, 220, 220);
-  --ion-color-step-950: rgb(230, 230, 230);
+  --ion-color-step-50: rgb(28, 28, 28);
+  --ion-color-step-100: rgb(38, 38, 38);
+  --ion-color-step-150: rgb(48, 48, 48);
+  --ion-color-step-200: rgb(58, 58, 58);
+  --ion-color-step-250: rgb(68, 68, 68);
+  --ion-color-step-300: rgb(78, 78, 78);
+  --ion-color-step-350: rgb(88, 88, 88);
+  --ion-color-step-400: rgb(98, 98, 98);
+  --ion-color-step-450: rgb(108, 108, 108);
+  --ion-color-step-500: rgb(118, 118, 118);
+  --ion-color-step-550: rgb(128, 128, 128);
+  --ion-color-step-600: rgb(138, 138, 138);
+  --ion-color-step-650: rgb(148, 148, 148);
+  --ion-color-step-700: rgb(158, 158, 158);
+  --ion-color-step-750: rgb(168, 168, 168);
+  --ion-color-step-800: rgb(178, 178, 178);
+  --ion-color-step-850: rgb(188, 188, 188);
+  --ion-color-step-900: rgb(198, 198, 198);
+  --ion-color-step-950: rgb(208, 208, 208);
 }
 
 // ============================================
@@ -181,9 +187,23 @@
   --bg-void: #{$bg-deep};
   --ion-background-color: #{$bg-deep};
   --ion-background-color-rgb: 10, 9, 8;
-  --ion-item-background: #{$bg-surface};
-  --ion-card-background: #{$bg-surface};
+  --ion-item-background: #000000;
+  --ion-card-background: #000000;
   --ion-toolbar-background: #{$bg-deep};
+}
+
+// ============================================
+// LIGHT MODE INPUT STYLING
+// ============================================
+@mixin ionic-light-inputs {
+  ion-select {
+    color: #000000;
+  }
+
+  ion-select::part(text),
+  ion-select::part(placeholder) {
+    color: #000000;
+  }
 }
 
 // ============================================
@@ -192,17 +212,68 @@
 // Applies styling to Ionic input components for dark mode
 @mixin ionic-dark-inputs {
   ion-input,
-  ion-textarea,
+  ion-textarea {
+    --background: #000000;
+    --color: #dee2e6;
+    --placeholder-color: rgb(108, 117, 125);
+    --border-color: rgb(73, 80, 87);
+  }
+
   ion-select {
-    --background: rgb(55, 55, 55);
-    --color: #a9a9a9;
-    --placeholder-color: rgb(140, 140, 140);
+    --background: #000000;
+    --placeholder-color: rgb(108, 117, 125);
+    --border-color: rgb(73, 80, 87);
+    color: #ffffff;
+  }
+
+  // Select value text should be white
+  ion-select::part(text),
+  ion-select::part(placeholder) {
+    color: #ffffff;
   }
 
   ion-item {
-    --background: rgb(55, 55, 55);
-    --color: #a9a9a9;
-    --border-color: rgb(71, 71, 71);
+    --background: #000000;
+    --color: #dee2e6;
+    --border-color: rgb(73, 80, 87);
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --inner-padding-start: 0.5rem;
+    --inner-padding-end: 0.5rem;
+  }
+
+  // Alert dialog (used by select) styling
+  ion-alert {
+    --background: #000000;
+
+    .alert-wrapper {
+      background: #000000 !important;
+    }
+
+    .alert-head {
+      background: rgb(10, 9, 8) !important;
+    }
+
+    .alert-message,
+    .alert-radio-group,
+    .alert-checkbox-group {
+      background: #000000 !important;
+    }
+
+    .alert-button-group {
+      background: #000000 !important;
+    }
+
+    // Radio and checkbox options
+    .alert-radio-label,
+    .alert-checkbox-label {
+      color: #dee2e6 !important;
+    }
+
+    [aria-checked='true'].alert-radio-button .alert-radio-label,
+    [aria-checked='true'].alert-checkbox-button .alert-checkbox-label {
+      color: $ember-glow !important;
+    }
   }
 }
 

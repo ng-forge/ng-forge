@@ -23,33 +23,34 @@ const SEMANTIC = {
 // ============================================
 // These match our SCSS theme definitions
 
+// Light surfaces - matches Bootstrap light mode
 const SURFACES_LIGHT = {
-  0: '#ffffff',
-  50: '#fafafa',
-  100: '#f5f5f5',
-  200: '#e5e7eb',
-  300: '#d1d5db',
-  400: '#9ca3af',
-  500: '#6b7280',
-  600: '#4b5563',
-  700: '#374151',
-  800: '#1f2937',
+  0: '#ffffff', // input background
+  50: 'rgb(250, 250, 250)', // page background
+  100: '#f8f9fa', // subtle background
+  200: '#dee2e6', // borders (Bootstrap)
+  300: '#ced4da', // darker borders
+  400: '#adb5bd', // muted elements
+  500: '#6c757d', // secondary text
+  600: '#495057', // primary text
+  700: '#343a40',
+  800: '#212529',
   900: '#111827',
   950: '#030712',
 } as const;
 
-// Dark surfaces match $theme-dark from _themes.scss
+// Dark surfaces - Bootstrap-like colors for consistency
 const SURFACES_DARK = {
-  0: '#000000', // bg-void
-  50: '#0a0908', // bg-deep
-  100: '#131210', // bg-surface
-  200: '#1a1916', // bg-elevated
-  300: '#2a2824', // border
-  400: '#5c5850', // text-muted
-  500: '#9a958c', // text-secondary
-  600: '#e8e4de', // text-primary
-  700: '#f5f3f0',
-  800: '#faf9f7',
+  0: 'rgb(19, 18, 16)', // page background
+  50: 'rgb(25, 25, 25)', // slightly elevated
+  100: 'rgb(33, 37, 41)', // input/card background (Bootstrap $gray-800)
+  200: 'rgb(52, 58, 64)', // elevated surfaces (Bootstrap $gray-700)
+  300: 'rgb(73, 80, 87)', // borders (Bootstrap $gray-600)
+  400: 'rgb(108, 117, 125)', // muted text (Bootstrap $gray-500)
+  500: 'rgb(134, 142, 150)', // secondary text
+  600: 'rgb(222, 226, 230)', // primary text (Bootstrap $gray-200)
+  700: 'rgb(233, 236, 239)',
+  800: 'rgb(248, 249, 250)',
   900: '#ffffff',
   950: '#ffffff',
 } as const;
@@ -84,7 +85,7 @@ export const EmberPreset = definePreset(Aura, {
           activeColor: '#c2410c',
         },
         formField: {
-          background: '{surface.0}',
+          background: '#ffffff',
           disabledBackground: '{surface.100}',
           borderColor: '{surface.200}',
           focusBorderColor: EMBER.core,
@@ -100,10 +101,32 @@ export const EmberPreset = definePreset(Aura, {
           activeColor: EMBER.hot,
         },
         formField: {
-          background: '{surface.100}',
-          disabledBackground: '{surface.50}',
+          background: '#000000',
+          disabledBackground: '{surface.100}',
           borderColor: '{surface.300}',
           focusBorderColor: EMBER.glow,
+          color: '{surface.600}',
+        },
+        overlay: {
+          select: {
+            background: '{surface.100}',
+            borderColor: '{surface.300}',
+            color: '{surface.600}',
+          },
+          popover: {
+            background: '{surface.100}',
+            borderColor: '{surface.300}',
+            color: '{surface.600}',
+          },
+          modal: {
+            background: '{surface.100}',
+            borderColor: '{surface.300}',
+            color: '{surface.600}',
+          },
+        },
+        content: {
+          background: '{surface.100}',
+          borderColor: '{surface.300}',
           color: '{surface.600}',
         },
       },
@@ -120,22 +143,6 @@ export const PRIMENG_EMBER_THEME: PrimeNGConfigType['theme'] = {
   preset: EmberPreset,
   options: {
     darkModeSelector: '[data-theme="dark"]',
-    cssLayer: {
-      name: 'primeng',
-      order: 'primeng',
-    },
-  },
-};
-
-// ============================================
-// LANDING PAGE THEME CONFIG
-// ============================================
-// Uses dark mode by default for landing page context
-
-export const PRIMENG_LANDING_THEME: PrimeNGConfigType['theme'] = {
-  preset: EmberPreset,
-  options: {
-    darkModeSelector: ':root', // Always dark on landing
     cssLayer: {
       name: 'primeng',
       order: 'primeng',
