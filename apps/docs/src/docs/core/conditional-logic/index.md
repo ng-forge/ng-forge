@@ -3,7 +3,7 @@ title: Basics
 keyword: ConditionalLogicBasicsPage
 ---
 
-Control field behavior dynamically based on form state. ng-forge provides a declarative API for conditional visibility, required state, and readonly state that maps directly to Angular's signal forms.
+Control field behavior dynamically based on form state. Dynamic forms provides a declarative API for conditional visibility, required state, and readonly state that maps directly to Angular's signal forms.
 
 ## Signal Forms Integration
 

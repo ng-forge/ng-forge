@@ -1,5 +1,3 @@
-> Prerequisites: [What is Dynamic Forms?](../what-is-dynamic-forms)
-
 Get ng-forge dynamic forms up and running in your Angular project.
 
 ## Requirements

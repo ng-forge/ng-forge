@@ -1,6 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
 
-@use 'bootstrap/scss/bootstrap';
+// ============================================
+// EMBER COLOR OVERRIDES FOR BOOTSTRAP
+// ============================================
+// Using ember-glow (#ff8c42) as primary to distinguish from error states
+// Note: Bootstrap 5 requires variable overrides before the import
+$primary: #ff8c42; // ember-glow
+$link-color: #ff8c42; // ember-glow
+$link-hover-color: #ff6b2b; // ember-hot
+
+// Focus ring styling with ember colors
+$focus-ring-color: rgba(255, 140, 66, 0.25); // ember-glow with transparency
+$input-focus-border-color: #ff8c42; // ember-glow
+$input-focus-box-shadow: 0 0 0 0.25rem rgba(255, 140, 66, 0.25);
+
+@import 'bootstrap/scss/bootstrap';
 
 * {
   margin: 0;

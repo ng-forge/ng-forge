@@ -23,9 +23,10 @@
 <!-- Navigation -->
 <nav [class.scrolled]="navScrolled()" aria-label="Main navigation">
   <a routerLink="/" class="logo">
-    <img src="logo-dark.svg" alt="ng-forge" class="logo-img" />
+    <app-logo size="lg" />
   </a>
   <div class="nav-links">
+    <ng-doc-search />
     <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="github-link" title="GitHub">
       <span class="icon icon--github"></span>
     </a>

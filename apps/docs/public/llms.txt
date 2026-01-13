@@ -4,7 +4,7 @@
 
 ## Overview
 
-ng-forge provides a powerful way to create dynamic forms in Angular applications. Instead of manually building form templates, you define form structure through configuration objects, and ng-forge renders the appropriate UI components automatically.
+Dynamic Forms provides a powerful way to create dynamic forms in Angular applications. Instead of manually building form templates, you define form structure through configuration objects, and ng-forge renders the appropriate UI components automatically.
 
 ## Key Features
 
@@ -18,8 +18,7 @@ ng-forge provides a powerful way to create dynamic forms in Angular applications
 ## Documentation Structure
 
 ### Getting Started
-- /what-is-dynamic-forms: Introduction to ng-forge and its concepts
-- /installation: How to install and set up ng-forge in your project
+- /installation: How to install and set up ng-forge dynamic forms in your project
 
 ### UI Library Integrations
 - /ui-libs-integrations/material: Angular Material integration
