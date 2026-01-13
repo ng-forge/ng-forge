@@ -56,14 +56,16 @@ body {
 }
 
 // ============================================
-// MATERIAL INPUT BACKGROUND OVERRIDE
+// MATERIAL INPUT BACKGROUND & TEXT OVERRIDE
 // ============================================
-// Set input backgrounds to white (light) and black (dark) for contrast
+// Set input backgrounds and text colors for proper contrast
 // Note: Default appearance is 'outline', so we target the notched outline elements
 
-// Light mode - white input backgrounds
+// Light mode - white background, dark text
 .mat-mdc-form-field {
   --mat-form-field-filled-container-color: #ffffff !important;
+  --mdc-filled-text-field-input-text-color: #000000 !important;
+  --mdc-outlined-text-field-input-text-color: #000000 !important;
 }
 
 .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -72,10 +74,12 @@ body {
   background-color: #ffffff !important;
 }
 
-// Auto mode - black input backgrounds when system prefers dark
+// Auto mode - black background, light text when system prefers dark
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]) .mat-mdc-form-field {
     --mat-form-field-filled-container-color: #000000 !important;
+    --mdc-filled-text-field-input-text-color: #dee2e6 !important;
+    --mdc-outlined-text-field-input-text-color: #dee2e6 !important;
   }
 
   html:not([data-theme]) .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -85,9 +89,11 @@ body {
   }
 }
 
-// Dark mode - black input backgrounds
+// Dark mode - black background, light text
 [data-theme='dark'] .mat-mdc-form-field {
   --mat-form-field-filled-container-color: #000000 !important;
+  --mdc-filled-text-field-input-text-color: #dee2e6 !important;
+  --mdc-outlined-text-field-input-text-color: #dee2e6 !important;
 }
 
 [data-theme='dark'] .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -96,9 +102,11 @@ body {
   background-color: #000000 !important;
 }
 
-// Landing mode - black input backgrounds (dark variant)
+// Landing mode - black background, light text (dark variant)
 [data-theme='landing'] .mat-mdc-form-field {
   --mat-form-field-filled-container-color: #000000 !important;
+  --mdc-filled-text-field-input-text-color: #dee2e6 !important;
+  --mdc-outlined-text-field-input-text-color: #dee2e6 !important;
 }
 
 [data-theme='landing'] .mdc-text-field--outlined .mdc-notched-outline__leading,
