@@ -10,17 +10,16 @@ import { AsyncPipe } from '@angular/common';
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
+    @let f = field(); @let selectId = key() + '-select'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="mb-3">
       @if (label(); as label) {
-        <label [for]="key()" class="form-label">{{ label | dynamicText | async }}</label>
+        <label [for]="selectId" class="form-label">{{ label | dynamicText | async }}</label>
       }
       <select
         [formField]="f"
-        [id]="key()"
+        [id]="selectId"
         class="form-select"
         [class.form-select-sm]="props()?.size === 'sm'"
         [class.form-select-lg]="props()?.size === 'lg'"

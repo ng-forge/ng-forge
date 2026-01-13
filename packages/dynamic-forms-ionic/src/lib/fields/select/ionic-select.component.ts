@@ -13,8 +13,10 @@ import { AsyncPipe } from '@angular/common';
     @let f = field();
     @let ariaInvalid = isAriaInvalid();
     @let ariaRequired = isRequired() || null;
+    @let selectId = key() + '-select';
 
     <ion-select
+      [id]="selectId"
       [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"

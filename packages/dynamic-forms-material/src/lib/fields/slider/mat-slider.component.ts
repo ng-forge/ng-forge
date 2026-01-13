@@ -12,6 +12,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatSlider, MatSliderThumb, MatError, DynamicTextPipe, AsyncPipe, FormField],
   template: `
     @let f = field();
+    @let inputId = key() + '-input';
     @let ariaInvalid = this.ariaInvalid();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
@@ -30,6 +31,7 @@ import { AsyncPipe } from '@angular/common';
     >
       <input
         matSliderThumb
+        [id]="inputId"
         [formField]="f"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"

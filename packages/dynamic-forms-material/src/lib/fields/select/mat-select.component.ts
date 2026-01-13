@@ -14,6 +14,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   imports: [MatFormField, MatLabel, MatSelect, MatOption, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let selectId = key() + '-select';
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
@@ -23,6 +24,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       }
 
       <mat-select
+        [id]="selectId"
         [formField]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"

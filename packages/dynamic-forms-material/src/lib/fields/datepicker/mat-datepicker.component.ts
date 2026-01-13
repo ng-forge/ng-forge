@@ -33,6 +33,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   },
   template: `
     @let f = field();
+    @let inputId = key() + '-input';
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
@@ -43,6 +44,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
       <input
         matInput
+        [id]="inputId"
         [matDatepicker]="picker"
         [formField]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"

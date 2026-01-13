@@ -14,9 +14,11 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   imports: [MatCheckbox, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let checkboxId = key() + '-checkbox';
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-checkbox
+      [id]="checkboxId"
       [formField]="f"
       [labelPosition]="props()?.labelPosition || 'after'"
       [indeterminate]="props()?.indeterminate || false"

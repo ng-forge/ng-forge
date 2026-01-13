@@ -24,8 +24,9 @@ import { BsButtonComponent, BsButtonProps } from './bs-button.type';
     '[hidden]': 'hidden()',
   },
   template: `
+    @let buttonId = key() + '-button';
     <button
-      [id]="key()"
+      [id]="buttonId"
       [type]="buttonType()"
       [disabled]="disabled()"
       [class]="buttonClasses()"

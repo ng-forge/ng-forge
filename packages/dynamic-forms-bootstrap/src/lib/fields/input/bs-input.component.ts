@@ -13,6 +13,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
   template: `
     @let f = field(); @let p = props(); @let effectiveSize = this.effectiveSize();
     @let effectiveFloatingLabel = this.effectiveFloatingLabel();
+    @let inputId = key() + '-input';
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
     @if (effectiveFloatingLabel) {
@@ -21,7 +22,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
         <input
           #inputRef
           [formField]="f"
-          [id]="key()"
+          [id]="inputId"
           [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
@@ -36,7 +37,7 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         />
         @if (label()) {
-          <label [for]="key()">{{ label() | dynamicText | async }}</label>
+          <label [for]="inputId">{{ label() | dynamicText | async }}</label>
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
@@ -51,12 +52,12 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
       <!-- Standard variant -->
       <div class="mb-3">
         @if (label()) {
-          <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
+          <label [for]="inputId" class="form-label">{{ label() | dynamicText | async }}</label>
         }
         <input
           #inputRef
           [formField]="f"
-          [id]="key()"
+          [id]="inputId"
           [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"

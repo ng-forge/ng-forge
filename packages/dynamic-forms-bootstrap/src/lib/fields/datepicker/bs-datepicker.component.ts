@@ -12,14 +12,14 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let ariaDescribedBy = this.ariaDescribedBy(); @let inputId = key() + '-input';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <input
           dfBsInputConstraints
           [formField]="f"
-          [id]="key()"
+          [id]="inputId"
           type="date"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [dfMin]="minAsString()"
@@ -35,7 +35,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         />
         @if (label()) {
-          <label [for]="key()">{{ label() | dynamicText | async }}</label>
+          <label [for]="inputId">{{ label() | dynamicText | async }}</label>
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
@@ -50,13 +50,13 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
       <!-- Standard variant -->
       <div class="mb-3">
         @if (label()) {
-          <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
+          <label [for]="inputId" class="form-label">{{ label() | dynamicText | async }}</label>
         }
 
         <input
           dfBsInputConstraints
           [formField]="f"
-          [id]="key()"
+          [id]="inputId"
           type="date"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [dfMin]="minAsString()"

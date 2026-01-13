@@ -11,13 +11,12 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
+    @let f = field(); @let inputId = key() + '-input'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="mb-3">
       @if (label(); as label) {
-        <label [for]="key()" class="form-label">
+        <label [for]="inputId" class="form-label">
           {{ label | dynamicText | async }}
           @if (props()?.showValue) {
             <span class="ms-2 badge bg-secondary"> {{ props()?.valuePrefix }}{{ f().value() }}{{ props()?.valueSuffix }} </span>
@@ -29,7 +28,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
         type="range"
         dfBsInputConstraints
         [formField]="f"
-        [id]="key()"
+        [id]="inputId"
         [dfMin]="props()?.min ?? min()"
         [dfMax]="props()?.max ?? max()"
         [dfStep]="props()?.step ?? step()"

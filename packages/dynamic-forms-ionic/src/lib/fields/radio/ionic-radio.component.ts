@@ -11,11 +11,13 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonRadioGroup, IonRadio, IonItem, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let radioGroupId = key() + '-radio-group';
     @if (label(); as label) {
       <div class="radio-label">{{ label | dynamicText | async }}</div>
     }
 
     <ion-radio-group
+      [id]="radioGroupId"
       [formField]="f"
       [compareWith]="props()?.compareWith || defaultCompare"
       [attr.aria-invalid]="isAriaInvalid()"

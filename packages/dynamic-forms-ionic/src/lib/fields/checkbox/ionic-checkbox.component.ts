@@ -11,8 +11,10 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonCheckbox, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let checkboxId = key() + '-checkbox';
 
     <ion-checkbox
+      [id]="checkboxId"
       [formField]="f"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"
       [justify]="props()?.justify"
