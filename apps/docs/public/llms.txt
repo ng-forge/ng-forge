@@ -94,7 +94,7 @@ const formConfig = {
 ## Repository
 
 - GitHub: https://github.com/ng-forge/ng-forge
-- Documentation: https://ng-forge.com/
+- Documentation: https://ng-forge.com/dynamic-forms/
 
 ## License
 
