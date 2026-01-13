@@ -49,7 +49,7 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
   `,
   styleUrl: './group-field.component.scss',
   host: {
-    class: 'df-field df-group',
+    '[class]': '"df-field df-group" + (className() ? " " + className() : "")',
     role: 'group',
     '[class.disabled]': 'disabled()',
     '[id]': '`${key()}`',
@@ -102,6 +102,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
   field = input.required<GroupField>();
   key = input.required<string>();
+  className = input<string>();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals

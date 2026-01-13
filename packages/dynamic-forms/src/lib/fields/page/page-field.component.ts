@@ -29,7 +29,7 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
   `,
   styleUrl: './page-field.component.scss',
   host: {
-    class: 'df-field df-page-field',
+    '[class]': '"df-field df-page-field" + (className() ? " " + className() : "")',
     '[class.disabled]': 'disabled()',
     '[class.df-page-visible]': 'isVisible()',
     '[class.df-page-hidden]': '!isVisible()',
@@ -57,6 +57,7 @@ export default class PageFieldComponent {
 
   field = input.required<PageField>();
   key = input.required<string>();
+  className = input<string>();
   pageIndex = input.required<number>();
   isVisible = input.required<boolean>();
 
