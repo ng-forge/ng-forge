@@ -33,3 +33,50 @@ export function getGridClassString(fieldDef: FieldDef<unknown>): string {
   }
   return '';
 }
+
+/**
+ * Builds a combined className string from a field definition.
+ *
+ * Combines user-provided className with generated grid classes into a single string.
+ * Returns undefined if no classes are present (allowing conditional spreading in objects).
+ *
+ * @param fieldDef - Field definition containing className and col properties
+ * @returns Combined class string, or undefined if no classes
+ *
+ * @example
+ * ```typescript
+ * // With both className and col
+ * buildClassName({ key: 'test', type: 'group', className: 'my-class', col: 6 });
+ * // Returns: 'df-col-6 my-class'
+ *
+ * // With only className
+ * buildClassName({ key: 'test', type: 'group', className: 'my-class' });
+ * // Returns: 'my-class'
+ *
+ * // With only col
+ * buildClassName({ key: 'test', type: 'group', col: 6 });
+ * // Returns: 'df-col-6'
+ *
+ * // With neither
+ * buildClassName({ key: 'test', type: 'group' });
+ * // Returns: undefined
+ * ```
+ *
+ * @public
+ */
+export function buildClassName(fieldDef: FieldDef<unknown>): string | undefined {
+  const gridClass = getGridClassString(fieldDef);
+  const userClass = fieldDef.className;
+
+  const classes: string[] = [];
+
+  if (gridClass) {
+    classes.push(gridClass);
+  }
+
+  if (userClass) {
+    classes.push(userClass);
+  }
+
+  return classes.length > 0 ? classes.join(' ') : undefined;
+}
