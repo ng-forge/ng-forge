@@ -1,0 +1,27 @@
+# CODEOWNERS - Auto-assign reviewers to pull requests
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @antimprisacaru
+
+# Core library
+/packages/dynamic-forms/ @antimprisacaru
+
+# UI Adapters
+/packages/dynamic-forms-material/ @antimprisacaru
+/packages/dynamic-forms-bootstrap/ @antimprisacaru
+/packages/dynamic-forms-primeng/ @antimprisacaru
+/packages/dynamic-forms-ionic/ @antimprisacaru
+
+# Documentation
+/apps/docs/ @antimprisacaru
+/guides/ @antimprisacaru
+
+# Examples
+/apps/examples/ @antimprisacaru
+
+# CI/CD and configuration
+/.github/ @antimprisacaru
+/nx.json @antimprisacaru
+/package.json @antimprisacaru
+/tsconfig*.json @antimprisacaru
