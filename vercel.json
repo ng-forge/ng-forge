@@ -10,7 +10,7 @@
     {
       "source": "/",
       "destination": "/dynamic-forms/",
-      "permanent": false
+      "permanent": true
     }
   ],
   "rewrites": [
