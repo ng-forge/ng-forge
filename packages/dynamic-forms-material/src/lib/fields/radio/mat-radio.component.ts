@@ -12,6 +12,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatRadioGroup, MatRadioButton, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let radioGroupId = key() + '-radio-group';
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
@@ -20,6 +21,7 @@ import { AsyncPipe } from '@angular/common';
     }
 
     <mat-radio-group
+      [id]="radioGroupId"
       [formField]="f"
       [attr.aria-invalid]="ariaInvalid"
       [attr.aria-required]="ariaRequired"

@@ -38,8 +38,10 @@ import { format } from 'date-fns';
     @let f = field(); @let dateValue = f().value();
     @let ariaInvalid = isAriaInvalid();
     @let ariaRequired = isRequired() || null;
+    @let inputId = key() + '-input';
 
     <ion-input
+      [id]="inputId"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="'stacked'"
       [placeholder]="(placeholder() | dynamicText | async) ?? ''"

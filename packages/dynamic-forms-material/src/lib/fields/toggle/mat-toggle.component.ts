@@ -14,9 +14,11 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   imports: [MatSlideToggle, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let toggleId = key() + '-toggle';
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-slide-toggle
+      [id]="toggleId"
       [formField]="f"
       [color]="props()?.color || 'primary'"
       [labelPosition]="props()?.labelPosition || 'after'"

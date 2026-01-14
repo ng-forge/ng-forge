@@ -23,7 +23,10 @@ import { AsyncPipe } from '@angular/common';
     '[attr.data-testid]': 'key()',
   },
   template: `
+    @let buttonId = key() + '-button';
+
     <ion-button
+      [id]="buttonId"
       [type]="buttonType()"
       [expand]="props()?.expand"
       [fill]="props()?.fill || 'solid'"

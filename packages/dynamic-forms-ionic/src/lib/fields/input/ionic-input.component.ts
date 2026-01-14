@@ -14,8 +14,10 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
     @let f = field();
     @let ariaInvalid = isAriaInvalid();
     @let ariaRequired = isRequired() || null;
+    @let inputId = key() + '-input';
 
     <ion-input
+      [id]="inputId"
       [type]="props()?.type ?? 'text'"
       [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"

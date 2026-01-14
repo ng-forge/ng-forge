@@ -14,6 +14,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   imports: [MatFormField, MatLabel, MatInput, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let textareaId = key() + '-textarea';
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
@@ -25,6 +26,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       <textarea
         #textareaRef
         matInput
+        [id]="textareaId"
         [formField]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"

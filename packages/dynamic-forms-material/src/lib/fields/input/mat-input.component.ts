@@ -13,6 +13,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   imports: [MatFormField, MatLabel, MatInput, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let inputId = key() + '-input';
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
@@ -23,6 +24,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       <input
         #inputRef
         matInput
+        [id]="inputId"
         [formField]="f"
         [type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"

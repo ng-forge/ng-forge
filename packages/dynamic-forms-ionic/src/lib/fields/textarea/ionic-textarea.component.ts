@@ -13,8 +13,10 @@ import { AsyncPipe } from '@angular/common';
     @let f = field();
     @let ariaInvalid = isAriaInvalid();
     @let ariaRequired = isRequired() || null;
+    @let textareaId = key() + '-textarea';
 
     <ion-textarea
+      [id]="textareaId"
       [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"

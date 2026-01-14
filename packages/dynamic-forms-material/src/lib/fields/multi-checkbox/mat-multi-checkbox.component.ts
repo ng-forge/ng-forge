@@ -19,6 +19,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatCheckbox, ValueInArrayPipe, MatError, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let checkboxGroupId = key() + '-checkbox-group';
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
@@ -27,6 +28,7 @@ import { AsyncPipe } from '@angular/common';
     }
 
     <div
+      [id]="checkboxGroupId"
       class="checkbox-group"
       role="group"
       [attr.aria-invalid]="ariaInvalid"

@@ -12,8 +12,10 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonicToggleControlComponent, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let toggleId = key() + '-toggle';
 
     <df-ion-toggle-control
+      [id]="toggleId"
       [formField]="f"
       [meta]="meta()"
       [labelPlacement]="props()?.labelPlacement ?? 'end'"

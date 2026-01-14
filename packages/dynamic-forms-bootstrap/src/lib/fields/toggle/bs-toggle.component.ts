@@ -10,8 +10,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
+    @let f = field(); @let inputId = key() + '-input'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div
@@ -25,7 +24,7 @@ import { AsyncPipe } from '@angular/common';
       <input
         type="checkbox"
         [formField]="f"
-        [id]="key()"
+        [id]="inputId"
         class="form-check-input"
         [class.is-invalid]="f().invalid() && f().touched()"
         [attr.tabindex]="tabIndex()"
@@ -33,7 +32,7 @@ import { AsyncPipe } from '@angular/common';
         [attr.aria-required]="ariaRequired"
         [attr.aria-describedby]="ariaDescribedBy"
       />
-      <label [for]="key()" class="form-check-label">
+      <label [for]="inputId" class="form-check-label">
         {{ label() | dynamicText | async }}
       </label>
     </div>

@@ -11,13 +11,13 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field(); @let p = props(); @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let ariaDescribedBy = this.ariaDescribedBy(); @let textareaId = key() + '-textarea';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <textarea
           [formField]="f"
-          [id]="key()"
+          [id]="textareaId"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
           [attr.aria-invalid]="ariaInvalid"
@@ -31,7 +31,7 @@ import { AsyncPipe } from '@angular/common';
         ></textarea>
 
         @if (label()) {
-          <label [for]="key()">{{ label() | dynamicText | async }}</label>
+          <label [for]="textareaId">{{ label() | dynamicText | async }}</label>
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
@@ -46,12 +46,12 @@ import { AsyncPipe } from '@angular/common';
       <!-- Standard variant -->
       <div class="mb-3">
         @if (label()) {
-          <label [for]="key()" class="form-label">{{ label() | dynamicText | async }}</label>
+          <label [for]="textareaId" class="form-label">{{ label() | dynamicText | async }}</label>
         }
 
         <textarea
           [formField]="f"
-          [id]="key()"
+          [id]="textareaId"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
           [attr.aria-invalid]="ariaInvalid"

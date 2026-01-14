@@ -23,8 +23,10 @@ import { AsyncPipe } from '@angular/common';
     '[class]': 'className()',
   },
   template: `
+    @let buttonId = key() + '-button';
     <button
       mat-raised-button
+      [id]="buttonId"
       [type]="buttonType()"
       [color]="props()?.color || 'primary'"
       [disabled]="disabled()"

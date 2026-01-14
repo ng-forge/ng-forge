@@ -11,8 +11,10 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonRange, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
+    @let inputId = key() + '-input';
 
     <ion-range
+      [id]="inputId"
       [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
