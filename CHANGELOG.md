@@ -1,3 +1,23 @@
+## 0.3.1 (2026-01-14)
+
+### 🚀 Features
+
+- **docs:** add interactive demo and syntax highlighting to landing page ([#132](https://github.com/ng-forge/ng-forge/pull/132))
+- **docs:** add link title attributes and improve example input theming ([#138](https://github.com/ng-forge/ng-forge/pull/138))
+
+### 🐛 Bug Fixes
+
+- **core:** add unique ids to form field inner elements ([#136](https://github.com/ng-forge/ng-forge/pull/136), [#131](https://github.com/ng-forge/ng-forge/issues/131))
+- **dynamic-forms:** bind classname to container field components ([#137](https://github.com/ng-forge/ng-forge/pull/137), [#133](https://github.com/ng-forge/ng-forge/issues/133))
+
+### ⏪ Reverts
+
+- **docs:** feat(docs): add new landing page with improved design (#127) ([#127](https://github.com/ng-forge/ng-forge/pull/127))
+
+### ❤️ Thank You
+
+- Antim Prisacaru @antimprisacaru
+
 ## 0.3.0 (2026-01-12)
 
 ### 🚀 Features
