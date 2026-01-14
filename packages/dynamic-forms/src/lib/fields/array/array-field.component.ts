@@ -37,7 +37,7 @@ import { ArrayFieldTree } from '../../core/field-tree-utils';
   `,
   styleUrl: './array-field.component.scss',
   host: {
-    '[class]': '"df-field df-array" + (className() ? " " + className() : "")',
+    '[class]': 'hostClasses()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
@@ -66,6 +66,12 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals
   // ─────────────────────────────────────────────────────────────────────────────
+
+  readonly hostClasses = computed(() => {
+    const base = 'df-field df-array';
+    const custom = this.className();
+    return custom ? `${base} ${custom}` : base;
+  });
 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 

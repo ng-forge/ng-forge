@@ -29,7 +29,7 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
   `,
   styleUrl: './page-field.component.scss',
   host: {
-    '[class]': '"df-field df-page-field" + (className() ? " " + className() : "")',
+    '[class]': 'hostClasses()',
     '[class.disabled]': 'disabled()',
     '[class.df-page-visible]': 'isVisible()',
     '[class.df-page-hidden]': '!isVisible()',
@@ -64,6 +64,12 @@ export default class PageFieldComponent {
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals
   // ─────────────────────────────────────────────────────────────────────────────
+
+  readonly hostClasses = computed(() => {
+    const base = 'df-field df-page-field';
+    const custom = this.className();
+    return custom ? `${base} ${custom}` : base;
+  });
 
   readonly disabled = computed(() => this.field().disabled || false);
 
