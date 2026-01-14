@@ -1,1 +1,1 @@
-export { getGridClassString } from './grid-classes';
+export { getGridClassString, buildClassName } from './grid-classes';

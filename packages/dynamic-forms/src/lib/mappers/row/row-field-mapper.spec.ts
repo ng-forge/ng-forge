@@ -21,7 +21,7 @@ describe('rowFieldMapper', () => {
     expect(inputs).toHaveProperty('field');
   });
 
-  it('should create inputs with key and field regardless of additional properties', () => {
+  it('should create inputs with key, field, and className when className is provided', () => {
     const fieldDef: RowField = {
       key: 'complexRow',
       type: 'row',
@@ -34,9 +34,10 @@ describe('rowFieldMapper', () => {
 
     const inputsSignal = rowFieldMapper(fieldDef);
     const inputs = inputsSignal(); // Call the signal to get the actual inputs
-    expect(Object.keys(inputs)).toHaveLength(2);
+    expect(Object.keys(inputs)).toHaveLength(3);
     expect(inputs).toHaveProperty('key');
     expect(inputs).toHaveProperty('field');
+    expect(inputs).toHaveProperty('className', 'row-class');
   });
 
   it('should handle nested fields of various types', () => {

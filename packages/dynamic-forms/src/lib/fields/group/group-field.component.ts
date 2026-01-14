@@ -49,7 +49,7 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
   `,
   styleUrl: './group-field.component.scss',
   host: {
-    class: 'df-field df-group',
+    '[class]': 'hostClasses()',
     role: 'group',
     '[class.disabled]': 'disabled()',
     '[id]': '`${key()}`',
@@ -102,10 +102,17 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
   field = input.required<GroupField>();
   key = input.required<string>();
+  className = input<string>();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals
   // ─────────────────────────────────────────────────────────────────────────────
+
+  readonly hostClasses = computed(() => {
+    const base = 'df-field df-group';
+    const custom = this.className();
+    return custom ? `${base} ${custom}` : base;
+  });
 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 

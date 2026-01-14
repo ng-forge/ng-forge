@@ -28,6 +28,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   ],
   host: {
     '[id]': '`${key()}`',
+    '[class]': 'className()',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
@@ -36,7 +37,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
     @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
     @let ariaDescribedBy = this.ariaDescribedBy();
 
-    <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()" [class]="className() || ''">
+    <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label(); as label) {
         <mat-label>{{ label | dynamicText | async }}</mat-label>
       }

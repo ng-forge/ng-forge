@@ -19,6 +19,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [IonButton, DynamicTextPipe, AsyncPipe],
   host: {
     '[id]': '`${key()}`',
+    '[class]': 'className()',
     '[attr.data-testid]': 'key()',
   },
   template: `
@@ -30,7 +31,6 @@ import { AsyncPipe } from '@angular/common';
       [size]="props()?.size"
       [color]="props()?.color || 'primary'"
       [strong]="props()?.strong"
-      [class]="className() || ''"
       [disabled]="disabled()"
       [attr.data-testid]="buttonTestId()"
       (click)="onClick()"
