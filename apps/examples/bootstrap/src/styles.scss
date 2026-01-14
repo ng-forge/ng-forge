@@ -26,6 +26,7 @@
 
 @include examples.example-base();
 @include examples.example-theme-variables();
+@include examples.example-body-themes();
 @include examples.example-components();
 
 // ============================================
@@ -37,10 +38,8 @@
   @include ember-bs.bootstrap-theme-light();
 }
 
-html,
+// Bootstrap-specific body font
 body {
-  background: var(--bg-void);
-  color: var(--text-primary);
   font-family: $font-primary;
 }
 
@@ -50,12 +49,6 @@ body {
   :root:not([data-theme]) {
     @include ember-bs.bootstrap-theme-dark();
   }
-
-  html:not([data-theme]),
-  html:not([data-theme]) body {
-    background-color: rgb(19, 18, 16);
-    color: #a9a9a9;
-  }
 }
 
 // Explicit light theme (same as default, for when data-theme='light' is set)
@@ -64,32 +57,14 @@ html[data-theme='light'],
   @include ember-bs.bootstrap-theme-light();
 }
 
-html[data-theme='light'],
-html[data-theme='light'] body {
-  background-color: rgb(250, 250, 250);
-  color: rgb(78, 78, 78);
-}
-
 // Explicit dark theme
 html[data-theme='dark'],
 :root[data-theme='dark'] {
   @include ember-bs.bootstrap-theme-dark();
 }
 
-html[data-theme='dark'],
-html[data-theme='dark'] body {
-  background-color: rgb(19, 18, 16);
-  color: #a9a9a9;
-}
-
 // Landing page theme (dark variant with landing background)
 html[data-theme='landing'],
 :root[data-theme='landing'] {
   @include ember-bs.bootstrap-theme-landing();
-}
-
-html[data-theme='landing'],
-html[data-theme='landing'] body {
-  background-color: var(--bg-void);
-  color: var(--text-primary);
 }

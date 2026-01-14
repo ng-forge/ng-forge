@@ -60,21 +60,50 @@ body {
 // ============================================
 // Material theme handles backgrounds - we only override text colors for contrast
 
-// Light mode uses default Material text colors (dark on light)
+// Light mode - white input backgrounds
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-color: #ffffff;
+  --mdc-filled-text-field-container-color: #ffffff;
+}
 
-// Auto mode - light text when system prefers dark
+// Direct override for outlined text field background
+.mdc-text-field--outlined {
+  background-color: #ffffff !important;
+}
+
+.mdc-text-field--filled {
+  background-color: #ffffff !important;
+}
+
+// Auto mode - light text and black backgrounds when system prefers dark
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]) .mat-mdc-form-field {
     --mat-form-field-outlined-input-text-color: #dee2e6;
     --mat-form-field-filled-input-text-color: #dee2e6;
+    --mdc-outlined-text-field-container-color: #000000;
+    --mdc-filled-text-field-container-color: #000000;
+  }
+
+  html:not([data-theme]) .mdc-text-field--outlined,
+  html:not([data-theme]) .mdc-text-field--filled {
+    background-color: #000000 !important;
   }
 }
 
-// Dark mode - light text
+// Dark mode - light text and black backgrounds
 [data-theme='dark'] .mat-mdc-form-field,
 [data-theme='landing'] .mat-mdc-form-field {
   --mat-form-field-outlined-input-text-color: #dee2e6;
   --mat-form-field-filled-input-text-color: #dee2e6;
+  --mdc-outlined-text-field-container-color: #000000;
+  --mdc-filled-text-field-container-color: #000000;
+}
+
+[data-theme='dark'] .mdc-text-field--outlined,
+[data-theme='dark'] .mdc-text-field--filled,
+[data-theme='landing'] .mdc-text-field--outlined,
+[data-theme='landing'] .mdc-text-field--filled {
+  background-color: #000000 !important;
 }
 
 // ============================================
