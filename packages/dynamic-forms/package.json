@@ -31,12 +31,12 @@
   ],
   "sideEffects": false,
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "peerDependencies": {
-    "@angular/common": ">=21.0.7",
-    "@angular/core": ">=21.0.7",
-    "@angular/forms": ">=21.0.7",
+    "@angular/common": "~21.0.7",
+    "@angular/core": "~21.0.7",
+    "@angular/forms": "~21.0.7",
     "ngxtension": ">=4.0.0",
     "rxjs": ">=7.0.0"
   }
