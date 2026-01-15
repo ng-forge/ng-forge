@@ -15,15 +15,6 @@ updates:
       - 'dependencies'
       - 'automated'
     groups:
-      # Group Angular updates together
-      angular:
-        patterns:
-          - '@angular/*'
-          - '@angular-devkit/*'
-          - '@schematics/angular'
-        update-types:
-          - 'minor'
-          - 'patch'
       # Group Nx updates together
       nx:
         patterns:
@@ -78,6 +69,10 @@ updates:
       # Ignore major version updates - review these manually
       - dependency-name: '*'
         update-types: ['version-update:semver-major']
+      # Angular updates are handled manually due to breaking changes between patches
+      - dependency-name: '@angular/*'
+      - dependency-name: '@angular-devkit/*'
+      - dependency-name: '@schematics/angular'
 
   # GitHub Actions
   - package-ecosystem: 'github-actions'
