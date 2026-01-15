@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonItem, IonNote, IonRadio, IonRadioGroup } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicRadioComponent, IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';
@@ -69,10 +69,10 @@ import { AsyncPipe } from '@angular/common';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<T> {
+export default class IonicRadioFieldComponent implements IonicRadioComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<T>>();
+  readonly field = input.required<FieldTree<ValueType>>();
   readonly key = input.required<string>();
 
   // Properties
@@ -80,8 +80,8 @@ export default class IonicRadioFieldComponent<T> implements IonicRadioComponent<
   readonly placeholder = input<DynamicText>();
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
-  readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<IonicRadioProps<T>>();
+  readonly options = input<FieldOption<ValueType>[]>([]);
+  readonly props = input<IonicRadioProps>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();

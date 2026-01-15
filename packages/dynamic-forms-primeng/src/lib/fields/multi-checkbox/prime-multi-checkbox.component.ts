@@ -10,11 +10,12 @@ import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'df-prime-multi-checkbox',
-  imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormsModule],
+  imports: [Checkbox, FormsModule, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
     @let ariaDescribedBy = this.ariaDescribedBy();
+    @let checked = checkedValuesMap();
     @if (label(); as label) {
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
@@ -24,9 +25,9 @@ import { AsyncPipe } from '@angular/common';
         <div class="checkbox-option">
           <p-checkbox
             [inputId]="key() + '-' + option.value"
-            [binary]="false"
-            [value]="option.value"
-            [(ngModel)]="valueViewModel"
+            [binary]="true"
+            [ngModel]="checked['' + option.value] || false"
+            (ngModelChange)="onCheckboxChange(option, $event)"
             [disabled]="f().disabled() || option.disabled || false"
           />
           <label [for]="key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
@@ -66,10 +67,10 @@ import { AsyncPipe } from '@angular/common';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> implements PrimeMultiCheckboxComponent<T> {
+export default class PrimeMultiCheckboxFieldComponent implements PrimeMultiCheckboxComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<T[]>>();
+  readonly field = input.required<FieldTree<ValueType[]>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -78,7 +79,7 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
+  readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<PrimeMultiCheckboxProps>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();
@@ -105,7 +106,34 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
     return classes.join(' ');
   });
 
-  valueViewModel = linkedSignal<T[]>(() => this.field()().value(), { equal: isEqual });
+  valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
+    () => {
+      const currentValues = this.field()().value();
+      return this.options().filter((option) => currentValues.includes(option.value));
+    },
+    { equal: isEqual },
+  );
+
+  /** Computed map of checked option values for O(1) lookup in template */
+  readonly checkedValuesMap = computed(() => {
+    const map: Record<string, boolean> = {};
+    for (const opt of this.valueViewModel()) {
+      map[String(opt.value)] = true;
+    }
+    return map;
+  });
+
+  onCheckboxChange(option: FieldOption<ValueType>, checked: boolean): void {
+    this.valueViewModel.update((currentOptions: FieldOption<ValueType>[]) => {
+      if (checked) {
+        return currentOptions.some((opt: FieldOption<ValueType>) => opt.value === option.value)
+          ? currentOptions
+          : [...currentOptions, option];
+      } else {
+        return currentOptions.filter((opt: FieldOption<ValueType>) => opt.value !== option.value);
+      }
+    });
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Accessibility
@@ -140,7 +168,9 @@ export default class PrimeMultiCheckboxFieldComponent<T extends ValueType> imple
       dependents: [this.options],
     });
 
-    explicitEffect([this.valueViewModel], ([selectedValues]) => {
+    explicitEffect([this.valueViewModel], ([selectedOptions]: [FieldOption<ValueType>[]]) => {
+      const selectedValues = selectedOptions.map((option: FieldOption<ValueType>) => option.value);
+
       if (!isEqual(selectedValues, this.field()().value())) {
         this.field()().value.set(selectedValues);
       }

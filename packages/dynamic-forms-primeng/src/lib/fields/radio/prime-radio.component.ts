@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
@@ -57,10 +57,10 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<T> {
+export default class PrimeRadioFieldComponent implements PrimeRadioComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<T>>();
+  readonly field = input.required<FieldTree<ValueType>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -69,7 +69,7 @@ export default class PrimeRadioFieldComponent<T> implements PrimeRadioComponent<
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
+  readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<PrimeRadioProps>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();

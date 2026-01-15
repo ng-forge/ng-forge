@@ -1,4 +1,4 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
 import { RadioField } from '@ng-forge/dynamic-forms/integration';
 
 export interface PrimeRadioProps {
@@ -18,4 +18,4 @@ export interface PrimeRadioProps {
 
 export type PrimeRadioField<T> = RadioField<T, PrimeRadioProps>;
 
-export type PrimeRadioComponent<T> = ValueFieldComponent<PrimeRadioField<T>>;
+export type PrimeRadioComponent = ValueFieldComponent<PrimeRadioField<ValueType>>;

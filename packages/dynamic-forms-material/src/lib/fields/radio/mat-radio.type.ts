@@ -1,4 +1,4 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
 import { RadioField } from '@ng-forge/dynamic-forms/integration';
 import { ThemePalette } from '@angular/material/core';
 
@@ -11,4 +11,4 @@ export interface MatRadioProps {
 
 export type MatRadioField<T> = RadioField<T, MatRadioProps>;
 
-export type MatRadioComponent<T> = ValueFieldComponent<MatRadioField<T>>;
+export type MatRadioComponent = ValueFieldComponent<MatRadioField<ValueType>>;

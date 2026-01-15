@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsRadioComponent, BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
@@ -54,10 +54,10 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
     '[attr.hidden]': 'field()().hidden() || null',
   },
 })
-export default class BsRadioFieldComponent<T extends string> implements BsRadioComponent<T> {
+export default class BsRadioFieldComponent implements BsRadioComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<T>>();
+  readonly field = input.required<FieldTree<ValueType>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -66,7 +66,7 @@ export default class BsRadioFieldComponent<T extends string> implements BsRadioC
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
+  readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<BsRadioProps>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();

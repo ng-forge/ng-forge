@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { Select } from 'primeng/select';
@@ -75,10 +75,10 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
     `,
   ],
 })
-export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponent<T> {
+export default class PrimeSelectFieldComponent implements PrimeSelectComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<T>>();
+  readonly field = input.required<FieldTree<ValueType>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -87,7 +87,7 @@ export default class PrimeSelectFieldComponent<T> implements PrimeSelectComponen
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
+  readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<PrimeSelectProps>();
   readonly meta = input<FieldMeta>();
   readonly validationMessages = input<ValidationMessages>();

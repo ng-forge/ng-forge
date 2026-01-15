@@ -1,14 +1,13 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
 import { MultiCheckboxField } from '@ng-forge/dynamic-forms/integration';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface BsMultiCheckboxProps<T> {
+export interface BsMultiCheckboxProps {
   switch?: boolean;
   inline?: boolean;
   reverse?: boolean;
   helpText?: DynamicText;
 }
 
-export type BsMultiCheckboxField<T> = MultiCheckboxField<T, BsMultiCheckboxProps<T>>;
+export type BsMultiCheckboxField<T> = MultiCheckboxField<T, BsMultiCheckboxProps>;
 
-export type BsMultiCheckboxComponent<T> = ValueFieldComponent<BsMultiCheckboxField<T>>;
+export type BsMultiCheckboxComponent = ValueFieldComponent<BsMultiCheckboxField<ValueType>>;
