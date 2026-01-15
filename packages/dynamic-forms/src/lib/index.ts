@@ -185,3 +185,6 @@ export { interpolateParams } from './utils/interpolate-params';
 
 // Meta utilities (used by UI library wrapped-meta directives)
 export { applyMetaToElement } from './utils/apply-meta';
+
+// Registry services (used by UI library button mappers)
+export { RootFormRegistryService } from './core/registry/root-form-registry.service';

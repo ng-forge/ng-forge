@@ -12,6 +12,7 @@ import {
   RemoveArrayItemEvent,
   resolveNextButtonDisabled,
   resolveSubmitButtonDisabled,
+  RootFormRegistryService,
 } from '@ng-forge/dynamic-forms';
 import { AddArrayItemButtonField, RemoveArrayItemButtonField } from './ionic-button.type';
 
@@ -31,16 +32,13 @@ import { AddArrayItemButtonField, RemoveArrayItemButtonField } from './ionic-but
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
-  // Inject field signal context to access form state and options
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
+  const rootFormRegistry = inject(RootFormRegistryService);
 
-  // Build base inputs (static, from field definition)
   const baseInputs = buildBaseInputs(fieldDef);
-
-  // Use button-logic-resolver to compute disabled state
   const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
   const disabledSignal = resolveSubmitButtonDisabled({
-    form: fieldSignalContext.form,
+    form: rootFormRegistry.getRootForm()!,
     formOptions: fieldSignalContext.formOptions,
     fieldLogic: fieldWithLogic.logic,
     explicitlyDisabled: fieldDef.disabled,
