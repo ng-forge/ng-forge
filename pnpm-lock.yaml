@@ -94,14 +94,14 @@ importers:
         version: 7.8.2
     devDependencies:
       '@analogjs/platform':
-        specifier: 2.2.1
-        version: 2.2.1(552160927234a5cc75735f448daf98f7)
+        specifier: 2.2.2
+        version: 2.2.2(552160927234a5cc75735f448daf98f7)
       '@analogjs/vite-plugin-angular':
-        specifier: 2.2.1
-        version: 2.2.1(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72))
+        specifier: 2.2.2
+        version: 2.2.2(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72))
       '@analogjs/vitest-angular':
-        specifier: 2.2.1
-        version: 2.2.1(@analogjs/vite-plugin-angular@2.2.1(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72)))(@angular-devkit/architect@0.2101.0)(vitest@4.0.16)
+        specifier: 2.2.2
+        version: 2.2.2(@analogjs/vite-plugin-angular@2.2.2(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72)))(@angular-devkit/architect@0.2101.0)(vitest@4.0.16)
       '@angular-devkit/build-angular':
         specifier: ~21.0.5
         version: 21.0.5(388ce2036ee3835fb83fbdf36f1d416f)
@@ -133,8 +133,8 @@ importers:
         specifier: ^9.39.2
         version: 9.39.2
       '@ionic/angular':
-        specifier: 8.7.16
-        version: 8.7.16(00334f6319449e763b6a16f700581683)
+        specifier: 8.7.17
+        version: 8.7.17(00334f6319449e763b6a16f700581683)
       '@nx/angular':
         specifier: 22.3.3
         version: 22.3.3(9d01cfb21f94d7f66304f306110240e5)
@@ -262,8 +262,8 @@ importers:
         specifier: ^1.29.2
         version: 1.29.2
       swc-loader:
-        specifier: 0.2.6
-        version: 0.2.6(@swc/core@1.15.8(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.27.2))
+        specifier: 0.2.7
+        version: 0.2.7(@swc/core@1.15.8(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.27.2))
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -357,8 +357,8 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@analogjs/platform@2.2.1':
-    resolution: {integrity: sha512-Q3/ClsMju7OFtRe4pMes6jqcb8GWkhAqlJ8/4+6HD0Bw3kkZ5sJGje2zZElLANbDOwMsNxRcWWaTbpd71aFqMQ==}
+  '@analogjs/platform@2.2.2':
+    resolution: {integrity: sha512-OGrLKQhlj014gXJsBcZbN/rDm496L8SKl8qdwcXH2Vv5w0wVL7TLI35Z28MQoO3uD7PXchtxPpz8PLlUlV7eeQ==}
     peerDependencies:
       '@nx/angular': ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0 || ^22.0.0 || ^22
       '@nx/devkit': ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0 || ^22.0.0 || ^22
@@ -387,8 +387,8 @@ packages:
       shiki:
         optional: true
 
-  '@analogjs/vite-plugin-angular@2.2.1':
-    resolution: {integrity: sha512-SYtaWKPHE+BtywbSOQl5r31bIDuph7SCzCbRMsrS7H3MvS1SDc9bsTdn+RewYKqKUJzReRwNe9CDLdVCY8eLFg==}
+  '@analogjs/vite-plugin-angular@2.2.2':
+    resolution: {integrity: sha512-lZ+v/RXQw2stVWdN02h0d5ruynz67rA4VLu2g5Wn8hh4YF/4MhfREKi8ILeSSyRtg3XlhvfYpau2vCyaSDhpww==}
     peerDependencies:
       '@angular-devkit/build-angular': ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0
       '@angular/build': ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0
@@ -401,8 +401,8 @@ packages:
   '@analogjs/vite-plugin-nitro@2.2.2':
     resolution: {integrity: sha512-agGmlzKLgpguNxhMdjlaIZj3en69JDqZz46PAA5Ys2Azq1epjKfg7KKO2UrikAEWq7j6sx0JI0AqS/dW2D7jIg==}
 
-  '@analogjs/vitest-angular@2.2.1':
-    resolution: {integrity: sha512-fwu8hZZPXK1FVHIxGhIjg+KF5vHSOh9IzGnygJNEHC0Q6con9BkjsdlxdTlFPpdBcjvj440kjEkCX6vm5PBL1A==}
+  '@analogjs/vitest-angular@2.2.2':
+    resolution: {integrity: sha512-vIN0UCVY3wG/EvVh9tCYT40LsnrYhiEAhIwkz+Rdp9Yj2SMRQHBTaZLeNMTUwoLjcb5kOH2uCQFWkEC34HZWjw==}
     peerDependencies:
       '@analogjs/vite-plugin-angular': '*'
       '@angular-devkit/architect': '>=0.1500.0 < 0.2200.0'
@@ -2162,8 +2162,8 @@ packages:
       '@types/node':
         optional: true
 
-  '@ionic/angular@8.7.16':
-    resolution: {integrity: sha512-rdOQu07VvfqgnIbas/K+ebitjQI5u4OgiH7fcy/LAKdSxERzWqkDVBXpHtZIVDMOQcPlVN0cWEnaQUbnfDpTVA==}
+  '@ionic/angular@8.7.17':
+    resolution: {integrity: sha512-EKXX5leNzgxVq9QgF67DJmQsJwiX/WKNx/EAqFTWd0eYlgXp3Cxcdkh+AJkoqnCPLoKeWqrmrze7QlxPy/ZfSw==}
     peerDependencies:
       '@angular/core': '>=16.0.0'
       '@angular/forms': '>=16.0.0'
@@ -2171,8 +2171,8 @@ packages:
       rxjs: '>=7.5.0'
       zone.js: '>=0.13.0'
 
-  '@ionic/core@8.7.16':
-    resolution: {integrity: sha512-+vdv/o2Z/2YfoZJIDBLnoh11eJmOOZqQdfwC0zl2MemAVRSofjGuIQlUTZqiUUNht56Rnk9oo53TvmgjNCtmDA==}
+  '@ionic/core@8.7.17':
+    resolution: {integrity: sha512-gp7PIEJX27NX/FkjiUlpjQUtJiFFE5W1lofRC5CfORQ8p4PrLh9wJO9EJH0YryCr2qZS0k47sYgRQP5FwiXlpg==}
     engines: {node: '>= 16'}
 
   '@ioredis/commands@1.5.0':
@@ -9468,8 +9468,8 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
 
-  swc-loader@0.2.6:
-    resolution: {integrity: sha512-9Zi9UP2YmDpgmQVbyOPJClY0dwf58JDyDMQ7uRc4krmc72twNI2fvlBWHLqVekBpPc7h5NJkGVT1zNDxFrqhvg==}
+  swc-loader@0.2.7:
+    resolution: {integrity: sha512-nwYWw3Fh9ame3Rtm7StS9SBLpHRRnYcK7bnpF3UKZmesAK0gw2/ADvlURFAINmPvKtDLzp+GBiP9yLoEjg6S9w==}
     peerDependencies:
       '@swc/core': ^1.2.147
       webpack: '>=2'
@@ -10587,9 +10587,9 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
 
-  '@analogjs/platform@2.2.1(552160927234a5cc75735f448daf98f7)':
+  '@analogjs/platform@2.2.2(552160927234a5cc75735f448daf98f7)':
     dependencies:
-      '@analogjs/vite-plugin-angular': 2.2.1(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72))
+      '@analogjs/vite-plugin-angular': 2.2.2(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72))
       '@analogjs/vite-plugin-nitro': 2.2.2(encoding@0.1.13)(rolldown@1.0.0-beta.58)
       marked: 12.0.1
       marked-gfm-heading-id: 4.1.3(marked@12.0.1)
@@ -10635,7 +10635,7 @@ snapshots:
       - uploadthing
       - xml2js
 
-  '@analogjs/vite-plugin-angular@2.2.1(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72))':
+  '@analogjs/vite-plugin-angular@2.2.2(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72))':
     dependencies:
       ts-morph: 21.0.1
     optionalDependencies:
@@ -10680,9 +10680,9 @@ snapshots:
       - uploadthing
       - xml2js
 
-  '@analogjs/vitest-angular@2.2.1(@analogjs/vite-plugin-angular@2.2.1(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72)))(@angular-devkit/architect@0.2101.0)(vitest@4.0.16)':
+  '@analogjs/vitest-angular@2.2.2(@analogjs/vite-plugin-angular@2.2.2(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72)))(@angular-devkit/architect@0.2101.0)(vitest@4.0.16)':
     dependencies:
-      '@analogjs/vite-plugin-angular': 2.2.1(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72))
+      '@analogjs/vite-plugin-angular': 2.2.2(@angular-devkit/build-angular@21.0.5(388ce2036ee3835fb83fbdf36f1d416f))(@angular/build@21.0.5(3a217eff2643fee414021cfb7cbf5f72))
       '@angular-devkit/architect': 0.2101.0
       vitest: 4.0.16(@types/node@25.0.8)(@vitest/browser-playwright@4.0.16)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(less@4.5.1)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.44.1)(yaml@2.8.2)
 
@@ -13113,19 +13113,19 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.0.8
 
-  '@ionic/angular@8.7.16(00334f6319449e763b6a16f700581683)':
+  '@ionic/angular@8.7.17(00334f6319449e763b6a16f700581683)':
     dependencies:
       '@angular/core': 21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0)
       '@angular/forms': 21.0.8(@angular/common@21.0.8(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2))(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0))(@angular/platform-browser@21.0.8(@angular/animations@21.0.8(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0)))(@angular/common@21.0.8(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2))(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0)))(rxjs@7.8.2)
       '@angular/router': 21.0.8(@angular/common@21.0.8(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2))(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0))(@angular/platform-browser@21.0.8(@angular/animations@21.0.8(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0)))(@angular/common@21.0.8(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0))(rxjs@7.8.2))(@angular/core@21.0.8(@angular/compiler@21.0.8)(rxjs@7.8.2)(zone.js@0.16.0)))(rxjs@7.8.2)
-      '@ionic/core': 8.7.16
+      '@ionic/core': 8.7.17
       ionicons: 8.0.13
       jsonc-parser: 3.3.1
       rxjs: 7.8.2
       tslib: 2.8.1
       zone.js: 0.16.0
 
-  '@ionic/core@8.7.16':
+  '@ionic/core@8.7.17':
     dependencies:
       '@stencil/core': 4.38.0
       ionicons: 8.0.13
@@ -21966,7 +21966,7 @@ snapshots:
       csso: 5.0.5
       picocolors: 1.1.1
 
-  swc-loader@0.2.6(@swc/core@1.15.8(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.27.2)):
+  swc-loader@0.2.7(@swc/core@1.15.8(@swc/helpers@0.5.18))(webpack@5.104.1(@swc/core@1.15.8(@swc/helpers@0.5.18))(esbuild@0.27.2)):
     dependencies:
       '@swc/core': 1.15.8(@swc/helpers@0.5.18)
       '@swc/counter': 0.1.3
