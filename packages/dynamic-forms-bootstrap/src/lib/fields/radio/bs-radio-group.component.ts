@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
-import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
+import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
 import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 
@@ -88,11 +88,11 @@ export interface BsRadioGroupProps {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BsRadioGroupComponent<T = unknown> implements FormValueControl<T | undefined> {
+export class BsRadioGroupComponent implements FormValueControl<ValueType | undefined> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   // Value model - FormField directive binds form value to this
-  readonly value = model<T | undefined>(undefined);
+  readonly value = model<ValueType | undefined>(undefined);
 
   // Optional FormValueControl properties - Field directive will bind these
   readonly disabled = input<boolean>(false);
@@ -101,7 +101,7 @@ export class BsRadioGroupComponent<T = unknown> implements FormValueControl<T | 
 
   // Component-specific inputs
   readonly label = input<DynamicText>();
-  readonly options = input.required<FieldOption<T>[]>();
+  readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<BsRadioGroupProps>();
   readonly meta = input<FieldMeta>();
 
@@ -115,7 +115,7 @@ export class BsRadioGroupComponent<T = unknown> implements FormValueControl<T | 
   /**
    * Handle radio button change event
    */
-  protected onRadioChange(newValue: T): void {
+  protected onRadioChange(newValue: ValueType): void {
     if (!this.disabled() && !this.readonly()) {
       this.value.set(newValue);
     }
