@@ -435,12 +435,12 @@ test.describe('User Journey Flow Tests', () => {
       // Select NPS score - PrimeNG radio
       await helpers.selectRadio(scenario, 'recommendToFriend', '9');
 
-      // Select future interests (multi-checkbox) - PrimeNG checkboxes
-      const newProductsCheckbox = scenario.locator('#futureInterest input[type="checkbox"][value="new_products"]');
+      // Select future interests (multi-checkbox) - PrimeNG checkboxes use inputId="key-optionValue"
+      const newProductsCheckbox = scenario.locator('#futureInterest-new_products');
       await newProductsCheckbox.check();
       await expect(newProductsCheckbox).toBeChecked({ timeout: 5000 });
 
-      const promotionsCheckbox = scenario.locator('#futureInterest input[type="checkbox"][value="promotions"]');
+      const promotionsCheckbox = scenario.locator('#futureInterest-promotions');
       await promotionsCheckbox.check();
       await expect(promotionsCheckbox).toBeChecked({ timeout: 5000 });
 

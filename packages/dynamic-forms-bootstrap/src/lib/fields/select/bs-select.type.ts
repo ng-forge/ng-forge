@@ -1,7 +1,11 @@
 import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
-export interface BsSelectProps<T> extends SelectProps {
+/**
+ * Bootstrap select uses native HTML <select> which only supports string values.
+ * The compareWith function signature uses string to match this constraint.
+ */
+export interface BsSelectProps extends SelectProps {
   multiple?: boolean;
   size?: 'sm' | 'lg';
   htmlSize?: number;
@@ -9,9 +13,10 @@ export interface BsSelectProps<T> extends SelectProps {
   helpText?: DynamicText;
   validFeedback?: DynamicText;
   invalidFeedback?: DynamicText;
-  compareWith?: (o1: T, o2: T) => boolean;
+  compareWith?: (o1: string, o2: string) => boolean;
 }
 
-export type BsSelectField<T> = SelectField<T, BsSelectProps<T>>;
+export type BsSelectField<T> = SelectField<T, BsSelectProps>;
 
-export type BsSelectComponent<T> = ValueFieldComponent<BsSelectField<T>>;
+/** Bootstrap select only supports string values due to native HTML select limitations */
+export type BsSelectComponent = ValueFieldComponent<BsSelectField<string>>;

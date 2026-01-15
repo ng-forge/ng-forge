@@ -20,31 +20,31 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 
 describe('BsMultiCheckboxProps - Exhaustive Whitelist', () => {
   type ExpectedKeys = 'switch' | 'inline' | 'reverse' | 'helpText';
-  type ActualKeys = keyof BsMultiCheckboxProps<string>;
+  type ActualKeys = keyof BsMultiCheckboxProps;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
   });
 
   it('should have all keys optional', () => {
-    expectTypeOf<RequiredKeys<BsMultiCheckboxProps<string>>>().toEqualTypeOf<never>();
+    expectTypeOf<RequiredKeys<BsMultiCheckboxProps>>().toEqualTypeOf<never>();
   });
 
   describe('property types', () => {
     it('switch', () => {
-      expectTypeOf<BsMultiCheckboxProps<string>['switch']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<BsMultiCheckboxProps['switch']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('inline', () => {
-      expectTypeOf<BsMultiCheckboxProps<string>['inline']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<BsMultiCheckboxProps['inline']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('reverse', () => {
-      expectTypeOf<BsMultiCheckboxProps<string>['reverse']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<BsMultiCheckboxProps['reverse']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('helpText', () => {
-      expectTypeOf<BsMultiCheckboxProps<string>['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+      expectTypeOf<BsMultiCheckboxProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

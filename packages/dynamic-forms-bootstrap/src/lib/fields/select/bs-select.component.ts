@@ -63,10 +63,10 @@ import { AsyncPipe } from '@angular/common';
     `,
   ],
 })
-export default class BsSelectFieldComponent<T extends string = string> implements BsSelectComponent<T> {
+export default class BsSelectFieldComponent implements BsSelectComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<T>>();
+  readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -75,8 +75,8 @@ export default class BsSelectFieldComponent<T extends string = string> implement
   readonly className = input<string>('');
   readonly tabIndex = input<number>();
 
-  readonly options = input<FieldOption<T>[]>([]);
-  readonly props = input<BsSelectProps<T>>();
+  readonly options = input<FieldOption<string>[]>([]);
+  readonly props = input<BsSelectProps>();
   readonly validationMessages = input<ValidationMessages>();
   readonly defaultValidationMessages = input<ValidationMessages>();
   readonly meta = input<FieldMeta>();
@@ -92,7 +92,7 @@ export default class BsSelectFieldComponent<T extends string = string> implement
 
   defaultCompare = Object.is;
 
-  protected isSelected(optionValue: T, fieldValue: T | T[] | null): boolean {
+  protected isSelected(optionValue: string, fieldValue: string | string[] | null): boolean {
     const compareWith = this.props()?.compareWith || this.defaultCompare;
 
     if (Array.isArray(fieldValue)) {

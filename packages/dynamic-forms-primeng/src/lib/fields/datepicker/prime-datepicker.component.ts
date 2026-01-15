@@ -22,7 +22,7 @@ import { DatePicker } from 'primeng/datepicker';
 
       <p-datepicker
         [inputId]="key()"
-        [formField]="f"
+        [formField]="$any(f)"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
         [attr.aria-invalid]="ariaInvalid"
