@@ -28,10 +28,10 @@
     "node": ">=20"
   },
   "peerDependencies": {
-    "@angular/common": "~21.0.7",
-    "@angular/core": "~21.0.7",
-    "@angular/forms": "~21.0.7",
-    "@angular/material": "~21.0.5",
+    "@angular/common": "~21.1.0",
+    "@angular/core": "~21.1.0",
+    "@angular/forms": "~21.1.0",
+    "@angular/material": "~21.1.0",
     "@ng-forge/dynamic-forms": "~0.3.0",
     "rxjs": ">=7.0.0"
   }

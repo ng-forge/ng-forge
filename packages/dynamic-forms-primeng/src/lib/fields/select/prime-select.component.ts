@@ -22,7 +22,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
       }
       @if (isMultiple()) {
         <p-multiSelect
-          [formField]="f"
+          [formField]="$any(f)"
           [inputId]="key()"
           [options]="options()"
           optionLabel="label"
@@ -37,7 +37,7 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
         />
       } @else {
         <p-select
-          [formField]="f"
+          [formField]="$any(f)"
           [inputId]="key()"
           [options]="options()"
           optionLabel="label"
