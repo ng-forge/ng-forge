@@ -26,7 +26,7 @@
   ],
   "sideEffects": false,
   "engines": {
-    "node": ">=22"
+    "node": ">=20"
   },
   "peerDependencies": {
     "@angular/common": ">=21.0.7",
