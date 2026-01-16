@@ -5,7 +5,7 @@ export interface BsMultiCheckboxProps {
   switch?: boolean;
   inline?: boolean;
   reverse?: boolean;
-  helpText?: DynamicText;
+  hint?: DynamicText;
 }
 
 export type BsMultiCheckboxField<T> = MultiCheckboxField<T, BsMultiCheckboxProps>;

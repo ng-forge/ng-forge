@@ -12,7 +12,7 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 // ============================================================================
 
 describe('BsSliderProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'showValue' | 'valuePrefix' | 'valueSuffix' | 'helpText' | 'min' | 'max' | 'step';
+  type ExpectedKeys = 'showValue' | 'valuePrefix' | 'valueSuffix' | 'hint' | 'min' | 'max' | 'step';
   type ActualKeys = keyof BsSliderProps;
 
   it('should have exactly the expected keys', () => {
@@ -36,8 +36,8 @@ describe('BsSliderProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsSliderProps['valueSuffix']>().toEqualTypeOf<string | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsSliderProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsSliderProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('min', () => {
@@ -207,7 +207,7 @@ describe('BsSliderField - Usage', () => {
       props: {
         showValue: true,
         valueSuffix: '%',
-        helpText: 'Adjust the volume',
+        hint: 'Adjust the volume',
       },
     } as const satisfies BsSliderField;
 

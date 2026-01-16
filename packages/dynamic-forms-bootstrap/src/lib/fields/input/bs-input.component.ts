@@ -67,9 +67,9 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           [class.is-invalid]="f().invalid() && f().touched()"
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         />
-        @if (p?.helpText) {
-          <div class="form-text" [id]="helpTextId()">
-            {{ p?.helpText | dynamicText | async }}
+        @if (p?.hint) {
+          <div class="form-text" [id]="hintId()">
+            {{ p?.hint | dynamicText | async }}
           </div>
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
@@ -164,8 +164,8 @@ export default class BsInputFieldComponent implements BsInputComponent {
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Unique ID for the help text element, used for aria-describedby */
-  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  /** Unique ID for the hint element, used for aria-describedby */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
 
   /** Base ID for error elements, used for aria-describedby */
   protected readonly errorId = computed(() => `${this.key()}-error`);
@@ -181,12 +181,12 @@ export default class BsInputFieldComponent implements BsInputComponent {
     return this.field()().required?.() === true ? true : null;
   });
 
-  /** aria-describedby: links to help text and error messages for screen readers */
+  /** aria-describedby: links to hint and error messages for screen readers */
   protected readonly ariaDescribedBy = computed(() => {
     const ids: string[] = [];
 
-    if (this.props()?.helpText) {
-      ids.push(this.helpTextId());
+    if (this.props()?.hint) {
+      ids.push(this.hintId());
     }
 
     const errors = this.errorsToDisplay();

@@ -45,9 +45,9 @@ import { AsyncPipe } from '@angular/common';
       }
     </div>
 
-    @if (props()?.helpText; as helpText) {
-      <div class="form-text" [id]="helpTextId()">
-        {{ helpText | dynamicText | async }}
+    @if (props()?.hint; as hint) {
+      <div class="form-text" [id]="hintId()">
+        {{ hint | dynamicText | async }}
       </div>
     }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
@@ -156,7 +156,7 @@ export default class BsMultiCheckboxFieldComponent implements BsMultiCheckboxCom
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   protected readonly ariaInvalid = computed(() => {
@@ -170,8 +170,8 @@ export default class BsMultiCheckboxFieldComponent implements BsMultiCheckboxCom
 
   protected readonly ariaDescribedBy = computed(() => {
     const ids: string[] = [];
-    if (this.props()?.helpText) {
-      ids.push(this.helpTextId());
+    if (this.props()?.hint) {
+      ids.push(this.hintId());
     }
     const errors = this.errorsToDisplay();
     errors.forEach((_, i) => {

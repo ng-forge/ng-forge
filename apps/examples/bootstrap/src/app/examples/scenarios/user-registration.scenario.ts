@@ -63,7 +63,7 @@ export const userRegistrationScenario: ExampleScenario = {
         props: {
           type: 'email',
           placeholder: 'user@example.com',
-          helpText: 'We will never share your email',
+          hint: 'We will never share your email',
         },
       },
 
@@ -131,7 +131,7 @@ export const userRegistrationScenario: ExampleScenario = {
         label: 'Bio',
         props: {
           placeholder: 'Tell us about yourself',
-          helpText: 'Optional - share a bit about yourself',
+          hint: 'Optional - share a bit about yourself',
         },
       },
       {
@@ -139,7 +139,7 @@ export const userRegistrationScenario: ExampleScenario = {
         type: 'checkbox',
         label: 'Subscribe to newsletter',
         props: {
-          helpText: 'Get updates about new features and special offers',
+          hint: 'Get updates about new features and special offers',
         },
       },
 

@@ -26,8 +26,8 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
         [ariaDescribedBy]="ariaDescribedBy()"
       />
 
-      @if (props()?.helpText; as helpText) {
-        <div class="form-text" [id]="helpTextId()">{{ helpText | dynamicText | async }}</div>
+      @if (props()?.hint; as hint) {
+        <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
       }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
@@ -87,7 +87,7 @@ export default class BsRadioFieldComponent implements BsRadioComponent {
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   protected readonly ariaInvalid = computed(() => {
@@ -101,8 +101,8 @@ export default class BsRadioFieldComponent implements BsRadioComponent {
 
   protected readonly ariaDescribedBy = computed(() => {
     const ids: string[] = [];
-    if (this.props()?.helpText) {
-      ids.push(this.helpTextId());
+    if (this.props()?.hint) {
+      ids.push(this.hintId());
     }
     const errors = this.errorsToDisplay();
     errors.forEach((_, i) => {

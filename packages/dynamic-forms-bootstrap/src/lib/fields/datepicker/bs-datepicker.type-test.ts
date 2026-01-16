@@ -16,7 +16,7 @@ describe('BsDatepickerProps - Exhaustive Whitelist', () => {
     | 'useNgBootstrap'
     | 'size'
     | 'floatingLabel'
-    | 'helpText'
+    | 'hint'
     | 'validFeedback'
     | 'invalidFeedback'
     | 'displayMonths'
@@ -47,8 +47,8 @@ describe('BsDatepickerProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsDatepickerProps['floatingLabel']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsDatepickerProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsDatepickerProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('validFeedback', () => {

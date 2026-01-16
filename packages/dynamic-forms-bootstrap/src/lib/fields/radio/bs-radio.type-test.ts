@@ -19,7 +19,7 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 // ============================================================================
 
 describe('BsRadioProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'inline' | 'reverse' | 'buttonGroup' | 'buttonSize' | 'helpText';
+  type ExpectedKeys = 'inline' | 'reverse' | 'buttonGroup' | 'buttonSize' | 'hint';
   type ActualKeys = keyof BsRadioProps;
 
   it('should have exactly the expected keys', () => {
@@ -47,8 +47,8 @@ describe('BsRadioProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsRadioProps['buttonSize']>().toEqualTypeOf<'sm' | 'lg' | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsRadioProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsRadioProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });

@@ -6,7 +6,7 @@ export interface BsRadioProps {
   reverse?: boolean;
   buttonGroup?: boolean;
   buttonSize?: 'sm' | 'lg';
-  helpText?: DynamicText;
+  hint?: DynamicText;
 }
 
 export type BsRadioField<T> = RadioField<T, BsRadioProps>;

@@ -187,7 +187,7 @@ Text input field with HTML5 type support and optional floating labels.
     type: 'email',
     floatingLabel: true,
     placeholder: 'Enter your email',
-    helpText: 'We will never share your email',
+    hint: 'We will never share your email',
   },
 }
 ```
@@ -224,7 +224,7 @@ Text input field with HTML5 type support and optional floating labels.
 | `size`            | `'sm' \| 'lg'`                                                  | -        | Bootstrap size class         |
 | `floatingLabel`   | `boolean`                                                       | `false`  | Enable floating label design |
 | `plaintext`       | `boolean`                                                       | `false`  | Render as plaintext          |
-| `helpText`        | `string`                                                        | -        | Helper text below input      |
+| `hint`            | `string`                                                        | -        | Helper text below input      |
 | `validFeedback`   | `string`                                                        | -        | Success message when valid   |
 | `invalidFeedback` | `string`                                                        | -        | Error message when invalid   |
 
@@ -260,7 +260,7 @@ Multi-line text input field with Bootstrap form styling.
 | `rows`          | `number`       | `3`     | Number of visible rows       |
 | `size`          | `'sm' \| 'lg'` | -       | Bootstrap size class         |
 | `floatingLabel` | `boolean`      | `false` | Enable floating label design |
-| `helpText`      | `string`       | -       | Helper text below textarea   |
+| `hint`          | `string`       | -       | Helper text below textarea   |
 
 ---
 
@@ -303,7 +303,7 @@ Dropdown selection field with native HTML select element. Supports both single a
 | `multiple`      | `boolean`      | `false` | Enable multi-select          |
 | `size`          | `'sm' \| 'lg'` | -       | Bootstrap size class         |
 | `floatingLabel` | `boolean`      | `false` | Enable floating label design |
-| `helpText`      | `string`       | -       | Helper text below select     |
+| `hint`          | `string`       | -       | Helper text below select     |
 
 #### Radio
 
@@ -338,7 +338,7 @@ Radio button group for selecting a single option with optional button group styl
 | `reverse`     | `boolean`      | `false` | Reverse label and input position          |
 | `buttonGroup` | `boolean`      | `false` | Render as Bootstrap button group          |
 | `buttonSize`  | `'sm' \| 'lg'` | -       | Button size (when buttonGroup is enabled) |
-| `helpText`    | `string`       | -       | Helper text below radio group             |
+| `hint`        | `string`       | -       | Helper text below radio group             |
 
 #### Checkbox
 
@@ -396,12 +396,12 @@ Multiple checkbox selection field for choosing multiple options.
 
 **Props (Bootstrap-Specific):**
 
-| Prop       | Type      | Default | Description                      |
-| ---------- | --------- | ------- | -------------------------------- |
-| `switch`   | `boolean` | `false` | Render checkboxes as switches    |
-| `inline`   | `boolean` | `false` | Display options inline           |
-| `reverse`  | `boolean` | `false` | Reverse label and input position |
-| `helpText` | `string`  | -       | Helper text below checkbox group |
+| Prop      | Type      | Default | Description                      |
+| --------- | --------- | ------- | -------------------------------- |
+| `switch`  | `boolean` | `false` | Render checkboxes as switches    |
+| `inline`  | `boolean` | `false` | Display options inline           |
+| `reverse` | `boolean` | `false` | Reverse label and input position |
+| `hint`    | `string`  | -       | Helper text below checkbox group |
 
 ---
 
@@ -465,7 +465,7 @@ Native HTML5 range input for selecting values from a numeric range.
 | Prop        | Type      | Default | Description              |
 | ----------- | --------- | ------- | ------------------------ |
 | `showValue` | `boolean` | `false` | Display current value    |
-| `helpText`  | `string`  | -       | Helper text below slider |
+| `hint`      | `string`  | -       | Helper text below slider |
 
 #### Datepicker
 
@@ -504,7 +504,7 @@ Native HTML5 date input with Bootstrap styling.
 | ----------------- | -------------------------------------- | ------- | ------------------------------------------ |
 | `size`            | `'sm' \| 'lg'`                         | -       | Bootstrap size class                       |
 | `floatingLabel`   | `boolean`                              | `false` | Enable floating label design               |
-| `helpText`        | `string`                               | -       | Helper text below field                    |
+| `hint`            | `string`                               | -       | Helper text below field                    |
 | `validFeedback`   | `string`                               | -       | Success message when valid                 |
 | `invalidFeedback` | `string`                               | -       | Error message when invalid                 |
 | `useNgBootstrap`  | `boolean`                              | -       | Use ng-bootstrap datepicker                |
@@ -650,10 +650,10 @@ Customize field spacing and styling with CSS variables:
 
 All Bootstrap fields support these common properties:
 
-| Prop       | Type           | Default | Description                       |
-| ---------- | -------------- | ------- | --------------------------------- |
-| `size`     | `'sm' \| 'lg'` | -       | Bootstrap size class              |
-| `helpText` | `string`       | -       | Helper text displayed below field |
+| Prop   | Type           | Default | Description                       |
+| ------ | -------------- | ------- | --------------------------------- |
+| `size` | `'sm' \| 'lg'` | -       | Bootstrap size class              |
+| `hint` | `string`       | -       | Helper text displayed below field |
 
 ## Bootstrap-Specific Features
 
