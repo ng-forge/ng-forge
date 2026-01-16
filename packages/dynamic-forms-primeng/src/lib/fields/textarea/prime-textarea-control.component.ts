@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { FormValueControl } from '@angular/forms/signals';
 import { setupMetaTracking, TextareaMeta } from '@ng-forge/dynamic-forms/integration';
 import { TextareaModule } from 'primeng/textarea';
@@ -9,11 +10,12 @@ import { TextareaModule } from 'primeng/textarea';
  */
 @Component({
   selector: 'df-prime-textarea-control',
-  imports: [TextareaModule],
+  imports: [TextareaModule, FormsModule],
   template: `
     <textarea
       pInputTextarea
-      [value]="value()"
+      [ngModel]="value()"
+      (ngModelChange)="value.set($event)"
       [placeholder]="placeholder()"
       [attr.maxlength]="maxlength()"
       [attr.tabindex]="tabIndex()"
@@ -24,7 +26,6 @@ import { TextareaModule } from 'primeng/textarea';
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
       [attr.aria-describedby]="ariaDescribedBy()"
-      (input)="onInput($event)"
       (blur)="onBlur()"
     ></textarea>
   `,
@@ -88,12 +89,6 @@ export class PrimeTextareaControlComponent implements FormValueControl<string> {
   protected readonly ariaRequired = computed(() => {
     return this.required() ? true : null;
   });
-
-  /** Handles input event to update value */
-  onInput(event: Event): void {
-    const target = event.target as HTMLTextAreaElement;
-    this.value.set(target.value);
-  }
 
   /** Marks the field as touched when textarea loses focus */
   onBlur(): void {

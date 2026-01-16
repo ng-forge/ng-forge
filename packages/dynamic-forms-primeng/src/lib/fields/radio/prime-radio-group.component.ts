@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
 import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
-import { RadioButton, RadioButtonClickEvent } from 'primeng/radiobutton';
+import { RadioButton } from 'primeng/radiobutton';
 
 export interface PrimeRadioGroupProps {
   /**
@@ -14,7 +15,7 @@ export interface PrimeRadioGroupProps {
 
 @Component({
   selector: 'df-prime-radio-group',
-  imports: [RadioButton, DynamicTextPipe, AsyncPipe],
+  imports: [RadioButton, FormsModule, DynamicTextPipe, AsyncPipe],
   template: `
     <div class="radio-group">
       @for (option of options(); track option.value; let i = $index) {
@@ -22,10 +23,11 @@ export interface PrimeRadioGroupProps {
           <p-radiobutton
             [name]="name()"
             [value]="option.value"
+            [ngModel]="value()"
+            (ngModelChange)="value.set($event)"
             [disabled]="disabled() || option.disabled || false"
             [inputId]="name() + '_' + i"
             [styleClass]="properties()?.styleClass"
-            (onClick)="onRadioClick($event, option.value)"
           />
           <label [for]="name() + '_' + i" class="radio-option-label">{{ option.label | dynamicText | async }}</label>
         </div>
@@ -81,14 +83,5 @@ export class PrimeRadioGroupComponent implements FormValueControl<ValueType | un
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });
-  }
-
-  /**
-   * Handle radio button click event
-   */
-  protected onRadioClick(event: RadioButtonClickEvent, optionValue: ValueType): void {
-    if (!this.disabled() && !this.readonly()) {
-      this.value.set(optionValue);
-    }
   }
 }
