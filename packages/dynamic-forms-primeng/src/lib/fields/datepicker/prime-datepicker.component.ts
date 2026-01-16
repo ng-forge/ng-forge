@@ -35,6 +35,8 @@ import { PrimeDatepickerControlComponent } from './prime-datepicker-control.comp
         [defaultDate]="startAt()"
         [styleClass]="datepickerClasses()"
         [meta]="meta()"
+        [ariaInvalid]="ariaInvalid()"
+        [ariaRequired]="ariaRequired()"
         [ariaDescribedBy]="ariaDescribedBy()"
       />
 
@@ -111,6 +113,17 @@ export default class PrimeDatepickerFieldComponent implements PrimeDatepickerCom
 
   /** Base ID for error elements, used for aria-describedby */
   protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** aria-invalid: true when field is invalid AND touched */
+  protected readonly ariaInvalid = computed(() => {
+    const fieldState = this.field()();
+    return fieldState.invalid() && fieldState.touched();
+  });
+
+  /** aria-required: true if field is required, null otherwise */
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
 
   /** aria-describedby: links to hint and error messages for screen readers */
   protected readonly ariaDescribedBy = computed(() => {

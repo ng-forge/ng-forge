@@ -22,6 +22,7 @@ import { DatePicker } from 'primeng/datepicker';
       [placeholder]="placeholder()"
       [disabled]="disabled()"
       [readonlyInput]="readonly()"
+      [invalid]="ariaInvalid()"
       [dateFormat]="dateFormat()"
       [inline]="inline()"
       [showIcon]="showIcon()"
@@ -87,6 +88,12 @@ export class PrimeDatepickerControlComponent implements FormValueControl<string 
   readonly tabIndex = input<number | undefined>(undefined);
   readonly meta = input<InputMeta>();
 
+  /** aria-invalid passed from parent (computed from field state) */
+  readonly ariaInvalid = input<boolean>(false);
+
+  /** aria-required passed from parent (computed from field state) */
+  readonly ariaRequired = input<boolean | null>(null);
+
   /** aria-describedby IDs passed from parent */
   readonly ariaDescribedBy = input<string | null>(null);
 
@@ -104,20 +111,6 @@ export class PrimeDatepickerControlComponent implements FormValueControl<string 
     if (!val) return null;
     const date = new Date(val);
     return isNaN(date.getTime()) ? null : date;
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Computed ARIA attributes
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** aria-invalid: true when field is invalid AND touched */
-  protected readonly ariaInvalid = computed(() => {
-    return this.invalid() && this.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise */
-  protected readonly ariaRequired = computed(() => {
-    return this.required() ? true : null;
   });
 
   /** Handles date selection from DatePicker - converts Date to ISO string */

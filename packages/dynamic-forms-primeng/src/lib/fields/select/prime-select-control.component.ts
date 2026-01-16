@@ -24,6 +24,7 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
         optionValue="value"
         [placeholder]="placeholder()"
         [disabled]="disabled()"
+        [invalid]="ariaInvalid()"
         [filter]="filter()"
         [showClear]="showClear()"
         [styleClass]="styleClass()"
@@ -31,6 +32,7 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
         [attr.aria-required]="ariaRequired()"
         [attr.aria-describedby]="ariaDescribedBy()"
         (onBlur)="onBlur()"
+        (onHide)="onBlur()"
       />
     } @else {
       <p-select
@@ -42,6 +44,7 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
         optionValue="value"
         [placeholder]="placeholder()"
         [disabled]="disabled()"
+        [invalid]="ariaInvalid()"
         [filter]="filter()"
         [showClear]="showClear()"
         [styleClass]="styleClass()"
@@ -49,6 +52,7 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primeng/multiselect';
         [attr.aria-required]="ariaRequired()"
         [attr.aria-describedby]="ariaDescribedBy()"
         (onBlur)="onBlur()"
+        (onHide)="onBlur()"
       />
     }
   `,
@@ -92,6 +96,12 @@ export class PrimeSelectControlComponent implements FormValueControl<ValueType> 
   readonly styleClass = input<string>('');
   readonly meta = input<FieldMeta>();
 
+  /** aria-invalid passed from parent (computed from field state) */
+  readonly ariaInvalid = input<boolean>(false);
+
+  /** aria-required passed from parent (computed from field state) */
+  readonly ariaRequired = input<boolean | null>(null);
+
   /** aria-describedby IDs passed from parent */
   readonly ariaDescribedBy = input<string | null>(null);
 
@@ -107,20 +117,6 @@ export class PrimeSelectControlComponent implements FormValueControl<ValueType> 
   protected readonly multiValue = computed(() => {
     const val = this.value();
     return Array.isArray(val) ? val : [];
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Computed ARIA attributes
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** aria-invalid: true when field is invalid AND touched */
-  protected readonly ariaInvalid = computed(() => {
-    return this.invalid() && this.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise */
-  protected readonly ariaRequired = computed(() => {
-    return this.required() ? true : null;
   });
 
   /** Handles single select change event */

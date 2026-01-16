@@ -22,6 +22,7 @@ import { TextareaModule } from 'primeng/textarea';
       [autoResize]="autoResize()"
       [disabled]="disabled()"
       [readonly]="readonly()"
+      [invalid]="ariaInvalid()"
       [class]="styleClass()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
