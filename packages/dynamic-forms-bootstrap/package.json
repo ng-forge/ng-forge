@@ -23,7 +23,7 @@
     "form-builder",
     "ng-forge"
   ],
-  "sideEffects": false,
+  "sideEffects": true,
   "engines": {
     "node": ">=20"
   },

@@ -128,6 +128,16 @@ export class ContactFormComponent {
 }
 ```
 
+## Type Augmentation
+
+Importing this package automatically extends `@ng-forge/dynamic-forms` with Bootstrap-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:
+
+```typescript
+import '@ng-forge/dynamic-forms-bootstrap';
+```
+
+---
+
 ## Complete Form Example
 
 Here's a full registration form showcasing multiple Bootstrap field types:
