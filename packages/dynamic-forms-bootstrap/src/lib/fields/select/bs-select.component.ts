@@ -10,8 +10,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let selectId = key() + '-select'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let f = field(); @let selectId = key() + '-select';
 
     <div class="mb-3">
       @if (label(); as label) {
@@ -26,9 +25,9 @@ import { AsyncPipe } from '@angular/common';
         [class.is-invalid]="f().invalid() && f().touched()"
         [multiple]="props()?.multiple || false"
         [size]="props()?.htmlSize"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       >
         @if (placeholder(); as placeholder) {
           <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>

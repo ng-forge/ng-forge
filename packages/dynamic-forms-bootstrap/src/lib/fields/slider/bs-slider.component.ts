@@ -11,8 +11,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let inputId = key() + '-input'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let f = field(); @let inputId = key() + '-input';
 
     <div class="mb-3">
       @if (label(); as label) {
@@ -33,9 +32,9 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
         [dfMax]="props()?.max ?? max()"
         [dfStep]="props()?.step ?? step()"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         class="form-range"
       />
 

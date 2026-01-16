@@ -11,12 +11,8 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let p = props(); @let effectiveSize = this.effectiveSize();
-    @let effectiveFloatingLabel = this.effectiveFloatingLabel();
-    @let inputId = key() + '-input';
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
-    @if (effectiveFloatingLabel) {
+    @let f = field(); @let p = props(); @let inputId = key() + '-input';
+    @if (effectiveFloatingLabel()) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
         <input
@@ -26,12 +22,12 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
+          [attr.aria-invalid]="ariaInvalid()"
+          [attr.aria-required]="ariaRequired()"
+          [attr.aria-describedby]="ariaDescribedBy()"
           class="form-control"
-          [class.form-control-sm]="effectiveSize === 'sm'"
-          [class.form-control-lg]="effectiveSize === 'lg'"
+          [class.form-control-sm]="effectiveSize() === 'sm'"
+          [class.form-control-lg]="effectiveSize() === 'lg'"
           [class.form-control-plaintext]="p?.plaintext"
           [class.is-invalid]="f().invalid() && f().touched()"
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
@@ -61,12 +57,12 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           [type]="p?.type ?? 'text'"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
+          [attr.aria-invalid]="ariaInvalid()"
+          [attr.aria-required]="ariaRequired()"
+          [attr.aria-describedby]="ariaDescribedBy()"
           class="form-control"
-          [class.form-control-sm]="effectiveSize === 'sm'"
-          [class.form-control-lg]="effectiveSize === 'lg'"
+          [class.form-control-sm]="effectiveSize() === 'sm'"
+          [class.form-control-lg]="effectiveSize() === 'lg'"
           [class.form-control-plaintext]="p?.plaintext"
           [class.is-invalid]="f().invalid() && f().touched()"
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"

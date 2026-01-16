@@ -32,7 +32,6 @@ export interface BsRadioGroupProps {
   imports: [DynamicTextPipe, AsyncPipe],
   template: `
     @let props = properties();
-    @let ariaDescribedBy = this.ariaDescribedBy();
     @if (props?.buttonGroup) {
       <div class="btn-group" role="group" [attr.aria-label]="label() | dynamicText | async">
         @for (option of options(); track option.value; let i = $index) {
@@ -43,7 +42,7 @@ export interface BsRadioGroupProps {
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="ariaDescribedBy"
+            [attr.aria-describedby]="ariaDescribedBy()"
             class="btn-check"
             [id]="name() + '_' + i"
             autocomplete="off"
@@ -68,7 +67,7 @@ export interface BsRadioGroupProps {
             [checked]="value() === option.value"
             (change)="onRadioChange(option.value)"
             [disabled]="disabled() || option.disabled || false"
-            [attr.aria-describedby]="ariaDescribedBy"
+            [attr.aria-describedby]="ariaDescribedBy()"
             class="form-check-input"
             [id]="name() + '_' + i"
           />
