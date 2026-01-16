@@ -37,6 +37,9 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
 
   const baseInputs = buildBaseInputs(fieldDef);
   const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
+  // Use rootFormRegistry instead of fieldSignalContext.form because when the submit button
+  // is inside a group/array, fieldSignalContext.form points to the nested form tree,
+  // not the root form. We need root form validity for submit button disabled state (#157).
   const disabledSignal = resolveSubmitButtonDisabled({
     form: rootFormRegistry.getRootForm()!,
     formOptions: fieldSignalContext.formOptions,
