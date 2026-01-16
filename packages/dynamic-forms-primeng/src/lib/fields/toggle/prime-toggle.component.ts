@@ -12,8 +12,6 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label()) {
@@ -24,9 +22,9 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
         [id]="key()"
         [formField]="f"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         [trueValue]="true"
         [falseValue]="false"
         [styleClass]="toggleClasses()"
@@ -45,7 +43,6 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.ng-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [

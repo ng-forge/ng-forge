@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, input, model } from '@angular/core';
-import type { FormValueControl } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
+import type { FormValueControl } from '@angular/forms/signals';
 import { DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
 import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
@@ -24,7 +24,7 @@ export interface PrimeRadioGroupProps {
             [name]="name()"
             [value]="option.value"
             [ngModel]="value()"
-            (ngModelChange)="onRadioChange($event)"
+            (ngModelChange)="value.set($event)"
             [disabled]="disabled() || option.disabled || false"
             [inputId]="name() + '_' + i"
             [styleClass]="properties()?.styleClass"
@@ -83,14 +83,5 @@ export class PrimeRadioGroupComponent implements FormValueControl<ValueType | un
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });
-  }
-
-  /**
-   * Handle radio button change event
-   */
-  protected onRadioChange(newValue: ValueType): void {
-    if (!this.disabled() && !this.readonly()) {
-      this.value.set(newValue);
-    }
   }
 }

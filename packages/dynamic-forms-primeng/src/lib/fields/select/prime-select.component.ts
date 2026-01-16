@@ -3,54 +3,36 @@ import { FormField, FieldTree } from '@angular/forms/signals';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
-import { Select } from 'primeng/select';
-import { MultiSelect } from 'primeng/multiselect';
 import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
+import { PrimeSelectControlComponent } from './prime-select-control.component';
 
 @Component({
   selector: 'df-prime-select',
-  imports: [FormField, Select, MultiSelect, DynamicTextPipe, AsyncPipe],
+  imports: [FormField, PrimeSelectControlComponent, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label(); as label) {
         <label [for]="key()" class="df-prime-label">{{ label | dynamicText | async }}</label>
       }
-      @if (isMultiple()) {
-        <p-multiSelect
-          [formField]="$any(f)"
-          [inputId]="key()"
-          [options]="options()"
-          optionLabel="label"
-          optionValue="value"
-          [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
-          [filter]="props()?.filter ?? false"
-          [showClear]="props()?.showClear ?? false"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
-          [styleClass]="selectClasses()"
-        />
-      } @else {
-        <p-select
-          [formField]="$any(f)"
-          [inputId]="key()"
-          [options]="options()"
-          optionLabel="label"
-          optionValue="value"
-          [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
-          [filter]="props()?.filter ?? false"
-          [showClear]="props()?.showClear ?? false"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
-          [styleClass]="selectClasses()"
-        />
-      }
+
+      <df-prime-select-control
+        [formField]="f"
+        [inputId]="key()"
+        [options]="options()"
+        [placeholder]="(props()?.placeholder | dynamicText | async) ?? ''"
+        [multiple]="isMultiple()"
+        [filter]="props()?.filter ?? false"
+        [showClear]="props()?.showClear ?? false"
+        [styleClass]="selectClasses()"
+        [meta]="meta()"
+        [ariaInvalid]="ariaInvalid()"
+        [ariaRequired]="ariaRequired()"
+        [ariaDescribedBy]="ariaDescribedBy()"
+      />
+
       @if (props()?.hint; as hint) {
         <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
       }
@@ -64,7 +46,6 @@ import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.ng-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [
@@ -126,13 +107,13 @@ export default class PrimeSelectFieldComponent implements PrimeSelectComponent {
   /** Base ID for error elements, used for aria-describedby */
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
-  /** aria-invalid: true when field is invalid AND touched, false otherwise */
+  /** aria-invalid: true when field is invalid AND touched */
   protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
     return fieldState.invalid() && fieldState.touched();
   });
 
-  /** aria-required: true if field is required, null otherwise (to remove attribute) */
+  /** aria-required: true if field is required, null otherwise */
   protected readonly ariaRequired = computed(() => {
     return this.field()().required?.() === true ? true : null;
   });

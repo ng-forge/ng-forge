@@ -11,8 +11,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [Checkbox, DynamicTextPipe, AsyncPipe, FormField],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let checkboxId = key() + '-checkbox'; @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
+    @let f = field(); @let checkboxId = key() + '-checkbox';
 
     <div class="flex items-center">
       <p-checkbox
@@ -21,9 +20,9 @@ import { AsyncPipe } from '@angular/common';
         [binary]="props()?.binary ?? true"
         [trueValue]="props()?.trueValue ?? true"
         [falseValue]="props()?.falseValue ?? false"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         [styleClass]="checkboxClasses()"
         [attr.tabindex]="tabIndex()"
       />
@@ -52,7 +51,6 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className()',
-    '[class.ng-touched]': 'field()().touched()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',

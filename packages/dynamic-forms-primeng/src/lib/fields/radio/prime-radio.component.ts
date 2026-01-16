@@ -12,17 +12,16 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaDescribedBy = this.ariaDescribedBy();
     @if (label()) {
       <div class="radio-label">{{ label() | dynamicText | async }}</div>
     }
 
     <df-prime-radio-group
-      [formField]="$any(f)"
+      [formField]="f"
       [options]="options()"
       [properties]="props()"
       [meta]="meta()"
-      [attr.aria-describedby]="ariaDescribedBy"
+      [attr.aria-describedby]="ariaDescribedBy()"
     />
 
     @if (props()?.hint; as hint) {
@@ -50,7 +49,6 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   ],
   host: {
     '[class]': 'className()',
-    '[class.ng-touched]': 'field()().touched()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',
