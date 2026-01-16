@@ -28,6 +28,7 @@ import { setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
       [attr.aria-readonly]="ariaReadonly()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     >
       <ng-content />
     </ion-toggle>
@@ -71,6 +72,7 @@ export class IonicToggleControlComponent implements FormCheckboxControl {
   readonly enableOnOffLabels = input<boolean>(false);
   readonly tabIndex = input<number | undefined>(undefined);
   readonly meta = input<FieldMeta>();
+  readonly ariaDescribedBy = input<string | null>(null);
 
   constructor() {
     // Shadow DOM - apply meta to ion-toggle element
