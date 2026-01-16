@@ -49,13 +49,6 @@ import { AsyncPipe } from '@angular/common';
       {{ label() | dynamicText | async }}
     </ion-button>
   `,
-  styles: [
-    `
-      :host([hidden]) {
-        display: none !important;
-      }
-    `,
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicButtonFieldComponent<TEvent extends FormEvent> implements IonicButtonComponent<TEvent> {
