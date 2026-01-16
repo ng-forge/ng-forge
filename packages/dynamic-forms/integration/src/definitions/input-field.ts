@@ -2,37 +2,101 @@ import { BaseValueField, DynamicText } from '@ng-forge/dynamic-forms';
 import { InputMeta } from './input-meta';
 
 /**
- * HTML input types supported by input fields
+ * All valid HTML input types per MDN specification.
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types
  */
-export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+export type HtmlInputType =
+  | 'text'
+  | 'email'
+  | 'password'
+  | 'number'
+  | 'tel'
+  | 'url'
+  | 'search'
+  | 'date'
+  | 'datetime-local'
+  | 'month'
+  | 'week'
+  | 'time'
+  | 'color'
+  | 'range'
+  | 'checkbox'
+  | 'radio'
+  | 'file'
+  | 'hidden'
+  | 'button'
+  | 'submit'
+  | 'reset'
+  | 'image';
 
 /**
- * Maps HTML input types to their corresponding TypeScript value types
+ * Input types supported by InputField.
+ * Other HTML input types have dedicated field implementations:
+ * - checkbox → CheckboxField
+ * - radio → RadioField
+ * - range → SliderField
+ * - date/time → DatepickerField
+ * - file, hidden, button, etc. → dedicated fields
  */
-export type InputTypeToValueType<T extends InputType> = T extends 'number' ? number : string;
+export type InputType = Extract<HtmlInputType, 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'>;
 
 /**
- * Props for input fields with optional inputType specification.
- * This is a generic interface that can be extended by framework-specific implementations.
+ * Infers the TypeScript value type for a given input type.
+ *
+ * @example
+ * type NumberValue = InferInputValue<'number'>; // number
+ * type TextValue = InferInputValue<'text'>; // string
+ * type DateValue = InferInputValue<'date'>; // string (extended types)
  */
-export interface InputProps<T extends InputType = InputType> {
+export type InferInputValue<T extends HtmlInputType> = T extends 'number' ? number : string;
+
+/**
+ * @deprecated Use `InferInputValue` instead. Will be removed in v1.0.0.
+ */
+export type InputTypeToValueType<T extends InputType> = InferInputValue<T>;
+
+/**
+ * Props for input fields with optional type specification.
+ * Generic parameter allows extending InputType with additional HtmlInputType values.
+ *
+ * @example
+ * // Default usage
+ * interface MyProps extends InputProps { ... }
+ *
+ * // Extended input types (e.g., supporting date inputs)
+ * type ExtendedType = InputType | 'date' | 'time';
+ * interface ExtendedProps extends InputProps<ExtendedType> { ... }
+ */
+export interface InputProps<T extends HtmlInputType = InputType> {
   /**
    * The HTML input type. Determines the value type:
    * - 'number': value will be number
-   * - 'text', 'email', 'password', 'tel', 'url': value will be string
+   * - All other types: value will be string
    */
   type?: T;
   placeholder?: DynamicText;
 }
 
 // ============================================================================
-// String input types (excludes 'number')
+// Input type categories
 // ============================================================================
 
 /**
- * Input types that produce string values
+ * Input types that produce numeric values.
+ * Currently only 'number' produces a numeric value in HTML inputs.
+ *
+ * @example
+ * type Numeric = NumericInputType; // 'number'
  */
-export type StringInputType = Exclude<InputType, 'number'>;
+export type NumericInputType<T extends HtmlInputType = InputType> = Extract<T, 'number'>;
+
+/**
+ * Input types that produce string values.
+ *
+ * @example
+ * type Strings = StringInputType; // Exclude<InputType, 'number'>
+ */
+export type StringInputType<T extends HtmlInputType = InputType> = Exclude<T, 'number'>;
 
 // ============================================================================
 // Discriminated union variants
@@ -58,12 +122,12 @@ interface NumberInputField<TProps extends { type?: string } = InputProps> extend
  * Props type cannot be 'number'.
  */
 interface StringInputField<TProps extends { type?: string } = InputProps> extends BaseValueField<
-  TProps & { type?: StringInputType },
+  TProps & { type?: Exclude<TProps['type'], 'number'> },
   string,
   InputMeta
 > {
   type: 'input';
-  props?: TProps & { type?: StringInputType }; // Optional, but type cannot be 'number'
+  props?: TProps & { type?: Exclude<TProps['type'], 'number'> }; // Optional, but type cannot be 'number'
 }
 
 /**
