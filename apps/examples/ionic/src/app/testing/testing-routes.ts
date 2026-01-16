@@ -117,10 +117,4 @@ export default [
     path: 'user-workflows',
     loadChildren: () => import('./user-workflows/user-workflows.routes'),
   },
-
-  // Helper Text Tests - Tests helper text display on all field types
-  {
-    path: 'helper-text',
-    loadChildren: () => import('./helper-text/helper-text.routes'),
-  },
 ] satisfies Route[];

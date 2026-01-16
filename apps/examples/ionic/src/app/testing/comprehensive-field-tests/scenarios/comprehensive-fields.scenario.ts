@@ -81,6 +81,9 @@ const config = {
         { value: 'option2', label: 'Option 2' },
         { value: 'option3', label: 'Option 3' },
       ],
+      props: {
+        helperText: 'Choose one option from the list',
+      },
       col: 6,
     },
     // Multi-Select Field
@@ -122,6 +125,9 @@ const config = {
       key: 'toggleField',
       type: 'toggle',
       label: 'Toggle Field',
+      props: {
+        helperText: 'Enable or disable this option',
+      },
       col: 6,
     },
     // Multi-Checkbox Field
@@ -148,9 +154,11 @@ const config = {
       key: 'sliderField',
       type: 'slider',
       label: 'Slider Field',
-      min: 0,
-      max: 100,
-      step: 10,
+      props: {
+        min: 0,
+        max: 100,
+        helperText: 'Drag to select a value (0-100)',
+      },
       col: 6,
     },
     // Submit Button
