@@ -20,7 +20,7 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 // ============================================================================
 
 describe('IonicRadioProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'compareWith';
+  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'compareWith' | 'hint';
   type ActualKeys = keyof IonicRadioProps;
 
   it('should have exactly the expected keys', () => {

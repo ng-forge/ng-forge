@@ -28,8 +28,12 @@ import { AsyncPipe } from '@angular/common';
       {{ label() | dynamicText | async }}
     </ion-checkbox>
 
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    @if (errorsToDisplay().length > 0) {
+      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+        <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+      }
+    } @else if (props()?.hint; as hint) {
+      <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -87,6 +91,9 @@ export default class IonicCheckboxFieldComponent implements IonicCheckboxCompone
   /** Base ID for error elements */
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
   /** Whether the field is currently in an invalid state (invalid AND touched) */
   protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
@@ -98,10 +105,20 @@ export default class IonicCheckboxFieldComponent implements IonicCheckboxCompone
     return this.field()().required?.() === true ? true : null;
   });
 
-  /** aria-describedby pointing to error messages when visible */
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
   protected readonly ariaDescribedBy = computed(() => {
     const errors = this.errorsToDisplay();
-    if (errors.length === 0) return null;
-    return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
+
+    // Errors take precedence over helper text
+    if (errors.length > 0) {
+      return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
+    }
+
+    // Show hint only when no errors
+    if (this.props()?.hint) {
+      return this.hintId();
+    }
+
+    return null;
   });
 }

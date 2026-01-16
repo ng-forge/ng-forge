@@ -1,4 +1,4 @@
-import { CheckedFieldComponent } from '@ng-forge/dynamic-forms';
+import { CheckedFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicToggleProps {
@@ -6,6 +6,7 @@ export interface IonicToggleProps {
   justify?: 'start' | 'end' | 'space-between';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
   enableOnOffLabels?: boolean;
+  hint?: DynamicText;
 }
 
 export type IonicToggleField = ToggleField<IonicToggleProps>;

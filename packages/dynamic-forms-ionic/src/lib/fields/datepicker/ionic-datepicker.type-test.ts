@@ -24,7 +24,8 @@ describe('IonicDatepickerProps - Exhaustive Whitelist', () => {
     | 'cancelText'
     | 'size'
     | 'color'
-    | 'placeholder';
+    | 'placeholder'
+    | 'hint';
   type ActualKeys = keyof IonicDatepickerProps;
 
   it('should have exactly the expected keys', () => {

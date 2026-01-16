@@ -44,11 +44,13 @@
 }
 
 .df-ion-hint {
+  display: block;
   color: var(--df-hint-color);
   font-size: var(--df-hint-font-size);
 }
 
 .df-ion-error {
+  display: block;
   color: var(--df-error-color);
   font-size: var(--df-error-font-size);
 }

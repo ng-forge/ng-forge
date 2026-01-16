@@ -12,7 +12,18 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 // ============================================================================
 
 describe('IonicSliderProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'min' | 'max' | 'step' | 'dualKnobs' | 'pin' | 'pinFormatter' | 'ticks' | 'snaps' | 'color' | 'labelPlacement';
+  type ExpectedKeys =
+    | 'min'
+    | 'max'
+    | 'step'
+    | 'dualKnobs'
+    | 'pin'
+    | 'pinFormatter'
+    | 'ticks'
+    | 'snaps'
+    | 'color'
+    | 'labelPlacement'
+    | 'hint';
   type ActualKeys = keyof IonicSliderProps;
 
   it('should have exactly the expected keys', () => {

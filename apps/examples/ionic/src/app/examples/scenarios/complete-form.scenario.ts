@@ -63,7 +63,7 @@ export const completeFormScenario: ExampleScenario = {
         props: {
           type: 'email',
           placeholder: 'user@example.com',
-          helperText: 'We will never share your email',
+          hint: 'We will never share your email',
         },
       },
 
@@ -131,7 +131,7 @@ export const completeFormScenario: ExampleScenario = {
         label: 'Bio',
         props: {
           placeholder: 'Tell us about yourself',
-          helperText: 'Optional - share a bit about yourself',
+          hint: 'Optional - share a bit about yourself',
           rows: 4,
           autoGrow: true,
         },
