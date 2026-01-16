@@ -9,3 +9,4 @@ export { hiddenFieldScenario } from './hidden-field.scenario';
 export { httpErrorHandlingScenario } from './http-error-handling.scenario';
 export { nextButtonNeverDisabledScenario } from './next-button-never-disabled.scenario';
 export { nextButtonPageValidationScenario } from './next-button-page-validation.scenario';
+export { submitInsideGroupScenario } from './submit-inside-group.scenario';

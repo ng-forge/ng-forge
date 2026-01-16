@@ -385,6 +385,37 @@ test.describe('Submission Behavior Tests', () => {
     });
   });
 
+  test.describe('Submit Button Inside Group', () => {
+    test.beforeEach(async ({ helpers }) => {
+      await helpers.navigateToScenario('/test/submission-behavior/submit-inside-group');
+    });
+
+    test('should disable submit button inside group when form is invalid (issue #157)', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('submit-inside-group');
+      await expect(scenario).toBeVisible();
+
+      // Submit button inside group should be disabled initially (form is empty/invalid)
+      const submitButton = scenario.locator('#submitInGroup button');
+      await expect(submitButton).toBeDisabled();
+
+      // Fill one field (still invalid)
+      await helpers.fillInput(helpers.getInput(scenario, 'email'), 'test@example.com');
+      await expect(submitButton).toBeDisabled();
+
+      // Fill all required fields (now valid)
+      await helpers.fillInput(helpers.getInput(scenario, 'name'), 'Test User');
+
+      // Submit button should be enabled now
+      await expect(submitButton).toBeEnabled();
+
+      // Clear one field to make form invalid again
+      await helpers.fillInput(helpers.getInput(scenario, 'email'), '');
+
+      // Submit button should be disabled again
+      await expect(submitButton).toBeDisabled();
+    });
+  });
+
   test.describe('Hidden Field', () => {
     test.beforeEach(async ({ helpers, mockApi }) => {
       await mockApi.mockSuccess('/api/hidden-field-submit', { delay: 300 });
