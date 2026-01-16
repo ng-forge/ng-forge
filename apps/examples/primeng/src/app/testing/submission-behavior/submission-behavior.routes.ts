@@ -62,6 +62,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getSubmissionBehaviorScenario('hidden-field') },
   },
+  {
+    path: 'submit-inside-group',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getSubmissionBehaviorScenario('submit-inside-group') },
+  },
 ];
 
 export default routes;
