@@ -23,6 +23,7 @@ import { AsyncPipe } from '@angular/common';
       [color]="props()?.color ?? 'primary'"
       [enableOnOffLabels]="props()?.enableOnOffLabels ?? false"
       [tabIndex]="tabIndex()"
+      [ariaDescribedBy]="ariaDescribedBy()"
     >
       {{ label() | dynamicText | async }}
     </df-ion-toggle-control>
@@ -81,5 +82,12 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** aria-describedby value linking to error elements */
+  protected readonly ariaDescribedBy = computed(() => {
+    const errors = this.errorsToDisplay();
+    if (errors.length === 0) return null;
+    return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
+  });
 }

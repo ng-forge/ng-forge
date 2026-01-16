@@ -12,8 +12,6 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
   imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe],
   template: `
     @let f = field();
-    @let ariaInvalid = isAriaInvalid();
-    @let ariaRequired = isRequired() || null;
     @let inputId = key() + '-input';
 
     <ion-input
@@ -31,8 +29,9 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [readonly]="f().readonly()"
       [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="ariaInvalid"
-      [attr.aria-required]="ariaRequired"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     />
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
@@ -92,16 +91,23 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
 
   /** Whether the field is currently in an invalid state (invalid AND touched) */
-  readonly isAriaInvalid = computed(() => {
+  protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
     return fieldState.invalid() && fieldState.touched();
   });
 
   /** Whether the field has a required validator */
-  readonly isRequired = computed(() => {
-    return this.field()().required?.() === true;
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
+
+  /** aria-describedby pointing to error messages when visible */
+  protected readonly ariaDescribedBy = computed(() => {
+    const errors = this.errorsToDisplay();
+    if (errors.length === 0) return null;
+    return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
   });
 }
