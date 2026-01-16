@@ -19,7 +19,7 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 // ============================================================================
 
 describe('IonicMultiCheckboxProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color';
+  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'helperText';
   type ActualKeys = keyof IonicMultiCheckboxProps;
 
   it('should have exactly the expected keys', () => {
