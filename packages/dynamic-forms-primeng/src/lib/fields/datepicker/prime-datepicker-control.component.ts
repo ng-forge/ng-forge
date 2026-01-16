@@ -17,6 +17,7 @@ import { DatePicker } from 'primeng/datepicker';
     <p-datepicker
       [inputId]="inputId()"
       [ngModel]="dateValue()"
+      (ngModelChange)="onModelChange($event)"
       (onSelect)="onSelect($event)"
       (onClear)="onClear()"
       [placeholder]="placeholder()"
@@ -113,8 +114,18 @@ export class PrimeDatepickerControlComponent implements FormValueControl<string 
     return isNaN(date.getTime()) ? null : date;
   });
 
-  /** Handles date selection from DatePicker - converts Date to ISO string */
+  /** Handles ngModel changes (from typing or calendar selection) */
+  onModelChange(date: Date | null): void {
+    if (date instanceof Date && !isNaN(date.getTime())) {
+      this.value.set(date.toISOString());
+    } else {
+      this.value.set(null);
+    }
+  }
+
+  /** Handles date selection from DatePicker calendar - converts Date to ISO string */
   onSelect(event: Date): void {
+    // onSelect is redundant with onModelChange but kept for explicit calendar selection handling
     if (event instanceof Date && !isNaN(event.getTime())) {
       this.value.set(event.toISOString());
     } else {
