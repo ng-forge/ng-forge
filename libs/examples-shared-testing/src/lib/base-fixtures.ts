@@ -395,7 +395,8 @@ export function createBaseHelpers(page: Page, testUrl: (path: string) => string,
     expectScreenshotMatch: async (scenario: Locator, name: string, options?: { maxDiffPixelRatio?: number; threshold?: number }) => {
       await expect(scenario).toHaveScreenshot(`${name}.png`, {
         animations: 'disabled',
-        maxDiffPixelRatio: options?.maxDiffPixelRatio ?? 0.01,
+        // Increased from 0.01 to 0.05 to accommodate cross-platform rendering differences (Linux vs macOS)
+        maxDiffPixelRatio: options?.maxDiffPixelRatio ?? 0.05,
         threshold: options?.threshold ?? 0.2,
       });
     },
