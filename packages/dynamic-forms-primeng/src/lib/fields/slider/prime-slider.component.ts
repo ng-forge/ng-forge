@@ -12,8 +12,6 @@ import { Slider } from 'primeng/slider';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label(); as label) {
@@ -27,9 +25,9 @@ import { Slider } from 'primeng/slider';
         [range]="props()?.range || false"
         [orientation]="props()?.orientation || 'horizontal'"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         [styleClass]="sliderClasses()"
       />
 
@@ -46,7 +44,6 @@ import { Slider } from 'primeng/slider';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.ng-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [

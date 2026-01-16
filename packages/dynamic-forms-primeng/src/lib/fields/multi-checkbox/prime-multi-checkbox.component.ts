@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, linkedSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
-import { Checkbox } from 'primeng/checkbox';
+import { Checkbox, CheckboxChangeEvent } from 'primeng/checkbox';
 import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessages, ValueType } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, isEqual, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -14,20 +14,19 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaDescribedBy = this.ariaDescribedBy();
     @let checked = checkedValuesMap();
     @if (label(); as label) {
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
-    <div class="checkbox-group" [class]="groupClasses()" [attr.aria-describedby]="ariaDescribedBy">
+    <div class="checkbox-group" [class]="groupClasses()" [attr.aria-describedby]="ariaDescribedBy()">
       @for (option of options(); track option.value) {
         <div class="checkbox-option">
           <p-checkbox
             [inputId]="key() + '-' + option.value"
             [binary]="true"
             [ngModel]="checked['' + option.value] || false"
-            (ngModelChange)="onCheckboxChange(option, $event)"
+            (onChange)="onCheckboxChange(option, $event)"
             [disabled]="f().disabled() || option.disabled || false"
           />
           <label [for]="key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
@@ -60,7 +59,6 @@ import { AsyncPipe } from '@angular/common';
   ],
   host: {
     '[class]': 'className() || ""',
-    '[class.ng-touched]': 'field()().touched()',
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'field()().hidden() || null',
@@ -123,7 +121,8 @@ export default class PrimeMultiCheckboxFieldComponent implements PrimeMultiCheck
     return map;
   });
 
-  onCheckboxChange(option: FieldOption<ValueType>, checked: boolean): void {
+  onCheckboxChange(option: FieldOption<ValueType>, event: CheckboxChangeEvent): void {
+    const checked = event.checked;
     this.valueViewModel.update((currentOptions: FieldOption<ValueType>[]) => {
       if (checked) {
         return currentOptions.some((opt: FieldOption<ValueType>) => opt.value === option.value)

@@ -13,8 +13,6 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label()) {
@@ -28,9 +26,9 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
         [type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         [class]="inputClasses()"
       />
       @if (props()?.hint; as hint) {
@@ -46,7 +44,6 @@ import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.ng-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [

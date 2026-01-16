@@ -4,30 +4,25 @@ import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { PrimeDatepickerComponent, PrimeDatepickerProps } from './prime-datepicker.type';
 import { AsyncPipe } from '@angular/common';
-import { DatePicker } from 'primeng/datepicker';
+import { PrimeDatepickerControlComponent } from './prime-datepicker-control.component';
 
 @Component({
   selector: 'df-prime-datepicker',
-  imports: [DatePicker, FormField, DynamicTextPipe, AsyncPipe],
+  imports: [PrimeDatepickerControlComponent, FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label()) {
         <label [for]="key()" class="df-prime-label">{{ label() | dynamicText | async }}</label>
       }
 
-      <p-datepicker
+      <df-prime-datepicker-control
+        [formField]="f"
         [inputId]="key()"
-        [formField]="$any(f)"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [tabIndex]="tabIndex()"
         [dateFormat]="props()?.dateFormat || 'mm/dd/yy'"
         [inline]="props()?.inline ?? false"
         [showIcon]="props()?.showIcon ?? true"
@@ -35,7 +30,12 @@ import { DatePicker } from 'primeng/datepicker';
         [selectionMode]="props()?.selectionMode || 'single'"
         [touchUI]="props()?.touchUI ?? false"
         [view]="props()?.view || 'date'"
+        [minDate]="minDate()"
+        [maxDate]="maxDate()"
+        [defaultDate]="startAt()"
         [styleClass]="datepickerClasses()"
+        [meta]="meta()"
+        [ariaDescribedBy]="ariaDescribedBy()"
       />
 
       @if (props()?.hint; as hint) {
@@ -51,7 +51,6 @@ import { DatePicker } from 'primeng/datepicker';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.ng-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [
@@ -65,7 +64,7 @@ import { DatePicker } from 'primeng/datepicker';
 export default class PrimeDatepickerFieldComponent implements PrimeDatepickerComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly field = input.required<FieldTree<Date | null>>();
+  readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
 
   readonly label = input<DynamicText>();
@@ -112,17 +111,6 @@ export default class PrimeDatepickerFieldComponent implements PrimeDatepickerCom
 
   /** Base ID for error elements, used for aria-describedby */
   protected readonly errorId = computed(() => `${this.key()}-error`);
-
-  /** aria-invalid: true when field is invalid AND touched, false otherwise */
-  protected readonly ariaInvalid = computed(() => {
-    const fieldState = this.field()();
-    return fieldState.invalid() && fieldState.touched();
-  });
-
-  /** aria-required: true if field is required, null otherwise (to remove attribute) */
-  protected readonly ariaRequired = computed(() => {
-    return this.field()().required?.() === true ? true : null;
-  });
 
   /** aria-describedby: links to hint and error messages for screen readers */
   protected readonly ariaDescribedBy = computed(() => {

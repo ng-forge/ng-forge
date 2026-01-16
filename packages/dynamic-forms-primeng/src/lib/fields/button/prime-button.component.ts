@@ -21,6 +21,7 @@ import { PrimeButtonComponent, PrimeButtonProps } from './prime-button.type';
     '[id]': '`${key()}`',
     '[class]': 'className()',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'hidden() || null',
   },
   template: `
     <button

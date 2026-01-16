@@ -12,7 +12,6 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="df-prime-field">
       @if (label()) {
@@ -29,7 +28,7 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
         [maxlength]="props()?.maxlength"
         [tabIndex]="tabIndex()"
         [autoResize]="props()?.autoResize ?? false"
-        [ariaDescribedBy]="ariaDescribedBy"
+        [ariaDescribedBy]="ariaDescribedBy()"
         [styleClass]="textareaClasses()"
       />
 
@@ -46,7 +45,6 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[class.ng-touched]': 'field()().touched()',
     '[attr.hidden]': 'field()().hidden() || null',
   },
   styles: [
