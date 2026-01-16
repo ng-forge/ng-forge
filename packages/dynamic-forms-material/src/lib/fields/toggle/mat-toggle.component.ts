@@ -15,7 +15,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   template: `
     @let f = field();
     @let toggleId = key() + '-toggle';
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-slide-toggle
       [id]="toggleId"
@@ -25,7 +24,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
       [hideIcon]="props()?.hideIcon || false"
       [disableRipple]="effectiveDisableRipple()"
       [required]="!!f().required()"
-      [aria-describedby]="ariaDescribedBy"
+      [aria-describedby]="ariaDescribedBy()"
       [attr.tabindex]="tabIndex()"
       class="toggle-container"
     >

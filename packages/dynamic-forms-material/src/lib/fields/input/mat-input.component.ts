@@ -14,8 +14,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   template: `
     @let f = field();
     @let inputId = key() + '-input';
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label()) {
@@ -29,9 +27,9 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         [type]="props()?.type ?? 'text'"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       />
       @if (props()?.hint; as hint) {
         <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>

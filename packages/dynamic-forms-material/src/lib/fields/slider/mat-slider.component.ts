@@ -13,8 +13,6 @@ import { AsyncPipe } from '@angular/common';
   template: `
     @let f = field();
     @let inputId = key() + '-input';
-    @let ariaInvalid = this.ariaInvalid();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     @if (label(); as label) {
       <div class="slider-label">{{ label | dynamicText | async }}</div>
@@ -34,8 +32,8 @@ import { AsyncPipe } from '@angular/common';
         [id]="inputId"
         [formField]="f"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       />
     </mat-slider>
 

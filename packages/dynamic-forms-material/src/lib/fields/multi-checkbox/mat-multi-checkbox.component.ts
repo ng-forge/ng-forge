@@ -14,8 +14,6 @@ import { AsyncPipe } from '@angular/common';
   template: `
     @let f = field();
     @let checkboxGroupId = key() + '-checkbox-group';
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
     @let checked = checkedValuesMap();
 
     @if (label(); as label) {
@@ -26,9 +24,9 @@ import { AsyncPipe } from '@angular/common';
       [id]="checkboxGroupId"
       class="checkbox-group"
       role="group"
-      [attr.aria-invalid]="ariaInvalid"
-      [attr.aria-required]="ariaRequired"
-      [attr.aria-describedby]="ariaDescribedBy"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     >
       @for (option of options(); track option.value) {
         <mat-checkbox

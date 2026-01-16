@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
@@ -7,7 +7,6 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, Textar
 import { MatTextareaComponent, MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
-import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'df-mat-textarea',
@@ -15,8 +14,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   template: `
     @let f = field();
     @let textareaId = key() + '-textarea';
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label()) {
@@ -30,9 +27,9 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
         [formField]="f"
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [attr.tabindex]="tabIndex()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
 
@@ -102,16 +99,22 @@ export default class MatTextareaFieldComponent implements MatTextareaComponent {
    * Note: We cannot use [readonly] or [attr.readonly] bindings because Angular throws
    * NG8022: "Binding to '[readonly]' is not allowed on nodes using the '[field]' directive"
    *
+   * Uses afterRenderEffect to ensure DOM is ready before manipulating attributes.
+   *
    * @see https://github.com/angular/angular/issues/65897
    */
-  private readonly syncReadonlyToDom = explicitEffect([this.textareaRef, this.isReadonly], ([textareaRef, isReadonly]) => {
-    if (textareaRef?.nativeElement) {
-      if (isReadonly) {
-        textareaRef.nativeElement.setAttribute('readonly', '');
-      } else {
-        textareaRef.nativeElement.removeAttribute('readonly');
+  private readonly syncReadonlyToDom = afterRenderEffect({
+    write: () => {
+      const textareaRef = this.textareaRef();
+      const isReadonly = this.isReadonly();
+      if (textareaRef?.nativeElement) {
+        if (isReadonly) {
+          textareaRef.nativeElement.setAttribute('readonly', '');
+        } else {
+          textareaRef.nativeElement.removeAttribute('readonly');
+        }
       }
-    }
+    },
   });
 
   readonly effectiveAppearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');

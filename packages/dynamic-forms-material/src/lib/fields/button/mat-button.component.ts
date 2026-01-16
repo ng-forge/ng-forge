@@ -21,6 +21,7 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
+    '[attr.hidden]': 'hidden() || null',
   },
   template: `
     @let buttonId = key() + '-button';
