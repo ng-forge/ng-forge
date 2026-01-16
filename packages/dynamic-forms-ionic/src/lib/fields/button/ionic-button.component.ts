@@ -23,6 +23,13 @@ import { AsyncPipe } from '@angular/common';
     '[attr.data-testid]': 'key()',
     '[attr.hidden]': 'hidden() || null',
   },
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
   template: `
     @let buttonId = key() + '-button';
 
