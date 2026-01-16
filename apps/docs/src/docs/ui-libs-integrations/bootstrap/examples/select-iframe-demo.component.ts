@@ -23,7 +23,7 @@ export class SelectIframeDemoComponent {
     placeholder: 'Select a country',
     floatingLabel: true,
     size: 'md',
-    helpText: 'Choose your country of residence',
+    hint: 'Choose your country of residence',
   },
 }`;
 }

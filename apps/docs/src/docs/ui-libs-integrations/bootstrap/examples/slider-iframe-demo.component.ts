@@ -17,7 +17,7 @@ export class SliderIframeDemoComponent {
   maxValue: 100,
   step: 5,
   props: {
-    helpText: 'Adjust the volume level',
+    hint: 'Adjust the volume level',
   },
 }`;
 }

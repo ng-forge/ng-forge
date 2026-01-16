@@ -5,7 +5,7 @@ export interface BsDatepickerProps extends DatepickerProps {
   useNgBootstrap?: boolean;
   size?: 'sm' | 'lg';
   floatingLabel?: boolean;
-  helpText?: DynamicText;
+  hint?: DynamicText;
   validFeedback?: DynamicText;
   invalidFeedback?: DynamicText;
   // ng-bootstrap specific props (if used)

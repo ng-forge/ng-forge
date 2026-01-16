@@ -12,7 +12,7 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 // ============================================================================
 
 describe('BsTextareaProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'rows' | 'cols' | 'size' | 'floatingLabel' | 'helpText' | 'validFeedback' | 'invalidFeedback' | 'placeholder';
+  type ExpectedKeys = 'rows' | 'cols' | 'size' | 'floatingLabel' | 'hint' | 'validFeedback' | 'invalidFeedback' | 'placeholder';
   type ActualKeys = keyof BsTextareaProps;
 
   it('should have exactly the expected keys', () => {
@@ -40,8 +40,8 @@ describe('BsTextareaProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsTextareaProps['floatingLabel']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsTextareaProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsTextareaProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('validFeedback', () => {
@@ -195,7 +195,7 @@ describe('BsTextareaField - Usage', () => {
         rows: 5,
         size: 'lg',
         floatingLabel: true,
-        helpText: 'Enter a detailed description',
+        hint: 'Enter a detailed description',
       },
     } as const satisfies BsTextareaField;
 

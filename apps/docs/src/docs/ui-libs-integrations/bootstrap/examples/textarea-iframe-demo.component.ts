@@ -17,7 +17,7 @@ export class TextareaIframeDemoComponent {
     placeholder: 'Enter your comments here',
     rows: 4,
     floatingLabel: true,
-    helpText: 'Maximum 500 characters',
+    hint: 'Maximum 500 characters',
   },
 }`;
 }

@@ -18,7 +18,7 @@ export class DatepickerIframeDemoComponent {
     placeholder: 'Select your birth date',
     floatingLabel: true,
     size: 'md',
-    helpText: 'You must be 18 years or older',
+    hint: 'You must be 18 years or older',
   },
 }`;
 }

@@ -20,7 +20,7 @@ export class InputIframeDemoComponent {
     placeholder: 'Enter your email',
     floatingLabel: true,
     size: 'lg',
-    helpText: 'We will never share your email',
+    hint: 'We will never share your email',
   },
 }`;
 }

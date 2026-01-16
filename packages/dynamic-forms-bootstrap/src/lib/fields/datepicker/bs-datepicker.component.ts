@@ -71,9 +71,9 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         />
 
-        @if (p?.helpText) {
-          <div class="form-text" [id]="helpTextId()">
-            {{ p?.helpText | dynamicText | async }}
+        @if (p?.hint) {
+          <div class="form-text" [id]="hintId()">
+            {{ p?.hint | dynamicText | async }}
           </div>
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
@@ -145,7 +145,7 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
   // Accessibility
   // ─────────────────────────────────────────────────────────────────────────────
 
-  protected readonly helpTextId = computed(() => `${this.key()}-help`);
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   protected readonly ariaInvalid = computed(() => {
@@ -159,8 +159,8 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
 
   protected readonly ariaDescribedBy = computed(() => {
     const ids: string[] = [];
-    if (this.props()?.helpText) {
-      ids.push(this.helpTextId());
+    if (this.props()?.hint) {
+      ids.push(this.hintId());
     }
     const errors = this.errorsToDisplay();
     errors.forEach((_, i) => {

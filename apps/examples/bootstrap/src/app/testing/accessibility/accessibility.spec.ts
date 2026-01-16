@@ -25,7 +25,7 @@ test.describe('Accessibility Tests', () => {
       const scenario = helpers.getScenario('all-fields-aria');
       const input = scenario.locator('#inputField input');
       const ariaDescribedBy = await input.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('inputField-help');
+      expect(ariaDescribedBy).toContain('inputField-hint');
     });
 
     test('input field should have aria-invalid="true" when invalid and touched', async ({ page, helpers }) => {
@@ -49,7 +49,7 @@ test.describe('Accessibility Tests', () => {
       const scenario = helpers.getScenario('all-fields-aria');
       const textarea = scenario.locator('#textareaField textarea');
       const ariaDescribedBy = await textarea.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('textareaField-help');
+      expect(ariaDescribedBy).toContain('textareaField-hint');
     });
 
     test('textarea field should have aria-invalid="true" when invalid and touched', async ({ page, helpers }) => {
@@ -73,7 +73,7 @@ test.describe('Accessibility Tests', () => {
       const scenario = helpers.getScenario('all-fields-aria');
       const select = scenario.locator('#selectField select');
       const ariaDescribedBy = await select.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('selectField-help');
+      expect(ariaDescribedBy).toContain('selectField-hint');
     });
 
     test('select field should have aria-invalid="true" when invalid and touched', async ({ page, helpers }) => {
@@ -97,7 +97,7 @@ test.describe('Accessibility Tests', () => {
       const scenario = helpers.getScenario('all-fields-aria');
       const checkbox = scenario.locator('#checkboxField .form-check input');
       const ariaDescribedBy = await checkbox.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('checkboxField-help');
+      expect(ariaDescribedBy).toContain('checkboxField-hint');
     });
 
     // Toggle field tests
@@ -113,7 +113,7 @@ test.describe('Accessibility Tests', () => {
       const scenario = helpers.getScenario('all-fields-aria');
       const toggle = scenario.locator('#toggleField .form-check input');
       const ariaDescribedBy = await toggle.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('toggleField-help');
+      expect(ariaDescribedBy).toContain('toggleField-hint');
     });
 
     // Radio field tests
@@ -132,7 +132,7 @@ test.describe('Accessibility Tests', () => {
       // Bootstrap radio puts aria attrs on individual radio inputs
       const radioInput = scenario.locator('#radioField input[type="radio"]').first();
       const ariaDescribedBy = await radioInput.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('radioField-help');
+      expect(ariaDescribedBy).toContain('radioField-hint');
     });
 
     // Multi-checkbox field tests
@@ -150,7 +150,7 @@ test.describe('Accessibility Tests', () => {
       // Bootstrap multi-checkbox puts aria attrs on individual checkbox inputs
       const checkboxInput = scenario.locator('#multiCheckboxField input[type="checkbox"]').first();
       const ariaDescribedBy = await checkboxInput.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('multiCheckboxField-help');
+      expect(ariaDescribedBy).toContain('multiCheckboxField-hint');
     });
 
     // Slider field tests
@@ -160,7 +160,7 @@ test.describe('Accessibility Tests', () => {
 
       const slider = scenario.locator('#sliderField input[type="range"]');
       const ariaDescribedBy = await slider.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('sliderField-help');
+      expect(ariaDescribedBy).toContain('sliderField-hint');
     });
 
     // Datepicker field tests
@@ -176,7 +176,7 @@ test.describe('Accessibility Tests', () => {
       const scenario = helpers.getScenario('all-fields-aria');
       const datepicker = scenario.locator('#datepickerField input');
       const ariaDescribedBy = await datepicker.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('datepickerField-help');
+      expect(ariaDescribedBy).toContain('datepickerField-hint');
     });
 
     test('datepicker field should have aria-invalid="true" when invalid and touched', async ({ page, helpers }) => {
@@ -267,12 +267,12 @@ test.describe('Accessibility Tests', () => {
 
       // Check that aria-describedby contains the help text ID
       const ariaDescribedBy = await requiredInput.getAttribute('aria-describedby');
-      expect(ariaDescribedBy).toContain('requiredField-help');
+      expect(ariaDescribedBy).toContain('requiredField-hint');
 
       // Verify the help text element exists with the correct ID
       const hint = scenario.locator('#requiredField .form-text');
       const hintId = await hint.getAttribute('id');
-      expect(hintId).toBe('requiredField-help');
+      expect(hintId).toBe('requiredField-hint');
     });
 
     test('field with error should have aria-describedby referencing error', async ({ page, helpers }) => {

@@ -22,9 +22,9 @@ export interface BsRadioGroupProps {
    */
   buttonSize?: 'sm' | 'lg';
   /**
-   * Help text to display below the radio group
+   * Hint text to display below the radio group
    */
-  helpText?: DynamicText;
+  hint?: DynamicText;
 }
 
 @Component({

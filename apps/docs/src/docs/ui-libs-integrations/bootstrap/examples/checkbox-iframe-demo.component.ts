@@ -16,7 +16,7 @@ export class CheckboxIframeDemoComponent {
   required: true,
   props: {
     inline: false,
-    helpText: 'Please read and accept our terms',
+    hint: 'Please read and accept our terms',
   },
 }`;
 }

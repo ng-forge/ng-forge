@@ -25,7 +25,7 @@ describe('BsSelectProps - Exhaustive Whitelist', () => {
     | 'size'
     | 'htmlSize'
     | 'floatingLabel'
-    | 'helpText'
+    | 'hint'
     | 'validFeedback'
     | 'invalidFeedback'
     | 'compareWith'
@@ -57,8 +57,8 @@ describe('BsSelectProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsSelectProps['floatingLabel']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsSelectProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsSelectProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('validFeedback', () => {
@@ -223,7 +223,7 @@ describe('BsSelectField - Usage', () => {
       props: {
         size: 'lg',
         floatingLabel: true,
-        helpText: 'Select your country',
+        hint: 'Select your country',
       },
     } as const satisfies BsSelectField<string>;
 

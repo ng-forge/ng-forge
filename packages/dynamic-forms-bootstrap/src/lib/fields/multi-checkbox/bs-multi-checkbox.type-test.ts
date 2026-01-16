@@ -19,7 +19,7 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 // ============================================================================
 
 describe('BsMultiCheckboxProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'switch' | 'inline' | 'reverse' | 'helpText';
+  type ExpectedKeys = 'switch' | 'inline' | 'reverse' | 'hint';
   type ActualKeys = keyof BsMultiCheckboxProps;
 
   it('should have exactly the expected keys', () => {
@@ -43,8 +43,8 @@ describe('BsMultiCheckboxProps - Exhaustive Whitelist', () => {
       expectTypeOf<BsMultiCheckboxProps['reverse']>().toEqualTypeOf<boolean | undefined>();
     });
 
-    it('helpText', () => {
-      expectTypeOf<BsMultiCheckboxProps['helpText']>().toEqualTypeOf<DynamicText | undefined>();
+    it('hint', () => {
+      expectTypeOf<BsMultiCheckboxProps['hint']>().toEqualTypeOf<DynamicText | undefined>();
     });
   });
 });
@@ -193,7 +193,7 @@ describe('BsMultiCheckboxField - Usage', () => {
       props: {
         switch: false,
         inline: true,
-        helpText: 'Select your interests',
+        hint: 'Select your interests',
       },
     } as const satisfies BsMultiCheckboxField<string>;
 

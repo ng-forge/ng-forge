@@ -21,7 +21,7 @@ export class RadioIframeDemoComponent {
   ],
   props: {
     inline: true,
-    helpText: 'Select a subscription plan',
+    hint: 'Select a subscription plan',
   },
 }`;
 }

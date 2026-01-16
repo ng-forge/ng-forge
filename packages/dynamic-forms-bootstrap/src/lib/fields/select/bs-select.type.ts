@@ -10,7 +10,7 @@ export interface BsSelectProps extends SelectProps {
   size?: 'sm' | 'lg';
   htmlSize?: number;
   floatingLabel?: boolean;
-  helpText?: DynamicText;
+  hint?: DynamicText;
   validFeedback?: DynamicText;
   invalidFeedback?: DynamicText;
   compareWith?: (o1: string, o2: string) => boolean;

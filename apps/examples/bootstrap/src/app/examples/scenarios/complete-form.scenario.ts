@@ -66,7 +66,7 @@ export const completeFormScenario: ExampleScenario = {
           type: 'email',
           placeholder: 'user@example.com',
           floatingLabel: true,
-          helpText: 'We will never share your email',
+          hint: 'We will never share your email',
         },
       },
 
@@ -138,7 +138,7 @@ export const completeFormScenario: ExampleScenario = {
         props: {
           placeholder: 'Tell us about yourself',
           floatingLabel: true,
-          helpText: 'Optional - share a bit about yourself',
+          hint: 'Optional - share a bit about yourself',
           rows: 4,
         },
       },
@@ -148,7 +148,7 @@ export const completeFormScenario: ExampleScenario = {
         label: 'Subscribe to newsletter',
         props: {
           switch: true,
-          helpText: 'Get updates about new features and special offers',
+          hint: 'Get updates about new features and special offers',
         },
       },
 

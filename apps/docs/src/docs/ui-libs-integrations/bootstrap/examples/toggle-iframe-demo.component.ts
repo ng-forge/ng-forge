@@ -15,7 +15,7 @@ export class ToggleIframeDemoComponent {
   value: true,
   props: {
     switch: true,
-    helpText: 'Receive updates about your account',
+    hint: 'Receive updates about your account',
   },
 }`;
 }
