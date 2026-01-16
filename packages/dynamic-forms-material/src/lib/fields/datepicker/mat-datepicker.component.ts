@@ -35,8 +35,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   template: `
     @let f = field();
     @let inputId = key() + '-input';
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label(); as label) {
@@ -52,12 +50,12 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         [attr.tabindex]="tabIndex()"
         [min]="minDate()"
         [max]="maxDate()"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       />
 
-      <mat-datepicker-toggle matIconSuffix [for]="$any(picker)" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
       <mat-datepicker #picker [startAt]="startAt()" [startView]="props()?.startView || 'month'" [touchUi]="props()?.touchUi ?? false" />
 
       @if (props()?.hint; as hint) {

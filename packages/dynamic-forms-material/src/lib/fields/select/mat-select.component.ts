@@ -15,8 +15,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
   template: `
     @let f = field();
     @let selectId = key() + '-select';
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-form-field [appearance]="effectiveAppearance()" [subscriptSizing]="effectiveSubscriptSizing()">
       @if (label(); as label) {
@@ -29,9 +27,9 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         [placeholder]="(placeholder() | dynamicText | async) ?? ''"
         [multiple]="props()?.multiple || false"
         [compareWith]="props()?.compareWith || defaultCompare"
-        [attr.aria-invalid]="ariaInvalid"
-        [attr.aria-required]="ariaRequired"
-        [attr.aria-describedby]="ariaDescribedBy"
+        [attr.aria-invalid]="ariaInvalid()"
+        [attr.aria-required]="ariaRequired()"
+        [attr.aria-describedby]="ariaDescribedBy()"
       >
         @for (option of options(); track option.value) {
           <mat-option [value]="option.value" [disabled]="option.disabled || false">

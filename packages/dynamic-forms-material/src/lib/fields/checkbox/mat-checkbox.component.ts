@@ -15,7 +15,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   template: `
     @let f = field();
     @let checkboxId = key() + '-checkbox';
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <mat-checkbox
       [id]="checkboxId"
@@ -25,7 +24,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       [color]="props()?.color || 'primary'"
       [disableRipple]="effectiveDisableRipple()"
       [required]="!!f().required()"
-      [aria-describedby]="ariaDescribedBy"
+      [aria-describedby]="ariaDescribedBy()"
       [attr.tabindex]="tabIndex()"
       [attr.hidden]="f().hidden() || null"
     >

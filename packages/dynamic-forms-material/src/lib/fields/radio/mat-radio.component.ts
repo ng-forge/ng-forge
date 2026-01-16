@@ -13,8 +13,6 @@ import { AsyncPipe } from '@angular/common';
   template: `
     @let f = field();
     @let radioGroupId = key() + '-radio-group';
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     @if (label()) {
       <div class="radio-label">{{ label() | dynamicText | async }}</div>
@@ -23,9 +21,9 @@ import { AsyncPipe } from '@angular/common';
     <mat-radio-group
       [id]="radioGroupId"
       [formField]="f"
-      [attr.aria-invalid]="ariaInvalid"
-      [attr.aria-required]="ariaRequired"
-      [attr.aria-describedby]="ariaDescribedBy"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
     >
       @for (option of options(); track option.value) {
         <mat-radio-button
