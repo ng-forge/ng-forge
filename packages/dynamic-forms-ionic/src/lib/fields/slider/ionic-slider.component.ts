@@ -18,6 +18,8 @@ import { AsyncPipe } from '@angular/common';
       [formField]="f"
       [label]="(label() | dynamicText | async) ?? undefined"
       [labelPlacement]="props()?.labelPlacement ?? 'stacked'"
+      [min]="props()?.min ?? 0"
+      [max]="props()?.max ?? 100"
       [step]="props()?.step ?? 1"
       [dualKnobs]="props()?.dualKnobs ?? false"
       [pin]="props()?.pin ?? false"

@@ -157,6 +157,7 @@ const config = {
       props: {
         min: 0,
         max: 100,
+        step: 10,
         helperText: 'Drag to select a value (0-100)',
       },
       col: 6,
