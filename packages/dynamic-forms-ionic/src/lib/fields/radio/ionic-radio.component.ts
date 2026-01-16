@@ -43,8 +43,8 @@ import { AsyncPipe } from '@angular/common';
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
       }
-    } @else if (props()?.helperText; as helperText) {
-      <ion-note class="df-ion-hint" [id]="hintId()">{{ helperText | dynamicText | async }}</ion-note>
+    } @else if (props()?.hint; as hint) {
+      <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -137,7 +137,7 @@ export default class IonicRadioFieldComponent implements IonicRadioComponent {
     }
 
     // Show hint only when no errors
-    if (this.props()?.helperText) {
+    if (this.props()?.hint) {
       return this.hintId();
     }
 

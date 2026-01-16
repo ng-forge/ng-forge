@@ -13,7 +13,7 @@ export interface IonicDatepickerProps extends DatepickerProps {
   cancelText?: string;
   size?: 'cover' | 'fixed';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
-  helperText?: DynamicText;
+  hint?: DynamicText;
 }
 export type IonicDatepickerField = DatepickerField<IonicDatepickerProps>;
 export type IonicDatepickerComponent = ValueFieldComponent<IonicDatepickerField>;

@@ -12,7 +12,7 @@ export interface IonicSliderProps {
   snaps?: boolean;
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
-  helperText?: DynamicText;
+  hint?: DynamicText;
 }
 
 export type IonicSliderField = SliderField<IonicSliderProps>;

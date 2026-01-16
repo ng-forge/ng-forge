@@ -12,7 +12,7 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 // ============================================================================
 
 describe('IonicCheckboxProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'indeterminate' | 'helperText';
+  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'indeterminate' | 'hint';
   type ActualKeys = keyof IonicCheckboxProps;
 
   it('should have exactly the expected keys', () => {

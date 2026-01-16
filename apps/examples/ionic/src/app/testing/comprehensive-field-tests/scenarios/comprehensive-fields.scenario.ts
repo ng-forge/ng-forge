@@ -82,7 +82,7 @@ const config = {
         { value: 'option3', label: 'Option 3' },
       ],
       props: {
-        helperText: 'Choose one option from the list',
+        hint: 'Choose one option from the list',
       },
       col: 6,
     },
@@ -126,7 +126,7 @@ const config = {
       type: 'toggle',
       label: 'Toggle Field',
       props: {
-        helperText: 'Enable or disable this option',
+        hint: 'Enable or disable this option',
       },
       col: 6,
     },
@@ -158,7 +158,7 @@ const config = {
         min: 0,
         max: 100,
         step: 10,
-        helperText: 'Drag to select a value (0-100)',
+        hint: 'Drag to select a value (0-100)',
       },
       col: 6,
     },

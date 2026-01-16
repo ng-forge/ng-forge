@@ -6,7 +6,7 @@ export interface IonicRadioProps {
   justify?: 'start' | 'end' | 'space-between';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
   compareWith?: (o1: ValueType, o2: ValueType) => boolean;
-  helperText?: DynamicText;
+  hint?: DynamicText;
 }
 export type IonicRadioField<T> = RadioField<T, IonicRadioProps>;
 export type IonicRadioComponent = ValueFieldComponent<IonicRadioField<ValueType>>;

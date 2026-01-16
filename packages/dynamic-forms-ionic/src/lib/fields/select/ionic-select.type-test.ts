@@ -32,7 +32,7 @@ describe('IonicSelectProps - Exhaustive Whitelist', () => {
     | 'labelPlacement'
     | 'color'
     | 'compareWith'
-    | 'helperText';
+    | 'hint';
   type ActualKeys = keyof IonicSelectProps;
 
   it('should have exactly the expected keys', () => {

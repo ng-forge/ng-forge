@@ -12,7 +12,7 @@ import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
 // ============================================================================
 
 describe('IonicToggleProps - Exhaustive Whitelist', () => {
-  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'enableOnOffLabels' | 'helperText';
+  type ExpectedKeys = 'labelPlacement' | 'justify' | 'color' | 'enableOnOffLabels' | 'hint';
   type ActualKeys = keyof IonicToggleProps;
 
   it('should have exactly the expected keys', () => {

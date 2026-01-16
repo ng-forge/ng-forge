@@ -5,7 +5,7 @@ export interface IonicMultiCheckboxProps {
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
   justify?: 'start' | 'end' | 'space-between';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
-  helperText?: DynamicText;
+  hint?: DynamicText;
 }
 
 export type IonicMultiCheckboxField<T> = MultiCheckboxField<T, IonicMultiCheckboxProps>;

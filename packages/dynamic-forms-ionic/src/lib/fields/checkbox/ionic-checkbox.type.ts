@@ -6,7 +6,7 @@ export interface IonicCheckboxProps {
   justify?: 'start' | 'end' | 'space-between';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
   indeterminate?: boolean;
-  helperText?: DynamicText;
+  hint?: DynamicText;
 }
 
 export type IonicCheckboxField = CheckboxField<IonicCheckboxProps>;

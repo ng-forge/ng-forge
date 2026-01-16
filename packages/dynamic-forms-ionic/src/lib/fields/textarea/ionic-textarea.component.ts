@@ -26,7 +26,7 @@ import { AsyncPipe } from '@angular/common';
       [fill]="props()?.fill ?? 'outline'"
       [shape]="props()?.shape"
       [readonly]="f().readonly()"
-      [helperText]="(props()?.helperText | dynamicText | async) ?? undefined"
+      [helperText]="(props()?.hint | dynamicText | async) ?? undefined"
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"

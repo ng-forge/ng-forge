@@ -6,7 +6,7 @@ export interface IonicToggleProps {
   justify?: 'start' | 'end' | 'space-between';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
   enableOnOffLabels?: boolean;
-  helperText?: DynamicText;
+  hint?: DynamicText;
 }
 
 export type IonicToggleField = ToggleField<IonicToggleProps>;

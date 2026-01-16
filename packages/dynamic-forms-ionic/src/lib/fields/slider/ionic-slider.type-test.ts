@@ -23,7 +23,7 @@ describe('IonicSliderProps - Exhaustive Whitelist', () => {
     | 'snaps'
     | 'color'
     | 'labelPlacement'
-    | 'helperText';
+    | 'hint';
   type ActualKeys = keyof IonicSliderProps;
 
   it('should have exactly the expected keys', () => {
