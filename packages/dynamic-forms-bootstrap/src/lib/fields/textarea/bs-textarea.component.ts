@@ -10,8 +10,7 @@ import { AsyncPipe } from '@angular/common';
   imports: [FormField, DynamicTextPipe, AsyncPipe],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let p = props(); @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy(); @let textareaId = key() + '-textarea';
+    @let f = field(); @let p = props(); @let textareaId = key() + '-textarea';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -20,9 +19,9 @@ import { AsyncPipe } from '@angular/common';
           [id]="textareaId"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
+          [attr.aria-invalid]="ariaInvalid()"
+          [attr.aria-required]="ariaRequired()"
+          [attr.aria-describedby]="ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -54,9 +53,9 @@ import { AsyncPipe } from '@angular/common';
           [id]="textareaId"
           [placeholder]="(placeholder() | dynamicText | async) ?? ''"
           [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
+          [attr.aria-invalid]="ariaInvalid()"
+          [attr.aria-required]="ariaRequired()"
+          [attr.aria-describedby]="ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"

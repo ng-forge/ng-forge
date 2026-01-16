@@ -12,8 +12,6 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy();
     @let checked = checkedValuesMap();
     @if (label(); as label) {
       <div class="form-label">{{ label | dynamicText | async }}</div>
@@ -32,13 +30,13 @@ import { AsyncPipe } from '@angular/common';
             [id]="key() + '_' + i"
             [checked]="checked['' + option.value]"
             [disabled]="f().disabled() || option.disabled"
-            (change)="onCheckboxChange(option, $any($event.target).checked)"
+            (change)="onCheckboxChange(option, $event)"
             class="form-check-input"
             [class.is-invalid]="f().invalid() && f().touched()"
             [attr.tabindex]="tabIndex()"
-            [attr.aria-invalid]="ariaInvalid"
-            [attr.aria-required]="ariaRequired"
-            [attr.aria-describedby]="ariaDescribedBy"
+            [attr.aria-invalid]="ariaInvalid()"
+            [attr.aria-required]="ariaRequired()"
+            [attr.aria-describedby]="ariaDescribedBy()"
           />
           <label [for]="key() + '_' + i" class="form-check-label">
             {{ option.label | dynamicText | async }}
@@ -141,7 +139,8 @@ export default class BsMultiCheckboxFieldComponent implements BsMultiCheckboxCom
     });
   }
 
-  onCheckboxChange(option: FieldOption<ValueType>, checked: boolean): void {
+  onCheckboxChange(option: FieldOption<ValueType>, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
     this.valueViewModel.update((currentOptions: FieldOption<ValueType>[]) => {
       if (checked) {
         return currentOptions.some((opt: FieldOption<ValueType>) => opt.value === option.value)

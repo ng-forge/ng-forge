@@ -11,8 +11,7 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
   imports: [FormField, DynamicTextPipe, AsyncPipe, InputConstraintsDirective],
   styleUrl: '../../styles/_form-field.scss',
   template: `
-    @let f = field(); @let p = props(); @let ariaInvalid = this.ariaInvalid(); @let ariaRequired = this.ariaRequired();
-    @let ariaDescribedBy = this.ariaDescribedBy(); @let inputId = key() + '-input';
+    @let f = field(); @let p = props(); @let inputId = key() + '-input';
     @if (p?.floatingLabel) {
       <!-- Floating label variant -->
       <div class="form-floating mb-3">
@@ -25,9 +24,9 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
           [dfMin]="minAsString()"
           [dfMax]="maxAsString()"
           [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
+          [attr.aria-invalid]="ariaInvalid()"
+          [attr.aria-required]="ariaRequired()"
+          [attr.aria-describedby]="ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"
@@ -62,9 +61,9 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
           [dfMin]="minAsString()"
           [dfMax]="maxAsString()"
           [attr.tabindex]="tabIndex()"
-          [attr.aria-invalid]="ariaInvalid"
-          [attr.aria-required]="ariaRequired"
-          [attr.aria-describedby]="ariaDescribedBy"
+          [attr.aria-invalid]="ariaInvalid()"
+          [attr.aria-required]="ariaRequired()"
+          [attr.aria-describedby]="ariaDescribedBy()"
           class="form-control"
           [class.form-control-sm]="p?.size === 'sm'"
           [class.form-control-lg]="p?.size === 'lg'"

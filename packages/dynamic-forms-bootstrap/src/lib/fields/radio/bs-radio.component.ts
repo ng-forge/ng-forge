@@ -12,7 +12,6 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
   styleUrl: '../../styles/_form-field.scss',
   template: `
     @let f = field();
-    @let ariaDescribedBy = this.ariaDescribedBy();
 
     <div class="mb-3">
       @if (label(); as label) {
@@ -20,11 +19,11 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
       }
 
       <df-bs-radio-group
-        [formField]="$any(f)"
+        [formField]="f"
         [label]="label()"
         [options]="options()"
         [properties]="props()"
-        [ariaDescribedBy]="ariaDescribedBy"
+        [ariaDescribedBy]="ariaDescribedBy()"
       />
 
       @if (props()?.helpText; as helpText) {

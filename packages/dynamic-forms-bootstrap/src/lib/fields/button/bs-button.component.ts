@@ -21,7 +21,7 @@ import { BsButtonComponent, BsButtonProps } from './bs-button.type';
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
     '[class]': 'className()',
-    '[hidden]': 'hidden()',
+    '[attr.hidden]': 'hidden() || null',
   },
   template: `
     @let buttonId = key() + '-button';
