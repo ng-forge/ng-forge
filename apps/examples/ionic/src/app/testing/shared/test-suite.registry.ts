@@ -15,6 +15,7 @@ import { essentialTestsSuite } from '../essential-tests/essential-tests.suite';
 import { expressionBasedLogicSuite } from '../expression-based-logic/expression-based-logic.suite';
 import { formResetClearSuite } from '../form-reset-clear/form-reset-clear.suite';
 import { groupFieldsSuite } from '../group-fields/group-fields.suite';
+import { helperTextSuite } from '../helper-text/helper-text.suite';
 import { multiPageNavigationSuite } from '../multi-page-navigation/multi-page-navigation.suite';
 import { schemaSystemSuite } from '../schema-system/schema-system.suite';
 import { submissionBehaviorSuite } from '../submission-behavior/submission-behavior.suite';
@@ -43,6 +44,7 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   expressionBasedLogicSuite,
   formResetClearSuite,
   groupFieldsSuite,
+  helperTextSuite,
   multiPageNavigationSuite,
   schemaSystemSuite,
   submissionBehaviorSuite,

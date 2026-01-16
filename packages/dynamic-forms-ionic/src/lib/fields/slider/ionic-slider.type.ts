@@ -1,4 +1,4 @@
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 import { SliderField } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicSliderProps {
@@ -12,6 +12,7 @@ export interface IonicSliderProps {
   snaps?: boolean;
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
+  helperText?: DynamicText;
 }
 
 export type IonicSliderField = SliderField<IonicSliderProps>;

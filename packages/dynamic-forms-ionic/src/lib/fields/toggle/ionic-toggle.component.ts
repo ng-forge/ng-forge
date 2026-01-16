@@ -28,8 +28,12 @@ import { AsyncPipe } from '@angular/common';
       {{ label() | dynamicText | async }}
     </df-ion-toggle-control>
 
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    @if (errorsToDisplay().length > 0) {
+      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+        <ion-note color="danger" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+      }
+    } @else if (props()?.helperText; as helperText) {
+      <ion-note class="df-ion-hint" [id]="hintId()">{{ helperText | dynamicText | async }}</ion-note>
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -84,10 +88,23 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   /** Base ID for error elements */
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
-  /** aria-describedby value linking to error elements */
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
   protected readonly ariaDescribedBy = computed(() => {
     const errors = this.errorsToDisplay();
-    if (errors.length === 0) return null;
-    return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
+
+    // Errors take precedence over helper text
+    if (errors.length > 0) {
+      return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
+    }
+
+    // Show hint only when no errors
+    if (this.props()?.helperText) {
+      return this.hintId();
+    }
+
+    return null;
   });
 }

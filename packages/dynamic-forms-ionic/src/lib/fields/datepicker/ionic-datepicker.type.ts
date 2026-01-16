@@ -1,4 +1,4 @@
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
 import { DatepickerField, DatepickerProps } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicDatepickerProps extends DatepickerProps {
@@ -13,6 +13,7 @@ export interface IonicDatepickerProps extends DatepickerProps {
   cancelText?: string;
   size?: 'cover' | 'fixed';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+  helperText?: DynamicText;
 }
 export type IonicDatepickerField = DatepickerField<IonicDatepickerProps>;
 export type IonicDatepickerComponent = ValueFieldComponent<IonicDatepickerField>;

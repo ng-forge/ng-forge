@@ -13,6 +13,7 @@ export interface IonicSelectProps extends SelectProps {
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
   compareWith?: (o1: ValueType, o2: ValueType) => boolean;
+  helperText?: DynamicText;
 }
 
 export type IonicSelectField<T> = SelectField<T, IonicSelectProps>;

@@ -35,7 +35,8 @@ import { format } from 'date-fns';
     AsyncPipe,
   ],
   template: `
-    @let f = field(); @let dateValue = f().value();
+    @let f = field();
+    @let dateValue = f().value();
     @let inputId = key() + '-input';
 
     <ion-input
@@ -53,8 +54,12 @@ import { format } from 'date-fns';
       [attr.aria-describedby]="ariaDescribedBy()"
       (click)="!f().disabled() && openModal()"
     />
-    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    @if (errorsToDisplay().length > 0) {
+      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+        <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+      }
+    } @else if (props()?.helperText; as helperText) {
+      <ion-note class="df-ion-hint" [id]="hintId()">{{ helperText | dynamicText | async }}</ion-note>
     }
 
     <ion-modal [isOpen]="isModalOpen()" (didDismiss)="closeModal()">
@@ -148,6 +153,9 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
   /** Base ID for error elements */
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
   /** Whether the field is currently in an invalid state (invalid AND touched) */
   protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
@@ -159,11 +167,21 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
     return this.field()().required?.() === true ? true : null;
   });
 
-  /** aria-describedby pointing to error messages when visible */
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
   protected readonly ariaDescribedBy = computed(() => {
     const errors = this.errorsToDisplay();
-    if (errors.length === 0) return null;
-    return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
+
+    // Errors take precedence over helper text
+    if (errors.length > 0) {
+      return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
+    }
+
+    // Show hint only when no errors
+    if (this.props()?.helperText) {
+      return this.hintId();
+    }
+
+    return null;
   });
 
   openModal() {
