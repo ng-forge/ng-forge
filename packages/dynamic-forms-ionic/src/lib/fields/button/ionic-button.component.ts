@@ -21,6 +21,7 @@ import { AsyncPipe } from '@angular/common';
     '[id]': '`${key()}`',
     '[class]': 'className()',
     '[attr.data-testid]': 'key()',
+    '[attr.hidden]': 'hidden() || null',
   },
   template: `
     @let buttonId = key() + '-button';
@@ -41,6 +42,13 @@ import { AsyncPipe } from '@angular/common';
       {{ label() | dynamicText | async }}
     </ion-button>
   `,
+  styles: [
+    `
+      :host([hidden]) {
+        display: none !important;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicButtonFieldComponent<TEvent extends FormEvent> implements IonicButtonComponent<TEvent> {

@@ -36,8 +36,6 @@ import { format } from 'date-fns';
   ],
   template: `
     @let f = field(); @let dateValue = f().value();
-    @let ariaInvalid = isAriaInvalid();
-    @let ariaRequired = isRequired() || null;
     @let inputId = key() + '-input';
 
     <ion-input
@@ -50,8 +48,9 @@ import { format } from 'date-fns';
       [readonly]="true"
       [fill]="'outline'"
       [attr.tabindex]="tabIndex()"
-      [attr.aria-invalid]="ariaInvalid"
-      [attr.aria-required]="ariaRequired"
+      [attr.aria-invalid]="ariaInvalid()"
+      [attr.aria-required]="ariaRequired()"
+      [attr.aria-describedby]="ariaDescribedBy()"
       (click)="!f().disabled() && openModal()"
     />
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
@@ -147,17 +146,24 @@ export default class IonicDatepickerFieldComponent implements IonicDatepickerCom
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
 
   /** Whether the field is currently in an invalid state (invalid AND touched) */
-  readonly isAriaInvalid = computed(() => {
+  protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
     return fieldState.invalid() && fieldState.touched();
   });
 
   /** Whether the field has a required validator */
-  readonly isRequired = computed(() => {
-    return this.field()().required?.() === true;
+  protected readonly ariaRequired = computed(() => {
+    return this.field()().required?.() === true ? true : null;
+  });
+
+  /** aria-describedby pointing to error messages when visible */
+  protected readonly ariaDescribedBy = computed(() => {
+    const errors = this.errorsToDisplay();
+    if (errors.length === 0) return null;
+    return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
   });
 
   openModal() {

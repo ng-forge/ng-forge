@@ -81,5 +81,5 @@ export default class IonicToggleFieldComponent implements IonicToggleComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Base ID for error elements */
-  readonly errorId = computed(() => `${this.key()}-error`);
+  protected readonly errorId = computed(() => `${this.key()}-error`);
 }
