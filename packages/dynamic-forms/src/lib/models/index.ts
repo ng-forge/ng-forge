@@ -4,7 +4,13 @@ export type { SubmissionConfig, SubmissionActionResult } from './submission-conf
 export type { FieldTypeDefinition, ValueHandlingMode } from './field-type';
 export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';
 export type { FieldOption } from './field-option';
-export { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from './field-signal-context.token';
+export {
+  ARRAY_CONTEXT,
+  DEFAULT_PROPS,
+  DEFAULT_VALIDATION_MESSAGES,
+  FIELD_SIGNAL_CONTEXT,
+  FORM_OPTIONS,
+} from './field-signal-context.token';
 export type { ValidationError, ValidationMessages } from './validation-types';
 export type { Prettify } from './prettify';
 

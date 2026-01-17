@@ -1,8 +1,6 @@
 import { FieldDef } from '../definitions/base/field-def';
 import { Injector, Signal, WritableSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { ValidationMessages } from '../models/validation-types';
-import { FormOptions } from '../models/form-config';
 
 /**
  * Field signal context - the "nervous system" of the dynamic form.
@@ -13,19 +11,18 @@ import { FormOptions } from '../models/form-config';
  *
  * The `form` property uses Angular's FieldTree which includes Subfields<TModel>
  * for type-safe child field access via bracket notation when TModel is a Record.
+ *
+ * Note: Form-level configuration (defaultValidationMessages, formOptions, defaultProps)
+ * is provided via dedicated injection tokens (DEFAULT_VALIDATION_MESSAGES, FORM_OPTIONS,
+ * DEFAULT_PROPS) at the DynamicForm level and inherited by all children.
  */
 export interface FieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>> {
   injector: Injector;
   value: WritableSignal<Partial<TModel> | undefined>;
   defaultValues: () => TModel;
   form: FieldTree<TModel>;
-  defaultValidationMessages?: ValidationMessages;
-  /** Form-level options used by button mappers to determine disabled state defaults. */
-  formOptions?: FormOptions;
   /** Current page validity signal for paged forms. Used by next button to determine disabled state. */
   currentPageValid?: Signal<boolean>;
-  /** Form-level default props that are merged with field-level props. Field props take precedence. */
-  defaultProps?: Record<string, unknown>;
 }
 
 /**

@@ -3,10 +3,12 @@ import {
   AddArrayItemEvent,
   ARRAY_CONTEXT,
   buildBaseInputs,
+  DEFAULT_PROPS,
   DynamicFormLogger,
   FIELD_SIGNAL_CONTEXT,
   FieldDef,
   FieldWithValidation,
+  FORM_OPTIONS,
   NextPageEvent,
   PreviousPageEvent,
   RemoveArrayItemEvent,
@@ -32,17 +34,18 @@ import { AddArrayItemButtonField, RemoveArrayItemButtonField } from './bs-button
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
-  const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
   const rootFormRegistry = inject(RootFormRegistryService);
+  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
+  const formOptions = inject(FORM_OPTIONS, { optional: true }) ?? undefined;
 
-  const baseInputs = buildBaseInputs(fieldDef, fieldSignalContext.defaultProps);
+  const baseInputs = buildBaseInputs(fieldDef, defaultProps);
   const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
   // Use rootFormRegistry instead of fieldSignalContext.form because when the submit button
   // is inside a group/array, fieldSignalContext.form points to the nested form tree,
   // not the root form. We need root form validity for submit button disabled state (#157).
   const disabledSignal = resolveSubmitButtonDisabled({
     form: rootFormRegistry.getRootForm()!,
-    formOptions: fieldSignalContext.formOptions,
+    formOptions,
     fieldLogic: fieldWithLogic.logic,
     explicitlyDisabled: fieldDef.disabled,
   });
@@ -78,17 +81,19 @@ export function submitButtonFieldMapper(fieldDef: FieldDef<Record<string, unknow
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
-  // Inject field signal context to access form state and options
+  // Inject field signal context to access form state
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
+  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
+  const formOptions = inject(FORM_OPTIONS, { optional: true }) ?? undefined;
 
   // Build base inputs (static, from field definition)
-  const baseInputs = buildBaseInputs(fieldDef, fieldSignalContext.defaultProps);
+  const baseInputs = buildBaseInputs(fieldDef, defaultProps);
 
   // Use button-logic-resolver to compute disabled state
   const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
   const disabledSignal = resolveNextButtonDisabled({
     form: fieldSignalContext.form,
-    formOptions: fieldSignalContext.formOptions,
+    formOptions,
     fieldLogic: fieldWithLogic.logic,
     explicitlyDisabled: fieldDef.disabled,
     currentPageValid: fieldSignalContext.currentPageValid,
@@ -119,10 +124,10 @@ export function nextButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function previousButtonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
-  const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
+  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
 
   // Build base inputs (static, from field definition)
-  const baseInputs = buildBaseInputs(fieldDef, fieldSignalContext.defaultProps);
+  const baseInputs = buildBaseInputs(fieldDef, defaultProps);
 
   return computed(() => {
     const inputs: Record<string, unknown> = {
@@ -158,7 +163,7 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
   // Use optional injection so it doesn't fail when outside an array
   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
   const logger = inject(DynamicFormLogger);
-  const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
+  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
 
   // Determine the target array key
   // Priority: explicit arrayKey from fieldDef > arrayKey from context
@@ -172,7 +177,7 @@ export function addArrayItemButtonFieldMapper(fieldDef: AddArrayItemButtonField)
   }
 
   // Build base inputs (static, from field definition)
-  const baseInputs = buildBaseInputs(fieldDef, fieldSignalContext.defaultProps);
+  const baseInputs = buildBaseInputs(fieldDef, defaultProps);
 
   // Set default eventArgs for AddArrayItemEvent (arrayKey)
   // User can override by providing eventArgs in field definition
@@ -226,7 +231,7 @@ export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButton
   // Use optional injection so it doesn't fail when outside an array
   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
   const logger = inject(DynamicFormLogger);
-  const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
+  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
 
   // Determine the target array key
   // Priority: explicit arrayKey from fieldDef > arrayKey from context
@@ -240,7 +245,7 @@ export function removeArrayItemButtonFieldMapper(fieldDef: RemoveArrayItemButton
   }
 
   // Build base inputs (static, from field definition)
-  const baseInputs = buildBaseInputs(fieldDef, fieldSignalContext.defaultProps);
+  const baseInputs = buildBaseInputs(fieldDef, defaultProps);
 
   // Set default eventArgs for RemoveArrayItemEvent (arrayKey, index if inside array)
   // When outside array, only pass arrayKey (removes last by default)

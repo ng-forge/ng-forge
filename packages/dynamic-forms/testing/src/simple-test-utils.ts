@@ -248,7 +248,6 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
               value: valueSignal,
               defaultValues: () => defaultValue,
               form: formInstance,
-              defaultValidationMessages: undefined,
             };
           });
         },
