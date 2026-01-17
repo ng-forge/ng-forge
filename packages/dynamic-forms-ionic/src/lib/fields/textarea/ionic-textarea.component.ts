@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
@@ -108,4 +109,30 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
     this.hintId,
     () => !!this.props()?.hint,
   );
+
+  /**
+   * Workaround: Ionic's ion-textarea does NOT automatically propagate aria-describedby changes
+   * to the native textarea element inside its shadow DOM. This effect imperatively syncs the attribute
+   * after a microtask to ensure Ionic has processed the attribute change.
+   *
+   * Uses Ionic's getInputElement() API to access the native textarea element.
+   */
+  private readonly _ = explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
+    // Use queueMicrotask to ensure this runs after Ionic processes the attribute
+    queueMicrotask(() => {
+      const ionTextarea = this.elementRef.nativeElement.querySelector('ion-textarea') as HTMLIonTextareaElement | null;
+
+      if (ionTextarea?.getInputElement) {
+        ionTextarea.getInputElement().then((textareaEl) => {
+          if (textareaEl) {
+            if (describedBy) {
+              textareaEl.setAttribute('aria-describedby', describedBy);
+            } else {
+              textareaEl.removeAttribute('aria-describedby');
+            }
+          }
+        });
+      }
+    });
+  });
 }

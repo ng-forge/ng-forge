@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
@@ -115,4 +116,30 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
     this.hintId,
     () => !!this.props()?.hint,
   );
+
+  /**
+   * Workaround: Ionic's ion-input does NOT automatically propagate aria-describedby changes
+   * to the native input element inside its shadow DOM. This effect imperatively syncs the attribute
+   * after a microtask to ensure Ionic has processed the attribute change.
+   *
+   * Uses Ionic's getInputElement() API to access the native input element.
+   */
+  private readonly _ = explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
+    // Use queueMicrotask to ensure this runs after Ionic processes the attribute
+    queueMicrotask(() => {
+      const ionInput = this.elementRef.nativeElement.querySelector('ion-input') as HTMLIonInputElement | null;
+
+      if (ionInput?.getInputElement) {
+        ionInput.getInputElement().then((inputEl) => {
+          if (inputEl) {
+            if (describedBy) {
+              inputEl.setAttribute('aria-describedby', describedBy);
+            } else {
+              inputEl.removeAttribute('aria-describedby');
+            }
+          }
+        });
+      }
+    });
+  });
 }

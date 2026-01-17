@@ -82,6 +82,33 @@
 - **Remove redundant code when refactoring.** Do not leave dead code, unused imports, or commented-out code behind.
 - **Update related documentation and imports accordingly.** When renaming, moving, or deleting code, ensure all references are updated.
 
+## E2E Testing and Screenshots
+
+- **E2E tests use Playwright** and are located in `apps/examples/*/src/app/testing/`.
+- **Screenshots MUST be updated in Docker** to ensure cross-platform consistency. Font rendering differs between macOS, Linux, and CI environments.
+- **Use the provided scripts** in `package.json`:
+
+  ```bash
+  # Run E2E tests in Docker (validates screenshots)
+  pnpm e2e:material
+  pnpm e2e:bootstrap
+  pnpm e2e:primeng
+  pnpm e2e:ionic
+
+  # Update screenshots in Docker (when visual changes are intentional)
+  pnpm e2e:material:update
+  pnpm e2e:bootstrap:update
+  pnpm e2e:primeng:update
+  pnpm e2e:ionic:update
+
+  # Run all E2E tests sequentially
+  pnpm e2e:all
+  pnpm e2e:all:update
+  ```
+
+- **Never run `--update-snapshots` locally** outside Docker, as this will create platform-specific screenshots that fail in CI.
+- The Docker script is at `scripts/playwright-docker.sh` and uses `docker-compose.playwright.yml`.
+
 ## Commit Messages
 
 **You MUST use Angular-style conventional commits for PR titles.** PRs are squash-merged, so only the PR title matters for the changelog. PR titles are validated by commitlint in CI.
