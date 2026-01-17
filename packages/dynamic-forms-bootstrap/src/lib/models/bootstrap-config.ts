@@ -1,7 +1,23 @@
 /**
  * Configuration options for Bootstrap form fields.
- * These settings will be applied as defaults to all Bootstrap form fields
- * unless overridden by individual field props.
+ *
+ * These settings can be applied at two levels:
+ * - **Library-level**: Via `withBootstrapFields({ ... })` - applies to all forms
+ * - **Form-level**: Via `defaultProps` in form config - applies to a specific form
+ *
+ * The cascade hierarchy is: Library-level → Form-level → Field-level
+ *
+ * @example
+ * ```typescript
+ * // Library-level (in app config)
+ * provideDynamicForms(withBootstrapFields({ size: 'sm', floatingLabel: true }))
+ *
+ * // Form-level (in form config)
+ * const config: BsFormConfig = {
+ *   defaultProps: { size: 'lg' },
+ *   fields: [...]
+ * };
+ * ```
  */
 export interface BootstrapConfig {
   /**

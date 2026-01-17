@@ -1,7 +1,23 @@
 /**
  * Configuration options for PrimeNG form fields.
- * These settings will be applied as defaults to all PrimeNG form fields
- * unless overridden by individual field props.
+ *
+ * These settings can be applied at two levels:
+ * - **Library-level**: Via `withPrimeNGFields({ ... })` - applies to all forms
+ * - **Form-level**: Via `defaultProps` in form config - applies to a specific form
+ *
+ * The cascade hierarchy is: Library-level → Form-level → Field-level
+ *
+ * @example
+ * ```typescript
+ * // Library-level (in app config)
+ * provideDynamicForms(withPrimeNGFields({ size: 'small', variant: 'filled' }))
+ *
+ * // Form-level (in form config)
+ * const config: PrimeFormConfig = {
+ *   defaultProps: { variant: 'outlined' },
+ *   fields: [...]
+ * };
+ * ```
  */
 export interface PrimeNGConfig {
   /**

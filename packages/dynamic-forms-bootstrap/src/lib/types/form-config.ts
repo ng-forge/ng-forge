@@ -1,15 +1,13 @@
 import { FormConfig, InferFormValue, NarrowFields, RegisteredFieldTypes } from '@ng-forge/dynamic-forms';
+import { BootstrapConfig } from '../models/bootstrap-config';
 
 /**
  * Bootstrap-specific props that can be set at form level and cascade to all fields.
  *
- * These props override library-level defaults (from `withBootstrapFields()`) but are
- * overridden by field-level props.
+ * This is the same type as `BootstrapConfig` used in `withBootstrapFields()`.
+ * Using a single type ensures consistency between library-level and form-level configuration.
  *
  * The cascade hierarchy is: Library-level → Form-level → Field-level
- *
- * @remarks
- * These are the same properties available in `BootstrapConfig` when using `withBootstrapFields()`.
  *
  * @example
  * ```typescript
@@ -24,37 +22,7 @@ import { FormConfig, InferFormValue, NarrowFields, RegisteredFieldTypes } from '
  * };
  * ```
  */
-export interface BsFormProps {
-  /**
-   * Default size for form controls
-   * @default undefined
-   */
-  size?: 'sm' | 'lg';
-
-  /**
-   * Whether to use floating labels by default for inputs
-   * @default false
-   */
-  floatingLabel?: boolean;
-
-  /**
-   * Default variant for buttons
-   * @default 'primary'
-   */
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'link';
-
-  /**
-   * Whether buttons should be outlined by default
-   * @default false
-   */
-  outline?: boolean;
-
-  /**
-   * Whether buttons should be block-level by default
-   * @default false
-   */
-  block?: boolean;
-}
+export type BsFormProps = BootstrapConfig;
 
 /**
  * Bootstrap-specific FormConfig with type-safe defaultProps.
