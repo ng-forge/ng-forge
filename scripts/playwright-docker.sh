@@ -21,12 +21,9 @@ APP=${1:-ionic-examples}
 shift || true
 EXTRA_ARGS="$@"
 
-# Map app to port
+# Validate app name
 case $APP in
-  material-examples) PORT=4201 ;;
-  primeng-examples) PORT=4202 ;;
-  ionic-examples) PORT=4203 ;;
-  bootstrap-examples) PORT=4204 ;;
+  material-examples|primeng-examples|ionic-examples|bootstrap-examples) ;;
   *)
     echo "Unknown app: $APP"
     echo "Valid apps: ionic-examples, material-examples, bootstrap-examples, primeng-examples"
@@ -35,22 +32,13 @@ case $APP in
 esac
 
 echo "Running Playwright tests for $APP in Docker..."
-echo "Extra args: $EXTRA_ARGS"
+[[ -n "$EXTRA_ARGS" ]] && echo "Extra args: $EXTRA_ARGS"
 
-# Build the command
-# 1. Install dependencies
-# 2. Install Playwright browsers (cached in volume)
-# 3. Start dev server, wait for it, run tests
-# 4. Capture exit code, kill server, exit with test result
-CMD="pnpm install --frozen-lockfile && \
-pnpm exec playwright install chromium && \
-(pnpm exec nx run $APP:serve --port $PORT &) && \
-pnpm exec wait-on http://localhost:$PORT --timeout 60000 && \
-pnpm exec nx run $APP:e2e $EXTRA_ARGS; \
-E2E_EXIT=\$?; \
-kill %1 2>/dev/null || true; \
-exit \$E2E_EXIT"
+# Build the command - Playwright's webServer config handles dev server automatically
+CMD="pnpm install --frozen-lockfile && pnpm exec nx run $APP:e2e $EXTRA_ARGS"
 
-# Build the image (uses cache if unchanged) and run
+# Build the image (uses cache if unchanged) and run tests
 docker compose -f docker-compose.playwright.yml build
-PLAYWRIGHT_CMD="$CMD" docker compose -f docker-compose.playwright.yml run --rm playwright
+PLAYWRIGHT_CMD="$CMD" docker compose -f docker-compose.playwright.yml up \
+  --abort-on-container-exit \
+  --exit-code-from playwright
