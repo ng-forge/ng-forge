@@ -79,6 +79,26 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'ion-textarea',
     });
+
+    // Workaround: Ionic's ion-textarea does NOT automatically propagate aria-describedby changes
+    // to the native textarea element inside its shadow DOM. This effect imperatively syncs the attribute
+    // after a microtask to ensure Ionic has processed the attribute change.
+    explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
+      queueMicrotask(() => {
+        const ionTextarea = this.elementRef.nativeElement.querySelector('ion-textarea') as HTMLIonTextareaElement | null;
+        if (ionTextarea?.getInputElement) {
+          ionTextarea.getInputElement().then((textareaEl) => {
+            if (textareaEl) {
+              if (describedBy) {
+                textareaEl.setAttribute('aria-describedby', describedBy);
+              } else {
+                textareaEl.removeAttribute('aria-describedby');
+              }
+            }
+          });
+        }
+      });
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -109,30 +129,4 @@ export default class IonicTextareaFieldComponent implements IonicTextareaCompone
     this.hintId,
     () => !!this.props()?.hint,
   );
-
-  /**
-   * Workaround: Ionic's ion-textarea does NOT automatically propagate aria-describedby changes
-   * to the native textarea element inside its shadow DOM. This effect imperatively syncs the attribute
-   * after a microtask to ensure Ionic has processed the attribute change.
-   *
-   * Uses Ionic's getInputElement() API to access the native textarea element.
-   */
-  private readonly _ = explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
-    // Use queueMicrotask to ensure this runs after Ionic processes the attribute
-    queueMicrotask(() => {
-      const ionTextarea = this.elementRef.nativeElement.querySelector('ion-textarea') as HTMLIonTextareaElement | null;
-
-      if (ionTextarea?.getInputElement) {
-        ionTextarea.getInputElement().then((textareaEl) => {
-          if (textareaEl) {
-            if (describedBy) {
-              textareaEl.setAttribute('aria-describedby', describedBy);
-            } else {
-              textareaEl.removeAttribute('aria-describedby');
-            }
-          }
-        });
-      }
-    });
-  });
 }
