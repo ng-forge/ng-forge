@@ -9,9 +9,10 @@ import { getGridClassString } from '../../utils/grid-classes/grid-classes';
  * Used by mappers to build the inputs record.
  *
  * @param fieldDef The field definition to extract properties from
+ * @param defaultProps Optional form-level default props to merge with field props
  * @returns Record of input names to values
  */
-export function buildBaseInputs(fieldDef: FieldDef<unknown>): Record<string, unknown> {
+export function buildBaseInputs(fieldDef: FieldDef<unknown>, defaultProps?: Record<string, unknown>): Record<string, unknown> {
   const { key, label, className, tabIndex, props, meta } = fieldDef;
   const inputs: Record<string, unknown> = {};
 
@@ -42,8 +43,14 @@ export function buildBaseInputs(fieldDef: FieldDef<unknown>): Record<string, unk
     inputs['tabIndex'] = tabIndex;
   }
 
-  if (props !== undefined) {
-    inputs['props'] = props;
+  // Merge props: form-level defaultProps as base, field-level props override
+  // Cast props to Record since it's typed as unknown but always represents an object at runtime
+  const fieldProps = props as Record<string, unknown> | undefined;
+  const mergedProps =
+    fieldProps !== undefined || defaultProps !== undefined ? { ...(defaultProps ?? {}), ...(fieldProps ?? {}) } : undefined;
+
+  if (mergedProps !== undefined) {
+    inputs['props'] = mergedProps;
   }
 
   if (meta !== undefined) {

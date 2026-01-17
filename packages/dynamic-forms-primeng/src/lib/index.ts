@@ -55,6 +55,7 @@ export { PRIMENG_CONFIG } from './models';
 
 // Types and constants
 export { PrimeField, type PrimeFieldType } from './types/types';
+export type { PrimeFormProps, PrimeFormConfig } from './types/form-config';
 
 // Module augmentation for global types
 import './types/registry-augmentation';

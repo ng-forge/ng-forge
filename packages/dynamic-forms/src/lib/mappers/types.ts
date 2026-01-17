@@ -24,6 +24,8 @@ export interface FieldSignalContext<TModel extends Record<string, unknown> = Rec
   formOptions?: FormOptions;
   /** Current page validity signal for paged forms. Used by next button to determine disabled state. */
   currentPageValid?: Signal<boolean>;
+  /** Form-level default props that are merged with field-level props. Field props take precedence. */
+  defaultProps?: Record<string, unknown>;
 }
 
 /**
