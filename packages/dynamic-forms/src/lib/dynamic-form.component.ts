@@ -76,7 +76,13 @@ import { DynamicFormLogger } from './providers/features/logger/logger.token';
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
     @if (formModeDetection().mode === 'paged') {
-      <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
+      <div
+        page-orchestrator
+        [pageFields]="pageFieldDefinitions()"
+        [form]="form()"
+        [fieldSignalContext]="fieldSignalContext()"
+        [formOptions]="effectiveFormOptions()"
+      ></div>
     } @else {
       @for (field of resolvedFields(); track field.key) {
         <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
