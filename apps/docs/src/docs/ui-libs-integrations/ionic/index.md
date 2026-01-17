@@ -123,6 +123,87 @@ export class ContactFormComponent {
 }
 ```
 
+## Default Props & Configuration
+
+Configure default styling for all fields at the library or form level. Props cascade in this order:
+
+**Library-level → Form-level → Field-level**
+
+### Library-Level Configuration
+
+Set defaults for all forms in your application via `withIonicFields()`:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withIonicFields({
+        fill: 'outline',
+        labelPlacement: 'floating',
+        color: 'primary',
+      }),
+    ),
+  ],
+};
+```
+
+### Form-Level Configuration
+
+Override library defaults for a specific form using `defaultProps`:
+
+```typescript
+import { IonicFormConfig } from '@ng-forge/dynamic-forms-ionic';
+
+const formConfig: IonicFormConfig = {
+  defaultProps: {
+    fill: 'solid', // All fields in this form use 'solid'
+    labelPlacement: 'stacked',
+    color: 'tertiary',
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' },
+  ],
+};
+```
+
+### Field-Level Override
+
+Override form defaults on individual fields:
+
+```typescript
+const formConfig: IonicFormConfig = {
+  defaultProps: {
+    fill: 'outline',
+    labelPlacement: 'floating',
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' }, // Uses 'outline' + 'floating'
+    { key: 'email', type: 'input', label: 'Email', props: { fill: 'solid' } }, // Overrides to 'solid'
+  ],
+};
+```
+
+### Available Configuration Options
+
+| Option           | Type                                                                                                            | Default     | Description              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------ |
+| `fill`           | `'solid' \| 'outline'`                                                                                          | `'solid'`   | Input fill style         |
+| `shape`          | `'round'`                                                                                                       | -           | Rounded shape for inputs |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                                                        | `'start'`   | Label position           |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger' \| 'light' \| 'medium' \| 'dark'` | `'primary'` | Ionic color theme        |
+| `size`           | `'small' \| 'default' \| 'large'`                                                                               | `'default'` | Button size              |
+| `expand`         | `'full' \| 'block'`                                                                                             | -           | Button expand behavior   |
+| `buttonFill`     | `'clear' \| 'outline' \| 'solid' \| 'default'`                                                                  | `'solid'`   | Button fill style        |
+| `strong`         | `boolean`                                                                                                       | `false`     | Bold button text         |
+
+---
+
 ## Type Augmentation
 
 Importing this package automatically extends `@ng-forge/dynamic-forms` with Ionic-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:

@@ -127,6 +127,82 @@ export class ContactFormComponent {
 }
 ```
 
+## Default Props & Configuration
+
+Configure default styling for all fields at the library or form level. Props cascade in this order:
+
+**Library-level → Form-level → Field-level**
+
+### Library-Level Configuration
+
+Set defaults for all forms in your application via `withMaterialFields()`:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withMaterialFields({
+        appearance: 'outline',
+        subscriptSizing: 'dynamic',
+        color: 'accent',
+      }),
+    ),
+  ],
+};
+```
+
+### Form-Level Configuration
+
+Override library defaults for a specific form using `defaultProps`:
+
+```typescript
+import { MatFormConfig } from '@ng-forge/dynamic-forms-material';
+
+const formConfig: MatFormConfig = {
+  defaultProps: {
+    appearance: 'fill', // All fields in this form use 'fill'
+    color: 'primary', // All fields use 'primary' color
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' },
+  ],
+};
+```
+
+### Field-Level Override
+
+Override form defaults on individual fields:
+
+```typescript
+const formConfig: MatFormConfig = {
+  defaultProps: {
+    appearance: 'fill',
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' }, // Uses 'fill'
+    { key: 'email', type: 'input', label: 'Email', props: { appearance: 'outline' } }, // Overrides to 'outline'
+  ],
+};
+```
+
+### Available Configuration Options
+
+| Option            | Type                              | Default     | Description                   |
+| ----------------- | --------------------------------- | ----------- | ----------------------------- |
+| `appearance`      | `'fill' \| 'outline'`             | `'fill'`    | Form field visual style       |
+| `subscriptSizing` | `'fixed' \| 'dynamic'`            | `'fixed'`   | Error/hint spacing behavior   |
+| `color`           | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Theme color for controls      |
+| `labelPosition`   | `'before' \| 'after'`             | `'after'`   | Label position for checkboxes |
+| `disableRipple`   | `boolean`                         | `false`     | Disable ripple effect         |
+
+---
+
 ## Type Augmentation
 
 Importing this package automatically extends `@ng-forge/dynamic-forms` with Material-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:

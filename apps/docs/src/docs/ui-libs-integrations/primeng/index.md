@@ -133,6 +133,84 @@ export class ContactFormComponent {
 }
 ```
 
+## Default Props & Configuration
+
+Configure default styling for all fields at the library or form level. Props cascade in this order:
+
+**Library-level → Form-level → Field-level**
+
+### Library-Level Configuration
+
+Set defaults for all forms in your application via `withPrimeNGFields()`:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withPrimeNGFields({
+        size: 'small',
+        variant: 'filled',
+        severity: 'primary',
+      }),
+    ),
+  ],
+};
+```
+
+### Form-Level Configuration
+
+Override library defaults for a specific form using `defaultProps`:
+
+```typescript
+import { PrimeFormConfig } from '@ng-forge/dynamic-forms-primeng';
+
+const formConfig: PrimeFormConfig = {
+  defaultProps: {
+    variant: 'outlined', // All fields in this form use 'outlined'
+    severity: 'success', // All buttons use 'success' color
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' },
+  ],
+};
+```
+
+### Field-Level Override
+
+Override form defaults on individual fields:
+
+```typescript
+const formConfig: PrimeFormConfig = {
+  defaultProps: {
+    variant: 'filled',
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' }, // Uses 'filled'
+    { key: 'email', type: 'input', label: 'Email', props: { variant: 'outlined' } }, // Overrides to 'outlined'
+  ],
+};
+```
+
+### Available Configuration Options
+
+| Option     | Type                                                                                            | Default      | Description            |
+| ---------- | ----------------------------------------------------------------------------------------------- | ------------ | ---------------------- |
+| `size`     | `'small' \| 'large'`                                                                            | -            | Component size         |
+| `variant`  | `'outlined' \| 'filled'`                                                                        | `'outlined'` | Input visual style     |
+| `severity` | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warn' \| 'danger' \| 'help' \| 'contrast'` | `'primary'`  | Button color           |
+| `text`     | `boolean`                                                                                       | `false`      | Text-only button style |
+| `outlined` | `boolean`                                                                                       | `false`      | Outlined button style  |
+| `raised`   | `boolean`                                                                                       | `false`      | Raised button style    |
+| `rounded`  | `boolean`                                                                                       | `false`      | Rounded button style   |
+
+---
+
 ## Type Augmentation
 
 Importing this package automatically extends `@ng-forge/dynamic-forms` with PrimeNG-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:

@@ -128,6 +128,79 @@ export class ContactFormComponent {
 }
 ```
 
+## Default Props & Configuration
+
+Configure default styling for all fields at the library or form level. Props cascade in this order:
+
+**Library-level → Form-level → Field-level**
+
+### Library-Level Configuration
+
+Set defaults for all forms in your application via `withBootstrapFields()`:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withBootstrapFields({
+        size: 'lg',
+        floatingLabel: true,
+      }),
+    ),
+  ],
+};
+```
+
+### Form-Level Configuration
+
+Override library defaults for a specific form using `defaultProps`:
+
+```typescript
+import { BsFormConfig } from '@ng-forge/dynamic-forms-bootstrap';
+
+const formConfig: BsFormConfig = {
+  defaultProps: {
+    size: 'sm', // All fields in this form use 'sm'
+    floatingLabel: true, // All fields use floating labels
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' },
+  ],
+};
+```
+
+### Field-Level Override
+
+Override form defaults on individual fields:
+
+```typescript
+const formConfig: BsFormConfig = {
+  defaultProps: {
+    size: 'lg',
+    floatingLabel: true,
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' }, // Uses 'lg' + floating
+    { key: 'email', type: 'input', label: 'Email', props: { size: 'sm' } }, // Overrides to 'sm'
+  ],
+};
+```
+
+### Available Configuration Options
+
+| Option          | Type           | Default | Description                  |
+| --------------- | -------------- | ------- | ---------------------------- |
+| `size`          | `'sm' \| 'lg'` | -       | Bootstrap size class         |
+| `floatingLabel` | `boolean`      | `false` | Enable floating label design |
+
+---
+
 ## Type Augmentation
 
 Importing this package automatically extends `@ng-forge/dynamic-forms` with Bootstrap-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:
