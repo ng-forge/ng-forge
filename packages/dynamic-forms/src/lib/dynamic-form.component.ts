@@ -82,6 +82,8 @@ import { DynamicFormLogger } from './providers/features/logger/logger.token';
         [form]="form()"
         [fieldSignalContext]="fieldSignalContext()"
         [formOptions]="effectiveFormOptions()"
+        [defaultProps]="config().defaultProps"
+        [defaultValidationMessages]="config().defaultValidationMessages"
       ></div>
     } @else {
       @for (field of resolvedFields(); track field.key) {
