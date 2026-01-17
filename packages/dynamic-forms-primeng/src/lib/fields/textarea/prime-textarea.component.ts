@@ -5,6 +5,7 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors, Textar
 import { PrimeTextareaComponent, PrimeTextareaProps } from './prime-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeTextareaControlComponent } from './prime-textarea-control.component';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-textarea',
@@ -32,11 +33,12 @@ import { PrimeTextareaControlComponent } from './prime-textarea-control.componen
         [styleClass]="textareaClasses()"
       />
 
-      @if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
+        }
       }
     </div>
   `,
@@ -108,18 +110,10 @@ export default class PrimeTextareaFieldComponent implements PrimeTextareaCompone
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

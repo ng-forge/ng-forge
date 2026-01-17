@@ -5,6 +5,7 @@ import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dyna
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 @Component({
@@ -93,6 +94,9 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
   /** Base ID for error elements */
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
+
   /** Whether the field is currently in an invalid state (invalid AND touched) */
   protected readonly ariaInvalid = computed(() => {
     const fieldState = this.field()();
@@ -104,10 +108,11 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
     return this.field()().required?.() === true ? true : null;
   });
 
-  /** aria-describedby pointing to error messages when visible */
-  protected readonly ariaDescribedBy = computed(() => {
-    const errors = this.errorsToDisplay();
-    if (errors.length === 0) return null;
-    return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
-  });
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

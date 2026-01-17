@@ -4,6 +4,7 @@ import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { BsCheckboxComponent, BsCheckboxProps } from './bs-checkbox.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-checkbox',
@@ -36,13 +37,12 @@ import { AsyncPipe } from '@angular/common';
       </label>
     </div>
 
-    @if (props()?.hint; as hint) {
-      <div class="form-text" [id]="hintId()" [attr.hidden]="f().hidden() || null">
-        {{ hint | dynamicText | async }}
-      </div>
-    }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <div class="form-text" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
+      }
     }
   `,
   styles: [
@@ -116,15 +116,10 @@ export default class BsCheckboxFieldComponent implements BsCheckboxComponent {
     return this.field()().required?.() === true ? true : null;
   });
 
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

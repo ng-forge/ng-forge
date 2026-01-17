@@ -5,6 +5,7 @@ import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErr
 import { BsDatepickerComponent, BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-datepicker',
@@ -71,11 +72,6 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         />
 
-        @if (p?.hint) {
-          <div class="form-text" [id]="hintId()">
-            {{ p?.hint | dynamicText | async }}
-          </div>
-        }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
             {{ p?.validFeedback | dynamicText | async }}
@@ -83,6 +79,10 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
         }
         @for (error of errorsToDisplay(); track error.kind; let i = $index) {
           <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+        } @empty {
+          @if (p?.hint) {
+            <div class="form-text" [id]="hintId()">{{ p?.hint | dynamicText | async }}</div>
+          }
         }
       </div>
     }
@@ -157,15 +157,10 @@ export default class BsDatepickerFieldComponent implements BsDatepickerComponent
     return this.field()().required?.() === true ? true : null;
   });
 
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

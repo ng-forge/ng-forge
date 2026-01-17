@@ -8,6 +8,7 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from 
 import { MatSelectComponent, MatSelectProps } from './mat-select.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-select',
@@ -38,11 +39,12 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         }
       </mat-select>
 
-      @if (props()?.hint; as hint) {
-        <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <mat-hint [id]="hintId()">{{ hint | dynamicText | async }}</mat-hint>
+        }
       }
     </mat-form-field>
   `,
@@ -121,18 +123,10 @@ export default class MatSelectFieldComponent implements MatSelectComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

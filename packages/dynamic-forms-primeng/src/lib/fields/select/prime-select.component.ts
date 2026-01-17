@@ -5,6 +5,7 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from 
 import { AsyncPipe } from '@angular/common';
 import { PrimeSelectComponent, PrimeSelectProps } from './prime-select.type';
 import { PrimeSelectControlComponent } from './prime-select-control.component';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-select',
@@ -33,11 +34,12 @@ import { PrimeSelectControlComponent } from './prime-select-control.component';
         [ariaDescribedBy]="ariaDescribedBy()"
       />
 
-      @if (props()?.hint; as hint) {
-        <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <small class="df-prime-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
+        }
       }
     </div>
   `,
@@ -119,18 +121,10 @@ export default class PrimeSelectFieldComponent implements PrimeSelectComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

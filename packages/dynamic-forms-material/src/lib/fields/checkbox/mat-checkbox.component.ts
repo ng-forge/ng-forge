@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DynamicText, DynamicTextPipe, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms';
@@ -7,7 +7,7 @@ import { MatCheckboxComponent, MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
-import { explicitEffect } from 'ngxtension/explicit-effect';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-checkbox',
@@ -24,18 +24,19 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
       [color]="props()?.color || 'primary'"
       [disableRipple]="effectiveDisableRipple()"
       [required]="!!f().required()"
-      [aria-describedby]="ariaDescribedBy()"
+      [attr.aria-describedby]="ariaDescribedBy()"
       [attr.tabindex]="tabIndex()"
       [attr.hidden]="f().hidden() || null"
     >
       {{ label() | dynamicText | async }}
     </mat-checkbox>
 
-    @if (props()?.hint; as hint) {
-      <div class="mat-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
-    }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <mat-error [id]="errorId() + '-' + i" [attr.hidden]="f().hidden() || null">{{ error.message }}</mat-error>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <div class="mat-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</div>
+      }
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -100,20 +101,12 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.join(' ');
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 
   /**
    * Workaround: Angular Material's MatCheckbox does NOT set aria-required on its internal
@@ -122,14 +115,35 @@ export default class MatCheckboxFieldComponent implements MatCheckboxComponent {
    *
    * Bug: MatCheckbox sets `required` attribute but not `aria-required` for screen readers.
    * @see https://github.com/angular/components/issues/XXXXX (TODO: file issue)
+   *
+   * Uses afterRenderEffect to ensure DOM is ready before manipulating attributes.
    */
-  private readonly syncAriaRequiredToDom = explicitEffect([this.ariaRequired], ([isRequired]) => {
+  private readonly syncAriaRequiredToDom = afterRenderEffect(() => {
+    const isRequired = this.ariaRequired();
     const inputEl = this.elementRef.nativeElement.querySelector('input[type="checkbox"]');
     if (inputEl) {
       if (isRequired) {
         inputEl.setAttribute('aria-required', 'true');
       } else {
         inputEl.removeAttribute('aria-required');
+      }
+    }
+  });
+
+  /**
+   * Workaround: Angular Material's MatCheckbox does NOT propagate aria-describedby to its internal
+   * input element. This effect imperatively sets/removes aria-describedby on the internal input.
+   *
+   * Uses afterRenderEffect to ensure DOM is ready before querying internal elements.
+   */
+  private readonly syncAriaDescribedByToDom = afterRenderEffect(() => {
+    const describedBy = this.ariaDescribedBy();
+    const inputEl = this.elementRef.nativeElement.querySelector('input[type="checkbox"]');
+    if (inputEl) {
+      if (describedBy) {
+        inputEl.setAttribute('aria-describedby', describedBy);
+      } else {
+        inputEl.removeAttribute('aria-describedby');
       }
     }
   });

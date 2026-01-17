@@ -7,6 +7,7 @@ import { createResolvedErrorsSignal, isEqual, setupMetaTracking, shouldShowError
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PrimeMultiCheckboxComponent, PrimeMultiCheckboxProps } from './prime-multi-checkbox.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-multi-checkbox',
@@ -33,11 +34,12 @@ import { AsyncPipe } from '@angular/common';
         </div>
       }
     </div>
-    @if (props()?.hint; as hint) {
-      <small class="p-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
-    }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <small class="p-hint" [id]="hintId()">{{ hint | dynamicText | async }}</small>
+      }
     }
   `,
   styles: [
@@ -145,20 +147,12 @@ export default class PrimeMultiCheckboxFieldComponent implements PrimeMultiCheck
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 
   constructor() {
     // Apply meta attributes to all checkbox inputs, re-apply when options change

@@ -5,6 +5,7 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from 
 import { PrimeRadioComponent, PrimeRadioProps } from './prime-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { PrimeRadioGroupComponent } from './prime-radio-group.component';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-prime-radio',
@@ -24,11 +25,12 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
       [attr.aria-describedby]="ariaDescribedBy()"
     />
 
-    @if (props()?.hint; as hint) {
-      <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
-    }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <small class="p-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</small>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <small class="p-hint" [id]="hintId()" [attr.hidden]="f().hidden() || null">{{ hint | dynamicText | async }}</small>
+      }
     }
   `,
   styles: [
@@ -96,18 +98,10 @@ export default class PrimeRadioFieldComponent implements PrimeRadioComponent {
   protected readonly errorId = computed(() => `${this.key()}-error`);
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }
