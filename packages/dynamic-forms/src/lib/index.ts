@@ -154,7 +154,7 @@ export type { FieldTypeDefinition, ValueHandlingMode } from './models';
 export { FIELD_REGISTRY } from './models';
 
 // Signal Context - injection tokens for field components
-export { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from './models';
+export { ARRAY_CONTEXT, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models';
 
 // Dynamic Text utilities
 export { dynamicTextToObservable } from './utils';

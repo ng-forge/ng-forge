@@ -1,7 +1,7 @@
 import { BaseValueField } from '@ng-forge/dynamic-forms';
 import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { buildBaseInputs } from '@ng-forge/dynamic-forms';
+import { buildBaseInputs, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES } from '@ng-forge/dynamic-forms';
 import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
 import { omit } from '@ng-forge/dynamic-forms';
 import { ValidationMessages } from '@ng-forge/dynamic-forms';
@@ -13,7 +13,6 @@ import { ValidationMessages } from '@ng-forge/dynamic-forms';
 export interface ValueFieldContext {
   fieldTree: FieldTree<unknown> | undefined;
   defaultValidationMessages: ValidationMessages | undefined;
-  defaultProps: Record<string, unknown> | undefined;
 }
 
 /**
@@ -27,11 +26,10 @@ export interface ValueFieldContext {
  */
 export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
   const context = inject(FIELD_SIGNAL_CONTEXT);
-  const defaultValidationMessages = context.defaultValidationMessages;
-  const defaultProps = context.defaultProps;
+  const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES, { optional: true }) ?? undefined;
   const formRoot = context.form as Record<string, FieldTree<unknown> | undefined>;
   const fieldTree = formRoot[fieldKey];
-  return { fieldTree, defaultValidationMessages, defaultProps };
+  return { fieldTree, defaultValidationMessages };
 }
 
 /**
@@ -40,14 +38,16 @@ export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
  *
  * @param fieldDef The value field definition
  * @param ctx The resolved value field context
+ * @param defaultProps Optional default props from the form configuration
  * @returns Record of input names to values
  */
 export function buildValueFieldInputs<TProps, TValue = unknown>(
   fieldDef: BaseValueField<TProps, TValue>,
   ctx: ValueFieldContext,
+  defaultProps?: Record<string, unknown>,
 ): Record<string, unknown> {
   const omittedFields = omit(fieldDef, ['value']);
-  const baseInputs = buildBaseInputs(omittedFields, ctx.defaultProps);
+  const baseInputs = buildBaseInputs(omittedFields, defaultProps);
 
   const inputs: Record<string, unknown> = {
     ...baseInputs,
@@ -88,6 +88,7 @@ export function valueFieldMapper<TProps = unknown, TValue = unknown>(
   fieldDef: BaseValueField<TProps, TValue>,
 ): Signal<Record<string, unknown>> {
   const ctx = resolveValueFieldContext(fieldDef.key);
+  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
 
-  return computed(() => buildValueFieldInputs(fieldDef, ctx));
+  return computed(() => buildValueFieldInputs(fieldDef, ctx, defaultProps));
 }

@@ -1,5 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import type { FieldSignalContext, ArrayContext } from '../mappers/types';
+import type { ValidationMessages } from './validation-types';
+import type { FormOptions } from './form-config';
 
 /**
  * Injection token for providing field signal context to mappers and components.
@@ -62,3 +64,58 @@ export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIEL
  * ```
  */
 export const ARRAY_CONTEXT = new InjectionToken<ArrayContext>('ARRAY_CONTEXT');
+
+/**
+ * Injection token for form-level default props.
+ *
+ * Default props are form-wide property defaults that are merged with field-level props.
+ * Field props take precedence over default props.
+ *
+ * Unlike FIELD_SIGNAL_CONTEXT which is re-provided by container components (Group, Array),
+ * DEFAULT_PROPS is provided ONCE at the DynamicForm level and inherited by all children
+ * via Angular's hierarchical injector.
+ *
+ * @example
+ * ```typescript
+ * // In a mapper function
+ * const defaultProps = inject(DEFAULT_PROPS, { optional: true });
+ * const baseInputs = buildBaseInputs(fieldDef, defaultProps);
+ * ```
+ */
+export const DEFAULT_PROPS = new InjectionToken<Record<string, unknown> | undefined>('DEFAULT_PROPS');
+
+/**
+ * Injection token for form-level default validation messages.
+ *
+ * Default validation messages act as fallbacks when fields have validation
+ * errors but no field-level `validationMessages` defined.
+ *
+ * Like DEFAULT_PROPS, this token is provided ONCE at the DynamicForm level
+ * and inherited by all children via Angular's hierarchical injector.
+ *
+ * @example
+ * ```typescript
+ * // In a mapper or component
+ * const defaultMessages = inject(DEFAULT_VALIDATION_MESSAGES, { optional: true });
+ * const message = defaultMessages?.required ?? 'Field is required';
+ * ```
+ */
+export const DEFAULT_VALIDATION_MESSAGES = new InjectionToken<ValidationMessages | undefined>('DEFAULT_VALIDATION_MESSAGES');
+
+/**
+ * Injection token for form-level options.
+ *
+ * Form options control form-wide behavior including button disabled states.
+ * Used by button mappers to determine default disabled behavior.
+ *
+ * Like DEFAULT_PROPS, this token is provided ONCE at the DynamicForm level
+ * and inherited by all children via Angular's hierarchical injector.
+ *
+ * @example
+ * ```typescript
+ * // In a button mapper
+ * const formOptions = inject(FORM_OPTIONS, { optional: true });
+ * const disableWhenInvalid = formOptions?.submitButton?.disableWhenInvalid ?? true;
+ * ```
+ */
+export const FORM_OPTIONS = new InjectionToken<FormOptions | undefined>('FORM_OPTIONS');

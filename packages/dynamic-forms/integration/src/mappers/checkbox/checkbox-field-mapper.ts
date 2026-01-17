@@ -2,7 +2,7 @@ import { BaseCheckedField } from '@ng-forge/dynamic-forms';
 import { FieldDef } from '@ng-forge/dynamic-forms';
 import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { buildBaseInputs } from '@ng-forge/dynamic-forms';
+import { buildBaseInputs, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES } from '@ng-forge/dynamic-forms';
 import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
 import { omit } from '@ng-forge/dynamic-forms';
 
@@ -17,9 +17,10 @@ import { omit } from '@ng-forge/dynamic-forms';
  */
 export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal<Record<string, unknown>> {
   const context = inject(FIELD_SIGNAL_CONTEXT);
+  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
+  const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES, { optional: true }) ?? undefined;
   const omittedFields = omit(fieldDef, ['value']) as FieldDef<unknown>;
-  const baseInputs = buildBaseInputs(omittedFields, context.defaultProps);
-  const defaultValidationMessages = context.defaultValidationMessages;
+  const baseInputs = buildBaseInputs(omittedFields, defaultProps);
   const formRoot = context.form as Record<string, FieldTree<unknown> | undefined>;
   const fieldTree = formRoot[fieldDef.key];
 

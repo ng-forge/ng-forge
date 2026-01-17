@@ -24,7 +24,7 @@ import { derivedFromDeferred } from './utils/derived-from-deferred/derived-from-
 import { reconcileFields, ResolvedField, resolveField } from './utils/resolve-field/resolve-field';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
 import { keyBy, memoize, isEqual } from './utils/object-utils';
-import { FIELD_SIGNAL_CONTEXT } from './models/field-signal-context.token';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models/field-signal-context.token';
 import { FieldTypeDefinition } from './models/field-type';
 import { FormConfig, FormOptions } from './models/form-config';
 import { RegisteredFieldTypes } from './models/registry/field-registry';
@@ -240,19 +240,16 @@ export class DynamicForm<
     value: this.value,
     defaultValues: this.defaultValues,
     form: this.form(),
-    defaultValidationMessages: this.config().defaultValidationMessages,
-    formOptions: this.effectiveFormOptions(),
-    defaultProps: this.config().defaultProps,
   }));
 
   private readonly fieldInjector = computed(() =>
     Injector.create({
       parent: this.injector,
       providers: [
-        {
-          provide: FIELD_SIGNAL_CONTEXT,
-          useValue: this.fieldSignalContext(),
-        },
+        { provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() },
+        { provide: DEFAULT_PROPS, useValue: this.config().defaultProps },
+        { provide: DEFAULT_VALIDATION_MESSAGES, useValue: this.config().defaultValidationMessages },
+        { provide: FORM_OPTIONS, useValue: this.effectiveFormOptions() },
       ],
     }),
   );
