@@ -5,6 +5,7 @@ import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErr
 import { BsInputComponent, BsInputProps } from './bs-input.type';
 import { AsyncPipe } from '@angular/common';
 import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-input',
@@ -67,11 +68,6 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
           [class.is-invalid]="f().invalid() && f().touched()"
           [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
         />
-        @if (p?.hint) {
-          <div class="form-text" [id]="hintId()">
-            {{ p?.hint | dynamicText | async }}
-          </div>
-        }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">
             {{ p?.validFeedback | dynamicText | async }}
@@ -79,6 +75,10 @@ import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
         }
         @for (error of errorsToDisplay(); track error.kind; let i = $index) {
           <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+        } @empty {
+          @if (p?.hint) {
+            <div class="form-text" [id]="hintId()">{{ p?.hint | dynamicText | async }}</div>
+          }
         }
       </div>
     }
@@ -182,18 +182,10 @@ export default class BsInputFieldComponent implements BsInputComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

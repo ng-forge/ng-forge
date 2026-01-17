@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField, FieldTree } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
 import { DynamicText, DynamicTextPipe, ValidationMessages } from '@ng-forge/dynamic-forms';
 import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicInputComponent, IonicInputProps } from './ionic-input.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 
 @Component({
@@ -27,7 +29,7 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
       [fill]="effectiveFill()"
       [shape]="effectiveShape()"
       [readonly]="f().readonly()"
-      [helperText]="(props()?.hint | dynamicText | async) ?? undefined"
+      [helperText]="errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
       [attr.tabindex]="tabIndex()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-required]="ariaRequired()"
@@ -84,6 +86,26 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
     setupMetaTracking(this.elementRef, this.meta, {
       selector: 'ion-input',
     });
+
+    // Workaround: Ionic's ion-input does NOT automatically propagate aria-describedby changes
+    // to the native input element inside its shadow DOM. This effect imperatively syncs the attribute
+    // after a microtask to ensure Ionic has processed the attribute change.
+    explicitEffect([this.ariaDescribedBy], ([describedBy]) => {
+      queueMicrotask(() => {
+        const ionInput = this.elementRef.nativeElement.querySelector('ion-input') as HTMLIonInputElement | null;
+        if (ionInput?.getInputElement) {
+          ionInput.getInputElement().then((inputEl) => {
+            if (inputEl) {
+              if (describedBy) {
+                inputEl.setAttribute('aria-describedby', describedBy);
+              } else {
+                inputEl.removeAttribute('aria-describedby');
+              }
+            }
+          });
+        }
+      });
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -92,6 +114,9 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
 
   /** Base ID for error elements */
   protected readonly errorId = computed(() => `${this.key()}-error`);
+
+  /** Unique ID for the helper text element */
+  protected readonly hintId = computed(() => `${this.key()}-hint`);
 
   /** Whether the field is currently in an invalid state (invalid AND touched) */
   protected readonly ariaInvalid = computed(() => {
@@ -104,10 +129,11 @@ export default class IonicInputFieldComponent implements IonicInputComponent {
     return this.field()().required?.() === true ? true : null;
   });
 
-  /** aria-describedby pointing to error messages when visible */
-  protected readonly ariaDescribedBy = computed(() => {
-    const errors = this.errorsToDisplay();
-    if (errors.length === 0) return null;
-    return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
-  });
+  /** aria-describedby linking to hint OR error elements (mutually exclusive) */
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

@@ -5,6 +5,7 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from 
 import { BsRadioComponent, BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';
 import { BsRadioGroupComponent } from './bs-radio-group.component';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-radio',
@@ -26,11 +27,12 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
         [ariaDescribedBy]="ariaDescribedBy()"
       />
 
-      @if (props()?.hint; as hint) {
-        <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+        }
       }
     </div>
   `,
@@ -99,15 +101,10 @@ export default class BsRadioFieldComponent implements BsRadioComponent {
     return this.field()().required?.() === true ? true : null;
   });
 
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

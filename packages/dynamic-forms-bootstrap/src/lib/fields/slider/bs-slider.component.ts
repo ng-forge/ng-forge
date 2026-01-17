@@ -5,6 +5,7 @@ import { createResolvedErrorsSignal, InputMeta, setupMetaTracking, shouldShowErr
 import { BsSliderComponent, BsSliderProps } from './bs-slider.type';
 import { AsyncPipe } from '@angular/common';
 import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-bs-slider',
@@ -38,13 +39,12 @@ import { InputConstraintsDirective } from '../../directives/input-constraints.di
         class="form-range"
       />
 
-      @if (props()?.hint; as hint) {
-        <div class="form-text" [id]="hintId()">
-          {{ hint | dynamicText | async }}
-        </div>
-      }
       @for (error of errorsToDisplay(); track error.kind; let i = $index) {
         <div class="invalid-feedback d-block" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</div>
+      } @empty {
+        @if (props()?.hint; as hint) {
+          <div class="form-text" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+        }
       }
     </div>
   `,
@@ -113,15 +113,10 @@ export default class BsSliderFieldComponent implements BsSliderComponent {
     return this.field()().required?.() === true ? true : null;
   });
 
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

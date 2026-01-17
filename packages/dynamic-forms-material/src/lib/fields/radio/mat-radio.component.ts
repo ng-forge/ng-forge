@@ -6,6 +6,7 @@ import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from 
 import { MatRadioComponent, MatRadioProps } from './mat-radio.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-mat-radio',
@@ -37,11 +38,12 @@ import { AsyncPipe } from '@angular/common';
       }
     </mat-radio-group>
 
-    @if (props()?.hint; as hint) {
-      <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
-    }
     @for (error of errorsToDisplay(); track error.kind; let i = $index) {
       <mat-error [id]="errorId() + '-' + i">{{ error.message }}</mat-error>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <div class="mat-hint" [id]="hintId()">{{ hint | dynamicText | async }}</div>
+      }
     }
   `,
   styleUrl: '../../styles/_form-field.scss',
@@ -106,18 +108,10 @@ export default class MatRadioFieldComponent implements MatRadioComponent {
   });
 
   /** aria-describedby: links to hint and error messages for screen readers */
-  protected readonly ariaDescribedBy = computed(() => {
-    const ids: string[] = [];
-
-    if (this.props()?.hint) {
-      ids.push(this.hintId());
-    }
-
-    const errors = this.errorsToDisplay();
-    errors.forEach((_, i) => {
-      ids.push(`${this.errorId()}-${i}`);
-    });
-
-    return ids.length > 0 ? ids.join(' ') : null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }

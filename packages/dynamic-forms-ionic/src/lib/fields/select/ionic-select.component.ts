@@ -5,6 +5,7 @@ import { DynamicText, DynamicTextPipe, FieldMeta, FieldOption, ValidationMessage
 import { createResolvedErrorsSignal, setupMetaTracking, shouldShowErrors } from '@ng-forge/dynamic-forms/integration';
 import { IonicSelectComponent, IonicSelectProps } from './ionic-select.type';
 import { AsyncPipe } from '@angular/common';
+import { createAriaDescribedBySignal } from '../../utils/create-aria-described-by';
 
 @Component({
   selector: 'df-ion-select',
@@ -39,12 +40,12 @@ import { AsyncPipe } from '@angular/common';
         </ion-select-option>
       }
     </ion-select>
-    @if (errorsToDisplay().length > 0) {
-      @for (error of errorsToDisplay(); track error.kind; let i = $index) {
-        <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    @for (error of errorsToDisplay(); track error.kind; let i = $index) {
+      <ion-note color="danger" class="df-ion-error" [id]="errorId() + '-' + i" role="alert">{{ error.message }}</ion-note>
+    } @empty {
+      @if (props()?.hint; as hint) {
+        <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
       }
-    } @else if (props()?.hint; as hint) {
-      <ion-note class="df-ion-hint" [id]="hintId()">{{ hint | dynamicText | async }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -114,19 +115,10 @@ export default class IonicSelectFieldComponent implements IonicSelectComponent {
   });
 
   /** aria-describedby linking to hint OR error elements (mutually exclusive) */
-  protected readonly ariaDescribedBy = computed(() => {
-    const errors = this.errorsToDisplay();
-
-    // Errors take precedence over helper text
-    if (errors.length > 0) {
-      return errors.map((_, i) => `${this.errorId()}-${i}`).join(' ');
-    }
-
-    // Show hint only when no errors
-    if (this.props()?.hint) {
-      return this.hintId();
-    }
-
-    return null;
-  });
+  protected readonly ariaDescribedBy = createAriaDescribedBySignal(
+    this.errorsToDisplay,
+    this.errorId,
+    this.hintId,
+    () => !!this.props()?.hint,
+  );
 }
