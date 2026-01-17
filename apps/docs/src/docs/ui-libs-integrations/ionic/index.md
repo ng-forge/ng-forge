@@ -123,73 +123,13 @@ export class ContactFormComponent {
 }
 ```
 
-## Default Props & Configuration
+## Configuration Options
 
-Configure default styling for all fields at the library or form level. Props cascade in this order:
+Configure default props at the library, form, or field level. See [Configuration](../../deep-dive/configuration) for the full cascade behavior and examples.
 
-**Library-level → Form-level → Field-level**
+Use `IonicFormConfig` for type-safe form configurations with Ionic-specific props.
 
-### Library-Level Configuration
-
-Set defaults for all forms in your application via `withIonicFields()`:
-
-```typescript
-// app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(
-      ...withIonicFields({
-        fill: 'outline',
-        labelPlacement: 'floating',
-        color: 'primary',
-      }),
-    ),
-  ],
-};
-```
-
-### Form-Level Configuration
-
-Override library defaults for a specific form using `defaultProps`:
-
-```typescript
-import { IonicFormConfig } from '@ng-forge/dynamic-forms-ionic';
-
-const formConfig: IonicFormConfig = {
-  defaultProps: {
-    fill: 'solid', // All fields in this form use 'solid'
-    labelPlacement: 'stacked',
-    color: 'tertiary',
-  },
-  fields: [
-    { key: 'name', type: 'input', label: 'Name' },
-    { key: 'email', type: 'input', label: 'Email' },
-  ],
-};
-```
-
-### Field-Level Override
-
-Override form defaults on individual fields:
-
-```typescript
-const formConfig: IonicFormConfig = {
-  defaultProps: {
-    fill: 'outline',
-    labelPlacement: 'floating',
-  },
-  fields: [
-    { key: 'name', type: 'input', label: 'Name' }, // Uses 'outline' + 'floating'
-    { key: 'email', type: 'input', label: 'Email', props: { fill: 'solid' } }, // Overrides to 'solid'
-  ],
-};
-```
-
-### Available Configuration Options
+### Available Options
 
 | Option           | Type                                                                                                            | Default     | Description              |
 | ---------------- | --------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------ |

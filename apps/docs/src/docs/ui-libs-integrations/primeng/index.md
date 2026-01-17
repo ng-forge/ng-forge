@@ -133,71 +133,13 @@ export class ContactFormComponent {
 }
 ```
 
-## Default Props & Configuration
+## Configuration Options
 
-Configure default styling for all fields at the library or form level. Props cascade in this order:
+Configure default props at the library, form, or field level. See [Configuration](../../deep-dive/configuration) for the full cascade behavior and examples.
 
-**Library-level → Form-level → Field-level**
+Use `PrimeFormConfig` for type-safe form configurations with PrimeNG-specific props.
 
-### Library-Level Configuration
-
-Set defaults for all forms in your application via `withPrimeNGFields()`:
-
-```typescript
-// app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(
-      ...withPrimeNGFields({
-        size: 'small',
-        variant: 'filled',
-        severity: 'primary',
-      }),
-    ),
-  ],
-};
-```
-
-### Form-Level Configuration
-
-Override library defaults for a specific form using `defaultProps`:
-
-```typescript
-import { PrimeFormConfig } from '@ng-forge/dynamic-forms-primeng';
-
-const formConfig: PrimeFormConfig = {
-  defaultProps: {
-    variant: 'outlined', // All fields in this form use 'outlined'
-    severity: 'success', // All buttons use 'success' color
-  },
-  fields: [
-    { key: 'name', type: 'input', label: 'Name' },
-    { key: 'email', type: 'input', label: 'Email' },
-  ],
-};
-```
-
-### Field-Level Override
-
-Override form defaults on individual fields:
-
-```typescript
-const formConfig: PrimeFormConfig = {
-  defaultProps: {
-    variant: 'filled',
-  },
-  fields: [
-    { key: 'name', type: 'input', label: 'Name' }, // Uses 'filled'
-    { key: 'email', type: 'input', label: 'Email', props: { variant: 'outlined' } }, // Overrides to 'outlined'
-  ],
-};
-```
-
-### Available Configuration Options
+### Available Options
 
 | Option     | Type                                                                                            | Default      | Description            |
 | ---------- | ----------------------------------------------------------------------------------------------- | ------------ | ---------------------- |

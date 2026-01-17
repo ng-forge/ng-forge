@@ -128,71 +128,13 @@ export class ContactFormComponent {
 }
 ```
 
-## Default Props & Configuration
+## Configuration Options
 
-Configure default styling for all fields at the library or form level. Props cascade in this order:
+Configure default props at the library, form, or field level. See [Configuration](../../deep-dive/configuration) for the full cascade behavior and examples.
 
-**Library-level → Form-level → Field-level**
+Use `BsFormConfig` for type-safe form configurations with Bootstrap-specific props.
 
-### Library-Level Configuration
-
-Set defaults for all forms in your application via `withBootstrapFields()`:
-
-```typescript
-// app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(
-      ...withBootstrapFields({
-        size: 'lg',
-        floatingLabel: true,
-      }),
-    ),
-  ],
-};
-```
-
-### Form-Level Configuration
-
-Override library defaults for a specific form using `defaultProps`:
-
-```typescript
-import { BsFormConfig } from '@ng-forge/dynamic-forms-bootstrap';
-
-const formConfig: BsFormConfig = {
-  defaultProps: {
-    size: 'sm', // All fields in this form use 'sm'
-    floatingLabel: true, // All fields use floating labels
-  },
-  fields: [
-    { key: 'name', type: 'input', label: 'Name' },
-    { key: 'email', type: 'input', label: 'Email' },
-  ],
-};
-```
-
-### Field-Level Override
-
-Override form defaults on individual fields:
-
-```typescript
-const formConfig: BsFormConfig = {
-  defaultProps: {
-    size: 'lg',
-    floatingLabel: true,
-  },
-  fields: [
-    { key: 'name', type: 'input', label: 'Name' }, // Uses 'lg' + floating
-    { key: 'email', type: 'input', label: 'Email', props: { size: 'sm' } }, // Overrides to 'sm'
-  ],
-};
-```
-
-### Available Configuration Options
+### Available Options
 
 | Option          | Type           | Default | Description                  |
 | --------------- | -------------- | ------- | ---------------------------- |
