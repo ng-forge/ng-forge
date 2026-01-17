@@ -18,7 +18,7 @@ import { omit } from '@ng-forge/dynamic-forms';
 export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal<Record<string, unknown>> {
   const context = inject(FIELD_SIGNAL_CONTEXT);
   const omittedFields = omit(fieldDef, ['value']) as FieldDef<unknown>;
-  const baseInputs = buildBaseInputs(omittedFields);
+  const baseInputs = buildBaseInputs(omittedFields, context.defaultProps);
   const defaultValidationMessages = context.defaultValidationMessages;
   const formRoot = context.form as Record<string, FieldTree<unknown> | undefined>;
   const fieldTree = formRoot[fieldDef.key];

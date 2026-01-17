@@ -20,14 +20,88 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-**Two Levels of Configuration:**
+**Three Levels of Configuration:**
 
-| Level        | Scope    | Where                  | Examples                                                 |
-| ------------ | -------- | ---------------------- | -------------------------------------------------------- |
-| **Provider** | App-wide | `provideDynamicForm()` | `withLoggerConfig()`, future features                    |
-| **Form**     | Per-form | `FormConfig`           | `options`, `customFnConfig`, `defaultValidationMessages` |
+| Level       | Scope     | Where                     | Examples                                          |
+| ----------- | --------- | ------------------------- | ------------------------------------------------- |
+| **Library** | App-wide  | `withXXXFields({ ... })`  | `appearance`, `size`, `color`, `variant`          |
+| **Form**    | Per-form  | `FormConfig.defaultProps` | Same options as library-level, scoped to one form |
+| **Field**   | Per-field | `field.props`             | Override any prop on individual fields            |
 
-This page covers **provider-level** features. For form-level configuration, see [Submission](../core/submission), [Custom Validators](../core/validation/custom-validators), and [i18n](../core/i18n).
+---
+
+## Default Props Cascade
+
+Configure default styling for all fields at the library or form level. Props cascade in this order, with each level overriding the previous:
+
+**Library-level → Form-level → Field-level**
+
+### Library-Level Configuration
+
+Set defaults for all forms in your application by passing a config object to your UI library's `withXXXFields()` function:
+
+```typescript
+// app.config.ts
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDynamicForm(
+      ...withMaterialFields({
+        appearance: 'outline',
+        color: 'accent',
+      }),
+    ),
+  ],
+};
+```
+
+### Form-Level Configuration
+
+Override library defaults for a specific form using `defaultProps`:
+
+```typescript
+import { MatFormConfig } from '@ng-forge/dynamic-forms-material';
+
+const formConfig: MatFormConfig = {
+  defaultProps: {
+    appearance: 'fill',
+    color: 'primary',
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' },
+  ],
+};
+```
+
+### Field-Level Override
+
+Override form defaults on individual fields using the `props` property:
+
+```typescript
+const formConfig: MatFormConfig = {
+  defaultProps: {
+    appearance: 'fill',
+  },
+  fields: [
+    { key: 'name', type: 'input', label: 'Name' }, // Uses 'fill'
+    { key: 'email', type: 'input', label: 'Email', props: { appearance: 'outline' } }, // Overrides to 'outline'
+  ],
+};
+```
+
+### Library-Specific Options
+
+Each UI library has its own set of configurable options. See the integration guides for available options:
+
+- [Material Design](../../ui-libs-integrations/material) - `appearance`, `color`, `subscriptSizing`, `labelPosition`, `disableRipple`
+- [Bootstrap](../../ui-libs-integrations/bootstrap) - `size`, `floatingLabel`
+- [PrimeNG](../../ui-libs-integrations/primeng) - `size`, `variant`, `severity`, `text`, `outlined`, `raised`, `rounded`
+- [Ionic](../../ui-libs-integrations/ionic) - `fill`, `shape`, `labelPlacement`, `color`, `size`, `expand`, `buttonFill`, `strong`
+
+---
 
 ## Logging
 

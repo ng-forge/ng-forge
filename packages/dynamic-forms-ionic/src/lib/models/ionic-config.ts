@@ -1,7 +1,23 @@
 /**
  * Configuration options for Ionic form fields.
- * These settings will be applied as defaults to all Ionic form fields
- * unless overridden by individual field props.
+ *
+ * These settings can be applied at two levels:
+ * - **Library-level**: Via `withIonicFields({ ... })` - applies to all forms
+ * - **Form-level**: Via `defaultProps` in form config - applies to a specific form
+ *
+ * The cascade hierarchy is: Library-level → Form-level → Field-level
+ *
+ * @example
+ * ```typescript
+ * // Library-level (in app config)
+ * provideDynamicForms(withIonicFields({ fill: 'outline', labelPlacement: 'floating' }))
+ *
+ * // Form-level (in form config)
+ * const config: IonicFormConfig = {
+ *   defaultProps: { color: 'tertiary' },
+ *   fields: [...]
+ * };
+ * ```
  */
 export interface IonicConfig {
   /**

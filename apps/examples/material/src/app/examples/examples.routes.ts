@@ -101,6 +101,11 @@ export default [
     loadComponent: () => import('./shared/example-scenario.component'),
     data: { scenario: getScenarioById('validation-showcase') },
   },
+  {
+    path: 'default-props',
+    loadComponent: () => import('./shared/example-scenario.component'),
+    data: { scenario: getScenarioById('default-props') },
+  },
   // Special components with custom logic
   {
     path: 'conditional-logic-showcase',

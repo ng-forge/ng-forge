@@ -13,6 +13,7 @@ import { ValidationMessages } from '@ng-forge/dynamic-forms';
 export interface ValueFieldContext {
   fieldTree: FieldTree<unknown> | undefined;
   defaultValidationMessages: ValidationMessages | undefined;
+  defaultProps: Record<string, unknown> | undefined;
 }
 
 /**
@@ -27,9 +28,10 @@ export interface ValueFieldContext {
 export function resolveValueFieldContext(fieldKey: string): ValueFieldContext {
   const context = inject(FIELD_SIGNAL_CONTEXT);
   const defaultValidationMessages = context.defaultValidationMessages;
+  const defaultProps = context.defaultProps;
   const formRoot = context.form as Record<string, FieldTree<unknown> | undefined>;
   const fieldTree = formRoot[fieldKey];
-  return { fieldTree, defaultValidationMessages };
+  return { fieldTree, defaultValidationMessages, defaultProps };
 }
 
 /**
@@ -45,7 +47,7 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
   ctx: ValueFieldContext,
 ): Record<string, unknown> {
   const omittedFields = omit(fieldDef, ['value']);
-  const baseInputs = buildBaseInputs(omittedFields);
+  const baseInputs = buildBaseInputs(omittedFields, ctx.defaultProps);
 
   const inputs: Record<string, unknown> = {
     ...baseInputs,

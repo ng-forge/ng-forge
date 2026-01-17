@@ -9,6 +9,7 @@ export { datepickerScenario } from './datepicker.scenario';
 export { sliderScenario } from './slider.scenario';
 export { buttonScenario } from './button.scenario';
 export { completeFormScenario } from './complete-form.scenario';
+export { defaultPropsScenario } from './default-props.scenario';
 
 import { ExampleScenario } from '../shared/types';
 import { inputScenario } from './input.scenario';
@@ -22,6 +23,7 @@ import { datepickerScenario } from './datepicker.scenario';
 import { sliderScenario } from './slider.scenario';
 import { buttonScenario } from './button.scenario';
 import { completeFormScenario } from './complete-form.scenario';
+import { defaultPropsScenario } from './default-props.scenario';
 
 export const ALL_SCENARIOS: ExampleScenario[] = [
   inputScenario,
@@ -35,6 +37,7 @@ export const ALL_SCENARIOS: ExampleScenario[] = [
   sliderScenario,
   buttonScenario,
   completeFormScenario,
+  defaultPropsScenario,
 ];
 
 export function getScenarioById(id: string): ExampleScenario | undefined {

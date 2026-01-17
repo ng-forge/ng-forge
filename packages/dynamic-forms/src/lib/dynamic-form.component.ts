@@ -242,6 +242,7 @@ export class DynamicForm<
     form: this.form(),
     defaultValidationMessages: this.config().defaultValidationMessages,
     formOptions: this.effectiveFormOptions(),
+    defaultProps: this.config().defaultProps,
   }));
 
   private readonly fieldInjector = computed(() =>

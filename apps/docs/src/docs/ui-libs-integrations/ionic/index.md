@@ -123,6 +123,27 @@ export class ContactFormComponent {
 }
 ```
 
+## Configuration Options
+
+Configure default props at the library, form, or field level. See [Configuration](../../deep-dive/configuration) for the full cascade behavior and examples.
+
+Use `IonicFormConfig` for type-safe form configurations with Ionic-specific props.
+
+### Available Options
+
+| Option           | Type                                                                                                            | Default     | Description              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------ |
+| `fill`           | `'solid' \| 'outline'`                                                                                          | `'solid'`   | Input fill style         |
+| `shape`          | `'round'`                                                                                                       | -           | Rounded shape for inputs |
+| `labelPlacement` | `'start' \| 'end' \| 'fixed' \| 'stacked' \| 'floating'`                                                        | `'start'`   | Label position           |
+| `color`          | `'primary' \| 'secondary' \| 'tertiary' \| 'success' \| 'warning' \| 'danger' \| 'light' \| 'medium' \| 'dark'` | `'primary'` | Ionic color theme        |
+| `size`           | `'small' \| 'default' \| 'large'`                                                                               | `'default'` | Button size              |
+| `expand`         | `'full' \| 'block'`                                                                                             | -           | Button expand behavior   |
+| `buttonFill`     | `'clear' \| 'outline' \| 'solid' \| 'default'`                                                                  | `'solid'`   | Button fill style        |
+| `strong`         | `boolean`                                                                                                       | `false`     | Bold button text         |
+
+---
+
 ## Type Augmentation
 
 Importing this package automatically extends `@ng-forge/dynamic-forms` with Ionic-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:

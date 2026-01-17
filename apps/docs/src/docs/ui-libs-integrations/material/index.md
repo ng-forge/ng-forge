@@ -127,6 +127,24 @@ export class ContactFormComponent {
 }
 ```
 
+## Configuration Options
+
+Configure default props at the library, form, or field level. See [Configuration](../../deep-dive/configuration) for the full cascade behavior and examples.
+
+Use `MatFormConfig` for type-safe form configurations with Material-specific props.
+
+### Available Options
+
+| Option            | Type                              | Default     | Description                   |
+| ----------------- | --------------------------------- | ----------- | ----------------------------- |
+| `appearance`      | `'fill' \| 'outline'`             | `'fill'`    | Form field visual style       |
+| `subscriptSizing` | `'fixed' \| 'dynamic'`            | `'fixed'`   | Error/hint spacing behavior   |
+| `color`           | `'primary' \| 'accent' \| 'warn'` | `'primary'` | Theme color for controls      |
+| `labelPosition`   | `'before' \| 'after'`             | `'after'`   | Label position for checkboxes |
+| `disableRipple`   | `boolean`                         | `false`     | Disable ripple effect         |
+
+---
+
 ## Type Augmentation
 
 Importing this package automatically extends `@ng-forge/dynamic-forms` with Material-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:

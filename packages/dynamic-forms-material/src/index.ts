@@ -51,4 +51,6 @@ export type {
   MatToggleComponent,
   MaterialConfig,
   MatFieldType,
+  MatFormProps,
+  MatFormConfig,
 } from './lib';

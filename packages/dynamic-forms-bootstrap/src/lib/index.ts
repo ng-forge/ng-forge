@@ -55,6 +55,7 @@ export { BOOTSTRAP_CONFIG } from './models';
 
 // Types and constants
 export { BsField, type BsFieldType } from './types/types';
+export type { BsFormProps, BsFormConfig } from './types/form-config';
 
 // Module augmentation for global types
 import './types/registry-augmentation';

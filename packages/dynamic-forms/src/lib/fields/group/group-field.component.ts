@@ -197,6 +197,8 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
       defaultValues: this.defaultValues,
       form: this.nestedFieldTree(),
       defaultValidationMessages: this.parentFieldSignalContext.defaultValidationMessages,
+      formOptions: this.parentFieldSignalContext.formOptions,
+      defaultProps: this.parentFieldSignalContext.defaultProps,
     };
 
     return Injector.create({

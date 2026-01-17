@@ -128,6 +128,21 @@ export class ContactFormComponent {
 }
 ```
 
+## Configuration Options
+
+Configure default props at the library, form, or field level. See [Configuration](../../deep-dive/configuration) for the full cascade behavior and examples.
+
+Use `BsFormConfig` for type-safe form configurations with Bootstrap-specific props.
+
+### Available Options
+
+| Option          | Type           | Default | Description                  |
+| --------------- | -------------- | ------- | ---------------------------- |
+| `size`          | `'sm' \| 'lg'` | -       | Bootstrap size class         |
+| `floatingLabel` | `boolean`      | `false` | Enable floating label design |
+
+---
+
 ## Type Augmentation
 
 Importing this package automatically extends `@ng-forge/dynamic-forms` with Bootstrap-specific field types via TypeScript module augmentation. If you need type safety in a file without importing specific exports, use a bare import:
