@@ -5,7 +5,7 @@ import { FunctionRegistryService } from '../../core/registry/function-registry.s
 import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
 import { evaluateCondition } from '../../core/expressions/condition-evaluator';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { DEFAULT_PROPS } from '../../models/field-signal-context.token';
 
 /**
  * Maps a text field definition to component inputs.
@@ -20,16 +20,14 @@ import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unknown>> {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
-  const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
-
-  // Build base inputs (static, from field definition)
-  const baseInputs = buildBaseInputs(fieldDef, fieldSignalContext.defaultProps);
+  const defaultProps = inject(DEFAULT_PROPS);
 
   // Create computed signal for hidden state based on logic configuration
   const hiddenLogic = fieldDef.logic?.filter((l) => l.type === 'hidden') ?? [];
 
   // Return computed signal for reactive updates
   return computed(() => {
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const inputs: Record<string, unknown> = { ...baseInputs };
 
     // Evaluate hidden logic if present
