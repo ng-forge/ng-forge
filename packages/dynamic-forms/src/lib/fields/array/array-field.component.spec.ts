@@ -11,7 +11,7 @@ import { provideDynamicForm } from '../../providers';
 import { withLoggerConfig } from '../../providers/features/logger/with-logger-config';
 import { FIELD_REGISTRY } from '../../models/field-type';
 import { FieldTypeDefinition } from '../../models/field-type';
-import { DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { AddArrayItemEvent, EventBus, RemoveArrayItemEvent } from '../../events';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
@@ -482,6 +482,9 @@ describe('ArrayFieldComponent', () => {
             provide: FIELD_REGISTRY,
             useValue: registry,
           },
+          { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+          { provide: DEFAULT_VALIDATION_MESSAGES, useValue: signal(undefined) },
+          { provide: FORM_OPTIONS, useValue: signal(undefined) },
           {
             provide: FIELD_SIGNAL_CONTEXT,
             useFactory: (injector: Injector) => {
@@ -763,7 +766,12 @@ describe('ArrayFieldComponent', () => {
 
       return Injector.create({
         parent: TestBed.inject(Injector),
-        providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: fieldSignalContext }],
+        providers: [
+          { provide: FIELD_SIGNAL_CONTEXT, useValue: fieldSignalContext },
+          { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+          { provide: DEFAULT_VALIDATION_MESSAGES, useValue: signal(undefined) },
+          { provide: FORM_OPTIONS, useValue: signal(undefined) },
+        ],
       });
     }
 
@@ -823,7 +831,12 @@ describe('ArrayFieldComponent', () => {
 
       const injector = Injector.create({
         parent: TestBed.inject(Injector),
-        providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: fieldSignalContext }],
+        providers: [
+          { provide: FIELD_SIGNAL_CONTEXT, useValue: fieldSignalContext },
+          { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+          { provide: DEFAULT_VALIDATION_MESSAGES, useValue: signal(undefined) },
+          { provide: FORM_OPTIONS, useValue: signal(undefined) },
+        ],
       });
 
       const fieldDef = { key: 'itemField', type: 'input', label: 'Item Field' };
@@ -867,7 +880,9 @@ describe('ArrayFieldComponent', () => {
         parent: TestBed.inject(Injector),
         providers: [
           { provide: FIELD_SIGNAL_CONTEXT, useValue: fieldSignalContext },
-          { provide: DEFAULT_VALIDATION_MESSAGES, useValue: { required: 'This field is required' } },
+          { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+          { provide: DEFAULT_VALIDATION_MESSAGES, useValue: signal({ required: 'This field is required' }) },
+          { provide: FORM_OPTIONS, useValue: signal(undefined) },
         ],
       });
 

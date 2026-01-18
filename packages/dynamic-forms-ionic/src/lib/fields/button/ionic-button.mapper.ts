@@ -10,12 +10,11 @@ import { buildBaseInputs, DEFAULT_PROPS, FieldDef } from '@ng-forge/dynamic-form
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
 export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
-  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
-
-  // Build base inputs (static, from field definition)
-  const baseInputs = buildBaseInputs(fieldDef, defaultProps);
+  const defaultProps = inject(DEFAULT_PROPS);
 
   return computed(() => {
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
+
     const inputs: Record<string, unknown> = {
       ...baseInputs,
     };

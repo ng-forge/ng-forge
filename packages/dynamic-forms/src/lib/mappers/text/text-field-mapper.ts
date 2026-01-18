@@ -20,16 +20,14 @@ import { DEFAULT_PROPS } from '../../models/field-signal-context.token';
 export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unknown>> {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
-  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
-
-  // Build base inputs (static, from field definition)
-  const baseInputs = buildBaseInputs(fieldDef, defaultProps);
+  const defaultProps = inject(DEFAULT_PROPS);
 
   // Create computed signal for hidden state based on logic configuration
   const hiddenLogic = fieldDef.logic?.filter((l) => l.type === 'hidden') ?? [];
 
   // Return computed signal for reactive updates
   return computed(() => {
+    const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const inputs: Record<string, unknown> = { ...baseInputs };
 
     // Evaluate hidden logic if present

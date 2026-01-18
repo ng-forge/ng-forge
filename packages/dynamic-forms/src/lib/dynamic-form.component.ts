@@ -76,15 +76,7 @@ import { DynamicFormLogger } from './providers/features/logger/logger.token';
   imports: [NgComponentOutlet, PageOrchestratorComponent],
   template: `
     @if (formModeDetection().mode === 'paged') {
-      <div
-        page-orchestrator
-        [pageFields]="pageFieldDefinitions()"
-        [form]="form()"
-        [fieldSignalContext]="fieldSignalContext()"
-        [formOptions]="effectiveFormOptions()"
-        [defaultProps]="config().defaultProps"
-        [defaultValidationMessages]="config().defaultValidationMessages"
-      ></div>
+      <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
     } @else {
       @for (field of resolvedFields(); track field.key) {
         <ng-container *ngComponentOutlet="field.component; injector: field.injector; inputs: field.inputs()" />
@@ -250,14 +242,26 @@ export class DynamicForm<
     form: this.form(),
   }));
 
+  /**
+   * Computed signal for default props from config.
+   * Provided as a signal to enable reactive updates when config changes.
+   */
+  private readonly defaultProps = computed(() => this.config().defaultProps);
+
+  /**
+   * Computed signal for default validation messages from config.
+   * Provided as a signal to enable reactive updates when config changes.
+   */
+  private readonly defaultValidationMessages = computed(() => this.config().defaultValidationMessages);
+
   private readonly fieldInjector = computed(() =>
     Injector.create({
       parent: this.injector,
       providers: [
         { provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() },
-        { provide: DEFAULT_PROPS, useValue: this.config().defaultProps },
-        { provide: DEFAULT_VALIDATION_MESSAGES, useValue: this.config().defaultValidationMessages },
-        { provide: FORM_OPTIONS, useValue: this.effectiveFormOptions() },
+        { provide: DEFAULT_PROPS, useValue: this.defaultProps },
+        { provide: DEFAULT_VALIDATION_MESSAGES, useValue: this.defaultValidationMessages },
+        { provide: FORM_OPTIONS, useValue: this.effectiveFormOptions },
       ],
     }),
   );

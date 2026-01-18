@@ -17,14 +17,16 @@ import { omit } from '@ng-forge/dynamic-forms';
  */
 export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal<Record<string, unknown>> {
   const context = inject(FIELD_SIGNAL_CONTEXT);
-  const defaultProps = inject(DEFAULT_PROPS, { optional: true }) ?? undefined;
-  const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES, { optional: true }) ?? undefined;
-  const omittedFields = omit(fieldDef, ['value']) as FieldDef<unknown>;
-  const baseInputs = buildBaseInputs(omittedFields, defaultProps);
+  const defaultProps = inject(DEFAULT_PROPS);
+  const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES);
   const formRoot = context.form as Record<string, FieldTree<unknown> | undefined>;
   const fieldTree = formRoot[fieldDef.key];
 
   return computed(() => {
+    const omittedFields = omit(fieldDef, ['value']) as FieldDef<unknown>;
+    const baseInputs = buildBaseInputs(omittedFields, defaultProps());
+    const validationMessages = defaultValidationMessages();
+
     const inputs: Record<string, unknown> = {
       ...baseInputs,
       validationMessages: fieldDef.validationMessages ?? {},
@@ -34,8 +36,8 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal
       inputs['placeholder'] = fieldDef.placeholder;
     }
 
-    if (defaultValidationMessages !== undefined) {
-      inputs['defaultValidationMessages'] = defaultValidationMessages;
+    if (validationMessages !== undefined) {
+      inputs['defaultValidationMessages'] = validationMessages;
     }
 
     if (fieldTree !== undefined) {

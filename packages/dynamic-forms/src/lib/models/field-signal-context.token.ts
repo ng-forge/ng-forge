@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { InjectionToken, Signal } from '@angular/core';
 import type { FieldSignalContext, ArrayContext } from '../mappers/types';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
@@ -75,14 +75,22 @@ export const ARRAY_CONTEXT = new InjectionToken<ArrayContext>('ARRAY_CONTEXT');
  * DEFAULT_PROPS is provided ONCE at the DynamicForm level and inherited by all children
  * via Angular's hierarchical injector.
  *
+ * The token provides a Signal to enable reactivity - when config changes, mappers
+ * that read the signal inside their computed() will automatically update.
+ *
  * @example
  * ```typescript
  * // In a mapper function
- * const defaultProps = inject(DEFAULT_PROPS, { optional: true });
- * const baseInputs = buildBaseInputs(fieldDef, defaultProps);
+ * const defaultPropsSignal = inject(DEFAULT_PROPS);
+ *
+ * return computed(() => {
+ *   const defaultProps = defaultPropsSignal?.();  // Read inside computed for reactivity
+ *   const baseInputs = buildBaseInputs(fieldDef, defaultProps);
+ *   // ...
+ * });
  * ```
  */
-export const DEFAULT_PROPS = new InjectionToken<Record<string, unknown> | undefined>('DEFAULT_PROPS');
+export const DEFAULT_PROPS = new InjectionToken<Signal<Record<string, unknown> | undefined>>('DEFAULT_PROPS');
 
 /**
  * Injection token for form-level default validation messages.
@@ -93,14 +101,22 @@ export const DEFAULT_PROPS = new InjectionToken<Record<string, unknown> | undefi
  * Like DEFAULT_PROPS, this token is provided ONCE at the DynamicForm level
  * and inherited by all children via Angular's hierarchical injector.
  *
+ * The token provides a Signal to enable reactivity - when config changes, mappers
+ * that read the signal inside their computed() will automatically update.
+ *
  * @example
  * ```typescript
  * // In a mapper or component
- * const defaultMessages = inject(DEFAULT_VALIDATION_MESSAGES, { optional: true });
- * const message = defaultMessages?.required ?? 'Field is required';
+ * const defaultMessagesSignal = inject(DEFAULT_VALIDATION_MESSAGES);
+ *
+ * return computed(() => {
+ *   const defaultMessages = defaultMessagesSignal?.();  // Read inside computed for reactivity
+ *   const message = defaultMessages?.required ?? 'Field is required';
+ *   // ...
+ * });
  * ```
  */
-export const DEFAULT_VALIDATION_MESSAGES = new InjectionToken<ValidationMessages | undefined>('DEFAULT_VALIDATION_MESSAGES');
+export const DEFAULT_VALIDATION_MESSAGES = new InjectionToken<Signal<ValidationMessages | undefined>>('DEFAULT_VALIDATION_MESSAGES');
 
 /**
  * Injection token for form-level options.
@@ -111,11 +127,19 @@ export const DEFAULT_VALIDATION_MESSAGES = new InjectionToken<ValidationMessages
  * Like DEFAULT_PROPS, this token is provided ONCE at the DynamicForm level
  * and inherited by all children via Angular's hierarchical injector.
  *
+ * The token provides a Signal to enable reactivity - when config changes, mappers
+ * that read the signal inside their computed() will automatically update.
+ *
  * @example
  * ```typescript
  * // In a button mapper
- * const formOptions = inject(FORM_OPTIONS, { optional: true });
- * const disableWhenInvalid = formOptions?.submitButton?.disableWhenInvalid ?? true;
+ * const formOptionsSignal = inject(FORM_OPTIONS);
+ *
+ * return computed(() => {
+ *   const formOptions = formOptionsSignal?.();  // Read inside computed for reactivity
+ *   const disableWhenInvalid = formOptions?.submitButton?.disableWhenInvalid ?? true;
+ *   // ...
+ * });
  * ```
  */
-export const FORM_OPTIONS = new InjectionToken<FormOptions | undefined>('FORM_OPTIONS');
+export const FORM_OPTIONS = new InjectionToken<Signal<FormOptions | undefined>>('FORM_OPTIONS');

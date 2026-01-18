@@ -9,13 +9,10 @@ import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
 import { FieldTree } from '@angular/forms/signals';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '../../models/field-signal-context.token';
-import { FormOptions } from '../../models/form-config';
-import { ValidationMessages } from '../../models/validation-types';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
 import { evaluateCondition } from '../expressions/condition-evaluator';
 import { FunctionRegistryService } from '../registry/function-registry.service';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 
 /**
@@ -85,21 +82,6 @@ import { FieldContextRegistryService } from '../registry/field-context-registry.
       useFactory: (orchestrator: PageOrchestratorComponent) => orchestrator.extendedFieldSignalContext(),
       deps: [PageOrchestratorComponent],
     },
-    {
-      provide: DEFAULT_PROPS,
-      useFactory: (orchestrator: PageOrchestratorComponent) => orchestrator.defaultProps(),
-      deps: [PageOrchestratorComponent],
-    },
-    {
-      provide: DEFAULT_VALIDATION_MESSAGES,
-      useFactory: (orchestrator: PageOrchestratorComponent) => orchestrator.defaultValidationMessages(),
-      deps: [PageOrchestratorComponent],
-    },
-    {
-      provide: FORM_OPTIONS,
-      useFactory: (orchestrator: PageOrchestratorComponent) => orchestrator.formOptions(),
-      deps: [PageOrchestratorComponent],
-    },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -107,7 +89,6 @@ export class PageOrchestratorComponent {
   private readonly eventBus = inject(EventBus);
   private readonly fieldContextRegistry = inject(FieldContextRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
-  private readonly logger = inject(DynamicFormLogger);
 
   /**
    * Array of page field definitions to render
@@ -125,24 +106,6 @@ export class PageOrchestratorComponent {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- FieldSignalContext is contravariant in TModel, using any allows accepting any form type
   fieldSignalContext = input.required<FieldSignalContext<any>>();
-
-  /**
-   * Form options passed from DynamicForm.
-   * Provided to children via FORM_OPTIONS token for button mappers.
-   */
-  formOptions = input<FormOptions | undefined>(undefined);
-
-  /**
-   * Default props passed from DynamicForm.
-   * Provided to children via DEFAULT_PROPS token for field mappers.
-   */
-  defaultProps = input<Record<string, unknown> | undefined>(undefined);
-
-  /**
-   * Default validation messages passed from DynamicForm.
-   * Provided to children via DEFAULT_VALIDATION_MESSAGES token for field mappers.
-   */
-  defaultValidationMessages = input<ValidationMessages | undefined>(undefined);
 
   /**
    * Computed signal that tracks which pages are hidden.

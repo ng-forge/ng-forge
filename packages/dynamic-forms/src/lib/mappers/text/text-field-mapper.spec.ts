@@ -4,7 +4,7 @@ import { textFieldMapper } from './text-field-mapper';
 import { TextField } from '../../definitions/default/text-field';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { DEFAULT_PROPS, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { vi } from 'vitest';
 
 describe('textFieldMapper', () => {
@@ -44,6 +44,7 @@ describe('textFieldMapper', () => {
         { provide: FieldContextRegistryService, useValue: mockFieldContextRegistry },
         { provide: FunctionRegistryService, useValue: mockFunctionRegistry },
         { provide: FIELD_SIGNAL_CONTEXT, useValue: mockFieldSignalContext },
+        { provide: DEFAULT_PROPS, useValue: signal(undefined) },
       ],
     }).compileComponents();
 
