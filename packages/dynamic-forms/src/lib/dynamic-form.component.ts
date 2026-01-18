@@ -84,7 +84,29 @@ import { DynamicFormLogger } from './providers/features/logger/logger.token';
     }
   `,
   styleUrl: './dynamic-form.component.scss',
-  providers: [EventBus, SchemaRegistryService, FunctionRegistryService, RootFormRegistryService, FieldContextRegistryService],
+  providers: [
+    EventBus,
+    SchemaRegistryService,
+    FunctionRegistryService,
+    RootFormRegistryService,
+    FieldContextRegistryService,
+    // Form-level config tokens provided via useFactory to enable reactive updates
+    {
+      provide: DEFAULT_PROPS,
+      useFactory: (form: DynamicForm) => computed(() => form.config().defaultProps),
+      deps: [DynamicForm],
+    },
+    {
+      provide: DEFAULT_VALIDATION_MESSAGES,
+      useFactory: (form: DynamicForm) => computed(() => form.config().defaultValidationMessages),
+      deps: [DynamicForm],
+    },
+    {
+      provide: FORM_OPTIONS,
+      useFactory: (form: DynamicForm) => form.effectiveFormOptions,
+      deps: [DynamicForm],
+    },
+  ],
   host: {
     class: 'df-dynamic-form df-form',
     novalidate: '', // Disable browser validation - Angular Signal Forms handles validation
@@ -243,26 +265,13 @@ export class DynamicForm<
   }));
 
   /**
-   * Computed signal for default props from config.
-   * Provided as a signal to enable reactive updates when config changes.
+   * Injector for field components with FIELD_SIGNAL_CONTEXT.
+   * Other form-level tokens (DEFAULT_PROPS, etc.) are provided at component level.
    */
-  private readonly defaultProps = computed(() => this.config().defaultProps);
-
-  /**
-   * Computed signal for default validation messages from config.
-   * Provided as a signal to enable reactive updates when config changes.
-   */
-  private readonly defaultValidationMessages = computed(() => this.config().defaultValidationMessages);
-
   private readonly fieldInjector = computed(() =>
     Injector.create({
       parent: this.injector,
-      providers: [
-        { provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() },
-        { provide: DEFAULT_PROPS, useValue: this.defaultProps },
-        { provide: DEFAULT_VALIDATION_MESSAGES, useValue: this.defaultValidationMessages },
-        { provide: FORM_OPTIONS, useValue: this.effectiveFormOptions },
-      ],
+      providers: [{ provide: FIELD_SIGNAL_CONTEXT, useValue: this.fieldSignalContext() }],
     }),
   );
 
