@@ -10,7 +10,7 @@ The `@ng-forge/dynamic-forms` package is organized into multiple entrypoints to 
 | ------------------------------------- | ---------------------------------------------------------- |
 | `@ng-forge/dynamic-forms`             | Core types, components, and configuration (for all users)  |
 | `@ng-forge/dynamic-forms/integration` | Field types, mappers, and utilities for UI library authors |
-| `@ng-forge/dynamic-forms/testing`     | Testing utilities for unit testing custom integrations     |
+| `@ng-forge/testing-internal`          | Testing utilities for unit testing custom integrations     |
 
 When building a custom integration, you'll primarily import from the `/integration` entrypoint:
 

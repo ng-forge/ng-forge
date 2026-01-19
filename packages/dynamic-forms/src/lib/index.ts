@@ -16,7 +16,7 @@
  * - Error utilities (createResolvedErrorsSignal, shouldShowErrors)
  *
  * ## Testing API
- * Import from '@ng-forge/dynamic-forms/testing' for:
+ * Import from '@ng-forge/testing-internal' for:
  * - Test utilities and harnesses
  * - Form config builders for testing
  */

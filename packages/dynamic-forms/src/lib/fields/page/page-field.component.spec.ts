@@ -1,6 +1,6 @@
 import PageFieldComponent from './page-field.component';
 import { PageField, validatePageNesting } from '../../definitions/default/page-field';
-import { setupSimpleTest } from '@ng-forge/dynamic-forms/testing';
+import { setupSimpleTest } from '@ng-forge/testing-internal';
 
 describe('PageFieldComponent', () => {
   it('should create', () => {

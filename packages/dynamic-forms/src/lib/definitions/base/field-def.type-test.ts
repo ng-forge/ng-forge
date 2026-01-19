@@ -4,7 +4,7 @@
 import { expectTypeOf } from 'vitest';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { FieldDef, FieldComponent } from './field-def';
-import type { RequiredKeys, OptionalKeys } from '../../../../testing/src/type-test-utils';
+import type { RequiredKeys, OptionalKeys } from '@ng-forge/testing-internal';
 
 // ============================================================================
 // FieldDef - Whitelist Test

@@ -13,7 +13,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { IonicRadioProps, IonicRadioField } from './ionic-radio.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/testing-internal';
 
 // ============================================================================
 // IonicRadioProps - Whitelist Test

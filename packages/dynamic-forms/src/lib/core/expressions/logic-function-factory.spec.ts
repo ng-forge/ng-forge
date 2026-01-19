@@ -6,7 +6,7 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { createLogicFunction } from './logic-function-factory';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { createMockLogger, MockLogger } from '@ng-forge/dynamic-forms/testing';
+import { createMockLogger, MockLogger } from '@ng-forge/testing-internal';
 
 describe('logic-function-factory', () => {
   let functionRegistry: FunctionRegistryService;

@@ -4,7 +4,7 @@
 import { expectTypeOf } from 'vitest';
 import type { GroupField, GroupComponent } from './group-field';
 import type { GroupAllowedChildren } from '../../models/types/nesting-constraints';
-import type { RequiredKeys } from '../../../../testing/src/type-test-utils';
+import type { RequiredKeys } from '@ng-forge/testing-internal';
 
 // ============================================================================
 // GroupField - Whitelist Test

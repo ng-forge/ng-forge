@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createTypePredicateFunction } from './type-predicate-factory';
-import { createMockLogger, MockLogger } from '@ng-forge/dynamic-forms/testing';
+import { createMockLogger, MockLogger } from '@ng-forge/testing-internal';
 
 describe('createTypePredicateFunction', () => {
   let mockLogger: MockLogger;
