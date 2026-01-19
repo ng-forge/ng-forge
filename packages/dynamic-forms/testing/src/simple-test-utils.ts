@@ -1,15 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DynamicForm } from '@ng-forge/dynamic-forms';
-import { delay } from './delay';
-import { FieldDef } from '@ng-forge/dynamic-forms';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { DynamicForm } from '../../src/lib/dynamic-form.component';
+import { delay } from '@ng-forge/utils';
+import { FieldDef } from '../../src/lib/definitions/base/field-def';
+import { provideDynamicForm } from '../../src/lib/providers/dynamic-form-providers';
 import { Component, computed, Injector, input, runInInjectionContext, signal, Type } from '@angular/core';
-import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms';
-import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
-import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
-import { EventBus } from '@ng-forge/dynamic-forms';
+import { FIELD_REGISTRY } from '../../src/lib/models/field-type';
+import { FieldTypeDefinition } from '../../src/lib/models/field-type';
+import { FIELD_SIGNAL_CONTEXT } from '../../src/lib/models/field-signal-context.token';
+import { EventBus } from '../../src/lib/events/event.bus';
 import { form } from '@angular/forms/signals';
-import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms';
+import { RegisteredFieldTypes } from '../../src/lib/models/registry/field-registry';
 
 /**
  * Simple form configuration interface for testing

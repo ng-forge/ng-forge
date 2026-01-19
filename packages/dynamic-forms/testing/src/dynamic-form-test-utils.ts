@@ -3,9 +3,13 @@ import { computed, Signal } from '@angular/core';
 import { ValidationError } from '@angular/forms/signals';
 import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DynamicForm, FormConfig, FieldDef, FieldTypeDefinition, BUILT_IN_FIELDS } from '@ng-forge/dynamic-forms';
+import { DynamicForm } from '../../src/lib/dynamic-form.component';
+import { FormConfig } from '../../src/lib/models/form-config';
+import { FieldDef } from '../../src/lib/definitions/base/field-def';
+import { FieldTypeDefinition } from '../../src/lib/models/field-type';
+import { BUILT_IN_FIELDS } from '../../src/lib/providers/built-in-fields';
 import { InputField, SelectField, checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
-import { delay } from './delay';
+import { delay } from '@ng-forge/utils';
 
 /**
  * Internal interface for field registry operations needed by test utilities

@@ -1,13 +1,9 @@
 import { Injector, runInInjectionContext, signal, StaticProvider, WritableSignal } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import {
-  DEFAULT_VALIDATION_MESSAGES,
-  FIELD_SIGNAL_CONTEXT,
-  FieldSignalContext,
-  FORM_OPTIONS,
-  FormOptions,
-  ValidationMessages,
-} from '@ng-forge/dynamic-forms';
+import { DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '../../src/lib/models/field-signal-context.token';
+import { FieldSignalContext } from '../../src/lib/mappers/types';
+import { FormOptions } from '../../src/lib/models/form-config';
+import { ValidationMessages } from '../../src/lib/models/validation-types';
 
 /**
  * Configuration for creating a test form injector with field signal context

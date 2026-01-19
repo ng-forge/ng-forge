@@ -6,7 +6,7 @@ import { FunctionRegistryService, FieldContextRegistryService, RootFormRegistryS
 import { resolveSubmitButtonDisabled, resolveNextButtonDisabled, ButtonLogicContext } from '../../core/logic/button-logic-resolver';
 import { FormOptions, FormStateCondition, LogicConfig, isFormStateCondition } from '../../models';
 import { createMockLogger } from '../mock-logger';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { DynamicFormLogger } from '../../../src/lib/providers/features/logger/logger.token';
 
 describe('Button Logic Integration', () => {
   let injector: Injector;

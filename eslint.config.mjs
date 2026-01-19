@@ -14,8 +14,7 @@ export default [
         'error',
         {
           enforceBuildableLibDependency: true,
-          allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$', '^@examples/.*', '^@ng-forge/testing$', '^@ng-forge/utils$'],
-          ignoredCircularDependencies: [['testing', 'dynamic-forms']],
+          allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$', '^@examples/.*', '^@ng-forge/utils$'],
           depConstraints: [
             {
               sourceTag: '*',
