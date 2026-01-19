@@ -1,7 +1,8 @@
 import { ArrayFieldComponent } from './array-field.component';
 import { ArrayField } from '../../definitions/default/array-field';
 import { RowField } from '../../definitions/default/row-field';
-import { createSimpleTestField, delay, TestFieldComponent } from '@ng-forge/dynamic-forms/testing';
+import { delay } from '@ng-forge/utils';
+import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { DynamicFormTestUtils } from './dynamic-form-test-utils';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { provideDynamicForm } from '../../src/lib/providers/dynamic-form-providers';
 
 describe('DynamicFormTestUtils', () => {
   beforeEach(async () => {

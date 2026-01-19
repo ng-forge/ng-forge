@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
-import { ValidationMessages } from '@ng-forge/dynamic-forms';
+import { ValidationMessages } from '../../../src/lib/models/validation-types';
 
 @Component({
   selector: 'df-test-input',

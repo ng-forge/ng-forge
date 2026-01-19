@@ -79,9 +79,3 @@ export { isEqual } from './utils';
 
 export { setupMetaTracking } from './utils';
 export type { MetaTrackingOptions } from './utils';
-
-// =============================================================================
-// Pipes
-// =============================================================================
-
-export { ValueInArrayPipe } from './pipes';

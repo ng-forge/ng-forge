@@ -6,7 +6,7 @@ import type { ThemePalette } from '@angular/material/core';
 import type { DynamicText, LogicConfig, SchemaApplicationConfig, ValidatorConfig, ValidationMessages } from '@ng-forge/dynamic-forms';
 
 import type { MatCheckboxProps, MatCheckboxField } from './mat-checkbox.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // MatCheckboxProps - Whitelist Test

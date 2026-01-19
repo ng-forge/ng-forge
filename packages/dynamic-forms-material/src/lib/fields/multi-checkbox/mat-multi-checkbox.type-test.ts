@@ -13,7 +13,7 @@ import type {
 } from '@ng-forge/dynamic-forms';
 
 import type { MatMultiCheckboxProps, MatMultiCheckboxField } from './mat-multi-checkbox.type';
-import type { RequiredKeys } from '@ng-forge/dynamic-forms/testing';
+import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
 // MatMultiCheckboxProps - Whitelist Test

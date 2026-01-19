@@ -15,10 +15,6 @@
  * - Field mappers (valueFieldMapper, checkboxFieldMapper, etc.)
  * - Error utilities (createResolvedErrorsSignal, shouldShowErrors)
  *
- * ## Testing API
- * Import from '@ng-forge/dynamic-forms/testing' for:
- * - Test utilities and harnesses
- * - Form config builders for testing
  */
 
 // ============================================================
